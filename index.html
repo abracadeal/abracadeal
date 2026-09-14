@@ -1684,6 +1684,45 @@ a.btn{cursor:pointer}
 .location-help{font-size:.76rem;color:#8a788f;margin-top:6px}
 @media(max-width:640px){.location-suggestions{max-height:210px}}
 </style>
+<style>
+.b2b-modal{max-width:980px;width:calc(100% - 24px)}
+#b2bModal .modal-body{color:#36213f;background:#fff}
+#b2bModal .btn.ghost{color:#65297d;background:#f4e9fa;border:1px solid #cfb3dc;cursor:pointer}
+#b2bModal .btn.ghost:hover{background:#ead8f2}
+#b2bModal .btn:disabled{opacity:.55;cursor:not-allowed}
+#b2bModal .btn:focus-visible{outline:3px solid #ad4dc5;outline-offset:3px}
+.b2b-toolbar{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0}
+.b2b-intro{color:#70597b}
+.b2b-panel,.b2b-card{border:1px solid #e7d9ed;border-radius:16px;padding:20px;background:#fcf9fd;margin:16px 0;overflow-wrap:anywhere}
+.b2b-card h3{margin:8px 0}
+.b2b-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.b2b-card{margin:0}
+.b2b-options{border:1px solid #e7d9ed;border-radius:12px;padding:12px;display:flex;gap:16px;flex-wrap:wrap}
+.b2b-options label,.b2b-consent{display:flex;align-items:center;gap:8px}
+#b2bModal input[type=checkbox]{width:18px;height:18px;flex-shrink:0;accent-color:#9a3db5}
+#b2bModal .input,#b2bModal .select{background:#fff;color:#36213f;border:1px solid #cbb9d3;box-sizing:border-box;max-width:100%}
+.b2b-photos{display:flex;gap:8px;overflow-x:auto;margin:12px 0}
+.b2b-photos img{width:220px;height:160px;object-fit:contain;border-radius:8px;background:#f0e9f3}
+.b2b-description{white-space:pre-wrap}
+.b2b-review-note{width:100%;min-height:70px}
+#b2bNavBtn,#b2bAccountBtn{position:relative;overflow:visible;background:linear-gradient(135deg,#742797,#9b2bb3);color:#fff;border:1px solid #b974d0;box-shadow:0 5px 16px rgba(91,29,116,.22);cursor:pointer;font:inherit;font-weight:700;white-space:nowrap}
+#b2bNavBtn:hover,#b2bAccountBtn:hover{background:linear-gradient(135deg,#8731ad,#ae35c5);border-color:#d59deb}
+#b2bNavBtn:focus-visible,#b2bAccountBtn:focus-visible{outline:3px solid #edb7ff;outline-offset:3px}
+.b2b-pending-badge{position:absolute;top:-9px;right:-9px;min-width:23px;height:23px;padding:0 5px;box-sizing:border-box;border-radius:999px;background:#e82789;color:#fff;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;line-height:1;box-shadow:0 2px 7px rgba(60,10,70,.25);pointer-events:none}
+.b2b-discovery{margin:12px auto 22px;padding:18px 22px;border:1px solid #dfc3ed;border-radius:16px;background:#f7effb;color:#442153;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.b2b-discovery h2{font-size:1.05rem;margin:0 0 4px;color:#63277d}
+.b2b-discovery p{margin:0;font-size:.92rem;line-height:1.5;color:#654a71}
+#b2bDiscoveryLink{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 16px;box-sizing:border-box;background:#762a96;color:#fff;border:1px solid #a669c0;border-radius:20px;text-align:center;line-height:1.35;text-decoration:none;font-size:.78rem;font-weight:800;flex-shrink:0}
+#b2bDiscoveryLink:hover{background:#8b32ad;border-color:#bd83d2}
+@media(max-width:640px){
+  .b2b-grid{grid-template-columns:1fr}
+  .b2b-toolbar .btn{flex:1 1 140px}
+  .b2b-modal .form-grid{grid-template-columns:1fr}
+  .b2b-panel,.b2b-card{padding:14px}
+  .b2b-discovery{align-items:flex-start;flex-direction:column;gap:10px;padding:16px}
+  #b2bDiscoveryLink{white-space:normal;width:100%}
+}
+</style>
 </head>
 <body>
 
@@ -1691,6 +1730,7 @@ a.btn{cursor:pointer}
   <div class="container nav">
     <div></div>
     <div class="nav-actions">
+      <button class="btn b2b-entry hidden" id="b2bNavBtn" type="button" aria-label="Entre pros">Entre pros<span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
       <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Importer mon stock"><span aria-hidden="true">📦</span> <span class="header-stock-label">Importer mon stock</span></button>
       <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="À modérer"><span aria-hidden="true">🛡️</span> <span class="header-moderation-label">À modérer</span></button>
@@ -1727,6 +1767,14 @@ a.btn{cursor:pointer}
       </div>
     </div>
   </section>
+
+  <aside class="container b2b-discovery" aria-labelledby="b2bDiscoveryTitle">
+    <div>
+      <h2 id="b2bDiscoveryTitle">Découvrez Entre pros</h2>
+      <p>Des annonces entre professionnels, avec des prix accessibles sur accord du vendeur. Disponible avec un compte professionnel.</p>
+    </div>
+    <a id="b2bDiscoveryLink" href="#accountModal">Un espace dédié aux pros →</a>
+  </aside>
 
   <section class="trust">
     <div class="container trust-grid">
@@ -2118,6 +2166,7 @@ a.btn{cursor:pointer}
           </div>
           <div class="form-actions">
             <button class="btn primary" type="submit">Enregistrer mon profil</button>
+            <button class="btn b2b-entry hidden" id="b2bAccountBtn" type="button" aria-label="Entre pros">Entre pros<span id="b2bAccountBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
             <button class="btn ghost hidden" id="proImportBtn" type="button">📦 Importer mon stock</button>
             <button class="btn ghost" id="logoutBtn" type="button">Se déconnecter</button>
           </div>
@@ -2195,6 +2244,67 @@ a.btn{cursor:pointer}
   </div>
 </div>
 
+<div class="modal-backdrop" id="b2bModal" aria-hidden="true">
+  <div class="modal b2b-modal">
+    <div class="modal-head"><h2>Entre pros</h2><a class="close-btn" data-close="b2bModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body">
+      <p class="b2b-intro">Présente tes offres, choisis à qui tu révèles tes prix. Un accord donne accès aux prix de toutes les annonces du vendeur.</p>
+      <div class="b2b-toolbar"><button class="btn ghost" id="b2bRefresh" type="button">Actualiser</button></div>
+      <p id="b2bStatus" class="note" role="status" aria-live="polite"></p>
+      <div id="b2bMarketplace" class="hidden">
+        <div class="b2b-toolbar">
+          <button class="btn primary" id="b2bNewOffer" type="button">Déposer une offre</button>
+          <button class="btn ghost" id="b2bAllOffers" type="button">Toutes les offres</button>
+          <button class="btn ghost" id="b2bMyOffers" type="button">Mon stock</button>
+          <button class="btn ghost" id="b2bAccessBtn" type="button">Demandes et accès</button>
+          <button class="btn ghost hidden" id="b2bAdminRelationsBtn" type="button">Toutes les relations entre pros</button>
+        </div>
+        <form id="b2bPriceRequestForm" class="hidden b2b-panel">
+          <h3 id="b2bRequestHeading">Demander l’accès aux prix</h3>
+          <input id="b2bRequestSeller" type="hidden">
+          <p>Le vendeur recevra ta société, ton SIRET contrôlé et l’activité que tu indiques ci-dessous. Il décidera de te donner accès à ses prix et coordonnées.</p>
+          <label for="b2bBuyerActivity">Ton activité professionnelle</label>
+          <input class="input" id="b2bBuyerActivity" required minlength="3" maxlength="200" placeholder="Ex. : chauffeur VTC, achat et revente automobile…">
+          <p id="b2bRequestMessage" class="note" role="status"></p>
+          <div class="b2b-toolbar"><button class="btn primary" type="submit">Envoyer au vendeur</button><button class="btn ghost" id="b2bCancelRequest" type="button">Annuler</button></div>
+        </form>
+        <section id="b2bAccessArea" class="hidden">
+          <h3>Qui peut voir mes prix ?</h3>
+          <p>Un accord vaut pour toutes tes annonces Entre pros. Tu peux le retirer à tout moment.</p>
+          <div id="b2bIncoming"></div>
+          <h3>Mes demandes aux vendeurs</h3>
+          <div id="b2bOutgoing"></div>
+        </section>
+        <form id="b2bOfferForm" class="hidden b2b-panel">
+          <h3 id="b2bOfferHeading">Nouvelle offre privée</h3>
+          <input type="hidden" id="b2bOfferId">
+          <div class="form-grid">
+            <div class="form-row full"><label for="b2bOfferTitle">Titre</label><input class="input" id="b2bOfferTitle" required minlength="3" maxlength="160"></div>
+            <div class="form-row"><label for="b2bOfferPrice">Prix en euros</label><input class="input" id="b2bOfferPrice" type="number" min="0" max="9999999999" step="0.01" required></div>
+            <div class="form-row"><label for="b2bOfferBasis">Prix affiché</label><select class="select" id="b2bOfferBasis"><option>HT</option><option>TTC</option></select></div>
+            <div class="form-row"><label for="b2bOfferCity">Ville</label><input class="input" id="b2bOfferCity" required minlength="2" maxlength="120"></div>
+            <fieldset class="form-row full b2b-options"><legend>Catégories de l’offre</legend><label><input name="b2bAudience" type="checkbox" value="automobile"> Marchands automobiles</label><label><input name="b2bAudience" type="checkbox" value="transport"> Transport / VTC</label></fieldset>
+            <div class="form-row full"><label for="b2bOfferDescription">Description et état du bien — sans prix ni coordonnées</label><textarea class="input" id="b2bOfferDescription" required minlength="10" maxlength="10000" rows="4"></textarea></div>
+            <div class="form-row"><label for="b2bOfferPhone">Téléphone de contact</label><input class="input" id="b2bOfferPhone" type="tel" required minlength="6" maxlength="40"></div>
+            <div class="form-row"><label for="b2bOfferEmail">E-mail de contact</label><input class="input" id="b2bOfferEmail" type="email" required maxlength="254"></div>
+            <div class="form-row full"><label for="b2bOfferPhotos">Ajouter des photos — sans prix ni coordonnées visibles — 5 maximum par envoi, 5 Mo par photo</label><input class="input" id="b2bOfferPhotos" type="file" multiple accept="image/jpeg,image/png,image/webp"><small>Les photos déjà enregistrées sont conservées.</small></div>
+          </div>
+          <p class="note" id="b2bOfferMessage" role="status"></p>
+          <div class="b2b-toolbar"><button class="btn primary" type="submit">Publier avec prix masqué</button><button class="btn ghost" id="b2bCancelOffer" type="button">Annuler</button></div>
+        </form>
+        <section id="b2bAdminRelationsArea" class="hidden">
+          <h3>Relations entre professionnels — administration</h3>
+          <div id="b2bAdminRelationsList"></div>
+          <div class="b2b-toolbar"><button class="btn ghost" id="b2bRelationsPrevious" type="button">Précédente</button><span id="b2bRelationsPage"></span><button class="btn ghost" id="b2bRelationsNext" type="button">Suivante</button></div>
+        </section>
+        <div class="b2b-toolbar hidden" id="b2bAdminPager"><button class="btn ghost" id="b2bAdminPrevious" type="button">Précédente</button><span id="b2bAdminPage"></span><button class="btn ghost" id="b2bAdminNext" type="button">Suivante</button></div>
+        <p id="b2bStockStats" class="note"></p>
+        <div id="b2bOffers" class="b2b-grid"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -2207,6 +2317,11 @@ const sb = (window.supabase && window.supabase.createClient)
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 let currentUser=null, currentProfile=null, currentProVerification=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[];
+let b2bServerAdminUserId=null;
+function syncB2bEntryVisibility(){
+  const isProfessional=!!currentUser && (currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id);
+  for(const id of ['b2bNavBtn','b2bAccountBtn']) document.getElementById(id)?.classList.toggle('hidden',!isProfessional);
+}
 const detailAdsCache=new Map();
 let moderationMode=false, favoritesMode=false;
 let favoriteIds=new Set();
@@ -2401,6 +2516,7 @@ async function refreshAuth(){
   updateAuthUI();
 }
 function updateAuthUI(){
+  syncB2bEntryVisibility();
   if(currentUser){
     $('#accountBtn').textContent=currentProfile?.display_name||'Mon compte';
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
@@ -2443,6 +2559,7 @@ function updateAuthUI(){
     if($('#profileProVerification')) $('#profileProVerification').classList.add('hidden');
     $('#loggedOutAccount').classList.remove('hidden'); $('#loggedInAccount').classList.add('hidden');
   }
+  window.dispatchEvent(new Event('abracadeal:auth'));
 }
 
 $('#loginForm').addEventListener('submit',async e=>{
@@ -4654,5 +4771,195 @@ window.addEventListener('focus',()=>{
     <button type="button" class="photo-lightbox-bottom-contact" id="photoLightboxContact">Contacter</button>
   </div>
 </div>
+<script>
+// Entre pros V2 : prix transmis uniquement après accord du vendeur.
+(()=>{
+ const labels={automobile:'Automobile',transport:'Transport / VTC'};
+ const statusLabels={draft:'Brouillon',active:'En ligne',sold:'Vendu',archived:'Retiré'};
+ const accessLabels={pending:'En attente',accepted:'Accepté',rejected:'Refusé / retiré'};
+ let userId=null,version=0,offers=[],incoming=[],mine=false,blobUrls=[],isAdmin=false,adminPage=0,relationsPage=0;
+ const node=id=>document.getElementById(id);
+ const values=name=>Array.from(document.querySelectorAll('input[name="'+name+'"]:checked')).map(el=>el.value);
+ const show=(id,yes)=>node(id).classList.toggle('hidden',!yes);
+ const msg=(id,text)=>node(id).textContent=text;
+ const requireResult=result=>{if(result.error)throw result.error;return result.data;};
+ const sectorText=list=>(list||[]).map(x=>labels[x]||x).join(', ');
+ const errorText=error=>/PGRST202|42P01/.test(error?.code||'')?'L’espace Entre pros n’est pas encore activé. Réessaie après son ouverture.':error?.message||'Action impossible. Réessaie.';
+ function clearBlobs(){blobUrls.forEach(URL.revokeObjectURL);blobUrls=[];}
+ function clearPrivate(){version++;clearBlobs();offers=[];incoming=[];isAdmin=false;node('b2bAdminRelationsList').replaceChildren();['b2bAdminRelationsBtn','b2bAdminRelationsArea','b2bAdminPager'].forEach(id=>show(id,false));['b2bOffers','b2bIncoming','b2bOutgoing'].forEach(id=>node(id).replaceChildren());['b2bMarketplace','b2bOfferForm','b2bAccessArea','b2bPriceRequestForm'].forEach(id=>show(id,false));}
+ async function rpc(name,args){return requireResult(await sb.rpc(name,args));}
+ function same(v){return v===version&&userId===currentUser?.id;}
+ let roleCheckGeneration=0;
+ async function refreshAdminEntry(){
+  const uid=currentUser?.id||null,generation=++roleCheckGeneration;
+  b2bServerAdminUserId=null;syncB2bEntryVisibility();
+  if(!uid||!sb)return;
+  try{const value=await rpc('b2b_is_admin');if(generation===roleCheckGeneration&&currentUser?.id===uid){b2bServerAdminUserId=value===true?uid:null;syncB2bEntryVisibility();}}catch(_){}
+ }
+ window.addEventListener('abracadeal:auth',refreshAdminEntry);
+ refreshAdminEntry();
+ // Compteur des demandes reçues en attente, même lorsque l'espace est fermé.
+ let pendingIdentity='',pendingGeneration=0;
+ const pendingQueries=new Set();
+ function pendingKey(){return currentUser?.id&&currentProfile?.account_type==='professionnel'?currentUser.id:'';}
+ function paintPendingCount(count){
+  for(const [buttonId,badgeId] of [['b2bNavBtn','b2bNavBadge'],['b2bAccountBtn','b2bAccountBadge']]){
+   const badge=node(badgeId);badge.textContent=count>99?'99+':String(count);
+   badge.classList.toggle('hidden',count===0);
+   node(buttonId).setAttribute('aria-label',count?'Entre pros, '+count+' demande'+(count>1?'s':'')+' en attente':'Entre pros');
+   node(buttonId).title=count?count+' demande'+(count>1?'s':'')+' d’accès aux prix en attente':'Entre pros';
+  }
+  msg('b2bAccessBtn','Demandes et accès'+(count?' ('+count+')':''));
+ }
+ async function refreshPendingCount(force=false){
+  const key=pendingKey();
+  if(key!==pendingIdentity){pendingIdentity=key;pendingGeneration++;paintPendingCount(0);}
+  if(force===true)pendingGeneration++;
+  if(!sb||!key||document.visibilityState==='hidden')return;
+  const generation=pendingGeneration,queryKey=key+':'+generation;
+  if(pendingQueries.has(queryKey))return;
+  pendingQueries.add(queryKey);
+  try{
+   const {count,error}=await sb.from('b2b_price_access').select('buyer_id',{count:'exact',head:true}).eq('seller_id',key).eq('status','pending');
+   if(error||generation!==pendingGeneration||key!==pendingKey())return;
+   if(Number.isInteger(count))paintPendingCount(count);
+  }catch(error){/* Conserver le dernier compteur connu lors d'une panne réseau. */}
+  finally{pendingQueries.delete(queryKey);}
+ }
+ window.addEventListener('abracadeal:auth',refreshPendingCount);
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPendingCount();});
+ setInterval(refreshPendingCount,15000);
+ refreshPendingCount();
+ async function load(){
+  clearPrivate();userId=currentUser?.id||null;const v=version;
+  if(!sb||!userId){msg('b2bStatus','Connecte-toi avec un compte professionnel pour consulter Entre pros.');return;}
+  msg('b2bStatus','Chargement…');
+  try{
+   const [professional,serverAdmin]=await Promise.all([rpc('b2b_is_professional'),rpc('b2b_is_admin')]);if(!same(v))return;
+   isAdmin=serverAdmin===true;b2bServerAdminUserId=isAdmin?userId:null;syncB2bEntryVisibility();
+   if(!professional&&!isAdmin){msg('b2bStatus','Vérifie et enregistre ton SIRET dans Mon compte pour accéder à Entre pros.');return;}
+   show('b2bMarketplace',true);show('b2bNewOffer',!!professional);show('b2bAdminRelationsBtn',isAdmin);
+   msg('b2bStatus',isAdmin?'Mode administrateur : toutes les annonces Entre pros, tous les statuts et tous les prix sont accessibles sans accord des vendeurs.':'Les vendeurs choisissent à qui ils donnent accès à leurs prix. Une fois accepté, contacte le vendeur pour conclure directement avec lui.');
+   await loadOffers();
+   if(same(v))await refreshPendingCount();
+  }catch(error){if(same(v))msg('b2bStatus',errorText(error));}
+ }
+ async function open(){closeModal('accountModal');openModal('b2bModal');await load();}
+ node('b2bNavBtn').addEventListener('click',open);node('b2bAccountBtn').addEventListener('click',open);node('b2bRefresh').addEventListener('click',load);
+ window.addEventListener('abracadeal:auth',()=>{if(userId!==(currentUser?.id||null)){clearPrivate();userId=currentUser?.id||null;node('b2bPriceRequestForm').reset();node('b2bOfferForm').reset();if(node('b2bModal').classList.contains('open'))load();}});
+ async function loadOffers(){
+  const v=version;clearBlobs();node('b2bOffers').replaceChildren();msg('b2bStockStats','Chargement…');
+  try{
+   // Ne jamais lire directement b2b_offers pour constituer le catalogue masqué.
+   const adminView=isAdmin&&!mine;
+   const data=await rpc(adminView?'b2b_admin_catalog':'b2b_catalog',adminView?{page_number:adminPage}:{own_only:mine});if(!same(v))return;
+   offers=adminView?(data||[]).slice(0,100).map(o=>({...o,prices_allowed:true})):(data||[]);
+   show('b2bAdminPager',adminView);node('b2bAdminPrevious').disabled=adminPage===0;node('b2bAdminNext').disabled=(data||[]).length<=100;msg('b2bAdminPage','Page '+(adminPage+1));
+   msg('b2bStockStats',adminView?'Vue administrateur · tous les statuts · tous les prix · page '+(adminPage+1):mine?`${offers.filter(o=>o.status==='active').length} en ligne · ${offers.filter(o=>o.status==='sold').length} vendue(s) · ${offers.filter(o=>o.status==='draft').length} brouillon(s) — sur les 100 dernières offres`:'100 dernières offres Entre pros');
+   if(!offers.length){msg('b2bOffers',mine?'Ton stock Entre pros est vide.':'Aucune offre pour le moment.');return;}
+   node('b2bOffers').innerHTML=offers.map(o=>`<article class="b2b-card"><span class="status-pill">PRO · ${esc(statusLabels[o.status])}</span><h3>${esc(o.title)}</h3><strong>${o.prices_allowed?esc(money(o.price))+' '+esc(o.price_basis):'Prix sur accord du vendeur'}</strong><p>${esc(o.company_name)} · ${esc(o.city)}</p><p class="note">${esc(sectorText(o.audiences))}</p><p class="b2b-description">${esc(o.description)}</p>${o.prices_allowed?`<p>Contact : ${esc(o.contact_phone)}<br>${esc(o.contact_email)}</p>`:o.access_status?`<p class="note">${esc(accessLabels[o.access_status])}${o.access_status==='accepted'?' · Actualise pour contrôler l’accès.':''}</p>`:`<button class="btn primary" type="button" data-b2b-request="${esc(o.seller_id)}">Demander l’accès aux prix</button>`}<div class="b2b-toolbar"><button class="btn ghost" type="button" data-b2b-photos="${esc(o.id)}">Voir les photos</button></div><div class="b2b-photos" id="b2bPhotos-${esc(o.id)}"></div>${o.seller_id===userId?`<div class="b2b-toolbar"><button class="btn ghost" type="button" data-b2b-edit="${esc(o.id)}">Modifier / republier</button>${o.status==='active'?`<button class="btn ghost" type="button" data-b2b-status="sold" data-id="${esc(o.id)}">Marquer vendu</button>`:''}${o.status!=='archived'?`<button class="btn ghost" type="button" data-b2b-status="archived" data-id="${esc(o.id)}">Retirer</button>`:''}</div>`:''}</article>`).join('');
+  }catch(error){if(same(v))msg('b2bStockStats',errorText(error));}
+ }
+ node('b2bAllOffers').addEventListener('click',()=>{mine=false;adminPage=0;loadOffers();});node('b2bMyOffers').addEventListener('click',()=>{mine=true;adminPage=0;loadOffers();});
+ node('b2bCancelRequest').addEventListener('click',()=>show('b2bPriceRequestForm',false));
+ node('b2bPriceRequestForm').addEventListener('submit',async event=>{
+  event.preventDefault();const btn=event.submitter,v=version;btn.disabled=true;msg('b2bRequestMessage','Envoi…');
+  try{await rpc('b2b_request_prices',{seller:node('b2bRequestSeller').value,activity:node('b2bBuyerActivity').value.trim()});if(!same(v))return;show('b2bPriceRequestForm',false);await loadOffers();toast('Demande transmise au vendeur');}
+  catch(error){if(same(v))msg('b2bRequestMessage',errorText(error));}finally{btn.disabled=false;}
+ });
+ async function loadAccess(){
+  const v=version;show('b2bAccessArea',true);msg('b2bIncoming','Chargement…');msg('b2bOutgoing','Chargement…');
+  try{
+   const [received,sent]=await Promise.all([sb.from('b2b_price_access').select('*').eq('seller_id',userId).order('updated_at',{ascending:false}).limit(100),sb.from('b2b_price_access').select('*').eq('buyer_id',userId).order('updated_at',{ascending:false}).limit(100)]);
+   if(!same(v))return;incoming=requireResult(received)||[];const outgoing=requireResult(sent)||[];
+   node('b2bIncoming').innerHTML=incoming.length?incoming.map(r=>`<article class="b2b-panel"><span class="status-pill">${esc(accessLabels[r.status])}</span><h3>${esc(r.buyer_company)}</h3><p>SIRET contrôlé : ${esc(r.buyer_siret)}</p><p>Activité déclarée : ${esc(r.buyer_activity)}</p><div class="b2b-toolbar">${r.status!=='accepted'?`<button class="btn primary" type="button" data-b2b-decision="accepted" data-buyer="${esc(r.buyer_id)}">Accepter ce pro</button>`:''}<button class="btn ghost" type="button" data-b2b-decision="rejected" data-buyer="${esc(r.buyer_id)}">${r.status==='accepted'?'Retirer l’accès':'Refuser'}</button></div><p class="note b2b-decision-message" role="status"></p></article>`).join(''):'Aucune demande reçue.';
+   node('b2bOutgoing').innerHTML=outgoing.length?outgoing.map(r=>`<div class="b2b-panel"><strong>Vendeur · SIRET ${esc(r.seller_siret)}</strong><p>${esc(accessLabels[r.status])}</p></div>`).join(''):'Aucune demande envoyée.';
+  }catch(error){if(same(v))msg('b2bIncoming',errorText(error));}
+ }
+ node('b2bAccessBtn').addEventListener('click',loadAccess);
+ node('b2bIncoming').addEventListener('click',async event=>{
+  const btn=event.target.closest('button[data-b2b-decision]');if(!btn)return;const v=version,r=incoming.find(x=>x.buyer_id===btn.dataset.buyer);if(!r)return;
+  if(btn.dataset.b2bDecision==='rejected'&&!confirm('Refuser ou retirer l’accès de ce professionnel à tous tes prix ?'))return;
+  const buttons=Array.from(btn.closest('article').querySelectorAll('button'));buttons.forEach(b=>b.disabled=true);
+  try{await rpc('b2b_decide_prices',{buyer:r.buyer_id,decision:btn.dataset.b2bDecision,expected_updated_at:r.updated_at});if(same(v)){await loadAccess();await refreshPendingCount(true);toast(btn.dataset.b2bDecision==='accepted'?'Ce professionnel peut voir tous tes prix':'Accès retiré');}}
+  catch(error){if(same(v))btn.closest('article').querySelector('.b2b-decision-message').textContent=errorText(error);}finally{buttons.forEach(b=>b.disabled=false);}
+ });
+ node('b2bAdminPrevious').addEventListener('click',()=>{if(isAdmin&&adminPage>0){adminPage--;loadOffers();}});
+ node('b2bAdminNext').addEventListener('click',()=>{if(isAdmin){adminPage++;loadOffers();}});
+ async function loadAdminRelations(){
+  if(!isAdmin)return;const v=version;show('b2bAdminRelationsArea',true);msg('b2bAdminRelationsList','Chargement…');
+  try{
+   const rows=await rpc('b2b_admin_relations',{page_number:relationsPage});if(!same(v))return;
+   node('b2bRelationsPrevious').disabled=relationsPage===0;node('b2bRelationsNext').disabled=(rows||[]).length<=100;
+   msg('b2bRelationsPage','Page '+(relationsPage+1));
+   node('b2bAdminRelationsList').innerHTML=(rows||[]).slice(0,100).map(r=>`<article class="b2b-panel"><strong>${esc(r.buyer_company)}</strong><p>Acheteur : SIRET ${esc(r.buyer_siret)}<br>Vendeur : SIRET ${esc(r.seller_siret)}</p><p>Activité déclarée : ${esc(r.buyer_activity)}</p><span class="status-pill">${esc(accessLabels[r.status])}</span></article>`).join('')||'Aucune relation enregistrée.';
+  }catch(error){if(same(v))msg('b2bAdminRelationsList',errorText(error));}
+ }
+ node('b2bAdminRelationsBtn').addEventListener('click',()=>{relationsPage=0;loadAdminRelations();});
+ node('b2bRelationsPrevious').addEventListener('click',()=>{if(relationsPage>0){relationsPage--;loadAdminRelations();}});
+ node('b2bRelationsNext').addEventListener('click',()=>{relationsPage++;loadAdminRelations();});
+ function editOffer(o){
+  node('b2bOfferForm').reset();
+  for(const [id,key] of [['b2bOfferId','id'],['b2bOfferTitle','title'],['b2bOfferPrice','price'],['b2bOfferBasis','price_basis'],['b2bOfferCity','city'],['b2bOfferDescription','description'],['b2bOfferPhone','contact_phone'],['b2bOfferEmail','contact_email']])node(id).value=o?.[key]??'';
+  if(!o){node('b2bOfferBasis').value='TTC';node('b2bOfferCity').value=currentProfile?.city||'';node('b2bOfferPhone').value=currentProfile?.phone||'';node('b2bOfferEmail').value=currentUser?.email||'';}
+  document.querySelectorAll('input[name=b2bAudience]').forEach(el=>el.checked=(o?.audiences||['automobile']).includes(el.value));
+  msg('b2bOfferHeading',o?'Modifier mon offre':'Nouvelle offre — prix masqué');msg('b2bOfferMessage','');show('b2bOfferForm',true);node('b2bOfferTitle').focus();
+ }
+ node('b2bNewOffer').addEventListener('click',()=>editOffer(null));
+ node('b2bCancelOffer').addEventListener('click',()=>show('b2bOfferForm',false));
+ node('b2bOfferForm').addEventListener('submit',async event=>{
+  event.preventDefault();const btn=event.submitter,v=version;btn.disabled=true;msg('b2bOfferMessage','Enregistrement…');
+  try{
+   const files=Array.from(node('b2bOfferPhotos').files);if(files.length>5)throw new Error('Ajoute au maximum 5 photos par envoi.');
+   const types={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};
+   if(files.some(f=>!types[f.type]||f.size>5242880||!f.size))throw new Error('Photos JPG, PNG ou WebP de 5 Mo maximum.');
+   const audiences=values('b2bAudience');if(!audiences.length)throw new Error('Choisis les acheteurs autorisés.');
+   const payload={id:node('b2bOfferId').value||null,title:node('b2bOfferTitle').value.trim(),description:node('b2bOfferDescription').value.trim(),price:node('b2bOfferPrice').value,price_basis:node('b2bOfferBasis').value,city:node('b2bOfferCity').value.trim(),audiences,contact_phone:node('b2bOfferPhone').value.trim(),contact_email:node('b2bOfferEmail').value.trim(),status:'draft'};
+   const id=await rpc('b2b_save_offer',{payload});if(!same(v))return;
+   node('b2bOfferId').value=id;
+   for(const file of files){requireResult(await sb.storage.from('b2b-images').upload(userId+'/'+id+'/'+crypto.randomUUID()+'.'+types[file.type],file,{contentType:file.type,upsert:false}));if(!same(v))return;}
+   await rpc('b2b_save_offer',{payload:{...payload,id,status:'active'}});if(!same(v))return;
+   node('b2bOfferForm').reset();show('b2bOfferForm',false);mine=true;await loadOffers();toast('Offre privée publiée');
+  }catch(error){if(same(v))msg('b2bOfferMessage',errorText(error)+' Les informations saisies sont conservées. Si un brouillon a été enregistré, il reste dans Mon stock privé.');}
+  finally{btn.disabled=false;}
+ });
+ node('b2bOffers').addEventListener('click',async event=>{
+  const button=event.target.closest('button');if(!button)return;const v=version;
+  if(button.dataset.b2bRequest){const offer=offers.find(o=>o.seller_id===button.dataset.b2bRequest);node('b2bRequestSeller').value=offer.seller_id;msg('b2bRequestHeading','Demander les prix de '+offer.company_name);msg('b2bRequestMessage','');show('b2bPriceRequestForm',true);node('b2bBuyerActivity').focus();return;}
+  if(button.dataset.b2bEdit){editOffer(offers.find(o=>o.id===button.dataset.b2bEdit));return;}
+  button.disabled=true;
+  try{
+   if(button.dataset.b2bStatus){
+    if(!confirm(button.dataset.b2bStatus==='sold'?'Marquer cette offre comme vendue ?':'Retirer cette offre des résultats privés ?'))return;
+    await rpc('b2b_offer_status',{offer_id:button.dataset.id,new_status:button.dataset.b2bStatus});if(same(v))await loadOffers();
+   }else if(button.dataset.b2bPhotos){
+    const o=offers.find(o=>o.id===button.dataset.b2bPhotos);if(!o)return;
+    const host=node('b2bPhotos-'+o.id);host.replaceChildren();
+    const path=o.seller_id+'/'+o.id;
+    const items=requireResult(await sb.storage.from('b2b-images').list(path,{limit:100}));if(!same(v))return;
+    if(!items.length){host.textContent='Aucune photo.';return;}
+    for(const item of items){
+     const blob=requireResult(await sb.storage.from('b2b-images').download(path+'/'+item.name));if(!same(v))return;
+     const url=URL.createObjectURL(blob);blobUrls.push(url);const img=document.createElement('img');img.src=url;img.alt=o.title;host.appendChild(img);
+    }
+   }
+  }catch(error){if(same(v))toast(errorText(error));}finally{button.disabled=false;}
+ });
+
+})();
+
+document.getElementById('b2bDiscoveryLink')?.addEventListener('click',event=>{
+  event.preventDefault();
+  if(currentUser&&(currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id)){
+    document.getElementById('b2bNavBtn')?.click();
+    return;
+  }
+  window.setAuthTab('signup');
+  const type=document.getElementById('signupType');
+  if(type) type.value='professionnel';
+  syncSignupProFields();
+  openModal('accountModal');
+});
+</script>
 </body>
 </html>
