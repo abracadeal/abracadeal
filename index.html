@@ -6505,5 +6505,23 @@ document.getElementById('b2bDiscoveryLink').addEventListener('click',event=>{
  }else openProfessionalSignup();
 });
 </script>
+
+<script id="ABRACADEAL_RUNTIME_CATEGORY_FIX">
+(function(){
+  function fixCategoryCards(){
+    document.querySelectorAll('.categories .cat[data-category="vehicules"]:not([data-sub])').forEach(card=>{
+      card.dataset.sub='voitures';
+      const title=card.querySelector('h3');
+      const desc=card.querySelector('small');
+      const icon=card.querySelector('.cat-icon');
+      if(title) title.textContent='Voiture';
+      if(desc) desc.textContent='Voitures, utilitaires et pièces auto';
+      if(icon) icon.textContent='🚗';
+    });
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fixCategoryCards);
+  else fixCategoryCards();
+})();
+</script>
 </body>
 </html>
