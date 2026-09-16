@@ -1195,6 +1195,28 @@ a.btn{cursor:pointer}
 .seller-contact .btn.ghost:hover{
   background:#f6eef9 !important;
 }
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.info-badge{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;border:1px solid #e1d5ea;background:#fff;color:#604e69;font-size:.76rem;font-weight:850;line-height:1}
+.info-badge.pro{background:#f3ebf9;color:#6f2f8b;border-color:#dbc8e8}
+.info-badge.loa{background:linear-gradient(135deg,#1976ff 0%,#4da2ff 100%);color:#fff;border-color:#4da2ff;box-shadow:0 10px 20px rgba(27,121,255,.22)}
+.info-badge.loa strong{color:#fff}
+.detail-finance-note{margin-top:10px;color:#544776;font-weight:800;font-size:.9rem}
+.seller-badges{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+.seller-badge-loa{background:linear-gradient(135deg,#1976ff 0%,#4da2ff 100%);color:#fff;border-color:#4da2ff;box-shadow:0 10px 20px rgba(27,121,255,.20)}
+.seller-public-shell{display:grid;grid-template-columns:72px 1fr auto;gap:14px;align-items:center}
+.seller-logo{width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#ffffff 0%,#f5edf9 100%);border:1px solid #e8daef;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 1px 0 rgba(255,255,255,.85)}
+.seller-logo span{display:inline-flex;align-items:center;justify-content:center;width:52px;height:52px;border-radius:16px;background:linear-gradient(135deg,#251434 0%,#5d2386 100%);color:#fff;font-weight:900;letter-spacing:.03em;font-size:1rem;text-transform:uppercase}
+.seller-summary h3{margin:0;font-size:1.08rem;line-height:1.25}
+.seller-summary p{margin:4px 0 0;color:#7d6d87;font-size:.86rem}
+.seller-rating-rich{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin-top:8px}
+.seller-rating-rich strong{color:#2c1636;font-size:1rem}
+.seller-arrow{font-size:1.6rem;color:#8f77a1;font-weight:700}
+.seller-quick-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.seller-stat-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 11px;border-radius:999px;background:#fff;border:1px solid #e8dcef;color:#5f4c68;font-size:.78rem;font-weight:800}
+.seller-profile-link{width:100%;margin-top:14px;border:none;background:#f2ebf7;color:#5b2780;border-radius:14px;padding:11px 13px;font-weight:850;cursor:pointer}
+.seller-profile-link:hover{background:#ece2f4}
+.seller-contact{grid-template-columns:1fr 1fr}
+@media(max-width:760px){.seller-public-shell{grid-template-columns:64px 1fr}.seller-arrow{display:none}.seller-logo{width:64px;height:64px;border-radius:16px}.seller-logo span{width:46px;height:46px;border-radius:14px;font-size:.9rem}.seller-contact{grid-template-columns:1fr}}
 .photo-preview{
   display:flex;
   flex-wrap:wrap;
@@ -4424,6 +4446,11 @@ function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_
 function basePhotoLimitForAudience(audience=accountAudience()){return audience==='professionnel'?15:3}
 function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:3;return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
 function listingHasPhotoPack(a){return a?.seller_type==='professionnel'?listingPhotoLimit(a)>=30:listingPhotoLimit(a)>=12}
+function euroNoCents(v){const n=Number(v);if(!Number.isFinite(n)||n<=0)return '';return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(n)}
+function listingFinancingMonthly(a){const raw=a?.loa_monthly ?? a?.monthly_payment ?? a?.financing_monthly ?? a?.finance_monthly ?? a?.credit_monthly ?? a?.monthly_price ?? null;if(raw===null||raw===undefined||raw==='')return null;const n=Number(String(raw).replace(/\s/g,'').replace(/[^\d,.-]/g,'').replace(',', '.'));return Number.isFinite(n)&&n>0?n:null}
+function listingHasLoa(a){if(!a||a.category!=='vehicules')return false;if(a?.loa_available===true||listingFinancingMonthly(a))return true;const hay=[a?.title,a?.description].filter(Boolean).join(' ').toLowerCase();return /\b(loa|leasing|lld|ll?d|financement)\b/.test(hay)}
+function listingLoaLabel(a){const monthly=listingFinancingMonthly(a);return monthly?`LOA dès ${euroNoCents(monthly)}/mois`:'LOA possible'}
+function sellerInitials(name){const clean=String(name||'').replace(/[^\p{L}\p{N} ]/gu,' ').trim();if(!clean)return 'PRO';const parts=clean.split(/\s+/).filter(Boolean).slice(0,2);return (parts.map(p=>p[0]).join('')||clean.slice(0,2)).toUpperCase()}
 function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return photos.slice(0,listingPhotoLimit(a))}
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
 function setPublishPhotoLimit(){
@@ -5213,6 +5240,10 @@ function renderAds(){
         <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
         <h3 class="ad-title">${esc(a.title)}</h3>
         <div class="ad-price">${money(a.price)}</div>
+        ${(a.seller_type==='professionnel'||listingHasLoa(a))?`<div class="badge-row">
+          ${a.seller_type==='professionnel'?`<span class="info-badge pro">PRO</span>`:''}
+          ${listingHasLoa(a)?`<span class="info-badge loa">${listingLoaLabel(a)}</span>`:''}
+        </div>`:''}
         ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs">
           ${a.vehicle_year?`<span class="ad-spec">📅 ${esc(a.vehicle_year)}</span>`:''}
           ${(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?`<span class="ad-spec">🛣️ ${Number(a.mileage).toLocaleString('fr-FR')} km</span>`:''}
@@ -5375,6 +5406,11 @@ window.openAd=id=>{
               <h1 class="detail-title-main">${esc(a.title)}</h1>
               <div class="detail-price-main">${money(a.price)}</div>
               <div class="detail-location">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
+              ${(a.seller_type==='professionnel'||listingHasLoa(a))?`<div class="badge-row">
+                ${a.seller_type==='professionnel'?`<span class="info-badge pro">PRO</span>`:''}
+                ${listingHasLoa(a)?`<span class="info-badge loa">${listingLoaLabel(a)}</span>`:''}
+              </div>`:''}
+              ${listingHasLoa(a)?`<div class="detail-finance-note">Financement disponible ${listingFinancingMonthly(a)?`· à partir de <strong>${euroNoCents(listingFinancingMonthly(a))}/mois</strong>`:''}</div>`:''}
               <div class="detail-meta-line">${esc(categoryLabel)}${created?' · Publiée le '+esc(created):''}</div>
             </div>
           </div>
@@ -5406,19 +5442,28 @@ window.openAd=id=>{
 
         <aside>
           <div class="seller-card">
-            <span class="seller-badge">${a.seller_type==='professionnel'?'PRO':'PARTICULIER'}</span>
-            <div id="sellerPublic-${a.id}">
-              <h3>${sellerLabel}</h3>
-              <p>${esc(a.city)}</p>
-              <div class="seller-rating-line"><span class="stars">☆☆☆☆☆</span><span class="rating-muted">Chargement des avis…</span></div>
+            <div class="seller-badges">
+              <span class="seller-badge">${a.seller_type==='professionnel'?'PRO':'PARTICULIER'}</span>
+              ${listingHasLoa(a)?`<span class="seller-badge seller-badge-loa">${listingLoaLabel(a)}</span>`:''}
             </div>
-            <button type="button" class="seller-profile-link" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">Voir le profil et les avis</button>
+            <div id="sellerPublic-${a.id}">
+              <div class="seller-public-shell">
+                <div class="seller-logo"><span>${a.seller_type==='professionnel'?'PRO':'AB'}</span></div>
+                <div class="seller-summary">
+                  <h3>${sellerLabel}</h3>
+                  <p>${esc(a.city)}</p>
+                  <div class="seller-rating-rich"><span class="stars">☆☆☆☆☆</span><span class="rating-muted">Chargement des avis…</span></div>
+                </div>
+                <div class="seller-arrow">›</div>
+              </div>
+            </div>
+            <button type="button" class="seller-profile-link" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">${a.seller_type==='professionnel'?'Voir le garage et les avis':'Voir le profil et les avis'}</button>
 
             <div class="seller-contact">
-              ${!isOwner?`<button class="btn primary" type="button" onclick="startMessageForListing('${a.id}')">💬 Envoyer un message</button>`:''}
               ${a.show_phone
                 ?`<div id="phoneContact-${a.id}"><button class="btn ghost" type="button" onclick="viewListingPhone('${a.id}')">📞 Voir le numéro</button><div class="contact-login-note">Le numéro est réservé aux membres connectés.</div></div>`
                 :`<div class="note">Le vendeur a choisi de ne pas afficher son numéro.</div>`}
+              ${!isOwner?`<button class="btn primary" type="button" onclick="startMessageForListing('${a.id}')">💬 Message</button>`:''}
             </div>
             ${canDelete?`
               <div class="detail-owner-actions">
@@ -5852,20 +5897,39 @@ function formatReviewDate(v){
 }
 async function hydrateSellerCard(sellerId,listingId){
   const host=document.getElementById(`sellerPublic-${listingId}`);
+  const ad=allAds.find(x=>x.id===listingId)||detailAdsCache.get(listingId);
   if(!host) return;
-  const [{data:profile},{data:reviews}]=await Promise.all([
+  const [{data:profile},{data:reviews},{data:sellerListings}]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
-    sb.from('reviews').select('rating').eq('seller_id',sellerId).eq('status','active')
+    sb.from('reviews').select('rating').eq('seller_id',sellerId).eq('status','active'),
+    sb.from('listings').select('id').eq('owner_id',sellerId).eq('status','active').limit(200)
   ]);
   const list=reviews||[];
-  const avg=list.length?list.reduce((s,r)=>s+Number(r.rating),0)/list.length:0;
+  const avg=list.length?list.reduce((sum,r)=>sum+Number(r.rating),0)/list.length:0;
+  const displayName=profile?.display_name || (profile?.account_type==='professionnel'?'Garage professionnel':'Vendeur particulier');
+  const city=profile?.city||ad?.city||'';
+  const initials=sellerInitials(displayName);
+  const listingsCount=(sellerListings||[]).length;
+  const since=profile?.joined_at?new Intl.DateTimeFormat('fr-FR',{month:'short',year:'numeric'}).format(new Date(profile.joined_at)):'';
+  const isPro=(profile?.account_type==='professionnel')||(ad?.seller_type==='professionnel');
   host.innerHTML=`
-    <h3>${esc(profile?.display_name || (profile?.account_type==='professionnel'?'Vendeur professionnel':'Vendeur particulier'))}</h3>
-    <p>${esc(profile?.city||'')}</p>
-    <div class="seller-rating-line">
-      <span class="stars">${starsText(avg)}</span>
-      <strong>${list.length?avg.toFixed(1).replace('.',','):'—'}</strong>
-      <span class="rating-muted">(${list.length} avis)</span>
+    <div class="seller-public-shell">
+      <div class="seller-logo"><span>${esc(initials)}</span></div>
+      <div class="seller-summary">
+        <h3>${esc(displayName)}</h3>
+        <p>${isPro?'Garage / vendeur professionnel':'Vendeur particulier'}${city?` · ${esc(city)}`:''}</p>
+        <div class="seller-rating-rich">
+          <span class="stars">${starsText(avg)}</span>
+          <strong>${list.length?avg.toFixed(1).replace('.',','):'—'}</strong>
+          <span class="rating-muted">${list.length?`${list.length} avis`:'Aucun avis pour le moment'}</span>
+        </div>
+      </div>
+      <div class="seller-arrow">›</div>
+    </div>
+    <div class="seller-quick-stats">
+      ${isPro?`<span class="seller-stat-chip">🏢 ${listingsCount} annonce${listingsCount>1?'s':''}</span>`:''}
+      ${city?`<span class="seller-stat-chip">📍 ${esc(city)}</span>`:''}
+      ${since?`<span class="seller-stat-chip">📅 ${isPro?'Actif':'Membre'} depuis ${esc(since)}</span>`:''}
     </div>`;
 }
 
