@@ -1869,6 +1869,22 @@ a.btn{cursor:pointer}
 .b2b-price-visibility label{display:flex;align-items:center;gap:7px;border:1px solid #eadcf0;background:#fff;border-radius:12px;padding:9px 12px;cursor:pointer;font-weight:700}
 .b2b-price-visibility label:has(input:checked){border-color:#a43ac3;box-shadow:0 0 0 2px rgba(164,58,195,.10);background:#fbf6fd}
 .b2b-price-visibility input{accent-color:#8d2bb0}
+
+/* ABRACADEAL LANDSCAPE BANNER FIX */
+@media (orientation:landscape) and (max-height:620px) and (max-width:1200px){
+  .hero{padding:0 0 18px !important;}
+  .banner-frame{margin-bottom:0 !important;overflow:visible !important;}
+  .banner{display:block !important;width:100% !important;height:auto !important;object-fit:contain !important;}
+  .search-wrap{position:relative !important;left:auto !important;bottom:auto !important;transform:none !important;width:calc(100% - 20px) !important;margin:12px auto 0 !important;z-index:4 !important;}
+  .search-card{grid-template-columns:minmax(0,1.25fr) minmax(0,.9fr) auto auto !important;align-items:center !important;padding:8px !important;border-radius:16px !important;}
+  .field,.search-btn,.search-nearby-btn{height:46px !important;min-height:46px !important;}
+  .search-btn,.search-nearby-btn{white-space:nowrap !important;padding-left:14px !important;padding-right:14px !important;}
+  .hero-shell::after{height:56px !important;}
+}
+@media (orientation:landscape) and (max-height:520px) and (max-width:950px){
+  .search-card{grid-template-columns:1fr 1fr !important;}
+  .search-btn,.search-nearby-btn{width:100% !important;}
+}
 </style>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
