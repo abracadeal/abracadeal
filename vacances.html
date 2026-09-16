@@ -116,11 +116,8 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 .direct-price{margin-top:12px;display:flex;justify-content:space-between;gap:14px;align-items:center;padding:14px 16px;background:#2b103e;color:#fff;border-radius:14px}
 .direct-price strong{font-size:1.3rem}
 .calc small{display:block;color:#817287;margin-top:12px;line-height:1.45}
-.calc-actions{display:flex;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
-.calc-btn{min-width:150px;min-height:48px;border-radius:15px}
-.calc-message{font-size:.82rem;font-weight:700;color:#74667c}
+.calc-message{display:block;font-size:.82rem;font-weight:700;color:#74667c;margin-top:10px}
 .calc-message.error{color:#b42353}
-.calc-message.ok{color:#672080}
 .steps{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
 .step{padding:24px;border-radius:20px;background:#fff;border:1px solid var(--line)}
 .step-number{width:36px;height:36px;border-radius:50%;display:grid;place-items:center;background:#43135f;color:#fff;font-weight:900;margin-bottom:15px}
@@ -144,7 +141,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><b>Abracadeal</b><small>Vacances</small></a>
     <div class="nav-actions">
       <a class="btn ghost" href="index.html">← Abracadeal</a>
-      <a class="btn primary" href="#proprietaires">Propriétaires</a>
+      <a class="btn primary" href="#hotes">Hôtes</a>
     </div>
   </div>
 </header>
@@ -155,7 +152,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     <div>
       <span class="kicker">☀️ Locations saisonnières en direct</span>
       <h1>Le même séjour.<br><span>Moins de frais.</span></h1>
-      <p>Abracadeal Vacances met directement en relation voyageurs et propriétaires. Le propriétaire paie un abonnement fixe de <strong>9,99 € par mois et par logement</strong> et Abracadeal ne prélève aucune commission sur le montant des réservations.</p>
+      <p>Abracadeal Vacances met directement en relation voyageurs et hôtes. L’hôte paie un abonnement fixe de <strong>9,99 € par mois et par logement</strong> et Abracadeal ne prélève aucune commission sur le montant des réservations.</p>
       <div class="hero-badges">
         <span class="hero-badge"><strong>9,99 €</strong> / mois / logement</span>
         <span class="hero-badge"><strong>0 %</strong> de commission</span>
@@ -182,48 +179,45 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 
 <section class="section alt">
   <div class="container">
-    <div class="section-head"><div><h2>Un prix direct propriétaire</h2><p>Le propriétaire choisit librement son tarif. Sans commission Abracadeal sur la réservation, il peut proposer un prix plus attractif au voyageur tout en conservant davantage.</p></div></div>
+    <div class="section-head"><div><h2>Un prix direct hôte</h2><p>L’hôte choisit librement son tarif. Sans commission Abracadeal sur la réservation, il peut proposer un prix plus attractif au voyageur tout en conservant davantage.</p></div></div>
     <div class="value-grid">
-      <div class="value-card"><div class="icon">💬</div><h3>Contact direct</h3><p>Messagerie Abracadeal, appel, SMS ou WhatsApp prérempli pour que le propriétaire sache immédiatement que le voyageur vient d’Abracadeal.</p></div>
+      <div class="value-card"><div class="icon">💬</div><h3>Contact direct</h3><p>Messagerie Abracadeal, appel, SMS ou WhatsApp prérempli pour que l’hôte sache immédiatement que le voyageur vient d’Abracadeal.</p></div>
       <div class="value-card"><div class="icon">📅</div><h3>Calendrier clair</h3><p>Tarif à la nuit, périodes spéciales, séjour minimum et disponibilités. La synchronisation iCal avec les autres calendriers pourra ensuite être ajoutée.</p></div>
-      <div class="value-card"><div class="icon">🏷️</div><h3>0 % sur la réservation</h3><p>Abracadeal facture la publication du logement, pas le séjour. Aucun pourcentage n’est prélevé sur le montant payé au propriétaire.</p></div>
+      <div class="value-card"><div class="icon">🏷️</div><h3>0 % sur la réservation</h3><p>Abracadeal facture la publication du logement, pas le séjour. Aucun pourcentage n’est prélevé sur le montant payé à l’hôte.</p></div>
       <div class="value-card"><div class="icon">🔒</div><h3>Annonce encadrée</h3><p>La publication Vacances disposera de champs spécifiques : résidence principale, numéro de déclaration lorsqu’il est requis et déclaration sur l’honneur du loueur.</p></div>
     </div>
   </div>
 </section>
 
-<section class="section owner" id="proprietaires">
+<section class="section owner" id="hotes">
   <div class="container owner-grid">
     <div class="price-card">
-      <div style="font-weight:900;color:#7a288f;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem">Offre propriétaire</div>
+      <div style="font-weight:900;color:#7a288f;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem">Offre hôte</div>
       <div class="price-big">9,99 €</div>
       <div style="font-weight:800;margin-bottom:16px">par mois et par logement</div>
       <div class="price-line"><span>Commission sur les réservations</span><strong>0 €</strong></div>
       <div class="price-line"><span>Engagement</span><strong>Aucun</strong></div>
       <div class="price-line"><span>Prix du séjour</span><strong>Vous décidez</strong></div>
       <div class="price-line"><span>Contact voyageur</span><strong>Direct</strong></div>
-      <p class="legal">L’abonnement concerne la publication du logement sur Abracadeal Vacances. Le contrat de location, la réservation et le paiement du séjour restent gérés directement entre le propriétaire et le voyageur.</p>
+      <p class="legal">L’abonnement concerne la publication du logement sur Abracadeal Vacances. Le contrat de location, la réservation et le paiement du séjour restent gérés directement entre l’hôte et le voyageur.</p>
     </div>
 
     <div class="calc">
       <h3>Simulateur de prix direct</h3>
-      <p class="calc-intro">Entrez les montants d’un séjour vendu ailleurs. Abracadeal vous montre un prix direct intermédiaire qui peut faire économiser le voyageur tout en augmentant ce que vous percevez.</p>
+      <p class="calc-intro"><strong>Comment ça marche ?</strong> Indiquez le prix total payé par le voyageur sur une autre plateforme et le montant net réellement reçu par l’hôte. Abracadeal partage automatiquement l’écart en deux : le voyageur paie moins et l’hôte reçoit plus.</p>
       <div class="calc-fields">
-        <div class="field-wrap"><label for="platformTotal">Prix payé par le voyageur ailleurs</label><input class="field" id="platformTotal" type="number" min="0" step="1" value="1050"></div>
-        <div class="field-wrap"><label for="ownerNet">Montant que vous percevez</label><input class="field" id="ownerNet" type="number" min="0" step="1" value="892.50"></div>
+        <div class="field-wrap"><label for="platformTotal">Prix total payé par le voyageur ailleurs</label><input class="field" id="platformTotal" type="number" min="0" step="1" value="1050"></div>
+        <div class="field-wrap"><label for="ownerNet">Montant net reçu par l’hôte</label><input class="field" id="ownerNet" type="number" min="0" step="1" value="892.50"></div>
       </div>
       <div class="calc-result" aria-live="polite">
         <div class="calc-result-top">
           <div class="metric"><span>Économie voyageur</span><strong id="travelerSaving">78,75 €</strong></div>
-          <div class="metric"><span>Gain propriétaire</span><strong id="ownerGain">78,75 €</strong></div>
+          <div class="metric"><span>Gain hôte</span><strong id="ownerGain">78,75 €</strong></div>
         </div>
         <div class="direct-price"><span>Exemple de prix direct Abracadeal</span><strong id="directPrice">971,25 €</strong></div>
       </div>
-      <div class="calc-actions">
-        <button class="btn primary calc-btn" id="calculateDirectPrice" type="button">Calculer</button>
-        <span class="calc-message" id="calcMessage" aria-live="polite"></span>
-      </div>
-      <small>Simulation indicative calculée uniquement à partir des deux montants saisis. Le propriétaire reste libre de fixer son prix.</small>
+      <span class="calc-message" id="calcMessage" aria-live="polite"></span>
+      <small>Le calcul se met à jour automatiquement. Exemple : si le voyageur paie 150 € et que l’hôte reçoit 128 €, l’écart est de 22 €. Un prix direct de 139 € fait économiser 11 € au voyageur et fait gagner 11 € de plus à l’hôte. Simulation indicative : l’hôte reste libre de fixer son prix.</small>
     </div>
   </div>
 </section>
@@ -232,13 +226,13 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
   <div class="container">
     <div class="section-head"><div><h2>Simple des deux côtés</h2><p>Abracadeal reste un service de publication et de mise en relation : pas besoin de recréer toute la mécanique d’une plateforme de réservation.</p></div></div>
     <div class="steps">
-      <div class="step"><div class="step-number">1</div><h3>Le propriétaire publie</h3><p>Photos, description, équipements, règles, prix, calendrier et informations réglementaires du logement.</p></div>
-      <div class="step"><div class="step-number">2</div><h3>Le voyageur contacte</h3><p>Il peut écrire via Abracadeal ou utiliser les moyens de contact proposés par le propriétaire.</p></div>
-      <div class="step"><div class="step-number">3</div><h3>Ils concluent directement</h3><p>Le propriétaire et le voyageur gèrent entre eux la réservation, le contrat et le règlement du séjour.</p></div>
+      <div class="step"><div class="step-number">1</div><h3>L’hôte publie</h3><p>Photos, description, équipements, règles, prix, calendrier et informations réglementaires du logement.</p></div>
+      <div class="step"><div class="step-number">2</div><h3>Le voyageur contacte</h3><p>Il peut écrire via Abracadeal ou utiliser les moyens de contact proposés par l’hôte.</p></div>
+      <div class="step"><div class="step-number">3</div><h3>Ils concluent directement</h3><p>L’hôte et le voyageur gèrent entre eux la réservation, le contrat et le règlement du séjour.</p></div>
     </div>
     <div class="direct-contact">
       <div class="contact-card"><h3>📞 Appel / SMS / WhatsApp</h3><p>Le contact peut être prérempli avec la mention « Je vous contacte depuis Abracadeal » afin d’identifier l’origine du voyageur.</p></div>
-      <div class="contact-card"><h3>💬 Messagerie Abracadeal</h3><p>La messagerie permet au propriétaire de voir clairement quelles demandes lui ont été apportées par Abracadeal.</p></div>
+      <div class="contact-card"><h3>💬 Messagerie Abracadeal</h3><p>La messagerie permet à l’hôte de voir clairement quelles demandes lui ont été apportées par Abracadeal.</p></div>
     </div>
   </div>
 </section>
@@ -263,9 +257,8 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
   const direct=root.getElementById('directPrice');
   const saving=root.getElementById('travelerSaving');
   const gain=root.getElementById('ownerGain');
-  const calcBtn=root.getElementById('calculateDirectPrice');
   const calcMessage=root.getElementById('calcMessage');
-  function calc(showConfirmation=false){
+  function calc(){
     const t=Math.max(0,Number(total.value)||0);
     const n=Math.max(0,Number(net.value)||0);
     calcMessage.className='calc-message';
@@ -275,13 +268,12 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     direct.textContent=money.format(d);
     saving.textContent=money.format(t-d);
     gain.textContent=money.format(d-n);
-    if(showConfirmation){calcMessage.textContent='Calcul mis à jour.';calcMessage.classList.add('ok');}else{calcMessage.textContent='';}
+    calcMessage.textContent='';
     return true;
   }
-  total.addEventListener('input',()=>calc(false));
-  net.addEventListener('input',()=>calc(false));
-  calcBtn?.addEventListener('click',()=>calc(true));
-  calc(false);
+  total.addEventListener('input',calc);
+  net.addEventListener('input',calc);
+  calc();
 
   const form=root.getElementById('vacationSearch');
   const state=root.getElementById('searchState');
