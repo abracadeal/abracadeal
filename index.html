@@ -1885,6 +1885,16 @@ a.btn{cursor:pointer}
   .search-card{grid-template-columns:1fr 1fr !important;}
   .search-btn,.search-nearby-btn{width:100% !important;}
 }
+
+/* ABRACADEAL CATEGORY ORDER FIX */
+.categories .cat[data-category="vehicules"][data-sub="voitures"]{order:1}
+.categories .cat[data-category="vehicules"][data-sub="motos"]{order:2}
+.categories .cat[data-category="immobilier"]{order:3}
+.categories .cat.vacances-cat{order:4}
+.categories .cat[data-category="hightech"]{order:5}
+.categories .cat[data-category="maison"]{order:6}
+.categories .cat[data-category="mode"]{order:7}
+.categories .cat[data-category="emploi"]{order:8}
 </style>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
