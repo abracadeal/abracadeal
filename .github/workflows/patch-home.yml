@@ -80,7 +80,7 @@ jobs:
             // Make Vacances immediately visible in the main top navigation.
             const publish=exact('Publier une annonce').find(visible);
             if(publish&&publish.parentElement&&!document.querySelector('.abraca-vacances-top')){
-              const a=document.createElement('a'); a.href='vacances.html'; a.className='abraca-vacances-top'; a.textContent='🪔 Vacances';
+              const a=document.createElement('a'); a.href='vacances.html'; a.className='abraca-vacances-top'; a.textContent='Vacances';
               publish.parentElement.insertBefore(a,publish);
             }
 
