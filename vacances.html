@@ -175,7 +175,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
         <div class="field-wrap"><label for="guests">Voyageurs</label><select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 voyageurs et +</option></select></div>
         <button class="btn primary" type="submit">Rechercher</button>
       </div>
-      <div class="search-note">Les logements disponibles seront affichés ici dès que les premières annonces Vacances seront publiées.</div>
+      <div class="search-note">La recherche tient compte des disponibilités Abracadeal et des calendriers iCal synchronisés.</div>
     </form>
   </div>
 </section>
@@ -286,12 +286,13 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
   const state=root.getElementById('searchState');
   form.addEventListener('submit',e=>{
     e.preventDefault();
-    const dest=root.getElementById('destination').value.trim()||'votre destination';
+    const dest=root.getElementById('destination').value.trim();
     const arr=root.getElementById('arrival').value;
     const dep=root.getElementById('departure').value;
+    const guests=(root.getElementById('guests').selectedIndex+1)||2;
     if(arr&&dep&&dep<=arr){state.textContent='La date de départ doit être postérieure à la date d’arrivée.';state.classList.add('show');return;}
-    state.textContent=`Recherche prête pour ${dest}${arr&&dep?` du ${new Date(arr+'T12:00:00').toLocaleDateString('fr-FR')} au ${new Date(dep+'T12:00:00').toLocaleDateString('fr-FR')}`:''}. Les premières annonces Vacances apparaîtront ici dès leur publication.`;
-    state.classList.add('show');
+    const q=new URLSearchParams({destination:dest,arrival:arr,departure:dep,guests:String(guests)});
+    location.href='recherche-vacances.html?'+q.toString();
   });
 })();
 </script>
