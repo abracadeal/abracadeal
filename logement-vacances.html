@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Logement — Abracadeal Vacances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#faf7fb;--card:#fff;--ink:#21132d;--muted:#75657d;--line:#e8dced;--p:#6c2088;--pink:#e946a5;--ok:#16794a;--shadow:0 18px 50px rgba(46,17,62,.1)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,input,select,textarea{font:inherit}.top{background:#1c0b2b;color:#fff;position:sticky;top:0;z-index:20}.topin{width:min(1180px,calc(100% - 28px));margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900;font-size:1.2rem}.brand span{color:#ff67bd}.wrap{width:min(1180px,calc(100% - 28px));margin:24px auto 60px}.gallery{display:grid;grid-template-columns:2fr 1fr 1fr;grid-template-rows:220px 220px;gap:8px;border-radius:22px;overflow:hidden;background:#eee}.gallery img{width:100%;height:100%;object-fit:cover}.gallery img:first-child{grid-row:1/3}.gallery .emptyPhoto{grid-row:1/3;grid-column:1/4;display:grid;place-items:center;color:var(--muted);background:#f0e8f3}.layout{display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;margin-top:24px}.card{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}h1{font-size:clamp(2rem,4vw,3.3rem);margin:0 0 8px;letter-spacing:-.035em}.muted{color:var(--muted)}.price{font-size:1.5rem;font-weight:900}.chips{display:flex;gap:8px;flex-wrap:wrap;margin:15px 0}.chip{padding:7px 10px;background:#f4ebf7;border-radius:999px;font-size:.78rem;font-weight:800;color:#64227d}.section{border-top:1px solid var(--line);padding-top:20px;margin-top:20px}.section h2{margin:0 0 12px}.host{display:flex;justify-content:space-between;align-items:center;gap:12px}.hostname{font-weight:900}.btn{border:0;border-radius:13px;min-height:46px;padding:0 15px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center}.primary{background:linear-gradient(135deg,#842aaa,var(--pink));color:#fff}.soft{background:#f3eaf6;color:var(--p)}.wide{width:100%}.field{display:flex;flex-direction:column;gap:6px;margin-top:11px}.field input,.field select,.field textarea{border:1px solid var(--line);border-radius:12px;padding:11px 12px}.field textarea{min-height:95px}.notice{margin-top:12px;padding:11px 12px;border-radius:12px;background:#f0e9f3;color:#61257b}.notice.ok{background:#eaf7ef;color:var(--ok)}.review{border-top:1px solid var(--line);padding:13px 0}.review:first-child{border-top:0}.stars{color:#f0a500}.hidden{display:none!important}.loginBox{margin-top:13px;padding:13px;border-radius:14px;background:#faf6fb;border:1px solid var(--line)}
+@media(max-width:850px){.layout{grid-template-columns:1fr}.gallery{grid-template-columns:1fr 1fr;grid-template-rows:260px 160px}.gallery img:first-child{grid-column:1/3;grid-row:auto}.gallery .emptyPhoto{grid-column:1/3;grid-row:1/3}}
+@media(max-width:580px){.gallery{grid-template-rows:220px 120px}.topin{align-items:flex-start;padding:10px 0}.card{padding:16px}}
+</style></head>
+<body>
+<header class="top"><div class="topin"><a class="brand" href="vacances.html">Abracadeal <span>Vacances</span></a><div><a href="vacances.html">← Retour aux logements</a></div></div></header>
+<main class="wrap">
+<div id="loading" class="card">Chargement du logement…</div>
+<div id="content" class="hidden">
+  <div id="gallery" class="gallery"></div>
+  <div class="layout">
+    <div>
+      <h1 id="title"></h1>
+      <div id="location" class="muted"></div>
+      <div id="chips" class="chips"></div>
+      <div class="card">
+        <div class="price"><span id="price"></span> / nuit</div>
+        <div id="desc" class="section"></div>
+        <div class="section"><h2>Équipements</h2><div id="amenities" class="chips"></div></div>
+        <div class="section"><h2>Règles et arrivée</h2><div id="rules"></div></div>
+        <div class="section"><h2>Votre hôte</h2><div class="host"><div><div id="hostName" class="hostname"></div><div id="hostRating" class="muted"></div></div><a id="hostProfile" class="btn soft">Voir le profil</a></div></div>
+        <div class="section"><h2>Avis sur l’hôte</h2><div id="reviews"></div></div>
+      </div>
+    </div>
+    <aside class="card">
+      <h2 style="margin-top:0">Demander ce séjour</h2>
+      <p class="muted">La demande est envoyée directement à l’hôte. Abracadeal ne prélève pas de commission sur la réservation.</p>
+      <div class="field"><label>Arrivée</label><input id="start" type="date"></div>
+      <div class="field"><label>Départ</label><input id="end" type="date"></div>
+      <div class="field"><label>Voyageurs</label><select id="guests"></select></div>
+      <div class="field"><label>Message</label><textarea id="message" placeholder="Bonjour, nous souhaitons séjourner…"></textarea></div>
+      <button id="requestBtn" class="btn primary wide" style="margin-top:14px">Envoyer la demande</button>
+      <div id="loginBox" class="loginBox hidden">
+        <b>Connexion requise</b>
+        <div class="field"><label>Email</label><input id="email" type="email"></div>
+        <div class="field"><label>Mot de passe</label><input id="password" type="password"></div>
+        <button id="loginBtn" class="btn soft wide" style="margin-top:10px">Se connecter</button>
+      </div>
+      <div id="requestNotice" class="notice hidden"></div>
+    </aside>
+  </div>
+</div>
+</main>
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co',SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);let listing=null,detail=null,user=null;
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+async function boot(){
+ const id=new URLSearchParams(location.search).get('id');if(!id){$('loading').textContent='Logement introuvable.';return}
+ const [{data:l,error},{data:d},{data:photos}]=await Promise.all([
+  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status').eq('id',id).eq('category','vacances').eq('status','active').maybeSingle(),
+  sb.from('vacation_listing_details').select('*').eq('listing_id',id).maybeSingle(),
+  sb.from('listing_photos').select('*').eq('listing_id',id).order('position')
+ ]);
+ if(error||!l){$('loading').textContent='Logement indisponible.';return}listing=l;detail=d||{};
+ const {data:{session}}=await sb.auth.getSession();user=session?.user||null;
+ $('title').textContent=l.title;$('location').textContent=l.city+(l.postal_code?' · '+l.postal_code:'');$('price').textContent=money(l.price);$('desc').innerHTML='<h2>Description</h2><p>'+esc(l.description).replace(/\n/g,'<br>')+'</p>';
+ $('chips').innerHTML=['👥 '+(detail.max_guests||2)+' voyageurs','🛏 '+(detail.beds??1)+' lit(s)','🚪 '+(detail.bedrooms??1)+' chambre(s)','🛁 '+(detail.bathrooms??1)+' salle(s) de bain','🌙 min. '+(detail.min_nights||1)+' nuit(s)'].map(x=>'<span class="chip">'+x+'</span>').join('');
+ $('amenities').innerHTML=(detail.amenities||[]).length?(detail.amenities||[]).map(x=>'<span class="chip">'+esc(x)+'</span>').join(''):'<span class="muted">Aucun équipement renseigné.</span>';
+ $('rules').innerHTML='<p><b>Arrivée :</b> à partir de '+String(detail.checkin_from||'15:00').slice(0,5)+' · <b>Départ :</b> avant '+String(detail.checkout_until||'11:00').slice(0,5)+'</p>'+(detail.house_rules?'<p>'+esc(detail.house_rules).replace(/\n/g,'<br>')+'</p>':'');
+ const urls=(photos||[]).map(p=>sb.storage.from('listing-images').getPublicUrl(p.storage_path).data.publicUrl);
+ $('gallery').innerHTML=urls.length?urls.slice(0,5).map(u=>'<img src="'+u+'" alt="">').join(''):'<div class="emptyPhoto">Aucune photo publiée</div>';
+ const [{data:hp},{data:reviews}]=await Promise.all([sb.from('public_profiles').select('*').eq('id',l.owner_id).maybeSingle(),sb.from('vacation_reviews').select('rating,comment,created_at,reviewer_id,subject_reply').eq('subject_id',l.owner_id).eq('subject_role','host').eq('status','active').order('created_at',{ascending:false}).limit(10)]);
+ $('hostName').textContent=hp?.display_name||'Hôte Abracadeal';const rv=reviews||[],avg=rv.length?(rv.reduce((s,x)=>s+Number(x.rating),0)/rv.length).toFixed(1).replace('.',','):null;$('hostRating').textContent=avg?'⭐ '+avg+' · '+rv.length+' avis':'Pas encore d’avis';$('hostProfile').href='profil-vacances.html?user='+l.owner_id;
+ $('reviews').innerHTML=rv.length?rv.map(r=>'<div class="review"><div class="stars">'+('★'.repeat(r.rating))+('☆'.repeat(5-r.rating))+'</div><p>'+esc(r.comment)+'</p>'+(r.subject_reply?'<div class="notice"><b>Réponse de l’hôte</b><br>'+esc(r.subject_reply)+'</div>':'')+'</div>').join(''):'<div class="muted">Aucun avis pour le moment.</div>';
+ const max=Math.max(1,Number(detail.max_guests||2));$('guests').innerHTML=Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+' voyageur'+(i?'s':'')+'</option>').join('');
+ const today=new Date().toISOString().slice(0,10);$('start').min=today;$('end').min=today;
+ $('loading').classList.add('hidden');$('content').classList.remove('hidden');
+}
+$('requestBtn').onclick=async()=>{
+ const {data:{user:u}}=await sb.auth.getUser();user=u||null;if(!user){$('loginBox').classList.remove('hidden');return}
+ const s=$('start').value,e=$('end').value;if(!s||!e||e<=s){showNotice('Choisissez une période valide.');return}
+ const {data,error}=await sb.rpc('create_vacation_request',{p_listing_id:listing.id,p_starts_on:s,p_ends_on:e,p_guests:Number($('guests').value),p_message:$('message').value.trim()||null});
+ if(error){showNotice(error.message);return}showNotice('Demande envoyée à l’hôte.',true);$('requestBtn').disabled=true;
+}
+$('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){showNotice(error.message);return}$('loginBox').classList.add('hidden');showNotice('Connecté. Vous pouvez envoyer votre demande.',true)}
+function showNotice(t,ok=false){$('requestNotice').textContent=t;$('requestNotice').className='notice'+(ok?' ok':'')}
+boot();
+</script>
+</body></html>
