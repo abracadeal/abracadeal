@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Exporter mon calendrier — Abracadeal Hôte</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f8f4fa;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#6f218c;--pink:#e746a3;--shadow:0 18px 45px rgba(47,17,63,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,input,select{font:inherit}.top{background:#1c0b2b;color:#fff}.topin{width:min(760px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between}.wrap{width:min(760px,calc(100% - 28px));margin:28px auto}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:20px;box-shadow:var(--shadow);margin-top:16px}.muted{color:var(--muted);line-height:1.5}.field{display:flex;flex-direction:column;gap:7px;margin-top:12px}.field select,.field input{border:1px solid var(--line);border-radius:12px;padding:11px}.btn{border:0;border-radius:12px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer}.primary{background:linear-gradient(135deg,#842aaa,var(--pink));color:#fff}.soft{background:#f3eaf6;color:var(--p)}.hidden{display:none!important}.urlbox{display:grid;grid-template-columns:1fr auto;gap:8px;margin-top:12px}.notice{padding:11px;border-radius:12px;background:#f3eaf6;color:#602777;margin-top:12px}
+@media(max-width:600px){.urlbox{grid-template-columns:1fr}.urlbox .btn{width:100%}}
+</style></head><body>
+<header class="top"><div class="topin"><b>Abracadeal Hôte · Export iCal</b><a href="espace-hote.html">← Espace Hôte</a></div></header>
+<main class="wrap">
+<div class="card">
+<h1>Exporter votre calendrier Abracadeal</h1>
+<p class="muted">Copiez ce lien dans Airbnb, Booking, Abritel ou toute plateforme acceptant un calendrier iCal. Les dates bloquées et les demandes Abracadeal acceptées seront exportées.</p>
+<div class="field"><label>Logement</label><select id="listing"></select></div>
+<button id="generate" class="btn primary" style="margin-top:14px">Générer mon lien iCal</button>
+<div id="result" class="hidden">
+  <div class="urlbox"><input id="url" readonly><button id="copy" class="btn soft">Copier</button></div>
+  <div class="notice">Ce lien est privé. Toute personne qui le possède peut lire vos périodes indisponibles. Ne le publiez pas publiquement.</div>
+</div>
+</div>
+</main>
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co',SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);let user=null;
+async function boot(){const {data:{user:u}}=await sb.auth.getUser();if(!u){location.href='espace-hote.html';return}user=u;const {data}=await sb.from('listings').select('id,title').eq('owner_id',user.id).eq('category','vacances').order('created_at',{ascending:false});$('listing').innerHTML=(data||[]).length?(data||[]).map(x=>'<option value="'+x.id+'">'+x.title.replace(/[<>&]/g,'')+'</option>').join(''):'<option value="">Aucun logement</option>';const q=new URLSearchParams(location.search).get('listing');if(q)$('listing').value=q}
+$('generate').onclick=async()=>{const id=$('listing').value;if(!id){alert('Ajoutez d’abord un logement.');return}const {data,error}=await sb.rpc('ensure_vacation_export_token',{p_listing_id:id});if(error){alert(error.message);return}const url='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/export-vacation-ical?token='+data;$('url').value=url;$('result').classList.remove('hidden')}
+$('copy').onclick=async()=>{await navigator.clipboard.writeText($('url').value);$('copy').textContent='Copié ✓';setTimeout(()=>$('copy').textContent='Copier',1500)}
+boot();
+</script></body></html>
