@@ -311,10 +311,21 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
         'https://jplzvxmpbpjssyinozap.supabase.co',
         'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF'
       );
-      sbVac.auth.getSession().then(({data})=>{
-        const loggedIn=!!data?.session?.user;
-        hostSignupCta.textContent=loggedIn?'Devenir hôte':'S’inscrire';
-        hostSignupCta.href=loggedIn?'espace-hote.html':'index.html#accountModal';
+      sbVac.auth.getSession().then(async ({data})=>{
+        const user=data?.session?.user||null;
+        if(!user){
+          hostSignupCta.textContent='S’inscrire';
+          hostSignupCta.href='index.html#accountModal';
+          return;
+        }
+        const {data:hostProfile}=await sbVac
+          .from('vacation_hosts')
+          .select('user_id,status')
+          .eq('user_id',user.id)
+          .maybeSingle();
+        const isHost=!!hostProfile && hostProfile.status==='active';
+        hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
+        hostSignupCta.href='espace-hote.html';
       });
     }catch(_){}
   }
