@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abracadeal — Espace Hôte</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f7f3f9;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#5b1a77;--p2:#8b2bb0;--pink:#e746a3;--ok:#16794a;--warn:#a56308;--bad:#b4234f;--shadow:0 18px 45px rgba(47,17,63,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}a{text-decoration:none;color:inherit}.hidden{display:none!important}
+.top{position:sticky;top:0;z-index:40;background:#1c0b2b;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}.topin{width:min(1220px,calc(100% - 28px));margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:900;font-size:1.25rem}.brand span{color:#ff65be}.topactions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+.btn{border:0;border-radius:13px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn.primary{color:#fff;background:linear-gradient(135deg,var(--p2),var(--pink))}.btn.soft{background:#f5edf8;color:var(--p)}.btn.white{background:#fff;color:#4c1c61}.btn.ghost{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}.btn.danger{background:#fff0f3;color:var(--bad)}.btn:disabled{opacity:.55;cursor:not-allowed}
+.shell{width:min(1220px,calc(100% - 28px));margin:24px auto 60px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px}.side{background:#251033;color:#fff;border-radius:22px;padding:14px;height:max-content;position:sticky;top:92px}.side h3{margin:10px 10px 14px;font-size:.85rem;color:#cdb7d8;text-transform:uppercase;letter-spacing:.06em}.navbtn{width:100%;border:0;background:transparent;color:#dbcde2;text-align:left;padding:12px 13px;border-radius:12px;font-weight:750;cursor:pointer;margin:2px 0}.navbtn.active,.navbtn:hover{background:rgba(255,255,255,.1);color:#fff}.main{min-width:0}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:18px}.hero h1{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.04em}.hero p{margin:7px 0 0;color:var(--muted)}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#efe4f4;color:#6b2687;font-size:.76rem;font-weight:850}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.metric{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:var(--shadow)}.metric span{display:block;color:var(--muted);font-size:.78rem;font-weight:750}.metric strong{display:block;font-size:1.65rem;margin-top:6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-top:16px}.cardhead{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}.card h2,.card h3{margin:0}.sub{color:var(--muted);font-size:.9rem;line-height:1.5}.list{display:grid;gap:12px}.listing{border:1px solid var(--line);border-radius:17px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.listing h3{margin:0 0 5px}.meta{color:var(--muted);font-size:.84rem}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{font-size:.72rem;font-weight:900;border-radius:999px;padding:6px 9px}.s-active{background:#e8f7ef;color:var(--ok)}.s-pending{background:#fff4df;color:var(--warn)}.s-archived,.s-rejected{background:#f2edf4;color:#745f7d}
+.formgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.wide{grid-column:1/-1}.field label{font-size:.78rem;font-weight:850;color:#5f5165}.field input,.field select,.field textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:#fff;padding:11px 12px;color:var(--ink);outline:none}.field textarea{min-height:105px;resize:vertical}.field input:focus,.field select:focus,.field textarea:focus{border-color:#a957c5;box-shadow:0 0 0 3px rgba(169,87,197,.1)}
+.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:3px}.tab{border:1px solid var(--line);background:#fff;color:#725e7b;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer;white-space:nowrap}.tab.active{background:#341347;color:#fff;border-color:#341347}.panel{display:none}.panel.active{display:block}
+.notice{display:none;margin:0 0 14px;padding:12px 14px;border-radius:12px;background:#f2eaf6;color:#602777;font-weight:700}.notice.show{display:block}.notice.err{background:#fff0f3;color:var(--bad)}
+.empty{border:1px dashed #d9c9e1;border-radius:16px;padding:24px;text-align:center;color:var(--muted)}.calendarRow,.ruleRow,.feedRow,.msgRow{border:1px solid var(--line);border-radius:15px;padding:14px;margin-top:10px}.msgRow.unread{border-color:#bd74d2;background:#fbf6fd}.msgRow b{display:block;margin-bottom:4px}.msgRow small{color:var(--muted)}
+.loginwrap{width:min(520px,calc(100% - 28px));margin:70px auto}.loginwrap .card{padding:26px}.loginwrap h1{margin-top:0}
+.kpiNote{font-size:.77rem;color:var(--muted);margin-top:5px}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.quick a,.quick button{min-height:90px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:15px;text-align:left;cursor:pointer}.quick strong{display:block;margin-bottom:5px}.quick span{color:var(--muted);font-size:.82rem}
+@media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:4px}.side h3{display:none}.navbtn{width:auto;white-space:nowrap}.grid4{grid-template-columns:1fr 1fr}.quick{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}}
+@media(max-width:620px){.grid4,.formgrid{grid-template-columns:1fr}.field.wide{grid-column:auto}.listing{grid-template-columns:1fr}.topin{align-items:flex-start;padding:10px 0}.topactions{justify-content:flex-end}.shell{margin-top:14px}.card{padding:16px}.hero h1{font-size:2.2rem}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="topin">
+    <a class="brand" href="vacances.html">Abracadeal <span>Hôte</span></a>
+    <div class="topactions">
+      <a class="btn ghost" href="vacances.html">Voir Vacances</a>
+      <button id="logoutTop" class="btn white hidden">Déconnexion</button>
+    </div>
+  </div>
+</header>
+
+<div id="loginView" class="loginwrap hidden">
+  <div class="card">
+    <span class="pill">Espace Hôte</span>
+    <h1>Gérez vos logements</h1>
+    <p class="sub">Connectez-vous avec votre compte Abracadeal. Un particulier ou un professionnel peut devenir hôte.</p>
+    <div class="formgrid">
+      <div class="field wide"><label>Email</label><input id="loginEmail" type="email" autocomplete="email"></div>
+      <div class="field wide"><label>Mot de passe</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
+    </div>
+    <div style="margin-top:14px"><button id="loginBtn" class="btn primary">Se connecter</button></div>
+  </div>
+</div>
+
+<div id="appView" class="shell hidden">
+  <aside class="side">
+    <h3>Espace Hôte</h3>
+    <button class="navbtn active" data-view="dashboard">Vue d’ensemble</button>
+    <button class="navbtn" data-view="listings">Mes logements</button>
+    <button class="navbtn" data-view="calendar">Calendrier</button>
+    <button class="navbtn" data-view="pricing">Tarifs</button>
+    <button class="navbtn" data-view="ical">iCal</button>
+    <button class="navbtn" data-view="messages">Messages</button>
+  </aside>
+
+  <main class="main">
+    <div id="notice" class="notice"></div>
+    <section class="hero">
+      <div><span class="pill" id="hostTypePill">Hôte</span><h1 id="hello">Votre espace hôte</h1><p>Tout ce qu’il faut pour publier, synchroniser et piloter vos logements.</p></div>
+      <button class="btn primary" onclick="showView('listings');openListingForm()">+ Ajouter un logement</button>
+    </section>
+
+    <section id="view-dashboard" class="view">
+      <div class="grid4">
+        <div class="metric"><span>Logements</span><strong id="mListings">0</strong><div class="kpiNote">publiés ou en cours</div></div>
+        <div class="metric"><span>En ligne</span><strong id="mActive">0</strong><div class="kpiNote">visibles aux voyageurs</div></div>
+        <div class="metric"><span>Calendriers iCal</span><strong id="mFeeds">0</strong><div class="kpiNote">connectés</div></div>
+        <div class="metric"><span>Messages non lus</span><strong id="mUnread">0</strong><div class="kpiNote">à traiter</div></div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><div><h2>Actions rapides</h2><div class="sub">Les tâches principales d’un hôte.</div></div></div>
+        <div class="quick">
+          <button onclick="showView('listings');openListingForm()"><strong>🏠 Publier un logement</strong><span>Créer une annonce Vacances complète.</span></button>
+          <button onclick="showView('ical')"><strong>🔄 Synchroniser iCal</strong><span>Airbnb, Booking, Abritel et autres flux .ics.</span></button>
+          <button onclick="showView('calendar')"><strong>📅 Bloquer des dates</strong><span>Fermer manuellement une période indisponible.</span></button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="cardhead"><div><h2>Vos derniers logements</h2><div class="sub">Aperçu de votre activité Vacances.</div></div><button class="btn soft" onclick="showView('listings')">Tout voir</button></div>
+        <div id="dashboardListings" class="list"></div>
+      </div>
+    </section>
+
+    <section id="view-listings" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Mes logements</h2><div class="sub">Créez et gérez vos annonces Abracadeal Vacances.</div></div><button class="btn primary" onclick="openListingForm()">+ Nouveau logement</button></div>
+        <div id="listingForm" class="hidden">
+          <div class="tabs" style="margin-bottom:14px"><button class="tab active">Informations</button></div>
+          <div class="formgrid">
+            <input id="editListingId" type="hidden">
+            <div class="field"><label>Titre</label><input id="lTitle" placeholder="Studio proche Croisette"></div>
+            <div class="field"><label>Ville</label><input id="lCity" placeholder="Cannes"></div>
+            <div class="field"><label>Code postal</label><input id="lPostal" placeholder="06400"></div>
+            <div class="field"><label>Prix de base / nuit (€)</label><input id="lPrice" type="number" min="0" step="1"></div>
+            <div class="field"><label>Type de logement</label><select id="lType"><option value="logement_entier">Logement entier</option><option value="chambre_privee">Chambre privée</option><option value="chambre_partagee">Chambre partagée</option><option value="hotel">Hôtel / résidence</option><option value="autre">Autre</option></select></div>
+            <div class="field"><label>Voyageurs max.</label><input id="lGuests" type="number" min="1" max="50" value="2"></div>
+            <div class="field"><label>Chambres</label><input id="lBedrooms" type="number" min="0" max="30" value="1"></div>
+            <div class="field"><label>Lits</label><input id="lBeds" type="number" min="0" max="50" value="1"></div>
+            <div class="field"><label>Salles de bain</label><input id="lBathrooms" type="number" min="0" max="30" step=".5" value="1"></div>
+            <div class="field"><label>Frais de ménage (€)</label><input id="lCleaning" type="number" min="0" step="1" value="0"></div>
+            <div class="field"><label>Séjour minimum</label><input id="lMinNights" type="number" min="1" max="365" value="1"></div>
+            <div class="field"><label>Arrivée à partir de</label><input id="lCheckin" type="time" value="15:00"></div>
+            <div class="field"><label>Départ avant</label><input id="lCheckout" type="time" value="11:00"></div>
+            <div class="field"><label>Résidence principale ?</label><select id="lPrimary"><option value="">Non renseigné</option><option value="true">Oui</option><option value="false">Non</option></select></div>
+            <div class="field"><label>N° de déclaration (si requis)</label><input id="lDeclaration"></div>
+            <div class="field wide"><label>Description</label><textarea id="lDescription" placeholder="Décrivez le logement, le quartier, les points forts…"></textarea></div>
+            <div class="field wide"><label>Équipements (séparés par des virgules)</label><input id="lAmenities" placeholder="Wi-Fi, climatisation, cuisine, parking"></div>
+            <div class="field wide"><label>Règles du logement</label><textarea id="lRules" placeholder="Non-fumeur, pas de fête…"></textarea></div>
+          </div>
+          <div class="actions" style="margin-top:14px"><button id="saveListingBtn" class="btn primary">Enregistrer</button><button class="btn soft" onclick="closeListingForm()">Annuler</button></div>
+          <hr style="border:0;border-top:1px solid var(--line);margin:20px 0">
+        </div>
+        <div id="listingsList" class="list"></div>
+      </div>
+    </section>
+
+    <section id="view-calendar" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Calendrier</h2><div class="sub">Bloquez manuellement des dates. Les périodes importées par iCal apparaissent aussi ici.</div></div></div>
+        <div class="formgrid">
+          <div class="field"><label>Logement</label><select id="cListing"></select></div>
+          <div class="field"><label>Motif</label><input id="cNote" placeholder="Occupation personnelle"></div>
+          <div class="field"><label>Du</label><input id="cStart" type="date"></div>
+          <div class="field"><label>Au</label><input id="cEnd" type="date"></div>
+        </div>
+        <div style="margin-top:13px"><button id="addBlockBtn" class="btn primary">Bloquer la période</button></div>
+        <div id="calendarList" style="margin-top:18px"></div>
+      </div>
+    </section>
+
+    <section id="view-pricing" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Tarifs & règles</h2><div class="sub">Ajoutez des prix spéciaux selon les périodes.</div></div></div>
+        <div class="formgrid">
+          <div class="field"><label>Logement</label><select id="pListing"></select></div>
+          <div class="field"><label>Nom de la période</label><input id="pLabel" placeholder="Festival de Cannes"></div>
+          <div class="field"><label>Du</label><input id="pStart" type="date"></div>
+          <div class="field"><label>Au</label><input id="pEnd" type="date"></div>
+          <div class="field"><label>Prix / nuit (€)</label><input id="pPrice" type="number" min="0" step="1"></div>
+          <div class="field"><label>Séjour minimum</label><input id="pMin" type="number" min="1" max="365" placeholder="Optionnel"></div>
+        </div>
+        <div style="margin-top:13px"><button id="addRuleBtn" class="btn primary">Ajouter la règle</button></div>
+        <div id="pricingList" style="margin-top:18px"></div>
+      </div>
+    </section>
+
+    <section id="view-ical" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Synchronisation iCal</h2><div class="sub">Importez les dates occupées de vos autres plateformes.</div></div><a class="btn soft" href="ical.html">Ouvrir la gestion avancée</a></div>
+        <div class="formgrid">
+          <div class="field"><label>Logement</label><select id="iListing"></select></div>
+          <div class="field"><label>Plateforme</label><select id="iProvider"><option value="airbnb">Airbnb</option><option value="booking">Booking</option><option value="abritel">Abritel</option><option value="google">Google Calendar</option><option value="autre">Autre</option></select></div>
+          <div class="field wide"><label>Lien iCal</label><input id="iUrl" placeholder="https://.../calendar.ics"></div>
+        </div>
+        <div style="margin-top:13px"><button id="addFeedBtn" class="btn primary">Ajouter et synchroniser</button></div>
+        <div id="feedsList" style="margin-top:18px"></div>
+      </div>
+    </section>
+
+    <section id="view-messages" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Messages voyageurs</h2><div class="sub">Demandes reçues sur vos annonces Vacances.</div></div></div>
+        <div id="messagesList"></div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let currentUser=null, profile=null, listings=[], details=new Map();
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+function msg(t,err=false){const n=$('notice');n.textContent=t;n.className='notice show'+(err?' err':'');window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>{n.classList.remove('show')},5000)}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));$('view-'+v).classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='calendar')loadCalendar();if(v==='pricing')loadPricing();if(v==='ical')loadFeeds();if(v==='messages')loadMessages()}
+window.showView=showView;
+document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  currentUser=session?.user||null;
+  $('loginView').classList.toggle('hidden',!!currentUser);
+  $('appView').classList.toggle('hidden',!currentUser);
+  $('logoutTop').classList.toggle('hidden',!currentUser);
+  if(!currentUser)return;
+  const {data:p}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(); profile=p;
+  const type=profile?.account_type==='professionnel'?'professionnel':'particulier';
+  await sb.from('vacation_hosts').upsert({user_id:currentUser.id,host_type:type,status:'active'},{onConflict:'user_id'});
+  $('hostTypePill').textContent=type==='professionnel'?'Hôte professionnel':'Hôte particulier';
+  $('hello').textContent='Bonjour'+(profile?.display_name?' '+profile.display_name:'');
+  await loadListings();
+  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false)]);
+}
+$('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){alert(error.message);return}boot()};
+$('logoutTop').onclick=async()=>{await sb.auth.signOut();location.reload()};
+
+function listingOptions(){return listings.map(l=>'<option value="'+l.id+'">'+esc(l.title)+'</option>').join('')}
+function refreshSelects(){['cListing','pListing','iListing'].forEach(id=>$(id).innerHTML=listingOptions()||'<option value="">Aucun logement</option>')}
+
+async function loadListings(){
+  const {data,error}=await sb.from('listings').select('id,title,description,price,city,postal_code,status,created_at,updated_at').eq('owner_id',currentUser.id).eq('category','vacances').order('created_at',{ascending:false});
+  if(error){msg(error.message,true);return}
+  listings=data||[];
+  const ids=listings.map(x=>x.id);
+  details=new Map();
+  if(ids.length){const {data:d}=await sb.from('vacation_listing_details').select('*').in('listing_id',ids);(d||[]).forEach(x=>details.set(x.listing_id,x))}
+  renderListings();refreshSelects();
+}
+function listingHtml(l){
+  const st=esc(l.status||'pending'),d=details.get(l.id);
+  return '<div class="listing"><div><div class="actions" style="margin-bottom:6px"><span class="status s-'+st+'">'+st+'</span><span class="pill">'+esc(d?.max_guests||2)+' voyageurs</span></div><h3>'+esc(l.title)+'</h3><div class="meta">'+esc(l.city)+(l.postal_code?' · '+esc(l.postal_code):'')+' · '+money(l.price)+'/nuit'+(d?.min_nights?' · min. '+d.min_nights+' nuit(s)':'')+'</div></div><div class="actions"><button class="btn soft" onclick="editListing(\''+l.id+'\')">Modifier</button><button class="btn soft" onclick="focusCalendar(\''+l.id+'\')">Calendrier</button><button class="btn danger" onclick="archiveListing(\''+l.id+'\')">'+(l.status==='archived'?'Réactiver':'Archiver')+'</button></div></div>'
+}
+function renderListings(){const html=listings.length?listings.map(listingHtml).join(''):'<div class="empty">Aucun logement pour le moment. Cliquez sur « Nouveau logement ».</div>';$('listingsList').innerHTML=html;$('dashboardListings').innerHTML=listings.length?listings.slice(0,3).map(listingHtml).join(''):'<div class="empty">Ajoutez votre premier logement pour démarrer.</div>';$('mListings').textContent=listings.length;$('mActive').textContent=listings.filter(x=>x.status==='active').length}
+function openListingForm(){resetListingForm();$('listingForm').classList.remove('hidden');$('lTitle').focus()}
+window.openListingForm=openListingForm;
+function closeListingForm(){$('listingForm').classList.add('hidden')}
+window.closeListingForm=closeListingForm;
+function resetListingForm(){['editListingId','lTitle','lCity','lPostal','lPrice','lDescription','lDeclaration','lAmenities','lRules'].forEach(id=>$(id).value='');$('lType').value='logement_entier';$('lGuests').value=2;$('lBedrooms').value=1;$('lBeds').value=1;$('lBathrooms').value=1;$('lCleaning').value=0;$('lMinNights').value=1;$('lCheckin').value='15:00';$('lCheckout').value='11:00';$('lPrimary').value=''}
+window.editListing=id=>{const l=listings.find(x=>x.id===id),d=details.get(id)||{};if(!l)return;openListingForm();$('editListingId').value=id;$('lTitle').value=l.title||'';$('lCity').value=l.city||'';$('lPostal').value=l.postal_code||'';$('lPrice').value=l.price??'';$('lDescription').value=l.description||'';$('lType').value=d.property_type||'logement_entier';$('lGuests').value=d.max_guests||2;$('lBedrooms').value=d.bedrooms??1;$('lBeds').value=d.beds??1;$('lBathrooms').value=d.bathrooms??1;$('lCleaning').value=d.cleaning_fee??0;$('lMinNights').value=d.min_nights||1;$('lCheckin').value=(d.checkin_from||'15:00').slice(0,5);$('lCheckout').value=(d.checkout_until||'11:00').slice(0,5);$('lPrimary').value=d.primary_residence===null||d.primary_residence===undefined?'':String(d.primary_residence);$('lDeclaration').value=d.declaration_number||'';$('lAmenities').value=(d.amenities||[]).join(', ');$('lRules').value=d.house_rules||'';window.scrollTo({top:100,behavior:'smooth'})}
+$('saveListingBtn').onclick=async()=>{
+  const id=$('editListingId').value;const title=$('lTitle').value.trim(),city=$('lCity').value.trim(),description=$('lDescription').value.trim(),price=Number($('lPrice').value);
+  if(!title||!city||!description||!Number.isFinite(price)){msg('Titre, ville, description et prix sont obligatoires.',true);return}
+  const listingPayload={owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:$('lPostal').value.trim()||null,seller_type:profile?.account_type==='professionnel'?'professionnel':'particulier'};
+  let listingId=id;
+  if(id){const {error}=await sb.from('listings').update({...listingPayload,updated_at:new Date().toISOString()}).eq('id',id);if(error){msg(error.message,true);return}}
+  else{listingPayload.status='pending';const {data,error}=await sb.from('listings').insert(listingPayload).select('id').single();if(error){msg(error.message,true);return}listingId=data.id}
+  const primary=$('lPrimary').value===''?null:$('lPrimary').value==='true';
+  const d={listing_id:listingId,owner_id:currentUser.id,property_type:$('lType').value,max_guests:Number($('lGuests').value)||2,bedrooms:Number($('lBedrooms').value)||0,beds:Number($('lBeds').value)||0,bathrooms:Number($('lBathrooms').value)||0,cleaning_fee:Number($('lCleaning').value)||0,min_nights:Number($('lMinNights').value)||1,checkin_from:$('lCheckin').value||'15:00',checkout_until:$('lCheckout').value||'11:00',primary_residence:primary,declaration_number:$('lDeclaration').value.trim()||null,amenities:$('lAmenities').value.split(',').map(x=>x.trim()).filter(Boolean),house_rules:$('lRules').value.trim()||null,updated_at:new Date().toISOString()};
+  const {error:de}=await sb.from('vacation_listing_details').upsert(d,{onConflict:'listing_id'});if(de){msg(de.message,true);return}
+  if(!id){await sb.functions.invoke('moderate-listing',{body:{listing_id:listingId}})}
+  msg(id?'Logement mis à jour.':'Logement créé. Il passe par la modération Abracadeal.');closeListingForm();await loadListings();await loadDashboardCounts()
+}
+window.archiveListing=async id=>{const l=listings.find(x=>x.id===id);if(!l)return;const next=l.status==='archived'?'pending':'archived';const {error}=await sb.from('listings').update({status:next,updated_at:new Date().toISOString()}).eq('id',id);if(error){msg(error.message,true);return}if(next==='pending')await sb.functions.invoke('moderate-listing',{body:{listing_id:id}});await loadListings()}
+window.focusCalendar=id=>{showView('calendar');$('cListing').value=id;loadCalendar()}
+
+$('addBlockBtn').onclick=async()=>{const listing_id=$('cListing').value,starts_on=$('cStart').value,ends_on=$('cEnd').value;if(!listing_id||!starts_on||!ends_on||ends_on<=starts_on){msg('Choisissez un logement et une période valide.',true);return}const {error}=await sb.from('vacation_manual_blocks').insert({owner_id:currentUser.id,listing_id,starts_on,ends_on,note:$('cNote').value.trim()||null});if(error){msg(error.message,true);return}$('cNote').value='';msg('Période bloquée.');loadCalendar()}
+$('cListing').onchange=loadCalendar;
+async function loadCalendar(){const id=$('cListing').value;if(!id){$('calendarList').innerHTML='<div class="empty">Ajoutez d’abord un logement.</div>';return}const [m,i]=await Promise.all([sb.from('vacation_manual_blocks').select('*').eq('listing_id',id).order('starts_on'),sb.from('vacation_calendar_blocks').select('*').eq('listing_id',id).order('starts_on')]);const rows=[];(m.data||[]).forEach(x=>rows.push({kind:'Manuel',...x}));(i.data||[]).forEach(x=>rows.push({kind:'iCal',...x}));rows.sort((a,b)=>a.starts_on.localeCompare(b.starts_on));$('calendarList').innerHTML=rows.length?rows.map(x=>'<div class="calendarRow"><div class="cardhead" style="margin:0"><div><b>'+esc(x.kind)+'</b> · '+new Date(x.starts_on+'T12:00').toLocaleDateString('fr-FR')+' → '+new Date(x.ends_on+'T12:00').toLocaleDateString('fr-FR')+(x.note?'<div class="sub">'+esc(x.note)+'</div>':'')+'</div>'+(x.kind==='Manuel'?'<button class="btn danger" onclick="deleteBlock(\''+x.id+'\')">Supprimer</button>':'')+'</div></div>').join(''):'<div class="empty">Aucune date bloquée.</div>'}
+window.deleteBlock=async id=>{await sb.from('vacation_manual_blocks').delete().eq('id',id);loadCalendar()}
+
+$('addRuleBtn').onclick=async()=>{const listing_id=$('pListing').value,starts_on=$('pStart').value,ends_on=$('pEnd').value,nightly_price=Number($('pPrice').value);if(!listing_id||!starts_on||!ends_on||ends_on<=starts_on||!Number.isFinite(nightly_price)){msg('Complétez la période et le prix.',true);return}const {error}=await sb.from('vacation_price_rules').insert({owner_id:currentUser.id,listing_id,label:$('pLabel').value.trim()||'Période spéciale',starts_on,ends_on,nightly_price,min_nights:$('pMin').value?Number($('pMin').value):null});if(error){msg(error.message,true);return}msg('Règle tarifaire ajoutée.');loadPricing()}
+$('pListing').onchange=loadPricing;
+async function loadPricing(){const id=$('pListing').value;if(!id){$('pricingList').innerHTML='<div class="empty">Ajoutez d’abord un logement.</div>';return}const {data}=await sb.from('vacation_price_rules').select('*').eq('listing_id',id).order('starts_on');$('pricingList').innerHTML=data?.length?data.map(x=>'<div class="ruleRow"><div class="cardhead" style="margin:0"><div><b>'+esc(x.label)+'</b><div class="sub">'+new Date(x.starts_on+'T12:00').toLocaleDateString('fr-FR')+' → '+new Date(x.ends_on+'T12:00').toLocaleDateString('fr-FR')+' · '+money(x.nightly_price)+'/nuit'+(x.min_nights?' · min. '+x.min_nights+' nuit(s)':'')+'</div></div><button class="btn danger" onclick="deleteRule(\''+x.id+'\')">Supprimer</button></div></div>').join(''):'<div class="empty">Aucune règle spéciale. Le prix de base de l’annonce s’applique.</div>'}
+window.deleteRule=async id=>{await sb.from('vacation_price_rules').delete().eq('id',id);loadPricing()}
+
+$('addFeedBtn').onclick=async()=>{const listing_id=$('iListing').value;if(!listing_id){msg('Ajoutez d’abord un logement.',true);return}let u=$('iUrl').value.trim();if(!u){msg('Collez un lien iCal.',true);return}if(u.startsWith('webcal://'))u='https://'+u.slice(9);const l=listings.find(x=>x.id===listing_id);const {data,error}=await sb.from('vacation_ical_feeds').insert({owner_id:currentUser.id,listing_id,property_label:l?.title||'Mon logement',provider:$('iProvider').value,feed_url:u}).select('id').single();if(error){msg(error.message,true);return}const {error:se}=await sb.functions.invoke('sync-vacation-ical',{body:{feed_id:data.id}});msg(se?'Flux ajouté, mais la première synchronisation a échoué.':'Calendrier ajouté et synchronisé.',!!se);$('iUrl').value='';loadFeeds();loadDashboardCounts()}
+async function loadFeeds(render=true){const {data,error}=await sb.from('vacation_ical_feeds').select('*').eq('owner_id',currentUser.id).order('created_at',{ascending:false});if(error)return;if(render){$('feedsList').innerHTML=data?.length?data.map(f=>'<div class="feedRow"><div class="cardhead" style="margin:0"><div><b>'+esc(f.property_label)+'</b> · '+esc(f.provider)+'<div class="sub">'+(f.last_synced_at?'Dernière synchro : '+new Date(f.last_synced_at).toLocaleString('fr-FR'):'Jamais synchronisé')+(f.last_error?' · Erreur : '+esc(f.last_error):'')+'</div></div><div class="actions"><button class="btn soft" onclick="syncFeed(\''+f.id+'\')">Synchroniser</button><button class="btn danger" onclick="deleteFeed(\''+f.id+'\')">Supprimer</button></div></div></div>').join(''):'<div class="empty">Aucun calendrier iCal connecté.</div>'}$('mFeeds').textContent=(data||[]).length}
+window.syncFeed=async id=>{msg('Synchronisation en cours…');const {data,error}=await sb.functions.invoke('sync-vacation-ical',{body:{feed_id:id}});msg(error?'Erreur de synchronisation.':'Synchronisation terminée : '+(data?.events??0)+' période(s) importée(s).',!!error);loadFeeds();loadCalendar()}
+window.deleteFeed=async id=>{if(!confirm('Supprimer ce calendrier ?'))return;await sb.from('vacation_ical_feeds').delete().eq('id',id);loadFeeds();loadDashboardCounts()}
+
+async function loadMessages(render=true){
+  const {data:convs}=await sb.from('conversations').select('id,listing_id,buyer_id,seller_id,updated_at,listings(title,category)').eq('seller_id',currentUser.id).order('updated_at',{ascending:false});
+  const vacation=(convs||[]).filter(c=>c.listings?.category==='vacances');
+  let unread=0,items=[];
+  for(const c of vacation){const {data:m}=await sb.from('messages').select('id,body,created_at,read_at,sender_id').eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(1);const last=m?.[0];if(last&&last.sender_id!==currentUser.id&&!last.read_at)unread++;items.push({c,last})}
+  $('mUnread').textContent=unread;
+  if(render)$('messagesList').innerHTML=items.length?items.map(({c,last})=>'<div class="msgRow '+(last&&last.sender_id!==currentUser.id&&!last.read_at?'unread':'')+'"><b>'+esc(c.listings?.title||'Logement')+'</b><div>'+esc(last?.body||'Nouvelle conversation')+'</div><small>'+(last?new Date(last.created_at).toLocaleString('fr-FR'):'')+'</small></div>').join(''):'<div class="empty">Aucun message voyageur pour le moment.</div>'
+}
+async function loadDashboardCounts(){await loadFeeds(false);await loadMessages(false)}
+
+boot();
+</script>
+</body>
+</html>
