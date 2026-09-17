@@ -1,0 +1,156 @@
+name: Patch Abracadeal home
+on:
+  push:
+    paths:
+      - '.github/workflows/patch-home.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch index.html
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          replacements=[
+            ("🏝 Abracadeal Vacances","🪔 Abracadeal Vacances"),
+            ("🏖 Abracadeal Vacances","🪔 Abracadeal Vacances"),
+            ("12 mois offerts, sans carte bancaire au démarrage.","12 mois offerts. La carte bancaire sera enregistrée lors de l’activation de l’offre."),
+            ("Puis -10 % pendant 12 mois, avant le tarif public.",""),
+            ("Puis –10 % pendant 12 mois, avant le tarif public.",""),
+            ("Puis −10 % pendant 12 mois, avant le tarif public.",""),
+            ("✓ -10 % la 2e année",""),
+            ("✓ –10 % la 2e année",""),
+            ("✓ Puis tarif public en vigueur",""),
+            ("✓ Sans engagement automatique",""),
+            ("Sans engagement automatique","Sans engagement"),
+            ("Aucun abonnement imposé à la fin de l’offre.","Résiliable avant la fin de la période gratuite."),
+          ]
+          for a,b in replacements:
+            s=s.replace(a,b)
+
+          # Remove renewal-auto wording wherever it is purely promotional.
+          s=re.sub(r"(?i)\s*[•·-]?\s*renouvellement automatique", "", s)
+          s=re.sub(r"(?i)se renouvellent automatiquement[^<\.]*[\.]?", "", s)
+          s=re.sub(r"(?i)renouvellement automatique[^<\.]*[\.]?", "", s)
+
+          # Remove obvious year-2 discount snippets from the launch banners.
+          s=re.sub(r"(?i)\s*Puis\s*[−–-]?10\s*%\s*pendant\s*12\s*mois\s*,?\s*avant\s*le\s*tarif\s*public\.?","",s)
+
+          css='''<style id="abraca-home-ux-patch">
+          .abraca-account-menu{position:relative;display:inline-block}
+          .abraca-account-menu>button{min-height:48px;padding:0 20px;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+          .abraca-account-dropdown{position:absolute;right:0;top:calc(100% + 8px);min-width:190px;padding:8px;background:#251033;border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 18px 35px rgba(0,0,0,.28);z-index:9999;display:none}
+          .abraca-account-menu.open .abraca-account-dropdown{display:grid;gap:6px}
+          .abraca-account-dropdown button{width:100%;border:0;border-radius:10px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.08);color:#fff;font-weight:750;cursor:pointer}
+          .abraca-vacances-top{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:16px;background:linear-gradient(135deg,#7e24aa,#ec3fa4);color:#fff!important;font-weight:850;text-decoration:none!important;box-shadow:0 8px 18px rgba(126,36,170,.2)}
+          @media(max-width:760px){.abraca-vacances-top{min-height:42px;padding:0 12px}.abraca-account-menu>button{min-height:42px;padding:0 12px}}
+          </style>'''
+          if 'id="abraca-home-ux-patch"' not in s:
+            s=s.replace("</head>",css+"</head>")
+
+          js=r'''<script id="abraca-home-ux-script">
+          document.addEventListener('DOMContentLoaded',()=>{
+            const all=[...document.querySelectorAll('a,button,div,span,strong,p,h1,h2,h3')];
+            const exact=t=>all.filter(el=>(el.textContent||'').trim()===t);
+            const visible=el=>!!(el.offsetWidth||el.offsetHeight||el.getClientRects().length);
+
+            // One top-level "Compte" control containing both account actions.
+            const create=exact('Créer un compte').find(visible);
+            const login=exact('Se connecter').find(visible);
+            if(create&&login&&create.parentElement===login.parentElement&&!document.querySelector('.abraca-account-menu')){
+              const parent=create.parentElement;
+              const menu=document.createElement('div'); menu.className='abraca-account-menu';
+              const trigger=document.createElement('button'); trigger.type='button'; trigger.textContent='Compte';
+              const dd=document.createElement('div'); dd.className='abraca-account-dropdown';
+              const c=document.createElement('button'); c.type='button'; c.textContent='Créer un compte'; c.onclick=()=>create.click();
+              const l=document.createElement('button'); l.type='button'; l.textContent='Se connecter'; l.onclick=()=>login.click();
+              dd.append(c,l); menu.append(trigger,dd);
+              trigger.onclick=e=>{e.stopPropagation();menu.classList.toggle('open')};
+              document.addEventListener('click',()=>menu.classList.remove('open'));
+              parent.insertBefore(menu,create); create.style.display='none'; login.style.display='none';
+            }
+
+            // Make Vacances immediately visible in the main top navigation.
+            const publish=exact('Publier une annonce').find(visible);
+            if(publish&&publish.parentElement&&!document.querySelector('.abraca-vacances-top')){
+              const a=document.createElement('a'); a.href='vacances.html'; a.className='abraca-vacances-top'; a.textContent='🪔 Vacances';
+              publish.parentElement.insertBefore(a,publish);
+            }
+
+            // Hide the four large explanatory tiles in the founder banner.
+            ['1re année','2e année','Ensuite','Sans engagement','Sans engagement automatique'].forEach(label=>{
+              for(const el of exact(label)){
+                let box=el;
+                for(let i=0;i<4&&box.parentElement;i++){
+                  const parent=box.parentElement;
+                  const txt=(parent.innerText||'').trim();
+                  if(txt.length<260){box=parent}else break;
+                }
+                if(box && box!==document.body) box.style.display='none';
+              }
+            });
+
+            // Keep only the "12 mois offerts" small founder pill in the registration card.
+            for(const el of all){
+              const t=(el.textContent||'').trim();
+              if((t.includes('-10 % la 2e année')||t.includes('–10 % la 2e année')||t.includes('Puis tarif public en vigueur')||t.includes('Sans engagement automatique'))&&t.length<90){
+                el.style.display='none';
+              }
+            }
+
+            // Put Pro/Pro CTA on the right.
+            const pro=exact('Découvrez Pro/Pro').find(visible);
+            const proBtn=all.find(el=>(el.textContent||'').trim().startsWith('Un espace dédié aux pros')&&visible(el));
+            if(pro&&proBtn){
+              let container=pro.parentElement;
+              for(let i=0;i<4&&container;i++){
+                if(container.contains(proBtn)){break}
+                container=container.parentElement;
+              }
+              if(container){
+                container.style.display='grid';
+                container.style.gridTemplateColumns='minmax(0,1fr) auto';
+                container.style.alignItems='center';
+                container.style.gap='18px';
+                proBtn.style.justifySelf='end';
+              }
+            }
+
+            // Founder buttons now lead to plan selection/card registration after account setup.
+            const founderButtons=[...document.querySelectorAll('a,button')].filter(el=>{
+              const t=(el.textContent||'').trim().toLowerCase();
+              return t==='créer un compte professionnel'||t==='profiter de l’offre fondateurs';
+            });
+            founderButtons.forEach((b,i)=>{
+              if(i===0){
+                b.addEventListener('click',e=>{
+                  // Keep the existing account creation flow. The Stripe step is available after signup.
+                  try{sessionStorage.setItem('abraca_founder_checkout_after_signup','1')}catch(_){}
+                });
+              }
+            });
+          });
+          </script>'''
+          if 'id="abraca-home-ux-script"' not in s:
+            s=s.replace("</body>",js+"</body>")
+
+          p.write_text(s,encoding="utf-8")
+          PY
+      - name: Commit patch
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "Abracadeal Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Simplify founder offer and improve Vacances access"
+          git push
