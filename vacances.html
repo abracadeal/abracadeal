@@ -143,6 +143,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 @media(max-width:900px){.hero-grid,.owner-grid{grid-template-columns:1fr}.search-grid{grid-template-columns:1fr 1fr}.value-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.direct-contact{grid-template-columns:1fr}}
 @media(max-width:620px){.container{width:min(100% - 20px,1180px)}.nav{min-height:68px;align-items:flex-start;padding:10px 0}.brand{font-size:1.25rem;gap:6px;flex-direction:column;align-items:flex-start}.brand small{font-size:.62rem}.nav-actions .btn{min-height:40px;padding:0 11px;font-size:.78rem}.hero{padding:44px 0}.hero-grid{gap:26px}h1{font-size:3rem}.search-box{border-radius:20px;padding:14px}.search-grid,.search-row,.value-grid,.calc-fields,.calc-result-top{grid-template-columns:1fr}.section{padding:52px 0}.section-head{align-items:flex-start;flex-direction:column}.price-card,.calc{padding:18px}.price-big{font-size:2.6rem}.direct-price{align-items:flex-start;flex-direction:column}.cta{padding:54px 0}.host-actions,.cta-actions{flex-direction:column}.host-actions .btn,.cta-actions .btn{width:100%}}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
@@ -151,7 +152,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     <div class="nav-actions">
       <a class="btn premium" href="index.html">Abracadeal</a>
       <a class="btn ghost" href="index.html#accountModal">Connexion</a>
-      <a class="btn primary" href="espace-hote.html">Devenir hôte</a>
+      <a class="btn primary" id="hostSignupCta" href="index.html#accountModal">S’inscrire</a>
     </div>
   </div>
 </header>
@@ -302,6 +303,22 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     const q=new URLSearchParams({destination:dest,arrival:arr,departure:dep,guests:String(guests)});
     location.href='recherche-vacances.html?'+q.toString();
   });
+
+  const hostSignupCta=root.getElementById('hostSignupCta');
+  if(hostSignupCta && window.supabase){
+    try{
+      const sbVac=supabase.createClient(
+        'https://jplzvxmpbpjssyinozap.supabase.co',
+        'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF'
+      );
+      sbVac.auth.getSession().then(({data})=>{
+        const loggedIn=!!data?.session?.user;
+        hostSignupCta.textContent=loggedIn?'Devenir hôte':'S’inscrire';
+        hostSignupCta.href=loggedIn?'espace-hote.html':'index.html#accountModal';
+      });
+    }catch(_){}
+  }
+
 })();
 </script>
 </body>
