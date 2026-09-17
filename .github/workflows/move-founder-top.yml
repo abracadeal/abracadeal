@@ -1,0 +1,31 @@
+name: Move founder block to top once
+
+on:
+  push:
+    branches:
+      - founder-top-fix
+    paths:
+      - '.github/workflows/move-founder-top.yml'
+      - '.github/move_founder_top.py'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: founder-top-fix
+      - run: python .github/move_founder_top.py
+      - run: |
+          if git diff --quiet -- index.html; then
+            echo "No index change needed"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Move professional founder offer to top of homepage"
+          git push origin HEAD:founder-top-fix
