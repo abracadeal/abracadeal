@@ -315,7 +315,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
         const user=data?.session?.user||null;
         if(!user){
           hostSignupCta.textContent='S’inscrire';
-          hostSignupCta.href='index.html#accountModal';
+          hostSignupCta.href='espace-hote.html?signup=1';
           return;
         }
         const {data:hostProfile}=await sbVac
