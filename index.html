@@ -2263,7 +2263,7 @@ a.btn{cursor:pointer}
 .b2b-discovery{margin:12px auto 22px;padding:18px 22px;border:1px solid #dfc3ed;border-radius:16px;background:#f7effb;color:#442153;box-sizing:border-box;display:flex;align-items:center;gap:24px}
 .b2b-discovery h2{font-size:1.05rem;margin:0 0 4px;color:#63277d}
 .b2b-discovery p{margin:0;font-size:.92rem;line-height:1.5;color:#654a71}
-.b2b-discovery-tag{flex-shrink:0;font-size:.78rem;font-weight:700;background:#e9d5f2;color:#63277d;padding:8px 12px;border-radius:20px}
+.b2b-discovery-tag{margin-left:auto;flex-shrink:0;font-size:.78rem;font-weight:700;background:#e9d5f2;color:#63277d;padding:8px 12px;border-radius:20px}
 @media(max-width:640px){.b2b-discovery{align-items:flex-start;flex-direction:column;gap:10px;padding:16px}.b2b-discovery-tag{white-space:normal}}
 </style>
 <style>
@@ -2855,6 +2855,32 @@ header .publish-trigger:hover{
   .b2b-panel,.b2b-card,.moderation-card,.flow-error-card{max-width:100%;overflow-wrap:anywhere}
 }
 </style>
+
+<style id="abracadeal-home-nav-refresh">
+.account-auth-group{display:flex;align-items:stretch;gap:0;border-radius:14px;overflow:hidden;box-shadow:0 7px 18px rgba(17,5,27,.16)}
+.account-auth-group .btn{border-radius:0!important;box-shadow:none!important}
+.account-auth-group #signupBtn{border-top-left-radius:14px!important;border-bottom-left-radius:14px!important;border-right-color:rgba(255,255,255,.10)!important}
+.account-auth-group #accountBtn{border-top-right-radius:14px!important;border-bottom-right-radius:14px!important}
+.header-vacances-btn{color:#fff!important;background:linear-gradient(135deg,#6d218d,#bb2fa9)!important;border:1px solid rgba(236,179,255,.42)!important;box-shadow:0 9px 22px rgba(126,34,145,.24)!important}
+.header-vacances-btn:hover{filter:brightness(1.07)}
+.header-lamp-crop,.vacances-lamp-logo{display:inline-block;overflow:hidden;flex:0 0 auto;background:#2a0f3a}
+.header-lamp-crop{width:28px;height:28px;border-radius:9px;margin-right:6px}
+.header-lamp-crop img{height:28px;width:auto;display:block;transform:translateX(-1px)}
+.vacances-lamp-logo{width:34px;height:34px;border-radius:10px;vertical-align:middle;margin-right:9px;box-shadow:0 5px 14px rgba(10,0,20,.2)}
+.vacances-lamp-logo img{height:34px;width:auto;display:block;transform:translateX(-1px)}
+.founder-simple-side{min-height:138px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.07);border-radius:18px;padding:24px;display:flex;flex-direction:column;justify-content:center}
+.founder-simple-side strong{font:700 2rem Fraunces,serif;margin-bottom:6px}
+.founder-simple-side span{color:#d7c9df;line-height:1.5}
+@media(max-width:720px){
+  header .nav-actions{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .account-auth-group{grid-column:1/-1;width:100%;display:grid;grid-template-columns:1fr 1fr}
+  .account-auth-group .btn{width:100%;min-height:46px}
+  .header-vacances-btn{grid-column:1/-1!important;width:100%!important;min-height:44px!important}
+  .header-vacances-btn .header-lamp-crop{display:none}
+  .b2b-discovery-tag{margin-left:0}
+}
+</style>
+
 </head>
 <body>
 
@@ -2863,8 +2889,11 @@ header .publish-trigger:hover{
     <div></div>
     <div class="nav-actions">
       <button class="btn b2b-entry hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">Pro/Pro<span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
-      <a class="btn ghost" id="signupBtn" href="#accountModal">Créer un compte</a>
-      <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
+      <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span class="header-lamp-crop" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span><span>Vacances</span></a>
+      <div class="account-auth-group" aria-label="Compte Abracadeal">
+        <a class="btn ghost" id="signupBtn" href="#accountModal">Créer un compte</a>
+        <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
+      </div>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Import"><span class="header-stock-label">Import</span></button>
       <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer"><span class="header-moderation-label">Modérer</span></button>
       <button class="btn header-flow-errors-btn hidden" id="flowErrorsBtn" type="button" aria-label="Flux"><span class="header-flow-errors-label">Flux</span><span class="header-flow-errors-badge hidden" id="flowErrorsBadge">0</span></button>
@@ -2920,11 +2949,9 @@ header .publish-trigger:hover{
             <button type="button" class="founder-terms-link" onclick="openModal('founderOfferModal')">Voir les conditions</button>
           </div>
         </div>
-        <div class="pro-grid">
-          <div class="pro-card"><b>1re année</b><span>12 mois offerts, sans carte bancaire au démarrage.</span></div>
-          <div class="pro-card"><b>2e année</b><span>-10 % sur le tarif public applicable.</span></div>
-          <div class="pro-card"><b>Ensuite</b><span>Tarif public en vigueur, présenté avant toute souscription.</span></div>
-          <div class="pro-card"><b>Sans engagement automatique</b><span>Aucun abonnement imposé à la fin de l’offre.</span></div>
+        <div class="founder-simple-side" aria-label="Offre Fondateurs">
+          <strong>12 mois offerts</strong>
+          <span>pour les 1 000 premiers comptes professionnels éligibles</span>
         </div>
       </div>
     </div>
@@ -2936,7 +2963,7 @@ header .publish-trigger:hover{
   </aside>
 
   <aside class="container vacances-discovery" id="vacancesDiscovery" aria-labelledby="vacancesDiscoveryTitle">
-    <div><h2 id="vacancesDiscoveryTitle">🏖️ Abracadeal Vacances</h2><p>Locations saisonnières en direct · <strong>offre de lancement 4,99 €/mois par logement</strong> · 0 % de commission. <span class="vacances-launch-note">Puis -10 % pendant 12 mois, avant le tarif public.</span></p></div>
+    <div><h2 id="vacancesDiscoveryTitle"><span class="vacances-lamp-logo" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span>Abracadeal Vacances</h2><p>Locations saisonnières en direct · <strong>500 premiers logements : 12 mois offerts</strong> · 0 % de commission.</p></div>
     <a class="vacances-discovery-tag" href="vacances.html">Découvrir Vacances</a>
   </aside>
 
@@ -3504,11 +3531,9 @@ header .publish-trigger:hover{
       <div class="founder-progress" aria-hidden="true"><span data-founder-progress></span></div>
       <div class="founder-progress-note" data-founder-progress-note>Le compteur se base sur les professionnels vérifiés.</div>
       <div class="founder-steps">
-        <div><b>1re année</b><span>12 mois de diffusion et de synchronisation du stock offerts. Aucune carte bancaire nécessaire pour bénéficier de la période gratuite.</span></div>
-        <div><b>2e année</b><span>-10 % sur le tarif public en vigueur pendant 12 mois.</span></div>
-        <div><b>Ensuite</b><span>Application du tarif public en vigueur selon le volume d’annonces.</span></div>
+        <div><b>12 mois offerts</b><span>Diffusion et synchronisation du stock offertes pendant les 12 premiers mois pour les comptes éligibles.</span></div>
       </div>
-      <p class="note">Les options de visibilité, boosts et autres services payants restent distincts de l’offre de diffusion.</p>
+      <p class="note">Le tarif applicable après la période offerte et les conditions de facturation sont présentés au moment de la validation du paiement. Les options de visibilité, boosts et autres services payants restent distincts.</p>
     </div>
   </div>
 </div>
@@ -3626,13 +3651,7 @@ header .publish-trigger:hover{
                 </div>
                 <div class="signup-founder-chip">1 000 premiers pros</div>
               </div>
-              <p class="signup-founder-copy"><strong>1re année :</strong> 12 mois de diffusion et de synchronisation de stock offerts, sans carte bancaire.</p>
-              <div class="signup-founder-benefits" aria-label="Avantages de l’offre">
-                <span class="signup-founder-benefit">12 mois offerts</span>
-                <span class="signup-founder-benefit">-10 % la 2e année</span>
-                <span class="signup-founder-benefit">Puis tarif public en vigueur</span>
-                <span class="signup-founder-benefit">Sans engagement automatique</span>
-              </div>
+              <p class="signup-founder-copy"><strong>Offre de lancement :</strong> 12 mois de diffusion et de synchronisation de stock offerts.</p>
               <div class="signup-founder-footer">
                 <span class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></span>
                 <button type="button" class="founder-terms-link" onclick="openModal('founderOfferModal')">Voir les conditions</button>
