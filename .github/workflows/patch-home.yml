@@ -45,7 +45,7 @@ jobs:
 
           css='''<style id="abraca-home-ux-patch">
           .abraca-account-menu{position:relative;display:inline-block}
-          .abraca-account-menu>button{min-height:48px;padding:0 20px;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+          .abraca-account-menu>button{min-height:48px;padding:0 20px;border-radius:16px;border:1px solid rgba(255,255,255,.24);background:linear-gradient(135deg,#6f218c 0%,#b72fb0 55%,#ec3fa4 100%);color:#fff;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(181,47,176,.28),inset 0 1px 0 rgba(255,255,255,.16)}
           .abraca-account-dropdown{position:absolute;right:0;top:calc(100% + 8px);min-width:190px;padding:8px;background:#251033;border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 18px 35px rgba(0,0,0,.28);z-index:9999;display:none}
           .abraca-account-menu.open .abraca-account-dropdown{display:grid;gap:6px}
           .abraca-account-dropdown button{width:100%;border:0;border-radius:10px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.08);color:#fff;font-weight:750;cursor:pointer}
@@ -77,16 +77,18 @@ jobs:
               parent.insertBefore(menu,create); create.style.display='none'; login.style.display='none';
             }
 
-            // Keep only one Vacances button in the main top navigation.
+            // Keep only one host CTA in the main top navigation.
             const publish=exact('Publier une annonce').find(visible);
-            const vacationLinks=[...document.querySelectorAll('a,button')].filter(el=>(el.textContent||'').trim()==='Vacances'&&visible(el));
+            const vacationLinks=[...document.querySelectorAll('a,button')].filter(el=>['Vacances','Devenir hôte'].includes((el.textContent||'').trim())&&visible(el));
             if(vacationLinks.length>1){
               vacationLinks.slice(1).forEach(el=>{
                 if(el.classList.contains('abraca-vacances-top')) el.remove();
               });
             }
+            const existingTop=document.querySelector('.abraca-vacances-top');
+            if(existingTop){ existingTop.textContent='Devenir hôte'; existingTop.setAttribute('href','espace-hote.html'); }
             if(publish&&publish.parentElement&&!vacationLinks.length&&!document.querySelector('.abraca-vacances-top')){
-              const a=document.createElement('a'); a.href='vacances.html'; a.className='abraca-vacances-top'; a.textContent='Vacances';
+              const a=document.createElement('a'); a.href='espace-hote.html'; a.className='abraca-vacances-top'; a.textContent='Devenir hôte';
               publish.parentElement.insertBefore(a,publish);
             }
 
