@@ -52,7 +52,9 @@ jobs:
           .abraca-vacances-top{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:16px;background:linear-gradient(135deg,#7e24aa,#ec3fa4);color:#fff!important;font-weight:850;text-decoration:none!important;box-shadow:0 8px 18px rgba(126,36,170,.2)}
           @media(max-width:760px){.abraca-vacances-top{min-height:42px;padding:0 12px}.abraca-account-menu>button{min-height:42px;padding:0 12px}}
           </style>'''
-          if 'id="abraca-home-ux-patch"' not in s:
+          if 'id="abraca-home-ux-patch"' in s:
+            s=re.sub(r'<style id="abraca-home-ux-patch">[\s\S]*?</style>',css,s,count=1)
+          else:
             s=s.replace("</head>",css+"</head>")
 
           js=r'''<script id="abraca-home-ux-script">
@@ -77,19 +79,24 @@ jobs:
               parent.insertBefore(menu,create); create.style.display='none'; login.style.display='none';
             }
 
-            // Keep only one host CTA in the main top navigation.
+            // Normalize the top navigation: one Devenir hôte CTA only.
             const publish=exact('Publier une annonce').find(visible);
-            const vacationLinks=[...document.querySelectorAll('a,button')].filter(el=>['Vacances','Devenir hôte'].includes((el.textContent||'').trim())&&visible(el));
-            if(vacationLinks.length>1){
-              vacationLinks.slice(1).forEach(el=>{
-                if(el.classList.contains('abraca-vacances-top')) el.remove();
+            if(publish&&publish.parentElement){
+              const parent=publish.parentElement;
+              [...parent.querySelectorAll('a,button')].forEach(el=>{
+                if(el===publish) return;
+                const t=(el.textContent||'').trim().toLowerCase();
+                if(t.includes('vacances')||t==='devenir hôte'||t==='devenir hote'||el.classList.contains('abraca-vacances-top')){
+                  el.remove();
+                }
               });
-            }
-            const existingTop=document.querySelector('.abraca-vacances-top');
-            if(existingTop){ existingTop.textContent='Devenir hôte'; existingTop.setAttribute('href','espace-hote.html'); }
-            if(publish&&publish.parentElement&&!vacationLinks.length&&!document.querySelector('.abraca-vacances-top')){
-              const a=document.createElement('a'); a.href='espace-hote.html'; a.className='abraca-vacances-top'; a.textContent='Devenir hôte';
-              publish.parentElement.insertBefore(a,publish);
+              const a=document.createElement('a');
+              a.href='espace-hote.html';
+              a.className='abraca-vacances-top';
+              a.textContent='Devenir hôte';
+              const account=parent.querySelector('.abraca-account-menu');
+              if(account) parent.insertBefore(a,account);
+              else parent.insertBefore(a,publish);
             }
 
             // Hide the four large explanatory tiles in the founder banner.
@@ -146,7 +153,9 @@ jobs:
             });
           });
           </script>'''
-          if 'id="abraca-home-ux-script"' not in s:
+          if 'id="abraca-home-ux-script"' in s:
+            s=re.sub(r'<script id="abraca-home-ux-script">[\s\S]*?</script>',js,s,count=1)
+          else:
             s=s.replace("</body>",js+"</body>")
 
           p.write_text(s,encoding="utf-8")
