@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Abracadeal Vacances — Synchronisation iCal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--p:#4d176e;--p2:#7e24aa;--pink:#ec3fa4;--ink:#21132d;--muted:#76677d;--line:#eadff0;--bg:#fbf8fd}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+a{text-decoration:none;color:inherit}.wrap{width:min(980px,calc(100% - 28px));margin:auto}.top{background:#1c0b2b;color:#fff;padding:18px 0}.top .wrap{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.brand{font-size:1.35rem;font-weight:800}.back{padding:10px 14px;border:1px solid rgba(255,255,255,.2);border-radius:12px}.hero{padding:42px 0 20px}.hero h1{font-size:clamp(2rem,4vw,3.6rem);margin:0 0 10px}.hero p{color:var(--muted);line-height:1.6;max-width:760px}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;box-shadow:0 20px 50px rgba(65,22,82,.08);margin:18px 0}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.field{display:flex;flex-direction:column;gap:7px}.field label{font-size:.82rem;font-weight:800}.field input,.field select{height:48px;border:1px solid var(--line);border-radius:13px;padding:0 13px;font:inherit}.wide{grid-column:1/-1}.btn{border:0;border-radius:13px;min-height:46px;padding:0 16px;font-weight:800;cursor:pointer}.btn.primary{background:linear-gradient(135deg,var(--p2),var(--pink));color:#fff}.btn.ghost{background:#f5edf8;color:var(--p)}.btn.danger{background:#fff0f3;color:#b4234f}.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.status{font-size:.86rem;color:var(--muted)}.feed{border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:12px}.feed h3{margin:0 0 6px;font-size:1rem}.feed small{color:var(--muted);word-break:break-all}.badge{display:inline-flex;padding:6px 9px;border-radius:999px;background:#f3e8f7;color:#6f218c;font-size:.76rem;font-weight:800}.notice{padding:12px 14px;border-radius:12px;background:#f5eef8;color:#5e2a70;margin:12px 0;display:none}.notice.show{display:block}.login{max-width:480px}.hidden{display:none!important}@media(max-width:700px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap"><div class="brand">Abracadeal · Vacances · iCal</div><a class="back" href="vacances.html">← Retour Vacances</a></div></header>
+<main class="wrap">
+<section class="hero"><h1>Synchronisez vos calendriers</h1><p>Importez les disponibilités Airbnb, Booking, Abritel ou tout autre calendrier iCal. Les dates occupées seront enregistrées dans Abracadeal pour éviter les doubles réservations.</p></section>
+<div id="notice" class="notice"></div>
+<section id="loginCard" class="card login hidden">
+<h2>Connexion Abracadeal</h2>
+<div class="grid"><div class="field wide"><label>Email</label><input id="email" type="email" autocomplete="email"></div><div class="field wide"><label>Mot de passe</label><input id="password" type="password" autocomplete="current-password"></div></div>
+<div class="row" style="margin-top:14px"><button id="loginBtn" class="btn primary">Se connecter</button></div>
+</section>
+<section id="app" class="hidden">
+<div class="card"><div class="row" style="justify-content:space-between"><div><h2 style="margin:0 0 6px">Ajouter un calendrier</h2><div class="status">Collez le lien iCal exporté par la plateforme.</div></div><button id="logoutBtn" class="btn ghost">Déconnexion</button></div>
+<div class="grid" style="margin-top:16px"><div class="field"><label>Nom du logement</label><input id="label" placeholder="Studio Cannes Centre"></div><div class="field"><label>Plateforme</label><select id="provider"><option value="airbnb">Airbnb</option><option value="booking">Booking</option><option value="abritel">Abritel</option><option value="google">Google Calendar</option><option value="autre">Autre</option></select></div><div class="field wide"><label>Lien iCal</label><input id="feedUrl" placeholder="https://.../calendar.ics"></div></div>
+<div class="row" style="margin-top:14px"><button id="addBtn" class="btn primary">Ajouter et synchroniser</button></div></div>
+<div class="card"><h2 style="margin-top:0">Mes calendriers</h2><div id="feeds"></div></div>
+</section>
+</main>
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);const notice=$('notice');
+function msg(t,err=false){notice.textContent=t;notice.classList.add('show');notice.style.background=err?'#fff0f3':'#f5eef8';notice.style.color=err?'#a11f48':'#5e2a70'}
+async function boot(){const {data:{session}}=await sb.auth.getSession();$('loginCard').classList.toggle('hidden',!!session);$('app').classList.toggle('hidden',!session);if(session)loadFeeds()}
+$('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error)return msg(error.message,true);boot()};
+$('logoutBtn').onclick=async()=>{await sb.auth.signOut();boot()};
+$('addBtn').onclick=async()=>{const {data:{user}}=await sb.auth.getUser();if(!user)return msg('Reconnectez-vous.',true);let u=$('feedUrl').value.trim();if(!u)return msg('Ajoutez un lien iCal.',true);if(u.startsWith('webcal://'))u='https://'+u.slice(9);const payload={owner_id:user.id,property_label:$('label').value.trim()||'Mon logement',provider:$('provider').value,feed_url:u};const {data,error}=await sb.from('vacation_ical_feeds').insert(payload).select('id').single();if(error)return msg(error.message,true);const {error:syncErr}=await sb.functions.invoke('sync-vacation-ical',{body:{feed_id:data.id}});if(syncErr)msg('Calendrier ajouté, mais la première synchronisation a échoué.',true);else msg('Calendrier ajouté et synchronisé.');$('feedUrl').value='';loadFeeds()};
+async function syncFeed(id){msg('Synchronisation en cours…');const {data,error}=await sb.functions.invoke('sync-vacation-ical',{body:{feed_id:id}});if(error)return msg(error.message||'Erreur de synchronisation',true);msg(`Synchronisation terminée : ${data?.events??0} période(s) importée(s).`);loadFeeds()}
+async function delFeed(id){if(!confirm('Supprimer ce calendrier importé ?'))return;const {error}=await sb.from('vacation_ical_feeds').delete().eq('id',id);if(error)return msg(error.message,true);loadFeeds()}
+async function loadFeeds(){const {data,error}=await sb.from('vacation_ical_feeds').select('*').order('created_at',{ascending:false});if(error)return msg(error.message,true);const box=$('feeds');if(!data?.length){box.innerHTML='<div class="status">Aucun calendrier connecté pour le moment.</div>';return}box.innerHTML=data.map(f=>`<div class="feed"><div class="row" style="justify-content:space-between"><div><h3>${esc(f.property_label)}</h3><span class="badge">${esc(f.provider)}</span></div><div class="row"><button class="btn ghost" onclick="syncFeed('${f.id}')">Synchroniser</button><button class="btn danger" onclick="delFeed('${f.id}')">Supprimer</button></div></div><small>${esc(f.feed_url)}</small><div class="status" style="margin-top:8px">${f.last_synced_at?'Dernière synchro : '+new Date(f.last_synced_at).toLocaleString('fr-FR'):'Jamais synchronisé'}${f.last_error?' · Erreur : '+esc(f.last_error):''}</div></div>`).join('')}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+boot();
+</script>
+</body></html>
