@@ -96,6 +96,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 .value-card{border:1px solid var(--line);border-radius:22px;padding:26px;background:#fff}
 .value-card h3{margin:0 0 9px;font-size:1.15rem}
 .value-card p{margin:0;color:var(--muted);line-height:1.6}
+.value-card .mini-link{display:inline-flex;margin-top:14px;color:#7a288f;font-weight:800}
 .icon{width:48px;height:48px;border-radius:14px;background:#f6ecfa;display:grid;place-items:center;font-size:1.45rem;margin-bottom:18px}
 .owner{background:linear-gradient(135deg,#f9f0fc,#fff 52%,#fff6fb);border-top:1px solid #efdff4;border-bottom:1px solid #efdff4}
 .owner-grid{display:grid;grid-template-columns:.88fr 1.12fr;gap:30px;align-items:start}
@@ -104,6 +105,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 .price-line:last-child{border-bottom:0}
 .price-line span{color:var(--muted)}
 .price-big{font:700 3rem/1 Fraunces,serif;color:#6f218c;margin:8px 0}
+.host-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}.host-actions .btn{min-height:46px}.host-actions .secondary{color:#6f218c;background:#fff;border-color:#ddcbe5;box-shadow:none}
 .calc{background:#fff;border:1px solid var(--line);border-radius:24px;padding:24px;box-shadow:var(--shadow)}
 .calc h3{margin:0 0 8px;font:700 1.6rem Fraunces,serif}
 .calc-intro{margin:0 0 20px;color:var(--muted);line-height:1.55}
@@ -129,10 +131,10 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 .search-state.show{display:block}
 .legal{font-size:.82rem;color:#837487;line-height:1.55;margin-top:16px}
 .cta{padding:70px 0;background:#21102f;color:#fff;text-align:center}
-.cta h2{margin:0;font:700 clamp(2rem,4vw,3.6rem)/1 Fraunces,serif}.cta p{color:#d8c7e1;max-width:760px;margin:14px auto 24px;line-height:1.6}
+.cta h2{margin:0;font:700 clamp(2rem,4vw,3.6rem)/1 Fraunces,serif}.cta p{color:#d8c7e1;max-width:760px;margin:14px auto 24px;line-height:1.6}.cta-actions{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}.cta-actions .btn.ghost{min-height:52px}
 .footer{padding:28px 0;background:#150920;color:#bfaec8}.footer-row{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}.footer a{color:#e8dcef}
 @media(max-width:900px){.hero-grid,.owner-grid{grid-template-columns:1fr}.search-grid{grid-template-columns:1fr 1fr}.value-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.direct-contact{grid-template-columns:1fr}}
-@media(max-width:620px){.container{width:min(100% - 20px,1180px)}.nav{min-height:68px;align-items:flex-start;padding:10px 0}.brand{font-size:1.25rem;gap:6px;flex-direction:column;align-items:flex-start}.brand small{font-size:.62rem}.nav-actions .btn{min-height:40px;padding:0 11px;font-size:.78rem}.hero{padding:44px 0}.hero-grid{gap:26px}h1{font-size:3rem}.search-box{border-radius:20px;padding:14px}.search-grid,.search-row,.value-grid,.calc-fields,.calc-result-top{grid-template-columns:1fr}.section{padding:52px 0}.section-head{align-items:flex-start;flex-direction:column}.price-card,.calc{padding:18px}.price-big{font-size:2.6rem}.direct-price{align-items:flex-start;flex-direction:column}.cta{padding:54px 0}}
+@media(max-width:620px){.container{width:min(100% - 20px,1180px)}.nav{min-height:68px;align-items:flex-start;padding:10px 0}.brand{font-size:1.25rem;gap:6px;flex-direction:column;align-items:flex-start}.brand small{font-size:.62rem}.nav-actions .btn{min-height:40px;padding:0 11px;font-size:.78rem}.hero{padding:44px 0}.hero-grid{gap:26px}h1{font-size:3rem}.search-box{border-radius:20px;padding:14px}.search-grid,.search-row,.value-grid,.calc-fields,.calc-result-top{grid-template-columns:1fr}.section{padding:52px 0}.section-head{align-items:flex-start;flex-direction:column}.price-card,.calc{padding:18px}.price-big{font-size:2.6rem}.direct-price{align-items:flex-start;flex-direction:column}.cta{padding:54px 0}.host-actions,.cta-actions{flex-direction:column}.host-actions .btn,.cta-actions .btn{width:100%}}
 </style>
 </head>
 <body>
@@ -141,7 +143,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><b>Abracadeal</b><small>Vacances</small></a>
     <div class="nav-actions">
       <a class="btn ghost" href="index.html">← Abracadeal</a>
-      <a class="btn primary" href="#hotes">Hôtes</a>
+      <a class="btn primary" href="#devenir-hote">Devenir hôte</a>
     </div>
   </div>
 </header>
@@ -183,17 +185,17 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     <div class="section-head"><div><h2>Un prix direct hôte</h2><p>L’hôte choisit librement son tarif. Sans commission Abracadeal sur la réservation, il peut proposer un prix plus attractif au voyageur tout en conservant davantage.</p></div></div>
     <div class="value-grid">
       <div class="value-card"><div class="icon">💬</div><h3>Contact direct</h3><p>Messagerie Abracadeal, appel, SMS ou WhatsApp prérempli pour que l’hôte sache immédiatement que le voyageur vient d’Abracadeal.</p></div>
-      <div class="value-card"><div class="icon">📅</div><h3>Calendrier clair</h3><p>Tarif à la nuit, périodes spéciales, séjour minimum et disponibilités. La synchronisation iCal avec les autres calendriers pourra ensuite être ajoutée.</p></div>
+      <div class="value-card"><div class="icon">📅</div><h3>Calendrier & iCal</h3><p>Tarif à la nuit, périodes spéciales, séjour minimum et disponibilités. La synchronisation iCal permet d’importer les dates occupées depuis Airbnb, Booking, Abritel ou un autre calendrier compatible.</p><a class="mini-link" href="ical.html">Synchroniser mes calendriers →</a></div>
       <div class="value-card"><div class="icon">🏷️</div><h3>0 % sur la réservation</h3><p>Abracadeal facture la publication du logement, pas le séjour. Aucun pourcentage n’est prélevé sur le montant payé à l’hôte.</p></div>
       <div class="value-card"><div class="icon">🔒</div><h3>Annonce encadrée</h3><p>La publication Vacances disposera de champs spécifiques : résidence principale, numéro de déclaration lorsqu’il est requis et déclaration sur l’honneur du loueur.</p></div>
     </div>
   </div>
 </section>
 
-<section class="section owner" id="hotes">
+<section class="section owner" id="devenir-hote">
   <div class="container owner-grid">
     <div class="price-card">
-      <div style="font-weight:900;color:#7a288f;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem">Offre de lancement — particuliers</div>
+      <div style="font-weight:900;color:#7a288f;text-transform:uppercase;letter-spacing:.05em;font-size:.78rem">Devenir hôte — Offre de lancement particuliers</div>
       <div class="price-big">0 €</div>
       <div style="font-weight:800;margin-bottom:16px">pendant 12 mois pour les 500 premiers logements</div>
       <div class="price-line"><span>Du 501e au 1000e logement</span><strong>4,99 €/mois pendant 6 mois</strong></div>
@@ -204,6 +206,7 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
       <div class="price-line"><span>Prix du séjour</span><strong>Vous décidez</strong></div>
       <div class="price-line"><span>Contact voyageur</span><strong>Direct</strong></div>
       <p class="legal">Les offres de lancement ci-dessus sont réservées aux particuliers, dans la limite des logements concernés par chaque palier. À l’issue de la période promotionnelle applicable, l’abonnement se poursuit au tarif standard de 9,99 € par mois et par logement et se renouvelle automatiquement chaque mois jusqu’à résiliation. L’abonnement reste sans engagement et peut être résilié à tout moment. Il concerne la publication du logement sur Abracadeal Vacances. Le contrat de location, la réservation et le paiement du séjour restent gérés directement entre l’hôte et le voyageur.</p>
+      <div class="host-actions"><a class="btn primary" href="index.html#accountModal">Devenir hôte</a><a class="btn secondary" href="ical.html">Déjà hôte ? Gérer mon iCal</a></div>
     </div>
 
     <div class="calc">
@@ -243,9 +246,9 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 
 <section class="cta">
   <div class="container">
-    <h2>Abracadeal Vacances</h2>
+    <h2>Devenez hôte sur Abracadeal Vacances</h2>
     <p><strong>Particuliers : 500 premiers logements = 12 mois gratuits • du 501e au 1000e = 4,99 €/mois pendant 6 mois.</strong><br>Puis 9,99 €/mois/logement • Sans engagement • Renouvellement automatique • 0 % de commission.</p>
-    <a class="btn primary" style="min-height:52px;padding:0 26px;font-size:1.02rem" href="index.html#accountModal">Créer ou ouvrir mon compte Abracadeal</a>
+    <div class="cta-actions"><a class="btn primary" style="min-height:52px;padding:0 26px;font-size:1.02rem" href="index.html#accountModal">Devenir hôte</a><a class="btn ghost" href="ical.html">Gérer mes calendriers iCal</a></div>
   </div>
 </section>
 </main>
