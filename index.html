@@ -2906,6 +2906,30 @@ header .publish-trigger:hover{
     </div>
   </section>
 
+
+  <section class="section" id="pros">
+    <div class="container">
+      <div class="pro-block">
+        <div>
+          <div class="founder-inline"><strong>Offre Fondateurs</strong> · réservée aux 1 000 premiers comptes professionnels éligibles</div>
+          <h2>Professionnels : démarrez avec 12 mois offerts.</h2>
+          <p>Garages, marchands, agences et boutiques peuvent publier et gérer leur stock sur Abracadeal. Profitez de l’offre de lancement dès la création de votre compte professionnel.</p>
+          <div class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></div>
+          <div class="pro-main-actions" style="margin-top:14px">
+            <a class="btn primary" id="proAccountBtn" href="#accountModal">Créer un compte professionnel</a>
+            <button type="button" class="founder-terms-link" onclick="openModal('founderOfferModal')">Voir les conditions</button>
+          </div>
+        </div>
+        <div class="pro-grid">
+          <div class="pro-card"><b>1re année</b><span>12 mois offerts, sans carte bancaire au démarrage.</span></div>
+          <div class="pro-card"><b>2e année</b><span>-10 % sur le tarif public applicable.</span></div>
+          <div class="pro-card"><b>Ensuite</b><span>Tarif public en vigueur, présenté avant toute souscription.</span></div>
+          <div class="pro-card"><b>Sans engagement automatique</b><span>Aucun abonnement imposé à la fin de l’offre.</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <aside class="container b2b-discovery" id="b2bDiscovery" aria-labelledby="b2bDiscoveryTitle">
     <div><h2 id="b2bDiscoveryTitle">Découvrez Pro/Pro</h2><p>Des annonces entre professionnels, avec des prix accessibles sur accord du vendeur.</p></div>
     <a class="b2b-discovery-tag home-action" id="b2bDiscoveryLink" href="#accountModal">Un espace dédié aux pros →</a>
@@ -4172,7 +4196,7 @@ function syncHomeMarketingVisibility(){
   // Un compte déjà opérationnel n'a plus besoin des gros blocs d'acquisition.
   $('#b2bDiscovery')?.classList.toggle('hidden',proExperience);
   $('#vacancesDiscovery')?.classList.toggle('hidden',proExperience);
-  $('#pros')?.classList.toggle('hidden',proExperience);
+  $('#pros')?.classList.toggle('hidden',!!currentUser);
 }
 function updateAuthUI(preserveEditing=false){
   const keep=preserveEditing && currentUser && displayedAccountId===currentUser.id;
