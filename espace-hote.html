@@ -52,9 +52,12 @@
     <h3>Espace Hôte</h3>
     <button class="navbtn active" data-view="dashboard">Vue d’ensemble</button>
     <button class="navbtn" data-view="listings">Mes logements</button>
+    <button class="navbtn" onclick="location.href='photos-vacances.html'">Photos</button>
+    <button class="navbtn" onclick="location.href='demandes-hote.html'">Demandes</button>
     <button class="navbtn" data-view="calendar">Calendrier</button>
     <button class="navbtn" data-view="pricing">Tarifs</button>
     <button class="navbtn" data-view="ical">iCal</button>
+    <button class="navbtn" onclick="location.href='export-ical-vacances.html'">Export iCal</button>
     <button class="navbtn" data-view="messages">Messages</button>
     <button class="navbtn" data-view="reviews">Avis</button>
   </aside>
@@ -78,6 +81,7 @@
         <div class="quick">
           <button onclick="showView('listings');openListingForm()"><strong>🏠 Publier un logement</strong><span>Créer une annonce Vacances complète.</span></button>
           <button onclick="showView('ical')"><strong>🔄 Synchroniser iCal</strong><span>Airbnb, Booking, Abritel et autres flux .ics.</span></button>
+          <button onclick="location.href='demandes-hote.html'"><strong>📨 Demandes de séjour</strong><span>Accepter ou refuser les demandes voyageurs.</span></button>
           <button onclick="showView('calendar')"><strong>📅 Bloquer des dates</strong><span>Fermer manuellement une période indisponible.</span></button>
         </div>
       </div>
@@ -152,7 +156,7 @@
 
     <section id="view-ical" class="view hidden">
       <div class="card">
-        <div class="cardhead"><div><h2>Synchronisation iCal</h2><div class="sub">Importez les dates occupées de vos autres plateformes.</div></div><a class="btn soft" href="ical.html">Ouvrir la gestion avancée</a></div>
+        <div class="cardhead"><div><h2>Synchronisation iCal</h2><div class="sub">Importez les dates occupées de vos autres plateformes. Synchronisation automatique toutes les 30 minutes.</div></div><div class="actions"><a class="btn soft" href="ical.html">Imports iCal</a><a class="btn soft" href="export-ical-vacances.html">Exporter Abracadeal</a></div></div>
         <div class="formgrid">
           <div class="field"><label>Logement</label><select id="iListing"></select></div>
           <div class="field"><label>Plateforme</label><select id="iProvider"><option value="airbnb">Airbnb</option><option value="booking">Booking</option><option value="abritel">Abritel</option><option value="google">Google Calendar</option><option value="autre">Autre</option></select></div>
@@ -227,7 +231,7 @@ async function loadListings(){
 }
 function listingHtml(l){
   const st=esc(l.status||'pending'),d=details.get(l.id);
-  return '<div class="listing"><div><div class="actions" style="margin-bottom:6px"><span class="status s-'+st+'">'+st+'</span><span class="pill">'+esc(d?.max_guests||2)+' voyageurs</span></div><h3>'+esc(l.title)+'</h3><div class="meta">'+esc(l.city)+(l.postal_code?' · '+esc(l.postal_code):'')+' · '+money(l.price)+'/nuit'+(d?.min_nights?' · min. '+d.min_nights+' nuit(s)':'')+'</div></div><div class="actions"><button class="btn soft" onclick="editListing(\''+l.id+'\')">Modifier</button><button class="btn soft" onclick="focusCalendar(\''+l.id+'\')">Calendrier</button><button class="btn danger" onclick="archiveListing(\''+l.id+'\')">'+(l.status==='archived'?'Réactiver':'Archiver')+'</button></div></div>'
+  return '<div class="listing"><div><div class="actions" style="margin-bottom:6px"><span class="status s-'+st+'">'+st+'</span><span class="pill">'+esc(d?.max_guests||2)+' voyageurs</span></div><h3>'+esc(l.title)+'</h3><div class="meta">'+esc(l.city)+(l.postal_code?' · '+esc(l.postal_code):'')+' · '+money(l.price)+'/nuit'+(d?.min_nights?' · min. '+d.min_nights+' nuit(s)':'')+'</div></div><div class="actions"><button class="btn soft" onclick="editListing(\''+l.id+'\')">Modifier</button><a class="btn soft" href="photos-vacances.html?listing='+l.id+'">Photos</a><a class="btn soft" href="logement-vacances.html?id='+l.id+'">Voir</a><button class="btn soft" onclick="focusCalendar(\''+l.id+'\')">Calendrier</button><button class="btn danger" onclick="archiveListing(\''+l.id+'\')">'+(l.status==='archived'?'Réactiver':'Archiver')+'</button></div></div>'
 }
 function renderListings(){const html=listings.length?listings.map(listingHtml).join(''):'<div class="empty">Aucun logement pour le moment. Cliquez sur « Nouveau logement ».</div>';$('listingsList').innerHTML=html;$('dashboardListings').innerHTML=listings.length?listings.slice(0,3).map(listingHtml).join(''):'<div class="empty">Ajoutez votre premier logement pour démarrer.</div>';$('mListings').textContent=listings.length;$('mActive').textContent=listings.filter(x=>x.status==='active').length}
 function openListingForm(){resetListingForm();$('listingForm').classList.remove('hidden');$('lTitle').focus()}
