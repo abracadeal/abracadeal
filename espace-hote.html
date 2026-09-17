@@ -56,6 +56,7 @@
     <button class="navbtn" data-view="pricing">Tarifs</button>
     <button class="navbtn" data-view="ical">iCal</button>
     <button class="navbtn" data-view="messages">Messages</button>
+    <button class="navbtn" data-view="reviews">Avis</button>
   </aside>
 
   <main class="main">
@@ -168,6 +169,14 @@
         <div id="messagesList"></div>
       </div>
     </section>
+
+    <section id="view-reviews" class="view hidden">
+      <div class="card">
+        <div class="cardhead"><div><h2>Avis & réputation</h2><div class="sub">Notes reçues comme hôte et avis que vous avez laissés aux voyageurs.</div></div><a id="hostPublicProfile" class="btn soft" href="#">Voir mon profil public</a></div>
+        <div id="reviewSummary" class="grid4" style="margin-bottom:14px"></div>
+        <div id="hostReviews"></div>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -181,7 +190,7 @@ let currentUser=null, profile=null, listings=[], details=new Map();
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
 function msg(t,err=false){const n=$('notice');n.textContent=t;n.className='notice show'+(err?' err':'');window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>{n.classList.remove('show')},5000)}
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));$('view-'+v).classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='calendar')loadCalendar();if(v==='pricing')loadPricing();if(v==='ical')loadFeeds();if(v==='messages')loadMessages()}
+function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));$('view-'+v).classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='calendar')loadCalendar();if(v==='pricing')loadPricing();if(v==='ical')loadFeeds();if(v==='messages')loadMessages();if(v==='reviews')loadHostReviews()}
 window.showView=showView;
 document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
@@ -198,7 +207,8 @@ async function boot(){
   $('hostTypePill').textContent=type==='professionnel'?'Hôte professionnel':'Hôte particulier';
   $('hello').textContent='Bonjour'+(profile?.display_name?' '+profile.display_name:'');
   await loadListings();
-  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false)]);
+  $('hostPublicProfile').href='profil-vacances.html?user='+currentUser.id;
+  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);
 }
 $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){alert(error.message);return}boot()};
 $('logoutTop').onclick=async()=>{await sb.auth.signOut();location.reload()};
@@ -263,8 +273,19 @@ async function loadMessages(render=true){
   let unread=0,items=[];
   for(const c of vacation){const {data:m}=await sb.from('messages').select('id,body,created_at,read_at,sender_id').eq('conversation_id',c.id).order('created_at',{ascending:false}).limit(1);const last=m?.[0];if(last&&last.sender_id!==currentUser.id&&!last.read_at)unread++;items.push({c,last})}
   $('mUnread').textContent=unread;
-  if(render)$('messagesList').innerHTML=items.length?items.map(({c,last})=>'<div class="msgRow '+(last&&last.sender_id!==currentUser.id&&!last.read_at?'unread':'')+'"><b>'+esc(c.listings?.title||'Logement')+'</b><div>'+esc(last?.body||'Nouvelle conversation')+'</div><small>'+(last?new Date(last.created_at).toLocaleString('fr-FR'):'')+'</small></div>').join(''):'<div class="empty">Aucun message voyageur pour le moment.</div>'
+  if(render)$('messagesList').innerHTML=items.length?items.map(({c,last})=>'<div class="msgRow '+(last&&last.sender_id!==currentUser.id&&!last.read_at?'unread':'')+'"><div class="cardhead" style="margin:0"><div><b>'+esc(c.listings?.title||'Logement')+'</b><div>'+esc(last?.body||'Nouvelle conversation')+'</div><small>'+(last?new Date(last.created_at).toLocaleString('fr-FR'):'')+'</small></div><div class="actions"><a class="btn soft" href="profil-vacances.html?user='+c.buyer_id+'">Profil voyageur</a><a class="btn primary" href="gestion-sejour.html?conversation='+c.id+'">Confirmer un séjour</a></div></div></div>').join(''):'<div class="empty">Aucun message voyageur pour le moment.</div>'
 }
+async function loadHostReviews(render=true){
+  const {data,error}=await sb.from('vacation_reviews').select('id,reviewer_id,subject_id,subject_role,rating,comment,subject_reply,created_at,visible_at,reveal_at').eq('subject_id',currentUser.id).eq('subject_role','host').eq('status','active').order('created_at',{ascending:false});
+  if(error)return;
+  const r=data||[],avg=r.length?(r.reduce((s,x)=>s+Number(x.rating),0)/r.length):0;
+  if(render){
+    $('reviewSummary').innerHTML='<div class="metric"><span>Note hôte</span><strong>'+(r.length?'⭐ '+avg.toFixed(1).replace('.',','):'—')+'</strong><div class="kpiNote">'+r.length+' avis</div></div><div class="metric"><span>Avis publics</span><strong>'+r.filter(x=>x.visible_at||new Date(x.reveal_at)<=new Date()).length+'</strong><div class="kpiNote">visibles sur le profil</div></div><div class="metric"><span>Réponses</span><strong>'+r.filter(x=>x.subject_reply).length+'</strong><div class="kpiNote">avis avec réponse</div></div><div class="metric"><span>Profil</span><strong>Public</strong><div class="kpiNote">hôte & voyageur</div></div>';
+    const ids=[...new Set(r.map(x=>x.reviewer_id))];let names={};if(ids.length){const {data:ps}=await sb.from('public_profiles').select('id,display_name').in('id',ids);(ps||[]).forEach(x=>names[x.id]=x.display_name)}
+    $('hostReviews').innerHTML=r.length?r.map(x=>'<div class="msgRow"><div class="cardhead" style="margin:0"><div><b>'+esc(names[x.reviewer_id]||'Voyageur Abracadeal')+' · '+('★'.repeat(Number(x.rating)))+('☆'.repeat(5-Number(x.rating)))+'</b><div>'+esc(x.comment)+'</div><small>'+new Date(x.created_at).toLocaleDateString('fr-FR')+'</small>'+(x.subject_reply?'<div class="reply" style="margin-top:8px"><b>Votre réponse</b><div>'+esc(x.subject_reply)+'</div></div>':'')+'</div><div class="actions">'+((x.visible_at||new Date(x.reveal_at)<=new Date())?'<button class="btn soft" onclick="replyReview(\''+x.id+'\')">Répondre</button>':'<span class="pill">Masqué jusqu’à réciprocité / 14 j</span>')+'</div></div></div>').join(''):'<div class="empty">Aucun avis reçu pour le moment.</div>';
+  }
+}
+window.replyReview=async id=>{const t=prompt('Votre réponse à cet avis :');if(t===null)return;const {error}=await sb.rpc('vacation_reply_review',{p_review_id:id,p_reply:t});if(error){msg(error.message,true);return}msg('Réponse enregistrée.');loadHostReviews()}
 async function loadDashboardCounts(){await loadFeeds(false);await loadMessages(false)}
 
 boot();
