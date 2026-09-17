@@ -142,20 +142,171 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
 .footer{padding:28px 0;background:#150920;color:#bfaec8}.footer-row{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}.footer a{color:#e8dcef}
 @media(max-width:900px){.hero-grid,.owner-grid{grid-template-columns:1fr}.search-grid{grid-template-columns:1fr 1fr}.value-grid{grid-template-columns:1fr 1fr}.steps{grid-template-columns:1fr}.direct-contact{grid-template-columns:1fr}}
 @media(max-width:620px){.container{width:min(100% - 20px,1180px)}.nav{min-height:68px;align-items:flex-start;padding:10px 0}.brand{font-size:1.25rem;gap:6px;flex-direction:column;align-items:flex-start}.brand small{font-size:.62rem}.nav-actions .btn{min-height:40px;padding:0 11px;font-size:.78rem}.hero{padding:44px 0}.hero-grid{gap:26px}h1{font-size:3rem}.search-box{border-radius:20px;padding:14px}.search-grid,.search-row,.value-grid,.calc-fields,.calc-result-top{grid-template-columns:1fr}.section{padding:52px 0}.section-head{align-items:flex-start;flex-direction:column}.price-card,.calc{padding:18px}.price-big{font-size:2.6rem}.direct-price{align-items:flex-start;flex-direction:column}.cta{padding:54px 0}.host-actions,.cta-actions{flex-direction:column}.host-actions .btn,.cta-actions .btn{width:100%}}
+
+body.auth-open{overflow:hidden}
+.auth-hidden{display:none!important}
+.auth-modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:20px}
+.auth-modal.show{display:flex}
+.auth-backdrop{position:absolute;inset:0;background:rgba(17,6,27,.72);backdrop-filter:blur(5px)}
+.auth-card{position:relative;width:min(470px,100%);background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:0 30px 90px rgba(0,0,0,.34)}
+.auth-card h2{margin:0 42px 8px 0;font:700 1.9rem Fraunces,serif}
+.auth-card p{margin:0 0 18px;color:var(--muted);line-height:1.5}
+.auth-close{position:absolute;right:16px;top:16px;width:38px;height:38px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);font-size:1.2rem;font-weight:900;cursor:pointer}
+.auth-switch{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;padding:5px;background:#f6eff9;border-radius:14px}
+.auth-tab{border:0;border-radius:10px;min-height:40px;background:transparent;color:#765f80;font-weight:850;cursor:pointer}
+.auth-tab.active{background:#fff;color:#5b1a77;box-shadow:0 4px 14px rgba(63,23,78,.09)}
+.auth-fields{display:grid;gap:11px}
+.auth-field{display:flex;flex-direction:column;gap:6px}
+.auth-field label{font-size:.78rem;font-weight:850;color:#5f5165}
+.auth-field input{width:100%;height:48px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:0 13px;color:var(--ink);outline:none}
+.auth-field input:focus{border-color:#a957c5;box-shadow:0 0 0 3px rgba(169,87,197,.10)}
+.auth-submit{width:100%;margin-top:15px}
+.auth-message{min-height:20px;margin:11px 0 0!important;font-size:.83rem;font-weight:750}
+.auth-message.error{color:#b42353}
+.auth-message.ok{color:#16794a}
+.auth-connected{padding:14px 0 2px}
+.auth-connected-box{padding:15px;border:1px solid var(--line);border-radius:14px;background:#faf6fc;margin-bottom:14px}
+.btn.auth-secondary{color:#6f218c;background:#fff;border-color:#ddcbe5;box-shadow:none;width:100%}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <header class="topbar">
   <div class="container nav">
-    <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><img class="brand-logo" src="assets/vac-logo.jpg" alt="Logo Abracadeal Vacances"><b>Abracadeal</b><small>Vacances</small></a>
+    <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><img class="brand-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAQDAwMDAgQDAwMEBAQFBgoGBgUF
+BgwICQcKDgwPDg4MDQ0PERYTDxAVEQ0NExoTFRcYGRkZDxIbHRsYHRYYGRj/
+2wBDAQQEBAYFBgsGBgsYEA0QGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgYGBgY
+GBgYGBgYGBgYGBgYGBgYGBgYGBj/wAARCACgAKADASIAAhEBAxEB/8QAHQAA
+AgIDAQEBAAAAAAAAAAAAAQIAAwQGBwUICf/EADsQAAEDAwMCBQEGBAMJAAAA
+AAEAAgMEBREGEiEHMRMiQVFhcQgUFTKBkVJicqEzQrEWI0NUc4LB0fH/xAAa
+AQACAwEBAAAAAAAAAAAAAAABAgADBQQG/8QALhEAAgEDAgUBBwUBAAAAAAAA
+AAECAwQRITEFEkFRYRMiMnGBkdHwBhShseHx/9oADAMBAAIRAxEAPwD4pRUH
+ZHC9EdQPhTBRwoPoiQOEVFESB7hLhOlxyoQg47JgOEEVCBzypwoiAoFAPdAp
+8KFqgcFeEccJsKY4UA0J8IYTEIcKAFyEHdkSgQgDAqZTHwoAgEibGAoomIEd
+0cIBMFCAU+UcZ7KY+EcEB6IhHCmMKYIRMBwoArGj0CZRLIxAGo7CSvYsdhrb
+3VVEFHG57oKWardgZ8kbC4/6L0dK2WG635sNQGmJmHPa5wBcNwGB79/RWRpN
+7HbTtJzxhbmsmnd4QfscGn/Mex+ioe3a7H6rbb9bK63ale3UFJP4W8jbEQzc
+zHl8M4I2gYxgYWrvheIvEx5c7c/P0VEddUV1qDg2mjHI4SlORgJSFDkaEwgm
+Ux8ICgH5UUB2RGVCEwjhEI4RIDCOEcIgJsBwTARwpgogZTJBwDBR2pgPRNtR
+wFIVreVY0YKIapjHKZFsVg7F0X1vZNNVtfFcbTTNd9zlmNW0EyStY0uMTtxI
+w4D0xz3ytGr7n+IanluVmtEFrGXStpaMuc2JoyTjcT2Gfj4C15vjU8hY4Pjf
+jBBBBwR/6K23Q+sbjom8VNxoaChq3z0c9KW1lKycNEkbmZAcDgjP69jwVXKn
+OLlVpZbxtnQ2v306tKFF6KPg2AdQWV9mpLRdaOmrYYmbQ2Zgd3/m7g/RJDon
+TuqjI22zyWitBALZiZKfngZP5mjPrytVobDc7vXskpaR7nyEl+I9jGftx+y6
+9o7Rlzqry6nt0Dp5BC2lzCNwcSRlx/b05W/ZekqTdxFKPVvT+TVsVK6lyV4J
+x8/focAvdnuFgvtTaLnA6Gqp3lj2kf3HuD3B9V5xC6/9ol1th6pxWqilimqL
+fSMpquWI5BlHdpPuAQD+y5CfdYVf0+dum8x6HmOIUYUa86dN5inoVkYS/RWO
+CQhVGeQD1RCCYIECEfhABM3vymSCkQDlOAgO62/TvTPXmqaZtRYtMVtXC7ls
+nkjD/wCne4Z/RSpVp0o81SSS8vBdCm5aRWTU9qYNXuah0fqfSV0Nu1PYbhaa
+rG4Q1kJjJHuM8EfIyF4+zlW02prmi8onI1uKGq0wSsYx8kb2tkG5jnNIDhkj
+I9xkEfoV6OnLXBedW2y0VVQ6mhq6qOCSZo3OY1zgCQPU47D3IXb9U0Wkbx9n
+a6n8OrKG7aaumy3zGlkZE+nl2NfSl7hguY5uQDznceziua4vadCrToy3k/pn
+b6vTx1OyhZyqwlNbI+fw3hNG1m8B+dvrhXeEcdkDEcdl16ZKlBpm5WXSdu1j
+1UpNP6WnqjTVckcUUteGtcPKNxdtJGB5sfAC7p/sbpfTD5aK02tsrKRwgkrK
+qNr5qiYgnAzwxnBPA+F86aYv1TpvUNJeaOodDU0kgliLW5y4dgfg+q+iaLrv
+oa9MM+o7PW26tnwZ5KHbNE9w7ODTgtP6n2W3Z1acKDUX7WPnk9LwlW79qo0m
+ener9adKWWjqr1CZ6iqYZqS2Ujm07Gx8jfI/kgHBAHJOFzDUPX3WP4VNa9NU
+FFpeklG3fQRnxiD3zK7Lhkerdq67916c9XI6a1UF+bDeGxiKlM8JhMrMkhha
+eDgk4LTnnsQuG9YtMX+w3CKG+TeNJTNbRNeGhoa1g8rDj1A/+rwSrurdOlcr
+M85w84x0aWz+O51cRnUlCTpy0XRdjkFSXyVDpJJC97iXOeTkkn3KxiMFZEgw
+SqHcrZy2eKqbiFKeyYpSoc5B2TAIDsiAUUiDYRCgTAfCdIeKNu6e6fbfdUtE
+kLJmwlgZE/8ALJK9+1gPwOXEeu1bJrbXcsGqJ7RYWwzUlC805rKuISvqHtOH
+ODT5Y25Bw1o7DklYHSW801l1nFUVUZkjhnp67wx3eIX7ntHudjnkD+VDqno+
+q0f1SutvkPi0lTK6ut9WzllVSzEvilYfUEOx8EEeixpUY3HEnCusxUU4ro+7
+x1xp9fGmvTm6VsnSeG28vr4OraX1vB1E6G3rRWrA2ZtPSz1NrklJkdb6yJni
+ARPcS4RSsDgWEkAjjjGPnYAOw4DAPK6/pK92S6QV9DBRT0jH0D4qmno2RsnZ
+EWhr5IHHLXuAJB3AHY5x78jOo7P0r0pc2TUkN/vt8hc2Snpbo+OkiheDlriy
+Il0hBwR5sZHIPZc9ne07CdWlOLWuYxxl+ddsZ8nTUtZV4wlDXu+mfuavYtD0
+Fp0vT6u1a+bdNiW3WmPa19QA7yvkLgcNJHDMZLQSSARnqXR6i0Z1M0/ddB66
+vctBLW1YraaaFkTBFOMjfktzznBGeQtCqINZXm9VN6r5qt80rzIXztEhGT7v
+BJXWujtpu8t4Z9+1rX0UQdnbA2Jh/csWLxziUo0fXnL2001h+7joljXy8rPg
+0reyUYOCWjWvnz9tDjXVHpVdemWspbNWStrKU5dS1sY8szfnBO1w9Rn2I4K0
+Mw4Pbhfp1f8AppZNXaTdQXDUNxudPIweJT3GpDmyEcgnYGkEHkEdl8+3b7L2
+mWXJ33evu8MefMyOpp3xtH/UkDcD65P1XTZfq63cErp4l3Wqf0zh+DOjQjV9
+x69Vt/eD5BMByT2C27TfS/Wup4hNbbNLHSfmNXVHwIQPfc7uPkArulzoujPS
+Vo+70Ueo763/AA2GX7wGO9MyFoaP+xgP8y0zWmr7tV2yO4a7q5I4qgb6HS1C
+8wte30fORyGfXLndh6kaC45Kvj9tB4ezfX4Lt5bSXUtjw9RXPVeF+fn9GJpL
+Qtss+raX8W6jWYsilD6mO3NmqXxYP8TWYB/UJPtJa2j1P1EcKGsoKi3NaJIX
+0dQJ9/G3LyACH8flI47+q5XetT3S7AQzTMgpGf4VDSt8KCMfDBwfqck+pXgS
+PJ7laNvZVXWVxcSy0sJds+dDmrXsYwdOknjz+eCmQ8lUlWOKqPZaDRizeRT3
+SpikPdKUjBMOUoynCKCMFY0KsK9g+FbFFiMmknmpauKpppHRTROD2PacFrh2
+IXXrP1KsV70nBpPX9mjrrbAXGmLHGKSic45c6mmAJiBPJicHRk9g1chjasuJ
+mVVcWFO5w5ZUls1o18zut6soabrsde07pmz2LXNo1dpG/C80FHVMmqLdVRth
+qzDn/eNbtJjm8hdwxwd/Kn62WG3QajrfuEjZSx/3imkbyJYneYY+rSCFp+ka
+a1Mgqa2puNbDcGSRilpqeIPZN5gXeKc5A25wWgncAulUVfoy879G6prXQFjG
+Opb23ztppXNy+CTbnLA44D25wc8EcjyfEaN1Sv4XFPNR0084WHjR/CWM6Y1e
+u7Rv2vpuhKD05vms9/H/AA47buompLLSNpaC7VMUI48Jx8RhH9Lshe/bOsF3
+imElQI/E/jiYGf2AXqa26DarsltkvtNBT3C0gBwuFFK2WJwPY5aSud2rSlxu
+laKejppJpScbY2l3P6BaVS74fxeDlLleNHsmvD/0ppUr6E1Gm8nZ6X7Q17p6
+TwWzyPGOxdwP2Xj1vUzW2ragUlLPK1r+MR5H91maf+z7qB1E26X7bbaMDcfG
+aWuI9eHYx9TgfKy7hetI6Jp3UthjhvFe3hpPmpoz/FI7/jEfwN8nuXdlRb/p
+qwUfWoqMn0xr/hsqjVpx57maiuy3Zi+Ba9B2lmoL6G3K+VDd9DSSnIPp4rh3
+EYPr/mIw3jLhye83SuvF1nuVyqX1FVO7dJI/1P8AoABwAOAAAFm3m63C83We
+5XOqkqqqd26SWQ5Lj/4AHAA4AAA4XiTHK27PhsbfM3rJ9fHZdkeevrp1XiOk
+VsvzqYkh8yoceFbIcrHeuxoxZsQlIUxSZVbKGwFIUxSqsQZqcKpp4ThyZELm
+g+yyI2klYjZFa2cj1V0ZJblsWj04onEjhehDTvJHC8FtZK08OwrRcKn0mcF0
+RrwXQ6oVII2ynoZSRhh/RbFZdM3e61jaW12+pq5yMiOniL3YHrgDt8rmYuFZ
+6VcrfoV6Vn1ZqiwVM09k1NcqB88RhmMExb4jCc7T7jICruLtqD9KPtdM7HfS
+u6cd4s63f5KrQOkqyxi6Nnu9za2OehpX+IyliyHHe9px4juBtaTgDk84B6ET
+Pi6pUzqllLR0sr9r6iWJ7/DB4yG7x/crkEOo7zFK6X71BM9xyXz07XH917lj
+6jaqslSJqGrt8bwc5dRMfz+q8fxPhtxc29SKUXOe71XwWz0RpUOJUebMs/x9
+z6X6x9K9bSagmudNcX32mnxIyKGQnAwBlkeTlp74HIOePVfPtysV0pqh8dRR
+TxSNJDmSMLSD7EFe/V/aP6s1dnNvdq/wYj/y9HDGR9CG8Lndw1ZqC53Ke4XL
+UNxrKqd26SaeUuc84xk/sFocGne29JUrhR9lYWM/YErylKOKmr8F1TRVEZO6
+IheVNDIM+UhSS81TvzVMj/6isZ9yld+Zy3VcZ3Rl1p0X7rKZGOB7FY7grJKp
+zu5VDpcpXNMzZ8vQRyQnBTOekJVTZQwEoEqE5QJSMUA7Jglb2TIogQjlBQIk
+DkohyUqAFHIclof6ZRDz7qpEHhQZSLg8oiT5VIJRB+UMDqZf4nHdKZPlVZKB
+KmAuY5fz3SlyUlBQRzCXFDJQyhlQRsb1So5Q9UoCcJSUSEpHCgBh2RQCKKCT
+siiiBlEgqKYNTbUyQUhMJgPhOGeqbYjgZRKsJtoVmxTZwjgPKV4SkK4sKBYp
+gjRQQgrixLtStC4K8IYVhCUhDAGIh8pz2S4S4AApSeESgUADgJsZUATgcpkh
+kgAJw3hEDn3VjW/CdIZIUNynaxWBvKsDE6iWJFQYm2K4MTCPPZOojKJQI0fD
+WSI+FPDKKiNymLs4QLFl+H7hKYyg4AcDDLEpasos+FWWJXEVxMUtKQj0WS5i
+qc1K0VtFJCUqwjhIQkaKysjlKeCrCFW7ABJSNEP/2Q==
+" alt="Logo Abracadeal Vacances"><b>Abracadeal</b><small>Vacances</small></a>
     <div class="nav-actions">
       <a class="btn premium" href="index.html">Abracadeal</a>
-      <a class="btn ghost" href="index.html#accountModal">Connexion</a>
-      <a class="btn primary" id="hostSignupCta" href="index.html#accountModal">S’inscrire</a>
+      <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
+      <a class="btn primary" id="hostSignupCta" href="#inscription-vacances">S’inscrire</a>
     </div>
   </div>
 </header>
+
+<div class="auth-modal" id="vacAuthModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="vacAuthTitle">
+  <div class="auth-backdrop" data-close-auth></div>
+  <div class="auth-card">
+    <button class="auth-close" type="button" aria-label="Fermer" data-close-auth>×</button>
+    <div id="authGuestView">
+      <h2 id="vacAuthTitle">Connexion</h2>
+      <p id="vacAuthIntro">Connectez-vous sans quitter Abracadeal Vacances.</p>
+      <div class="auth-switch">
+        <button class="auth-tab active" type="button" data-auth-mode="login">Connexion</button>
+        <button class="auth-tab" type="button" data-auth-mode="signup">S’inscrire</button>
+      </div>
+      <div class="auth-fields">
+        <div class="auth-field auth-hidden" id="authNameWrap">
+          <label for="vacAuthName">Nom / prénom</label>
+          <input id="vacAuthName" type="text" autocomplete="name" placeholder="Votre nom">
+        </div>
+        <div class="auth-field">
+          <label for="vacAuthEmail">E-mail</label>
+          <input id="vacAuthEmail" type="email" autocomplete="email" placeholder="vous@exemple.fr">
+        </div>
+        <div class="auth-field">
+          <label for="vacAuthPassword">Mot de passe</label>
+          <input id="vacAuthPassword" type="password" minlength="6" autocomplete="current-password" placeholder="6 caractères minimum">
+        </div>
+      </div>
+      <button class="btn primary auth-submit" id="vacAuthSubmit" type="button">Se connecter</button>
+      <p class="auth-message" id="vacAuthMessage" aria-live="polite"></p>
+    </div>
+    <div class="auth-connected auth-hidden" id="authConnectedView">
+      <h2>Mon compte</h2>
+      <div class="auth-connected-box">Connecté avec <strong id="authConnectedEmail"></strong></div>
+      <button class="btn auth-secondary" id="vacLogoutBtn" type="button">Se déconnecter</button>
+    </div>
+  </div>
+</div>
 
 <main>
 <section class="hero">
@@ -304,30 +455,147 @@ h1 span{background:linear-gradient(90deg,#fff,#f6c8ff 50%,#ff5fb7);-webkit-backg
     location.href='recherche-vacances.html?'+q.toString();
   });
 
+  const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+  const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+  const sbVac=window.supabase?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
   const hostSignupCta=root.getElementById('hostSignupCta');
-  if(hostSignupCta && window.supabase){
+  const vacLoginCta=root.getElementById('vacLoginCta');
+  const authModal=root.getElementById('vacAuthModal');
+  const authGuestView=root.getElementById('authGuestView');
+  const authConnectedView=root.getElementById('authConnectedView');
+  const authConnectedEmail=root.getElementById('authConnectedEmail');
+  const authTitle=root.getElementById('vacAuthTitle');
+  const authIntro=root.getElementById('vacAuthIntro');
+  const authNameWrap=root.getElementById('authNameWrap');
+  const authName=root.getElementById('vacAuthName');
+  const authEmail=root.getElementById('vacAuthEmail');
+  const authPassword=root.getElementById('vacAuthPassword');
+  const authSubmit=root.getElementById('vacAuthSubmit');
+  const authMessage=root.getElementById('vacAuthMessage');
+  const logoutBtn=root.getElementById('vacLogoutBtn');
+  let authMode='login';
+  let currentAuthUser=null;
+
+  function setAuthMessage(message,type=''){
+    authMessage.textContent=message||'';
+    authMessage.className='auth-message'+(type?' '+type:'');
+  }
+  function setAuthMode(mode){
+    authMode=mode==='signup'?'signup':'login';
+    root.querySelectorAll('[data-auth-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.authMode===authMode));
+    authNameWrap.classList.toggle('auth-hidden',authMode!=='signup');
+    authTitle.textContent=authMode==='signup'?'Créer votre compte':'Connexion';
+    authIntro.textContent=authMode==='signup'
+      ?'Inscrivez-vous sans quitter Abracadeal Vacances.'
+      :'Connectez-vous sans quitter Abracadeal Vacances.';
+    authSubmit.textContent=authMode==='signup'?'S’inscrire':'Se connecter';
+    authPassword.autocomplete=authMode==='signup'?'new-password':'current-password';
+    setAuthMessage('');
+  }
+  function openAuth(mode='login'){
+    if(currentAuthUser){
+      authGuestView.classList.add('auth-hidden');
+      authConnectedView.classList.remove('auth-hidden');
+      authConnectedEmail.textContent=currentAuthUser.email||'votre compte Abracadeal';
+    }else{
+      authConnectedView.classList.add('auth-hidden');
+      authGuestView.classList.remove('auth-hidden');
+      setAuthMode(mode);
+      setTimeout(()=>authEmail.focus(),60);
+    }
+    authModal.classList.add('show');
+    authModal.setAttribute('aria-hidden','false');
+    document.body.classList.add('auth-open');
+  }
+  function closeAuth(){
+    authModal.classList.remove('show');
+    authModal.setAttribute('aria-hidden','true');
+    document.body.classList.remove('auth-open');
+    setAuthMessage('');
+  }
+  root.querySelectorAll('[data-close-auth]').forEach(el=>el.addEventListener('click',closeAuth));
+  root.querySelectorAll('[data-auth-mode]').forEach(el=>el.addEventListener('click',()=>setAuthMode(el.dataset.authMode)));
+  root.addEventListener('keydown',e=>{if(e.key==='Escape'&&authModal.classList.contains('show'))closeAuth()});
+
+  vacLoginCta?.addEventListener('click',e=>{e.preventDefault();openAuth('login')});
+  hostSignupCta?.addEventListener('click',e=>{
+    if(hostSignupCta.dataset.authAction==='signup'){
+      e.preventDefault();
+      openAuth('signup');
+    }
+  });
+
+  authSubmit?.addEventListener('click',async ()=>{
+    if(!sbVac)return;
+    const email=authEmail.value.trim();
+    const password=authPassword.value;
+    if(!email||!password){setAuthMessage('Renseignez votre e-mail et votre mot de passe.','error');return}
+    if(password.length<6){setAuthMessage('Le mot de passe doit contenir au moins 6 caractères.','error');return}
+    authSubmit.disabled=true;
     try{
-      const sbVac=supabase.createClient(
-        'https://jplzvxmpbpjssyinozap.supabase.co',
-        'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF'
-      );
-      sbVac.auth.getSession().then(async ({data})=>{
-        const user=data?.session?.user||null;
-        if(!user){
-          hostSignupCta.textContent='S’inscrire';
-          hostSignupCta.href='espace-hote.html?signup=1';
-          return;
+      if(authMode==='login'){
+        const {error}=await sbVac.auth.signInWithPassword({email,password});
+        if(error){setAuthMessage(error.message,'error');return}
+        await refreshVacationAuth();
+        closeAuth();
+        state.textContent='Vous êtes connecté à Abracadeal Vacances.';
+        state.classList.add('show');
+      }else{
+        const displayName=authName.value.trim();
+        if(!displayName){setAuthMessage('Indiquez votre nom ou prénom.','error');return}
+        const {data,error}=await sbVac.auth.signUp({
+          email,
+          password,
+          options:{data:{display_name:displayName,account_type:'particulier'}}
+        });
+        if(error){setAuthMessage(error.message,'error');return}
+        if(data?.session){
+          await refreshVacationAuth();
+          closeAuth();
+          state.textContent='Votre compte est créé. Vous restez sur Abracadeal Vacances.';
+          state.classList.add('show');
+        }else{
+          setAuthMessage('Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.','ok');
         }
-        const {data:hostProfile}=await sbVac
-          .from('vacation_hosts')
-          .select('user_id,status')
-          .eq('user_id',user.id)
-          .maybeSingle();
-        const isHost=!!hostProfile && hostProfile.status==='active';
-        hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
-        hostSignupCta.href='espace-hote.html';
-      });
-    }catch(_){}
+      }
+    }finally{
+      authSubmit.disabled=false;
+    }
+  });
+
+  logoutBtn?.addEventListener('click',async ()=>{
+    if(!sbVac)return;
+    await sbVac.auth.signOut({scope:'local'});
+    closeAuth();
+    await refreshVacationAuth();
+  });
+
+  async function refreshVacationAuth(){
+    if(!sbVac)return;
+    const {data}=await sbVac.auth.getSession();
+    const user=data?.session?.user||null;
+    currentAuthUser=user;
+    vacLoginCta.textContent=user?'Mon compte':'Connexion';
+    if(!user){
+      hostSignupCta.textContent='S’inscrire';
+      hostSignupCta.href='#inscription-vacances';
+      hostSignupCta.dataset.authAction='signup';
+      return;
+    }
+    hostSignupCta.dataset.authAction='';
+    const {data:hostProfile}=await sbVac
+      .from('vacation_hosts')
+      .select('user_id,status')
+      .eq('user_id',user.id)
+      .maybeSingle();
+    const isHost=!!hostProfile && hostProfile.status==='active';
+    hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
+    hostSignupCta.href='espace-hote.html';
+  }
+
+  if(sbVac){
+    refreshVacationAuth();
+    sbVac.auth.onAuthStateChange(()=>{setTimeout(refreshVacationAuth,0)});
   }
 
 })();
