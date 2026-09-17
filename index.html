@@ -2883,7 +2883,7 @@ header .publish-trigger:hover{
 
 <style id="abraca-home-ux-patch">
 .abraca-account-menu{position:relative;display:inline-block}
-.abraca-account-menu>button{min-height:48px;padding:0 20px;border-radius:16px;border:1px solid rgba(255,255,255,.18);background:rgba(255,255,255,.06);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+.abraca-account-menu>button{min-height:48px;padding:0 20px;border-radius:16px;border:1px solid rgba(255,255,255,.24);background:linear-gradient(135deg,#6f218c 0%,#b72fb0 55%,#ec3fa4 100%);color:#fff;font:inherit;font-weight:900;cursor:pointer;box-shadow:0 10px 24px rgba(181,47,176,.28),inset 0 1px 0 rgba(255,255,255,.16)}
 .abraca-account-dropdown{position:absolute;right:0;top:calc(100% + 8px);min-width:190px;padding:8px;background:#251033;border:1px solid rgba(255,255,255,.14);border-radius:14px;box-shadow:0 18px 35px rgba(0,0,0,.28);z-index:9999;display:none}
 .abraca-account-menu.open .abraca-account-dropdown{display:grid;gap:6px}
 .abraca-account-dropdown button{width:100%;border:0;border-radius:10px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.08);color:#fff;font-weight:750;cursor:pointer}
@@ -8210,15 +8210,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     parent.insertBefore(menu,create); create.style.display='none'; login.style.display='none';
   }
 
-  // Make Vacances immediately visible in the main top navigation.
+  // Normalize the top navigation: one Devenir hôte CTA only.
   const publish=exact('Publier une annonce').find(visible);
-  if(publish&&publish.parentElement&&!document.querySelector('.abraca-vacances-top')){
-    const a=document.createElement('a'); a.href='vacances.html'; a.className='abraca-vacances-top'; a.textContent='🪔 Vacances';
-    publish.parentElement.insertBefore(a,publish);
+  if(publish&&publish.parentElement){
+    const parent=publish.parentElement;
+    [...parent.querySelectorAll('a,button')].forEach(el=>{
+      if(el===publish) return;
+      const t=(el.textContent||'').trim().toLowerCase();
+      if(t.includes('vacances')||t==='devenir hôte'||t==='devenir hote'||el.classList.contains('abraca-vacances-top')){
+        el.remove();
+      }
+    });
+    const a=document.createElement('a');
+    a.href='espace-hote.html';
+    a.className='abraca-vacances-top';
+    a.textContent='Devenir hôte';
+    const account=parent.querySelector('.abraca-account-menu');
+    if(account) parent.insertBefore(a,account);
+    else parent.insertBefore(a,publish);
   }
 
   // Hide the four large explanatory tiles in the founder banner.
-  ['1re année','2e année','Ensuite','Sans engagement','Sans engagement'].forEach(label=>{
+  ['1re année','2e année','Ensuite','Sans engagement','Sans engagement automatique'].forEach(label=>{
     for(const el of exact(label)){
       let box=el;
       for(let i=0;i<4&&box.parentElement;i++){
@@ -8233,7 +8246,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Keep only the "12 mois offerts" small founder pill in the registration card.
   for(const el of all){
     const t=(el.textContent||'').trim();
-    if((t.includes('-10 % la 2e année')||t.includes('–10 % la 2e année')||t.includes('Puis tarif public en vigueur')||t.includes('Sans engagement'))&&t.length<90){
+    if((t.includes('-10 % la 2e année')||t.includes('–10 % la 2e année')||t.includes('Puis tarif public en vigueur')||t.includes('Sans engagement automatique'))&&t.length<90){
       el.style.display='none';
     }
   }
