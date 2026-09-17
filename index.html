@@ -8218,7 +8218,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   // Hide the four large explanatory tiles in the founder banner.
-  ['1re année','2e année','Ensuite','Sans engagement','Sans engagement automatique'].forEach(label=>{
+  ['1re année','2e année','Ensuite','Sans engagement','Sans engagement'].forEach(label=>{
     for(const el of exact(label)){
       let box=el;
       for(let i=0;i<4&&box.parentElement;i++){
@@ -8233,7 +8233,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Keep only the "12 mois offerts" small founder pill in the registration card.
   for(const el of all){
     const t=(el.textContent||'').trim();
-    if((t.includes('-10 % la 2e année')||t.includes('–10 % la 2e année')||t.includes('Puis tarif public en vigueur')||t.includes('Sans engagement automatique'))&&t.length<90){
+    if((t.includes('-10 % la 2e année')||t.includes('–10 % la 2e année')||t.includes('Puis tarif public en vigueur')||t.includes('Sans engagement'))&&t.length<90){
       el.style.display='none';
     }
   }
