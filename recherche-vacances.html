@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Rechercher un séjour — Abracadeal Vacances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#faf7fb;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#6d2189;--pink:#e947a6;--shadow:0 16px 42px rgba(47,17,63,.09)}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,input,select{font:inherit}.top{background:#1c0b2b;color:#fff;position:sticky;top:0;z-index:20}.topin{width:min(1180px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900}.brand span{color:#ff67bd}.wrap{width:min(1180px,calc(100% - 28px));margin:22px auto 60px}.search{background:#fff;border:1px solid var(--line);border-radius:20px;padding:16px;box-shadow:var(--shadow);display:grid;grid-template-columns:1.4fr 1fr 1fr .8fr auto;gap:10px;align-items:end}.field{display:flex;flex-direction:column;gap:6px}.field label{font-size:.75rem;font-weight:850;color:#66566e}.field input,.field select{height:46px;border:1px solid var(--line);border-radius:12px;padding:0 12px;background:#fff}.btn{border:0;border-radius:12px;min-height:46px;padding:0 16px;font-weight:850;cursor:pointer}.primary{background:linear-gradient(135deg,#842aaa,var(--pink));color:#fff}.soft{background:#f3eaf6;color:var(--p)}.head{display:flex;justify-content:space-between;gap:16px;align-items:end;margin:28px 0 14px}.head h1{margin:0;font-size:clamp(2rem,4vw,3.1rem)}.muted{color:var(--muted)}.results{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:#fff;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow)}.photo{height:210px;background:#eee;display:grid;place-items:center;color:var(--muted)}.photo img{width:100%;height:100%;object-fit:cover}.body{padding:15px}.body h2{font-size:1.08rem;margin:0 0 7px}.meta{font-size:.85rem;color:var(--muted);line-height:1.5}.price{font-size:1.22rem;font-weight:900;margin-top:10px}.host{margin-top:8px;font-size:.82rem;color:#5f4a68}.empty{background:#fff;border:1px dashed #d7c7df;border-radius:18px;padding:35px;text-align:center;color:var(--muted);grid-column:1/-1}
+@media(max-width:950px){.search{grid-template-columns:1fr 1fr}.results{grid-template-columns:1fr 1fr}.search .go{grid-column:1/-1}.go .btn{width:100%}}
+@media(max-width:620px){.search,.results{grid-template-columns:1fr}.head{align-items:flex-start;flex-direction:column}.photo{height:230px}}
+</style></head>
+<body>
+<header class="top"><div class="topin"><a class="brand" href="vacances.html">Abracadeal <span>Vacances</span></a><div><a href="espace-voyageur.html">Espace Voyageur</a> · <a href="espace-hote.html">Espace Hôte</a></div></div></header>
+<main class="wrap">
+<form id="form" class="search">
+  <div class="field"><label>Destination</label><input id="dest" placeholder="Cannes, Nice, Paris…"></div>
+  <div class="field"><label>Arrivée</label><input id="start" type="date"></div>
+  <div class="field"><label>Départ</label><input id="end" type="date"></div>
+  <div class="field"><label>Voyageurs</label><select id="guests"><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option><option value="11">11</option><option value="12">12</option></select></div>
+  <div class="go"><button class="btn primary" type="submit">Rechercher</button></div>
+</form>
+<div class="head"><div><h1>Logements disponibles</h1><div id="subtitle" class="muted"></div></div><a class="btn soft" href="vacances.html">Retour Vacances</a></div>
+<div id="results" class="results"></div>
+</main>
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co',SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+function paramsToForm(){const q=new URLSearchParams(location.search);$('dest').value=q.get('destination')||'';$('start').value=q.get('arrival')||'';$('end').value=q.get('departure')||'';$('guests').value=q.get('guests')||'2'}
+async function run(){
+ const d=$('dest').value.trim(),s=$('start').value||null,e=$('end').value||null,g=Number($('guests').value)||1;
+ if(s&&e&&e<=s){$('results').innerHTML='<div class="empty">La date de départ doit être après la date d’arrivée.</div>';return}
+ const {data,error}=await sb.rpc('search_vacation_listings',{p_destination:d||null,p_starts_on:s,p_ends_on:e,p_guests:g});
+ if(error){$('results').innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}
+ $('subtitle').textContent=(data||[]).length+' logement(s)'+(d?' à '+d:'')+(s&&e?' pour vos dates':'');
+ $('results').innerHTML=(data||[]).length?(data||[]).map(x=>{
+   const url=x.photo_path?sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl:null;
+   const rating=x.host_rating?'⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis':'Nouvel hôte';
+   return '<a class="card" href="logement-vacances.html?id='+x.id+'"><div class="photo">'+(url?'<img src="'+url+'" alt="">':'Aucune photo')+'</div><div class="body"><h2>'+esc(x.title)+'</h2><div class="meta">'+esc(x.city)+' · '+x.max_guests+' voyageur(s) · '+x.bedrooms+' chambre(s)</div><div class="price">'+money(x.nightly_price)+' / nuit</div><div class="host">'+esc(x.host_name||'Hôte Abracadeal')+' · '+rating+'</div></div></a>'
+ }).join(''):'<div class="empty">Aucun logement disponible avec ces critères.</div>';
+}
+$('form').onsubmit=e=>{e.preventDefault();const q=new URLSearchParams({destination:$('dest').value.trim(),arrival:$('start').value,departure:$('end').value,guests:$('guests').value});history.replaceState(null,'','?'+q.toString());run()};
+paramsToForm();run();
+</script></body></html>
