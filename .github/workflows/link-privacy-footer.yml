@@ -1,0 +1,37 @@
+name: Link privacy footer
+
+on:
+  push:
+    branches:
+      - privacy-footer-link
+
+permissions:
+  contents: write
+
+jobs:
+  patch-footer:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Link privacy page in footer
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('index.html')
+          text = p.read_text(encoding='utf-8')
+          old = '<a href="#privacyModal" data-info-modal="privacyModal">Confidentialité</a>'
+          new = '<a href="confidentialite.html">Confidentialité</a>'
+          if old not in text:
+              raise SystemExit('Privacy footer link not found exactly once')
+          if text.count(old) != 1:
+              raise SystemExit(f'Expected 1 privacy footer link, found {text.count(old)}')
+          p.write_text(text.replace(old, new, 1), encoding='utf-8')
+          Path('.github/workflows/link-privacy-footer.yml').unlink()
+          PY
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html .github/workflows/link-privacy-footer.yml
+          git commit -m "Link privacy policy from footer"
+          git push origin HEAD:privacy-footer-link
