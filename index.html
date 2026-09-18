@@ -3509,9 +3509,9 @@ header #flowErrorsBtn{
         <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
       </div>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Import"><span class="header-stock-label">Import</span></button>
-      <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer" onclick="window.toggleAdminModeration?.()"><span class="header-moderation-label">Modérer</span></button>
-      <button class="btn header-flow-errors-btn hidden" id="flowErrorsBtn" type="button" aria-label="Flux" onclick="window.openAdminFlowErrors?.()"><span class="header-flow-errors-label">Flux</span><span class="header-flow-errors-badge hidden" id="flowErrorsBadge">0</span></button>
-      <button class="btn header-messages-btn hidden" id="headerMessagesBtn" type="button" aria-label="Messages" onclick="window.openMessages?.()"><span class="header-message-label">Messages</span><span class="header-message-badge hidden" id="headerMessagesUnread">0</span></button>
+      <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer"><span class="header-moderation-label">Modérer</span></button>
+      <button class="btn header-flow-errors-btn hidden" id="flowErrorsBtn" type="button" aria-label="Flux"><span class="header-flow-errors-label">Flux</span><span class="header-flow-errors-badge hidden" id="flowErrorsBadge">0</span></button>
+      <button class="btn header-messages-btn hidden" id="headerMessagesBtn" type="button" aria-label="Messages"><span class="header-message-label">Messages</span><span class="header-message-badge hidden" id="headerMessagesUnread">0</span></button>
       <button class="btn ghost hidden" id="headerLogoutBtn" type="button" aria-label="Se déconnecter">Se déconnecter</button>
       <a class="btn primary publish-trigger" href="#publishModal">Publier une annonce</a>
     </div>
@@ -4661,12 +4661,32 @@ const recoveryArrivalError = recoveryArrival.has('error') || recoveryArrival.has
 const recoveryArrivalExpected = recoveryArrival.get('type') === 'recovery';
 const SUPABASE_URL = 'https://jplzvxmpbpjssyinozap.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const SUPABASE_AUTH_STORAGE_KEY='sb-jplzvxmpbpjssyinozap-auth-token';
+const abracaAuthStorage={
+  getItem(key){
+    try{
+      const local=window.localStorage.getItem(key);
+      if(local)return local;
+    }catch(_){}
+    try{return window.sessionStorage.getItem(key)}catch(_){return null}
+  },
+  setItem(key,value){
+    try{window.localStorage.setItem(key,value)}catch(_){}
+    try{window.sessionStorage.setItem(key,value)}catch(_){}
+  },
+  removeItem(key){
+    try{window.localStorage.removeItem(key)}catch(_){}
+    try{window.sessionStorage.removeItem(key)}catch(_){}
+  }
+};
 const sb = (window.supabase && window.supabase.createClient)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,{
       auth:{
         persistSession:true,
         autoRefreshToken:true,
-        detectSessionInUrl:true
+        detectSessionInUrl:true,
+        storage:abracaAuthStorage,
+        storageKey:SUPABASE_AUTH_STORAGE_KEY
       }
     })
   : null;
@@ -4832,16 +4852,55 @@ async function applyAuthSession(session,{preserveEditing=true}={}){
   return !!currentUser;
 }
 
+function readStoredAuthSession(){
+  try{
+    const raw=abracaAuthStorage.getItem(SUPABASE_AUTH_STORAGE_KEY);
+    if(!raw)return null;
+    const parsed=JSON.parse(raw);
+    const session=parsed?.currentSession||parsed?.session||parsed;
+    return session?.access_token&&session?.refresh_token?session:null;
+  }catch(_){
+    return null;
+  }
+}
+
 async function refreshAuth({preserveEditing=true}={}){
   if(!sb){
     currentUser=null;
     currentProfile=null;
     try{updateAuthUI();}catch(error){console.error('Interface compte indisponible',error);}
-    return;
+    return false;
   }
-  const {data:{session},error:sessionError}=await sb.auth.getSession();
-  if(sessionError)console.warn('Session Supabase indisponible',sessionError);
+
+  let session=null;
+  let sessionError=null;
+  try{
+    const result=await sb.auth.getSession();
+    session=result.data?.session||null;
+    sessionError=result.error||null;
+  }catch(error){
+    sessionError=error;
+  }
+
+  if(!session){
+    const stored=readStoredAuthSession();
+    if(stored){
+      try{
+        const restored=await sb.auth.setSession({
+          access_token:stored.access_token,
+          refresh_token:stored.refresh_token
+        });
+        if(!restored.error)session=restored.data?.session||null;
+        else sessionError=restored.error;
+      }catch(error){
+        sessionError=error;
+      }
+    }
+  }
+
+  if(sessionError&&!session)console.warn('Session Supabase indisponible',sessionError);
   await applyAuthSession(session,{preserveEditing});
+  return !!session;
 }
 // Données déclaratives : ne jamais utiliser user_metadata pour accorder un statut vérifié.
 function syncCompanyFields(prefix){
@@ -8939,6 +8998,25 @@ window.toggleAdminModeration=async()=>{
   }
 };
 
+function bindAdminHeaderActions(){
+  const actions=[
+    ['moderationBtn',()=>window.toggleAdminModeration?.()],
+    ['headerMessagesBtn',()=>window.openMessages?.()],
+    ['flowErrorsBtn',()=>window.openAdminFlowErrors?.()]
+  ];
+  for(const [id,action] of actions){
+    const btn=document.getElementById(id);
+    if(!btn||btn.dataset.adminBound==='1')continue;
+    btn.dataset.adminBound='1';
+    btn.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      action();
+    },{passive:false});
+  }
+}
+bindAdminHeaderActions();
+
 // Password recovery: isolated from catalogue and account editing.
 const passwordRecovery = (()=>{
   const redirectTo='https://abracadeal.fr/';
@@ -9051,7 +9129,8 @@ if(sb){
     setTimeout(async()=>{
       try{
         if(event==='INITIAL_SESSION'){
-          await applyAuthSession(session,{preserveEditing:false});
+          if(session)await applyAuthSession(session,{preserveEditing:false});
+          else if(!currentUser)await refreshAuth({preserveEditing:false});
         }else{
           await refreshAuth();
         }
@@ -9083,6 +9162,24 @@ document.addEventListener('visibilitychange',()=>{
 });
 window.addEventListener('focus',()=>{
   if(currentUser) refreshUnreadMessages();
+});
+
+// Safari/iPhone peut restaurer une page depuis son cache mémoire.
+// On resynchronise toujours la session au retour sur la page.
+window.addEventListener('pageshow',()=>{
+  if(!sb)return;
+  setTimeout(async()=>{
+    try{
+      const wasLoggedIn=!!currentUser;
+      const restored=await refreshAuth({preserveEditing:false});
+      if(restored||wasLoggedIn){
+        try{await loadFavorites();}catch(_){}
+        try{await loadAds();}catch(_){}
+      }
+    }catch(error){
+      console.error('Restauration de session après affichage impossible',error);
+    }
+  },0);
 });
 </script>
 
