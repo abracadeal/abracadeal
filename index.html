@@ -2918,6 +2918,62 @@ header .publish-trigger:hover{
   .banner{height:130px!important;max-height:130px!important}
             .banner-frame{max-height:130px!important}
 }
+</style><style id="abraca-mobile-floating-actions-fix">
+@media (max-width:760px){
+  .abraca-mobile-floating-actions{
+    position:sticky!important;
+    top:0!important;
+    z-index:10000!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10px!important;
+    width:100%!important;
+    padding:10px 12px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    background:rgba(36,15,57,.96)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    backdrop-filter:blur(14px)!important;
+    box-shadow:0 8px 22px rgba(24,8,40,.16)!important;
+  }
+  .abraca-mobile-floating-actions .abraca-account-menu,
+  .abraca-mobile-floating-actions .abraca-publish-top{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    float:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:46px!important;
+    min-height:46px!important;
+    margin:0!important;
+    box-sizing:border-box!important;
+    justify-self:stretch!important;
+    align-self:stretch!important;
+  }
+  .abraca-mobile-floating-actions .abraca-account-trigger,
+  .abraca-mobile-floating-actions .abraca-account-menu>button,
+  .abraca-mobile-floating-actions .abraca-publish-top{
+    width:100%!important;
+    height:46px!important;
+    min-height:46px!important;
+    margin:0!important;
+    padding:0 10px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    box-sizing:border-box!important;
+    border-radius:14px!important;
+    font-size:15px!important;
+    line-height:1!important;
+  }
+  .abraca-mobile-floating-actions .abraca-account-dropdown{
+    top:calc(100% + 8px)!important;
+    left:0!important;
+    right:auto!important;
+  }
+}
 </style></head>
 <body>
 
@@ -8334,6 +8390,32 @@ document.addEventListener('DOMContentLoaded',()=>{
       });
     }
   });
+});
+</script><script id="abraca-mobile-floating-actions-script">
+document.addEventListener('DOMContentLoaded',()=>{
+  if(window.innerWidth>760) return;
+  const place=()=>{
+    const account=document.querySelector('.abraca-account-menu');
+    const publish=document.querySelector('.abraca-publish-top') ||
+      [...document.querySelectorAll('a,button')].find(el=>/^Publier(?: une annonce)?$/i.test((el.textContent||'').trim()));
+    if(!account || !publish) return false;
+    let bar=document.querySelector('.abraca-mobile-floating-actions');
+    if(!bar){
+      bar=document.createElement('div');
+      bar.className='abraca-mobile-floating-actions';
+      document.body.insertBefore(bar,document.body.firstChild);
+    }
+    if(account.parentElement!==bar) bar.appendChild(account);
+    if(publish.parentElement!==bar) bar.appendChild(publish);
+    return true;
+  };
+  if(!place()){
+    let tries=0;
+    const t=setInterval(()=>{
+      tries++;
+      if(place()||tries>20) clearInterval(t);
+    },100);
+  }
 });
 </script></body>
 </html>
