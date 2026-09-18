@@ -4608,7 +4608,19 @@ async function loadFounderOfferCounter(){
 function openModal(id){
   const el=document.getElementById(id);
   if(!el) return;
-  if(id==='accountModal'){professionalSignupViewerId=null;$('#loggedOutAccount').classList.toggle('hidden',!!currentUser);$('#loggedInAccount').classList.toggle('hidden',!currentUser);setProfileEditing(false);renderCompanyAccount();syncSignupCompany();}
+  if(id==='accountModal'){
+    professionalSignupViewerId=null;
+    $('#loggedOutAccount').classList.toggle('hidden',!!currentUser);
+    $('#loggedInAccount').classList.toggle('hidden',!currentUser);
+    setProfileEditing(false);
+    renderCompanyAccount();
+    syncSignupCompany();
+    if(currentProfile?.is_admin){
+      const panel=document.getElementById('adminStatsPanel');
+      panel?.classList.remove('hidden');
+      setTimeout(()=>window.loadAdminDashboardStats?.(),0);
+    }
+  }
   if(location.hash==='#'+id){
     history.replaceState(null,'',location.pathname+location.search);
   }
@@ -4821,7 +4833,14 @@ function updateAuthUI(preserveEditing=false){
     if($('#profilePhone')) $('#profilePhone').value=currentProfile?.phone||'';
     if($('#moderationBtn')) $('#moderationBtn').classList.toggle('hidden',!currentProfile?.is_admin);
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.toggle('hidden',!currentProfile?.is_admin);
-    if(currentProfile?.is_admin){ setTimeout(refreshModerationCount,0); setTimeout(refreshFlowErrorsCount,0); }
+    if(currentProfile?.is_admin){
+      setTimeout(refreshModerationCount,0);
+      setTimeout(refreshFlowErrorsCount,0);
+      document.getElementById('adminStatsPanel')?.classList.remove('hidden');
+      setTimeout(()=>window.loadAdminDashboardStats?.(),0);
+    }else{
+      document.getElementById('adminStatsPanel')?.classList.add('hidden');
+    }
     if($('#headerMessagesBtn')) $('#headerMessagesBtn').classList.remove('hidden');
     const isProAccount=currentProfile?.account_type==='professionnel';
     if($('#proImportBtn')) $('#proImportBtn').classList.toggle('hidden',!isProAccount);
@@ -4838,6 +4857,7 @@ function updateAuthUI(preserveEditing=false){
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
+    document.getElementById('adminStatsPanel')?.classList.add('hidden');
     if($('#flowErrorsBadge')) $('#flowErrorsBadge').classList.add('hidden');
     if($('#headerMessagesBtn')) $('#headerMessagesBtn').classList.add('hidden');
     if($('#headerMessagesUnread')) $('#headerMessagesUnread').classList.add('hidden');
