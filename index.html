@@ -3143,6 +3143,148 @@ header .publish-trigger:hover{
 }
 </style><style id="abraca-single-account-button">
 header #signupBtn{display:none!important}
+</style><style id="abraca-messages-layout-fix-v2">
+/* Messagerie : fenêtre propre sous le header flottant */
+@media(min-width:761px){
+  #messagesModal.modal-backdrop{
+    z-index:20050!important;
+    padding:18px 18px 24px!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow-y:auto!important;
+  }
+  #messagesModal .messages-modal{
+    width:min(1120px,calc(100vw - 36px))!important;
+    max-width:1120px!important;
+    height:auto!important;
+    max-height:calc(100vh - 112px)!important;
+    margin:76px auto 24px!important;
+    border-radius:22px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    box-sizing:border-box!important;
+  }
+  #messagesModal .modal-head{
+    flex:0 0 auto!important;
+    min-height:64px!important;
+    padding:18px 22px!important;
+    background:#fff!important;
+    border-bottom:1px solid #eee7f3!important;
+    position:relative!important;
+    z-index:3!important;
+  }
+  #messagesModal .modal-head h2{
+    margin:0!important;
+    line-height:1.2!important;
+  }
+  #messagesModal .close-btn{
+    position:absolute!important;
+    top:14px!important;
+    right:14px!important;
+    z-index:4!important;
+  }
+  #messagesModal .modal-body{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    padding:18px 22px 22px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #messagesModal .message-safety{
+    flex:0 0 auto!important;
+    margin:0 0 16px!important;
+  }
+  #messagesModal .messages-shell{
+    flex:1 1 auto!important;
+    min-height:430px!important;
+    max-height:calc(100vh - 300px)!important;
+    overflow:hidden!important;
+    border-radius:16px!important;
+  }
+  #messagesModal .conversation-panel{
+    min-height:0!important;
+    height:100%!important;
+  }
+  #messagesModal .conversation-list{
+    min-height:0!important;
+    overflow-y:auto!important;
+  }
+}
+
+@media(max-width:760px){
+  #messagesModal.modal-backdrop{
+    z-index:20050!important;
+    padding:0!important;
+    align-items:stretch!important;
+    overflow:hidden!important;
+  }
+  #messagesModal .messages-modal{
+    width:100%!important;
+    max-width:none!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    margin:0!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #messagesModal .modal-head{
+    flex:0 0 auto!important;
+    min-height:60px!important;
+    padding:calc(12px + env(safe-area-inset-top)) 52px 12px 16px!important;
+    background:#fff!important;
+    position:relative!important;
+    z-index:5!important;
+  }
+  #messagesModal .modal-head h2{
+    margin:0!important;
+    line-height:1.2!important;
+  }
+  #messagesModal .close-btn{
+    position:absolute!important;
+    top:calc(10px + env(safe-area-inset-top))!important;
+    right:12px!important;
+    z-index:6!important;
+  }
+  #messagesModal .modal-body{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    padding:0!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #messagesModal .message-safety{
+    flex:0 0 auto!important;
+    margin:0!important;
+    border-radius:0!important;
+    border-left:0!important;
+    border-right:0!important;
+  }
+  #messagesModal .messages-shell{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    height:auto!important;
+    overflow:hidden!important;
+    border:0!important;
+    border-radius:0!important;
+  }
+  #messagesModal .conversation-panel{
+    height:100%!important;
+    min-height:0!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #messagesModal .conversation-list{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+}
 </style></head>
 <body>
 
