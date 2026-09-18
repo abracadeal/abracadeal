@@ -543,7 +543,7 @@ body.auth-open{overflow:hidden}
       .select('user_id,status,onboarding_completed')
       .eq('user_id',user.id)
       .maybeSingle();
-    const isHost=!!hostProfile && (hostProfile.status==='active'||hostProfile.onboarding_completed);
+    const isHost=!!hostProfile && hostProfile.status==='active' && hostProfile.onboarding_completed===true;
     hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
     hostSignupCta.href=isHost?'espace-hote.html':'espace-hote.html?host_signup=1';
   }
