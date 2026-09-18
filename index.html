@@ -4512,10 +4512,10 @@ const PROMOTION_PACKS={
   photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'4,99 €',days:0,max:1,photos:30,link:'https://buy.stripe.com/test_eVq9ALaBE0iV9MT2b7grS08'},
   private_7d:{code:'private_7d',audience:'particulier',title:'Boost 7 jours',price:'9,99 €',days:7,max:1,photos:null,link:'https://buy.stripe.com/test_6oUfZ9bFI1mZ6AH7vrgrS00'},
   private_30d:{code:'private_30d',audience:'particulier',title:'Boost 30 jours',price:'19,99 €',days:30,max:1,photos:null,link:'https://buy.stripe.com/test_8x27sD4dg8Pr6AHbLHgrS01'},
-  pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ 5 annonces / 7 jours',price:'19,99 €',days:7,max:5,photos:null,link:'https://buy.stripe.com/test_7sYeV5114e9L5wD8zvgrS02'},
-  pro_10_7d:{code:'pro_10_7d',audience:'professionnel',title:'★ 10 annonces / 7 jours',price:'29,99 €',days:7,max:10,photos:null,link:'https://buy.stripe.com/test_aFa9ALeRU2r39MTg1XgrS03'},
-  pro_5_30d:{code:'pro_5_30d',audience:'professionnel',title:'★ 5 annonces / 30 jours',price:'39,99 €',days:30,max:5,photos:null,link:'https://buy.stripe.com/test_9B6fZ95hk8Pr7EL3fbgrS04'},
-  pro_10_30d:{code:'pro_10_30d',audience:'professionnel',title:'★ 10 annonces / 30 jours',price:'59,99 €',days:30,max:10,photos:null,link:'https://buy.stripe.com/test_eVqaEP5hk3v77EL173grS06'}
+  pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 7 jours',price:'39,90 € HT',days:7,max:5,photos:null,link:'https://buy.stripe.com/test_00w3cn1140iV9MTcPLgrS0t'},
+  pro_10_7d:{code:'pro_10_7d',audience:'professionnel',title:'★ Jusqu’à 10 annonces / 7 jours',price:'69,90 € HT',days:7,max:10,photos:null,link:'https://buy.stripe.com/test_dRm4grfVYc1De395njgrS0u'},
+  pro_5_30d:{code:'pro_5_30d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 30 jours',price:'79,90 € HT',days:30,max:5,photos:null,link:'https://buy.stripe.com/test_aFa4grfVYc1D1gn8zvgrS0v'},
+  pro_10_30d:{code:'pro_10_30d',audience:'professionnel',title:'★ Jusqu’à 10 annonces / 30 jours',price:'129,90 € HT',days:30,max:10,photos:null,link:'https://buy.stripe.com/test_fZueV5bFI4zbaQX4jfgrS0w'}
 };
 const detailAdsCache=new Map();
 let moderationMode=false, favoritesMode=false;
@@ -6146,7 +6146,7 @@ function renderPromotionModal(){
     const checked=[...box.querySelectorAll('input:checked')];
     if(checked.length>chosen.max){i.checked=false;toast(`Ce pack accepte ${chosen.max} annonce${chosen.max>1?'s':''} maximum`);}
   }));
-  if(intro)intro.textContent=accountAudience()==='professionnel'?'Choisissez un pack puis les annonces à mettre en avant. Les annonces tournent dans 3 emplacements prioritaires pour garder une vraie valeur au boost.':'Choisissez la durée de mise en avant de cette annonce.';
+  if(intro)intro.textContent=accountAudience()==='professionnel'?'Boost premium · places limitées. Choisissez un pack puis les annonces à mettre en avant. Les annonces tournent dans 3 emplacements prioritaires afin de préserver une vraie valeur au boost.':'Choisissez la durée de mise en avant de cette annonce.';
   if(photoNote)photoNote.textContent=accountAudience()==='professionnel'?'📷 Jusqu’à 15 photos incluses par annonce · Jusqu’à 30 avec le Pack Photos':'📷 Jusqu’à 3 photos incluses par annonce · Jusqu’à 12 avec le Pack Photos';
 }
 function openPromotionForListing(id){promoPreselectedListingId=id;promoSelectedPack=accountAudience()==='professionnel'?'pro_5_7d':'private_7d';renderPromotionModal();openModal('promotionModal')}
