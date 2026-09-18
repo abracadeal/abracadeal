@@ -3351,6 +3351,37 @@ header #signupBtn{display:none!important}
   border-radius:999px;
   padding:4px 7px;
 }
+</style><style id="abraca-pro-plan-admin-stats">
+.admin-stats-panel{margin:18px 0;padding:18px;border:1px solid #e7dced;border-radius:20px;background:linear-gradient(180deg,#fff,#fcf9fd)}
+.admin-stats-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-stats-head h3{margin:0;color:#31133f;font-size:1.15rem}
+.admin-stats-head p{margin:4px 0 0;color:#806f87;font-size:.8rem}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.admin-stat-card{min-width:0;padding:14px;border:1px solid #eadff0;border-radius:15px;background:#fff}
+.admin-stat-value{display:block;color:#451657;font-size:1.7rem;line-height:1;font-weight:950;letter-spacing:-.03em}
+.admin-stat-label{display:block;margin-top:7px;color:#78667f;font-size:.74rem;font-weight:800;line-height:1.25}
+.admin-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:11px}
+.admin-plan-chip{padding:12px;border-radius:14px;background:#f7f0fa;border:1px solid #e8d8ee}
+.admin-plan-chip b{display:block;color:#62247d;font-size:1.25rem}
+.admin-plan-chip span{display:block;margin-top:3px;color:#77637e;font-size:.72rem;font-weight:800}
+@media(max-width:700px){.admin-stat-grid,.admin-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.admin-stat-grid,.admin-plan-grid{grid-template-columns:1fr 1fr}.admin-stat-card{padding:12px}.admin-stat-value{font-size:1.45rem}}
+
+.pro-plan-modal{width:min(980px,calc(100vw - 40px))!important;max-width:980px!important}
+.pro-plan-intro{padding:14px 16px;border:1px solid #e7d7ed;border-radius:15px;background:#faf5fc;color:#51355d;line-height:1.5;margin-bottom:16px}
+.pro-plan-intro strong{color:#70258d}
+.pro-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.pro-plan-card{display:flex;flex-direction:column;min-height:210px;padding:16px;border:1px solid #e3d8e8;border-radius:17px;background:#fff;text-align:left;cursor:pointer;transition:.18s ease}
+.pro-plan-card:hover{transform:translateY(-2px);border-color:#b884ca;box-shadow:0 10px 24px rgba(83,34,101,.10)}
+.pro-plan-card h3{margin:0;color:#34133f;font-size:1.05rem}
+.pro-plan-price{margin:10px 0 3px;color:#7c299b;font-size:1.55rem;font-weight:950;letter-spacing:-.025em}
+.pro-plan-price small{font-size:.72rem;color:#806f87;font-weight:800}
+.pro-plan-desc{color:#77667d;font-size:.78rem;line-height:1.4;flex:1}
+.pro-plan-choose{margin-top:14px;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:12px;background:linear-gradient(135deg,#762a96,#9f31b5);color:#fff;font-weight:900}
+.pro-plan-status{min-height:20px;margin-top:12px;color:#6b5574;font-size:.82rem;font-weight:750}
+.pro-plan-modal .mandatory-note{margin:0 0 14px;color:#826d89;font-size:.78rem}
+@media(max-width:850px){.pro-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.pro-plan-grid{grid-template-columns:1fr}.pro-plan-card{min-height:0}}
 </style></head>
 <body>
 
@@ -3991,6 +4022,18 @@ header #signupBtn{display:none!important}
 
 
 
+<div class="modal-backdrop" id="proPlanModal" aria-hidden="true">
+  <div class="modal pro-plan-modal" role="dialog" aria-modal="true" aria-labelledby="proPlanTitle">
+    <div class="modal-head"><h2 id="proPlanTitle">Choisissez votre formule Pro</h2></div>
+    <div class="modal-body">
+      <div class="pro-plan-intro"><strong>Offre Fondateurs :</strong> 12 mois offerts pour les comptes éligibles. Votre carte est enregistrée maintenant, mais aucun débit n’est effectué pendant la période gratuite.</div>
+      <p class="mandatory-note">Le choix d’une formule est obligatoire pour finaliser un compte professionnel.</p>
+      <div id="proPlanGrid" class="pro-plan-grid"><div class="note">Chargement des formules…</div></div>
+      <div id="proPlanStatus" class="pro-plan-status" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Offre Fondateurs : détail volontairement discret, sans grille tarifaire complète sur l’accueil. -->
 <div class="modal-backdrop" id="founderOfferModal" aria-hidden="true">
   <div class="modal founder-offer-modal" role="dialog" aria-modal="true" aria-labelledby="founderOfferTitle">
@@ -4151,6 +4194,28 @@ header #signupBtn{display:none!important}
             <button class="btn primary" id="editProfileBtn" type="button">Modifier mes informations</button>
           </section>
         </div>
+<section id="adminStatsPanel" class="admin-stats-panel hidden" aria-live="polite">
+  <div class="admin-stats-head">
+    <div><h3>Tableau de bord Abracadeal</h3><p>Les chiffres essentiels du site en un coup d’œil.</p></div>
+    <button type="button" class="btn ghost" id="refreshAdminStatsBtn">Actualiser</button>
+  </div>
+  <div class="admin-stat-grid">
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTotalAccounts">—</span><span class="admin-stat-label">Total comptes</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statProfessionals">—</span><span class="admin-stat-label">Professionnels</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statPrivateAccounts">—</span><span class="admin-stat-label">Particuliers</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTravelers">—</span><span class="admin-stat-label">Voyageurs Vacances</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statHosts">—</span><span class="admin-stat-label">Hôtes Vacances</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTrialingPros">—</span><span class="admin-stat-label">Pros en 12 mois offerts</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statActivePros">—</span><span class="admin-stat-label">Pros payants actifs</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statMrr">—</span><span class="admin-stat-label">MRR théorique après gratuités</span></div>
+  </div>
+  <div class="admin-plan-grid">
+    <div class="admin-plan-chip"><b id="statPlan20">—</b><span>Plan 20 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan50">—</b><span>Plan 50 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan100">—</b><span>Plan 100 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan250">—</b><span>Plan 250 annonces</span></div>
+  </div>
+</section>
         <section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <dl id="companySummary" class="profile-summary"></dl>
@@ -4855,7 +4920,11 @@ $('#signupForm').addEventListener('submit',async e=>{
           return;
         }
       }
-      setTimeout(()=>closeModal('accountModal'),500);
+      if(type==='professionnel' && typeof window.ensureProPlanSelection==='function'){
+        await window.ensureProPlanSelection({force:true});
+      }else{
+        setTimeout(()=>closeModal('accountModal'),500);
+      }
       toast('Compte créé');
     }else{
       const createdEmail=$('#signupEmail').value.trim();
@@ -8815,5 +8884,135 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
 });
-</script></body>
+</script><script id="abraca-pro-plan-admin-stats-js">
+(()=>{
+  let proPlanCheckBusy=false;
+  let proPlanCheckoutBusy=false;
+
+  const moneyFromCents=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+
+  async function loadAdminDashboardStats(){
+    const panel=document.getElementById('adminStatsPanel');
+    if(!panel)return;
+    const isAdmin=!!currentProfile?.is_admin;
+    panel.classList.toggle('hidden',!isAdmin);
+    if(!isAdmin)return;
+    const {data,error}=await sb.rpc('get_admin_dashboard_stats');
+    if(error){console.error('Stats Admin indisponibles',error);return}
+    const stats=data||{};
+    const put=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=String(v??0)};
+    put('statTotalAccounts',stats.total_accounts);
+    put('statProfessionals',stats.professionals);
+    put('statPrivateAccounts',stats.private_accounts);
+    put('statTravelers',stats.vacation_travelers);
+    put('statHosts',stats.vacation_hosts);
+    put('statTrialingPros',stats.trialing_pros);
+    put('statActivePros',stats.active_paid_pros);
+    put('statPlan20',stats.plan_counts?.pro_20);
+    put('statPlan50',stats.plan_counts?.pro_50);
+    put('statPlan100',stats.plan_counts?.pro_100);
+    put('statPlan250',stats.plan_counts?.pro_250);
+    const mrr=document.getElementById('statMrr');
+    if(mrr)mrr.textContent=moneyFromCents(stats.theoretical_mrr_cents||0);
+  }
+  window.loadAdminDashboardStats=loadAdminDashboardStats;
+  document.getElementById('refreshAdminStatsBtn')?.addEventListener('click',loadAdminDashboardStats);
+
+  async function loadProPlans(){
+    const grid=document.getElementById('proPlanGrid');
+    if(!grid)return [];
+    const {data,error}=await sb.rpc('get_pro_subscription_plans');
+    if(error){grid.innerHTML='<div class="note">Impossible de charger les formules pour le moment.</div>';throw error}
+    const plans=Array.isArray(data)?data:[];
+    grid.innerHTML=plans.map(p=>`
+      <button type="button" class="pro-plan-card" data-pro-plan="${p.code}">
+        <h3>${Number(p.listing_limit).toLocaleString('fr-FR')} annonces</h3>
+        <div class="pro-plan-price">${moneyFromCents(p.amount_cents)} <small>HT / mois</small></div>
+        <div class="pro-plan-desc">Jusqu’à ${Number(p.listing_limit).toLocaleString('fr-FR')} annonces actives · import et gestion du stock Pro.</div>
+        <span class="pro-plan-choose">Choisir cette formule</span>
+      </button>`).join('');
+    grid.querySelectorAll('[data-pro-plan]').forEach(btn=>btn.addEventListener('click',()=>startProPlanCheckout(btn.dataset.proPlan,btn)));
+    return plans;
+  }
+
+  async function startProPlanCheckout(planCode,button){
+    if(proPlanCheckoutBusy)return;
+    proPlanCheckoutBusy=true;
+    const status=document.getElementById('proPlanStatus');
+    const old=button?.querySelector('.pro-plan-choose')?.textContent;
+    try{
+      if(status)status.textContent='Préparation de votre abonnement sécurisé…';
+      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent='Préparation…';
+
+      const siret=currentUser?.user_metadata?.company_registration?.siret;
+      if(siret){
+        try{await requestCompanyCheck('verify',String(siret).replace(/\s/g,''));}
+        catch(e){console.warn('Vérification Pro à finaliser',e)}
+      }
+
+      const {data,error}=await sb.functions.invoke('create-pro-subscription-order',{body:{plan_code:planCode}});
+      if(error){
+        let detail=null;
+        try{detail=await error.context?.json()}catch{}
+        throw new Error(detail?.error||detail?.message||error.message||'Impossible de préparer l’abonnement');
+      }
+      if(!data?.checkout_url)throw new Error(data?.error||'Lien Stripe indisponible');
+      if(status)status.textContent=data.message||'Redirection vers Stripe…';
+      location.href=data.checkout_url;
+    }catch(err){
+      console.error(err);
+      if(status)status.textContent=err.message||'Impossible de préparer l’abonnement.';
+      toast(err.message||'Impossible de préparer l’abonnement');
+      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent=old||'Choisir cette formule';
+      proPlanCheckoutBusy=false;
+    }
+  }
+
+  async function ensureProPlanSelection({force=false}={}){
+    if(proPlanCheckBusy||!sb||!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return false;
+    proPlanCheckBusy=true;
+    try{
+      const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle();
+      if(error && !/0 rows/i.test(error.message||''))console.warn('Abonnement Pro indisponible',error);
+      const complete=!!data && ['trialing','active'].includes(data.status);
+      if(complete){
+        if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
+        return false;
+      }
+      await loadProPlans();
+      closeModal('accountModal');
+      openModal('proPlanModal');
+      return true;
+    }finally{
+      proPlanCheckBusy=false;
+    }
+  }
+  window.ensureProPlanSelection=ensureProPlanSelection;
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && document.getElementById('proPlanModal')?.classList.contains('open')){
+      e.preventDefault();e.stopImmediatePropagation();
+    }
+  },true);
+
+  window.addEventListener('abracadeal:auth',()=>{
+    setTimeout(()=>{
+      loadAdminDashboardStats();
+      ensureProPlanSelection();
+    },80);
+  });
+
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('pro_subscription')==='success'){
+    setTimeout(async()=>{
+      try{await refreshAuth();await loadAdminDashboardStats();toast('Formule Pro activée');}
+      catch(e){console.error(e)}
+      try{history.replaceState({},document.title,location.pathname+(location.hash||''))}catch{}
+    },500);
+  }else{
+    setTimeout(()=>{loadAdminDashboardStats();ensureProPlanSelection();},700);
+  }
+})();
+</script>
+</body>
 </html>
