@@ -3382,6 +3382,25 @@ header #signupBtn{display:none!important}
 .pro-plan-modal .mandatory-note{margin:0 0 14px;color:#826d89;font-size:.78rem}
 @media(max-width:850px){.pro-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.pro-plan-grid{grid-template-columns:1fr}.pro-plan-card{min-height:0}}
+</style><style id="abraca-pro-boost-wallet-ui">
+.pro-boost-wallet{margin:18px 0;padding:17px;border:1px solid #e6d8ed;border-radius:18px;background:linear-gradient(180deg,#fff,#fbf6fd)}
+.pro-boost-wallet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.pro-boost-wallet-head h4{margin:0;color:#3c174a;font-size:1.05rem}
+.pro-boost-wallet-head p{margin:4px 0 0;color:#7a6881;font-size:.76rem}
+.pro-boost-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pro-boost-count{padding:13px 14px;border:1px solid #e7daec;border-radius:14px;background:#fff}
+.pro-boost-count strong{display:block;color:#762b93;font-size:1.55rem;line-height:1;font-weight:950}
+.pro-boost-count span{display:block;margin-top:6px;color:#76637c;font-size:.76rem;font-weight:800}
+.pro-boost-wallet-note{margin-top:10px;color:#86738c;font-size:.74rem}
+.boost-btn.boost-active,.boost-btn[disabled]{cursor:default!important;opacity:.72!important;background:#efedf0!important;border-color:#d7d0da!important;color:#6f6873!important;box-shadow:none!important}
+.boost-credit-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 4px}
+.boost-credit-option{padding:16px;border:1px solid #e4d7e9;border-radius:16px;background:#fff;text-align:left;cursor:pointer;transition:.18s ease}
+.boost-credit-option:hover:not(:disabled){transform:translateY(-2px);border-color:#b985ca;box-shadow:0 9px 22px rgba(74,31,91,.10)}
+.boost-credit-option:disabled{cursor:not-allowed;opacity:.46}
+.boost-credit-option b{display:block;color:#431852;font-size:1.05rem}
+.boost-credit-option span{display:block;margin-top:6px;color:#7b6682;font-size:.8rem}
+.boost-credit-option em{display:block;margin-top:10px;color:#8529a3;font-style:normal;font-weight:900}
+@media(max-width:540px){.pro-boost-wallet-head{align-items:flex-start;flex-direction:column}.boost-credit-options{grid-template-columns:1fr}}
 </style></head>
 <body>
 
@@ -4219,6 +4238,17 @@ header #signupBtn{display:none!important}
         <section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <dl id="companySummary" class="profile-summary"></dl>
+<div id="proBoostWallet" class="pro-boost-wallet hidden">
+  <div class="pro-boost-wallet-head">
+    <div><h4>Mes Boosts</h4><p>Vos crédits de mise en avant disponibles.</p></div>
+    <button type="button" class="btn primary" id="buyProBoostsBtn">Acheter des Boosts</button>
+  </div>
+  <div class="pro-boost-counts">
+    <div class="pro-boost-count"><strong id="proBoost7Count">0</strong><span>Boosts 7 jours disponibles</span></div>
+    <div class="pro-boost-count"><strong id="proBoost30Count">0</strong><span>Boosts 30 jours disponibles</span></div>
+  </div>
+  <div class="pro-boost-wallet-note">Les crédits achetés n’expirent pas tant qu’ils ne sont pas utilisés. Un crédit est retiré uniquement lorsque vous boostez une annonce.</div>
+</div>
           <p class="note">Le SIRET est contrôlé dans le registre des entreprises lors de l’enregistrement. Ce contrôle ne vérifie pas le numéro de TVA ni l’identité du représentant.</p>
           <button type="button" class="btn ghost" id="editCompanyBtn">Compléter mes informations d’entreprise</button>
           <form id="companyForm" class="hidden"><div class="form-grid">
@@ -4453,6 +4483,21 @@ header #signupBtn{display:none!important}
    </div>
   </div>
  </div>
+</div>
+
+<div class="modal-backdrop" id="boostCreditModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="boostCreditTitle" style="max-width:620px">
+    <div class="modal-head"><h2 id="boostCreditTitle">Booster cette annonce</h2><a class="close-btn" data-close="boostCreditModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body">
+      <p class="note">Choisissez le type de crédit à utiliser. Un seul jeton sera retiré de votre compteur.</p>
+      <div class="boost-credit-options">
+        <button type="button" class="boost-credit-option" id="useBoost7Btn"><b>Boost 7 jours</b><span>Mise en avant pendant 7 jours</span><em id="useBoost7Balance">0 crédit disponible</em></button>
+        <button type="button" class="boost-credit-option" id="useBoost30Btn"><b>Boost 30 jours</b><span>Mise en avant pendant 30 jours</span><em id="useBoost30Balance">0 crédit disponible</em></button>
+      </div>
+      <div id="boostCreditStatus" class="promo-status"></div>
+      <div class="form-actions"><button type="button" class="btn ghost" data-close="boostCreditModal">Annuler</button></div>
+    </div>
+  </div>
 </div>
 
 <div class="modal-backdrop" id="promotionModal" aria-hidden="true">
