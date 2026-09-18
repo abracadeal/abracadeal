@@ -8389,6 +8389,20 @@ window.openSellerProfile=async sellerId=>{
 
     ${reviewForm}
 
+    ${currentProfile?.is_admin&&profile.account_type==='professionnel'?`
+    <section class="review-section">
+      <h3>Outils Admin · Boosts</h3>
+      <div class="review-form">
+        <p class="note" style="margin-top:0">Offrir des jetons Boost à ce professionnel sans paiement Stripe.</p>
+        <div class="form-grid">
+          <div class="form-row"><label>Durée</label><select class="select" id="adminBoostDuration-${sellerId}"><option value="7">7 jours</option><option value="30">30 jours</option></select></div>
+          <div class="form-row"><label>Nombre de jetons</label><input class="input" id="adminBoostCredits-${sellerId}" type="number" min="1" max="1000" value="1"></div>
+          <div class="form-row full"><label>Note interne (facultatif)</label><input class="input" id="adminBoostNote-${sellerId}" maxlength="500" placeholder="Ex. geste commercial"></div>
+        </div>
+        <div class="form-actions"><button class="btn primary" type="button" onclick="adminGiftBoosts('${sellerId}')">Offrir les jetons</button></div>
+      </div>
+    </section>`:''}
+
     <section class="review-section">
       <h3>Ses annonces</h3>
       <div class="seller-listings-mini">
@@ -8400,6 +8414,25 @@ window.openSellerProfile=async sellerId=>{
       <h3>Avis (${list.length})</h3>
       <div>${reviewCards}</div>
     </section>`;
+};
+
+window.adminGiftBoosts=async sellerId=>{
+  if(!currentProfile?.is_admin)return;
+  const duration=Number(document.getElementById('adminBoostDuration-'+sellerId)?.value||7);
+  const credits=Number(document.getElementById('adminBoostCredits-'+sellerId)?.value||0);
+  const note=document.getElementById('adminBoostNote-'+sellerId)?.value?.trim()||null;
+  if(![7,30].includes(duration)){toast('Durée invalide');return;}
+  if(!Number.isInteger(credits)||credits<1||credits>1000){toast('Choisissez entre 1 et 1000 jetons');return;}
+  try{
+    const {data,error}=await sb.rpc('admin_grant_pro_boosts',{p_user_id:sellerId,p_duration_days:duration,p_credits:credits,p_note:note});
+    if(error)throw error;
+    toast(credits+' jeton'+(credits>1?'s':'')+' Boost '+duration+' jours offert'+(credits>1?'s':''));
+    const input=document.getElementById('adminBoostCredits-'+sellerId);if(input)input.value='1';
+    const noteInput=document.getElementById('adminBoostNote-'+sellerId);if(noteInput)noteInput.value='';
+  }catch(error){
+    console.error(error);
+    toast(error?.message||'Impossible d’offrir les Boosts');
+  }
 };
 
 window.setReviewRating=n=>{
