@@ -3033,6 +3033,28 @@ header .publish-trigger:hover{
     z-index:20050!important;
   }
 }
+</style><style id="abraca-mobile-sticky-safari-fix">
+@media(max-width:760px){
+  html,body{
+    overflow-x:clip!important;
+  }
+  header{
+    position:-webkit-sticky!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:10000!important;
+    overflow:visible!important;
+    transform:translateZ(0);
+    -webkit-transform:translateZ(0);
+  }
+  header .account-auth-group,
+  header #accountBtn,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    position:relative!important;
+    z-index:10001!important;
+  }
+}
 </style></head>
 <body>
 
