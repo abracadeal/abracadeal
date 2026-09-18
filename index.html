@@ -4523,8 +4523,8 @@ header #signupBtn{display:none!important}
     <div class="modal-body" style="text-align:center;padding:34px 28px 28px">
       <div style="width:70px;height:70px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#eafaf2;color:#169c5b;font-size:38px;font-weight:900">✓</div>
       <h2 id="paymentSuccessTitle" style="margin:0 0 10px">Paiement confirmé</h2>
-      <p style="margin:0 auto 10px;max-width:410px">Tout est bon. La mise en avant de vos annonces est activée automatiquement.</p>
-      <p class="note" style="margin:0 auto 22px">Vous pouvez maintenant revenir à vos annonces.</p>
+      <p id="paymentSuccessText" style="margin:0 auto 10px;max-width:410px">Tout est bon. La mise en avant de vos annonces est activée automatiquement.</p>
+      <p id="paymentSuccessNote" class="note" style="margin:0 auto 22px">Vous pouvez maintenant revenir à vos annonces.</p>
       <div class="form-actions" style="justify-content:center">
         <button class="btn ghost" type="button" onclick="closeModal('paymentSuccessModal')">Fermer</button>
         <button class="btn primary" type="button" onclick="closeModal('paymentSuccessModal');openMyAds()">Voir mes annonces</button>
@@ -4741,6 +4741,7 @@ function readCompanyFields(prefix){
 function renderCompanyAccount(){
   const pro=currentProfile?.account_type==='professionnel';
   $('#companyAccountSection').classList.toggle('hidden',!pro);
+  $('#proBoostWallet')?.classList.toggle('hidden',!pro);
   $('#companyForm').classList.add('hidden');
   $('#editCompanyBtn').classList.remove('hidden');
   const data=currentUser?.user_metadata?.company_registration||{};
@@ -6179,7 +6180,12 @@ async function createPromotionOrder(packCode,listingIds=[]){
   return data.checkout_url;
 }
 async function goToPromotionCheckout(packCode,listingIds){
-  const url=await createPromotionOrder(packCode,listingIds);location.href=url;
+  const url=await createPromotionOrder(packCode,listingIds);
+  try{
+    if(isProBoostCreditPack(packCode))sessionStorage.setItem('abraca_pending_pro_boost',packCode);
+    else sessionStorage.removeItem('abraca_pending_pro_boost');
+  }catch(_){}
+  location.href=url;
 }
 function promoPackList(){return Object.values(PROMOTION_PACKS).filter(p=>p.audience===accountAudience()&&!['photo_12','photo_30_pro'].includes(p.code))}
 function renderPromotionModal(){
