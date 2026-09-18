@@ -3485,6 +3485,16 @@ header #signupBtn{display:none!important}
   #publishModal .publish-status{grid-column:1/-1!important}
 }
 </style>
+<style id="abraca-admin-header-click-fix">
+header #moderationBtn,
+header #headerMessagesBtn,
+header #flowErrorsBtn{
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  position:relative!important;
+  z-index:10040!important;
+}
+</style>
 </head>
 <body>
 
@@ -4804,6 +4814,24 @@ window.setAuthTab = function(which){
   syncSignupCompany();
 };
 
+async function applyAuthSession(session,{preserveEditing=true}={}){
+  currentUser=session?.user||null;
+  currentProfile=null;
+
+  if(currentUser){
+    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    if(error)console.warn('Profil non chargé',error);
+    currentProfile=data||null;
+    if(!currentProfile?.is_admin)moderationMode=false;
+  }else{
+    moderationMode=false;
+  }
+
+  try{updateAuthUI(preserveEditing);}
+  catch(error){console.error('Interface compte indisponible',error);}
+  return !!currentUser;
+}
+
 async function refreshAuth({preserveEditing=true}={}){
   if(!sb){
     currentUser=null;
@@ -4813,18 +4841,7 @@ async function refreshAuth({preserveEditing=true}={}){
   }
   const {data:{session},error:sessionError}=await sb.auth.getSession();
   if(sessionError)console.warn('Session Supabase indisponible',sessionError);
-  currentUser=session?.user||null;
-  currentProfile=null;
-  if(currentUser){
-    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
-    if(error)console.warn('Profil non chargé',error);
-    currentProfile=data||null;
-    if(!currentProfile?.is_admin) moderationMode=false;
-  }else{
-    moderationMode=false;
-  }
-  try{updateAuthUI(preserveEditing);}
-  catch(error){console.error('Interface compte indisponible',error);}
+  await applyAuthSession(session,{preserveEditing});
 }
 // Données déclaratives : ne jamais utiliser user_metadata pour accorder un statut vérifié.
 function syncCompanyFields(prefix){
@@ -8887,7 +8904,6 @@ async function openMyAds(){
   await loadAds();
   $('#resultats').scrollIntoView({behavior:'smooth'});
 }
-$('#headerMessagesBtn')?.addEventListener('click',()=>openMessages());
 window.openAdminFlowErrors=async()=>{
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
   openModal('flowErrorsModal');
@@ -8903,16 +8919,25 @@ async function openFavorites(){
   $('#resultats').scrollIntoView({behavior:'smooth'});
 }
 $('#backToAllAds').addEventListener('click',()=>$('#showAll').click());
-$('#moderationBtn').addEventListener('click',async()=>{
-  if(!currentProfile?.is_admin) return;
-  moderationMode=!moderationMode;favoritesMode=false;
-  onlyMine=false;activeCategory='';activeVehicleSubcategory='';syncFilterCategory('','');refreshFilterCount();
+window.toggleAdminModeration=async()=>{
+  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+  moderationMode=!moderationMode;
+  favoritesMode=false;
+  onlyMine=false;
+  activeCategory='';
+  activeVehicleSubcategory='';
+  syncFilterCategory('','');
+  refreshFilterCount();
   setModerationButtonLabel(moderationMode?'Annonces':'Modérer');
-  
-  await loadAds();
-  // Le bouton est maintenant dans l'en-tête : on amène directement l'admin sur la file choisie.
-  requestAnimationFrame(()=>document.querySelector('#resultats')?.scrollIntoView({behavior:'smooth',block:'start'}));
-});
+
+  try{
+    await loadAds();
+    requestAnimationFrame(()=>document.querySelector('#resultats')?.scrollIntoView({behavior:'smooth',block:'start'}));
+  }catch(error){
+    console.error('Modération indisponible',error);
+    toast('Impossible de charger la modération');
+  }
+};
 
 // Password recovery: isolated from catalogue and account editing.
 const passwordRecovery = (()=>{
@@ -9022,10 +9047,16 @@ if(sb){
 
   sb.auth.onAuthStateChange((event,session)=>{
     passwordRecovery.handleAuth(event,session);
-    if(event==='INITIAL_SESSION') return;
+
     setTimeout(async()=>{
-      try{await refreshAuth();}
-      catch(error){console.error('Actualisation du compte impossible',error);}
+      try{
+        if(event==='INITIAL_SESSION'){
+          await applyAuthSession(session,{preserveEditing:false});
+        }else{
+          await refreshAuth();
+        }
+      }catch(error){console.error('Actualisation du compte impossible',error);}
+
       try{await loadFavorites();}
       catch(error){console.error('Actualisation des favoris impossible',error);}
       try{await loadAds();}
