@@ -4620,6 +4620,9 @@ function openModal(id){
       panel?.classList.remove('hidden');
       setTimeout(()=>window.loadAdminDashboardStats?.(),0);
     }
+    if(currentProfile?.account_type==='professionnel'){
+      setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
+    }
   }
   if(location.hash==='#'+id){
     history.replaceState(null,'',location.pathname+location.search);
@@ -8794,7 +8797,13 @@ setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refresh
 
 // Rafraîchit aussi immédiatement quand l'utilisateur revient sur l'onglet / la fenêtre.
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible' && currentUser){ refreshUnreadMessages(); if(currentProfile?.is_admin)refreshFlowErrorsCount(); }
+  if(document.visibilityState==='visible' && currentUser){
+    refreshUnreadMessages();
+    if(currentProfile?.is_admin)refreshFlowErrorsCount();
+    if(currentProfile?.account_type==='professionnel' && document.getElementById('accountModal')?.classList.contains('open')){
+      loadProBoostWallet().catch(error=>console.warn('Boost wallet refresh',error));
+    }
+  }
 });
 window.addEventListener('focus',()=>{
   if(currentUser) refreshUnreadMessages();
