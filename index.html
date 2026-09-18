@@ -3031,20 +3031,36 @@ header .publish-trigger:hover{
 }
 </style><style id="abraca-floating-account-host">
 @media(min-width:761px){
-  header .account-auth-group{
-    position:fixed!important;
-    top:12px!important;
-    right:250px!important;
-    z-index:10020!important;
-    margin:0!important;
+  header .nav-actions,
+  header .abraca-top-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
   }
-  header .abraca-vacances-top{
-    position:fixed!important;
-    top:12px!important;
-    right:24px!important;
-    z-index:10020!important;
+  header .account-auth-group,
+  header .abraca-account-menu,
+  header .abraca-vacances-top,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    float:none!important;
     margin:0!important;
+    flex:0 0 auto!important;
+  }
+  header .nav-actions .btn,
+  header .abraca-top-actions .btn,
+  header .abraca-account-trigger,
+  header .abraca-vacances-top{
     min-height:46px!important;
+    padding-left:12px!important;
+    padding-right:12px!important;
+    white-space:nowrap!important;
   }
   header #accountBtn{
     max-width:190px!important;
