@@ -10,10 +10,10 @@
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}a{text-decoration:none;color:inherit}.hidden{display:none!important}
 .top{position:sticky;top:0;z-index:40;background:#1c0b2b;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}.topin{width:min(1220px,calc(100% - 28px));margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:900;font-size:1.25rem;display:inline-flex;align-items:center;gap:10px}.brand img{width:38px;height:38px;border-radius:11px;object-fit:cover;display:block;flex:0 0 auto}.brand span{color:#ff65be}.topactions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
 .btn{border:0;border-radius:13px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .22s ease,box-shadow .22s ease,filter .22s ease}.btn.primary{color:#fff;background:linear-gradient(135deg,var(--p2),var(--pink))}.btn.soft{background:#f5edf8;color:var(--p)}.btn.white{background:#fff;color:#4c1c61}.btn.ghost{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}.btn.danger{background:#fff0f3;color:var(--bad)}.btn:disabled{opacity:.55;cursor:not-allowed}
-.btn.premium-action{position:relative;overflow:hidden;color:#fff;background:linear-gradient(120deg,#63208b 0%,#b72fb0 45%,#ee42a5 75%,#7b27a0 100%);background-size:220% 220%;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 24px rgba(181,47,176,.28),inset 0 1px 0 rgba(255,255,255,.18);animation:premiumFlow 4.5s ease-in-out infinite}
-.btn.premium-action::after{content:"";position:absolute;inset:-45% -20%;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.34) 49%,transparent 63%);transform:translateX(-120%);animation:premiumShine 3.4s ease-in-out infinite;pointer-events:none}
-.btn.premium-action:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 16px 32px rgba(181,47,176,.38),0 0 20px rgba(231,70,163,.18)}
-.btn.premium-action:active{transform:translateY(0) scale(.985)}
+.btn.premium-action,.btn:not(.danger){position:relative;overflow:hidden;color:#fff!important;background:linear-gradient(120deg,#63208b 0%,#b72fb0 45%,#ee42a5 75%,#7b27a0 100%)!important;background-size:220% 220%!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:0 10px 24px rgba(181,47,176,.28),inset 0 1px 0 rgba(255,255,255,.18)!important;animation:premiumFlow 4.5s ease-in-out infinite}
+.btn.premium-action::after,.btn:not(.danger)::after{content:"";position:absolute;inset:-45% -20%;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.34) 49%,transparent 63%);transform:translateX(-120%);animation:premiumShine 3.4s ease-in-out infinite;pointer-events:none}
+.btn.premium-action:hover,.btn:not(.danger):hover{transform:translateY(-2px) scale(1.025);box-shadow:0 16px 32px rgba(181,47,176,.38),0 0 20px rgba(231,70,163,.18)!important;filter:brightness(1.05)}
+.btn.premium-action:active,.btn:not(.danger):active{transform:translateY(0) scale(.985)}
 @keyframes premiumFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 @keyframes premiumShine{0%,38%{transform:translateX(-120%)}66%,100%{transform:translateX(120%)}}
 .shell{width:min(1220px,calc(100% - 28px));margin:24px auto 60px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px}.side{background:#251033;color:#fff;border-radius:22px;padding:14px;height:max-content;position:sticky;top:92px}.side h3{margin:10px 10px 14px;font-size:.85rem;color:#cdb7d8;text-transform:uppercase;letter-spacing:.06em}.navbtn{width:100%;border:0;background:transparent;color:#dbcde2;text-align:left;padding:12px 13px;border-radius:12px;font-weight:750;cursor:pointer;margin:2px 0}.navbtn.active,.navbtn:hover{background:rgba(255,255,255,.1);color:#fff}.main{min-width:0}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:18px}.hero h1{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.04em}.hero p{margin:7px 0 0;color:var(--muted)}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#efe4f4;color:#6b2687;font-size:.76rem;font-weight:850}
@@ -190,7 +190,7 @@
     </section>
 
     <div class="onboarding-actions">
-      <button id="completeHostBtn" class="btn primary" type="button">Continuer vers la carte bancaire</button>
+      <button id="completeHostBtn" class="btn primary" type="button">Continuer</button>
     </div>
   </div>
 </div>
