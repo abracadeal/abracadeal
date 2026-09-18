@@ -5026,12 +5026,13 @@ function abracaNormalizePhone(value=''){
   if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
   return null;
 }
-async function abracaPhoneAvailable(phone){
+async function abracaPhoneAvailable(phone,accountType='particulier'){
   const normalized=abracaNormalizePhone(phone);
+  const type=['particulier','professionnel'].includes(accountType)?accountType:'particulier';
   if(!normalized) return {ok:false,normalized:null,message:'Indiquez un numéro de téléphone valide.'};
-  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized});
+  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized,p_account_type:type});
   if(error) return {ok:false,normalized,message:'Impossible de vérifier le numéro pour le moment.'};
-  if(!data) return {ok:false,normalized,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+  if(!data) return {ok:false,normalized,message:'Ce numéro est déjà utilisé pour un compte '+(type==='professionnel'?'professionnel':'particulier')+'.'};
   return {ok:true,normalized,message:''};
 }
 
@@ -5090,7 +5091,7 @@ $('#signupForm').addEventListener('submit',async e=>{
   const name=$('#signupName').value.trim(), type=$('#signupType').value;
   const rawPhone=$('#signupPhone').value.trim();
   try{
-    const phoneCheck=await abracaPhoneAvailable(rawPhone);
+    const phoneCheck=await abracaPhoneAvailable(rawPhone,type);
     if(!phoneCheck.ok){
       status.textContent=phoneCheck.message;
       toast(phoneCheck.message);
