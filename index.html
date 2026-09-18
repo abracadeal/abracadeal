@@ -8333,12 +8333,15 @@ window.openSellerProfile=async sellerId=>{
   openModal('sellerProfileModal');
 
   const adminViewing=!!currentProfile?.is_admin;
-  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},{data:boostSummary}]=await Promise.all([
+  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
     sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8),
-    adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null})
+    adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
   ]);
+  const boostSummary=boostSummaryResult?.data||null;
+  const boostSummaryError=boostSummaryResult?.error||null;
+  if(boostSummaryError)console.error('Résumé Boost admin indisponible',boostSummaryError);
 
   if(pErr||!profile){
     body.innerHTML='<div class="note">Profil vendeur indisponible.</div>';
@@ -8353,6 +8356,7 @@ window.openSellerProfile=async sellerId=>{
   const profileComplete=!!(currentProfile?.display_name?.trim()&&currentProfile?.city?.trim()&&currentProfile?.phone?.trim());
   const emailVerified=!!currentUser?.email_confirmed_at;
   const summary=boostSummary||{};
+  const boostSummaryLoaded=!adminViewing||(!boostSummaryError&&!!boostSummary);
   const purchasedTotal=Math.max(0,Number(summary.purchased_total||0));
   const giftedTotal=Math.max(0,Number(summary.gifted_total||0));
   const availableTotal=Math.max(0,Number(summary.available_total||0));
@@ -8427,6 +8431,7 @@ window.openSellerProfile=async sellerId=>{
     <section class="review-section">
       <h3>Outils Admin · Boosts</h3>
       <div class="review-form">
+        ${!boostSummaryLoaded?`<div class="note" style="padding:12px;border:1px solid #efc9d6;border-radius:12px;background:#fff4f7;color:#8a2948;margin-bottom:12px"><strong>Données Boost indisponibles.</strong> Recharge la fiche ou réessaie dans quelques secondes.</div>`:''}
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">
           <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
             <span class="note" style="display:block;margin:0 0 5px">A déjà acheté des Boosts</span>
