@@ -178,7 +178,8 @@ body.auth-open{overflow:hidden}
     <div class="nav-actions">
       <a class="btn premium" href="index.html">Abracadeal</a>
       <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
-      <a class="btn primary" id="hostSignupCta" href="#inscription-vacances">S’inscrire</a>
+      <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">S’inscrire</a>
+      <a class="btn primary" id="hostSignupCta" href="espace-hote.html?host_signup=1">Devenir hôte</a>
     </div>
   </div>
 </header>
@@ -198,6 +199,10 @@ body.auth-open{overflow:hidden}
         <div class="auth-field auth-hidden" id="authNameWrap">
           <label for="vacAuthName">Nom / prénom</label>
           <input id="vacAuthName" type="text" autocomplete="name" placeholder="Votre nom">
+        </div>
+        <div class="auth-field auth-hidden" id="authPhoneWrap">
+          <label for="vacAuthPhone">Téléphone</label>
+          <input id="vacAuthPhone" type="tel" autocomplete="tel" placeholder="+33 6 12 34 56 78">
         </div>
         <div class="auth-field">
           <label for="vacAuthEmail">E-mail</label>
@@ -277,7 +282,7 @@ body.auth-open{overflow:hidden}
       <div class="price-line"><span>Prix du séjour</span><strong>Vous décidez</strong></div>
       <div class="price-line"><span>Contact voyageur</span><strong>Direct</strong></div>
       <p class="legal">Les offres de lancement ci-dessus sont réservées aux particuliers, dans la limite des logements concernés par chaque palier. À l’issue de la période promotionnelle applicable, le tarif applicable est présenté clairement à l’hôte. L’abonnement reste sans engagement et peut être résilié à tout moment. Il concerne la publication du logement sur Abracadeal Vacances. Le contrat de location, la réservation et le paiement du séjour restent gérés directement entre l’hôte et le voyageur.</p>
-      <div class="host-actions"><a class="btn primary" href="espace-hote.html">Devenir hôte</a><a class="btn secondary" href="espace-hote.html">Déjà hôte ? Ouvrir mon espace</a></div>
+      <div class="host-actions"><a class="btn primary" href="espace-hote.html?host_signup=1">Devenir hôte</a><a class="btn secondary" href="espace-hote.html">Déjà hôte ? Ouvrir mon espace</a></div>
     </div>
 
     <div class="calc">
@@ -370,6 +375,7 @@ body.auth-open{overflow:hidden}
   const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
   const sbVac=window.supabase?supabase.createClient(SUPABASE_URL,SUPABASE_KEY):null;
   const hostSignupCta=root.getElementById('hostSignupCta');
+  const travelerSignupCta=root.getElementById('travelerSignupCta');
   const vacLoginCta=root.getElementById('vacLoginCta');
   const authModal=root.getElementById('vacAuthModal');
   const authGuestView=root.getElementById('authGuestView');
@@ -379,6 +385,8 @@ body.auth-open{overflow:hidden}
   const authIntro=root.getElementById('vacAuthIntro');
   const authNameWrap=root.getElementById('authNameWrap');
   const authName=root.getElementById('vacAuthName');
+  const authPhoneWrap=root.getElementById('authPhoneWrap');
+  const authPhone=root.getElementById('vacAuthPhone');
   const authEmail=root.getElementById('vacAuthEmail');
   const authPassword=root.getElementById('vacAuthPassword');
   const authSubmit=root.getElementById('vacAuthSubmit');
@@ -395,9 +403,10 @@ body.auth-open{overflow:hidden}
     authMode=mode==='signup'?'signup':'login';
     root.querySelectorAll('[data-auth-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.authMode===authMode));
     authNameWrap.classList.toggle('auth-hidden',authMode!=='signup');
-    authTitle.textContent=authMode==='signup'?'Créer votre compte':'Connexion';
+    authPhoneWrap.classList.toggle('auth-hidden',authMode!=='signup');
+    authTitle.textContent=authMode==='signup'?'Créer votre compte voyageur':'Connexion';
     authIntro.textContent=authMode==='signup'
-      ?'Inscrivez-vous sans quitter Abracadeal Vacances.'
+      ?'Créez votre compte voyageur. Le téléphone est obligatoire pour les échanges liés aux séjours.'
       :'Connectez-vous sans quitter Abracadeal Vacances.';
     authSubmit.textContent=authMode==='signup'?'S’inscrire':'Se connecter';
     authPassword.autocomplete=authMode==='signup'?'new-password':'current-password';
@@ -429,12 +438,7 @@ body.auth-open{overflow:hidden}
   root.addEventListener('keydown',e=>{if(e.key==='Escape'&&authModal.classList.contains('show'))closeAuth()});
 
   vacLoginCta?.addEventListener('click',e=>{e.preventDefault();openAuth('login')});
-  hostSignupCta?.addEventListener('click',e=>{
-    if(hostSignupCta.dataset.authAction==='signup'){
-      e.preventDefault();
-      openAuth('signup');
-    }
-  });
+  travelerSignupCta?.addEventListener('click',e=>{e.preventDefault();openAuth('signup')});
 
   authSubmit?.addEventListener('click',async ()=>{
     if(!sbVac)return;
@@ -453,20 +457,40 @@ body.auth-open{overflow:hidden}
         state.classList.add('show');
       }else{
         const displayName=authName.value.trim();
+        const phone=authPhone.value.trim();
         if(!displayName){setAuthMessage('Indiquez votre nom ou prénom.','error');return}
+        if(!phone){setAuthMessage('Le numéro de téléphone est obligatoire pour un compte voyageur.','error');return}
+        const digits=phone.replace(/\D/g,'');
+        if(digits.length<8){setAuthMessage('Indiquez un numéro de téléphone valide.','error');return}
         const {data,error}=await sbVac.auth.signUp({
           email,
           password,
-          options:{data:{display_name:displayName,account_type:'particulier'}}
+          options:{data:{
+            display_name:displayName,
+            phone,
+            account_type:'particulier',
+            vacation_role:'traveler'
+          }}
         });
         if(error){setAuthMessage(error.message,'error');return}
         if(data?.session){
+          const parts=displayName.split(/\s+/).filter(Boolean);
+          const firstName=parts.shift()||displayName;
+          const lastName=parts.join(' ')||null;
+          await sbVac.from('vacation_user_details').upsert({
+            user_id:data.user.id,
+            first_name:firstName,
+            last_name:lastName,
+            phone,
+            country:'France',
+            updated_at:new Date().toISOString()
+          },{onConflict:'user_id'});
           await refreshVacationAuth();
           closeAuth();
-          state.textContent='Votre compte est créé. Vous restez sur Abracadeal Vacances.';
+          state.textContent='Votre compte voyageur est créé.';
           state.classList.add('show');
         }else{
-          setAuthMessage('Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.','ok');
+          setAuthMessage('Compte voyageur créé. Vérifiez votre e-mail pour confirmer votre inscription.','ok');
         }
       }
     }finally{
@@ -487,21 +511,41 @@ body.auth-open{overflow:hidden}
     const user=data?.session?.user||null;
     currentAuthUser=user;
     vacLoginCta.textContent=user?'Mon compte':'Connexion';
+    travelerSignupCta?.classList.toggle('auth-hidden',!!user);
     if(!user){
-      hostSignupCta.textContent='S’inscrire';
-      hostSignupCta.href='#inscription-vacances';
-      hostSignupCta.dataset.authAction='signup';
+      hostSignupCta.textContent='Devenir hôte';
+      hostSignupCta.href='espace-hote.html?host_signup=1';
       return;
     }
-    hostSignupCta.dataset.authAction='';
+
+    // If a traveler account was created with phone metadata, make sure it is persisted.
+    const metadataPhone=user.user_metadata?.phone||'';
+    if(metadataPhone){
+      const {data:identity}=await sbVac.from('vacation_user_details').select('user_id,phone').eq('user_id',user.id).maybeSingle();
+      if(!identity?.phone){
+        const displayName=String(user.user_metadata?.display_name||'').trim();
+        const parts=displayName.split(/\s+/).filter(Boolean);
+        const firstName=parts.shift()||displayName||null;
+        const lastName=parts.join(' ')||null;
+        await sbVac.from('vacation_user_details').upsert({
+          user_id:user.id,
+          first_name:firstName,
+          last_name:lastName,
+          phone:metadataPhone,
+          country:'France',
+          updated_at:new Date().toISOString()
+        },{onConflict:'user_id'});
+      }
+    }
+
     const {data:hostProfile}=await sbVac
       .from('vacation_hosts')
-      .select('user_id,status')
+      .select('user_id,status,onboarding_completed')
       .eq('user_id',user.id)
       .maybeSingle();
-    const isHost=!!hostProfile && hostProfile.status==='active';
+    const isHost=!!hostProfile && (hostProfile.status==='active'||hostProfile.onboarding_completed);
     hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
-    hostSignupCta.href='espace-hote.html';
+    hostSignupCta.href=isHost?'espace-hote.html':'espace-hote.html?host_signup=1';
   }
 
   if(sbVac){
