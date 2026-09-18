@@ -459,12 +459,13 @@ function abracaHostNormalizePhone(value=''){
   if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
   return null;
 }
-async function abracaHostPhoneAvailable(phone){
+async function abracaHostPhoneAvailable(phone,accountType='particulier'){
   const normalized=abracaHostNormalizePhone(phone);
+  const type=['particulier','professionnel'].includes(accountType)?accountType:'particulier';
   if(!normalized) return {ok:false,message:'Indiquez un numéro de téléphone valide.'};
-  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized});
+  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized,p_account_type:type});
   if(error) return {ok:false,message:'Impossible de vérifier le numéro pour le moment.'};
-  if(!data) return {ok:false,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+  if(!data) return {ok:false,message:'Ce numéro est déjà utilisé pour un compte '+(type==='professionnel'?'professionnel':'particulier')+'.'};
   return {ok:true,normalized};
 }
 
@@ -512,13 +513,13 @@ $('completeHostBtn').onclick=async()=>{
     let normalizedPhone=abracaHostNormalizePhone(phone);
     if(!normalizedPhone){onboardingMsg('Indiquez un numéro de téléphone valide.',true);return}
     if(!currentUser){
-      const phoneCheck=await abracaHostPhoneAvailable(phone);
+      const requestedType=$('oRentalStatus').value==='societe'?'professionnel':'particulier';
+      const phoneCheck=await abracaHostPhoneAvailable(phone,requestedType);
       if(!phoneCheck.ok){onboardingMsg(phoneCheck.message,true);return}
       normalizedPhone=phoneCheck.normalized;
       saveHostDraft();
       const accountEmail=$('oAccountEmail').value.trim();
       const accountPassword=$('oAccountPassword').value;
-      const requestedType=$('oRentalStatus').value==='societe'?'professionnel':'particulier';
 
       const {data:signupData,error:signupError}=await sb.auth.signUp({
         email:accountEmail,
