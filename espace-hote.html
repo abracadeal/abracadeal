@@ -417,7 +417,7 @@ async function boot(){
   $('hello').textContent='Bonjour'+(profile?.display_name?' '+profile.display_name:'');
   await loadListings();
   $('hostPublicProfile').href='profil-vacances.html?user='+currentUser.id;
-  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);
+  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);if(new URLSearchParams(location.search).get('new')==='1'){showView('listings');openListingForm();}
 }
 
 function getHostDraft(){
