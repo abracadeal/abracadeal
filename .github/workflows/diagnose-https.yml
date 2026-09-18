@@ -1,0 +1,28 @@
+name: Diagnose HTTPS
+on:
+  push:
+    paths:
+      - '.github/workflows/diagnose-https.yml'
+permissions:
+  contents: read
+  pages: read
+jobs:
+  diagnose:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check GitHub Pages HTTPS status
+        run: |
+          echo "=== GitHub Pages ==="
+          curl -sS -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2026-03-10"             https://api.github.com/repos/abracadeal/abracadeal/pages | python -m json.tool || true
+          echo "=== DNS apex A ==="
+          dig +short abracadeal.fr A || true
+          echo "=== DNS apex AAAA ==="
+          dig +short abracadeal.fr AAAA || true
+          echo "=== DNS www CNAME ==="
+          dig +short www.abracadeal.fr CNAME || true
+          echo "=== DNS CAA ==="
+          dig +short abracadeal.fr CAA || true
+          echo "=== HTTPS probe ==="
+          curl -I -sS --max-time 15 https://abracadeal.fr || true
+          echo "=== HTTP probe ==="
+          curl -I -sS --max-time 15 http://abracadeal.fr || true
