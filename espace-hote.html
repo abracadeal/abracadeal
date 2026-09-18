@@ -170,11 +170,11 @@
         <input id="oLegalCheck" type="checkbox">
         <span>Je certifie être autorisé à proposer ce logement à la location de courte durée et que les informations et numéros renseignés sont exacts. <span class="req">*</span></span>
       </label>
-      <div class="onboarding-note">Abracadeal conserve l’adresse exacte dans l’espace privé. Les informations nécessaires à l’annonce pourront ensuite être affichées conformément à la réglementation applicable.</div>
+      <div class="onboarding-note">Abracadeal conserve l’adresse exacte dans l’espace privé. Les informations nécessaires à l’annonce pourront ensuite être affichées conformément à la réglementation applicable.</div><div class="onboarding-note"><strong>Carte bancaire obligatoire pour tous les hôtes.</strong> Pour les 500 premiers logements, aucun débit pendant 12 mois : Stripe enregistre simplement le moyen de paiement pour l’abonnement futur. L’inscription hôte n’est finalisée qu’après cette étape.</div>
     </section>
 
     <div class="onboarding-actions">
-      <button id="completeHostBtn" class="btn primary" type="button">Créer mon espace hôte et mon annonce</button>
+      <button id="completeHostBtn" class="btn primary" type="button">Continuer vers la carte bancaire</button>
     </div>
   </div>
 </div>
@@ -348,6 +348,22 @@ async function boot(){
   hostProfile=h;
 
   if(!hostProfile?.onboarding_completed){
+    const params=new URLSearchParams(location.search);
+    if(params.get('stripe')==='success'){
+      $('onboardingView').classList.remove('hidden');
+      onboardingMsg('Carte enregistrée. Finalisation de votre inscription hôte en cours…');
+      for(let i=0;i<8;i++){
+        await new Promise(r=>setTimeout(r,700));
+        const {data:hp}=await sb.from('vacation_hosts').select('onboarding_completed,onboarding_listing_id').eq('user_id',currentUser.id).maybeSingle();
+        if(hp?.onboarding_completed){
+          const target=hp.onboarding_listing_id?('photos-vacances.html?listing='+hp.onboarding_listing_id):'espace-hote.html';
+          location.replace(target);
+          return;
+        }
+      }
+      onboardingMsg('Le paiement Stripe est validé mais la confirmation prend quelques secondes. Rechargez la page dans un instant.');
+      return;
+    }
     $('onboardingView').classList.remove('hidden');
     $('oFirstName').value=identity?.first_name||'';
     $('oLastName').value=identity?.last_name||'';
@@ -441,14 +457,19 @@ $('completeHostBtn').onclick=async()=>{
     },{onConflict:'listing_id'});
     if(privateErr){await sb.from('listings').delete().eq('id',listingId);onboardingMsg(privateErr.message,true);return}
 
-    const {error:finishErr}=await sb.from('vacation_hosts').update({
-      onboarding_completed:true,updated_at:now
+    const {error:hostPendingErr}=await sb.from('vacation_hosts').update({
+      onboarding_completed:false,onboarding_listing_id:listingId,updated_at:now
     }).eq('user_id',currentUser.id);
-    if(finishErr){onboardingMsg(finishErr.message,true);return}
+    if(hostPendingErr){onboardingMsg(hostPendingErr.message,true);return}
 
-    await sb.functions.invoke('moderate-listing',{body:{listing_id:listingId}});
-    onboardingMsg('Profil hôte créé. Votre première annonce est prête : ajoutez maintenant vos photos.');
-    setTimeout(()=>location.href='photos-vacances.html?listing='+listingId,900);
+    const {data:checkoutData,error:checkoutErr}=await sb.functions.invoke('create-vacation-subscription-order',{body:{listing_id:listingId}});
+    if(checkoutErr||!checkoutData?.checkout_url){
+      onboardingMsg(checkoutErr?.message||checkoutData?.error||'Impossible d’ouvrir le paiement sécurisé Stripe.',true);
+      return;
+    }
+
+    onboardingMsg(checkoutData.offer+' — redirection vers le paiement sécurisé Stripe…');
+    location.href=checkoutData.checkout_url;
   }finally{btn.disabled=false}
 };
 
