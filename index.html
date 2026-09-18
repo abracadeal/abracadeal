@@ -4624,8 +4624,13 @@ $('#signupForm').addEventListener('submit',async e=>{
       setTimeout(()=>closeModal('accountModal'),500);
       toast('Compte créé');
     }else{
-      status.textContent='Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.'+(company_registration?' Après connexion, ouvrez Mon compte puis Compléter mes informations d’entreprise pour finaliser la vérification du SIRET.':'');
-      toast('Vérifiez votre e-mail pour confirmer');
+      const createdEmail=$('#signupEmail').value.trim();
+      status.textContent='';
+      $('#loginEmail').value=createdEmail;
+      $('#loginPassword').value='';
+      window.setAuthTab('login');
+      toast('Compte créé. Vérifiez votre e-mail puis connectez-vous.');
+      setTimeout(()=>$('#loginPassword')?.focus(),80);
     }
   }catch(err){
     console.error(err);
