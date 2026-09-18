@@ -9277,7 +9277,12 @@ document.addEventListener('DOMContentLoaded',()=>{
       }
       if(!data?.checkout_url)throw new Error(data?.error||'Lien Stripe indisponible');
       if(status)status.textContent=data.message||'Redirection vers la validation sécurisée…';
-      try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
+      try{
+        sessionStorage.setItem('abraca_pro_plan_pending','1');
+        if(!history.state?.abracaProPlanReturn){
+          history.pushState({...history.state,abracaProPlanReturn:true},document.title,location.href);
+        }
+      }catch(_){}
       location.href=data.checkout_url;
     }catch(err){
       console.error(err);
