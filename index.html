@@ -2916,7 +2916,49 @@ header .publish-trigger:hover{
   transform:translateY(0) scale(.98)!important;
 }
 @media(max-width:760px){
-  .abraca-account-trigger,.abraca-host-top{min-height:42px!important;padding:0 13px!important;font-size:.82rem!important}
+  /* Header mobile : Compte + Devenir hôte sur une ligne, Publier pleine largeur. */
+  header .nav{
+    min-height:auto!important;
+    padding:8px 0 9px!important;
+  }
+  header .nav-actions{
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    align-items:stretch!important;
+  }
+  header .nav-actions .account-auth-group{
+    display:none!important;
+  }
+  header .nav-actions .abraca-account-menu,
+  header .nav-actions .abraca-host-top{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .abraca-account-trigger,.abraca-host-top{
+    width:100%!important;
+    min-height:42px!important;
+    padding:0 10px!important;
+    border-radius:12px!important;
+    font-size:.80rem!important;
+    line-height:1.1!important;
+    white-space:nowrap!important;
+  }
+  header .nav-actions .publish-trigger{
+    grid-column:1/-1!important;
+    width:100%!important;
+    min-height:43px!important;
+    padding:0 12px!important;
+    border-radius:12px!important;
+    font-size:.84rem!important;
+    white-space:nowrap!important;
+  }
+  header .nav-actions > .hidden{display:none!important}
+}
+@media(max-width:380px){
+  .abraca-account-trigger,.abraca-host-top{font-size:.75rem!important;padding:0 7px!important}
+  header .nav-actions .publish-trigger{font-size:.80rem!important}
 }
 </style></head>
 <body>
@@ -8245,6 +8287,11 @@ document.addEventListener('DOMContentLoaded',()=>{
 
     if(createOriginal) createOriginal.style.display='none';
     if(loginOriginal) loginOriginal.style.display='none';
+    const legacyAccountGroup=(createOriginal||loginOriginal)?.closest?.('.account-auth-group');
+    if(legacyAccountGroup){
+      legacyAccountGroup.style.display='none';
+      legacyAccountGroup.setAttribute('aria-hidden','true');
+    }
 
     const accountWrap=document.createElement('div');
     accountWrap.className='abraca-account-menu';
