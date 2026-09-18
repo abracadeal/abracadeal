@@ -8309,10 +8309,14 @@ window.openSellerProfile=async sellerId=>{
   body.innerHTML='<div class="note">Chargement du profil…</div>';
   openModal('sellerProfileModal');
 
-  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings}]=await Promise.all([
+  const adminViewing=!!currentProfile?.is_admin;
+  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},{data:boostWallet},{data:boostGifts},{data:boostOrders}]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
-    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8)
+    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8),
+    adminViewing?sb.from('pro_boost_wallet').select('duration_days,available_credits,purchased_credits,used_credits').eq('user_id',sellerId):Promise.resolve({data:[]}),
+    adminViewing?sb.from('pro_boost_admin_grants').select('duration_days,credits').eq('user_id',sellerId):Promise.resolve({data:[]}),
+    adminViewing?sb.from('promotion_orders').select('pack_code,amount_cents,status,paid_at').eq('owner_id',sellerId).eq('status','paid').in('pack_code',['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d']):Promise.resolve({data:[]})
   ]);
 
   if(pErr||!profile){
@@ -8327,6 +8331,27 @@ window.openSellerProfile=async sellerId=>{
   const myReview=currentUser?list.find(r=>r.reviewer_id===currentUser.id):null;
   const profileComplete=!!(currentProfile?.display_name?.trim()&&currentProfile?.city?.trim()&&currentProfile?.phone?.trim());
   const emailVerified=!!currentUser?.email_confirmed_at;
+  const walletByDuration={7:{available:0,purchased:0,used:0},30:{available:0,purchased:0,used:0}};
+  for(const row of (boostWallet||[])){
+    const d=Number(row.duration_days);
+    if(d===7||d===30)walletByDuration[d]={
+      available:Math.max(0,Number(row.available_credits||0)),
+      purchased:Math.max(0,Number(row.purchased_credits||0)),
+      used:Math.max(0,Number(row.used_credits||0))
+    };
+  }
+  const giftsByDuration={7:0,30:0};
+  for(const row of (boostGifts||[])){
+    const d=Number(row.duration_days);
+    if(d===7||d===30)giftsByDuration[d]+=Math.max(0,Number(row.credits||0));
+  }
+  const paidBoostOrders=boostOrders||[];
+  const purchasedTotal=walletByDuration[7].purchased+walletByDuration[30].purchased;
+  const giftedTotal=giftsByDuration[7]+giftsByDuration[30];
+  const availableTotal=walletByDuration[7].available+walletByDuration[30].available;
+  const usedTotal=walletByDuration[7].used+walletByDuration[30].used;
+  const spentBoostCents=paidBoostOrders.reduce((sum,row)=>sum+Math.max(0,Number(row.amount_cents||0)),0);
+  const spentBoostEuros=(spentBoostCents/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 
   let reviewForm='';
   if(!currentUser){
@@ -8393,7 +8418,36 @@ window.openSellerProfile=async sellerId=>{
     <section class="review-section">
       <h3>Outils Admin · Boosts</h3>
       <div class="review-form">
-        <p class="note" style="margin-top:0">Offrir des jetons Boost à ce professionnel sans paiement Stripe.</p>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">A déjà acheté des Boosts</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${purchasedTotal>0?'Oui':'Non'}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Dépensé en Boosts</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${spentBoostEuros}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Boosts achetés</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${purchasedTotal}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Solde restant</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${availableTotal}</strong>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px">
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fbf7fd">
+            <b>Boosts 7 jours</b>
+            <div class="note" style="margin-top:6px">Achetés : <strong>${walletByDuration[7].purchased}</strong> · Offerts : <strong>${giftsByDuration[7]}</strong> · Utilisés : <strong>${walletByDuration[7].used}</strong> · Restants : <strong>${walletByDuration[7].available}</strong></div>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fbf7fd">
+            <b>Boosts 30 jours</b>
+            <div class="note" style="margin-top:6px">Achetés : <strong>${walletByDuration[30].purchased}</strong> · Offerts : <strong>${giftsByDuration[30]}</strong> · Utilisés : <strong>${walletByDuration[30].used}</strong> · Restants : <strong>${walletByDuration[30].available}</strong></div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:0">Commandes Boost payées : <strong>${paidBoostOrders.length}</strong> · Offerts par l’admin : <strong>${giftedTotal}</strong> · Utilisés : <strong>${usedTotal}</strong>.</p>
+        <p class="note">Offrir des jetons Boost à ce professionnel sans paiement Stripe.</p>
         <div class="form-grid">
           <div class="form-row"><label>Durée</label><select class="select" id="adminBoostDuration-${sellerId}"><option value="7">7 jours</option><option value="30">30 jours</option></select></div>
           <div class="form-row"><label>Nombre de jetons</label><input class="input" id="adminBoostCredits-${sellerId}" type="number" min="1" max="1000" value="1"></div>
@@ -8429,6 +8483,7 @@ window.adminGiftBoosts=async sellerId=>{
     toast(credits+' jeton'+(credits>1?'s':'')+' Boost '+duration+' jours offert'+(credits>1?'s':''));
     const input=document.getElementById('adminBoostCredits-'+sellerId);if(input)input.value='1';
     const noteInput=document.getElementById('adminBoostNote-'+sellerId);if(noteInput)noteInput.value='';
+    await openSellerProfile(sellerId);
   }catch(error){
     console.error(error);
     toast(error?.message||'Impossible d’offrir les Boosts');
