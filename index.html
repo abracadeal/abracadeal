@@ -3494,8 +3494,8 @@ header #headerLogoutBtn,
 header .publish-trigger{
   pointer-events:auto!important;
   touch-action:manipulation!important;
-  position:relative;
-  z-index:3;
+  position:relative!important;
+  z-index:10030!important;
 }
 @media(max-height:520px) and (orientation:landscape){
   header .nav-actions{position:relative!important;z-index:20!important}
@@ -4839,6 +4839,39 @@ window.setAuthTab = function(which){
 };
 
 let authBootstrapComplete=false;
+
+function readPersistedAuthSession(){
+  const stores=[];
+  try{stores.push(window.localStorage)}catch(_){}
+  try{stores.push(window.sessionStorage)}catch(_){}
+  for(const store of stores){
+    try{
+      const raw=store?.getItem(SUPABASE_AUTH_STORAGE_KEY);
+      if(!raw)continue;
+      const parsed=JSON.parse(raw);
+      const session=parsed?.currentSession||parsed?.session||parsed;
+      if(session?.access_token&&session?.refresh_token)return session;
+    }catch(_){}
+  }
+  return null;
+}
+
+async function applyAuthSession(session,{preserveEditing=true}={}){
+  currentUser=session?.user||null;
+  currentProfile=null;
+  if(currentUser){
+    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    if(error)console.warn('Profil non chargé',error);
+    currentProfile=data||null;
+    if(!currentProfile?.is_admin)moderationMode=false;
+  }else{
+    moderationMode=false;
+  }
+  authBootstrapComplete=true;
+  updateAuthUI(preserveEditing);
+  return !!currentUser;
+}
+
 async function refreshAuth({preserveEditing=true,retryInitial=false}={}){
   if(!sb){
     currentUser=null;
@@ -4856,30 +4889,35 @@ async function refreshAuth({preserveEditing=true,retryInitial=false}={}){
       const result=await sb.auth.getSession();
       lastError=result.error||null;
       session=result.data?.session||null;
-      if(session||!lastError)break;
+      if(session)break;
     }catch(error){
       lastError=error;
     }
-    if(attempt<attempts-1)await new Promise(resolve=>setTimeout(resolve,120*(attempt+1)));
+    if(attempt<attempts-1)await new Promise(resolve=>setTimeout(resolve,150*(attempt+1)));
   }
 
-  if(lastError && !session){
+  if(!session){
+    const stored=readPersistedAuthSession();
+    if(stored){
+      try{
+        const restored=await sb.auth.setSession({
+          access_token:stored.access_token,
+          refresh_token:stored.refresh_token
+        });
+        if(!restored.error)session=restored.data?.session||null;
+        else lastError=restored.error;
+      }catch(error){
+        lastError=error;
+      }
+    }
+  }
+
+  if(lastError&&!session){
     console.warn('Restauration de session différée',lastError);
     if(!authBootstrapComplete)return false;
   }
 
-  currentUser=session?.user||null;
-  currentProfile=null;
-  if(currentUser){
-    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
-    if(error)console.warn('Profil non chargé',error);
-    currentProfile=data||null;
-    if(!currentProfile?.is_admin)moderationMode=false;
-  }
-
-  authBootstrapComplete=true;
-  updateAuthUI(preserveEditing);
-  return !!currentUser;
+  return applyAuthSession(session,{preserveEditing});
 }
 // Données déclaratives : ne jamais utiliser user_metadata pour accorder un statut vérifié.
 function syncCompanyFields(prefix){
@@ -8894,8 +8932,12 @@ async function openMyAds(){
   await loadAds();
   $('#resultats').scrollIntoView({behavior:'smooth'});
 }
-// Le bouton Messages appelle directement window.openMessages depuis le HTML pour rester fiable sur mobile.
-$('#flowErrorsBtn')?.addEventListener('click',async()=>{if(!currentProfile?.is_admin)return;openModal('flowErrorsModal');await loadAdminFlowErrors();await refreshFlowErrorsCount();});
+window.openAdminFlowErrors=async()=>{
+  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+  openModal('flowErrorsModal');
+  await loadAdminFlowErrors();
+  await refreshFlowErrorsCount();
+};
 async function openFavorites(){
   if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos favoris');return;}
   resetSearchFilters();favoritesMode=true;
@@ -8905,21 +8947,6 @@ async function openFavorites(){
   $('#resultats').scrollIntoView({behavior:'smooth'});
 }
 $('#backToAllAds').addEventListener('click',()=>$('#showAll').click());
-document.addEventListener('click',event=>{
-  const moderationButton=event.target.closest?.('#moderationBtn');
-  if(moderationButton){
-    event.preventDefault();
-    event.stopPropagation();
-    window.toggleAdminModeration?.();
-    return;
-  }
-  const messagesButton=event.target.closest?.('#headerMessagesBtn');
-  if(messagesButton){
-    event.preventDefault();
-    event.stopPropagation();
-    window.openMessages?.();
-  }
-},true);
 
 window.toggleAdminModeration=async()=>{
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
@@ -8939,6 +8966,25 @@ window.toggleAdminModeration=async()=>{
     toast('Impossible de charger la modération');
   }
 };
+
+function bindAdminHeaderActions(){
+  const bindings=[
+    ['moderationBtn',()=>window.toggleAdminModeration?.()],
+    ['headerMessagesBtn',()=>window.openMessages?.()],
+    ['flowErrorsBtn',()=>window.openAdminFlowErrors?.()]
+  ];
+  for(const [id,action] of bindings){
+    const btn=document.getElementById(id);
+    if(!btn||btn.dataset.adminActionBound==='1')continue;
+    btn.dataset.adminActionBound='1';
+    btn.addEventListener('click',event=>{
+      event.preventDefault();
+      event.stopPropagation();
+      action();
+    });
+  }
+}
+bindAdminHeaderActions();
 
 // Password recovery: isolated from catalogue and account editing.
 const passwordRecovery = (()=>{
@@ -9041,14 +9087,18 @@ if(sb){
   })();
   sb.auth.onAuthStateChange((event,session)=>{
     passwordRecovery.handleAuth(event,session);
-    if(event==='INITIAL_SESSION'){
-      // Le bootstrap principal restaure la session et le profil.
-      return;
-    }
-    // Sortir du callback d'authentification avant tout nouvel appel au service.
     setTimeout(async()=>{
-      try{await refreshAuth();await loadFavorites();await loadAds();}
-      catch(error){console.error('Actualisation du compte impossible',error);}
+      try{
+        if(event==='INITIAL_SESSION'&&session){
+          await applyAuthSession(session,{preserveEditing:false});
+        }else{
+          await refreshAuth({preserveEditing:event!=='INITIAL_SESSION',retryInitial:event==='INITIAL_SESSION'});
+        }
+        await loadFavorites();
+        await loadAds();
+      }catch(error){
+        console.error('Actualisation du compte impossible',error);
+      }
     },0);
   });
 }else{
