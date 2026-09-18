@@ -4488,7 +4488,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.github.io/abracadeal/',data:{display_name:name,account_type:type,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{display_name:name,account_type:type,...(company_registration?{company_registration}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();
@@ -7972,7 +7972,7 @@ $('#moderationBtn').addEventListener('click',async()=>{
 
 // Password recovery: isolated from catalogue and account editing.
 const passwordRecovery = (()=>{
-  const redirectTo='https://abracadeal.github.io/abracadeal/';
+  const redirectTo='https://abracadeal.fr/';
   const storageKey='abracadeal.passwordRecoveryUser.v1';
   let recoveryUserId=null, sending=false, updating=false;
   const readMarker=()=>{try{return sessionStorage.getItem(storageKey)}catch{return null}};
