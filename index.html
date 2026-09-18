@@ -9276,7 +9276,8 @@ document.addEventListener('DOMContentLoaded',()=>{
         throw new Error(detail?.error||detail?.message||error.message||'Impossible de préparer l’abonnement');
       }
       if(!data?.checkout_url)throw new Error(data?.error||'Lien Stripe indisponible');
-      if(status)status.textContent=data.message||'Redirection vers Stripe…';
+      if(status)status.textContent=data.message||'Redirection vers la validation sécurisée…';
+      try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
       location.href=data.checkout_url;
     }catch(err){
       console.error(err);
@@ -9295,9 +9296,11 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(error && !/0 rows/i.test(error.message||''))console.warn('Abonnement Pro indisponible',error);
       const complete=!!data && ['trialing','active'].includes(data.status);
       if(complete){
+        try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
         if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
         return false;
       }
+      try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
       await loadProPlans();
       closeModal('accountModal');
       openModal('proPlanModal');
@@ -9314,18 +9317,47 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   },true);
 
+  function restoreMandatoryProPlanGate(){
+    if(!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return;
+    let pending=false;
+    try{pending=sessionStorage.getItem('abraca_pro_plan_pending')==='1'}catch(_){}
+    if(pending){
+      closeModal('accountModal');
+      openModal('proPlanModal');
+      loadProPlans().catch(error=>console.error('Formules Pro indisponibles',error));
+    }
+    ensureProPlanSelection();
+  }
+
   window.addEventListener('abracadeal:auth',()=>{
     setTimeout(()=>{
       loadAdminDashboardStats();
-      ensureProPlanSelection();
+      restoreMandatoryProPlanGate();
     },80);
+  });
+
+  window.addEventListener('pageshow',()=>{
+    setTimeout(restoreMandatoryProPlanGate,0);
+  });
+  window.addEventListener('focus',()=>{
+    setTimeout(restoreMandatoryProPlanGate,0);
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')setTimeout(restoreMandatoryProPlanGate,0);
   });
 
   const qs=new URLSearchParams(location.search);
   if(qs.get('pro_subscription')==='success'){
     setTimeout(async()=>{
-      try{await refreshAuth();await loadAdminDashboardStats();toast('Formule Pro activée');}
-      catch(e){console.error(e)}
+      try{
+        await refreshAuth();
+        const blocked=await ensureProPlanSelection();
+        await loadAdminDashboardStats();
+        if(!blocked){
+          try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+          toast('Formule Pro activée');
+        }
+      }catch(e){console.error(e)}
       try{history.replaceState({},document.title,location.pathname+(location.hash||''))}catch{}
     },500);
   }else{
