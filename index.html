@@ -6223,18 +6223,25 @@ function renderPromotionModal(){
 }
 function renderProBoostWallet(){
   const isPro=!!currentUser&&currentProfile?.account_type==='professionnel';
-  $('#proBoostWallet')?.classList.toggle('hidden',!isPro);
+  const isAdmin=!!currentUser&&currentProfile?.is_admin===true;
+  $('#proBoostWallet')?.classList.toggle('hidden',!isPro&&!isAdmin);
   const count7=Math.max(0,Number(proBoostWalletState[7]||0));
   const count30=Math.max(0,Number(proBoostWalletState[30]||0));
-  if($('#proBoost7Count'))$('#proBoost7Count').textContent=String(count7);
-  if($('#proBoost30Count'))$('#proBoost30Count').textContent=String(count30);
-  if($('#useBoost7Balance'))$('#useBoost7Balance').textContent=count7+' crédit'+(count7>1?'s':'')+' disponible'+(count7>1?'s':'');
-  if($('#useBoost30Balance'))$('#useBoost30Balance').textContent=count30+' crédit'+(count30>1?'s':'')+' disponible'+(count30>1?'s':'');
-  if($('#useBoost7Btn'))$('#useBoost7Btn').disabled=count7<=0;
-  if($('#useBoost30Btn'))$('#useBoost30Btn').disabled=count30<=0;
+  if($('#proBoost7Count'))$('#proBoost7Count').textContent=isAdmin?'∞':String(count7);
+  if($('#proBoost30Count'))$('#proBoost30Count').textContent=isAdmin?'∞':String(count30);
+  if($('#useBoost7Balance'))$('#useBoost7Balance').textContent=isAdmin?'Boosts admin illimités':count7+' crédit'+(count7>1?'s':'')+' disponible'+(count7>1?'s':'');
+  if($('#useBoost30Balance'))$('#useBoost30Balance').textContent=isAdmin?'Boosts admin illimités':count30+' crédit'+(count30>1?'s':'')+' disponible'+(count30>1?'s':'');
+  if($('#useBoost7Btn'))$('#useBoost7Btn').disabled=!isAdmin&&count7<=0;
+  if($('#useBoost30Btn'))$('#useBoost30Btn').disabled=!isAdmin&&count30<=0;
 }
 async function loadProBoostWallet(){
-  if(!sb||!currentUser||currentProfile?.account_type!=='professionnel'){
+  if(!sb||!currentUser){
+    proBoostWalletState={7:0,30:0};renderProBoostWallet();return proBoostWalletState;
+  }
+  if(currentProfile?.is_admin===true){
+    proBoostWalletState={7:999999,30:999999};renderProBoostWallet();return proBoostWalletState;
+  }
+  if(currentProfile?.account_type!=='professionnel'){
     proBoostWalletState={7:0,30:0};renderProBoostWallet();return proBoostWalletState;
   }
   const {data,error}=await sb.from('pro_boost_wallet').select('duration_days,available_credits').eq('user_id',currentUser.id);
@@ -6254,9 +6261,11 @@ function openProBoostStore(){
   openModal('promotionModal');
 }
 async function openBoostCreditForListing(id){
-  if(!currentUser||currentProfile?.account_type!=='professionnel'){toast('Compte professionnel requis');return;}
+  const isAdmin=currentProfile?.is_admin===true;
+  if(!currentUser||(!isAdmin&&currentProfile?.account_type!=='professionnel')){toast('Compte professionnel requis');return;}
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
-  if(!a||a.owner_id!==currentUser.id){toast('Annonce introuvable');return;}
+  if(!a||(!isAdmin&&a.owner_id!==currentUser.id)){toast('Annonce introuvable');return;}
+  if(a.seller_type!=='professionnel'){toast('Le Boost Pro est réservé aux annonces professionnelles');return;}
   if(listingIsFeatured(a)){toast('Cette annonce est déjà boostée');return;}
   boostCreditListingId=id;
   if($('#boostCreditTitle'))$('#boostCreditTitle').textContent='Booster · '+(a.title||'Annonce');
@@ -6280,30 +6289,32 @@ async function useProBoostCredit(durationDays){
   const days=Number(durationDays);
   const btn=days===7?$('#useBoost7Btn'):$('#useBoost30Btn');
   const status=$('#boostCreditStatus');
-  if(Number(proBoostWalletState[days]||0)<=0){toast('Aucun jeton '+days+' jours disponible');return;}
+  const isAdmin=currentProfile?.is_admin===true;
+  if(!isAdmin&&Number(proBoostWalletState[days]||0)<=0){toast('Aucun jeton '+days+' jours disponible');return;}
   if(btn)btn.disabled=true;
   if(status)status.textContent='Activation du Boost…';
   try{
     const {data,error}=await sb.rpc('consume_pro_boost',{p_listing_id:boostCreditListingId,p_duration_days:days});
     if(error)throw error;
-    const remaining=Math.max(0,Number(data?.remaining_credits??(Number(proBoostWalletState[days]||0)-1)));
-    proBoostWalletState[days]=remaining;
+    const adminUnlimited=!!data?.admin_unlimited;
+    const remaining=adminUnlimited?null:Math.max(0,Number(data?.remaining_credits??(Number(proBoostWalletState[days]||0)-1)));
+    if(!adminUnlimited)proBoostWalletState[days]=remaining;
     renderProBoostWallet();
     closeModal('boostCreditModal');
     boostCreditListingId=null;
     await loadAds();
-    toast('Annonce boostée '+days+' jours · '+remaining+' jeton'+(remaining>1?'s':'')+' restant'+(remaining>1?'s':''));
+    toast(adminUnlimited?'Boost admin offert · '+days+' jours':'Annonce boostée '+days+' jours · '+remaining+' jeton'+(remaining>1?'s':'')+' restant'+(remaining>1?'s':''));
   }catch(err){
     const message=boostRpcErrorMessage(err);
     if(status)status.textContent=message;
     toast(message);
     await loadProBoostWallet();
   }finally{
-    if(btn)btn.disabled=Number(proBoostWalletState[days]||0)<=0;
+    if(btn)btn.disabled=currentProfile?.is_admin===true?false:Number(proBoostWalletState[days]||0)<=0;
   }
 }
 function openPromotionForListing(id){
-  if(accountAudience()==='professionnel'){openBoostCreditForListing(id);return;}
+  if(currentProfile?.is_admin===true||accountAudience()==='professionnel'){openBoostCreditForListing(id);return;}
   promoPreselectedListingId=id;promoSelectedPack='private_7d';renderPromotionModal();openModal('promotionModal');
 }
 async function buyPhotoPackForListing(id){try{const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);const pack=a?.seller_type==='professionnel'?'photo_30_pro':'photo_12';const url=await createPromotionOrder(pack,[id]);location.href=url}catch(err){toast(err.message||'Impossible de préparer le paiement')}}
