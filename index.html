@@ -4729,7 +4729,10 @@ function openModal(id){
       const panel=document.getElementById('adminStatsPanel');
       panel?.classList.remove('hidden');
       setTimeout(()=>window.loadAdminDashboardStats?.(),0);
-      setTimeout(()=>window.searchAdminDatabase?.(),30);
+      const dbHost=document.getElementById('adminDbResults');
+      const dbStatus=document.getElementById('adminDbStatus');
+      if(dbHost)dbHost.innerHTML='';
+      if(dbStatus)dbStatus.textContent='Saisissez un nom, un téléphone, un e-mail ou un numéro d’annonce pour lancer une recherche.';
     }
     if(currentProfile?.account_type==='professionnel'){
       setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
@@ -9418,6 +9421,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     const status=document.getElementById('adminDbStatus');
     const query=document.getElementById('adminDbQuery')?.value?.trim()||'';
     const state=document.getElementById('adminDbState')?.value||'all';
+    const host=document.getElementById('adminDbResults');
+    if(!query){
+      if(host)host.innerHTML='';
+      if(status)status.textContent='Saisissez un nom, un téléphone, un e-mail ou un numéro d’annonce pour lancer une recherche.';
+      return;
+    }
     if(status)status.textContent='Recherche…';
     const {data,error}=await sb.rpc('admin_search_listings',{p_query:query,p_state:state,p_limit:50});
     if(error){
@@ -9453,7 +9462,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   document.getElementById('adminDbSearchBtn')?.addEventListener('click',searchAdminDatabase);
   document.getElementById('adminDbQuery')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAdminDatabase();}});
-  document.getElementById('adminDbState')?.addEventListener('change',searchAdminDatabase);
+  document.getElementById('adminDbState')?.addEventListener('change',()=>{
+    if(document.getElementById('adminDbQuery')?.value?.trim())searchAdminDatabase();
+  });
 
   async function loadProPlans(){
     const grid=document.getElementById('proPlanGrid');
