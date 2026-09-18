@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abracadeal — Recherche Admin</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0d0812;--panel:#17101f;--panel2:#201329;--line:#382642;
+  --text:#f8f4fb;--muted:#b9a8c2;--purple:#7b2aa8;--pink:#ec3fa4;
+  --green:#3bd18b;--orange:#f2ae58;--red:#ff6c7d;--blue:#6ca8ff;
+  --shadow:0 20px 60px rgba(0,0,0,.35)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 15% 0%,rgba(123,42,168,.22),transparent 38%),
+radial-gradient(circle at 90% 10%,rgba(236,63,164,.14),transparent 32%),var(--bg);color:var(--text)}
+button,input{font:inherit}
+.wrap{width:min(1320px,calc(100% - 28px));margin:auto}
+.top{position:sticky;top:0;z-index:20;background:rgba(13,8,18,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topin{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.02em}.brand span{color:#f354b5}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:800;cursor:pointer;color:#fff;background:#2a1a34;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:.18s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--purple),var(--pink))}
+main{padding:34px 0 70px}
+.hero{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;margin-bottom:22px}
+h1{margin:0;font-size:clamp(1.8rem,3vw,3rem);letter-spacing:-.04em}
+.sub{color:var(--muted);margin:8px 0 0;max-width:800px;line-height:1.5}
+.card{background:linear-gradient(180deg,rgba(32,19,41,.98),rgba(23,16,31,.98));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.searchbox{padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px}
+.searchbox input{width:100%;min-height:54px;border-radius:16px;border:1px solid #4a3157;background:#0f0a14;color:#fff;padding:0 18px;outline:none}
+.searchbox input:focus{border-color:#b34bd6;box-shadow:0 0 0 3px rgba(179,75,214,.13)}
+.help{padding:0 18px 18px;color:var(--muted);font-size:.9rem}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}
+.filter{border:1px solid var(--line);color:#d9cbe0;background:#17101f;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer}
+.filter.active{border-color:#9d4ec1;background:#321a40;color:#fff}
+.status{margin:14px 0;color:var(--muted)}
+.results{display:grid;gap:14px}
+.item{padding:18px;display:grid;grid-template-columns:1fr auto;gap:18px}
+.item h3{margin:0 0 6px;font-size:1.13rem}
+.ref{font:800 .82rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#d9b5ef}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+.badge{padding:6px 9px;border-radius:999px;font-size:.78rem;font-weight:900;border:1px solid transparent}
+.badge.live{color:#9df0c5;background:rgba(59,209,139,.1);border-color:rgba(59,209,139,.27)}
+.badge.archive{color:#ffc77f;background:rgba(242,174,88,.09);border-color:rgba(242,174,88,.25)}
+.badge.sold{color:#ffc77f;background:rgba(242,174,88,.09);border-color:rgba(242,174,88,.25)}
+.badge.active{color:#9df0c5;background:rgba(59,209,139,.1);border-color:rgba(59,209,139,.27)}
+.badge.pending{color:#a9caff;background:rgba(108,168,255,.1);border-color:rgba(108,168,255,.25)}
+.badge.rejected{color:#ffacb5;background:rgba(255,108,125,.1);border-color:rgba(255,108,125,.25)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.kv{background:#120c18;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px;min-width:0}
+.k{display:block;color:#937f9e;font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.v{display:block;color:#f5eef8;font-size:.9rem;overflow-wrap:anywhere}
+.side{text-align:right;min-width:150px}
+.price{font-weight:900;font-size:1.12rem;margin-bottom:6px}
+.date{color:var(--muted);font-size:.82rem;line-height:1.45}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.lock{display:none;max-width:680px;margin:80px auto;text-align:center;padding:30px}
+.lock h2{margin-top:0}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr}
+  .side{text-align:left}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:580px){
+  .wrap{width:min(100% - 18px,1320px)}
+  .topin{align-items:flex-start;padding:12px 0;flex-direction:column}
+  .searchbox{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .item{padding:14px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand">Abracadeal <span>Admin</span></div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='index.html'">Retour au site</button>
+      <button class="btn" id="logoutBtn">Déconnexion</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="app" style="display:none">
+  <section class="hero">
+    <div>
+      <h1>Recherche historique des annonces</h1>
+      <p class="sub">Retrouve une annonce active, vendue ou supprimée à partir du nom du propriétaire, téléphone, e-mail, référence Abracadeal, marque, modèle, titre, entreprise ou adresse de logement.</p>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="searchbox">
+      <input id="q" autocomplete="off" placeholder="Ex. Dupont, 06 12 34 56 78, email@..., BMW X5, ABR-2026-..." />
+      <button class="btn primary" id="searchBtn">Rechercher</button>
+    </div>
+    <div class="help">Minimum 2 caractères. Pour un téléphone, 4 chiffres minimum. Jusqu’à 100 résultats par recherche.</div>
+  </section>
+
+  <div class="filters">
+    <button class="filter active" data-filter="all">Toutes</button>
+    <button class="filter" data-filter="live">Actives</button>
+    <button class="filter" data-filter="archive">Archivées</button>
+    <button class="filter" data-filter="sold">Vendues</button>
+  </div>
+
+  <div class="status" id="status">Saisis un nom, téléphone, e-mail, référence ou modèle.</div>
+  <section class="results" id="results"></section>
+</main>
+
+<section class="card lock" id="lock">
+  <h2>Accès administrateur uniquement</h2>
+  <p id="lockText">Vérification de ton compte…</p>
+  <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
+</section>
+
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let rows=[],currentFilter='all';
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function fmtDate(v){if(!v)return '—';return new Intl.DateTimeFormat('fr-FR',{dateStyle:'medium',timeStyle:'short'}).format(new Date(v))}
+function fmtPrice(v){if(v===null||v===undefined||v==='')return '—';return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v))}
+function labelReason(v){return ({sold:'Vendue',user_deleted:'Supprimée par utilisateur',admin_removed:'Retirée par admin',expired:'Expirée',duplicate:'Doublon',import_removed:'Retirée du flux',other:'Archivée'})[v]||v||'—'}
+function labelStatus(v){return ({active:'Active',pending:'À valider',rejected:'Refusée',archived:'Archivée'})[v]||v||'—'}
+
+function filtered(){
+  if(currentFilter==='all')return rows;
+  if(currentFilter==='live')return rows.filter(r=>r.record_source==='live');
+  if(currentFilter==='archive')return rows.filter(r=>r.record_source==='archive');
+  if(currentFilter==='sold')return rows.filter(r=>r.archive_reason==='sold');
+  return rows;
+}
+
+function render(){
+  const data=filtered();
+  $('status').textContent=rows.length ? data.length+' résultat(s) affiché(s) sur '+rows.length : $('status').textContent;
+  if(!data.length){
+    $('results').innerHTML='<div class="card empty">Aucune annonce correspondante.</div>';
+    return;
+  }
+  $('results').innerHTML=data.map(r=>{
+    const isArchive=r.record_source==='archive';
+    const statusClass=isArchive?'archive':(r.status||'active');
+    const owner=r.owner_name||r.company_name||'Propriétaire non renseigné';
+    const vehicle=[r.vehicle_make,r.vehicle_model,r.vehicle_year].filter(Boolean).join(' ');
+    return `<article class="card item">
+      <div>
+        <div class="ref">${esc(r.listing_reference||'Sans référence')}</div>
+        <h3>${esc(r.title||vehicle||'Annonce sans titre')}</h3>
+        <div class="badges">
+          <span class="badge ${statusClass}">${esc(isArchive?'Archive':labelStatus(r.status))}</span>
+          ${r.archive_reason?'<span class="badge sold">'+esc(labelReason(r.archive_reason))+'</span>':''}
+          ${r.category?'<span class="badge">'+esc(r.category)+'</span>':''}
+        </div>
+        <div class="grid">
+          <div class="kv"><span class="k">Propriétaire</span><span class="v">${esc(owner)}</span></div>
+          <div class="kv"><span class="k">Téléphone</span><span class="v">${esc(r.owner_phone||'—')}</span></div>
+          <div class="kv"><span class="k">E-mail</span><span class="v">${esc(r.owner_email||'—')}</span></div>
+          <div class="kv"><span class="k">Ville</span><span class="v">${esc(r.city||'—')}</span></div>
+          <div class="kv"><span class="k">Véhicule / modèle</span><span class="v">${esc(vehicle||'—')}</span></div>
+          <div class="kv"><span class="k">Entreprise</span><span class="v">${esc(r.company_name||'—')}</span></div>
+          <div class="kv"><span class="k">SIREN</span><span class="v">${esc(r.siren||'—')}</span></div>
+          <div class="kv"><span class="k">SIRET</span><span class="v">${esc(r.siret||'—')}</span></div>
+        </div>
+      </div>
+      <div class="side">
+        <div class="price">${fmtPrice(r.price)}</div>
+        <div class="date">
+          Créée : ${fmtDate(r.created_at)}<br>
+          ${r.archived_at?'Archivée : '+fmtDate(r.archived_at)+'<br>':''}
+          ${r.retention_until?'Conservation : '+fmtDate(r.retention_until):''}
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+async function search(){
+  const q=$('q').value.trim();
+  if(q.length<2){$('status').textContent='Entre au moins 2 caractères.';$('results').innerHTML='';return}
+  $('searchBtn').disabled=true;$('searchBtn').textContent='Recherche…';$('status').textContent='Recherche en cours…';
+  const {data,error}=await sb.rpc('admin_search_listing_history',{p_query:q,p_limit:100});
+  $('searchBtn').disabled=false;$('searchBtn').textContent='Rechercher';
+  if(error){$('status').textContent='Erreur : '+error.message;$('results').innerHTML='';return}
+  rows=data||[];render();
+}
+
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.user){
+    $('lock').style.display='block';$('lockText').textContent='Connecte-toi avec ton compte administrateur.';
+    return;
+  }
+  const {data:profile,error}=await sb.from('profiles').select('is_admin').eq('id',session.user.id).maybeSingle();
+  if(error||!profile?.is_admin){
+    $('lock').style.display='block';$('lockText').textContent='Ce compte ne possède pas les droits administrateur.';
+    return;
+  }
+  $('app').style.display='block';
+  $('lock').style.display='none';
+}
+
+$('searchBtn').addEventListener('click',search);
+$('q').addEventListener('keydown',e=>{if(e.key==='Enter')search()});
+document.querySelectorAll('.filter').forEach(b=>b.addEventListener('click',()=>{
+  document.querySelectorAll('.filter').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');currentFilter=b.dataset.filter;render();
+}));
+$('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.href='index.html'});
+boot();
+</script>
+</body>
+</html>
