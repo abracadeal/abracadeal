@@ -9,7 +9,13 @@
 :root{--bg:#f7f3f9;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#5b1a77;--p2:#8b2bb0;--pink:#e746a3;--ok:#16794a;--warn:#a56308;--bad:#b4234f;--shadow:0 18px 45px rgba(47,17,63,.09)}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}button,input,select,textarea{font:inherit}a{text-decoration:none;color:inherit}.hidden{display:none!important}
 .top{position:sticky;top:0;z-index:40;background:#1c0b2b;color:#fff;border-bottom:1px solid rgba(255,255,255,.08)}.topin{width:min(1220px,calc(100% - 28px));margin:auto;min-height:70px;display:flex;align-items:center;justify-content:space-between;gap:14px}.brand{font-weight:900;font-size:1.25rem;display:inline-flex;align-items:center;gap:10px}.brand img{width:38px;height:38px;border-radius:11px;object-fit:cover;display:block;flex:0 0 auto}.brand span{color:#ff65be}.topactions{display:flex;gap:9px;align-items:center;flex-wrap:wrap}
-.btn{border:0;border-radius:13px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px}.btn.primary{color:#fff;background:linear-gradient(135deg,var(--p2),var(--pink))}.btn.soft{background:#f5edf8;color:var(--p)}.btn.white{background:#fff;color:#4c1c61}.btn.ghost{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}.btn.danger{background:#fff0f3;color:var(--bad)}.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn{border:0;border-radius:13px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:8px;transition:transform .22s ease,box-shadow .22s ease,filter .22s ease}.btn.primary{color:#fff;background:linear-gradient(135deg,var(--p2),var(--pink))}.btn.soft{background:#f5edf8;color:var(--p)}.btn.white{background:#fff;color:#4c1c61}.btn.ghost{color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15)}.btn.danger{background:#fff0f3;color:var(--bad)}.btn:disabled{opacity:.55;cursor:not-allowed}
+.btn.premium-action{position:relative;overflow:hidden;color:#fff;background:linear-gradient(120deg,#63208b 0%,#b72fb0 45%,#ee42a5 75%,#7b27a0 100%);background-size:220% 220%;border:1px solid rgba(255,255,255,.18);box-shadow:0 10px 24px rgba(181,47,176,.28),inset 0 1px 0 rgba(255,255,255,.18);animation:premiumFlow 4.5s ease-in-out infinite}
+.btn.premium-action::after{content:"";position:absolute;inset:-45% -20%;background:linear-gradient(110deg,transparent 35%,rgba(255,255,255,.34) 49%,transparent 63%);transform:translateX(-120%);animation:premiumShine 3.4s ease-in-out infinite;pointer-events:none}
+.btn.premium-action:hover{transform:translateY(-2px) scale(1.025);box-shadow:0 16px 32px rgba(181,47,176,.38),0 0 20px rgba(231,70,163,.18)}
+.btn.premium-action:active{transform:translateY(0) scale(.985)}
+@keyframes premiumFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes premiumShine{0%,38%{transform:translateX(-120%)}66%,100%{transform:translateX(120%)}}
 .shell{width:min(1220px,calc(100% - 28px));margin:24px auto 60px;display:grid;grid-template-columns:230px minmax(0,1fr);gap:22px}.side{background:#251033;color:#fff;border-radius:22px;padding:14px;height:max-content;position:sticky;top:92px}.side h3{margin:10px 10px 14px;font-size:.85rem;color:#cdb7d8;text-transform:uppercase;letter-spacing:.06em}.navbtn{width:100%;border:0;background:transparent;color:#dbcde2;text-align:left;padding:12px 13px;border-radius:12px;font-weight:750;cursor:pointer;margin:2px 0}.navbtn.active,.navbtn:hover{background:rgba(255,255,255,.1);color:#fff}.main{min-width:0}.hero{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:18px}.hero h1{margin:0;font-size:clamp(2rem,4vw,3.4rem);letter-spacing:-.04em}.hero p{margin:7px 0 0;color:var(--muted)}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#efe4f4;color:#6b2687;font-size:.76rem;font-weight:850}
 .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.metric{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:17px;box-shadow:var(--shadow)}.metric span{display:block;color:var(--muted);font-size:.78rem;font-weight:750}.metric strong{display:block;font-size:1.65rem;margin-top:6px}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow);margin-top:16px}.cardhead{display:flex;justify-content:space-between;gap:14px;align-items:center;margin-bottom:14px}.card h2,.card h3{margin:0}.sub{color:var(--muted);font-size:.9rem;line-height:1.5}.list{display:grid;gap:12px}.listing{border:1px solid var(--line);border-radius:17px;padding:15px;display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center}.listing h3{margin:0 0 5px}.meta{color:var(--muted);font-size:.84rem}.actions{display:flex;gap:8px;flex-wrap:wrap}.status{font-size:.72rem;font-weight:900;border-radius:999px;padding:6px 9px}.s-active{background:#e8f7ef;color:var(--ok)}.s-pending{background:#fff4df;color:var(--warn)}.s-archived,.s-rejected{background:#f2edf4;color:#745f7d}
@@ -61,7 +67,7 @@
       <div class="field wide"><label>Email</label><input id="loginEmail" type="email" autocomplete="email"></div>
       <div class="field wide"><label>Mot de passe</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
     </div>
-    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="loginBtn" class="btn primary">Se connecter</button><a class="btn soft" href="espace-hote.html?host_signup=1">Créer un compte hôte</a></div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="loginBtn" class="btn premium-action" type="button">Se connecter</button><button id="createHostAccountBtn" class="btn premium-action" type="button">Créer un compte hôte</button></div>
   </div>
 </div>
 
@@ -78,6 +84,16 @@
     </div>
 
     <div id="onboardingNotice" class="notice"></div>
+
+    <section id="hostAccountCreate" class="onboarding-section hidden">
+      <h2>Créer votre compte hôte</h2>
+      <div class="sub">Commencez par vos identifiants Abracadeal. Ensuite vous complétez votre profil, le logement et la carte bancaire.</div>
+      <div class="formgrid">
+        <div class="field"><label>E-mail <span class="req">*</span></label><input id="oAccountEmail" type="email" autocomplete="email" placeholder="vous@exemple.fr"></div>
+        <div class="field"><label>Mot de passe <span class="req">*</span></label><input id="oAccountPassword" type="password" minlength="6" autocomplete="new-password" placeholder="6 caractères minimum"></div>
+        <div class="field"><label>Confirmer le mot de passe <span class="req">*</span></label><input id="oAccountPassword2" type="password" minlength="6" autocomplete="new-password" placeholder="Confirmez le mot de passe"></div>
+      </div>
+    </section>
 
     <section class="onboarding-section">
       <h2>1. Identité du loueur</h2>
@@ -331,13 +347,29 @@ window.showView=showView;
 document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 
 async function boot(){
+  const params=new URLSearchParams(location.search);
+  const hostSignupMode=params.get('host_signup')==='1';
+
   const {data:{session}}=await sb.auth.getSession();
   currentUser=session?.user||null;
-  $('loginView').classList.toggle('hidden',!!currentUser);
+
+  $('loginView').classList.add('hidden');
   $('appView').classList.add('hidden');
   $('onboardingView').classList.add('hidden');
+  $('hostAccountCreate')?.classList.add('hidden');
   $('logoutTop').classList.toggle('hidden',!currentUser);
-  if(!currentUser)return;
+
+  if(!currentUser){
+    if(hostSignupMode){
+      $('onboardingView').classList.remove('hidden');
+      $('hostAccountCreate')?.classList.remove('hidden');
+      restoreHostDraft(true);
+      setTimeout(()=>$('oAccountEmail')?.focus(),80);
+    }else{
+      $('loginView').classList.remove('hidden');
+    }
+    return;
+  }
 
   const [{data:p},{data:h},{data:identity}]=await Promise.all([
     sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(),
@@ -348,7 +380,6 @@ async function boot(){
   hostProfile=h;
 
   if(!hostProfile?.onboarding_completed){
-    const params=new URLSearchParams(location.search);
     if(params.get('stripe')==='success'){
       $('onboardingView').classList.remove('hidden');
       onboardingMsg('Carte enregistrée. Finalisation de votre inscription hôte en cours…');
@@ -356,15 +387,18 @@ async function boot(){
         await new Promise(r=>setTimeout(r,700));
         const {data:hp}=await sb.from('vacation_hosts').select('onboarding_completed,onboarding_listing_id').eq('user_id',currentUser.id).maybeSingle();
         if(hp?.onboarding_completed){
+          clearHostDraft();
           const target=hp.onboarding_listing_id?('photos-vacances.html?listing='+hp.onboarding_listing_id):'espace-hote.html';
           location.replace(target);
           return;
         }
       }
-      onboardingMsg('Le paiement Stripe est validé mais la confirmation prend quelques secondes. Rechargez la page dans un instant.');
+      onboardingMsg('La confirmation Stripe prend quelques secondes. Rechargez la page dans un instant.');
       return;
     }
+
     $('onboardingView').classList.remove('hidden');
+    $('hostAccountCreate')?.classList.add('hidden');
     $('oFirstName').value=identity?.first_name||'';
     $('oLastName').value=identity?.last_name||'';
     $('oPhone').value=identity?.phone||profile?.phone||'';
@@ -373,6 +407,7 @@ async function boot(){
     $('oCountry').value=identity?.country||'France';
     $('oRentalStatus').value=hostProfile?.rental_status||'';
     $('oSiret').value=hostProfile?.siret||'';
+    restoreHostDraft(false);
     return;
   }
 
@@ -384,6 +419,30 @@ async function boot(){
   $('hostPublicProfile').href='profil-vacances.html?user='+currentUser.id;
   await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);
 }
+
+function getHostDraft(){
+  try{return JSON.parse(localStorage.getItem('abraca_host_signup_draft')||'null')}catch{return null}
+}
+function saveHostDraft(){
+  const ids=['oFirstName','oLastName','oPhone','oBirthDate','oHostCity','oCountry','oRentalStatus','oSiret','oAddress1','oPostal','oCity','oPropertyType','oPrimaryResidence','oGuests','oBedrooms','oBeds','oBathrooms','oRegistrationNumber','oClassifiedStars','oTitle','oPrice','oCleaning','oDescription'];
+  const d={};ids.forEach(id=>{const el=$(id);if(el)d[id]=el.value});
+  localStorage.setItem('abraca_host_signup_draft',JSON.stringify(d));
+}
+function restoreHostDraft(overwrite=true){
+  const d=getHostDraft();if(!d)return;
+  Object.entries(d).forEach(([id,value])=>{const el=$(id);if(el&&(overwrite||!el.value))el.value=value??''});
+}
+function clearHostDraft(){localStorage.removeItem('abraca_host_signup_draft')}
+
+$('createHostAccountBtn')?.addEventListener('click',()=>{
+  history.replaceState(null,'','espace-hote.html?host_signup=1');
+  $('loginView').classList.add('hidden');
+  $('onboardingView').classList.remove('hidden');
+  $('hostAccountCreate')?.classList.remove('hidden');
+  restoreHostDraft(true);
+  window.scrollTo({top:0,behavior:'smooth'});
+  setTimeout(()=>$('oAccountEmail')?.focus(),120);
+});
 
 function onboardingMsg(t,err=false){
   const n=$('onboardingNotice');
@@ -409,6 +468,22 @@ $('completeHostBtn').onclick=async()=>{
   const title=$('oTitle').value.trim();
   const description=$('oDescription').value.trim();
   const price=Number($('oPrice').value);
+
+  if(!currentUser){
+    const accountEmail=$('oAccountEmail')?.value.trim()||'';
+    const accountPassword=$('oAccountPassword')?.value||'';
+    const accountPassword2=$('oAccountPassword2')?.value||'';
+    if(!accountEmail||!accountPassword||!accountPassword2){
+      onboardingMsg('Renseignez votre e-mail et votre mot de passe pour créer le compte hôte.',true);return;
+    }
+    if(accountPassword.length<6){
+      onboardingMsg('Le mot de passe doit contenir au moins 6 caractères.',true);return;
+    }
+    if(accountPassword!==accountPassword2){
+      onboardingMsg('Les deux mots de passe ne correspondent pas.',true);return;
+    }
+  }
+
   if(!first||!last||!phone||!birth||!hostCity||!rentalStatus||!address||!postal||!city||primary===''||!registration||!title||!description||!Number.isFinite(price)){
     onboardingMsg('Complétez tous les champs obligatoires avant de continuer.',true);return;
   }
@@ -417,6 +492,40 @@ $('completeHostBtn').onclick=async()=>{
 
   const btn=$('completeHostBtn');btn.disabled=true;
   try{
+    if(!currentUser){
+      saveHostDraft();
+      const accountEmail=$('oAccountEmail').value.trim();
+      const accountPassword=$('oAccountPassword').value;
+      const requestedType=$('oRentalStatus').value==='societe'?'professionnel':'particulier';
+
+      const {data:signupData,error:signupError}=await sb.auth.signUp({
+        email:accountEmail,
+        password:accountPassword,
+        options:{
+          emailRedirectTo:location.origin+'/espace-hote.html?host_signup=1',
+          data:{
+            display_name:(first+' '+last).trim(),
+            account_type:requestedType,
+            vacation_role:'host',
+            phone
+          }
+        }
+      });
+      if(signupError){onboardingMsg(signupError.message,true);return}
+
+      if(!signupData?.session){
+        onboardingMsg('Compte hôte créé. Confirmez votre adresse e-mail : votre formulaire est conservé et vous reprendrez ici après confirmation.');
+        return;
+      }
+
+      currentUser=signupData.user;
+      await new Promise(r=>setTimeout(r,300));
+      const {data:newProfile}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+      profile=newProfile||{account_type:requestedType,display_name:(first+' '+last).trim()};
+      $('hostAccountCreate')?.classList.add('hidden');
+      $('logoutTop').classList.remove('hidden');
+    }
+
     const type=profile?.account_type==='professionnel'?'professionnel':'particulier';
     const now=new Date().toISOString();
 
@@ -468,6 +577,7 @@ $('completeHostBtn').onclick=async()=>{
       return;
     }
 
+    clearHostDraft();
     onboardingMsg(checkoutData.offer+' — redirection vers le paiement sécurisé Stripe…');
     location.href=checkoutData.checkout_url;
   }finally{btn.disabled=false}
