@@ -1,0 +1,73 @@
+name: Fix auth domain and refresh
+on:
+  push:
+    paths:
+      - '.github/workflows/fix-auth-domain.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch auth flow
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path("index.html")
+          s=p.read_text(encoding="utf-8")
+
+          s=s.replace("https://abracadeal.github.io/abracadeal/","https://abracadeal.fr/")
+
+          old="""$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!sb){ toast('Connexion au service indisponible. Recharge la page.'); return; }
+  const btn=e.submitter; btn.classList.add('loading');
+  const {error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});
+  btn.classList.remove('loading');
+  if(error){toast(error.message);return}
+  closeModal('accountModal'); toast('Connexion réussie');
+});"""
+
+          new="""$('#loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!sb){ toast('Connexion au service indisponible. Recharge la page.'); return; }
+  const btn=e.submitter||e.currentTarget.querySelector('button[type="submit"]');
+  if(btn) btn.classList.add('loading');
+  const email=$('#loginEmail').value.trim();
+  const password=$('#loginPassword').value;
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(btn) btn.classList.remove('loading');
+  if(error){
+    const msg=(error.code==='invalid_credentials'||/invalid login credentials/i.test(error.message||''))
+      ? 'E-mail ou mot de passe incorrect.'
+      : (error.message||'Connexion impossible.');
+    toast(msg);
+    return;
+  }
+  await refreshAuth({preserveEditing:false});
+  if(!currentUser){
+    toast('Connexion reçue mais session non chargée. Recharge la page.');
+    return;
+  }
+  closeModal('accountModal');
+  toast('Connexion réussie');
+});"""
+
+          if old not in s:
+              raise SystemExit("login handler target not found")
+          s=s.replace(old,new,1)
+
+          p.write_text(s,encoding="utf-8")
+          PY
+      - name: Commit fix
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "No changes"
+            exit 0
+          fi
+          git config user.name "Abracadeal Bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add index.html
+          git commit -m "Fix auth redirect domain and session refresh"
+          git push
