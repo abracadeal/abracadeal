@@ -50,7 +50,30 @@ jobs:
           .abraca-account-menu.open .abraca-account-dropdown{display:grid;gap:6px}
           .abraca-account-dropdown button{width:100%;border:0;border-radius:10px;padding:10px 12px;text-align:left;background:rgba(255,255,255,.08);color:#fff;font-weight:750;cursor:pointer}
           .abraca-vacances-top{display:inline-flex;align-items:center;justify-content:center;min-height:48px;padding:0 18px;border-radius:16px;background:linear-gradient(135deg,#7e24aa,#ec3fa4);color:#fff!important;font-weight:850;text-decoration:none!important;box-shadow:0 8px 18px rgba(126,36,170,.2)}
-          @media(max-width:760px){.abraca-vacances-top{min-height:42px;padding:0 12px}.abraca-account-menu>button{min-height:42px;padding:0 12px}}
+          @media(max-width:760px){
+            html,body{overflow-x:hidden!important}
+            .abraca-top-actions{display:grid!important;grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr)!important;gap:10px!important;align-items:center!important;padding:10px 12px 12px!important}
+            .abraca-account-menu{width:100%!important;min-width:0!important}
+            .abraca-account-menu>button,.abraca-account-trigger,.abraca-vacances-top{width:100%!important;min-width:0!important;min-height:44px!important;height:44px!important;padding:0 12px!important;border-radius:14px!important;font-size:15px!important;line-height:1!important}
+            .abraca-publish-top{grid-column:1/-1!important;width:100%!important;min-height:46px!important;height:46px!important;margin:0!important;border-radius:14px!important;font-size:15px!important}
+            .abraca-account-dropdown{left:0!important;right:auto!important;min-width:210px!important}
+            .hero{padding-top:0!important}
+            .banner-frame{margin:0!important}
+            .banner{display:block!important;width:100%!important;height:auto!important;max-height:190px!important;object-fit:cover!important;object-position:center!important}
+            .search-wrap{position:relative!important;left:auto!important;bottom:auto!important;transform:none!important;width:calc(100% - 24px)!important;margin:12px auto 18px!important}
+            .search-card{display:grid!important;grid-template-columns:1fr!important;gap:8px!important;padding:10px!important;border-radius:18px!important;box-shadow:0 12px 28px rgba(36,9,55,.18)!important}
+            .field{min-height:48px!important;height:48px!important;padding:0 14px!important;border-radius:12px!important;font-size:16px!important}
+            .search-btn,.search-nearby-btn{min-height:48px!important;height:48px!important;border-radius:12px!important;font-size:16px!important}
+            .hero-shell::after{height:22px!important}
+            .abraca-founder-mobile-card{margin:18px 12px!important;padding:22px 18px!important;border-radius:22px!important}
+            .abraca-founder-mobile-title{font-size:clamp(31px,9vw,44px)!important;line-height:1.05!important;letter-spacing:-.025em!important;margin:8px 0 14px!important}
+            .abraca-founder-mobile-card p,.abraca-founder-mobile-card li{font-size:16px!important;line-height:1.45!important}
+          }
+          @media(max-width:390px){
+            .abraca-top-actions{grid-template-columns:minmax(0,.74fr) minmax(0,1.26fr)!important;gap:8px!important;padding-left:10px!important;padding-right:10px!important}
+            .abraca-account-menu>button,.abraca-account-trigger,.abraca-vacances-top{font-size:14px!important;padding:0 8px!important}
+            .banner{max-height:172px!important}
+          }
           </style>'''
           if 'id="abraca-home-ux-patch"' in s:
             s=re.sub(r'<style id="abraca-home-ux-patch">[\s\S]*?</style>',css,s,count=1)
@@ -83,6 +106,8 @@ jobs:
             const publish=exact('Publier une annonce').find(visible);
             if(publish&&publish.parentElement){
               const parent=publish.parentElement;
+              parent.classList.add('abraca-top-actions');
+              publish.classList.add('abraca-publish-top');
               [...parent.querySelectorAll('a,button')].forEach(el=>{
                 if(el===publish) return;
                 const t=(el.textContent||'').trim().toLowerCase();
@@ -97,6 +122,21 @@ jobs:
               const account=parent.querySelector('.abraca-account-menu');
               if(account) parent.insertBefore(a,account);
               else parent.insertBefore(a,publish);
+            }
+
+            // Compact the founder card on phones without changing desktop.
+            const founderTitle=all.find(el=>{
+              const t=(el.textContent||'').trim().replace(/\s+/g,' ');
+              return /^Professionnels\s*:\s*démarrez avec 12 mois gratuits\.?$/i.test(t);
+            });
+            if(founderTitle){
+              founderTitle.classList.add('abraca-founder-mobile-title');
+              let card=founderTitle.parentElement;
+              for(let i=0;i<3&&card&&card.parentElement;i++){
+                const txt=(card.innerText||'').trim();
+                if(txt.length<1600) card=card.parentElement; else break;
+              }
+              if(card&&card!==document.body) card.classList.add('abraca-founder-mobile-card');
             }
 
             // Hide the four large explanatory tiles in the founder banner.
