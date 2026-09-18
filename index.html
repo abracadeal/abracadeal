@@ -2921,13 +2921,14 @@ header .publish-trigger:hover{
 </style><style id="abraca-mobile-account-real-button">
 @media(max-width:760px){
   header{
-    position:sticky!important;
-    top:0!important;
-    z-index:10000!important;
+    position:relative!important;
+    top:auto!important;
+    z-index:50!important;
+    overflow:visible!important;
   }
   header .nav{
     min-height:0!important;
-    padding:8px 10px 10px!important;
+    padding:70px 10px 10px!important;
     box-sizing:border-box!important;
   }
   header .nav-actions,
@@ -2943,18 +2944,19 @@ header .publish-trigger:hover{
     box-sizing:border-box!important;
   }
   header .account-auth-group{
+    position:fixed!important;
+    top:8px!important;
+    left:12px!important;
+    z-index:10020!important;
     display:block!important;
-    grid-column:1!important;
-    grid-row:1!important;
-    width:100%!important;
+    width:calc(50vw - 17px)!important;
     min-width:0!important;
+    margin:0!important;
     border-radius:14px!important;
     overflow:visible!important;
     box-shadow:none!important;
   }
-  header #signupBtn{
-    display:none!important;
-  }
+  header #signupBtn{display:none!important}
   header #accountBtn{
     display:flex!important;
     align-items:center!important;
@@ -2968,34 +2970,33 @@ header .publish-trigger:hover{
     padding:0 10px!important;
     border-radius:14px!important;
     box-sizing:border-box!important;
-    position:static!important;
+    position:relative!important;
     inset:auto!important;
     transform:none!important;
     float:none!important;
-    font-size:0!important;
+    font-size:15px!important;
+    line-height:1!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
     color:#fff!important;
     background:linear-gradient(135deg,#4d176e 0%,#8f2aa8 48%,#ec3fa4 100%)!important;
     border:1px solid rgba(255,218,130,.85)!important;
     box-shadow:0 10px 28px rgba(210,55,173,.30)!important;
   }
-  header #accountBtn::after{
-    content:"Compte";
-    font-size:15px!important;
-    line-height:1!important;
-    font-weight:900!important;
-    color:#fff!important;
-  }
-  header .abraca-account-menu{
-    display:none!important;
-  }
+  header #accountBtn::after{content:none!important}
   header .publish-trigger,
   header .abraca-publish-top{
-    grid-column:2!important;
-    grid-row:1!important;
+    position:fixed!important;
+    top:8px!important;
+    right:12px!important;
+    left:auto!important;
+    z-index:10020!important;
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:100%!important;
+    width:calc(50vw - 17px)!important;
     min-width:0!important;
     max-width:none!important;
     height:46px!important;
@@ -3004,8 +3005,6 @@ header .publish-trigger:hover{
     padding:0 10px!important;
     border-radius:14px!important;
     box-sizing:border-box!important;
-    position:static!important;
-    inset:auto!important;
     transform:none!important;
     float:none!important;
     white-space:nowrap!important;
@@ -3013,7 +3012,6 @@ header .publish-trigger:hover{
   }
   header .abraca-vacances-top{
     grid-column:1/-1!important;
-    grid-row:2!important;
     width:100%!important;
     min-height:42px!important;
     height:42px!important;
@@ -3021,13 +3019,473 @@ header .publish-trigger:hover{
   }
 }
 @media(max-width:390px){
-  header #accountBtn::after,
+  header #accountBtn,
   header .publish-trigger,
-  header .abraca-publish-top{
-    font-size:14px!important;
+  header .abraca-publish-top{font-size:14px!important}
+}
+</style><style id="abraca-messages-layer-fix">
+@media(max-width:760px){
+  #messagesModal.modal-backdrop{
+    z-index:20050!important;
   }
 }
-</style></head>
+</style><style id="abraca-floating-account-host">
+@media(min-width:761px){
+  header{
+    position:sticky!important;
+    top:0!important;
+    z-index:10000!important;
+    overflow:visible!important;
+  }
+  header .nav{
+    min-height:68px!important;
+    padding:8px 0!important;
+    box-sizing:border-box!important;
+  }
+  header .nav-actions,
+  header .abraca-top-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin:0!important;
+    padding:0!important;
+  }
+  header .account-auth-group,
+  header .abraca-vacances-top,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    float:none!important;
+    margin:0!important;
+    flex:0 0 auto!important;
+  }
+  header #accountBtn,
+  header .abraca-vacances-top,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    min-height:46px!important;
+    height:46px!important;
+    padding:0 14px!important;
+    white-space:nowrap!important;
+    border-radius:14px!important;
+  }
+  header #accountBtn{
+    min-width:150px!important;
+    max-width:230px!important;
+    width:auto!important;
+    padding-left:16px!important;
+    padding-right:16px!important;
+    font-size:clamp(12px,1vw,15px)!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+  }
+  header .abraca-vacances-top{
+    min-width:138px!important;
+  }
+}
+@media(max-width:760px){
+  header .account-auth-group{
+    position:static!important;
+    width:auto!important;
+    overflow:visible!important;
+    transform:none!important;
+    margin:0!important;
+  }
+  header #accountBtn{
+    position:fixed!important;
+    top:8px!important;
+    left:10px!important;
+    right:auto!important;
+    width:calc(50vw - 15px)!important;
+    max-width:none!important;
+    min-height:46px!important;
+    height:46px!important;
+    z-index:900!important;
+    margin:0!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  header .publish-trigger,
+  header .abraca-publish-top{
+    position:fixed!important;
+    top:8px!important;
+    right:10px!important;
+    left:auto!important;
+    width:calc(50vw - 15px)!important;
+    max-width:none!important;
+    min-height:46px!important;
+    height:46px!important;
+    z-index:900!important;
+    margin:0!important;
+  }
+  header .abraca-vacances-top{
+    position:fixed!important;
+    top:62px!important;
+    left:10px!important;
+    right:10px!important;
+    width:auto!important;
+    min-height:44px!important;
+    height:44px!important;
+    z-index:899!important;
+    margin:0!important;
+  }
+  header .nav{
+    padding-top:116px!important;
+  }
+}
+</style><style id="abraca-single-account-button">
+header #signupBtn{display:none!important}
+</style><style id="abraca-global-modal-system-v3">
+/* ===== Système global des fenêtres Abracadeal ===== */
+.modal-backdrop{
+  position:fixed!important;
+  inset:0!important;
+  z-index:30000!important;
+  background:rgba(18,7,29,.64)!important;
+  -webkit-backdrop-filter:blur(7px)!important;
+  backdrop-filter:blur(7px)!important;
+  padding:20px!important;
+  overflow:hidden!important;
+  align-items:flex-start!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
+}
+.modal-backdrop.open,
+.modal-backdrop:target{
+  display:flex!important;
+}
+
+.modal-backdrop > .modal{
+  width:min(960px,calc(100vw - 40px))!important;
+  max-width:960px!important;
+  max-height:calc(100dvh - 40px)!important;
+  margin:0 auto!important;
+  border-radius:22px!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  background:#fff!important;
+  box-sizing:border-box!important;
+  box-shadow:0 30px 90px rgba(17,7,28,.34)!important;
+}
+
+.modal-backdrop .modal-head{
+  flex:0 0 auto!important;
+  min-height:64px!important;
+  padding:18px 54px 18px 22px!important;
+  background:#fff!important;
+  border-bottom:1px solid #eee7f3!important;
+  position:relative!important;
+  z-index:3!important;
+  box-sizing:border-box!important;
+}
+
+.modal-backdrop .modal-head h2{
+  margin:0!important;
+  line-height:1.2!important;
+}
+
+.modal-backdrop .close-btn{
+  position:absolute!important;
+  top:12px!important;
+  right:12px!important;
+  z-index:4!important;
+  width:40px!important;
+  height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  border-radius:10px!important;
+  line-height:1!important;
+}
+
+.modal-backdrop .modal-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:22px!important;
+  box-sizing:border-box!important;
+}
+
+/* Largeurs adaptées aux fenêtres qui ont besoin de plus d'espace */
+#publishModal > .modal,
+#proImportModal > .modal,
+#sellerProfileModal > .modal,
+#detailModal > .modal,
+#flowErrorsModal > .modal,
+#b2bModal > .modal,
+#promotionModal > .modal{
+  width:min(1040px,calc(100vw - 40px))!important;
+  max-width:1040px!important;
+}
+
+#messagesModal > .messages-modal{
+  width:min(1120px,calc(100vw - 40px))!important;
+  max-width:1120px!important;
+}
+
+/* Petites fenêtres */
+#accountModal > .modal,
+#forgotPasswordModal > .modal,
+#resetPasswordModal > .modal,
+#paymentSuccessModal > .modal{
+  width:min(560px,calc(100vw - 40px))!important;
+  max-width:560px!important;
+}
+
+/* Messagerie : conserve son organisation interne */
+#messagesModal .modal-body{
+  display:flex!important;
+  flex-direction:column!important;
+}
+#messagesModal .messages-shell{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow:hidden!important;
+}
+
+/* Publication : actions restent accessibles en bas du formulaire */
+#publishModal #publishForm{
+  min-height:100%!important;
+}
+#publishModal .form-actions{
+  position:sticky!important;
+  bottom:0!important;
+  z-index:5!important;
+  background:rgba(255,255,255,.98)!important;
+  padding-top:12px!important;
+  padding-bottom:4px!important;
+}
+
+/* Mobile */
+@media(max-width:760px){
+  .modal-backdrop{
+    padding:0!important;
+    align-items:stretch!important;
+    overflow:hidden!important;
+  }
+
+  .modal-backdrop > .modal{
+    width:100%!important;
+    max-width:none!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    margin:0!important;
+    border-radius:0!important;
+  }
+
+  .modal-backdrop .modal-head{
+    min-height:58px!important;
+    padding:calc(12px + env(safe-area-inset-top)) 52px 12px 16px!important;
+  }
+
+  .modal-backdrop .close-btn{
+    top:calc(8px + env(safe-area-inset-top))!important;
+    right:8px!important;
+  }
+
+  .modal-backdrop .modal-body{
+    padding:16px!important;
+    padding-bottom:calc(16px + env(safe-area-inset-bottom))!important;
+  }
+
+  #messagesModal .modal-body{
+    padding:0!important;
+  }
+
+  #messagesModal .message-safety{
+    border-radius:0!important;
+    margin:0!important;
+    border-left:0!important;
+    border-right:0!important;
+  }
+
+  #publishModal .modal-body{
+    padding:14px!important;
+  }
+
+  #publishModal .form-actions{
+    margin:16px -14px -14px!important;
+    padding:11px 14px calc(11px + env(safe-area-inset-bottom))!important;
+    box-shadow:0 -8px 24px rgba(35,17,48,.10)!important;
+  }
+}
+</style><style id="abraca-pack-cards-unified">
+/* Formules de publication : aucun contour spécial sur le pack choisi */
+#publishPackPicker .pack-card{
+  position:relative!important;
+  background:#fbf8fc!important;
+  border:1px solid #e3d7e9!important;
+  box-shadow:none!important;
+}
+#publishPackPicker .pack-card:hover{
+  background:#fbf8fc!important;
+  border-color:#d7c8de!important;
+  transform:translateY(-1px);
+}
+#publishPackPicker .pack-card.selected{
+  background:#fbf8fc!important;
+  border:1px solid #e3d7e9!important;
+  box-shadow:none!important;
+}
+#publishPackPicker .pack-card.selected::after{
+  content:"✓ Sélectionné";
+  position:absolute;
+  top:8px;
+  right:9px;
+  font-size:.68rem;
+  font-weight:900;
+  color:#7b2699;
+  background:#f1e7f6;
+  border-radius:999px;
+  padding:4px 7px;
+}
+</style><style id="abraca-pro-plan-admin-stats">
+.admin-stats-panel{margin:18px 0;padding:18px;border:1px solid #e7dced;border-radius:20px;background:linear-gradient(180deg,#fff,#fcf9fd)}
+.admin-stats-head{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin-bottom:14px}
+.admin-stats-head h3{margin:0;color:#31133f;font-size:1.15rem}
+.admin-stats-head p{margin:4px 0 0;color:#806f87;font-size:.8rem}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.admin-stat-card{min-width:0;padding:14px;border:1px solid #eadff0;border-radius:15px;background:#fff}
+.admin-stat-value{display:block;color:#451657;font-size:1.7rem;line-height:1;font-weight:950;letter-spacing:-.03em}
+.admin-stat-label{display:block;margin-top:7px;color:#78667f;font-size:.74rem;font-weight:800;line-height:1.25}
+.admin-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:11px}
+.admin-plan-chip{padding:12px;border-radius:14px;background:#f7f0fa;border:1px solid #e8d8ee}
+.admin-plan-chip b{display:block;color:#62247d;font-size:1.25rem}
+.admin-plan-chip span{display:block;margin-top:3px;color:#77637e;font-size:.72rem;font-weight:800}
+@media(max-width:700px){.admin-stat-grid,.admin-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){.admin-stat-grid,.admin-plan-grid{grid-template-columns:1fr 1fr}.admin-stat-card{padding:12px}.admin-stat-value{font-size:1.45rem}}
+
+.pro-plan-modal{width:min(980px,calc(100vw - 40px))!important;max-width:980px!important}
+.pro-plan-intro{padding:14px 16px;border:1px solid #e7d7ed;border-radius:15px;background:#faf5fc;color:#51355d;line-height:1.5;margin-bottom:16px}
+.pro-plan-intro strong{color:#70258d}
+.pro-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}
+.pro-plan-card{display:flex;flex-direction:column;min-height:210px;padding:16px;border:1px solid #e3d8e8;border-radius:17px;background:#fff;text-align:left;cursor:pointer;transition:.18s ease}
+.pro-plan-card:hover{transform:translateY(-2px);border-color:#b884ca;box-shadow:0 10px 24px rgba(83,34,101,.10)}
+.pro-plan-card h3{margin:0;color:#34133f;font-size:1.05rem}
+.pro-plan-price{margin:10px 0 3px;color:#7c299b;font-size:1.55rem;font-weight:950;letter-spacing:-.025em}
+.pro-plan-price small{font-size:.72rem;color:#806f87;font-weight:800}
+.pro-plan-desc{color:#77667d;font-size:.78rem;line-height:1.4;flex:1}
+.pro-plan-choose{margin-top:14px;display:flex;align-items:center;justify-content:center;min-height:42px;border-radius:12px;background:linear-gradient(135deg,#762a96,#9f31b5);color:#fff;font-weight:900}
+.pro-plan-status{min-height:20px;margin-top:12px;color:#6b5574;font-size:.82rem;font-weight:750}
+.pro-plan-modal .mandatory-note{margin:0 0 14px;color:#826d89;font-size:.78rem}
+@media(max-width:850px){.pro-plan-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.pro-plan-grid{grid-template-columns:1fr}.pro-plan-card{min-height:0}}
+</style><style id="abraca-pro-boost-wallet-ui">
+.pro-boost-wallet{margin:18px 0;padding:17px;border:1px solid #e6d8ed;border-radius:18px;background:linear-gradient(180deg,#fff,#fbf6fd)}
+.pro-boost-wallet-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}
+.pro-boost-wallet-head h4{margin:0;color:#3c174a;font-size:1.05rem}
+.pro-boost-wallet-head p{margin:4px 0 0;color:#7a6881;font-size:.76rem}
+.pro-boost-counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:12px}
+.pro-boost-count{padding:13px 14px;border:1px solid #e7daec;border-radius:14px;background:#fff}
+.pro-boost-count strong{display:block;color:#762b93;font-size:1.55rem;line-height:1;font-weight:950}
+.pro-boost-count span{display:block;margin-top:6px;color:#76637c;font-size:.76rem;font-weight:800}
+.pro-boost-wallet-note{margin-top:10px;color:#86738c;font-size:.74rem}
+.boost-btn.boost-active,.boost-btn[disabled]{cursor:default!important;opacity:.72!important;background:#efedf0!important;border-color:#d7d0da!important;color:#6f6873!important;box-shadow:none!important}
+.boost-credit-options{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin:12px 0 4px}
+.boost-credit-option{padding:16px;border:1px solid #e4d7e9;border-radius:16px;background:#fff;text-align:left;cursor:pointer;transition:.18s ease}
+.boost-credit-option:hover:not(:disabled){transform:translateY(-2px);border-color:#b985ca;box-shadow:0 9px 22px rgba(74,31,91,.10)}
+.boost-credit-option:disabled{cursor:not-allowed;opacity:.46}
+.boost-credit-option b{display:block;color:#431852;font-size:1.05rem}
+.boost-credit-option span{display:block;margin-top:6px;color:#7b6682;font-size:.8rem}
+.boost-credit-option em{display:block;margin-top:10px;color:#8529a3;font-style:normal;font-weight:900}
+@media(max-width:540px){.pro-boost-wallet-head{align-items:flex-start;flex-direction:column}.boost-credit-options{grid-template-columns:1fr}}
+</style><style id="abraca-admin-db-mobile-landscape">
+.admin-db-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-db-head h3{margin:0 0 4px}
+.admin-db-search{display:grid;grid-template-columns:minmax(0,1fr) 190px auto;gap:9px;margin:14px 0 8px}
+.admin-db-results{display:grid;gap:10px;margin-top:12px}
+.admin-db-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid #eadfed;border-radius:15px;background:#fff}
+.admin-db-card-main{min-width:0}
+.admin-db-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-db-ref{margin-top:4px;font-size:.78rem;font-weight:900;color:#71298d}
+.admin-db-meta,.admin-db-contact{margin-top:4px;font-size:.82rem;color:#74667b;overflow-wrap:anywhere}
+.admin-db-actions{display:flex;gap:8px;flex:0 0 auto}
+.admin-db-danger{color:#a32b4d!important;border-color:#e6b8c7!important}
+.admin-db-empty{padding:16px;border:1px dashed #dbcce2;border-radius:14px;text-align:center;color:#7a6b81}
+
+@media(max-width:720px){
+  .admin-db-search{grid-template-columns:1fr}
+  .admin-db-card{align-items:flex-start;flex-direction:column}
+  .admin-db-actions{width:100%;display:grid;grid-template-columns:1fr}
+  #adminDatabasePanel{padding:14px!important}
+}
+
+@media(max-height:520px) and (orientation:landscape){
+  header{position:relative!important}
+  header .nav{display:block!important;min-height:0!important;padding:6px 8px!important;width:100%!important;max-width:none!important}
+  header .nav>div:first-child{display:none!important}
+  header .nav-actions,
+  header .abraca-top-actions{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    width:100%!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:visible!important;
+  }
+  header .nav-actions>.btn,
+  header .nav-actions>a.btn,
+  header .nav-actions>.account-auth-group,
+  header .abraca-top-actions>.btn,
+  header .abraca-top-actions>a.btn{
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:38px!important;
+    height:38px!important;
+    margin:0!important;
+    padding:0 7px!important;
+    font-size:12px!important;
+    line-height:1.1!important;
+    white-space:normal!important;
+    text-align:center!important;
+    border-radius:10px!important;
+  }
+  header .account-auth-group{display:contents!important}
+  header .account-auth-group .btn{width:100%!important;height:38px!important;font-size:12px!important;border-radius:10px!important}
+  header .header-vacances-btn .header-lamp-crop{display:none!important}
+  header #headerLogoutBtn{font-size:11px!important}
+  header .publish-trigger{font-size:12px!important}
+  header .header-message-badge,header .header-flow-errors-badge{top:-4px!important;right:-3px!important}
+
+  #publishModal .modal-head{min-height:48px!important;padding:9px 50px 9px 14px!important}
+  #publishModal .modal-head h2{font-size:1.05rem!important}
+  #publishModal .close-btn{top:5px!important;right:7px!important;width:38px!important;height:38px!important}
+  #publishModal .modal-body{padding:10px 12px 0!important}
+  #publishModal .form-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    margin:10px -12px 0!important;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;
+  }
+  #publishModal .form-actions .btn{width:100%!important;min-width:0!important;margin:0!important}
+  #publishModal .publish-status{grid-column:1/-1!important;margin:0!important}
+}
+
+@media(max-width:420px){
+  #publishModal .form-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
+  #publishModal .form-actions .btn{width:100%!important}
+  #publishModal .publish-status{grid-column:1/-1!important}
+}
+</style>
+</head>
 <body>
 
 <header>
@@ -3041,9 +3499,9 @@ header .publish-trigger:hover{
         <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
       </div>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Import"><span class="header-stock-label">Import</span></button>
-      <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer"><span class="header-moderation-label">Modérer</span></button>
-      <button class="btn header-flow-errors-btn hidden" id="flowErrorsBtn" type="button" aria-label="Flux"><span class="header-flow-errors-label">Flux</span><span class="header-flow-errors-badge hidden" id="flowErrorsBadge">0</span></button>
-      <button class="btn header-messages-btn hidden" id="headerMessagesBtn" type="button" aria-label="Messages"><span class="header-message-label">Messages</span><span class="header-message-badge hidden" id="headerMessagesUnread">0</span></button>
+      <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer" onclick="window.toggleAdminModeration?.()"><span class="header-moderation-label">Modérer</span></button>
+      <button class="btn header-flow-errors-btn hidden" id="flowErrorsBtn" type="button" aria-label="Flux" onclick="window.openAdminFlowErrors?.()"><span class="header-flow-errors-label">Flux</span><span class="header-flow-errors-badge hidden" id="flowErrorsBadge">0</span></button>
+      <button class="btn header-messages-btn hidden" id="headerMessagesBtn" type="button" aria-label="Messages" onclick="window.openMessages?.()"><span class="header-message-label">Messages</span><span class="header-message-badge hidden" id="headerMessagesUnread">0</span></button>
       <button class="btn ghost hidden" id="headerLogoutBtn" type="button" aria-label="Se déconnecter">Se déconnecter</button>
       <a class="btn primary publish-trigger" href="#publishModal">Publier une annonce</a>
     </div>
@@ -3667,6 +4125,18 @@ header .publish-trigger:hover{
 
 
 
+<div class="modal-backdrop" id="proPlanModal" aria-hidden="true">
+  <div class="modal pro-plan-modal" role="dialog" aria-modal="true" aria-labelledby="proPlanTitle">
+    <div class="modal-head"><h2 id="proPlanTitle">Choisissez votre formule Pro</h2></div>
+    <div class="modal-body">
+      <div class="pro-plan-intro"><strong>Offre Fondateurs :</strong> 12 mois offerts pour les comptes éligibles. Choisissez maintenant la formule qui prendra le relais à la fin de votre période gratuite. Votre moyen de paiement est enregistré dès maintenant de façon sécurisée afin que l’abonnement puisse démarrer automatiquement à l’issue des 12 mois, sans avoir à ressaisir vos coordonnées bancaires. <strong>Aucun débit n’est effectué pendant la période gratuite.</strong></div>
+      <p class="mandatory-note"><strong>Étape obligatoire :</strong> votre espace professionnel ne peut pas être finalisé tant qu’une formule n’a pas été choisie et le moyen de paiement enregistré. Vous pouvez résilier avant la fin de la période gratuite pour éviter le démarrage de l’abonnement payant.</p>
+      <div id="proPlanGrid" class="pro-plan-grid"><div class="note">Chargement des formules…</div></div>
+      <div id="proPlanStatus" class="pro-plan-status" role="status" aria-live="polite"></div>
+    </div>
+  </div>
+</div>
+
 <!-- Offre Fondateurs : détail volontairement discret, sans grille tarifaire complète sur l’accueil. -->
 <div class="modal-backdrop" id="founderOfferModal" aria-hidden="true">
   <div class="modal founder-offer-modal" role="dialog" aria-modal="true" aria-labelledby="founderOfferTitle">
@@ -3781,7 +4251,7 @@ header .publish-trigger:hover{
         <form id="signupForm" class="auth-panel auth-signup-panel">
           <div class="form-grid">
             <div class="form-row full"><label for="signupName">Nom public / pseudo</label><input class="input" id="signupName" required maxlength="80"></div>
-            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" required></div>
+            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" required></div><div class="form-row full"><label for="signupPhone">Téléphone</label><input class="input" id="signupPhone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" maxlength="24" required><div class="note">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div></div>
             <div class="form-row full"><label>Mot de passe</label><input class="input" id="signupPassword" type="password" minlength="6" required></div>
             <div class="form-row full"><label>Type de compte</label>
               <select class="select" id="signupType"><option value="particulier">Particulier</option><option value="professionnel">Professionnel</option></select>
@@ -3827,9 +4297,68 @@ header .publish-trigger:hover{
             <button class="btn primary" id="editProfileBtn" type="button">Modifier mes informations</button>
           </section>
         </div>
+<section id="adminStatsPanel" class="admin-stats-panel hidden" aria-live="polite">
+  <div class="admin-stats-head">
+    <div><h3>Tableau de bord Abracadeal</h3><p>Les chiffres essentiels du site en un coup d’œil.</p></div>
+    <button type="button" class="btn ghost" id="refreshAdminStatsBtn">Actualiser</button>
+  </div>
+  <div class="admin-stat-grid">
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTotalAccounts">—</span><span class="admin-stat-label">Total comptes</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statProfessionals">—</span><span class="admin-stat-label">Professionnels</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statPrivateAccounts">—</span><span class="admin-stat-label">Particuliers</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTravelers">—</span><span class="admin-stat-label">Voyageurs Vacances</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statHosts">—</span><span class="admin-stat-label">Hôtes Vacances</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statTrialingPros">—</span><span class="admin-stat-label">Pros en 12 mois offerts</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statActivePros">—</span><span class="admin-stat-label">Pros payants actifs</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statProsToFinalize">—</span><span class="admin-stat-label">Pros à finaliser</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statMrr">—</span><span class="admin-stat-label">MRR théorique après gratuités</span></div>
+  </div>
+  <div class="admin-plan-grid">
+    <div class="admin-plan-chip"><b id="statPlan20">—</b><span>Plan 20 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan50">—</b><span>Plan 50 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan100">—</b><span>Plan 100 annonces</span></div>
+    <div class="admin-plan-chip"><b id="statPlan250">—</b><span>Plan 250 annonces</span></div>
+  </div>
+</section>
+
+<section id="adminDatabasePanel" class="profile-edit-box hidden">
+  <div class="admin-db-head">
+    <div>
+      <h3>Base de données · Annonces</h3>
+      <p class="note">Retrouvez une annonce active, vendue, retirée ou supprimée par son numéro, son titre, le nom du vendeur, son téléphone ou son e-mail.</p>
+    </div>
+  </div>
+  <div class="admin-db-search">
+    <input class="input" id="adminDbQuery" type="search" placeholder="Nom, téléphone, e-mail, ABR-2026-…">
+    <select class="select" id="adminDbState">
+      <option value="all">Tous les statuts</option>
+      <option value="active">En ligne</option>
+      <option value="sold">Vendues</option>
+      <option value="deleted">Supprimées / retirées</option>
+      <option value="archived">Toutes archivées</option>
+      <option value="pending">À modérer</option>
+      <option value="rejected">Refusées</option>
+    </select>
+    <button class="btn primary" id="adminDbSearchBtn" type="button">Rechercher</button>
+  </div>
+  <div id="adminDbStatus" class="note" role="status" aria-live="polite"></div>
+  <div id="adminDbResults" class="admin-db-results"></div>
+</section>
+
         <section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <dl id="companySummary" class="profile-summary"></dl>
+<div id="proBoostWallet" class="pro-boost-wallet hidden">
+  <div class="pro-boost-wallet-head">
+    <div><h4>Mes Boosts</h4><p>Vos crédits de mise en avant disponibles.</p></div>
+    <button type="button" class="btn primary" id="buyProBoostsBtn">Acheter des Boosts</button>
+  </div>
+  <div class="pro-boost-counts">
+    <div class="pro-boost-count"><strong id="proBoost7Count">0</strong><span>Boosts 7 jours disponibles</span></div>
+    <div class="pro-boost-count"><strong id="proBoost30Count">0</strong><span>Boosts 30 jours disponibles</span></div>
+  </div>
+  <div class="pro-boost-wallet-note">Les crédits achetés n’expirent pas tant qu’ils ne sont pas utilisés. Un crédit est retiré uniquement lorsque vous boostez une annonce.</div>
+</div>
           <p class="note">Le SIRET est contrôlé dans le registre des entreprises lors de l’enregistrement. Ce contrôle ne vérifie pas le numéro de TVA ni l’identité du représentant.</p>
           <button type="button" class="btn ghost" id="editCompanyBtn">Compléter mes informations d’entreprise</button>
           <form id="companyForm" class="hidden"><div class="form-grid">
@@ -4066,6 +4595,21 @@ header .publish-trigger:hover{
  </div>
 </div>
 
+<div class="modal-backdrop" id="boostCreditModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="boostCreditTitle" style="max-width:620px">
+    <div class="modal-head"><h2 id="boostCreditTitle">Booster cette annonce</h2><a class="close-btn" data-close="boostCreditModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body">
+      <p class="note">Choisissez le type de crédit à utiliser. Un seul jeton sera retiré de votre compteur.</p>
+      <div class="boost-credit-options">
+        <button type="button" class="boost-credit-option" id="useBoost7Btn"><b>Boost 7 jours</b><span>Mise en avant pendant 7 jours</span><em id="useBoost7Balance">0 crédit disponible</em></button>
+        <button type="button" class="boost-credit-option" id="useBoost30Btn"><b>Boost 30 jours</b><span>Mise en avant pendant 30 jours</span><em id="useBoost30Balance">0 crédit disponible</em></button>
+      </div>
+      <div id="boostCreditStatus" class="promo-status"></div>
+      <div class="form-actions"><button type="button" class="btn ghost" data-close="boostCreditModal">Annuler</button></div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="promotionModal" aria-hidden="true">
   <div class="modal">
     <div class="modal-head"><h2>Booster mes annonces</h2><a class="close-btn" data-close="promotionModal" href="#" aria-label="Fermer">×</a></div>
@@ -4089,8 +4633,8 @@ header .publish-trigger:hover{
     <div class="modal-body" style="text-align:center;padding:34px 28px 28px">
       <div style="width:70px;height:70px;border-radius:50%;display:grid;place-items:center;margin:0 auto 18px;background:#eafaf2;color:#169c5b;font-size:38px;font-weight:900">✓</div>
       <h2 id="paymentSuccessTitle" style="margin:0 0 10px">Paiement confirmé</h2>
-      <p style="margin:0 auto 10px;max-width:410px">Tout est bon. La mise en avant de vos annonces est activée automatiquement.</p>
-      <p class="note" style="margin:0 auto 22px">Vous pouvez maintenant revenir à vos annonces.</p>
+      <p id="paymentSuccessText" style="margin:0 auto 10px;max-width:410px">Tout est bon. La mise en avant de vos annonces est activée automatiquement.</p>
+      <p id="paymentSuccessNote" class="note" style="margin:0 auto 22px">Vous pouvez maintenant revenir à vos annonces.</p>
       <div class="form-actions" style="justify-content:center">
         <button class="btn ghost" type="button" onclick="closeModal('paymentSuccessModal')">Fermer</button>
         <button class="btn primary" type="button" onclick="closeModal('paymentSuccessModal');openMyAds()">Voir mes annonces</button>
@@ -4108,7 +4652,13 @@ const recoveryArrivalExpected = recoveryArrival.get('type') === 'recovery';
 const SUPABASE_URL = 'https://jplzvxmpbpjssyinozap.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
 const sb = (window.supabase && window.supabase.createClient)
-  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+  ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY,{
+      auth:{
+        persistSession:true,
+        autoRefreshToken:true,
+        detectSessionInUrl:true
+      }
+    })
   : null;
 
 const $=s=>document.querySelector(s);
@@ -4118,15 +4668,16 @@ let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editing
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
 let selectedPublishPack='free', publishPhotoLimit=3;
 let promoSelectedPack=null, promoPreselectedListingId=null;
+let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={
   photo_12:{code:'photo_12',audience:'particulier',title:'Pack Photos · jusqu’à 12',price:'4,99 €',days:0,max:1,photos:12,link:'https://buy.stripe.com/test_6oU00b5hk2r35wDbLHgrS07'},
   photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'4,99 €',days:0,max:1,photos:30,link:'https://buy.stripe.com/test_eVq9ALaBE0iV9MT2b7grS08'},
   private_7d:{code:'private_7d',audience:'particulier',title:'Boost 7 jours',price:'9,99 €',days:7,max:1,photos:null,link:'https://buy.stripe.com/test_6oUfZ9bFI1mZ6AH7vrgrS00'},
   private_30d:{code:'private_30d',audience:'particulier',title:'Boost 30 jours',price:'19,99 €',days:30,max:1,photos:null,link:'https://buy.stripe.com/test_8x27sD4dg8Pr6AHbLHgrS01'},
-  pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ 5 annonces / 7 jours',price:'19,99 €',days:7,max:5,photos:null,link:'https://buy.stripe.com/test_7sYeV5114e9L5wD8zvgrS02'},
-  pro_10_7d:{code:'pro_10_7d',audience:'professionnel',title:'★ 10 annonces / 7 jours',price:'29,99 €',days:7,max:10,photos:null,link:'https://buy.stripe.com/test_aFa9ALeRU2r39MTg1XgrS03'},
-  pro_5_30d:{code:'pro_5_30d',audience:'professionnel',title:'★ 5 annonces / 30 jours',price:'39,99 €',days:30,max:5,photos:null,link:'https://buy.stripe.com/test_9B6fZ95hk8Pr7EL3fbgrS04'},
-  pro_10_30d:{code:'pro_10_30d',audience:'professionnel',title:'★ 10 annonces / 30 jours',price:'59,99 €',days:30,max:10,photos:null,link:'https://buy.stripe.com/test_eVqaEP5hk3v77EL173grS06'}
+  pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 7 jours',price:'39,90 € HT',days:7,max:5,photos:null,link:'https://buy.stripe.com/test_00w3cn1140iV9MTcPLgrS0t'},
+  pro_10_7d:{code:'pro_10_7d',audience:'professionnel',title:'★ Jusqu’à 10 annonces / 7 jours',price:'69,90 € HT',days:7,max:10,photos:null,link:'https://buy.stripe.com/test_dRm4grfVYc1De395njgrS0u'},
+  pro_5_30d:{code:'pro_5_30d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 30 jours',price:'79,90 € HT',days:30,max:5,photos:null,link:'https://buy.stripe.com/test_aFa4grfVYc1D1gn8zvgrS0v'},
+  pro_10_30d:{code:'pro_10_30d',audience:'professionnel',title:'★ Jusqu’à 10 annonces / 30 jours',price:'129,90 € HT',days:30,max:10,photos:null,link:'https://buy.stripe.com/test_fZueV5bFI4zbaQX4jfgrS0w'}
 };
 const detailAdsCache=new Map();
 let moderationMode=false, favoritesMode=false;
@@ -4173,7 +4724,26 @@ async function loadFounderOfferCounter(){
 function openModal(id){
   const el=document.getElementById(id);
   if(!el) return;
-  if(id==='accountModal'){professionalSignupViewerId=null;$('#loggedOutAccount').classList.toggle('hidden',!!currentUser);$('#loggedInAccount').classList.toggle('hidden',!currentUser);setProfileEditing(false);renderCompanyAccount();syncSignupCompany();}
+  if(id==='accountModal'){
+    professionalSignupViewerId=null;
+    $('#loggedOutAccount').classList.toggle('hidden',!!currentUser);
+    $('#loggedInAccount').classList.toggle('hidden',!currentUser);
+    setProfileEditing(false);
+    renderCompanyAccount();
+    syncSignupCompany();
+    if(currentProfile?.is_admin){
+      const panel=document.getElementById('adminStatsPanel');
+      panel?.classList.remove('hidden');
+      setTimeout(()=>window.loadAdminDashboardStats?.(),0);
+      const dbHost=document.getElementById('adminDbResults');
+      const dbStatus=document.getElementById('adminDbStatus');
+      if(dbHost)dbHost.innerHTML='';
+      if(dbStatus)dbStatus.textContent='Saisissez un nom, un téléphone, un e-mail ou un numéro d’annonce pour lancer une recherche.';
+    }
+    if(currentProfile?.account_type==='professionnel'){
+      setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
+    }
+  }
   if(location.hash==='#'+id){
     history.replaceState(null,'',location.pathname+location.search);
   }
@@ -4235,15 +4805,26 @@ window.setAuthTab = function(which){
 };
 
 async function refreshAuth({preserveEditing=true}={}){
-  if(!sb){ currentUser=null; currentProfile=null; updateAuthUI(); return; }
-  const {data:{session}}=await sb.auth.getSession();
-  currentUser=session?.user||null; currentProfile=null;
+  if(!sb){
+    currentUser=null;
+    currentProfile=null;
+    try{updateAuthUI();}catch(error){console.error('Interface compte indisponible',error);}
+    return;
+  }
+  const {data:{session},error:sessionError}=await sb.auth.getSession();
+  if(sessionError)console.warn('Session Supabase indisponible',sessionError);
+  currentUser=session?.user||null;
+  currentProfile=null;
   if(currentUser){
-    const {data}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    const {data,error}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+    if(error)console.warn('Profil non chargé',error);
     currentProfile=data||null;
     if(!currentProfile?.is_admin) moderationMode=false;
+  }else{
+    moderationMode=false;
   }
-  updateAuthUI(preserveEditing);
+  try{updateAuthUI(preserveEditing);}
+  catch(error){console.error('Interface compte indisponible',error);}
 }
 // Données déclaratives : ne jamais utiliser user_metadata pour accorder un statut vérifié.
 function syncCompanyFields(prefix){
@@ -4306,6 +4887,7 @@ function readCompanyFields(prefix){
 function renderCompanyAccount(){
   const pro=currentProfile?.account_type==='professionnel';
   $('#companyAccountSection').classList.toggle('hidden',!pro);
+  $('#proBoostWallet')?.classList.toggle('hidden',!pro);
   $('#companyForm').classList.add('hidden');
   $('#editCompanyBtn').classList.remove('hidden');
   const data=currentUser?.user_metadata?.company_registration||{};
@@ -4374,7 +4956,7 @@ function updateAuthUI(preserveEditing=false){
   renderProfileSummary();
   renderCompanyAccount();
   if(currentUser){
-    $('#accountBtn').textContent=currentProfile?.display_name||'Mon compte';
+    $('#accountBtn').textContent=currentProfile?.is_admin?'Admin':(currentProfile?.display_name||'Compte');
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.remove('hidden');
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
     $('#accountUserBox').innerHTML=`<strong>${esc(currentProfile?.display_name||currentUser.email)}</strong>
@@ -4385,7 +4967,14 @@ function updateAuthUI(preserveEditing=false){
     if($('#profilePhone')) $('#profilePhone').value=currentProfile?.phone||'';
     if($('#moderationBtn')) $('#moderationBtn').classList.toggle('hidden',!currentProfile?.is_admin);
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.toggle('hidden',!currentProfile?.is_admin);
-    if(currentProfile?.is_admin){ setTimeout(refreshModerationCount,0); setTimeout(refreshFlowErrorsCount,0); }
+    if(currentProfile?.is_admin){
+      setTimeout(refreshModerationCount,0);
+      setTimeout(refreshFlowErrorsCount,0);
+      document.getElementById('adminStatsPanel')?.classList.remove('hidden');
+      setTimeout(()=>window.loadAdminDashboardStats?.(),0);
+    }else{
+      document.getElementById('adminStatsPanel')?.classList.add('hidden');
+    }
     if($('#headerMessagesBtn')) $('#headerMessagesBtn').classList.remove('hidden');
     const isProAccount=currentProfile?.account_type==='professionnel';
     if($('#proImportBtn')) $('#proImportBtn').classList.toggle('hidden',!isProAccount);
@@ -4394,11 +4983,15 @@ function updateAuthUI(preserveEditing=false){
     if($('#proAccountBtn')) $('#proAccountBtn').classList.toggle('hidden',isProAccount);
     if($('#profileEmail')) $('#profileEmail').value=currentUser.email||'';
     setTimeout(refreshUnreadMessages,0);
+    if(isProAccount)setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
+    else{proBoostWalletState={7:0,30:0};renderProBoostWallet();}
   }else{
-    $('#accountBtn').textContent='Se connecter';
+    proBoostWalletState={7:0,30:0};renderProBoostWallet();
+    $('#accountBtn').textContent='Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
+    document.getElementById('adminStatsPanel')?.classList.add('hidden');
     if($('#flowErrorsBadge')) $('#flowErrorsBadge').classList.add('hidden');
     if($('#headerMessagesBtn')) $('#headerMessagesBtn').classList.add('hidden');
     if($('#headerMessagesUnread')) $('#headerMessagesUnread').classList.add('hidden');
@@ -4424,9 +5017,27 @@ function updateAuthUI(preserveEditing=false){
   }
 }
 
+function abracaNormalizePhone(value=''){
+  const raw=String(value||'').trim();
+  let compact=raw.replace(/[\s().-]/g,'');
+  if(/^00\d+$/.test(compact)) compact='+'+compact.slice(2);
+  if(/^0[1-9]\d{8}$/.test(compact)) return '+33'+compact.slice(1);
+  if(/^\+33[1-9]\d{8}$/.test(compact)) return compact;
+  if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
+  return null;
+}
+async function abracaPhoneAvailable(phone){
+  const normalized=abracaNormalizePhone(phone);
+  if(!normalized) return {ok:false,normalized:null,message:'Indiquez un numéro de téléphone valide.'};
+  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized});
+  if(error) return {ok:false,normalized,message:'Impossible de vérifier le numéro pour le moment.'};
+  if(!data) return {ok:false,normalized,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+  return {ok:true,normalized,message:''};
+}
+
 // Brouillon limité à cet onglet. Aucun mot de passe enregistré.
 const signupDraftKey='abracadeal.signupDraft.v1';
-const signupDraftIds=['signupName','signupEmail','signupType','signupCompany','signupSiret','signupVatStatus','signupVat'];
+const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSiret','signupVatStatus','signupVat'];
 function saveSignupDraft(){
   try{sessionStorage.setItem(signupDraftKey,JSON.stringify(Object.fromEntries(signupDraftIds.map(id=>[id,$('#'+id).value]))));}catch(_){}
 }
@@ -4441,11 +5052,26 @@ $('#signupForm').addEventListener('change',saveSignupDraft);
 $('#loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
   if(!sb){ toast('Connexion au service indisponible. Recharge la page.'); return; }
-  const btn=e.submitter; btn.classList.add('loading');
-  const {error}=await sb.auth.signInWithPassword({email:$('#loginEmail').value.trim(),password:$('#loginPassword').value});
-  btn.classList.remove('loading');
-  if(error){toast(error.message);return}
-  closeModal('accountModal'); toast('Connexion réussie');
+  const btn=e.submitter||e.currentTarget.querySelector('button[type="submit"]');
+  if(btn) btn.classList.add('loading');
+  const email=$('#loginEmail').value.trim();
+  const password=$('#loginPassword').value;
+  const {error}=await sb.auth.signInWithPassword({email,password});
+  if(btn) btn.classList.remove('loading');
+  if(error){
+    const msg=(error.code==='invalid_credentials'||/invalid login credentials/i.test(error.message||''))
+      ? 'E-mail ou mot de passe incorrect.'
+      : (error.message||'Connexion impossible.');
+    toast(msg);
+    return;
+  }
+  await refreshAuth({preserveEditing:false});
+  if(!currentUser){
+    toast('Connexion reçue mais session non chargée. Recharge la page.');
+    return;
+  }
+  closeModal('accountModal');
+  toast(currentProfile?.is_admin?'Connexion administrateur réussie':'Connexion réussie');
 });
 $('#signupForm').addEventListener('submit',async e=>{
   e.preventDefault();
@@ -4462,7 +5088,15 @@ $('#signupForm').addEventListener('submit',async e=>{
   btn.textContent='Création...';
   btn.disabled=true;
   const name=$('#signupName').value.trim(), type=$('#signupType').value;
+  const rawPhone=$('#signupPhone').value.trim();
   try{
+    const phoneCheck=await abracaPhoneAvailable(rawPhone);
+    if(!phoneCheck.ok){
+      status.textContent=phoneCheck.message;
+      toast(phoneCheck.message);
+      return;
+    }
+    const phone=phoneCheck.normalized;
     const company_registration=type==='professionnel'?readCompanyFields('signup'):null;
     if(company_registration){
       status.textContent='Contrôle du SIRET dans le registre…';
@@ -4473,7 +5107,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.github.io/abracadeal/',data:{display_name:name,account_type:type,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{display_name:name,account_type:type,phone,...(company_registration?{company_registration}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();
@@ -4490,11 +5124,20 @@ $('#signupForm').addEventListener('submit',async e=>{
           return;
         }
       }
-      setTimeout(()=>closeModal('accountModal'),500);
+      if(type==='professionnel' && typeof window.ensureProPlanSelection==='function'){
+        await window.ensureProPlanSelection({force:true});
+      }else{
+        setTimeout(()=>closeModal('accountModal'),500);
+      }
       toast('Compte créé');
     }else{
-      status.textContent='Compte créé. Vérifiez votre e-mail pour confirmer votre inscription.'+(company_registration?' Après connexion, ouvrez Mon compte puis Compléter mes informations d’entreprise pour finaliser la vérification du SIRET.':'');
-      toast('Vérifiez votre e-mail pour confirmer');
+      const createdEmail=$('#signupEmail').value.trim();
+      status.textContent='';
+      $('#loginEmail').value=createdEmail;
+      $('#loginPassword').value='';
+      window.setAuthTab('login');
+      toast('Compte créé. Vérifiez votre e-mail puis connectez-vous.');
+      setTimeout(()=>$('#loginPassword')?.focus(),80);
     }
   }catch(err){
     console.error(err);
@@ -4508,10 +5151,17 @@ $('#signupForm').addEventListener('submit',async e=>{
 });
 async function signOutUser(closeAccountModal=false){
   if(!sb) return;
-  const {error}=await sb.auth.signOut();
-  if(error){toast(error.message);return}
-  if(closeAccountModal) closeModal('accountModal');
+  const {error}=await sb.auth.signOut({scope:'local'});
+  if(error){toast(error.message);return;}
+  currentUser=null;
+  currentProfile=null;
   onlyMine=false;
+  moderationMode=false;
+  favoritesMode=false;
+  favoriteIds=new Set();
+  if(closeAccountModal) closeModal('accountModal');
+  try{updateAuthUI(false);}catch(uiError){console.error('Interface après déconnexion',uiError);}
+  try{await loadAds();}catch(loadError){console.error('Catalogue après déconnexion',loadError);}
   toast('Déconnecté');
 }
 $('#logoutBtn').addEventListener('click',()=>signOutUser(true));
@@ -4529,6 +5179,9 @@ $('#profileForm')?.addEventListener('submit',async e=>{
     toast('Complète le nom, la ville et le téléphone');
     return;
   }
+  const normalizedPhone=abracaNormalizePhone(payload.phone);
+  if(!normalizedPhone){toast('Indique un numéro de téléphone valide');return;}
+  payload.phone=normalizedPhone;
   const btn=e.submitter;
   if(btn){btn.disabled=true;btn.textContent='Enregistrement...'}
   const {error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
@@ -5286,7 +5939,14 @@ $('#runProImport')?.addEventListener('click',async()=>{
 $('#finishProImport')?.addEventListener('click',()=>closeModal('proImportModal'));
 $$('[data-info-modal]').forEach(link=>link.addEventListener('click',e=>{e.preventDefault();openModal(link.dataset.infoModal)}));
 $$('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();closeModal(b.dataset.close)}));
-$$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)closeModal(m.id)}));
+$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{
+  if(e.target!==m)return;
+  if(m.id==='proPlanModal'){
+    toast('Choisissez une formule pour finaliser votre compte professionnel');
+    return;
+  }
+  closeModal(m.id);
+}));
 
 document.querySelector('#accountModal .close-btn')?.addEventListener('click',e=>{
   e.preventDefault();
@@ -5671,11 +6331,16 @@ function renderPublishPackPicker(){
   }
   setPublishPhotoLimit();
 }
-async function createPromotionOrder(packCode,listingIds){
+function isProBoostCreditPack(code){return ['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d'].includes(code)}
+async function createPromotionOrder(packCode,listingIds=[]){
   const pack=PROMOTION_PACKS[packCode];if(!pack)throw new Error('Pack inconnu');
   if(!currentUser)throw new Error('Connexion requise');
-  const unique=[...new Set(listingIds)].filter(Boolean);
-  if(!unique.length||unique.length>pack.max)throw new Error(`Sélectionnez entre 1 et ${pack.max} annonce(s)`);
+  const unique=[...new Set(listingIds||[])].filter(Boolean);
+  if(isProBoostCreditPack(packCode)){
+    if(unique.length)throw new Error('Les Boosts Pro s’achètent comme des crédits, sans choisir d’annonce.');
+  }else if(!unique.length||unique.length>pack.max){
+    throw new Error('Sélectionnez entre 1 et '+pack.max+' annonce(s)');
+  }
   const {data,error}=await sb.functions.invoke('create-promotion-order',{body:{pack_code:packCode,listing_ids:unique}});
   if(error){
     let detail=null;
@@ -5686,28 +6351,140 @@ async function createPromotionOrder(packCode,listingIds){
   return data.checkout_url;
 }
 async function goToPromotionCheckout(packCode,listingIds){
-  const url=await createPromotionOrder(packCode,listingIds);location.href=url;
+  const url=await createPromotionOrder(packCode,listingIds);
+  try{
+    if(isProBoostCreditPack(packCode))sessionStorage.setItem('abraca_pending_pro_boost',packCode);
+    else sessionStorage.removeItem('abraca_pending_pro_boost');
+  }catch(_){}
+  location.href=url;
 }
 function promoPackList(){return Object.values(PROMOTION_PACKS).filter(p=>p.audience===accountAudience()&&!['photo_12','photo_30_pro'].includes(p.code))}
 function renderPromotionModal(){
   const packs=promoPackList(),grid=$('#promotionPackGrid'),box=$('#promotionListings'),intro=$('#promotionIntro'),photoNote=$('#promotionPhotoNote');
+  const proStore=accountAudience()==='professionnel';
   if(!packs.length)return;
   if(!promoSelectedPack||PROMOTION_PACKS[promoSelectedPack]?.audience!==accountAudience())promoSelectedPack=packs[0].code;
   const chosen=PROMOTION_PACKS[promoSelectedPack];
-  grid.innerHTML=packs.map(p=>`<button type="button" class="pack-card ${promoSelectedPack===p.code?'selected':''}" data-promo-pack="${p.code}"><div class="pack-card-title">${p.title}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.max} annonce${p.max>1?'s':''} maximum · ${p.days} jours</div></button>`).join('');
+  grid.innerHTML=packs.map(p=>'<button type="button" class="pack-card '+(promoSelectedPack===p.code?'selected':'')+'" data-promo-pack="'+p.code+'"><div class="pack-card-title">'+p.title+'</div><div class="pack-card-price">'+p.price+'</div><div class="pack-card-desc">'+p.max+' Boost'+(p.max>1?'s':'')+' · '+p.days+' jours</div></button>').join('');
   grid.querySelectorAll('[data-promo-pack]').forEach(b=>b.addEventListener('click',()=>{promoSelectedPack=b.dataset.promoPack;renderPromotionModal();}));
-  const own=allAds.filter(a=>a.owner_id===currentUser?.id && !['rejected','archived'].includes(a.status));
-  const pre=promoPreselectedListingId;
-  box.innerHTML=own.length?own.map(a=>`<label class="promo-listing"><input type="checkbox" value="${a.id}" ${pre===a.id?'checked':''}><span><b>${esc(a.title)}</b><br><small>${esc(a.city||'')} · ${money(a.price)}${listingIsFeatured(a)?' · déjà boostée':''}</small></span></label>`).join(''):'<div class="empty-state">Aucune annonce disponible.</div>';
-  if(accountAudience()==='particulier'&&pre){box.querySelectorAll('input').forEach(i=>{if(i.value!==pre)i.disabled=true;});}
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{
-    const checked=[...box.querySelectorAll('input:checked')];
-    if(checked.length>chosen.max){i.checked=false;toast(`Ce pack accepte ${chosen.max} annonce${chosen.max>1?'s':''} maximum`);}
-  }));
-  if(intro)intro.textContent=accountAudience()==='professionnel'?'Choisissez un pack puis les annonces à mettre en avant. Les annonces tournent dans 3 emplacements prioritaires pour garder une vraie valeur au boost.':'Choisissez la durée de mise en avant de cette annonce.';
-  if(photoNote)photoNote.textContent=accountAudience()==='professionnel'?'📷 Jusqu’à 15 photos incluses par annonce · Jusqu’à 30 avec le Pack Photos':'📷 Jusqu’à 3 photos incluses par annonce · Jusqu’à 12 avec le Pack Photos';
+  const listingArea=$('#promotionListingArea'),payBtn=$('#promotionPayBtn');
+  if(proStore){
+    listingArea?.classList.add('hidden');
+    if(box)box.innerHTML='';
+    if(intro)intro.textContent='Achetez un lot de crédits Boost. Ils restent disponibles dans votre espace Pro jusqu’à leur utilisation.';
+    if(photoNote)photoNote.textContent='★ Boost premium · places limitées · 1 crédit utilisé = 1 annonce boostée pendant 7 ou 30 jours.';
+    if(payBtn)payBtn.textContent='Acheter mes Boosts';
+  }else{
+    listingArea?.classList.remove('hidden');
+    if(payBtn)payBtn.textContent='Continuer vers le paiement';
+    const own=allAds.filter(a=>a.owner_id===currentUser?.id && !['rejected','archived'].includes(a.status));
+    const pre=promoPreselectedListingId;
+    box.innerHTML=own.length?own.map(a=>'<label class="promo-listing"><input type="checkbox" value="'+a.id+'" '+(pre===a.id?'checked':'')+'><span><b>'+esc(a.title)+'</b><br><small>'+esc(a.city||'')+' · '+money(a.price)+(listingIsFeatured(a)?' · déjà boostée':'')+'</small></span></label>').join(''):'<div class="empty-state">Aucune annonce disponible.</div>';
+    if(pre){box.querySelectorAll('input').forEach(i=>{if(i.value!==pre)i.disabled=true;});}
+    box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{
+      const checked=[...box.querySelectorAll('input:checked')];
+      if(checked.length>chosen.max){i.checked=false;toast('Ce pack accepte '+chosen.max+' annonce(s) maximum');}
+    }));
+    if(intro)intro.textContent='Choisissez la durée de mise en avant de cette annonce.';
+    if(photoNote)photoNote.textContent='📷 Jusqu’à 3 photos incluses par annonce · Jusqu’à 12 avec le Pack Photos';
+  }
 }
-function openPromotionForListing(id){promoPreselectedListingId=id;promoSelectedPack=accountAudience()==='professionnel'?'pro_5_7d':'private_7d';renderPromotionModal();openModal('promotionModal')}
+function renderProBoostWallet(){
+  const isPro=!!currentUser&&currentProfile?.account_type==='professionnel';
+  const isAdmin=!!currentUser&&currentProfile?.is_admin===true;
+  $('#proBoostWallet')?.classList.toggle('hidden',!isPro&&!isAdmin);
+  const count7=Math.max(0,Number(proBoostWalletState[7]||0));
+  const count30=Math.max(0,Number(proBoostWalletState[30]||0));
+  if($('#proBoost7Count'))$('#proBoost7Count').textContent=isAdmin?'∞':String(count7);
+  if($('#proBoost30Count'))$('#proBoost30Count').textContent=isAdmin?'∞':String(count30);
+  if($('#useBoost7Balance'))$('#useBoost7Balance').textContent=isAdmin?'Boosts admin illimités':count7+' crédit'+(count7>1?'s':'')+' disponible'+(count7>1?'s':'');
+  if($('#useBoost30Balance'))$('#useBoost30Balance').textContent=isAdmin?'Boosts admin illimités':count30+' crédit'+(count30>1?'s':'')+' disponible'+(count30>1?'s':'');
+  if($('#useBoost7Btn'))$('#useBoost7Btn').disabled=!isAdmin&&count7<=0;
+  if($('#useBoost30Btn'))$('#useBoost30Btn').disabled=!isAdmin&&count30<=0;
+}
+async function loadProBoostWallet(){
+  if(!sb||!currentUser){
+    proBoostWalletState={7:0,30:0};renderProBoostWallet();return proBoostWalletState;
+  }
+  if(currentProfile?.is_admin===true){
+    proBoostWalletState={7:999999,30:999999};renderProBoostWallet();return proBoostWalletState;
+  }
+  if(currentProfile?.account_type!=='professionnel'){
+    proBoostWalletState={7:0,30:0};renderProBoostWallet();return proBoostWalletState;
+  }
+  const {data,error}=await sb.from('pro_boost_wallet').select('duration_days,available_credits').eq('user_id',currentUser.id);
+  if(error){console.warn('Portefeuille Boost indisponible',error);renderProBoostWallet();return proBoostWalletState;}
+  const next={7:0,30:0};
+  for(const row of (data||[])){
+    const d=Number(row.duration_days);
+    if(d===7||d===30)next[d]=Math.max(0,Number(row.available_credits||0));
+  }
+  proBoostWalletState=next;renderProBoostWallet();return next;
+}
+function openProBoostStore(){
+  if(!currentUser||currentProfile?.account_type!=='professionnel'){toast('Compte professionnel requis');return;}
+  promoPreselectedListingId=null;
+  promoSelectedPack='pro_5_7d';
+  renderPromotionModal();
+  openModal('promotionModal');
+}
+async function openBoostCreditForListing(id){
+  const isAdmin=currentProfile?.is_admin===true;
+  if(!currentUser||(!isAdmin&&currentProfile?.account_type!=='professionnel')){toast('Compte professionnel requis');return;}
+  const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
+  if(!a||(!isAdmin&&a.owner_id!==currentUser.id)){toast('Annonce introuvable');return;}
+  if(a.seller_type!=='professionnel'){toast('Le Boost Pro est réservé aux annonces professionnelles');return;}
+  if(listingIsFeatured(a)){toast('Cette annonce est déjà boostée');return;}
+  boostCreditListingId=id;
+  if($('#boostCreditTitle'))$('#boostCreditTitle').textContent='Booster · '+(a.title||'Annonce');
+  if($('#boostCreditStatus'))$('#boostCreditStatus').textContent='Chargement de vos jetons…';
+  openModal('boostCreditModal');
+  await loadProBoostWallet();
+  const total=Number(proBoostWalletState[7]||0)+Number(proBoostWalletState[30]||0);
+  if($('#boostCreditStatus'))$('#boostCreditStatus').textContent=total>0?'Choisissez le jeton à utiliser.':'Aucun jeton disponible. Achetez un pack depuis votre espace Pro.';
+}
+function boostRpcErrorMessage(error){
+  const raw=String(error?.message||error?.details||error?.hint||'');
+  if(raw.includes('no_boost_credit'))return 'Vous n’avez plus de jeton pour cette durée.';
+  if(raw.includes('listing_already_boosted'))return 'Cette annonce est déjà boostée.';
+  if(raw.includes('listing_not_owned'))return 'Vous ne pouvez booster que vos propres annonces.';
+  if(raw.includes('listing_not_eligible'))return 'Cette annonce ne peut pas être boostée.';
+  if(raw.includes('professional_account_required'))return 'Compte professionnel requis.';
+  return error?.message||'Impossible d’utiliser ce jeton Boost.';
+}
+async function useProBoostCredit(durationDays){
+  if(!boostCreditListingId)return;
+  const days=Number(durationDays);
+  const btn=days===7?$('#useBoost7Btn'):$('#useBoost30Btn');
+  const status=$('#boostCreditStatus');
+  const isAdmin=currentProfile?.is_admin===true;
+  if(!isAdmin&&Number(proBoostWalletState[days]||0)<=0){toast('Aucun jeton '+days+' jours disponible');return;}
+  if(btn)btn.disabled=true;
+  if(status)status.textContent='Activation du Boost…';
+  try{
+    const {data,error}=await sb.rpc('consume_pro_boost',{p_listing_id:boostCreditListingId,p_duration_days:days});
+    if(error)throw error;
+    const adminUnlimited=!!data?.admin_unlimited;
+    const remaining=adminUnlimited?null:Math.max(0,Number(data?.remaining_credits??(Number(proBoostWalletState[days]||0)-1)));
+    if(!adminUnlimited)proBoostWalletState[days]=remaining;
+    renderProBoostWallet();
+    closeModal('boostCreditModal');
+    boostCreditListingId=null;
+    await loadAds();
+    toast(adminUnlimited?'Boost admin offert · '+days+' jours':'Annonce boostée '+days+' jours · '+remaining+' jeton'+(remaining>1?'s':'')+' restant'+(remaining>1?'s':''));
+  }catch(err){
+    const message=boostRpcErrorMessage(err);
+    if(status)status.textContent=message;
+    toast(message);
+    await loadProBoostWallet();
+  }finally{
+    if(btn)btn.disabled=currentProfile?.is_admin===true?false:Number(proBoostWalletState[days]||0)<=0;
+  }
+}
+function openPromotionForListing(id){
+  if(currentProfile?.is_admin===true||accountAudience()==='professionnel'){openBoostCreditForListing(id);return;}
+  promoPreselectedListingId=id;promoSelectedPack='private_7d';renderPromotionModal();openModal('promotionModal');
+}
 async function buyPhotoPackForListing(id){try{const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);const pack=a?.seller_type==='professionnel'?'photo_30_pro':'photo_12';const url=await createPromotionOrder(pack,[id]);location.href=url}catch(err){toast(err.message||'Impossible de préparer le paiement')}}
 
 function resetPublishForm(){
@@ -6757,6 +7534,14 @@ function renderAds(){
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone};
     const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
+    const canUseProBoost=!!(
+      currentUser &&
+      a.seller_type==='professionnel' &&
+      (
+        currentProfile?.is_admin===true ||
+        (currentProfile?.account_type==='professionnel' && (onlyMine || a.owner_id===currentUser.id))
+      )
+    );
     const statusBadge=(onlyMine && a.status!=='active')
       ?`<div style="display:inline-flex;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:${a.status==='pending'?'#fff3cd':'#f8d7da'};color:${a.status==='pending'?'#7a5a00':'#842029'};font-size:.74rem;font-weight:850">${a.status==='pending'?'En attente de validation':'Refusée'}</div>`
       :'';
@@ -6780,9 +7565,11 @@ function renderAds(){
           ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
         </div>`:''}
         <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
-        ${(moderationActions||(!moderationMode&&canDelete))?`<div class="ad-actions">
+        ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
-          ${(!moderationMode&&canDelete)?`${currentProfile?.is_admin?`<button class="mini-btn" onclick="event.stopPropagation();openAdminEditAd('${a.id}')">Modifier</button>`:''}${(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}${(!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">Booster</button>`:''}<button class="mini-btn danger" onclick="event.stopPropagation();${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>`:''}
+          ${(!moderationMode&&canDelete)?`${currentProfile?.is_admin?`<button class="mini-btn" onclick="event.stopPropagation();openAdminEditAd('${a.id}')">Modifier</button>`:''}${(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}`:''}
+          ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>Boost actif</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
+          ${(!moderationMode&&canDelete)?`<button class="mini-btn danger" onclick="event.stopPropagation();${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
   }).join('');
@@ -6792,20 +7579,47 @@ function renderAds(){
 $('#promotionPayBtn')?.addEventListener('click',async()=>{
   const btn=$('#promotionPayBtn'),status=$('#promotionStatus'),pack=PROMOTION_PACKS[promoSelectedPack];
   const ids=[...document.querySelectorAll('#promotionListings input:checked')].map(x=>x.value);
-  if(!pack){toast('Choisissez un pack');return}if(!ids.length){toast('Sélectionnez au moins une annonce');return}if(ids.length>pack.max){toast(`Maximum ${pack.max} annonces`);return}
+  if(!pack){toast('Choisissez un pack');return}
+  const creditPack=isProBoostCreditPack(pack.code);
+  if(!creditPack&&!ids.length){toast('Sélectionnez au moins une annonce');return}
+  if(!creditPack&&ids.length>pack.max){toast(`Maximum ${pack.max} annonces`);return}
   btn.disabled=true;status.textContent='Préparation du paiement sécurisé…';
-  try{await goToPromotionCheckout(pack.code,ids)}catch(err){console.error(err);status.textContent=err.message||'Impossible de préparer le paiement';toast(status.textContent);btn.disabled=false;}
+  try{await goToPromotionCheckout(pack.code,creditPack?[]:ids)}catch(err){console.error(err);status.textContent=err.message||'Impossible de préparer le paiement';toast(status.textContent);btn.disabled=false;}
 });
+
+$('#buyProBoostsBtn')?.addEventListener('click',()=>{closeModal('accountModal');openProBoostStore();});
+$('#useBoost7Btn')?.addEventListener('click',()=>useProBoostCredit(7));
+$('#useBoost30Btn')?.addEventListener('click',()=>useProBoostCredit(30));
 
 const paymentParams=new URLSearchParams(location.search);
 if(paymentParams.get('payment')==='photos-success'){
   setTimeout(async()=>{try{await loadAds()}catch{};toast('Paiement confirmé · Pack Photos activé sur votre annonce');try{history.replaceState({},document.title,location.pathname+(location.hash||''))}catch{}},350);
 }
 if(paymentParams.get('payment')==='success'){
+  let pendingProBoost='';
+  try{pendingProBoost=sessionStorage.getItem('abraca_pending_pro_boost')||''}catch(_){}
   setTimeout(async()=>{
     try{await loadAds()}catch{}
+    if(pendingProBoost){
+      try{
+        await loadProBoostWallet();
+        for(let attempt=0;attempt<4 && Number(proBoostWalletState[7]||0)+Number(proBoostWalletState[30]||0)===0;attempt++){
+          await new Promise(resolve=>setTimeout(resolve,650));
+          await loadProBoostWallet();
+        }
+      }catch{}
+      if($('#paymentSuccessTitle'))$('#paymentSuccessTitle').textContent='Boosts ajoutés';
+      if($('#paymentSuccessText'))$('#paymentSuccessText').textContent='Vos jetons Boost ont été ajoutés à votre espace Pro. Vous pouvez maintenant les utiliser sur vos annonces.';
+      if($('#paymentSuccessNote'))$('#paymentSuccessNote').textContent='Chaque clic sur Booster retire 1 jeton de la durée choisie.';
+      toast('Paiement confirmé · jetons Boost ajoutés');
+      try{sessionStorage.removeItem('abraca_pending_pro_boost')}catch(_){}
+    }else{
+      if($('#paymentSuccessTitle'))$('#paymentSuccessTitle').textContent='Paiement confirmé';
+      if($('#paymentSuccessText'))$('#paymentSuccessText').textContent='Tout est bon. La mise en avant de vos annonces est activée automatiquement.';
+      if($('#paymentSuccessNote'))$('#paymentSuccessNote').textContent='Vous pouvez maintenant revenir à vos annonces.';
+      toast('Paiement confirmé · mise en avant activée');
+    }
     openModal('paymentSuccessModal');
-    toast('Paiement confirmé · mise en avant activée');
     try{
       const cleanUrl=location.pathname+(location.hash||'');
       history.replaceState({},document.title,cleanUrl);
@@ -7673,11 +8487,19 @@ window.openSellerProfile=async sellerId=>{
   body.innerHTML='<div class="note">Chargement du profil…</div>';
   openModal('sellerProfileModal');
 
-  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings}]=await Promise.all([
+  const adminViewing=!!currentProfile?.is_admin;
+  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult,proAccountSummaryResult]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
-    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8)
+    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8),
+    adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null}),
+    adminViewing?sb.rpc('get_admin_pro_account_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
   ]);
+  const boostSummary=boostSummaryResult?.data||null;
+  const proAccountSummary=proAccountSummaryResult?.data||null;
+  if(proAccountSummaryResult?.error)console.error('Résumé compte Pro admin indisponible',proAccountSummaryResult.error);
+  const boostSummaryError=boostSummaryResult?.error||null;
+  if(boostSummaryError)console.error('Résumé Boost admin indisponible',boostSummaryError);
 
   if(pErr||!profile){
     body.innerHTML='<div class="note">Profil vendeur indisponible.</div>';
@@ -7691,6 +8513,16 @@ window.openSellerProfile=async sellerId=>{
   const myReview=currentUser?list.find(r=>r.reviewer_id===currentUser.id):null;
   const profileComplete=!!(currentProfile?.display_name?.trim()&&currentProfile?.city?.trim()&&currentProfile?.phone?.trim());
   const emailVerified=!!currentUser?.email_confirmed_at;
+  const summary=boostSummary||{};
+  const boostSummaryLoaded=!adminViewing||(!boostSummaryError&&!!boostSummary);
+  const purchasedTotal=Math.max(0,Number(summary.purchased_total||0));
+  const giftedTotal=Math.max(0,Number(summary.gifted_total||0));
+  const availableTotal=Math.max(0,Number(summary.available_total||0));
+  const usedTotal=Math.max(0,Number(summary.used_total||0));
+  const paidBoostOrders=Math.max(0,Number(summary.paid_orders||0));
+  const spentBoostEuros=(Math.max(0,Number(summary.spent_cents||0))/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+  const boost7=summary.days_7||{purchased:0,gifted:0,available:0,used:0};
+  const boost30=summary.days_30||{purchased:0,gifted:0,available:0,used:0};
 
   let reviewForm='';
   if(!currentUser){
@@ -7753,6 +8585,67 @@ window.openSellerProfile=async sellerId=>{
 
     ${reviewForm}
 
+    ${currentProfile?.is_admin&&profile.account_type==='professionnel'&&proAccountSummary?`
+    <section class="review-section">
+      <h3>Compte Pro · Admin</h3>
+      <div class="review-form">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <div><span class="note">Société</span><strong style="display:block">${esc(proAccountSummary.company?.name||'—')}</strong></div>
+          <div><span class="note">SIRET</span><strong style="display:block">${esc(proAccountSummary.company?.siret||'—')}</strong></div>
+          <div><span class="note">Formule</span><strong style="display:block">${esc(proAccountSummary.plan?.label||'À choisir')}</strong></div>
+          <div><span class="note">Statut</span><strong style="display:block">${proAccountSummary.subscription?.exists?esc(proAccountSummary.subscription?.status||'—'):(proAccountSummary.checkout?.status==='pending'?'Validation du moyen de paiement en attente':(proAccountSummary.checkout?.status==='completed'?'Paiement validé · activation en cours':'À finaliser'))}</strong></div>
+          <div><span class="note">Offre Fondateurs</span><strong style="display:block">${proAccountSummary.founder?.eligible?'Oui · n°'+Number(proAccountSummary.founder?.number||0):'Non'}</strong></div>
+          <div><span class="note">Début facturation</span><strong style="display:block">${(proAccountSummary.subscription?.billing_starts_at||proAccountSummary.checkout?.billing_starts_at)?new Date(proAccountSummary.subscription?.billing_starts_at||proAccountSummary.checkout?.billing_starts_at).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Fin gratuité</span><strong style="display:block">${(proAccountSummary.subscription?.free_until||proAccountSummary.checkout?.free_until)?new Date(proAccountSummary.subscription?.free_until||proAccountSummary.checkout?.free_until).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Ville société</span><strong style="display:block">${esc([proAccountSummary.company?.postal_code,proAccountSummary.company?.city].filter(Boolean).join(' ')||'—')}</strong></div>
+        </div>
+      </div>
+    </section>`:''}
+
+    ${currentProfile?.is_admin&&profile.account_type==='professionnel'?`
+    <section class="review-section">
+      <h3>Outils Admin · Boosts</h3>
+      <div class="review-form">
+        ${!boostSummaryLoaded?`<div class="note" style="padding:12px;border:1px solid #efc9d6;border-radius:12px;background:#fff4f7;color:#8a2948;margin-bottom:12px"><strong>Données Boost indisponibles.</strong> Recharge la fiche ou réessaie dans quelques secondes.</div>`:''}
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:10px">
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">A déjà acheté des Boosts</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${summary.has_purchased?'Oui':'Non'}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Dépensé en Boosts</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${spentBoostEuros}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Boosts achetés</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${purchasedTotal}</strong>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fff">
+            <span class="note" style="display:block;margin:0 0 5px">Solde restant</span>
+            <strong style="font-size:1.05rem;color:#4a1d5d">${availableTotal}</strong>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-bottom:14px">
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fbf7fd">
+            <b>Boosts 7 jours</b>
+            <div class="note" style="margin-top:6px">Achetés : <strong>${Number(boost7.purchased||0)}</strong> · Offerts : <strong>${Number(boost7.gifted||0)}</strong> · Utilisés : <strong>${Number(boost7.used||0)}</strong> · Restants : <strong>${Number(boost7.available||0)}</strong></div>
+          </div>
+          <div style="border:1px solid #eadfed;border-radius:14px;padding:12px;background:#fbf7fd">
+            <b>Boosts 30 jours</b>
+            <div class="note" style="margin-top:6px">Achetés : <strong>${Number(boost30.purchased||0)}</strong> · Offerts : <strong>${Number(boost30.gifted||0)}</strong> · Utilisés : <strong>${Number(boost30.used||0)}</strong> · Restants : <strong>${Number(boost30.available||0)}</strong></div>
+          </div>
+        </div>
+        <p class="note" style="margin-top:0">Commandes Boost payées : <strong>${paidBoostOrders}</strong> · Offerts par l’admin : <strong>${giftedTotal}</strong> · Utilisés : <strong>${usedTotal}</strong>.</p>
+        <p class="note">Offrir des jetons Boost à ce professionnel sans paiement Stripe.</p>
+        <div class="form-grid">
+          <div class="form-row"><label>Durée</label><select class="select" id="adminBoostDuration-${sellerId}"><option value="7">7 jours</option><option value="30">30 jours</option></select></div>
+          <div class="form-row"><label>Nombre de jetons</label><input class="input" id="adminBoostCredits-${sellerId}" type="number" min="1" max="1000" value="1"></div>
+          <div class="form-row full"><label>Note interne (facultatif)</label><input class="input" id="adminBoostNote-${sellerId}" maxlength="500" placeholder="Ex. geste commercial"></div>
+        </div>
+        <div class="form-actions"><button class="btn primary" type="button" onclick="adminGiftBoosts('${sellerId}')">Offrir les jetons</button></div>
+      </div>
+    </section>`:''}
+
     <section class="review-section">
       <h3>Ses annonces</h3>
       <div class="seller-listings-mini">
@@ -7764,6 +8657,26 @@ window.openSellerProfile=async sellerId=>{
       <h3>Avis (${list.length})</h3>
       <div>${reviewCards}</div>
     </section>`;
+};
+
+window.adminGiftBoosts=async sellerId=>{
+  if(!currentProfile?.is_admin)return;
+  const duration=Number(document.getElementById('adminBoostDuration-'+sellerId)?.value||7);
+  const credits=Number(document.getElementById('adminBoostCredits-'+sellerId)?.value||0);
+  const note=document.getElementById('adminBoostNote-'+sellerId)?.value?.trim()||null;
+  if(![7,30].includes(duration)){toast('Durée invalide');return;}
+  if(!Number.isInteger(credits)||credits<1||credits>1000){toast('Choisissez entre 1 et 1000 jetons');return;}
+  try{
+    const {data,error}=await sb.rpc('admin_grant_pro_boosts',{p_user_id:sellerId,p_duration_days:duration,p_credits:credits,p_note:note});
+    if(error)throw error;
+    toast(credits+' jeton'+(credits>1?'s':'')+' Boost '+duration+' jours offert'+(credits>1?'s':''));
+    const input=document.getElementById('adminBoostCredits-'+sellerId);if(input)input.value='1';
+    const noteInput=document.getElementById('adminBoostNote-'+sellerId);if(noteInput)noteInput.value='';
+    await openSellerProfile(sellerId);
+  }catch(error){
+    console.error(error);
+    toast(error?.message||'Impossible d’offrir les Boosts');
+  }
 };
 
 window.setReviewRating=n=>{
@@ -7934,7 +8847,12 @@ async function openMyAds(){
   $('#resultats').scrollIntoView({behavior:'smooth'});
 }
 $('#headerMessagesBtn')?.addEventListener('click',()=>openMessages());
-$('#flowErrorsBtn')?.addEventListener('click',async()=>{if(!currentProfile?.is_admin)return;openModal('flowErrorsModal');await loadAdminFlowErrors();await refreshFlowErrorsCount();});
+window.openAdminFlowErrors=async()=>{
+  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+  openModal('flowErrorsModal');
+  await loadAdminFlowErrors();
+  await refreshFlowErrorsCount();
+};
 async function openFavorites(){
   if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos favoris');return;}
   resetSearchFilters();favoritesMode=true;
@@ -7957,7 +8875,7 @@ $('#moderationBtn').addEventListener('click',async()=>{
 
 // Password recovery: isolated from catalogue and account editing.
 const passwordRecovery = (()=>{
-  const redirectTo='https://abracadeal.github.io/abracadeal/';
+  const redirectTo='https://abracadeal.fr/';
   const storageKey='abracadeal.passwordRecoveryUser.v1';
   let recoveryUserId=null, sending=false, updating=false;
   const readMarker=()=>{try{return sessionStorage.getItem(storageKey)}catch{return null}};
@@ -8040,22 +8958,30 @@ const passwordRecovery = (()=>{
 
 if(sb){
   (async()=>{
-    await refreshAuth();
-    await loadFavorites();
-    await loadAds();
-    openSharedListingFromUrl();
+    try{await refreshAuth();}
+    catch(error){console.error('Initialisation du compte impossible',error);}
+    try{await loadFavorites();}
+    catch(error){console.error('Favoris indisponibles',error);}
+    try{await loadAds();}
+    catch(error){console.error('Catalogue indisponible',error);}
+    try{openSharedListingFromUrl();}
+    catch(error){console.error('Ouverture du lien partagé impossible',error);}
   })();
+
   sb.auth.onAuthStateChange((event,session)=>{
     passwordRecovery.handleAuth(event,session);
     if(event==='INITIAL_SESSION') return;
-    // Sortir du callback d'authentification avant tout nouvel appel au service.
     setTimeout(async()=>{
-      try{await refreshAuth();await loadFavorites();await loadAds();}
+      try{await refreshAuth();}
       catch(error){console.error('Actualisation du compte impossible',error);}
+      try{await loadFavorites();}
+      catch(error){console.error('Actualisation des favoris impossible',error);}
+      try{await loadAds();}
+      catch(error){console.error('Actualisation du catalogue impossible',error);}
     },0);
   });
 }else{
-  updateAuthUI();
+  try{updateAuthUI();}catch(error){console.error('Interface compte indisponible',error);}
   console.error('Supabase JS ne s’est pas chargé.');
 }
 // Vérification automatique des nouveaux messages sans recharger la page.
@@ -8064,7 +8990,13 @@ setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refresh
 
 // Rafraîchit aussi immédiatement quand l'utilisateur revient sur l'onglet / la fenêtre.
 document.addEventListener('visibilitychange',()=>{
-  if(document.visibilityState==='visible' && currentUser){ refreshUnreadMessages(); if(currentProfile?.is_admin)refreshFlowErrorsCount(); }
+  if(document.visibilityState==='visible' && currentUser){
+    refreshUnreadMessages();
+    if(currentProfile?.is_admin)refreshFlowErrorsCount();
+    if(currentProfile?.account_type==='professionnel' && document.getElementById('accountModal')?.classList.contains('open')){
+      loadProBoostWallet().catch(error=>console.warn('Boost wallet refresh',error));
+    }
+  }
 });
 window.addEventListener('focus',()=>{
   if(currentUser) refreshUnreadMessages();
@@ -8335,7 +9267,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // One top-level "Compte" control containing both account actions.
   const create=exact('Créer un compte').find(visible);
   const login=exact('Se connecter').find(visible);
-  if(window.innerWidth>760&&create&&login&&create.parentElement===login.parentElement&&!document.querySelector('.abraca-account-menu')){
+  if(false&&window.innerWidth>760&&create&&login&&create.parentElement===login.parentElement&&!document.querySelector('.abraca-account-menu')){
     const parent=create.parentElement;
     const menu=document.createElement('div'); menu.className='abraca-account-menu';
     const trigger=document.createElement('button'); trigger.type='button'; trigger.className='abraca-account-trigger'; trigger.textContent='Compte';
@@ -8442,5 +9374,267 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   });
 });
-</script></body>
+</script><script id="abraca-pro-plan-admin-stats-js">
+(()=>{
+  let proPlanCheckBusy=false;
+  let proPlanCheckoutBusy=false;
+
+  const moneyFromCents=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+
+  async function loadAdminDashboardStats(){
+    const panel=document.getElementById('adminStatsPanel');
+    if(!panel)return;
+    const isAdmin=!!currentProfile?.is_admin;
+    panel.classList.toggle('hidden',!isAdmin);
+    document.getElementById('adminDatabasePanel')?.classList.toggle('hidden',!isAdmin);
+    if(!isAdmin)return;
+    const {data,error}=await sb.rpc('get_admin_dashboard_stats');
+    if(error){console.error('Stats Admin indisponibles',error);return}
+    const stats=data||{};
+    const put=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=String(v??0)};
+    put('statTotalAccounts',stats.total_accounts);
+    put('statProfessionals',stats.professionals);
+    put('statPrivateAccounts',stats.private_accounts);
+    put('statTravelers',stats.vacation_travelers);
+    put('statHosts',stats.vacation_hosts);
+    put('statTrialingPros',stats.trialing_pros);
+    put('statActivePros',stats.active_paid_pros);
+    put('statProsToFinalize',stats.pros_to_finalize);
+    put('statPlan20',stats.plan_counts?.pro_20);
+    put('statPlan50',stats.plan_counts?.pro_50);
+    put('statPlan100',stats.plan_counts?.pro_100);
+    put('statPlan250',stats.plan_counts?.pro_250);
+    const mrr=document.getElementById('statMrr');
+    if(mrr)mrr.textContent=moneyFromCents(stats.theoretical_mrr_cents||0);
+  }
+  window.loadAdminDashboardStats=loadAdminDashboardStats;
+  document.getElementById('refreshAdminStatsBtn')?.addEventListener('click',loadAdminDashboardStats);
+
+  function adminDbStatusLabel(row){
+    if(row.status==='active')return 'En ligne';
+    if(row.status==='pending')return 'À modérer';
+    if(row.status==='rejected')return 'Refusée';
+    if(row.status==='archived'){
+      if(row.archive_reason==='sold')return 'Vendue';
+      if(row.archive_reason==='user_deleted')return 'Supprimée par le vendeur';
+      if(row.archive_reason==='admin_removed')return 'Retirée par l’admin';
+      return 'Archivée';
+    }
+    return row.status||'—';
+  }
+
+  function renderAdminDbResults(rows){
+    const host=document.getElementById('adminDbResults');
+    if(!host)return;
+    const list=Array.isArray(rows)?rows:[];
+    if(!list.length){
+      host.innerHTML='<div class="admin-db-empty">Aucune annonce trouvée.</div>';
+      return;
+    }
+    host.innerHTML=list.map(row=>{
+      const contact=[row.owner_phone||row.listing_phone,row.owner_email||row.listing_email].filter(Boolean);
+      const archived=row.status==='archived';
+      return `<article class="admin-db-card">
+        <div class="admin-db-card-main">
+          <div class="admin-db-card-top">
+            <strong>${esc(row.title||'Annonce')}</strong>
+            <span class="status-pill">${esc(adminDbStatusLabel(row))}</span>
+          </div>
+          <div class="admin-db-ref">${esc(row.listing_reference||row.id||'')}</div>
+          <div class="admin-db-meta">${esc(row.owner_name||'Vendeur')} · ${esc(row.city||'—')}${row.postal_code?' · '+esc(row.postal_code):''}</div>
+          <div class="admin-db-contact">${contact.length?contact.map(esc).join(' · '):'Coordonnées non renseignées'}</div>
+          ${row.archived_at?`<div class="note">Archivée le ${new Date(row.archived_at).toLocaleString('fr-FR')}</div>`:''}
+        </div>
+        <div class="admin-db-actions">
+          ${!archived?`<button class="btn ghost" type="button" onclick="adminDbOpenListing('${row.id}')">Voir l’annonce</button>`:''}
+          ${!archived?`<button class="btn ghost admin-db-danger" type="button" onclick="adminDbArchiveListing('${row.id}')">Retirer du site</button>`:''}
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  async function searchAdminDatabase(){
+    if(!currentProfile?.is_admin)return;
+    const status=document.getElementById('adminDbStatus');
+    const query=document.getElementById('adminDbQuery')?.value?.trim()||'';
+    const state=document.getElementById('adminDbState')?.value||'all';
+    const host=document.getElementById('adminDbResults');
+    if(!query){
+      if(host)host.innerHTML='';
+      if(status)status.textContent='Saisissez un nom, un téléphone, un e-mail ou un numéro d’annonce pour lancer une recherche.';
+      return;
+    }
+    if(status)status.textContent='Recherche…';
+    const {data,error}=await sb.rpc('admin_search_listings',{p_query:query,p_state:state,p_limit:50});
+    if(error){
+      console.error('Recherche base annonces',error);
+      if(status)status.textContent='Recherche indisponible.';
+      return;
+    }
+    const rows=data?.results||[];
+    if(status)status.textContent=rows.length+' résultat'+(rows.length>1?'s':'');
+    renderAdminDbResults(rows);
+  }
+  window.searchAdminDatabase=searchAdminDatabase;
+
+  window.adminDbOpenListing=async id=>{
+    let a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
+    if(!a){
+      const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('id',id).maybeSingle();
+      if(error||!data){toast('Annonce indisponible');return;}
+      a=data;detailAdsCache.set(id,a);
+    }
+    closeModal('accountModal');
+    openAd(id);
+  };
+
+  window.adminDbArchiveListing=async id=>{
+    if(!currentProfile?.is_admin)return;
+    if(!confirm('Retirer cette annonce du site ? Elle restera consultable dans la base de données Admin.'))return;
+    const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
+    if(error){toast(error.message||'Impossible de retirer cette annonce');return;}
+    toast('Annonce retirée du site et conservée dans la base Admin');
+    await Promise.all([loadAds(),searchAdminDatabase(),loadAdminDashboardStats()]);
+  };
+
+  document.getElementById('adminDbSearchBtn')?.addEventListener('click',searchAdminDatabase);
+  document.getElementById('adminDbQuery')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAdminDatabase();}});
+  document.getElementById('adminDbState')?.addEventListener('change',()=>{
+    if(document.getElementById('adminDbQuery')?.value?.trim())searchAdminDatabase();
+  });
+
+  async function loadProPlans(){
+    const grid=document.getElementById('proPlanGrid');
+    if(!grid)return [];
+    const {data,error}=await sb.rpc('get_pro_subscription_plans');
+    if(error){grid.innerHTML='<div class="note">Impossible de charger les formules pour le moment.</div>';throw error}
+    const plans=Array.isArray(data)?data:[];
+    grid.innerHTML=plans.map(p=>`
+      <button type="button" class="pro-plan-card" data-pro-plan="${p.code}">
+        <h3>${Number(p.listing_limit).toLocaleString('fr-FR')} annonces</h3>
+        <div class="pro-plan-price">${moneyFromCents(p.amount_cents)} <small>HT / mois</small></div>
+        <div class="pro-plan-desc">Jusqu’à ${Number(p.listing_limit).toLocaleString('fr-FR')} annonces actives · import et gestion du stock Pro.</div>
+        <span class="pro-plan-choose">Choisir cette formule</span>
+      </button>`).join('');
+    grid.querySelectorAll('[data-pro-plan]').forEach(btn=>btn.addEventListener('click',()=>startProPlanCheckout(btn.dataset.proPlan,btn)));
+    return plans;
+  }
+
+  async function startProPlanCheckout(planCode,button){
+    if(proPlanCheckoutBusy)return;
+    proPlanCheckoutBusy=true;
+    const status=document.getElementById('proPlanStatus');
+    const old=button?.querySelector('.pro-plan-choose')?.textContent;
+    try{
+      if(status)status.textContent='Préparation de votre abonnement sécurisé…';
+      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent='Préparation…';
+
+      const siret=currentUser?.user_metadata?.company_registration?.siret;
+      if(siret){
+        try{await requestCompanyCheck('verify',String(siret).replace(/\s/g,''));}
+        catch(e){console.warn('Vérification Pro à finaliser',e)}
+      }
+
+      const {data,error}=await sb.functions.invoke('create-pro-subscription-order',{body:{plan_code:planCode}});
+      if(error){
+        let detail=null;
+        try{detail=await error.context?.json()}catch{}
+        throw new Error(detail?.error||detail?.message||error.message||'Impossible de préparer l’abonnement');
+      }
+      if(!data?.checkout_url)throw new Error(data?.error||'Lien Stripe indisponible');
+      if(status)status.textContent=data.message||'Redirection vers la validation sécurisée…';
+      try{
+        sessionStorage.setItem('abraca_pro_plan_pending','1');
+        if(!history.state?.abracaProPlanReturn){
+          history.pushState({...history.state,abracaProPlanReturn:true},document.title,location.href);
+        }
+      }catch(_){}
+      location.href=data.checkout_url;
+    }catch(err){
+      console.error(err);
+      if(status)status.textContent=err.message||'Impossible de préparer l’abonnement.';
+      toast(err.message||'Impossible de préparer l’abonnement');
+      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent=old||'Choisir cette formule';
+      proPlanCheckoutBusy=false;
+    }
+  }
+
+  async function ensureProPlanSelection({force=false}={}){
+    if(proPlanCheckBusy||!sb||!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return false;
+    proPlanCheckBusy=true;
+    try{
+      const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle();
+      if(error && !/0 rows/i.test(error.message||''))console.warn('Abonnement Pro indisponible',error);
+      const complete=!!data && ['trialing','active'].includes(data.status);
+      if(complete){
+        try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+        if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
+        return false;
+      }
+      try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
+      await loadProPlans();
+      closeModal('accountModal');
+      openModal('proPlanModal');
+      return true;
+    }finally{
+      proPlanCheckBusy=false;
+    }
+  }
+  window.ensureProPlanSelection=ensureProPlanSelection;
+
+  document.addEventListener('keydown',e=>{
+    if(e.key==='Escape' && document.getElementById('proPlanModal')?.classList.contains('open')){
+      e.preventDefault();e.stopImmediatePropagation();
+    }
+  },true);
+
+  function restoreMandatoryProPlanGate(){
+    if(!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return;
+    let pending=false;
+    try{pending=sessionStorage.getItem('abraca_pro_plan_pending')==='1'}catch(_){}
+    if(pending){
+      closeModal('accountModal');
+      openModal('proPlanModal');
+      loadProPlans().catch(error=>console.error('Formules Pro indisponibles',error));
+    }
+    ensureProPlanSelection();
+  }
+
+  window.addEventListener('abracadeal:auth',()=>{
+    setTimeout(()=>{
+      loadAdminDashboardStats();
+      restoreMandatoryProPlanGate();
+    },80);
+  });
+
+  window.addEventListener('pageshow',()=>{
+    setTimeout(restoreMandatoryProPlanGate,0);
+  });
+  window.addEventListener('focus',()=>{
+    setTimeout(restoreMandatoryProPlanGate,0);
+  });
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible')setTimeout(restoreMandatoryProPlanGate,0);
+  });
+
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('pro_subscription')==='success'){
+    setTimeout(async()=>{
+      try{
+        await refreshAuth();
+        const blocked=await ensureProPlanSelection();
+        await loadAdminDashboardStats();
+        if(!blocked){
+          try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+          toast('Formule Pro activée');
+        }
+      }catch(e){console.error(e)}
+      try{history.replaceState({},document.title,location.pathname+(location.hash||''))}catch{}
+    },500);
+  }else{
+    setTimeout(()=>{loadAdminDashboardStats();ensureProPlanSelection();},700);
+  }
+})();
+</script>
+</body>
 </html>
