@@ -4552,6 +4552,7 @@ let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editing
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
 let selectedPublishPack='free', publishPhotoLimit=3;
 let promoSelectedPack=null, promoPreselectedListingId=null;
+let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={
   photo_12:{code:'photo_12',audience:'particulier',title:'Pack Photos · jusqu’à 12',price:'4,99 €',days:0,max:1,photos:12,link:'https://buy.stripe.com/test_6oU00b5hk2r35wDbLHgrS07'},
   photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'4,99 €',days:0,max:1,photos:30,link:'https://buy.stripe.com/test_eVq9ALaBE0iV9MT2b7grS08'},
@@ -6158,11 +6159,16 @@ function renderPublishPackPicker(){
   }
   setPublishPhotoLimit();
 }
-async function createPromotionOrder(packCode,listingIds){
+function isProBoostCreditPack(code){return ['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d'].includes(code)}
+async function createPromotionOrder(packCode,listingIds=[]){
   const pack=PROMOTION_PACKS[packCode];if(!pack)throw new Error('Pack inconnu');
   if(!currentUser)throw new Error('Connexion requise');
-  const unique=[...new Set(listingIds)].filter(Boolean);
-  if(!unique.length||unique.length>pack.max)throw new Error(`Sélectionnez entre 1 et ${pack.max} annonce(s)`);
+  const unique=[...new Set(listingIds||[])].filter(Boolean);
+  if(isProBoostCreditPack(packCode)){
+    if(unique.length)throw new Error('Les Boosts Pro s’achètent comme des crédits, sans choisir d’annonce.');
+  }else if(!unique.length||unique.length>pack.max){
+    throw new Error('Sélectionnez entre 1 et '+pack.max+' annonce(s)');
+  }
   const {data,error}=await sb.functions.invoke('create-promotion-order',{body:{pack_code:packCode,listing_ids:unique}});
   if(error){
     let detail=null;
@@ -6178,21 +6184,33 @@ async function goToPromotionCheckout(packCode,listingIds){
 function promoPackList(){return Object.values(PROMOTION_PACKS).filter(p=>p.audience===accountAudience()&&!['photo_12','photo_30_pro'].includes(p.code))}
 function renderPromotionModal(){
   const packs=promoPackList(),grid=$('#promotionPackGrid'),box=$('#promotionListings'),intro=$('#promotionIntro'),photoNote=$('#promotionPhotoNote');
+  const proStore=accountAudience()==='professionnel';
   if(!packs.length)return;
   if(!promoSelectedPack||PROMOTION_PACKS[promoSelectedPack]?.audience!==accountAudience())promoSelectedPack=packs[0].code;
   const chosen=PROMOTION_PACKS[promoSelectedPack];
-  grid.innerHTML=packs.map(p=>`<button type="button" class="pack-card ${promoSelectedPack===p.code?'selected':''}" data-promo-pack="${p.code}"><div class="pack-card-title">${p.title}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.max} annonce${p.max>1?'s':''} maximum · ${p.days} jours</div></button>`).join('');
+  grid.innerHTML=packs.map(p=>'<button type="button" class="pack-card '+(promoSelectedPack===p.code?'selected':'')+'" data-promo-pack="'+p.code+'"><div class="pack-card-title">'+p.title+'</div><div class="pack-card-price">'+p.price+'</div><div class="pack-card-desc">'+p.max+' Boost'+(p.max>1?'s':'')+' · '+p.days+' jours</div></button>').join('');
   grid.querySelectorAll('[data-promo-pack]').forEach(b=>b.addEventListener('click',()=>{promoSelectedPack=b.dataset.promoPack;renderPromotionModal();}));
-  const own=allAds.filter(a=>a.owner_id===currentUser?.id && !['rejected','archived'].includes(a.status));
-  const pre=promoPreselectedListingId;
-  box.innerHTML=own.length?own.map(a=>`<label class="promo-listing"><input type="checkbox" value="${a.id}" ${pre===a.id?'checked':''}><span><b>${esc(a.title)}</b><br><small>${esc(a.city||'')} · ${money(a.price)}${listingIsFeatured(a)?' · déjà boostée':''}</small></span></label>`).join(''):'<div class="empty-state">Aucune annonce disponible.</div>';
-  if(accountAudience()==='particulier'&&pre){box.querySelectorAll('input').forEach(i=>{if(i.value!==pre)i.disabled=true;});}
-  box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{
-    const checked=[...box.querySelectorAll('input:checked')];
-    if(checked.length>chosen.max){i.checked=false;toast(`Ce pack accepte ${chosen.max} annonce${chosen.max>1?'s':''} maximum`);}
-  }));
-  if(intro)intro.textContent=accountAudience()==='professionnel'?'Boost premium · places limitées. Choisissez un pack puis les annonces à mettre en avant. Les annonces tournent dans 3 emplacements prioritaires afin de préserver une vraie valeur au boost.':'Choisissez la durée de mise en avant de cette annonce.';
-  if(photoNote)photoNote.textContent=accountAudience()==='professionnel'?'📷 Jusqu’à 15 photos incluses par annonce · Jusqu’à 30 avec le Pack Photos':'📷 Jusqu’à 3 photos incluses par annonce · Jusqu’à 12 avec le Pack Photos';
+  const listingArea=$('#promotionListingArea'),payBtn=$('#promotionPayBtn');
+  if(proStore){
+    listingArea?.classList.add('hidden');
+    if(box)box.innerHTML='';
+    if(intro)intro.textContent='Achetez un lot de crédits Boost. Ils restent disponibles dans votre espace Pro jusqu’à leur utilisation.';
+    if(photoNote)photoNote.textContent='★ Boost premium · places limitées · 1 crédit utilisé = 1 annonce boostée pendant 7 ou 30 jours.';
+    if(payBtn)payBtn.textContent='Acheter mes Boosts';
+  }else{
+    listingArea?.classList.remove('hidden');
+    if(payBtn)payBtn.textContent='Continuer vers le paiement';
+    const own=allAds.filter(a=>a.owner_id===currentUser?.id && !['rejected','archived'].includes(a.status));
+    const pre=promoPreselectedListingId;
+    box.innerHTML=own.length?own.map(a=>'<label class="promo-listing"><input type="checkbox" value="'+a.id+'" '+(pre===a.id?'checked':'')+'><span><b>'+esc(a.title)+'</b><br><small>'+esc(a.city||'')+' · '+money(a.price)+(listingIsFeatured(a)?' · déjà boostée':'')+'</small></span></label>').join(''):'<div class="empty-state">Aucune annonce disponible.</div>';
+    if(pre){box.querySelectorAll('input').forEach(i=>{if(i.value!==pre)i.disabled=true;});}
+    box.querySelectorAll('input').forEach(i=>i.addEventListener('change',()=>{
+      const checked=[...box.querySelectorAll('input:checked')];
+      if(checked.length>chosen.max){i.checked=false;toast('Ce pack accepte '+chosen.max+' annonce(s) maximum');}
+    }));
+    if(intro)intro.textContent='Choisissez la durée de mise en avant de cette annonce.';
+    if(photoNote)photoNote.textContent='📷 Jusqu’à 3 photos incluses par annonce · Jusqu’à 12 avec le Pack Photos';
+  }
 }
 function openPromotionForListing(id){promoPreselectedListingId=id;promoSelectedPack=accountAudience()==='professionnel'?'pro_5_7d':'private_7d';renderPromotionModal();openModal('promotionModal')}
 async function buyPhotoPackForListing(id){try{const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);const pack=a?.seller_type==='professionnel'?'photo_30_pro':'photo_12';const url=await createPromotionOrder(pack,[id]);location.href=url}catch(err){toast(err.message||'Impossible de préparer le paiement')}}
