@@ -7194,6 +7194,23 @@ const SHOWROOM_LOA_ADS=[
 ];
 
 let adsLoadSequence=0;
+let lastGoodPublicAds=[];
+
+function hasActiveCatalogueFilters(){
+  const ids=[
+    'searchQuery','searchCity','filterCategory','filterSubcategory','filterPriceMin','filterPriceMax',
+    'filterCondition','filterSeller','filterVehicleMake','filterVehicleModel','filterYearMin','filterYearMax',
+    'filterMileageMax','filterFuel','filterImmoTransaction','filterImmoPropertyType','filterImmoSurfaceMin',
+    'filterImmoSurfaceMax','filterImmoRoomsMin','filterImmoBedroomsMin','filterImmoDpe','filterImmoFurnished',
+    'filterImmoOutdoor','filterImmoParking'
+  ];
+  return ids.some(id=>String(document.getElementById(id)?.value||'').trim()!=='')
+    || Number(document.getElementById('filterImmoRadius')?.value||0)>0
+    || !!immoNearbyFilterState.active
+    || !!activeCategory
+    || !!activeVehicleSubcategory;
+}
+
 async function loadAds(){
   const sequence=++adsLoadSequence;
   const viewerId=currentUser?.id;
@@ -7228,10 +7245,19 @@ async function loadAds(){
   }
 
   if(!isCurrent()) return;
+
   if(!moderationMode && !onlyMine){
     const existingIds=new Set((loadedAds||[]).map(a=>a.id));
     loadedAds=[...SHOWROOM_LOA_ADS.filter(a=>!existingIds.has(a.id)),...(loadedAds||[])];
+
+    if(loadedAds.length){
+      lastGoodPublicAds=loadedAds.slice();
+    }else if(lastGoodPublicAds.length){
+      console.warn('Catalogue vide ignoré : restauration du dernier chargement valide');
+      loadedAds=lastGoodPublicAds.slice();
+    }
   }
+
   allAds=loadedAds;
   moderationRiskById.clear();
   risks.forEach((v,k)=>moderationRiskById.set(k,v));
@@ -7515,7 +7541,21 @@ function renderAds(){
     if(selected) el.setAttribute('aria-current','true');else el.removeAttribute('aria-current');
   });
   $('#backToAllAds').classList.toggle('hidden',!favoritesMode&&!onlyMine);
-  const ads=filteredAds(), grid=$('#adsGrid');
+  let ads=filteredAds(), grid=$('#adsGrid');
+
+  if(
+    !moderationMode &&
+    !onlyMine &&
+    !favoritesMode &&
+    !hasActiveCatalogueFilters() &&
+    ads.length===0 &&
+    lastGoodPublicAds.length
+  ){
+    console.warn('Rendu vide ignoré : restauration du catalogue public');
+    allAds=lastGoodPublicAds.slice();
+    ads=filteredAds();
+  }
+
   $('#resultTitle').textContent=moderationMode
     ?'À modérer'
     :(favoritesMode
@@ -8966,6 +9006,17 @@ if(sb){
     catch(error){console.error('Catalogue indisponible',error);}
     try{openSharedListingFromUrl();}
     catch(error){console.error('Ouverture du lien partagé impossible',error);}
+
+    setTimeout(async()=>{
+      try{
+        if(!onlyMine&&!favoritesMode&&!moderationMode){
+          resetSearchFilters();
+          await loadAds();
+        }
+      }catch(error){
+        console.error('Stabilisation du catalogue impossible',error);
+      }
+    },700);
   })();
 
   sb.auth.onAuthStateChange((event,session)=>{
