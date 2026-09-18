@@ -57,7 +57,7 @@ function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currenc
 async function boot(){
  const id=new URLSearchParams(location.search).get('id');if(!id){$('loading').textContent='Logement introuvable.';return}
  const [{data:l,error},{data:d},{data:photos}]=await Promise.all([
-  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status').eq('id',id).eq('category','vacances').eq('status','active').maybeSingle(),
+  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status').eq('id',id).eq('category','vacances').maybeSingle(),
   sb.from('vacation_listing_details').select('*').eq('listing_id',id).maybeSingle(),
   sb.from('listing_photos').select('*').eq('listing_id',id).order('position')
  ]);
