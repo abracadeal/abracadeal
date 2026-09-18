@@ -7389,6 +7389,14 @@ function renderAds(){
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone};
     const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
+    const canUseProBoost=!!(
+      currentUser &&
+      a.seller_type==='professionnel' &&
+      (
+        currentProfile?.is_admin===true ||
+        (currentProfile?.account_type==='professionnel' && (onlyMine || a.owner_id===currentUser.id))
+      )
+    );
     const statusBadge=(onlyMine && a.status!=='active')
       ?`<div style="display:inline-flex;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:${a.status==='pending'?'#fff3cd':'#f8d7da'};color:${a.status==='pending'?'#7a5a00':'#842029'};font-size:.74rem;font-weight:850">${a.status==='pending'?'En attente de validation':'Refusée'}</div>`
       :'';
@@ -7412,9 +7420,11 @@ function renderAds(){
           ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
         </div>`:''}
         <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
-        ${(moderationActions||(!moderationMode&&canDelete))?`<div class="ad-actions">
+        ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
-          ${(!moderationMode&&canDelete)?`${currentProfile?.is_admin?`<button class="mini-btn" onclick="event.stopPropagation();openAdminEditAd('${a.id}')">Modifier</button>`:''}${(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}${(a.seller_type==='professionnel'&&(a.owner_id===currentUser?.id||currentProfile?.is_admin))?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>Boost actif</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}<button class="mini-btn danger" onclick="event.stopPropagation();${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>`:''}
+          ${(!moderationMode&&canDelete)?`${currentProfile?.is_admin?`<button class="mini-btn" onclick="event.stopPropagation();openAdminEditAd('${a.id}')">Modifier</button>`:''}${(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}`:''}
+          ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>Boost actif</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
+          ${(!moderationMode&&canDelete)?`<button class="mini-btn danger" onclick="event.stopPropagation();${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
   }).join('');
