@@ -451,6 +451,23 @@ function onboardingMsg(t,err=false){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
+function abracaHostNormalizePhone(value=''){
+  let compact=String(value||'').trim().replace(/[\s().-]/g,'');
+  if(/^00\d+$/.test(compact)) compact='+'+compact.slice(2);
+  if(/^0[1-9]\d{8}$/.test(compact)) return '+33'+compact.slice(1);
+  if(/^\+33[1-9]\d{8}$/.test(compact)) return compact;
+  if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
+  return null;
+}
+async function abracaHostPhoneAvailable(phone){
+  const normalized=abracaHostNormalizePhone(phone);
+  if(!normalized) return {ok:false,message:'Indiquez un numéro de téléphone valide.'};
+  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized});
+  if(error) return {ok:false,message:'Impossible de vérifier le numéro pour le moment.'};
+  if(!data) return {ok:false,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+  return {ok:true,normalized};
+}
+
 $('completeHostBtn').onclick=async()=>{
   const first=$('oFirstName').value.trim();
   const last=$('oLastName').value.trim();
@@ -492,7 +509,12 @@ $('completeHostBtn').onclick=async()=>{
 
   const btn=$('completeHostBtn');btn.disabled=true;
   try{
+    let normalizedPhone=abracaHostNormalizePhone(phone);
+    if(!normalizedPhone){onboardingMsg('Indiquez un numéro de téléphone valide.',true);return}
     if(!currentUser){
+      const phoneCheck=await abracaHostPhoneAvailable(phone);
+      if(!phoneCheck.ok){onboardingMsg(phoneCheck.message,true);return}
+      normalizedPhone=phoneCheck.normalized;
       saveHostDraft();
       const accountEmail=$('oAccountEmail').value.trim();
       const accountPassword=$('oAccountPassword').value;
@@ -507,7 +529,7 @@ $('completeHostBtn').onclick=async()=>{
             display_name:(first+' '+last).trim(),
             account_type:requestedType,
             vacation_role:'host',
-            phone
+            phone:normalizedPhone
           }
         }
       });
@@ -530,7 +552,7 @@ $('completeHostBtn').onclick=async()=>{
     const now=new Date().toISOString();
 
     const {error:idErr}=await sb.from('vacation_user_details').upsert({
-      user_id:currentUser.id,first_name:first,last_name:last,phone,birth_date:birth,city:hostCity,country,updated_at:now
+      user_id:currentUser.id,first_name:first,last_name:last,phone:normalizedPhone,birth_date:birth,city:hostCity,country,updated_at:now
     },{onConflict:'user_id'});
     if(idErr){onboardingMsg(idErr.message,true);return}
 
