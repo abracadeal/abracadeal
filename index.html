@@ -3030,42 +3030,57 @@ header .publish-trigger:hover{
   }
 }
 </style><style id="abraca-floating-account-host">
-/* Compte + Devenir hôte restent visibles pendant le scroll, sans chevaucher la barre principale. */
 @media(min-width:761px){
-  header .account-auth-group{
-    position:static!important;
+  header{
+    position:sticky!important;
+    top:0!important;
+    z-index:10000!important;
     overflow:visible!important;
-    transform:none!important;
+  }
+  header .nav{
+    min-height:68px!important;
+    padding:8px 0!important;
+    box-sizing:border-box!important;
+  }
+  header .nav-actions,
+  header .abraca-top-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:8px!important;
+    width:100%!important;
+    max-width:100%!important;
     margin:0!important;
+    padding:0!important;
+  }
+  header .account-auth-group,
+  header .abraca-vacances-top,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    position:static!important;
+    inset:auto!important;
+    transform:none!important;
+    float:none!important;
+    margin:0!important;
+    flex:0 0 auto!important;
+  }
+  header #accountBtn,
+  header .abraca-vacances-top,
+  header .publish-trigger,
+  header .abraca-publish-top{
+    min-height:46px!important;
+    height:46px!important;
+    padding:0 14px!important;
+    white-space:nowrap!important;
+    border-radius:14px!important;
   }
   header #accountBtn{
-    position:fixed!important;
-    top:78px!important;
-    right:184px!important;
-    width:158px!important;
-    max-width:158px!important;
-    min-height:46px!important;
-    z-index:900!important;
-    margin:0!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    border-radius:14px!important;
-    box-shadow:0 12px 28px rgba(41,12,62,.24)!important;
+    min-width:112px!important;
+    max-width:150px!important;
   }
   header .abraca-vacances-top{
-    position:fixed!important;
-    top:78px!important;
-    right:16px!important;
-    width:158px!important;
-    min-height:46px!important;
-    z-index:899!important;
-    margin:0!important;
-    display:flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    border-radius:14px!important;
-    box-shadow:0 12px 28px rgba(41,12,62,.24)!important;
+    min-width:138px!important;
   }
 }
 @media(max-width:760px){
@@ -4466,7 +4481,7 @@ function updateAuthUI(preserveEditing=false){
   renderProfileSummary();
   renderCompanyAccount();
   if(currentUser){
-    $('#accountBtn').textContent=currentProfile?.display_name||'Mon compte';
+    $('#accountBtn').textContent=currentProfile?.is_admin?'Admin':(currentProfile?.display_name||'Compte');
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.remove('hidden');
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
     $('#accountUserBox').innerHTML=`<strong>${esc(currentProfile?.display_name||currentUser.email)}</strong>
@@ -4487,7 +4502,7 @@ function updateAuthUI(preserveEditing=false){
     if($('#profileEmail')) $('#profileEmail').value=currentUser.email||'';
     setTimeout(refreshUnreadMessages,0);
   }else{
-    $('#accountBtn').textContent=window.innerWidth<=760?'Compte':'Se connecter';
+    $('#accountBtn').textContent='Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
@@ -8442,7 +8457,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // One top-level "Compte" control containing both account actions.
   const create=exact('Créer un compte').find(visible);
   const login=exact('Se connecter').find(visible);
-  if(window.innerWidth>760&&create&&login&&create.parentElement===login.parentElement&&!document.querySelector('.abraca-account-menu')){
+  if(false&&window.innerWidth>760&&create&&login&&create.parentElement===login.parentElement&&!document.querySelector('.abraca-account-menu')){
     const parent=create.parentElement;
     const menu=document.createElement('div'); menu.className='abraca-account-menu';
     const trigger=document.createElement('button'); trigger.type='button'; trigger.className='abraca-account-trigger'; trigger.textContent='Compte';
