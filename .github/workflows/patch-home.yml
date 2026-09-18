@@ -88,7 +88,7 @@ jobs:
           }
           </style>'''
           if 'id="abraca-home-ux-patch"' in s:
-            s=re.sub(r'<style id="abraca-home-ux-patch">[\s\S]*?</style>',css,s,count=1)
+            s=re.sub(r'<style id="abraca-home-ux-patch">[\s\S]*?</style>',lambda m: css,s,count=1)
           else:
             s=s.replace("</head>",css+"</head>")
 
@@ -212,7 +212,7 @@ jobs:
           });
           </script>'''
           if 'id="abraca-home-ux-script"' in s:
-            s=re.sub(r'<script id="abraca-home-ux-script">[\s\S]*?</script>',js,s,count=1)
+            s=re.sub(r'<script id="abraca-home-ux-script">[\s\S]*?</script>',lambda m: js,s,count=1)
           else:
             s=s.replace("</body>",js+"</body>")
 
