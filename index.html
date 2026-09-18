@@ -2921,13 +2921,14 @@ header .publish-trigger:hover{
 </style><style id="abraca-mobile-account-real-button">
 @media(max-width:760px){
   header{
-    position:sticky!important;
-    top:0!important;
-    z-index:10000!important;
+    position:relative!important;
+    top:auto!important;
+    z-index:50!important;
+    overflow:visible!important;
   }
   header .nav{
     min-height:0!important;
-    padding:8px 10px 10px!important;
+    padding:70px 10px 10px!important;
     box-sizing:border-box!important;
   }
   header .nav-actions,
@@ -2943,18 +2944,19 @@ header .publish-trigger:hover{
     box-sizing:border-box!important;
   }
   header .account-auth-group{
+    position:fixed!important;
+    top:8px!important;
+    left:12px!important;
+    z-index:10020!important;
     display:block!important;
-    grid-column:1!important;
-    grid-row:1!important;
-    width:100%!important;
+    width:calc(50vw - 17px)!important;
     min-width:0!important;
+    margin:0!important;
     border-radius:14px!important;
     overflow:visible!important;
     box-shadow:none!important;
   }
-  header #signupBtn{
-    display:none!important;
-  }
+  header #signupBtn{display:none!important}
   header #accountBtn{
     display:flex!important;
     align-items:center!important;
@@ -2968,34 +2970,33 @@ header .publish-trigger:hover{
     padding:0 10px!important;
     border-radius:14px!important;
     box-sizing:border-box!important;
-    position:static!important;
+    position:relative!important;
     inset:auto!important;
     transform:none!important;
     float:none!important;
-    font-size:0!important;
+    font-size:15px!important;
+    line-height:1!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
     color:#fff!important;
     background:linear-gradient(135deg,#4d176e 0%,#8f2aa8 48%,#ec3fa4 100%)!important;
     border:1px solid rgba(255,218,130,.85)!important;
     box-shadow:0 10px 28px rgba(210,55,173,.30)!important;
   }
-  header #accountBtn::after{
-    content:"Compte";
-    font-size:15px!important;
-    line-height:1!important;
-    font-weight:900!important;
-    color:#fff!important;
-  }
-  header .abraca-account-menu{
-    display:none!important;
-  }
+  header #accountBtn::after{content:none!important}
   header .publish-trigger,
   header .abraca-publish-top{
-    grid-column:2!important;
-    grid-row:1!important;
+    position:fixed!important;
+    top:8px!important;
+    right:12px!important;
+    left:auto!important;
+    z-index:10020!important;
     display:flex!important;
     align-items:center!important;
     justify-content:center!important;
-    width:100%!important;
+    width:calc(50vw - 17px)!important;
     min-width:0!important;
     max-width:none!important;
     height:46px!important;
@@ -3004,8 +3005,6 @@ header .publish-trigger:hover{
     padding:0 10px!important;
     border-radius:14px!important;
     box-sizing:border-box!important;
-    position:static!important;
-    inset:auto!important;
     transform:none!important;
     float:none!important;
     white-space:nowrap!important;
@@ -3013,7 +3012,6 @@ header .publish-trigger:hover{
   }
   header .abraca-vacances-top{
     grid-column:1/-1!important;
-    grid-row:2!important;
     width:100%!important;
     min-height:42px!important;
     height:42px!important;
@@ -3021,38 +3019,14 @@ header .publish-trigger:hover{
   }
 }
 @media(max-width:390px){
-  header #accountBtn::after,
+  header #accountBtn,
   header .publish-trigger,
-  header .abraca-publish-top{
-    font-size:14px!important;
-  }
+  header .abraca-publish-top{font-size:14px!important}
 }
 </style><style id="abraca-messages-layer-fix">
 @media(max-width:760px){
   #messagesModal.modal-backdrop{
     z-index:20050!important;
-  }
-}
-</style><style id="abraca-mobile-sticky-safari-fix">
-@media(max-width:760px){
-  html,body{
-    overflow-x:clip!important;
-  }
-  header{
-    position:-webkit-sticky!important;
-    position:sticky!important;
-    top:0!important;
-    z-index:10000!important;
-    overflow:visible!important;
-    transform:translateZ(0);
-    -webkit-transform:translateZ(0);
-  }
-  header .account-auth-group,
-  header #accountBtn,
-  header .publish-trigger,
-  header .abraca-publish-top{
-    position:relative!important;
-    z-index:10001!important;
   }
 }
 </style></head>
@@ -4423,7 +4397,7 @@ function updateAuthUI(preserveEditing=false){
     if($('#profileEmail')) $('#profileEmail').value=currentUser.email||'';
     setTimeout(refreshUnreadMessages,0);
   }else{
-    $('#accountBtn').textContent='Se connecter';
+    $('#accountBtn').textContent=window.innerWidth<=760?'Compte':'Se connecter';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
