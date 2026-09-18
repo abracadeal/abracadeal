@@ -8350,13 +8350,16 @@ window.openSellerProfile=async sellerId=>{
   openModal('sellerProfileModal');
 
   const adminViewing=!!currentProfile?.is_admin;
-  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult]=await Promise.all([
+  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult,proAccountSummaryResult]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
     sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8),
-    adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
+    adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null}),
+    adminViewing?sb.rpc('get_admin_pro_account_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
   ]);
   const boostSummary=boostSummaryResult?.data||null;
+  const proAccountSummary=proAccountSummaryResult?.data||null;
+  if(proAccountSummaryResult?.error)console.error('Résumé compte Pro admin indisponible',proAccountSummaryResult.error);
   const boostSummaryError=boostSummaryResult?.error||null;
   if(boostSummaryError)console.error('Résumé Boost admin indisponible',boostSummaryError);
 
@@ -8443,6 +8446,23 @@ window.openSellerProfile=async sellerId=>{
     </div>
 
     ${reviewForm}
+
+    ${currentProfile?.is_admin&&profile.account_type==='professionnel'&&proAccountSummary?`
+    <section class="review-section">
+      <h3>Compte Pro · Admin</h3>
+      <div class="review-form">
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+          <div><span class="note">Société</span><strong style="display:block">${esc(proAccountSummary.company?.name||'—')}</strong></div>
+          <div><span class="note">SIRET</span><strong style="display:block">${esc(proAccountSummary.company?.siret||'—')}</strong></div>
+          <div><span class="note">Formule</span><strong style="display:block">${esc(proAccountSummary.subscription?.plan_label||'À finaliser')}</strong></div>
+          <div><span class="note">Statut</span><strong style="display:block">${esc(proAccountSummary.subscription?.status||'—')}</strong></div>
+          <div><span class="note">Offre Fondateurs</span><strong style="display:block">${proAccountSummary.founder?.eligible?'Oui · n°'+Number(proAccountSummary.founder?.number||0):'Non'}</strong></div>
+          <div><span class="note">Début facturation</span><strong style="display:block">${proAccountSummary.subscription?.billing_starts_at?new Date(proAccountSummary.subscription.billing_starts_at).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Fin gratuité</span><strong style="display:block">${proAccountSummary.subscription?.free_until?new Date(proAccountSummary.subscription.free_until).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Ville société</span><strong style="display:block">${esc([proAccountSummary.company?.postal_code,proAccountSummary.company?.city].filter(Boolean).join(' ')||'—')}</strong></div>
+        </div>
+      </div>
+    </section>`:''}
 
     ${currentProfile?.is_admin&&profile.account_type==='professionnel'?`
     <section class="review-section">
