@@ -5939,7 +5939,7 @@ $('#runProImport')?.addEventListener('click',async()=>{
 $('#finishProImport')?.addEventListener('click',()=>closeModal('proImportModal'));
 $$('[data-info-modal]').forEach(link=>link.addEventListener('click',e=>{e.preventDefault();openModal(link.dataset.infoModal)}));
 $$('[data-close]').forEach(b=>b.addEventListener('click',e=>{e.preventDefault();closeModal(b.dataset.close)}));
-$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{
+$$('.modal-backdrop').forEach(m=>m.addEventListener('click',e=>{
   if(e.target!==m)return;
   if(m.id==='proPlanModal'){
     toast('Choisissez une formule pour finaliser votre compte professionnel');
