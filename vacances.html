@@ -518,6 +518,23 @@ body.auth-open{overflow:hidden!important}
   vacLoginCta?.addEventListener('click',e=>{e.preventDefault();openAuth('login')});
   travelerSignupCta?.addEventListener('click',e=>{e.preventDefault();openAuth('signup')});
 
+  function abracaVacNormalizePhone(value=''){
+    let compact=String(value||'').trim().replace(/[\s().-]/g,'');
+    if(/^00\d+$/.test(compact)) compact='+'+compact.slice(2);
+    if(/^0[1-9]\d{8}$/.test(compact)) return '+33'+compact.slice(1);
+    if(/^\+33[1-9]\d{8}$/.test(compact)) return compact;
+    if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
+    return null;
+  }
+  async function abracaVacPhoneAvailable(phone){
+    const normalized=abracaVacNormalizePhone(phone);
+    if(!normalized) return {ok:false,message:'Indiquez un numéro de téléphone valide.'};
+    const {data,error}=await sbVac.rpc('abracadeal_phone_available',{p_phone:normalized});
+    if(error) return {ok:false,message:'Impossible de vérifier le numéro pour le moment.'};
+    if(!data) return {ok:false,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+    return {ok:true,normalized};
+  }
+
   authSubmit?.addEventListener('click',async ()=>{
     if(!sbVac)return;
     const email=authEmail.value.trim();
@@ -538,14 +555,15 @@ body.auth-open{overflow:hidden!important}
         const phone=authPhone.value.trim();
         if(!displayName){setAuthMessage('Indiquez votre nom ou prénom.','error');return}
         if(!phone){setAuthMessage('Le numéro de téléphone est obligatoire pour un compte voyageur.','error');return}
-        const digits=phone.replace(/\D/g,'');
-        if(digits.length<8){setAuthMessage('Indiquez un numéro de téléphone valide.','error');return}
+        const phoneCheck=await abracaVacPhoneAvailable(phone);
+        if(!phoneCheck.ok){setAuthMessage(phoneCheck.message,'error');return}
+        const normalizedPhone=phoneCheck.normalized;
         const {data,error}=await sbVac.auth.signUp({
           email,
           password,
           options:{data:{
             display_name:displayName,
-            phone,
+            phone:normalizedPhone,
             account_type:'particulier',
             vacation_role:'traveler'
           }}
@@ -559,7 +577,7 @@ body.auth-open{overflow:hidden!important}
             user_id:data.user.id,
             first_name:firstName,
             last_name:lastName,
-            phone,
+            phone:normalizedPhone,
             country:'France',
             updated_at:new Date().toISOString()
           },{onConflict:'user_id'});
