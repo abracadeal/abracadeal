@@ -8454,11 +8454,11 @@ window.openSellerProfile=async sellerId=>{
         <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
           <div><span class="note">Société</span><strong style="display:block">${esc(proAccountSummary.company?.name||'—')}</strong></div>
           <div><span class="note">SIRET</span><strong style="display:block">${esc(proAccountSummary.company?.siret||'—')}</strong></div>
-          <div><span class="note">Formule</span><strong style="display:block">${esc(proAccountSummary.subscription?.plan_label||'À finaliser')}</strong></div>
-          <div><span class="note">Statut</span><strong style="display:block">${esc(proAccountSummary.subscription?.status||'—')}</strong></div>
+          <div><span class="note">Formule</span><strong style="display:block">${esc(proAccountSummary.plan?.label||'À choisir')}</strong></div>
+          <div><span class="note">Statut</span><strong style="display:block">${proAccountSummary.subscription?.exists?esc(proAccountSummary.subscription?.status||'—'):(proAccountSummary.checkout?.status==='pending'?'Validation du moyen de paiement en attente':(proAccountSummary.checkout?.status==='completed'?'Paiement validé · activation en cours':'À finaliser'))}</strong></div>
           <div><span class="note">Offre Fondateurs</span><strong style="display:block">${proAccountSummary.founder?.eligible?'Oui · n°'+Number(proAccountSummary.founder?.number||0):'Non'}</strong></div>
-          <div><span class="note">Début facturation</span><strong style="display:block">${proAccountSummary.subscription?.billing_starts_at?new Date(proAccountSummary.subscription.billing_starts_at).toLocaleDateString('fr-FR'):'—'}</strong></div>
-          <div><span class="note">Fin gratuité</span><strong style="display:block">${proAccountSummary.subscription?.free_until?new Date(proAccountSummary.subscription.free_until).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Début facturation</span><strong style="display:block">${(proAccountSummary.subscription?.billing_starts_at||proAccountSummary.checkout?.billing_starts_at)?new Date(proAccountSummary.subscription?.billing_starts_at||proAccountSummary.checkout?.billing_starts_at).toLocaleDateString('fr-FR'):'—'}</strong></div>
+          <div><span class="note">Fin gratuité</span><strong style="display:block">${(proAccountSummary.subscription?.free_until||proAccountSummary.checkout?.free_until)?new Date(proAccountSummary.subscription?.free_until||proAccountSummary.checkout?.free_until).toLocaleDateString('fr-FR'):'—'}</strong></div>
           <div><span class="note">Ville société</span><strong style="display:block">${esc([proAccountSummary.company?.postal_code,proAccountSummary.company?.city].filter(Boolean).join(' ')||'—')}</strong></div>
         </div>
       </div>
