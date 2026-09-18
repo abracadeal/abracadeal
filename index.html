@@ -3401,7 +3401,91 @@ header #signupBtn{display:none!important}
 .boost-credit-option span{display:block;margin-top:6px;color:#7b6682;font-size:.8rem}
 .boost-credit-option em{display:block;margin-top:10px;color:#8529a3;font-style:normal;font-weight:900}
 @media(max-width:540px){.pro-boost-wallet-head{align-items:flex-start;flex-direction:column}.boost-credit-options{grid-template-columns:1fr}}
-</style></head>
+</style><style id="abraca-admin-db-mobile-landscape">
+.admin-db-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.admin-db-head h3{margin:0 0 4px}
+.admin-db-search{display:grid;grid-template-columns:minmax(0,1fr) 190px auto;gap:9px;margin:14px 0 8px}
+.admin-db-results{display:grid;gap:10px;margin-top:12px}
+.admin-db-card{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:13px;border:1px solid #eadfed;border-radius:15px;background:#fff}
+.admin-db-card-main{min-width:0}
+.admin-db-card-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.admin-db-ref{margin-top:4px;font-size:.78rem;font-weight:900;color:#71298d}
+.admin-db-meta,.admin-db-contact{margin-top:4px;font-size:.82rem;color:#74667b;overflow-wrap:anywhere}
+.admin-db-actions{display:flex;gap:8px;flex:0 0 auto}
+.admin-db-danger{color:#a32b4d!important;border-color:#e6b8c7!important}
+.admin-db-empty{padding:16px;border:1px dashed #dbcce2;border-radius:14px;text-align:center;color:#7a6b81}
+
+@media(max-width:720px){
+  .admin-db-search{grid-template-columns:1fr}
+  .admin-db-card{align-items:flex-start;flex-direction:column}
+  .admin-db-actions{width:100%;display:grid;grid-template-columns:1fr}
+  #adminDatabasePanel{padding:14px!important}
+}
+
+@media(max-height:520px) and (orientation:landscape){
+  header{position:relative!important}
+  header .nav{display:block!important;min-height:0!important;padding:6px 8px!important;width:100%!important;max-width:none!important}
+  header .nav>div:first-child{display:none!important}
+  header .nav-actions,
+  header .abraca-top-actions{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:6px!important;
+    width:100%!important;
+    padding:0!important;
+    margin:0!important;
+    overflow:visible!important;
+  }
+  header .nav-actions>.btn,
+  header .nav-actions>a.btn,
+  header .nav-actions>.account-auth-group,
+  header .abraca-top-actions>.btn,
+  header .abraca-top-actions>a.btn{
+    position:relative!important;
+    inset:auto!important;
+    transform:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    min-height:38px!important;
+    height:38px!important;
+    margin:0!important;
+    padding:0 7px!important;
+    font-size:12px!important;
+    line-height:1.1!important;
+    white-space:normal!important;
+    text-align:center!important;
+    border-radius:10px!important;
+  }
+  header .account-auth-group{display:contents!important}
+  header .account-auth-group .btn{width:100%!important;height:38px!important;font-size:12px!important;border-radius:10px!important}
+  header .header-vacances-btn .header-lamp-crop{display:none!important}
+  header #headerLogoutBtn{font-size:11px!important}
+  header .publish-trigger{font-size:12px!important}
+  header .header-message-badge,header .header-flow-errors-badge{top:-4px!important;right:-3px!important}
+
+  #publishModal .modal-head{min-height:48px!important;padding:9px 50px 9px 14px!important}
+  #publishModal .modal-head h2{font-size:1.05rem!important}
+  #publishModal .close-btn{top:5px!important;right:7px!important;width:38px!important;height:38px!important}
+  #publishModal .modal-body{padding:10px 12px 0!important}
+  #publishModal .form-actions{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    margin:10px -12px 0!important;
+    padding:8px 12px calc(8px + env(safe-area-inset-bottom))!important;
+  }
+  #publishModal .form-actions .btn{width:100%!important;min-width:0!important;margin:0!important}
+  #publishModal .publish-status{grid-column:1/-1!important;margin:0!important}
+}
+
+@media(max-width:420px){
+  #publishModal .form-actions{display:grid!important;grid-template-columns:1fr 1fr!important}
+  #publishModal .form-actions .btn{width:100%!important}
+  #publishModal .publish-status{grid-column:1/-1!important}
+}
+</style>
+</head>
 <body>
 
 <header>
@@ -4226,6 +4310,7 @@ header #signupBtn{display:none!important}
     <div class="admin-stat-card"><span class="admin-stat-value" id="statHosts">—</span><span class="admin-stat-label">Hôtes Vacances</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statTrialingPros">—</span><span class="admin-stat-label">Pros en 12 mois offerts</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statActivePros">—</span><span class="admin-stat-label">Pros payants actifs</span></div>
+    <div class="admin-stat-card"><span class="admin-stat-value" id="statProsToFinalize">—</span><span class="admin-stat-label">Pros à finaliser</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statMrr">—</span><span class="admin-stat-label">MRR théorique après gratuités</span></div>
   </div>
   <div class="admin-plan-grid">
@@ -4235,6 +4320,31 @@ header #signupBtn{display:none!important}
     <div class="admin-plan-chip"><b id="statPlan250">—</b><span>Plan 250 annonces</span></div>
   </div>
 </section>
+
+<section id="adminDatabasePanel" class="profile-edit-box hidden">
+  <div class="admin-db-head">
+    <div>
+      <h3>Base de données · Annonces</h3>
+      <p class="note">Retrouvez une annonce active, vendue, retirée ou supprimée par son numéro, son titre, le nom du vendeur, son téléphone ou son e-mail.</p>
+    </div>
+  </div>
+  <div class="admin-db-search">
+    <input class="input" id="adminDbQuery" type="search" placeholder="Nom, téléphone, e-mail, ABR-2026-…">
+    <select class="select" id="adminDbState">
+      <option value="all">Tous les statuts</option>
+      <option value="active">En ligne</option>
+      <option value="sold">Vendues</option>
+      <option value="deleted">Supprimées / retirées</option>
+      <option value="archived">Toutes archivées</option>
+      <option value="pending">À modérer</option>
+      <option value="rejected">Refusées</option>
+    </select>
+    <button class="btn primary" id="adminDbSearchBtn" type="button">Rechercher</button>
+  </div>
+  <div id="adminDbStatus" class="note" role="status" aria-live="polite"></div>
+  <div id="adminDbResults" class="admin-db-results"></div>
+</section>
+
         <section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <dl id="companySummary" class="profile-summary"></dl>
@@ -4619,6 +4729,7 @@ function openModal(id){
       const panel=document.getElementById('adminStatsPanel');
       panel?.classList.remove('hidden');
       setTimeout(()=>window.loadAdminDashboardStats?.(),0);
+      setTimeout(()=>window.searchAdminDatabase?.(),30);
     }
     if(currentProfile?.account_type==='professionnel'){
       setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
@@ -9235,6 +9346,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!panel)return;
     const isAdmin=!!currentProfile?.is_admin;
     panel.classList.toggle('hidden',!isAdmin);
+    document.getElementById('adminDatabasePanel')?.classList.toggle('hidden',!isAdmin);
     if(!isAdmin)return;
     const {data,error}=await sb.rpc('get_admin_dashboard_stats');
     if(error){console.error('Stats Admin indisponibles',error);return}
@@ -9247,6 +9359,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     put('statHosts',stats.vacation_hosts);
     put('statTrialingPros',stats.trialing_pros);
     put('statActivePros',stats.active_paid_pros);
+    put('statProsToFinalize',stats.pros_to_finalize);
     put('statPlan20',stats.plan_counts?.pro_20);
     put('statPlan50',stats.plan_counts?.pro_50);
     put('statPlan100',stats.plan_counts?.pro_100);
@@ -9256,6 +9369,91 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
   window.loadAdminDashboardStats=loadAdminDashboardStats;
   document.getElementById('refreshAdminStatsBtn')?.addEventListener('click',loadAdminDashboardStats);
+
+  function adminDbStatusLabel(row){
+    if(row.status==='active')return 'En ligne';
+    if(row.status==='pending')return 'À modérer';
+    if(row.status==='rejected')return 'Refusée';
+    if(row.status==='archived'){
+      if(row.archive_reason==='sold')return 'Vendue';
+      if(row.archive_reason==='user_deleted')return 'Supprimée par le vendeur';
+      if(row.archive_reason==='admin_removed')return 'Retirée par l’admin';
+      return 'Archivée';
+    }
+    return row.status||'—';
+  }
+
+  function renderAdminDbResults(rows){
+    const host=document.getElementById('adminDbResults');
+    if(!host)return;
+    const list=Array.isArray(rows)?rows:[];
+    if(!list.length){
+      host.innerHTML='<div class="admin-db-empty">Aucune annonce trouvée.</div>';
+      return;
+    }
+    host.innerHTML=list.map(row=>{
+      const contact=[row.owner_phone||row.listing_phone,row.owner_email||row.listing_email].filter(Boolean);
+      const archived=row.status==='archived';
+      return `<article class="admin-db-card">
+        <div class="admin-db-card-main">
+          <div class="admin-db-card-top">
+            <strong>${esc(row.title||'Annonce')}</strong>
+            <span class="status-pill">${esc(adminDbStatusLabel(row))}</span>
+          </div>
+          <div class="admin-db-ref">${esc(row.listing_reference||row.id||'')}</div>
+          <div class="admin-db-meta">${esc(row.owner_name||'Vendeur')} · ${esc(row.city||'—')}${row.postal_code?' · '+esc(row.postal_code):''}</div>
+          <div class="admin-db-contact">${contact.length?contact.map(esc).join(' · '):'Coordonnées non renseignées'}</div>
+          ${row.archived_at?`<div class="note">Archivée le ${new Date(row.archived_at).toLocaleString('fr-FR')}</div>`:''}
+        </div>
+        <div class="admin-db-actions">
+          ${!archived?`<button class="btn ghost" type="button" onclick="adminDbOpenListing('${row.id}')">Voir l’annonce</button>`:''}
+          ${!archived?`<button class="btn ghost admin-db-danger" type="button" onclick="adminDbArchiveListing('${row.id}')">Retirer du site</button>`:''}
+        </div>
+      </article>`;
+    }).join('');
+  }
+
+  async function searchAdminDatabase(){
+    if(!currentProfile?.is_admin)return;
+    const status=document.getElementById('adminDbStatus');
+    const query=document.getElementById('adminDbQuery')?.value?.trim()||'';
+    const state=document.getElementById('adminDbState')?.value||'all';
+    if(status)status.textContent='Recherche…';
+    const {data,error}=await sb.rpc('admin_search_listings',{p_query:query,p_state:state,p_limit:50});
+    if(error){
+      console.error('Recherche base annonces',error);
+      if(status)status.textContent='Recherche indisponible.';
+      return;
+    }
+    const rows=data?.results||[];
+    if(status)status.textContent=rows.length+' résultat'+(rows.length>1?'s':'');
+    renderAdminDbResults(rows);
+  }
+  window.searchAdminDatabase=searchAdminDatabase;
+
+  window.adminDbOpenListing=async id=>{
+    let a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
+    if(!a){
+      const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('id',id).maybeSingle();
+      if(error||!data){toast('Annonce indisponible');return;}
+      a=data;detailAdsCache.set(id,a);
+    }
+    closeModal('accountModal');
+    openAd(id);
+  };
+
+  window.adminDbArchiveListing=async id=>{
+    if(!currentProfile?.is_admin)return;
+    if(!confirm('Retirer cette annonce du site ? Elle restera consultable dans la base de données Admin.'))return;
+    const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
+    if(error){toast(error.message||'Impossible de retirer cette annonce');return;}
+    toast('Annonce retirée du site et conservée dans la base Admin');
+    await Promise.all([loadAds(),searchAdminDatabase(),loadAdminDashboardStats()]);
+  };
+
+  document.getElementById('adminDbSearchBtn')?.addEventListener('click',searchAdminDatabase);
+  document.getElementById('adminDbQuery')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();searchAdminDatabase();}});
+  document.getElementById('adminDbState')?.addEventListener('change',searchAdminDatabase);
 
   async function loadProPlans(){
     const grid=document.getElementById('proPlanGrid');
