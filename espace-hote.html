@@ -21,6 +21,24 @@
 .kpiNote{font-size:.77rem;color:var(--muted);margin-top:5px}.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.quick a,.quick button{min-height:90px;border:1px solid var(--line);background:#fff;border-radius:18px;padding:15px;text-align:left;cursor:pointer}.quick strong{display:block;margin-bottom:5px}.quick span{color:var(--muted);font-size:.82rem}
 @media(max-width:900px){.shell{grid-template-columns:1fr}.side{position:static;display:flex;overflow:auto;gap:4px}.side h3{display:none}.navbtn{width:auto;white-space:nowrap}.grid4{grid-template-columns:1fr 1fr}.quick{grid-template-columns:1fr}.hero{align-items:flex-start;flex-direction:column}}
 @media(max-width:620px){.grid4,.formgrid{grid-template-columns:1fr}.field.wide{grid-column:auto}.listing{grid-template-columns:1fr}.topin{align-items:flex-start;padding:10px 0}.topactions{justify-content:flex-end}.shell{margin-top:14px}.card{padding:16px}.hero h1{font-size:2.2rem}}
+
+.onboardingwrap{width:min(900px,calc(100% - 28px));margin:34px auto 70px}
+.onboarding-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:26px;box-shadow:var(--shadow)}
+.onboarding-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:22px}
+.onboarding-head h1{margin:6px 0 8px;font-size:clamp(2rem,4vw,3rem);letter-spacing:-.035em}
+.onboarding-head p{margin:0;color:var(--muted);line-height:1.55}
+.onboarding-step{display:inline-flex;padding:7px 10px;border-radius:999px;background:#f1e8f5;color:#6d2589;font-size:.76rem;font-weight:900}
+.onboarding-section{border-top:1px solid var(--line);padding-top:20px;margin-top:20px}
+.onboarding-section:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.onboarding-section h2{margin:0 0 5px;font-size:1.15rem}
+.onboarding-section .sub{margin-bottom:14px}
+.req{color:#b4234f}
+.legal-check{display:flex;gap:10px;align-items:flex-start;padding:13px 14px;border:1px solid var(--line);border-radius:14px;background:#faf7fc;margin-top:14px}
+.legal-check input{margin-top:3px}
+.onboarding-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;margin-top:22px}
+.onboarding-note{font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:10px}
+@media(max-width:620px){.onboarding-card{padding:17px}.onboarding-head{flex-direction:column}.onboarding-actions{flex-direction:column}.onboarding-actions .btn{width:100%}}
+
 </style>
 </head>
 <body>
@@ -44,6 +62,120 @@
       <div class="field wide"><label>Mot de passe</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
     </div>
     <div style="margin-top:14px"><button id="loginBtn" class="btn primary">Se connecter</button></div>
+  </div>
+</div>
+
+
+<div id="onboardingView" class="onboardingwrap hidden">
+  <div class="onboarding-card">
+    <div class="onboarding-head">
+      <div>
+        <span class="onboarding-step">Inscription hôte · presque prêt à publier</span>
+        <h1>Créez votre profil hôte</h1>
+        <p>Ces informations préparent votre premier logement Abracadeal Vacances. Après cette étape, il restera surtout les photos et la validation de l’annonce.</p>
+      </div>
+      <a class="btn soft" href="vacances.html">Mode voyageur</a>
+    </div>
+
+    <div id="onboardingNotice" class="notice"></div>
+
+    <section class="onboarding-section">
+      <h2>1. Identité du loueur</h2>
+      <div class="sub">Informations privées utilisées pour votre compte et vos obligations de location.</div>
+      <div class="formgrid">
+        <div class="field"><label>Prénom <span class="req">*</span></label><input id="oFirstName" autocomplete="given-name"></div>
+        <div class="field"><label>Nom <span class="req">*</span></label><input id="oLastName" autocomplete="family-name"></div>
+        <div class="field"><label>Téléphone <span class="req">*</span></label><input id="oPhone" type="tel" autocomplete="tel" placeholder="+33 6..."></div>
+        <div class="field"><label>Date de naissance <span class="req">*</span></label><input id="oBirthDate" type="date"></div>
+        <div class="field"><label>Ville de résidence <span class="req">*</span></label><input id="oHostCity" autocomplete="address-level2"></div>
+        <div class="field"><label>Pays</label><input id="oCountry" value="France" autocomplete="country-name"></div>
+      </div>
+    </section>
+
+    <section class="onboarding-section">
+      <h2>2. Statut du loueur</h2>
+      <div class="sub">Le statut et le SIRET pourront être repris dans vos documents de location.</div>
+      <div class="formgrid">
+        <div class="field">
+          <label>Statut <span class="req">*</span></label>
+          <select id="oRentalStatus">
+            <option value="">Choisir</option>
+            <option value="lmnp">LMNP — Loueur meublé non professionnel</option>
+            <option value="lmp">LMP — Loueur meublé professionnel</option>
+            <option value="societe">Société / professionnel</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>N° SIRET <span class="req">*</span></label>
+          <input id="oSiret" inputmode="numeric" maxlength="14" placeholder="14 chiffres">
+        </div>
+      </div>
+    </section>
+
+    <section class="onboarding-section">
+      <h2>3. Votre premier logement</h2>
+      <div class="sub">Adresse complète conservée dans l’espace privé ; la ville et le code postal servent à l’annonce.</div>
+      <div class="formgrid">
+        <div class="field wide"><label>Adresse du logement <span class="req">*</span></label><input id="oAddress1" autocomplete="street-address" placeholder="12 rue..."></div>
+        <div class="field"><label>Code postal <span class="req">*</span></label><input id="oPostal" inputmode="numeric" maxlength="10"></div>
+        <div class="field"><label>Ville <span class="req">*</span></label><input id="oCity" autocomplete="address-level2"></div>
+        <div class="field"><label>Type de logement <span class="req">*</span></label>
+          <select id="oPropertyType">
+            <option value="logement_entier">Logement entier</option>
+            <option value="chambre_privee">Chambre privée</option>
+            <option value="chambre_partagee">Chambre partagée</option>
+            <option value="hotel">Hôtel / résidence</option>
+            <option value="autre">Autre</option>
+          </select>
+        </div>
+        <div class="field"><label>Résidence principale ? <span class="req">*</span></label>
+          <select id="oPrimaryResidence"><option value="">Choisir</option><option value="true">Oui</option><option value="false">Non</option></select>
+        </div>
+        <div class="field"><label>Voyageurs max. <span class="req">*</span></label><input id="oGuests" type="number" min="1" max="50" value="2"></div>
+        <div class="field"><label>Chambres <span class="req">*</span></label><input id="oBedrooms" type="number" min="0" max="30" value="1"></div>
+        <div class="field"><label>Lits <span class="req">*</span></label><input id="oBeds" type="number" min="0" max="50" value="1"></div>
+        <div class="field"><label>Salles de bain <span class="req">*</span></label><input id="oBathrooms" type="number" min="0" max="30" step=".5" value="1"></div>
+      </div>
+    </section>
+
+    <section class="onboarding-section">
+      <h2>4. Numéros réglementaires</h2>
+      <div class="sub">Le numéro d’enregistrement du meublé doit pouvoir être affiché sur l’annonce.</div>
+      <div class="formgrid">
+        <div class="field">
+          <label>N° d’enregistrement du meublé <span class="req">*</span></label>
+          <input id="oRegistrationNumber" placeholder="Numéro délivré lors de l’enregistrement">
+        </div>
+        <div class="field">
+          <label>Classement meublé de tourisme</label>
+          <select id="oClassifiedStars">
+            <option value="">Non classé</option>
+            <option value="1">1 étoile</option><option value="2">2 étoiles</option><option value="3">3 étoiles</option><option value="4">4 étoiles</option><option value="5">5 étoiles</option>
+          </select>
+        </div>
+      </div>
+    </section>
+
+    <section class="onboarding-section">
+      <h2>5. Préparer l’annonce</h2>
+      <div class="formgrid">
+        <div class="field wide"><label>Titre de l’annonce <span class="req">*</span></label><input id="oTitle" maxlength="100" placeholder="Studio à 5 min de la Croisette"></div>
+        <div class="field"><label>Prix de base / nuit (€) <span class="req">*</span></label><input id="oPrice" type="number" min="0" step="1"></div>
+        <div class="field"><label>Frais de ménage (€)</label><input id="oCleaning" type="number" min="0" step="1" value="0"></div>
+        <div class="field wide"><label>Description <span class="req">*</span></label><textarea id="oDescription" placeholder="Décrivez le logement, l’emplacement et ses points forts..."></textarea></div>
+      </div>
+
+      <label class="legal-check">
+        <input id="oLegalCheck" type="checkbox">
+        <span>Je certifie être autorisé à proposer ce logement à la location de courte durée et que les informations et numéros renseignés sont exacts. <span class="req">*</span></span>
+      </label>
+      <div class="onboarding-note">Abracadeal conserve l’adresse exacte dans l’espace privé. Les informations nécessaires à l’annonce pourront ensuite être affichées conformément à la réglementation applicable.</div>
+    </section>
+
+    <div class="onboarding-actions">
+      <button id="completeHostBtn" class="btn primary" type="button">Créer mon espace hôte et mon annonce</button>
+    </div>
   </div>
 </div>
 
@@ -112,7 +244,7 @@
             <div class="field"><label>Arrivée à partir de</label><input id="lCheckin" type="time" value="15:00"></div>
             <div class="field"><label>Départ avant</label><input id="lCheckout" type="time" value="11:00"></div>
             <div class="field"><label>Résidence principale ?</label><select id="lPrimary"><option value="">Non renseigné</option><option value="true">Oui</option><option value="false">Non</option></select></div>
-            <div class="field"><label>N° de déclaration (si requis)</label><input id="lDeclaration"></div>
+            <div class="field"><label>N° d’enregistrement du meublé</label><input id="lDeclaration"></div><div class="field"><label>Adresse exacte</label><input id="lAddress" placeholder="Adresse privée du logement"></div>
             <div class="field wide"><label>Description</label><textarea id="lDescription" placeholder="Décrivez le logement, le quartier, les points forts…"></textarea></div>
             <div class="field wide"><label>Équipements (séparés par des virgules)</label><input id="lAmenities" placeholder="Wi-Fi, climatisation, cuisine, parking"></div>
             <div class="field wide"><label>Règles du logement</label><textarea id="lRules" placeholder="Non-fumeur, pas de fête…"></textarea></div>
@@ -189,7 +321,7 @@ const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
 const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let currentUser=null, profile=null, listings=[], details=new Map();
+let currentUser=null, profile=null, listings=[], details=new Map(), privateDetails=new Map(), hostProfile=null;
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
@@ -202,18 +334,124 @@ async function boot(){
   const {data:{session}}=await sb.auth.getSession();
   currentUser=session?.user||null;
   $('loginView').classList.toggle('hidden',!!currentUser);
-  $('appView').classList.toggle('hidden',!currentUser);
+  $('appView').classList.add('hidden');
+  $('onboardingView').classList.add('hidden');
   $('logoutTop').classList.toggle('hidden',!currentUser);
   if(!currentUser)return;
-  const {data:p}=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(); profile=p;
+
+  const [{data:p},{data:h},{data:identity}]=await Promise.all([
+    sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle(),
+    sb.from('vacation_hosts').select('*').eq('user_id',currentUser.id).maybeSingle(),
+    sb.from('vacation_user_details').select('*').eq('user_id',currentUser.id).maybeSingle()
+  ]);
+  profile=p;
+  hostProfile=h;
+
+  if(!hostProfile?.onboarding_completed){
+    $('onboardingView').classList.remove('hidden');
+    $('oFirstName').value=identity?.first_name||'';
+    $('oLastName').value=identity?.last_name||'';
+    $('oPhone').value=identity?.phone||profile?.phone||'';
+    $('oBirthDate').value=identity?.birth_date||'';
+    $('oHostCity').value=identity?.city||profile?.city||'';
+    $('oCountry').value=identity?.country||'France';
+    $('oRentalStatus').value=hostProfile?.rental_status||'';
+    $('oSiret').value=hostProfile?.siret||'';
+    return;
+  }
+
+  $('appView').classList.remove('hidden');
   const type=profile?.account_type==='professionnel'?'professionnel':'particulier';
-  await sb.from('vacation_hosts').upsert({user_id:currentUser.id,host_type:type,status:'active'},{onConflict:'user_id'});
   $('hostTypePill').textContent=type==='professionnel'?'Hôte professionnel':'Hôte particulier';
   $('hello').textContent='Bonjour'+(profile?.display_name?' '+profile.display_name:'');
   await loadListings();
   $('hostPublicProfile').href='profil-vacances.html?user='+currentUser.id;
   await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);
 }
+
+function onboardingMsg(t,err=false){
+  const n=$('onboardingNotice');
+  n.textContent=t;
+  n.className='notice show'+(err?' err':'');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+$('completeHostBtn').onclick=async()=>{
+  const first=$('oFirstName').value.trim();
+  const last=$('oLastName').value.trim();
+  const phone=$('oPhone').value.trim();
+  const birth=$('oBirthDate').value;
+  const hostCity=$('oHostCity').value.trim();
+  const country=$('oCountry').value.trim()||'France';
+  const rentalStatus=$('oRentalStatus').value;
+  const siret=$('oSiret').value.replace(/\s/g,'');
+  const address=$('oAddress1').value.trim();
+  const postal=$('oPostal').value.trim();
+  const city=$('oCity').value.trim();
+  const primary=$('oPrimaryResidence').value;
+  const registration=$('oRegistrationNumber').value.trim();
+  const title=$('oTitle').value.trim();
+  const description=$('oDescription').value.trim();
+  const price=Number($('oPrice').value);
+  if(!first||!last||!phone||!birth||!hostCity||!rentalStatus||!address||!postal||!city||primary===''||!registration||!title||!description||!Number.isFinite(price)){
+    onboardingMsg('Complétez tous les champs obligatoires avant de continuer.',true);return;
+  }
+  if(!/^\d{14}$/.test(siret)){onboardingMsg('Le numéro SIRET doit contenir exactement 14 chiffres.',true);return}
+  if(!$('oLegalCheck').checked){onboardingMsg('Vous devez confirmer la déclaration sur l’honneur.',true);return}
+
+  const btn=$('completeHostBtn');btn.disabled=true;
+  try{
+    const type=profile?.account_type==='professionnel'?'professionnel':'particulier';
+    const now=new Date().toISOString();
+
+    const {error:idErr}=await sb.from('vacation_user_details').upsert({
+      user_id:currentUser.id,first_name:first,last_name:last,phone,birth_date:birth,city:hostCity,country,updated_at:now
+    },{onConflict:'user_id'});
+    if(idErr){onboardingMsg(idErr.message,true);return}
+
+    const {error:hostErr}=await sb.from('vacation_hosts').upsert({
+      user_id:currentUser.id,host_type:type,status:'active',siret,rental_status:rentalStatus,
+      onboarding_completed:false,legal_declaration_accepted_at:now,updated_at:now
+    },{onConflict:'user_id'});
+    if(hostErr){onboardingMsg(hostErr.message,true);return}
+
+    const listingPayload={
+      owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:postal,
+      seller_type:type,status:'pending',phone,contact_email:currentUser.email||null
+    };
+    const {data:newListing,error:listErr}=await sb.from('listings').insert(listingPayload).select('id').single();
+    if(listErr){onboardingMsg(listErr.message,true);return}
+
+    const listingId=newListing.id;
+    const stars=$('oClassifiedStars').value?Number($('oClassifiedStars').value):null;
+    const {error:detailErr}=await sb.from('vacation_listing_details').upsert({
+      listing_id:listingId,owner_id:currentUser.id,property_type:$('oPropertyType').value,
+      max_guests:Number($('oGuests').value)||2,bedrooms:Number($('oBedrooms').value)||0,
+      beds:Number($('oBeds').value)||0,bathrooms:Number($('oBathrooms').value)||0,
+      cleaning_fee:Number($('oCleaning').value)||0,min_nights:1,checkin_from:'15:00',
+      checkout_until:'11:00',primary_residence:primary==='true',
+      declaration_number:registration,registration_status:'numero_obtenu',
+      registration_number:registration,classified_stars:stars,
+      regulatory_declaration_accepted_at:now,amenities:[],updated_at:now
+    },{onConflict:'listing_id'});
+    if(detailErr){await sb.from('listings').delete().eq('id',listingId);onboardingMsg(detailErr.message,true);return}
+
+    const {error:privateErr}=await sb.from('vacation_listing_private').upsert({
+      listing_id:listingId,owner_id:currentUser.id,address_line1:address,postal_code:postal,city,country:'France',updated_at:now
+    },{onConflict:'listing_id'});
+    if(privateErr){await sb.from('listings').delete().eq('id',listingId);onboardingMsg(privateErr.message,true);return}
+
+    const {error:finishErr}=await sb.from('vacation_hosts').update({
+      onboarding_completed:true,updated_at:now
+    }).eq('user_id',currentUser.id);
+    if(finishErr){onboardingMsg(finishErr.message,true);return}
+
+    await sb.functions.invoke('moderate-listing',{body:{listing_id:listingId}});
+    onboardingMsg('Profil hôte créé. Votre première annonce est prête : ajoutez maintenant vos photos.');
+    setTimeout(()=>location.href='photos-vacances.html?listing='+listingId,900);
+  }finally{btn.disabled=false}
+};
+
 $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('loginEmail').value.trim(),password:$('loginPassword').value});if(error){alert(error.message);return}boot()};
 $('logoutTop').onclick=async()=>{await sb.auth.signOut();location.reload()};
 
@@ -225,8 +463,8 @@ async function loadListings(){
   if(error){msg(error.message,true);return}
   listings=data||[];
   const ids=listings.map(x=>x.id);
-  details=new Map();
-  if(ids.length){const {data:d}=await sb.from('vacation_listing_details').select('*').in('listing_id',ids);(d||[]).forEach(x=>details.set(x.listing_id,x))}
+  details=new Map();privateDetails=new Map();
+  if(ids.length){const [{data:d},{data:pd}]=await Promise.all([sb.from('vacation_listing_details').select('*').in('listing_id',ids),sb.from('vacation_listing_private').select('*').in('listing_id',ids)]);(d||[]).forEach(x=>details.set(x.listing_id,x));(pd||[]).forEach(x=>privateDetails.set(x.listing_id,x))}
   renderListings();refreshSelects();
 }
 function listingHtml(l){
@@ -238,8 +476,8 @@ function openListingForm(){resetListingForm();$('listingForm').classList.remove(
 window.openListingForm=openListingForm;
 function closeListingForm(){$('listingForm').classList.add('hidden')}
 window.closeListingForm=closeListingForm;
-function resetListingForm(){['editListingId','lTitle','lCity','lPostal','lPrice','lDescription','lDeclaration','lAmenities','lRules'].forEach(id=>$(id).value='');$('lType').value='logement_entier';$('lGuests').value=2;$('lBedrooms').value=1;$('lBeds').value=1;$('lBathrooms').value=1;$('lCleaning').value=0;$('lMinNights').value=1;$('lCheckin').value='15:00';$('lCheckout').value='11:00';$('lPrimary').value=''}
-window.editListing=id=>{const l=listings.find(x=>x.id===id),d=details.get(id)||{};if(!l)return;openListingForm();$('editListingId').value=id;$('lTitle').value=l.title||'';$('lCity').value=l.city||'';$('lPostal').value=l.postal_code||'';$('lPrice').value=l.price??'';$('lDescription').value=l.description||'';$('lType').value=d.property_type||'logement_entier';$('lGuests').value=d.max_guests||2;$('lBedrooms').value=d.bedrooms??1;$('lBeds').value=d.beds??1;$('lBathrooms').value=d.bathrooms??1;$('lCleaning').value=d.cleaning_fee??0;$('lMinNights').value=d.min_nights||1;$('lCheckin').value=(d.checkin_from||'15:00').slice(0,5);$('lCheckout').value=(d.checkout_until||'11:00').slice(0,5);$('lPrimary').value=d.primary_residence===null||d.primary_residence===undefined?'':String(d.primary_residence);$('lDeclaration').value=d.declaration_number||'';$('lAmenities').value=(d.amenities||[]).join(', ');$('lRules').value=d.house_rules||'';window.scrollTo({top:100,behavior:'smooth'})}
+function resetListingForm(){['editListingId','lTitle','lCity','lPostal','lPrice','lDescription','lDeclaration','lAddress','lAmenities','lRules'].forEach(id=>$(id).value='');$('lType').value='logement_entier';$('lGuests').value=2;$('lBedrooms').value=1;$('lBeds').value=1;$('lBathrooms').value=1;$('lCleaning').value=0;$('lMinNights').value=1;$('lCheckin').value='15:00';$('lCheckout').value='11:00';$('lPrimary').value=''}
+window.editListing=id=>{const l=listings.find(x=>x.id===id),d=details.get(id)||{};if(!l)return;openListingForm();$('editListingId').value=id;$('lTitle').value=l.title||'';$('lCity').value=l.city||'';$('lPostal').value=l.postal_code||'';$('lPrice').value=l.price??'';$('lDescription').value=l.description||'';$('lType').value=d.property_type||'logement_entier';$('lGuests').value=d.max_guests||2;$('lBedrooms').value=d.bedrooms??1;$('lBeds').value=d.beds??1;$('lBathrooms').value=d.bathrooms??1;$('lCleaning').value=d.cleaning_fee??0;$('lMinNights').value=d.min_nights||1;$('lCheckin').value=(d.checkin_from||'15:00').slice(0,5);$('lCheckout').value=(d.checkout_until||'11:00').slice(0,5);$('lPrimary').value=d.primary_residence===null||d.primary_residence===undefined?'':String(d.primary_residence);$('lDeclaration').value=d.registration_number||d.declaration_number||'';$('lAddress').value=(privateDetails.get(id)||{}).address_line1||'';$('lAmenities').value=(d.amenities||[]).join(', ');$('lRules').value=d.house_rules||'';window.scrollTo({top:100,behavior:'smooth'})}
 $('saveListingBtn').onclick=async()=>{
   const id=$('editListingId').value;const title=$('lTitle').value.trim(),city=$('lCity').value.trim(),description=$('lDescription').value.trim(),price=Number($('lPrice').value);
   if(!title||!city||!description||!Number.isFinite(price)){msg('Titre, ville, description et prix sont obligatoires.',true);return}
@@ -248,8 +486,9 @@ $('saveListingBtn').onclick=async()=>{
   if(id){const {error}=await sb.from('listings').update({...listingPayload,updated_at:new Date().toISOString()}).eq('id',id);if(error){msg(error.message,true);return}}
   else{listingPayload.status='pending';const {data,error}=await sb.from('listings').insert(listingPayload).select('id').single();if(error){msg(error.message,true);return}listingId=data.id}
   const primary=$('lPrimary').value===''?null:$('lPrimary').value==='true';
-  const d={listing_id:listingId,owner_id:currentUser.id,property_type:$('lType').value,max_guests:Number($('lGuests').value)||2,bedrooms:Number($('lBedrooms').value)||0,beds:Number($('lBeds').value)||0,bathrooms:Number($('lBathrooms').value)||0,cleaning_fee:Number($('lCleaning').value)||0,min_nights:Number($('lMinNights').value)||1,checkin_from:$('lCheckin').value||'15:00',checkout_until:$('lCheckout').value||'11:00',primary_residence:primary,declaration_number:$('lDeclaration').value.trim()||null,amenities:$('lAmenities').value.split(',').map(x=>x.trim()).filter(Boolean),house_rules:$('lRules').value.trim()||null,updated_at:new Date().toISOString()};
+  const d={listing_id:listingId,owner_id:currentUser.id,property_type:$('lType').value,max_guests:Number($('lGuests').value)||2,bedrooms:Number($('lBedrooms').value)||0,beds:Number($('lBeds').value)||0,bathrooms:Number($('lBathrooms').value)||0,cleaning_fee:Number($('lCleaning').value)||0,min_nights:Number($('lMinNights').value)||1,checkin_from:$('lCheckin').value||'15:00',checkout_until:$('lCheckout').value||'11:00',primary_residence:primary,declaration_number:$('lDeclaration').value.trim()||null,registration_number:$('lDeclaration').value.trim()||null,registration_status:$('lDeclaration').value.trim()?'numero_obtenu':'non_renseigne',amenities:$('lAmenities').value.split(',').map(x=>x.trim()).filter(Boolean),house_rules:$('lRules').value.trim()||null,updated_at:new Date().toISOString()};
   const {error:de}=await sb.from('vacation_listing_details').upsert(d,{onConflict:'listing_id'});if(de){msg(de.message,true);return}
+  const exactAddress=$('lAddress').value.trim();if(exactAddress){const {error:pe}=await sb.from('vacation_listing_private').upsert({listing_id:listingId,owner_id:currentUser.id,address_line1:exactAddress,postal_code:$('lPostal').value.trim(),city, country:'France',updated_at:new Date().toISOString()},{onConflict:'listing_id'});if(pe){msg(pe.message,true);return}}
   if(!id){await sb.functions.invoke('moderate-listing',{body:{listing_id:listingId}})}
   msg(id?'Logement mis à jour.':'Logement créé. Il passe par la modération Abracadeal.');closeListingForm();await loadListings();await loadDashboardCounts()
 }
