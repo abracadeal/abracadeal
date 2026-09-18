@@ -3285,6 +3285,99 @@ header #signupBtn{display:none!important}
     -webkit-overflow-scrolling:touch!important;
   }
 }
+</style><style id="abraca-account-layout-fix-v2">
+/* Mon compte : toujours au-dessus du header flottant */
+#accountModal.modal-backdrop{
+  z-index:20050!important;
+}
+
+@media(min-width:761px){
+  #accountModal.modal-backdrop{
+    padding:18px 18px 24px!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow-y:auto!important;
+  }
+  #accountModal .modal{
+    width:min(760px,calc(100vw - 36px))!important;
+    max-width:760px!important;
+    height:auto!important;
+    max-height:calc(100vh - 112px)!important;
+    margin:76px auto 24px!important;
+    border-radius:22px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+    box-sizing:border-box!important;
+  }
+  #accountModal .modal-head{
+    flex:0 0 auto!important;
+    min-height:64px!important;
+    padding:18px 22px!important;
+    background:#fff!important;
+    border-bottom:1px solid #eee7f3!important;
+    position:relative!important;
+    z-index:3!important;
+  }
+  #accountModal .modal-head h2{
+    margin:0!important;
+    line-height:1.2!important;
+  }
+  #accountModal .close-btn{
+    position:absolute!important;
+    top:14px!important;
+    right:14px!important;
+    z-index:4!important;
+  }
+  #accountModal .modal-body{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:22px!important;
+  }
+}
+
+@media(max-width:760px){
+  #accountModal.modal-backdrop{
+    padding:10px!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    overflow:hidden!important;
+  }
+  #accountModal .modal{
+    width:100%!important;
+    max-width:100%!important;
+    height:calc(100dvh - 20px)!important;
+    max-height:calc(100dvh - 20px)!important;
+    margin:0!important;
+    border-radius:18px!important;
+    overflow:hidden!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #accountModal .modal-head{
+    flex:0 0 auto!important;
+    min-height:58px!important;
+    padding:14px 52px 14px 16px!important;
+    background:#fff!important;
+    position:relative!important;
+    z-index:5!important;
+  }
+  #accountModal .close-btn{
+    position:absolute!important;
+    top:10px!important;
+    right:10px!important;
+    z-index:6!important;
+  }
+  #accountModal .modal-body{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    overflow-y:auto!important;
+    -webkit-overflow-scrolling:touch!important;
+    padding:16px!important;
+  }
+}
 </style></head>
 <body>
 
