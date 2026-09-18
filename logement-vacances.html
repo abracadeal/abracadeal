@@ -51,7 +51,7 @@
 </main>
 <script>
 const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co',SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);let listing=null,detail=null,user=null;
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY),$=id=>document.getElementById(id);let listing=null,detail=null,user=null,travelerAccess=false;
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
 async function boot(){
@@ -62,7 +62,14 @@ async function boot(){
   sb.from('listing_photos').select('*').eq('listing_id',id).order('position')
  ]);
  if(error||!l){$('loading').textContent='Logement indisponible.';return}listing=l;detail=d||{};
- const {data:{session}}=await sb.auth.getSession();user=session?.user||null;
+ const {data:{session}}=await sb.auth.getSession();user=session?.user||null;travelerAccess=false;
+ if(user){
+   if(user.user_metadata?.vacation_role==='traveler') travelerAccess=true;
+   if(!travelerAccess){
+     const {data:traveler}=await sb.from('vacation_user_details').select('user_id,phone').eq('user_id',user.id).maybeSingle();
+     travelerAccess=!!traveler?.phone;
+   }
+ }
  $('title').textContent=l.title;$('location').textContent=l.city+(l.postal_code?' · '+l.postal_code:'');$('price').textContent=money(l.price);$('desc').innerHTML='<h2>Description</h2><p>'+esc(l.description).replace(/\n/g,'<br>')+'</p>';
  $('chips').innerHTML=['👥 '+(detail.max_guests||2)+' voyageurs','🛏 '+(detail.beds??1)+' lit(s)','🚪 '+(detail.bedrooms??1)+' chambre(s)','🛁 '+(detail.bathrooms??1)+' salle(s) de bain','🌙 min. '+(detail.min_nights||1)+' nuit(s)'].map(x=>'<span class="chip">'+x+'</span>').join('');
  $('amenities').innerHTML=(detail.amenities||[]).length?(detail.amenities||[]).map(x=>'<span class="chip">'+esc(x)+'</span>').join(''):'<span class="muted">Aucun équipement renseigné.</span>';
