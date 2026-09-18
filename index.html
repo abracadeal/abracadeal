@@ -4105,7 +4105,7 @@ header #signupBtn{display:none!important}
         <form id="signupForm" class="auth-panel auth-signup-panel">
           <div class="form-grid">
             <div class="form-row full"><label for="signupName">Nom public / pseudo</label><input class="input" id="signupName" required maxlength="80"></div>
-            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" required></div>
+            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" required></div><div class="form-row full"><label for="signupPhone">Téléphone</label><input class="input" id="signupPhone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" maxlength="24" required><div class="note">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div></div>
             <div class="form-row full"><label>Mot de passe</label><input class="input" id="signupPassword" type="password" minlength="6" required></div>
             <div class="form-row full"><label>Type de compte</label>
               <select class="select" id="signupType"><option value="particulier">Particulier</option><option value="professionnel">Professionnel</option></select>
@@ -4748,9 +4748,27 @@ function updateAuthUI(preserveEditing=false){
   }
 }
 
+function abracaNormalizePhone(value=''){
+  const raw=String(value||'').trim();
+  let compact=raw.replace(/[\s().-]/g,'');
+  if(/^00\d+$/.test(compact)) compact='+'+compact.slice(2);
+  if(/^0[1-9]\d{8}$/.test(compact)) return '+33'+compact.slice(1);
+  if(/^\+33[1-9]\d{8}$/.test(compact)) return compact;
+  if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
+  return null;
+}
+async function abracaPhoneAvailable(phone){
+  const normalized=abracaNormalizePhone(phone);
+  if(!normalized) return {ok:false,normalized:null,message:'Indiquez un numéro de téléphone valide.'};
+  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized});
+  if(error) return {ok:false,normalized,message:'Impossible de vérifier le numéro pour le moment.'};
+  if(!data) return {ok:false,normalized,message:'Ce numéro de téléphone est déjà associé à un compte.'};
+  return {ok:true,normalized,message:''};
+}
+
 // Brouillon limité à cet onglet. Aucun mot de passe enregistré.
 const signupDraftKey='abracadeal.signupDraft.v1';
-const signupDraftIds=['signupName','signupEmail','signupType','signupCompany','signupSiret','signupVatStatus','signupVat'];
+const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSiret','signupVatStatus','signupVat'];
 function saveSignupDraft(){
   try{sessionStorage.setItem(signupDraftKey,JSON.stringify(Object.fromEntries(signupDraftIds.map(id=>[id,$('#'+id).value]))));}catch(_){}
 }
@@ -4801,7 +4819,15 @@ $('#signupForm').addEventListener('submit',async e=>{
   btn.textContent='Création...';
   btn.disabled=true;
   const name=$('#signupName').value.trim(), type=$('#signupType').value;
+  const rawPhone=$('#signupPhone').value.trim();
   try{
+    const phoneCheck=await abracaPhoneAvailable(rawPhone);
+    if(!phoneCheck.ok){
+      status.textContent=phoneCheck.message;
+      toast(phoneCheck.message);
+      return;
+    }
+    const phone=phoneCheck.normalized;
     const company_registration=type==='professionnel'?readCompanyFields('signup'):null;
     if(company_registration){
       status.textContent='Contrôle du SIRET dans le registre…';
@@ -4812,7 +4838,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.fr/',data:{display_name:name,account_type:type,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{display_name:name,account_type:type,phone,...(company_registration?{company_registration}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();
@@ -4873,6 +4899,9 @@ $('#profileForm')?.addEventListener('submit',async e=>{
     toast('Complète le nom, la ville et le téléphone');
     return;
   }
+  const normalizedPhone=abracaNormalizePhone(payload.phone);
+  if(!normalizedPhone){toast('Indique un numéro de téléphone valide');return;}
+  payload.phone=normalizedPhone;
   const btn=e.submitter;
   if(btn){btn.disabled=true;btn.textContent='Enregistrement...'}
   const {error}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
