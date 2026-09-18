@@ -535,7 +535,7 @@ $('completeHostBtn').onclick=async()=>{
     if(idErr){onboardingMsg(idErr.message,true);return}
 
     const {error:hostErr}=await sb.from('vacation_hosts').upsert({
-      user_id:currentUser.id,host_type:type,status:'active',siret,rental_status:rentalStatus,
+      user_id:currentUser.id,host_type:type,status:'pending',siret,rental_status:rentalStatus,
       onboarding_completed:false,legal_declaration_accepted_at:now,updated_at:now
     },{onConflict:'user_id'});
     if(hostErr){onboardingMsg(hostErr.message,true);return}
@@ -544,10 +544,48 @@ $('completeHostBtn').onclick=async()=>{
       owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:postal,
       seller_type:type,status:'pending',phone,contact_email:currentUser.email||null
     };
-    const {data:newListing,error:listErr}=await sb.from('listings').insert(listingPayload).select('id').single();
-    if(listErr){onboardingMsg(listErr.message,true);return}
 
-    const listingId=newListing.id;
+    const {data:hostState,error:hostStateErr}=await sb.from('vacation_hosts')
+      .select('onboarding_listing_id')
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+    if(hostStateErr){onboardingMsg(hostStateErr.message,true);return}
+
+    let listingId=hostState?.onboarding_listing_id||null;
+
+    if(listingId){
+      const {data:existingListing,error:existingErr}=await sb.from('listings')
+        .select('id,owner_id,category')
+        .eq('id',listingId)
+        .maybeSingle();
+      if(existingErr){onboardingMsg(existingErr.message,true);return}
+      if(!existingListing||existingListing.owner_id!==currentUser.id||existingListing.category!=='vacances'){
+        listingId=null;
+      }
+    }
+
+    if(listingId){
+      const {error:listErr}=await sb.from('listings')
+        .update({...listingPayload,updated_at:now})
+        .eq('id',listingId);
+      if(listErr){onboardingMsg(listErr.message,true);return}
+    }else{
+      const {data:newListing,error:listErr}=await sb.from('listings')
+        .insert(listingPayload)
+        .select('id')
+        .single();
+      if(listErr){onboardingMsg(listErr.message,true);return}
+      listingId=newListing.id;
+
+      const {error:bindErr}=await sb.from('vacation_hosts')
+        .update({onboarding_listing_id:listingId,updated_at:now})
+        .eq('user_id',currentUser.id);
+      if(bindErr){
+        await sb.from('listings').delete().eq('id',listingId);
+        onboardingMsg(bindErr.message,true);
+        return;
+      }
+    }
     const stars=$('oClassifiedStars').value?Number($('oClassifiedStars').value):null;
     const {error:detailErr}=await sb.from('vacation_listing_details').upsert({
       listing_id:listingId,owner_id:currentUser.id,property_type:$('oPropertyType').value,
@@ -567,7 +605,7 @@ $('completeHostBtn').onclick=async()=>{
     if(privateErr){await sb.from('listings').delete().eq('id',listingId);onboardingMsg(privateErr.message,true);return}
 
     const {error:hostPendingErr}=await sb.from('vacation_hosts').update({
-      onboarding_completed:false,onboarding_listing_id:listingId,updated_at:now
+      status:'pending',onboarding_completed:false,onboarding_listing_id:listingId,updated_at:now
     }).eq('user_id',currentUser.id);
     if(hostPendingErr){onboardingMsg(hostPendingErr.message,true);return}
 
@@ -577,7 +615,7 @@ $('completeHostBtn').onclick=async()=>{
       return;
     }
 
-    clearHostDraft();
+    saveHostDraft();
     onboardingMsg(checkoutData.offer+' — redirection vers le paiement sécurisé Stripe…');
     location.href=checkoutData.checkout_url;
   }finally{btn.disabled=false}
