@@ -1,1 +1,47 @@
-<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Inscription Hôte — Abracadeal Vacances</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script></head><body><main><h1>Créer mon compte hôte</h1><form id="hostSignup"><input id="firstName" placeholder="Prénom"><input id="lastName" placeholder="Nom"><input id="phone" placeholder="Téléphone"><input id="birthDate" type="date"><input id="city" placeholder="Ville"><input id="country" value="France"><input id="email" type="email" placeholder="Email"><input id="password" type="password" placeholder="Mot de passe"><button type="submit">Créer mon compte hôte</button></form><p id="msg"></p></main></body></html>
+<!doctype html>
+<html lang="fr"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Devenir hôte — Abracadeal Vacances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f8f4fa;--ink:#21132d;--muted:#76687d;--line:#e7dbea;--p:#6f218c;--pink:#e746a3}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}input,button{font:inherit}
+.top{background:#1c0b2b;color:#fff}.topin{width:min(760px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between}
+.wrap{width:min(760px,calc(100% - 28px));margin:34px auto}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:24px;box-shadow:0 18px 45px rgba(47,17,63,.09)}
+h1{margin:8px 0}.muted{color:var(--muted);line-height:1.55}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field{display:flex;flex-direction:column;gap:6px}.wide{grid-column:1/-1}
+input{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}.btn{border:0;border-radius:13px;min-height:46px;padding:0 17px;font-weight:900;cursor:pointer}.primary{color:#fff;background:linear-gradient(135deg,#842aaa,var(--pink));box-shadow:0 10px 24px rgba(183,47,176,.24)}
+.notice{display:none;margin-top:14px;padding:12px;border-radius:12px;background:#f3eaf6;color:#602777}.notice.show{display:block}
+@media(max-width:620px){.grid{grid-template-columns:1fr}.wide{grid-column:auto}}
+</style></head>
+<body>
+<header class="top"><div class="topin"><b>Abracadeal Vacances</b><a href="vacances.html">← Retour Vacances</a></div></header>
+<main class="wrap"><section class="card">
+<div style="font-weight:900;color:#7a288f">DEVENIR HÔTE</div>
+<h1>Créer mon compte hôte</h1>
+<p class="muted">Renseignez vos informations. Une fois le compte créé, vous accédez directement au formulaire pour publier votre premier logement.</p>
+<div class="grid">
+<div class="field"><label>Prénom</label><input id="firstName" autocomplete="given-name"></div>
+<div class="field"><label>Nom</label><input id="lastName" autocomplete="family-name"></div>
+<div class="field"><label>Téléphone</label><input id="phone" type="tel" autocomplete="tel"></div>
+<div class="field"><label>Date de naissance</label><input id="birthDate" type="date"></div>
+<div class="field"><label>Ville</label><input id="city" autocomplete="address-level2"></div>
+<div class="field"><label>Pays</label><input id="country" value="France" autocomplete="country-name"></div>
+<div class="field wide"><label>Email</label><input id="email" type="email" autocomplete="email"></div>
+<div class="field wide"><label>Mot de passe</label><input id="password" type="password" autocomplete="new-password" placeholder="8 caractères minimum"></div>
+</div>
+<button id="signupBtn" class="btn primary" style="margin-top:16px">Créer mon compte hôte</button>
+<div id="msg" class="notice"></div>
+</section></main>
+<script>
+const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+const $=id=>document.getElementById(id);
+const show=t=>{ $('msg').textContent=t;$('msg').classList.add('show') };
+$('signupBtn').onclick=async()=>{
+ const first=$('firstName').value.trim(),last=$('lastName').value.trim(),phone=$('phone').value.trim(),birth=$('birthDate').value,city=$('city').value.trim(),country=$('country').value.trim(),email=$('email').value.trim(),password=$('password').value;
+ if(!first||!last||!phone||!birth||!city||!country||!email||password.length<8){show('Complétez tous les champs. Le mot de passe doit contenir au moins 8 caractères.');return}
+ const {data,error}=await sb.auth.signUp({email,password,options:{data:{display_name:(first+' '+last).trim(),first_name:first,last_name:last,phone,birth_date:birth,city,country,vacation_role:'host',account_type:'particulier'}}});
+ if(error){show(error.message);return}
+ if(data?.session){location.href='espace-hote.html?new=1';return}
+ show('Compte créé. Confirmez votre e-mail puis connectez-vous : vous arriverez ensuite sur votre Espace Hôte.');
+};
+</script></body></html>
