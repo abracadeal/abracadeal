@@ -4830,7 +4830,10 @@ function updateAuthUI(preserveEditing=false){
     if($('#proAccountBtn')) $('#proAccountBtn').classList.toggle('hidden',isProAccount);
     if($('#profileEmail')) $('#profileEmail').value=currentUser.email||'';
     setTimeout(refreshUnreadMessages,0);
+    if(isProAccount)setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
+    else{proBoostWalletState={7:0,30:0};renderProBoostWallet();}
   }else{
+    proBoostWalletState={7:0,30:0};renderProBoostWallet();
     $('#accountBtn').textContent='Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
@@ -7387,20 +7390,47 @@ function renderAds(){
 $('#promotionPayBtn')?.addEventListener('click',async()=>{
   const btn=$('#promotionPayBtn'),status=$('#promotionStatus'),pack=PROMOTION_PACKS[promoSelectedPack];
   const ids=[...document.querySelectorAll('#promotionListings input:checked')].map(x=>x.value);
-  if(!pack){toast('Choisissez un pack');return}if(!ids.length){toast('Sélectionnez au moins une annonce');return}if(ids.length>pack.max){toast(`Maximum ${pack.max} annonces`);return}
+  if(!pack){toast('Choisissez un pack');return}
+  const creditPack=isProBoostCreditPack(pack.code);
+  if(!creditPack&&!ids.length){toast('Sélectionnez au moins une annonce');return}
+  if(!creditPack&&ids.length>pack.max){toast(`Maximum ${pack.max} annonces`);return}
   btn.disabled=true;status.textContent='Préparation du paiement sécurisé…';
-  try{await goToPromotionCheckout(pack.code,ids)}catch(err){console.error(err);status.textContent=err.message||'Impossible de préparer le paiement';toast(status.textContent);btn.disabled=false;}
+  try{await goToPromotionCheckout(pack.code,creditPack?[]:ids)}catch(err){console.error(err);status.textContent=err.message||'Impossible de préparer le paiement';toast(status.textContent);btn.disabled=false;}
 });
+
+$('#buyProBoostsBtn')?.addEventListener('click',()=>{closeModal('accountModal');openProBoostStore();});
+$('#useBoost7Btn')?.addEventListener('click',()=>useProBoostCredit(7));
+$('#useBoost30Btn')?.addEventListener('click',()=>useProBoostCredit(30));
 
 const paymentParams=new URLSearchParams(location.search);
 if(paymentParams.get('payment')==='photos-success'){
   setTimeout(async()=>{try{await loadAds()}catch{};toast('Paiement confirmé · Pack Photos activé sur votre annonce');try{history.replaceState({},document.title,location.pathname+(location.hash||''))}catch{}},350);
 }
 if(paymentParams.get('payment')==='success'){
+  let pendingProBoost='';
+  try{pendingProBoost=sessionStorage.getItem('abraca_pending_pro_boost')||''}catch(_){}
   setTimeout(async()=>{
     try{await loadAds()}catch{}
+    if(pendingProBoost){
+      try{
+        await loadProBoostWallet();
+        for(let attempt=0;attempt<4 && Number(proBoostWalletState[7]||0)+Number(proBoostWalletState[30]||0)===0;attempt++){
+          await new Promise(resolve=>setTimeout(resolve,650));
+          await loadProBoostWallet();
+        }
+      }catch{}
+      if($('#paymentSuccessTitle'))$('#paymentSuccessTitle').textContent='Boosts ajoutés';
+      if($('#paymentSuccessText'))$('#paymentSuccessText').textContent='Vos jetons Boost ont été ajoutés à votre espace Pro. Vous pouvez maintenant les utiliser sur vos annonces.';
+      if($('#paymentSuccessNote'))$('#paymentSuccessNote').textContent='Chaque clic sur Booster retire 1 jeton de la durée choisie.';
+      toast('Paiement confirmé · jetons Boost ajoutés');
+      try{sessionStorage.removeItem('abraca_pending_pro_boost')}catch(_){}
+    }else{
+      if($('#paymentSuccessTitle'))$('#paymentSuccessTitle').textContent='Paiement confirmé';
+      if($('#paymentSuccessText'))$('#paymentSuccessText').textContent='Tout est bon. La mise en avant de vos annonces est activée automatiquement.';
+      if($('#paymentSuccessNote'))$('#paymentSuccessNote').textContent='Vous pouvez maintenant revenir à vos annonces.';
+      toast('Paiement confirmé · mise en avant activée');
+    }
     openModal('paymentSuccessModal');
-    toast('Paiement confirmé · mise en avant activée');
     try{
       const cleanUrl=location.pathname+(location.hash||'');
       history.replaceState({},document.title,cleanUrl);
