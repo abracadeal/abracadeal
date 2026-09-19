@@ -6636,18 +6636,25 @@ header #flowErrorsBtn{
 </style>
 
 <style id="abraca-mobile-same-hero-as-desktop-20260919">
-/* Mobile : même bannière exacte que la version desktop */
+/* Mobile : même bannière et même esprit visuel que la version desktop */
 @media (max-width:760px){
-  .banner-frame{
+  .hero.container{
     width:100%!important;
-    height:auto!important;
-    max-height:none!important;
-    aspect-ratio:1460 / 326!important;
+    max-width:none!important;
+    padding:0 0 14px!important;
+  }
+  .banner-frame{
+    position:relative!important;
+    width:100%!important;
+    height:180px!important;
+    min-height:180px!important;
+    max-height:180px!important;
+    aspect-ratio:auto!important;
     margin:0 0 12px!important;
-    border-radius:0 0 18px 18px!important;
+    border-radius:0!important;
     overflow:hidden!important;
     background-image:url('assets/abracadeal-desktop-hero.jpg')!important;
-    background-size:contain!important;
+    background-size:cover!important;
     background-position:center center!important;
     background-repeat:no-repeat!important;
     background-color:#11091b!important;
@@ -6671,9 +6678,21 @@ header #flowErrorsBtn{
     inset:0!important;
     z-index:2!important;
     pointer-events:none!important;
-    background:linear-gradient(180deg,rgba(6,2,12,.01),rgba(10,5,18,.10))!important;
+    background:linear-gradient(180deg,rgba(6,2,12,.01) 0%,rgba(8,4,14,.04) 68%,rgba(10,5,18,.14) 100%)!important;
   }
   .banner-frame::after{display:none!important}
+
+  .search-wrap{
+    width:calc(100% - 20px)!important;
+    margin:0 auto!important;
+  }
+}
+@media (max-width:390px){
+  .banner-frame{
+    height:168px!important;
+    min-height:168px!important;
+    max-height:168px!important;
+  }
 }
 </style>
 </head>
