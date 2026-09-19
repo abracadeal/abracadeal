@@ -5033,551 +5033,339 @@ header #flowErrorsBtn{
 
 </style>
 <style id="abraca-desktop-redesign-20260919">
-/* ===== ABRACADEAL DESKTOP PC / MAC =====
-   Version dédiée grands écrans. Mobile et tablette restent inchangés. */
-.desktop-brand,.desktop-category-nav,.desktop-featured-all{display:none}
+
+/* ===== ABRACADEAL — MAQUETTE DESKTOP PC / MAC ===== */
+.desktop-brand,.desktop-category-nav,.desktop-featured-all,.desktop-favorites-btn,
+.desktop-trust-strip,.desktop-footer-brand{display:none}
+#searchCity.desktop-search-city{display:none!important}
 
 @media (min-width:1367px){
   :root{
-    --desk-bg:#0d0719;
-    --desk-bg2:#150923;
-    --desk-panel:#1d0e2c;
-    --desk-panel2:#28113a;
-    --desk-line:rgba(255,255,255,.10);
-    --desk-soft:#cbbbd6;
-    --desk-pink:#f13daa;
-    --desk-purple:#8b2db6;
+    --d-bg:#0b0714;
+    --d-bg2:#12081d;
+    --d-panel:#1a0d27;
+    --d-panel2:#241033;
+    --d-border:rgba(255,255,255,.10);
+    --d-text:#fff;
+    --d-soft:#bfaec9;
+    --d-pink:#f13aad;
+    --d-purple:#8b2eb7;
   }
 
-  html{background:var(--desk-bg)!important}
+  html{background:var(--d-bg)!important}
   body{
     background:
-      radial-gradient(75% 34% at 50% 0%,rgba(116,37,154,.22),transparent 72%),
-      linear-gradient(180deg,var(--desk-bg) 0%,#12091e 58%,#0d0718 100%)!important;
-    color:#fff!important;
+      radial-gradient(75% 30% at 50% 0%,rgba(115,35,150,.20),transparent 72%),
+      linear-gradient(180deg,var(--d-bg) 0%,#10081b 58%,#0a0612 100%)!important;
+    color:var(--d-text)!important;
+    overflow-x:hidden!important;
   }
+  .container{width:min(1460px,calc(100% - 60px))!important;max-width:1460px!important}
 
-  .container{
-    width:min(1500px,calc(100% - 56px))!important;
-    max-width:1500px!important;
-  }
-
-  /* Header desktop */
+  /* HEADER — comme la maquette */
   header{
     position:sticky!important;
     top:0!important;
     z-index:10050!important;
-    background:rgba(11,6,19,.94)!important;
-    border-bottom:1px solid rgba(255,255,255,.08)!important;
-    box-shadow:0 8px 28px rgba(0,0,0,.22)!important;
+    min-height:70px!important;
+    background:rgba(9,5,16,.96)!important;
+    border-bottom:1px solid rgba(255,255,255,.075)!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.20)!important;
     -webkit-backdrop-filter:blur(18px)!important;
     backdrop-filter:blur(18px)!important;
   }
   header .nav{
-    min-height:68px!important;
+    min-height:70px!important;
     display:grid!important;
-    grid-template-columns:minmax(190px,245px) minmax(0,1fr) auto!important;
+    grid-template-columns:245px minmax(0,1fr) auto!important;
     align-items:center!important;
-    gap:18px!important;
+    gap:15px!important;
     padding:7px 0!important;
   }
-
   .desktop-brand{
-    min-width:0;
     display:flex!important;
-    align-items:center;
-    gap:10px;
-    color:#fff;
+    align-items:center!important;
+    gap:10px!important;
+    min-width:0!important;
   }
   .desktop-brand-lamp{
-    width:48px;
-    height:48px;
-    overflow:hidden;
-    flex:0 0 48px;
-    border-radius:13px;
-    background:#260f37;
-    border:1px solid rgba(255,255,255,.09);
-    box-shadow:0 6px 18px rgba(0,0,0,.24);
+    width:58px!important;height:50px!important;flex:0 0 58px!important;
+    display:block!important;overflow:hidden!important;border-radius:12px!important;
+    background:#210d32!important;box-shadow:0 6px 18px rgba(0,0,0,.24)!important;
   }
   .desktop-brand-lamp img{
-    display:block;
-    height:48px;
-    width:auto;
-    transform:translateX(-1px);
+    width:58px!important;height:50px!important;object-fit:cover!important;display:block!important;
   }
-  .desktop-brand-copy{display:flex;flex-direction:column;min-width:0;line-height:1}
+  .desktop-brand-copy{display:flex!important;flex-direction:column!important;line-height:1!important}
   .desktop-brand-copy strong{
-    font-family:Fraunces,serif;
-    font-size:25px;
-    line-height:1;
-    letter-spacing:-.025em;
-    color:#fff;
-    white-space:nowrap;
+    font:700 25px/1 Fraunces,serif!important;letter-spacing:-.025em!important;color:#fff!important;
   }
   .desktop-brand-copy small{
-    margin-top:4px;
-    color:#bdaac8;
-    font-size:9.5px;
-    font-weight:700;
-    white-space:nowrap;
+    margin-top:4px!important;font-size:9px!important;font-weight:700!important;color:#bdadc7!important;
+    white-space:nowrap!important;
   }
 
   .desktop-category-nav{
-    display:flex!important;
-    min-width:0;
-    justify-content:center;
-    align-items:center;
-    gap:4px;
-    overflow:hidden;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-width:0!important;gap:2px!important;overflow:hidden!important;
   }
   .desktop-category-link{
-    min-height:40px;
-    padding:0 8px;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    gap:5px;
-    border-radius:11px;
-    color:#eee6f3;
-    font-size:12px;
-    font-weight:800;
-    white-space:nowrap;
-    transition:background .15s ease,color .15s ease,transform .15s ease;
+    min-height:40px!important;padding:0 8px!important;display:inline-flex!important;align-items:center!important;
+    gap:5px!important;border-radius:10px!important;color:#f1eaf5!important;
+    font-size:12px!important;font-weight:800!important;white-space:nowrap!important;
+    transition:.16s ease!important;
   }
-  .desktop-category-link span{font-size:14px}
-  .desktop-category-link:hover{
-    background:rgba(255,255,255,.075);
-    color:#fff;
-    transform:translateY(-1px);
-  }
+  .desktop-category-link span{font-size:14px!important}
+  .desktop-category-link:hover{background:rgba(255,255,255,.075)!important;transform:translateY(-1px)!important}
 
   header .nav-actions{
-    display:flex!important;
-    justify-content:flex-end!important;
-    align-items:center!important;
-    flex-wrap:wrap!important;
-    gap:6px!important;
-    min-width:0!important;
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    flex-wrap:nowrap!important;gap:6px!important;min-width:0!important;
   }
-  header .header-vacances-btn,
-  header #signupBtn{
-    display:none!important;
+  header .header-vacances-btn,header #signupBtn{display:none!important}
+  .desktop-favorites-btn{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:40px!important;height:40px!important;flex:0 0 40px!important;border-radius:12px!important;
+    color:#fff!important;font-size:30px!important;line-height:1!important;background:transparent!important;
+    border:0!important;box-shadow:none!important;
   }
-  header .nav-actions .btn{
-    min-height:40px!important;
-    height:40px!important;
-    padding:0 12px!important;
-    border-radius:12px!important;
-    font-size:12px!important;
-    white-space:nowrap!important;
-  }
+  .desktop-favorites-btn:hover{background:rgba(255,255,255,.07)!important;transform:none!important}
   header #accountBtn{
-    min-width:108px!important;
-    max-width:180px!important;
-    background:rgba(255,255,255,.065)!important;
-    border:1px solid rgba(255,255,255,.12)!important;
-    color:#fff!important;
+    min-width:102px!important;max-width:150px!important;height:40px!important;min-height:40px!important;
+    padding:0 15px!important;border-radius:13px!important;background:#1c1029!important;
+    border:1px solid rgba(255,255,255,.09)!important;color:#fff!important;
+    box-shadow:none!important;font-size:12px!important;font-weight:800!important;
   }
   header .publish-trigger{
-    min-width:148px!important;
-    background:linear-gradient(135deg,#8c2ab9,#e637aa 58%,#ff4eb4)!important;
-    border-color:rgba(255,255,255,.15)!important;
-    box-shadow:0 8px 20px rgba(221,49,169,.28)!important;
+    min-width:158px!important;height:40px!important;min-height:40px!important;padding:0 17px!important;
+    border-radius:12px!important;background:linear-gradient(135deg,#9a29c7,#e32dac 58%,#ff49b7)!important;
+    color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;
+    box-shadow:0 8px 20px rgba(223,45,172,.29)!important;font-size:12px!important;
   }
-  header #b2bNavBtn,
-  header #headerStockBtn,
-  header #moderationBtn,
-  header #flowErrorsBtn,
-  header #headerMessagesBtn,
-  header #headerLogoutBtn{
-    min-width:0!important;
-    padding:0 9px!important;
-    font-size:11px!important;
+  header #b2bNavBtn,header #headerStockBtn,header #moderationBtn,header #flowErrorsBtn,
+  header #headerMessagesBtn,header #headerLogoutBtn{
+    min-height:32px!important;height:32px!important;min-width:0!important;padding:0 8px!important;
+    border-radius:9px!important;font-size:10px!important;box-shadow:none!important;
   }
 
-  /* Ordre général desktop */
-  main#top{
-    display:flex!important;
-    flex-direction:column!important;
-    width:100%!important;
-    min-width:0!important;
-  }
+  /* ORDRE DES BLOCS */
+  main#top{display:flex!important;flex-direction:column!important;width:100%!important;background:transparent!important}
   main#top>.hero-shell{order:1}
   main#top>#homeFeaturedSection{order:2}
-  main#top>#recentSearchSection{order:3}
-  main#top>#recentViewedSection{order:4}
-  main#top>#nearbySection{order:5}
-  main#top>#b2bDiscovery{order:6}
-  main#top>#resultats{order:7}
-  main#top>.trust{order:8}
-  main#top>#pros{order:9}
-  main#top>#vacancesDiscovery{order:10}
-  main#top>#annonces{display:none!important}
+  main#top>#b2bDiscovery{order:3}
+  main#top>#desktopTrustStrip{order:4}
+  main#top>#resultats{order:5}
+  main#top>#recentSearchSection{order:6}
+  main#top>#recentViewedSection{order:7}
+  main#top>#nearbySection{order:8}
+  main#top>#pros,main#top>#vacancesDiscovery,main#top>#annonces,main#top>.trust{display:none!important}
 
-  /* Hero / bannière */
+  /* HERO — visuel directement issu de la maquette validée */
   .hero-shell{
-    background:#10081b!important;
-    overflow:visible!important;
+    position:relative!important;background:#11091b!important;overflow:visible!important;
+    border:0!important;
   }
   .hero-shell::after{display:none!important}
   .hero.container{
-    width:100%!important;
-    max-width:none!important;
-    padding:0 0 76px!important;
+    width:100%!important;max-width:none!important;height:326px!important;
+    padding:0 0 68px!important;position:relative!important;
   }
   .banner-frame{
-    width:100%!important;
-    margin:0!important;
-    border-radius:0!important;
-    overflow:hidden!important;
-    background:#180b29!important;
+    position:relative!important;width:100%!important;height:326px!important;max-height:326px!important;
+    margin:0!important;border-radius:0!important;overflow:hidden!important;
+    background-image:url('assets/abracadeal-desktop-hero.jpg')!important;
+    background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;
     box-shadow:none!important;
-    max-height:390px!important;
   }
   .banner-frame::before{
-    content:""!important;
-    position:absolute!important;
-    inset:0!important;
-    z-index:2!important;
-    pointer-events:none!important;
-    background:
-      linear-gradient(90deg,rgba(8,4,14,.16),transparent 12%,transparent 88%,rgba(8,4,14,.17)),
-      linear-gradient(180deg,transparent 66%,rgba(10,5,18,.22))!important;
+    content:""!important;position:absolute!important;inset:0!important;z-index:2!important;pointer-events:none!important;
+    background:linear-gradient(180deg,rgba(6,2,12,.02) 0%,rgba(8,4,14,.05) 67%,rgba(10,5,18,.16) 100%)!important;
   }
   .banner-frame::after{display:none!important}
-  .banner-desktop{
-    display:block!important;
-    width:100%!important;
-    height:390px!important;
-    max-height:390px!important;
-    object-fit:cover!important;
-    object-position:center center!important;
-    border-radius:0!important;
-    box-shadow:none!important;
-  }
-  .mobile-banner-img{display:none!important}
-  .banner-hotspots{display:none!important}
+  #homeBrandLink{position:absolute!important;inset:0!important;z-index:1!important}
+  .banner-desktop,.mobile-banner-img,.banner-hotspots{display:none!important}
 
   .search-wrap{
-    position:absolute!important;
-    left:50%!important;
-    right:auto!important;
-    bottom:22px!important;
-    width:min(1120px,calc(100% - 110px))!important;
-    transform:translateX(-50%)!important;
-    z-index:12!important;
+    position:absolute!important;left:50%!important;bottom:20px!important;right:auto!important;
+    width:min(1080px,calc(100% - 120px))!important;transform:translateX(-50%)!important;z-index:12!important;
   }
   .search-card{
-    grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;
-    gap:9px!important;
-    padding:8px!important;
-    border-radius:18px!important;
-    background:rgba(255,255,255,.985)!important;
-    border:1px solid rgba(255,255,255,.92)!important;
-    box-shadow:0 16px 44px rgba(0,0,0,.28)!important;
+    display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr) 160px!important;
+    gap:0!important;align-items:center!important;padding:0!important;overflow:hidden!important;
+    background:#fff!important;border:1px solid rgba(255,255,255,.96)!important;border-radius:16px!important;
+    box-shadow:0 14px 38px rgba(0,0,0,.28)!important;
   }
   .search-card .field{
-    height:52px!important;
-    min-height:52px!important;
-    border-radius:12px!important;
-    background:#f8f5fa!important;
-    color:#25162f!important;
-    font-size:15px!important;
-    padding:0 17px!important;
+    display:block!important;height:54px!important;min-height:54px!important;border-radius:0!important;
+    border:0!important;border-right:1px solid #ece5f0!important;background:#fff!important;
+    color:#25172d!important;font-size:14px!important;padding:0 18px!important;box-shadow:none!important;
+  }
+  #searchCity.desktop-search-city{
+    display:block!important;
+    padding-left:42px!important;
+    background-image:radial-gradient(circle at 21px 27px,#6c2d88 0 4px,transparent 5px)!important;
+    background-repeat:no-repeat!important;
   }
   #searchBtn{
-    width:auto!important;
-    min-width:165px!important;
-    height:52px!important;
-    min-height:52px!important;
-    padding:0 26px!important;
-    border-radius:12px!important;
-    font-size:15px!important;
-    background:linear-gradient(135deg,#7624a2,#d62dab 56%,#ef3eaa)!important;
-    box-shadow:0 8px 20px rgba(194,44,166,.28)!important;
+    width:160px!important;min-width:160px!important;height:54px!important;min-height:54px!important;
+    border-radius:0!important;border:0!important;padding:0 18px!important;color:#fff!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    box-shadow:none!important;font-size:14px!important;font-weight:900!important;
   }
 
-  /* Sections sur fond sombre */
-  .home-featured-section,
-  .personalized-section,
-  .listing-section,
-  .trust{
-    background:transparent!important;
+  /* À LA UNE */
+  .home-featured-section{padding:26px 0 12px!important;background:transparent!important}
+  .home-featured-head{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;margin-bottom:12px!important}
+  .home-featured-head h2{
+    margin:0!important;font-size:0!important;color:#fff!important;font-family:Fraunces,serif!important;
   }
-  .home-featured-section{padding:28px 0 10px!important}
-  .personalized-section{padding:18px 0 6px!important}
-  .listing-section{padding:26px 0 34px!important}
-  .home-featured-head,
-  .personalized-head,
-  .listing-head{
-    margin-bottom:14px!important;
-    align-items:flex-end!important;
+  .home-featured-head h2::before{
+    content:"Annonces à la une";font:700 27px/1 Fraunces,serif;color:#fff;
   }
-  .home-featured-head h2,
-  .personalized-head h2,
-  .listing-head h2{
-    color:#fff!important;
-    font-family:Fraunces,serif!important;
-    font-size:28px!important;
-    line-height:1.05!important;
-    letter-spacing:-.02em!important;
+  .home-featured-head h2::after{
+    content:"";display:block;width:48px;height:4px;border-radius:99px;margin-top:7px;
+    background:linear-gradient(90deg,#ea3eb1,#a63ad2);
   }
-  .home-featured-head p,
-  .personalized-head p,
-  .listing-head p{
-    color:#b9a9c4!important;
-    font-size:13px!important;
-  }
+  .home-featured-head p{display:none!important}
   .desktop-featured-all{
-    display:inline-flex!important;
-    align-items:center;
-    color:#ded0e7;
-    font-size:12px;
-    font-weight:800;
-    white-space:nowrap;
+    display:inline-flex!important;color:#e5d8ec!important;font-size:12px!important;font-weight:750!important;padding-bottom:2px!important;
   }
-  .desktop-featured-all:hover{color:#ff63be}
+  .desktop-featured-all:hover{color:#ff5fbd!important}
 
-  /* Cartes desktop : 5 visibles */
-  .home-featured-grid,
-  .personalized-grid,
-  #resultats .ads-grid{
-    display:grid!important;
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-    gap:12px!important;
-    overflow:visible!important;
-    padding:0!important;
+  .home-featured-grid,.personalized-grid{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;
+    overflow:visible!important;padding:0!important;
   }
-
-  .home-featured-card,
-  .personalized-card,
-  #resultats .ad-card{
-    width:auto!important;
-    min-width:0!important;
-    max-width:none!important;
-    height:auto!important;
-    background:linear-gradient(180deg,#21102f 0%,#180b26 100%)!important;
-    border:1px solid rgba(220,167,239,.13)!important;
-    border-radius:15px!important;
-    color:#fff!important;
-    box-shadow:0 9px 24px rgba(0,0,0,.19)!important;
-    overflow:hidden!important;
+  .home-featured-card,.personalized-card{
+    width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;
+    border-radius:14px!important;overflow:hidden!important;background:linear-gradient(180deg,#1f102d,#160b22)!important;
+    border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 8px 20px rgba(0,0,0,.19)!important;color:#fff!important;
   }
-  .home-featured-card:hover,
-  .personalized-card:hover,
-  #resultats .ad-card:hover{
-    transform:translateY(-3px)!important;
-    border-color:rgba(245,92,190,.34)!important;
-    box-shadow:0 14px 30px rgba(0,0,0,.28)!important;
+  .home-featured-card:hover,.personalized-card:hover{transform:translateY(-3px)!important;border-color:rgba(241,58,173,.34)!important}
+  .home-featured-photo,.personalized-photo{
+    height:128px!important;min-height:128px!important;max-height:128px!important;background:#251337!important;
+  }
+  .home-featured-body,.personalized-body{padding:9px 10px 11px!important}
+  .home-featured-meta,.personalized-meta{font-size:9.5px!important;color:#b8a8c2!important;margin-bottom:4px!important}
+  .home-featured-title,.personalized-title{
+    margin:0 0 4px!important;font-size:13px!important;line-height:1.18!important;color:#fff!important;min-height:0!important;
+  }
+  .home-featured-price,.personalized-price{
+    color:#ff54b7!important;font-size:17px!important;line-height:1.1!important;font-weight:950!important;margin-bottom:5px!important;
+  }
+  .home-featured-city,.personalized-city{font-size:10px!important;color:#c7b8d0!important}
+  .home-featured-card .favorite-btn,.personalized-card .favorite-btn{
+    width:29px!important;height:29px!important;top:7px!important;right:7px!important;background:rgba(22,9,34,.72)!important;
+    color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;
   }
 
-  .home-featured-photo,
-  .personalized-photo,
-  #resultats .ad-photo,
-  #resultats .ad-card.immo-card .ad-photo{
-    height:148px!important;
-    min-height:148px!important;
-    max-height:148px!important;
-    background:#261438!important;
-  }
-  .home-featured-body,
-  .personalized-body,
-  #resultats .ad-body{
-    padding:10px 11px 12px!important;
-  }
-  .home-featured-meta,
-  .personalized-meta,
-  #resultats .ad-meta{
-    color:#bbaac5!important;
-    font-size:10px!important;
-    line-height:1.2!important;
-    margin-bottom:4px!important;
-  }
-  .home-featured-title,
-  .personalized-title,
-  #resultats .ad-title{
-    color:#fff!important;
-    font-size:13px!important;
-    line-height:1.22!important;
-    min-height:0!important;
-    margin:0 0 5px!important;
-  }
-  .home-featured-price,
-  .personalized-price,
-  #resultats .ad-price{
-    color:#ff58b7!important;
-    font-size:17px!important;
-    line-height:1.1!important;
-    font-weight:950!important;
-    margin-bottom:5px!important;
-  }
-  .home-featured-city,
-  .personalized-city,
-  #resultats .ad-city,
-  #resultats .ad-specs{
-    color:#c7b7d0!important;
-  }
-
-  #resultats .ad-specs{
-    font-size:9.5px!important;
-    gap:3px 6px!important;
-    margin-bottom:6px!important;
-  }
-  #resultats .ad-city{font-size:10px!important}
-  #resultats .immo-card-location-extra{color:#9e8daa!important;font-size:10px!important}
-  #resultats .immo-card-unit-price,
-  #resultats .immo-card-charges{color:#9f8da9!important;font-size:10px!important}
-  #resultats .ad-actions{
-    gap:5px!important;
-    margin-top:8px!important;
-  }
-  #resultats .ad-actions .mini-btn{
-    min-height:31px!important;
-    height:31px!important;
-    padding:0 8px!important;
-    font-size:9.5px!important;
-    border-radius:8px!important;
-  }
-
-  /* Filtres */
-  .results-tools{
-    display:grid!important;
-    grid-template-columns:180px 220px!important;
-    justify-content:start!important;
-    gap:9px!important;
-    margin-bottom:13px!important;
-  }
-  .filters-toggle,
-  .sort-select,
-  .filter-chip{
-    min-height:40px!important;
-    border-radius:11px!important;
-    border:1px solid rgba(255,255,255,.11)!important;
-    background:#21102f!important;
-    color:#f5edf8!important;
-    box-shadow:none!important;
-  }
-  .filters-panel{
-    margin-bottom:16px!important;
-    background:#fdfaff!important;
-    color:#2c1737!important;
-    border:1px solid #eadff0!important;
-    border-radius:16px!important;
-  }
-
-  /* Pro/Pro au bon endroit, compact comme la maquette */
+  /* PRO/PRO — gros bloc comme la maquette */
   #b2bDiscovery{
-    width:min(1500px,calc(100% - 56px))!important;
-    max-width:1500px!important;
-    margin:20px auto 8px!important;
-    min-height:130px!important;
-    padding:24px 28px!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;
-    gap:24px!important;
-    border:1px solid rgba(239,65,180,.38)!important;
-    border-radius:20px!important;
+    position:relative!important;width:min(1460px,calc(100% - 60px))!important;max-width:1460px!important;
+    min-height:145px!important;margin:14px auto 0!important;padding:25px 31px!important;overflow:hidden!important;
+    display:grid!important;grid-template-columns:minmax(0,42%) 1fr!important;align-items:center!important;
+    border:1px solid rgba(235,56,183,.42)!important;border-radius:19px!important;color:#fff!important;
     background:
-      radial-gradient(90% 130% at 0% 50%,rgba(205,38,171,.26),transparent 64%),
-      linear-gradient(120deg,#4a145f 0%,#321043 47%,#160a24 100%)!important;
-    box-shadow:0 14px 34px rgba(0,0,0,.22)!important;
-    color:#fff!important;
+      radial-gradient(75% 150% at 10% 50%,rgba(226,40,183,.30),transparent 62%),
+      linear-gradient(105deg,#501364 0%,#381044 48%,#14091f 100%)!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.20)!important;
   }
+  #b2bDiscovery::after{
+    content:""!important;position:absolute!important;right:0!important;top:0!important;bottom:0!important;width:50%!important;
+    background:
+      radial-gradient(circle at 50% 40%,rgba(255,255,255,.10),transparent 28%),
+      linear-gradient(120deg,rgba(92,30,115,.20),rgba(8,4,15,.18)),
+      url('assets/abracadeal-desktop-hero.jpg') center 58% / 150% auto no-repeat!important;
+    filter:saturate(.75) brightness(.58)!important;opacity:.66!important;
+    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
+    mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
+    pointer-events:none!important;
+  }
+  #b2bDiscovery>div{position:relative!important;z-index:2!important;max-width:460px!important}
   #b2bDiscovery h2{
-    margin:0 0 5px!important;
-    color:#fff!important;
-    font-family:Fraunces,serif!important;
-    font-size:28px!important;
+    margin:0 0 7px!important;font:700 31px/.98 Fraunces,serif!important;color:#fff!important;
   }
-  #b2bDiscovery p{
-    margin:0!important;
-    max-width:660px!important;
-    color:#e1d2e8!important;
-  }
+  #b2bDiscovery p{margin:0!important;color:#eadced!important;font-size:14px!important;line-height:1.48!important}
   #b2bDiscoveryLink{
-    min-height:46px!important;
-    padding:0 22px!important;
-    border-radius:999px!important;
-    color:#fff!important;
-    background:linear-gradient(135deg,#a82bc4,#ed38ad)!important;
-    border:1px solid rgba(255,255,255,.18)!important;
-    box-shadow:0 8px 18px rgba(212,43,170,.26)!important;
+    position:absolute!important;z-index:3!important;left:31%!important;top:50%!important;transform:translateY(-50%)!important;
+    min-height:46px!important;padding:0 23px!important;border-radius:999px!important;color:#fff!important;
+    background:linear-gradient(135deg,#a62ac4,#ef35ad)!important;border:1px solid rgba(255,255,255,.18)!important;
+    box-shadow:0 8px 20px rgba(212,43,171,.28)!important;font-size:12px!important;font-weight:900!important;
   }
+  #b2bDiscoveryLink:hover{transform:translateY(calc(-50% - 2px))!important}
 
-  /* Blocs utilitaires / offre pro plus bas */
-  .trust{padding:16px 0 12px!important}
-  .trust-grid{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    gap:10px!important;
+  /* Ligne de confiance */
+  .desktop-trust-strip{display:block!important;padding:17px 0 20px!important;background:transparent!important}
+  .desktop-trust-grid{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:70px!important;
   }
-  .trust-card{
-    min-height:84px!important;
-    padding:14px 15px!important;
-    background:#180c25!important;
-    color:#fff!important;
-    border:1px solid rgba(255,255,255,.08)!important;
-    box-shadow:none!important;
+  .desktop-trust-item{display:flex!important;align-items:center!important;gap:14px!important;min-width:0!important}
+  .desktop-trust-icon{
+    width:48px!important;height:48px!important;flex:0 0 48px!important;border-radius:50%!important;
+    display:grid!important;place-items:center!important;font-size:22px!important;color:#ff5dba!important;
+    background:radial-gradient(circle at 40% 35%,#5e176d,#250d35 72%)!important;border:1px solid rgba(255,255,255,.06)!important;
   }
-  .trust-card b{color:#fff!important;font-size:13px!important}
-  .trust-card span{color:#b9a8c4!important;font-size:11px!important}
-  .trust-icon{
-    background:linear-gradient(135deg,#4d176f,#8e26a9)!important;
-    color:#fff!important;
-  }
+  .desktop-trust-item strong{display:block!important;color:#fff!important;font-size:13px!important;margin-bottom:4px!important}
+  .desktop-trust-item small{display:block!important;color:#b7a8c0!important;font-size:11px!important;line-height:1.35!important}
 
-  #pros{
-    padding:18px 0 10px!important;
-    background:transparent!important;
+  /* Résultats : même langage visuel, mais en dessous de la maquette d'accueil */
+  .listing-section{padding:26px 0 40px!important;background:transparent!important}
+  .listing-head h2{color:#fff!important;font:700 27px/1 Fraunces,serif!important}
+  .listing-head p{color:#b6a7c0!important;font-size:12px!important}
+  #resultats .ads-grid{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important;
   }
-  #pros .pro-block{
-    padding:24px 26px!important;
-    border-radius:20px!important;
-    grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;
-    background:linear-gradient(135deg,#241039,#321349)!important;
-    border:1px solid rgba(255,255,255,.08)!important;
-    box-shadow:none!important;
+  #resultats .ad-card{
+    width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;align-self:start!important;
+    background:linear-gradient(180deg,#1f102d,#160b22)!important;border:1px solid rgba(255,255,255,.10)!important;
+    border-radius:14px!important;color:#fff!important;box-shadow:0 8px 20px rgba(0,0,0,.18)!important;
   }
-  #pros .pro-block h2{font-size:27px!important}
-  #pros .founder-simple-side{min-height:110px!important}
+  #resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{height:128px!important;min-height:128px!important;max-height:128px!important;background:#251337!important}
+  #resultats .ad-body{padding:9px 10px 11px!important}
+  #resultats .ad-meta{font-size:9.5px!important;color:#b8a8c2!important;margin-bottom:4px!important}
+  #resultats .ad-title{font-size:13px!important;line-height:1.18!important;color:#fff!important;min-height:0!important;margin-bottom:4px!important}
+  #resultats .ad-price{font-size:17px!important;line-height:1.1!important;color:#ff54b7!important;margin-bottom:5px!important}
+  #resultats .ad-city,#resultats .ad-specs{color:#c7b8d0!important;font-size:10px!important}
+  #resultats .immo-card-location-extra,#resultats .immo-card-unit-price,#resultats .immo-card-charges{color:#9f90a9!important;font-size:9.5px!important}
+  .results-tools{display:grid!important;grid-template-columns:170px 215px!important;gap:9px!important;margin-bottom:13px!important}
+  .filters-toggle,.sort-select,.filter-chip{
+    min-height:40px!important;border-radius:11px!important;background:#1d0f2b!important;color:#f4edf8!important;
+    border:1px solid rgba(255,255,255,.10)!important;box-shadow:none!important;
+  }
+  .filters-panel{background:#fbf7fd!important;color:#2d1738!important;border-radius:16px!important}
 
-  #vacancesDiscovery{
-    display:none!important;
-  }
+  .personalized-section{padding:18px 0 6px!important;background:transparent!important}
+  .personalized-head h2{color:#fff!important;font:700 25px/1 Fraunces,serif!important}
+  .personalized-head p{color:#b5a6bf!important}
 
-  /* Footer */
+  /* FOOTER */
   footer{
-    margin-top:20px!important;
-    padding:26px 0 30px!important;
-    background:#0b0613!important;
-    border-top:1px solid rgba(255,255,255,.08)!important;
-    color:#bcaac7!important;
+    margin-top:18px!important;padding:22px 0 24px!important;background:#0a0611!important;
+    color:#bbaac5!important;border-top:1px solid rgba(255,255,255,.08)!important;
   }
   footer .footer-row{
-    align-items:center!important;
+    display:grid!important;grid-template-columns:280px minmax(0,1fr) auto!important;
+    align-items:center!important;gap:22px!important;
   }
-  footer .footer-links{
-    display:flex!important;
-    gap:20px!important;
-  }
-  footer a{color:#d8c9df!important}
-  footer a:hover{color:#ff63bd!important}
-
-  /* Les liens aide/légal restent dans Compte, mais ne sont pas dupliqués visuellement sur desktop */
+  .desktop-footer-brand{display:flex!important;align-items:center!important;gap:10px!important;color:#fff!important}
+  .desktop-footer-brand img{width:58px!important;height:48px!important;object-fit:cover!important;border-radius:11px!important}
+  .desktop-footer-brand span{display:flex!important;flex-direction:column!important}
+  .desktop-footer-brand strong{font:700 23px/1 Fraunces,serif!important;color:#fff!important}
+  .desktop-footer-brand small{margin-top:4px!important;font-size:9px!important;color:#b8a8c2!important}
+  footer .footer-links{display:flex!important;justify-content:center!important;gap:22px!important;font-size:11px!important}
+  footer .footer-links a{color:#dfd3e5!important}
+  footer .footer-links a:hover{color:#ff58b7!important}
+  .footer-copyright{order:3!important;color:#aa9ab4!important;font-size:10px!important;white-space:nowrap!important}
   #accountModal .account-info-links{display:none!important}
 }
 
 @media (min-width:1600px){
-  header .nav{
-    grid-template-columns:250px minmax(0,1fr) auto!important;
-    gap:22px!important;
-  }
-  .desktop-category-link{padding:0 10px;font-size:12.5px}
-  .banner-frame,.banner-desktop{height:410px!important;max-height:410px!important}
-  .home-featured-photo,.personalized-photo,
-  #resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{
-    height:158px!important;min-height:158px!important;max-height:158px!important;
+  header .nav{grid-template-columns:260px minmax(0,1fr) auto!important;gap:20px!important}
+  .desktop-category-link{padding:0 10px!important;font-size:12.5px!important}
+  .hero.container,.banner-frame{height:346px!important;max-height:346px!important}
+  .search-wrap{bottom:20px!important}
+  .home-featured-photo,.personalized-photo,#resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{
+    height:140px!important;min-height:140px!important;max-height:140px!important;
   }
 }
 
@@ -5596,7 +5384,7 @@ header #flowErrorsBtn{
 <header>
   <div class="container nav">
     <a class="desktop-brand" href="#top" aria-label="Accueil Abracadeal">
-      <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span>
+      <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-lamp-icon.webp" alt=""></span>
       <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez · Vendez · Louez · Voyagez</small></span>
     </a>
     <nav class="desktop-category-nav" aria-label="Catégories principales">
@@ -5612,9 +5400,10 @@ header #flowErrorsBtn{
     <div class="nav-actions">
       <button class="btn b2b-entry hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">Pro/Pro<span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
       <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span class="header-lamp-crop" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span><span>Vacances</span></a>
+      <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
       <div class="account-auth-group" aria-label="Compte Abracadeal">
         <a class="btn ghost" id="signupBtn" href="#accountModal">Créer un compte</a>
-        <a class="btn ghost" id="accountBtn" href="#accountModal">Se connecter</a>
+        <a class="btn ghost" id="accountBtn" href="#accountModal">Compte</a>
       </div>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Import"><span class="header-stock-label">Import</span></button>
       <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer"><span class="header-moderation-label">Modérer</span></button>
@@ -5666,7 +5455,7 @@ header #flowErrorsBtn{
       <div class="search-wrap">
         <div class="search-card">
           <input class="field" id="searchQuery" type="text" placeholder="Que recherchez-vous ?">
-          <input id="searchCity" type="hidden" value="">
+          <input class="field desktop-search-city" id="searchCity" type="text" inputmode="search" placeholder="Ville, code postal..." value="">
           <button class="search-btn" id="searchBtn" type="button">Rechercher</button>
           
         </div>
@@ -5700,6 +5489,14 @@ header #flowErrorsBtn{
     <div><h2 id="b2bDiscoveryTitle">Découvrez Pro/Pro</h2><p>Des annonces entre professionnels, avec des prix accessibles sur accord du vendeur.</p></div>
     <a class="b2b-discovery-tag home-action" id="b2bDiscoveryLink" href="#accountModal">Un espace dédié aux pros →</a>
   </aside>
+
+  <section class="desktop-trust-strip" id="desktopTrustStrip" aria-label="Les avantages Abracadeal">
+    <div class="container desktop-trust-grid">
+      <div class="desktop-trust-item"><span class="desktop-trust-icon">⚡</span><div><strong>Simple et rapide</strong><small>Déposez votre annonce en quelques clics</small></div></div>
+      <div class="desktop-trust-item"><span class="desktop-trust-icon">🛡</span><div><strong>En toute confiance</strong><small>Des outils pensés pour sécuriser les échanges</small></div></div>
+      <div class="desktop-trust-item"><span class="desktop-trust-icon">⌖</span><div><strong>Partout en France</strong><small>Des annonces près de chez vous</small></div></div>
+    </div>
+  </section>
 
   <aside class="container vacances-discovery" id="vacancesDiscovery" aria-labelledby="vacancesDiscoveryTitle">
     <div><h2 id="vacancesDiscoveryTitle"><span class="vacances-lamp-logo" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span>Abracadeal Vacances</h2><p>Locations saisonnières en direct · <strong>500 premiers logements : 12 mois offerts</strong> · 0 % de commission.</p></div>
@@ -5890,7 +5687,8 @@ header #flowErrorsBtn{
 
 <footer>
   <div class="container footer-row">
-    <div>© 2026 Abracadeal</div>
+    <div class="desktop-footer-brand"><img src="assets/abracadeal-lamp-icon.webp" alt=""><span><strong>Abracadeal</strong><small>Achetez · Vendez · Louez · Voyagez</small></span></div>
+    <div class="footer-copyright">© 2026 Abracadeal</div>
     <div class="footer-links">
       <a href="#helpModal" data-info-modal="helpModal">Aide</a>
       <a href="#safetyModal" data-info-modal="safetyModal">Sécurité</a>
