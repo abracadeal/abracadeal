@@ -4078,24 +4078,27 @@ header #flowErrorsBtn{
 }
 </style>
 
+
 <style id="abraca-mobile-banner-enlarge-20260919">
 @media(max-width:760px){
   .hero{
-    padding:12px 12px 10px!important;
+    padding:12px 10px 10px!important;
   }
   .banner-frame{
     width:100%!important;
-    height:180px!important;
-    max-height:180px!important;
+    height:auto!important;
+    max-height:none!important;
     margin:0 0 14px 0!important;
     border-radius:24px!important;
     overflow:hidden!important;
+    background:#250f38!important;
   }
   .banner{
+    display:block!important;
     width:100%!important;
-    height:180px!important;
-    max-height:180px!important;
-    object-fit:cover!important;
+    height:auto!important;
+    max-height:none!important;
+    object-fit:contain!important;
     object-position:center center!important;
     border-radius:24px!important;
   }
@@ -4107,16 +4110,8 @@ header #flowErrorsBtn{
   }
 }
 @media(max-width:390px){
-  .banner-frame{
-    height:165px!important;
-    max-height:165px!important;
-    border-radius:22px!important;
-  }
-  .banner{
-    height:165px!important;
-    max-height:165px!important;
-    border-radius:22px!important;
-  }
+  .hero{padding-left:8px!important;padding-right:8px!important}
+  .banner-frame,.banner{height:auto!important;max-height:none!important;border-radius:22px!important}
 }
 </style>
 </head>
