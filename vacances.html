@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Abracadeal Vacances — Location saisonnière en direct</title>
 <meta name="description" content="Abracadeal Vacances : locations saisonnières en direct. Offre de lancement particuliers : 500 premiers logements gratuits pendant 12 mois, puis 4,99 € par mois du 501e au 1000e logement pendant 6 mois. Sans engagement, 0 % de commission.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1969,6 +1969,51 @@ h1 span{
   }
 }
 </style>
+
+<style id="vacances-mobile-ios-no-autozone-20260919">
+@media(max-width:760px){
+  html,body{
+    max-width:100%!important;
+    overflow-x:hidden!important;
+    -webkit-text-size-adjust:100%!important;
+    text-size-adjust:100%!important;
+  }
+
+  #vacationSearch,
+  #vacationSearch *{
+    box-sizing:border-box!important;
+  }
+
+  #vacationSearch input,
+  #vacationSearch select,
+  #vacationSearch button,
+  #vacationSearch .vac-date-trigger{
+    font-size:17px!important;
+    line-height:1.25!important;
+  }
+
+  #vacationSearch input{
+    transform:none!important;
+    zoom:1!important;
+  }
+
+  #vacationSearch .vac-search-tile{
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+  }
+
+  #vacationSearch .vac-search-tile:focus-within{
+    transform:none!important;
+  }
+
+  #vacationSearch #destination{
+    min-width:0!important;
+    max-width:100%!important;
+    width:100%!important;
+  }
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -2480,7 +2525,7 @@ h1 span{
       setActive('explore');
       const target=document.getElementById('vacMobileTop')||document.getElementById('vacationSearch');
       target?.scrollIntoView({behavior:'smooth',block:'start'});
-      setTimeout(()=>document.getElementById('destination')?.focus({preventScroll:true}),320);
+      
     }
     if(action==='account'){
       e.preventDefault();
@@ -2499,7 +2544,6 @@ document.addEventListener('click',function(e){
   if(input){
     input.value=card.getAttribute('data-vac-destination')||'';
     document.getElementById('vacationSearch')?.scrollIntoView({behavior:'smooth',block:'center'});
-    setTimeout(()=>input.focus({preventScroll:true}),260);
   }
 });
 </script>
