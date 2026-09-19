@@ -395,3 +395,153 @@ html{scrollbar-gutter:stable}
     margin:0 auto!important;
   }
 }
+
+/* ===== CATEGORY BAR FIX — PC + iPad — 2026-09-20 ===== */
+@media(min-width:761px){
+  /* Les sous-menus ne doivent jamais participer à la hauteur du header. */
+  .desktop-category-nav{
+    overflow:visible!important;
+  }
+  .desktop-nav-item{
+    position:relative!important;
+    min-width:0!important;
+  }
+
+  .desktop-submenu{
+    position:absolute!important;
+    top:100%!important;
+    left:50%!important;
+    right:auto!important;
+    z-index:10150!important;
+
+    display:flex!important;
+    flex-direction:column!important;
+    gap:2px!important;
+
+    width:max-content!important;
+    min-width:210px!important;
+    max-width:min(280px,calc(100vw - 24px))!important;
+    padding:8px!important;
+
+    background:rgba(20,10,31,.985)!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    border-radius:14px!important;
+    box-shadow:0 18px 45px rgba(0,0,0,.38)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+
+    opacity:0!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    transform:translate(-50%,8px)!important;
+    transition:opacity .14s ease,transform .14s ease,visibility .14s ease!important;
+  }
+
+  .desktop-subcategory-link{
+    display:flex!important;
+    align-items:center!important;
+    min-height:34px!important;
+    padding:7px 10px!important;
+    border-radius:9px!important;
+    color:#f4edf8!important;
+    font-size:11px!important;
+    font-weight:700!important;
+    line-height:1.2!important;
+    white-space:nowrap!important;
+  }
+  .desktop-subcategory-link:hover,
+  .desktop-subcategory-link:focus{
+    background:rgba(255,255,255,.085)!important;
+    color:#fff!important;
+    outline:none!important;
+  }
+
+  .desktop-nav-item.menu-open>.desktop-submenu,
+  .desktop-nav-item:hover>.desktop-submenu,
+  .desktop-nav-item:focus-within>.desktop-submenu{
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translate(-50%,0)!important;
+  }
+
+  /* Le premier menu s'aligne à gauche pour ne pas sortir de l'écran. */
+  .desktop-nav-item:first-child>.desktop-submenu{
+    left:0!important;
+    transform:translate(0,8px)!important;
+  }
+  .desktop-nav-item:first-child.menu-open>.desktop-submenu,
+  .desktop-nav-item:first-child:hover>.desktop-submenu,
+  .desktop-nav-item:first-child:focus-within>.desktop-submenu{
+    transform:translate(0,0)!important;
+  }
+
+  /* Le dernier menu s'aligne à droite. */
+  .desktop-submenu-right{
+    left:auto!important;
+    right:0!important;
+    transform:translate(0,8px)!important;
+  }
+  .desktop-nav-item.menu-open>.desktop-submenu-right,
+  .desktop-nav-item:hover>.desktop-submenu-right,
+  .desktop-nav-item:focus-within>.desktop-submenu-right{
+    transform:translate(0,0)!important;
+  }
+}
+
+/* iPad portrait : même barre que PC sur une seconde ligne, sans chevauchement. */
+@media(min-width:761px) and (max-width:899px){
+  header .nav{
+    grid-template-columns:minmax(130px,1fr) auto!important;
+    grid-template-areas:
+      "brand actions"
+      "cats cats"!important;
+    row-gap:4px!important;
+    padding-top:6px!important;
+    padding-bottom:6px!important;
+  }
+
+  .desktop-category-nav{
+    grid-area:cats!important;
+    width:100%!important;
+    display:grid!important;
+    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    align-items:center!important;
+    justify-content:stretch!important;
+    gap:0!important;
+    overflow:visible!important;
+  }
+  .desktop-nav-item{
+    width:100%!important;
+    min-width:0!important;
+  }
+  .desktop-category-link{
+    width:100%!important;
+    min-width:0!important;
+    height:32px!important;
+    min-height:32px!important;
+    padding:0 2px!important;
+    gap:2px!important;
+    justify-content:center!important;
+    font-size:9px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+  .desktop-category-link span{
+    font-size:10px!important;
+  }
+  .desktop-nav-item>.desktop-category-link::after{
+    margin-left:0!important;
+    font-size:6px!important;
+  }
+}
+
+/* iPad paysage / petits laptops : barre PC compacte sur une ligne. */
+@media(min-width:900px) and (max-width:1366px){
+  .desktop-category-nav{
+    overflow:visible!important;
+  }
+  .desktop-category-link{
+    justify-content:center!important;
+  }
+}
