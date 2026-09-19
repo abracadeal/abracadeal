@@ -6634,6 +6634,48 @@ header #flowErrorsBtn{
   100%{background-position:-120% 50%}
 }
 </style>
+
+<style id="abraca-mobile-same-hero-as-desktop-20260919">
+/* Mobile : même bannière exacte que la version desktop */
+@media (max-width:760px){
+  .banner-frame{
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    aspect-ratio:1460 / 326!important;
+    margin:0 0 12px!important;
+    border-radius:0 0 18px 18px!important;
+    overflow:hidden!important;
+    background-image:url('assets/abracadeal-desktop-hero.jpg')!important;
+    background-size:contain!important;
+    background-position:center center!important;
+    background-repeat:no-repeat!important;
+    background-color:#11091b!important;
+    box-shadow:none!important;
+  }
+  .banner-frame #homeBrandLink{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .banner-frame .banner-desktop,
+  .banner-frame .mobile-banner-img,
+  .banner-hotspots{
+    display:none!important;
+  }
+  .banner-frame::before{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    z-index:2!important;
+    pointer-events:none!important;
+    background:linear-gradient(180deg,rgba(6,2,12,.01),rgba(10,5,18,.10))!important;
+  }
+  .banner-frame::after{display:none!important}
+}
+</style>
 </head>
 <body>
 
