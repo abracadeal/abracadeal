@@ -2609,6 +2609,21 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
         hostSignupCta.href='vacances.html?mode=hote&host_signup=1';
       }
     }
+
+    const mobileHostLink=root.getElementById('vacMobileHostLink');
+    const mobileHostLabel=root.getElementById('vacMobileHostLabel');
+    if(mobileHostLink&&mobileHostLabel){
+      if(isHost){
+        mobileHostLabel.textContent='Espace Hôte';
+        mobileHostLink.href='vacances.html?mode=hote';
+      }else if(hasHost){
+        mobileHostLabel.textContent='Continuer';
+        mobileHostLink.href='vacances.html?mode=hote&host_signup=1';
+      }else{
+        mobileHostLabel.textContent='Devenir hôte';
+        mobileHostLink.href='vacances.html?mode=hote&host_signup=1';
+      }
+    }
   }
 
   applyVacationPageMode();
@@ -2798,9 +2813,9 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
     <span>Favoris</span>
   </a>
-  <a class="vac-mobile-nav-item vac-mobile-host" href="vacances.html?mode=hote&host_signup=1">
+  <a class="vac-mobile-nav-item vac-mobile-host" id="vacMobileHostLink" href="vacances.html?mode=hote&host_signup=1">
     <span class="vac-mobile-host-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span>
-    <span>Devenir hôte</span>
+    <span id="vacMobileHostLabel">Devenir hôte</span>
   </a>
   <a class="vac-mobile-nav-item" href="messages-vacances.html">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg>
