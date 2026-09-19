@@ -1,0 +1,88 @@
+/* Abracadeal — stabilité menus et connexion — 19/09/2026 */
+
+/* Évite le décalage horizontal quand une modale masque la barre de défilement. */
+html{scrollbar-gutter:stable}
+
+/* ===== Sous-menus desktop : zone continue + tolérance au déplacement de la souris ===== */
+@media(min-width:1367px){
+  .desktop-nav-item{
+    padding-bottom:10px!important;
+    margin-bottom:-10px!important;
+  }
+  .desktop-submenu{
+    top:100%!important;
+    margin-top:0!important;
+    transform:translate(-50%,0)!important;
+  }
+  .desktop-submenu-right{
+    transform:none!important;
+  }
+
+  /* Pont invisible entre le bouton principal et le menu déroulant. */
+  .desktop-submenu::before{
+    content:"";
+    position:absolute;
+    left:0;
+    right:0;
+    top:-12px;
+    height:12px;
+    background:transparent;
+  }
+
+  .desktop-nav-item.menu-open>.desktop-submenu,
+  .desktop-nav-item:hover>.desktop-submenu,
+  .desktop-nav-item:focus-within>.desktop-submenu{
+    opacity:1!important;
+    visibility:visible!important;
+    pointer-events:auto!important;
+    transform:translate(-50%,0)!important;
+  }
+  .desktop-nav-item.menu-open>.desktop-submenu-right,
+  .desktop-nav-item:hover>.desktop-submenu-right,
+  .desktop-nav-item:focus-within>.desktop-submenu-right{
+    transform:none!important;
+  }
+}
+
+/* ===== Connexion : fenêtre stable, pas de saut de page ===== */
+#accountModal>.modal{
+  height:min(760px,calc(100dvh - 40px))!important;
+  max-height:calc(100dvh - 40px)!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+#accountModal>.modal>.modal-head{
+  flex:0 0 auto!important;
+}
+#accountModal>.modal>.modal-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+
+/* Les onglets restent visibles pendant le passage Connexion / Créer un compte. */
+#accountModal .auth-tabs{
+  position:sticky!important;
+  top:-1px!important;
+  z-index:20!important;
+  padding:2px 0 8px!important;
+  background:#fff!important;
+}
+#accountModal .auth-tab{
+  min-height:44px!important;
+  transition:background .14s ease,border-color .14s ease,color .14s ease,transform .14s ease!important;
+}
+#accountModal .auth-tab:active{
+  transform:scale(.985)!important;
+}
+
+@media(max-width:760px){
+  #accountModal>.modal{
+    width:calc(100vw - 16px)!important;
+    height:calc(100dvh - 16px)!important;
+    max-height:calc(100dvh - 16px)!important;
+  }
+}
