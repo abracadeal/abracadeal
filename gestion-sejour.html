@@ -6,7 +6,8 @@
 <style>
 :root{--bg:#f8f4fa;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#6f218c;--pink:#e746a3}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}button,input{font:inherit}.top{background:#1c0b2b;color:#fff}.topin{width:min(680px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between}.wrap{width:min(680px,calc(100% - 28px));margin:32px auto}.card{background:#fff;border:1px solid var(--line);border-radius:22px;padding:22px;margin-top:16px}.field{display:flex;flex-direction:column;gap:7px;margin-top:12px}.field input{border:1px solid var(--line);border-radius:12px;padding:11px}.muted{color:var(--muted);line-height:1.5}.btn{border:0;border-radius:12px;min-height:44px;padding:0 15px;font-weight:850;cursor:pointer}.primary{background:linear-gradient(135deg,#862aab,var(--pink));color:#fff}.soft{background:#f3eaf6;color:var(--p)}.hidden{display:none!important}.pill{display:inline-flex;padding:6px 9px;border-radius:999px;background:#f1e7f5;color:var(--p);font-size:.75rem;font-weight:850}
-</style><link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">\n</head><body>
+</style><link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
+</head><body>
 <header class="top"><div class="topin"><b>Abracadeal Hôte</b><a href="espace-hote.html">← Espace Hôte</a></div></header>
 <main class="wrap"><div id="box" class="card"><span class="pill">Séjour</span><h1 id="title">Confirmer un séjour</h1><p id="traveler" class="muted"></p><div class="field"><label>Arrivée</label><input id="start" type="date"></div><div class="field"><label>Départ</label><input id="end" type="date"></div><button id="save" class="btn primary" style="margin-top:14px">Confirmer le séjour</button><div id="done" class="hidden" style="margin-top:16px"></div></div></main>
 <script>
