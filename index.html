@@ -5494,7 +5494,7 @@ header #flowErrorsBtn{
       <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
       <div class="account-auth-group" aria-label="Compte Abracadeal">
         <a class="btn ghost" id="signupBtn" href="#accountModal">Créer un compte</a>
-        <a class="btn ghost" id="accountBtn" href="#accountModal">Compte</a>
+        <a class="btn ghost" id="accountBtn" href="#accountModal"><span id="accountBtnLabel">Compte</span><span class="account-unread-badge hidden" id="accountUnreadBadge" aria-label="0 message non lu">0</span></a>
       </div>
       <button class="btn header-stock-btn hidden" id="headerStockBtn" type="button" aria-label="Import"><span class="header-stock-label">Import</span></button>
       <button class="btn header-moderation-btn hidden" id="moderationBtn" type="button" aria-label="Modérer"><span class="header-moderation-label">Modérer</span></button>
@@ -7142,7 +7142,7 @@ function updateAuthUI(preserveEditing=false){
   if($('#profileCity')) $('#profileCity').required=!isAdminAccount;
   if($('#profilePhone')) $('#profilePhone').required=!isAdminAccount;
   if(currentUser){
-    $('#accountBtn').textContent=currentProfile?.is_admin?'Admin':(currentProfile?.display_name||'Compte');
+    $('#accountBtnLabel').textContent=currentProfile?.is_admin?'Admin':(currentProfile?.display_name||'Compte');
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.remove('hidden');
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
     $('#accountUserBox').innerHTML=`<strong>${esc(currentProfile?.display_name||currentUser.email)}</strong>
@@ -7173,7 +7173,7 @@ function updateAuthUI(preserveEditing=false){
     else{proBoostWalletState={7:0,30:0};renderProBoostWallet();}
   }else{
     proBoostWalletState={7:0,30:0};renderProBoostWallet();
-    $('#accountBtn').textContent='Compte';
+    $('#accountBtnLabel').textContent='Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
@@ -7181,6 +7181,7 @@ function updateAuthUI(preserveEditing=false){
     if($('#flowErrorsBadge')) $('#flowErrorsBadge').classList.add('hidden');
     if($('#headerMessagesBtn')) $('#headerMessagesBtn').classList.add('hidden');
     if($('#headerMessagesUnread')) $('#headerMessagesUnread').classList.add('hidden');
+    if($('#accountUnreadBadge')) $('#accountUnreadBadge').classList.add('hidden');
     lastUnreadMessageCount=null;
     if($('#proImportBtn')) $('#proImportBtn').classList.add('hidden');
     if($('#headerStockBtn')) $('#headerStockBtn').classList.add('hidden');
@@ -10490,6 +10491,13 @@ async function refreshUnreadMessages(){
   const n=Number(messages.data||0)+(notices.error?0:Number(notices.count||0))+(syncNotices.error?0:Number(syncNotices.count||0));
   const badge=$('#headerMessagesUnread');
   badge.textContent=n>99?'99+':String(n);badge.classList.toggle('hidden',n<1);
+  const accountBadge=$('#accountUnreadBadge');
+  if(accountBadge){
+    const label=n>99?'99+':String(n);
+    accountBadge.textContent=label;
+    accountBadge.classList.toggle('hidden',n<1);
+    accountBadge.setAttribute('aria-label',n===1?'1 message non lu':n+' messages non lus');
+  }
   if(n>0 && (lastUnreadMessageCount===null || n>lastUnreadMessageCount)){
     toast(n===1?'Vous avez 1 nouveau message':'Vous avez '+n+' nouveaux messages');
   }
