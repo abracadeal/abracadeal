@@ -4,6 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Abracadeal — Espace Hôte</title>
+<script>
+if(new URLSearchParams(location.search).get('embedded')==='1'){
+  document.documentElement.classList.add('abraca-embedded-host');
+}
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f7f3f9;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#5b1a77;--p2:#8b2bb0;--pink:#e746a3;--ok:#16794a;--warn:#a56308;--bad:#b4234f;--shadow:0 18px 45px rgba(47,17,63,.09)}
@@ -45,6 +50,19 @@
 .onboarding-note{font-size:.78rem;color:var(--muted);line-height:1.5;margin-top:10px}
 @media(max-width:620px){.onboarding-card{padding:17px}.onboarding-head{flex-direction:column}.onboarding-actions{flex-direction:column}.onboarding-actions .btn{width:100%}}
 
+
+
+/* Intégration dans vacances.html : un seul univers Vacances, sans deuxième en-tête. */
+html.abraca-embedded-host .top{display:none!important}
+html.abraca-embedded-host .shell{margin-top:18px!important;margin-bottom:28px!important}
+html.abraca-embedded-host .loginwrap{margin-top:34px!important}
+html.abraca-embedded-host .onboardingwrap{margin-top:22px!important;margin-bottom:36px!important}
+html.abraca-embedded-host body{background:#faf7fc!important}
+@media(max-width:900px){
+  html.abraca-embedded-host .shell{width:min(100% - 18px,1220px)!important;margin-top:10px!important}
+  html.abraca-embedded-host .onboardingwrap,
+  html.abraca-embedded-host .loginwrap{width:min(100% - 18px,900px)!important}
+}
 </style>
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
 </head>
@@ -725,6 +743,17 @@ window.replyReview=async id=>{const t=prompt('Votre réponse à cet avis :');if(
 async function loadDashboardCounts(){await loadFeeds(false);await loadMessages(false)}
 
 boot();
+</script>
+<script id="abraca-host-embedded-bridge">
+(()=>{
+  if(new URLSearchParams(location.search).get('embedded')!=='1')return;
+  document.addEventListener('click',event=>{
+    const link=event.target.closest('a[href="vacances.html"]');
+    if(!link)return;
+    event.preventDefault();
+    try{window.parent.location.href='vacances.html'}catch(_){location.href='vacances.html'}
+  });
+})();
 </script>
 </body>
 </html>
