@@ -7281,7 +7281,7 @@ $('#signupForm').addEventListener('submit',async e=>{
       $('#loginPassword').value='';
       window.setAuthTab('login');
       toast('Compte créé. Vérifiez votre e-mail puis connectez-vous.');
-      setTimeout(()=>$('#loginPassword')?.focus(),80);
+      setTimeout(()=>$('#loginPassword')?.focus({preventScroll:true}),80);
     }
   }catch(err){
     console.error(err);
@@ -7304,6 +7304,9 @@ async function signOutUser(closeAccountModal=false){
   favoritesMode=false;
   favoriteIds=new Set();
   clearAuthPasswords();
+  const loginForm=document.getElementById('loginForm');
+  if(loginForm)loginForm.reset();
+  window.setAuthTab('login',{clearPasswords:false});
   if(closeAccountModal) closeModal('accountModal');
   try{updateAuthUI(false);}catch(uiError){console.error('Interface après déconnexion',uiError);}
   try{await loadAds();}catch(loadError){console.error('Catalogue après déconnexion',loadError);}
