@@ -2177,8 +2177,486 @@ body.vac-date-open .vac-mobile-bottom-nav{
   }
 }
 </style>
+
+<style id="vacances-desktop-reference-20260919">
+.vac-desktop-home{display:none}
+
+@media(min-width:761px){
+  body{
+    margin:0!important;
+    background:linear-gradient(180deg,#fff 0%,#fff9fd 48%,#fcf5fb 100%)!important;
+    color:#2d1535!important;
+  }
+  body>.topbar,
+  body>.hero,
+  body>.vac-mobile-popular,
+  body>.vac-mobile-offer,
+  body>section.section,
+  body>footer{
+    display:none!important;
+  }
+  .vac-desktop-home{display:block!important;min-height:100vh}
+  .vac-desktop-shell{width:min(1400px,calc(100% - 72px));margin:0 auto}
+
+  .vac-desktop-header{
+    height:74px;
+    background:#fff;
+    border-bottom:1px solid #f0e7f1;
+    display:flex;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:25000;
+    box-shadow:0 4px 18px rgba(73,31,84,.04);
+  }
+  .vac-desktop-header-inner{
+    width:min(1400px,calc(100% - 72px));
+    margin:auto;
+    display:grid;
+    grid-template-columns:300px 1fr auto;
+    align-items:center;
+    gap:24px;
+  }
+  .vac-desktop-logo{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    text-decoration:none;
+    color:#361344;
+  }
+  .vac-desktop-lamp{
+    width:54px;height:46px;
+    display:grid;place-items:center;
+    border-radius:16px;
+    font-size:29px;
+    background:linear-gradient(145deg,#4c155d,#b8329f);
+    box-shadow:0 8px 18px rgba(103,30,118,.18);
+  }
+  .vac-desktop-logo-copy strong{
+    display:block;
+    font:700 1.8rem/1 Fraunces,Georgia,serif;
+    letter-spacing:-.035em;
+  }
+  .vac-desktop-logo-copy small{
+    display:block;
+    margin-top:4px;
+    font-size:.72rem;
+    font-weight:850;
+    letter-spacing:.32em;
+    color:#c025a4;
+  }
+  .vac-desktop-nav,
+  .vac-desktop-actions{
+    display:flex;
+    align-items:center;
+    gap:28px;
+  }
+  .vac-desktop-nav{justify-content:center}
+  .vac-desktop-nav a,
+  .vac-desktop-actions a,
+  .vac-desktop-actions button{
+    position:relative;
+    border:0;
+    background:transparent;
+    color:#3b2145;
+    font-weight:700;
+    font-size:.92rem;
+    text-decoration:none;
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .vac-desktop-nav a.active{color:#c02bb2}
+  .vac-desktop-nav a.active:after{
+    content:"";
+    position:absolute;
+    left:0;right:0;bottom:-16px;
+    height:2px;border-radius:99px;background:#d12ab5;
+  }
+  .vac-desktop-action-icon{display:inline-flex;align-items:center;gap:7px}
+  .vac-desktop-action-icon svg{
+    width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .vac-desktop-publish{
+    min-height:46px!important;
+    padding:0 22px!important;
+    border-radius:14px!important;
+    color:#fff!important;
+    background:linear-gradient(90deg,#b52cc1,#f146a9)!important;
+    box-shadow:0 9px 22px rgba(211,59,174,.20)!important;
+  }
+
+  .vac-desktop-hero{
+    position:relative;
+    width:100%;
+    height:300px;
+    overflow:hidden;
+    background:#4c175e;
+  }
+  .vac-desktop-hero img{
+    display:block;
+    width:100%;height:100%;
+    object-fit:cover;
+    object-position:center 49%;
+  }
+
+  .vac-desktop-search-wrap{
+    position:relative;
+    z-index:4;
+    margin-top:-30px;
+  }
+  .vac-desktop-search-card{
+    width:min(1180px,calc(100% - 90px));
+    margin:0 auto;
+    padding:18px 20px 20px;
+    border:1px solid #eadfeb;
+    border-radius:22px;
+    background:rgba(255,255,255,.98);
+    box-shadow:0 18px 45px rgba(80,33,91,.11);
+  }
+  .vac-desktop-search-top{
+    display:flex;
+    align-items:start;
+    justify-content:space-between;
+    gap:24px;
+    margin-bottom:15px;
+  }
+  .vac-desktop-search-title{
+    margin:0;
+    color:#32123c;
+    font:700 1.95rem/1.02 Fraunces,Georgia,serif;
+    letter-spacing:-.025em;
+  }
+  .vac-desktop-search-subtitle{
+    margin:6px 0 0;
+    color:#806f84;
+    font-size:.9rem;
+  }
+  .vac-desktop-france-note{
+    flex:0 0 auto;
+    max-width:355px;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:11px 14px;
+    border-radius:14px;
+    background:#fff2fb;
+    color:#8b297d;
+    font-size:.8rem;
+    line-height:1.35;
+    font-weight:700;
+  }
+  .vac-desktop-search-grid{
+    display:grid;
+    grid-template-columns:1.2fr 1.05fr 1fr 1fr;
+    gap:10px;
+    align-items:stretch;
+  }
+  .vac-desktop-field{
+    position:relative;
+    min-width:0;
+    min-height:72px;
+    padding:13px 14px 10px 48px;
+    border:1px solid #e7dce9;
+    border-radius:15px;
+    background:#fff;
+  }
+  .vac-desktop-field svg{
+    position:absolute;
+    left:15px;top:22px;
+    width:23px;height:23px;
+    fill:none;stroke:#9d21a8;stroke-width:1.8;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .vac-desktop-field label{
+    display:block;
+    color:#4d2458;
+    font-size:.76rem;
+    font-weight:850;
+    margin-bottom:5px;
+  }
+  .vac-desktop-field input,
+  .vac-desktop-field select{
+    width:100%;
+    border:0;
+    outline:0;
+    background:transparent;
+    color:#6a5c6e;
+    font-size:.84rem;
+    padding:0;
+  }
+  .vac-desktop-date-pair{
+    display:grid;
+    grid-template-columns:1fr 10px 1fr;
+    align-items:center;
+    gap:5px;
+  }
+  .vac-desktop-search-btn{
+    border:0;
+    border-radius:15px;
+    background:linear-gradient(90deg,#b62bc1,#f147aa);
+    color:#fff;
+    font-weight:850;
+    font-size:1rem;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(202,50,168,.20);
+  }
+  .vac-desktop-search-btn svg{
+    width:23px;height:23px;fill:none;stroke:#fff;stroke-width:2;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+
+  .vac-desktop-popular{
+    padding:30px 0 20px;
+  }
+  .vac-desktop-section-head{
+    display:flex;
+    align-items:end;
+    justify-content:space-between;
+    gap:24px;
+    margin-bottom:14px;
+  }
+  .vac-desktop-section-head h2{
+    margin:0;
+    font:700 2rem/1 Fraunces,Georgia,serif;
+    color:#35143f;
+  }
+  .vac-desktop-section-head p{
+    margin:6px 0 0;
+    color:#817387;
+    font-size:.9rem;
+  }
+  .vac-desktop-seeall{
+    color:#ad24aa;
+    font-size:.85rem;
+    font-weight:850;
+    text-decoration:none;
+    white-space:nowrap;
+  }
+  .vac-desktop-destinations{
+    display:grid;
+    grid-template-columns:repeat(6,minmax(0,1fr));
+    gap:12px;
+  }
+  .vac-desktop-destination{
+    position:relative;
+    min-width:0;
+    overflow:hidden;
+    border:1px solid #eadfeb;
+    border-radius:16px;
+    background:#fff;
+    box-shadow:0 7px 18px rgba(74,31,85,.06);
+    text-decoration:none;
+    color:#381743;
+  }
+  .vac-desktop-destination img{
+    width:100%;height:145px;object-fit:cover;display:block;
+  }
+  .vac-desktop-heart{
+    position:absolute;
+    right:10px;top:10px;
+    width:35px;height:35px;
+    display:grid;place-items:center;
+    border-radius:50%;
+    background:rgba(255,255,255,.95);
+    color:#76227d;
+    font-size:21px;
+    box-shadow:0 4px 12px rgba(0,0,0,.09);
+  }
+  .vac-desktop-destination-copy{padding:11px 12px 13px}
+  .vac-desktop-destination-copy strong{
+    display:block;
+    font-size:.94rem;
+  }
+  .vac-desktop-destination-copy small{
+    display:block;
+    margin-top:4px;
+    color:#9a8ca0;
+    font-size:.74rem;
+  }
+
+  .vac-desktop-promos{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:18px;
+    padding:2px 0 42px;
+  }
+  .vac-desktop-promo{
+    position:relative;
+    min-height:190px;
+    overflow:hidden;
+    border-radius:19px;
+    color:#fff;
+    text-decoration:none;
+    background:#4b1b57;
+    box-shadow:0 12px 28px rgba(72,31,83,.10);
+  }
+  .vac-desktop-promo img{
+    position:absolute;inset:0;
+    width:100%;height:100%;object-fit:cover;
+  }
+  .vac-desktop-promo:after{
+    content:"";
+    position:absolute;inset:0;
+    background:linear-gradient(90deg,rgba(45,15,55,.90) 0%,rgba(45,15,55,.55) 42%,rgba(45,15,55,.08) 78%);
+  }
+  .vac-desktop-promo.blue:after{
+    background:linear-gradient(90deg,rgba(29,95,160,.88) 0%,rgba(29,95,160,.50) 46%,rgba(29,95,160,.08) 80%);
+  }
+  .vac-desktop-promo-copy{
+    position:relative;
+    z-index:2;
+    max-width:360px;
+    padding:28px 30px;
+  }
+  .vac-desktop-promo-copy h3{
+    margin:0 0 8px;
+    font:700 1.85rem/1.05 Fraunces,Georgia,serif;
+  }
+  .vac-desktop-promo-copy p{
+    margin:0 0 16px;
+    line-height:1.45;
+    color:rgba(255,255,255,.93);
+  }
+  .vac-desktop-promo-copy span{
+    display:inline-flex;
+    min-height:40px;
+    align-items:center;
+    justify-content:center;
+    padding:0 17px;
+    border-radius:999px;
+    background:#fff;
+    color:#55205f;
+    font-weight:800;
+    font-size:.82rem;
+  }
+}
+@media(min-width:761px) and (max-width:1100px){
+  .vac-desktop-header-inner{grid-template-columns:240px 1fr}
+  .vac-desktop-actions{grid-column:1/-1;justify-content:center;padding-bottom:8px}
+  .vac-desktop-header{height:auto;padding:8px 0}
+  .vac-desktop-destinations{grid-template-columns:repeat(3,1fr)}
+  .vac-desktop-search-grid{grid-template-columns:1fr 1fr}
+  .vac-desktop-search-btn{min-height:64px}
+  .vac-desktop-hero{height:270px}
+}
+@media(max-width:760px){
+  .vac-desktop-home{display:none!important}
+}
+</style>
 </head>
 <body>
+
+<div class="vac-desktop-home" id="vacDesktopHome">
+  <header class="vac-desktop-header">
+    <div class="vac-desktop-header-inner">
+      <a class="vac-desktop-logo" href="vacances.html" aria-label="Abracadeal Vacances">
+        <span class="vac-desktop-lamp" aria-hidden="true">🪔</span>
+        <span class="vac-desktop-logo-copy"><strong>Abracadeal</strong><small>VACANCES</small></span>
+      </a>
+      <nav class="vac-desktop-nav" aria-label="Navigation Vacances">
+        <a class="active" href="#vacDesktopHome">Accueil</a>
+        <a href="#desktopDestinations">Destinations</a>
+        <a href="espace-hote.html?host_signup=1">Devenir hôte</a>
+        <a href="index.html#aide">Aide</a>
+      </nav>
+      <div class="vac-desktop-actions">
+        <a class="vac-desktop-action-icon" href="espace-voyageur.html">
+          <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg> Favoris
+        </a>
+        <a class="vac-desktop-action-icon" href="messages-vacances.html">
+          <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg> Messages
+        </a>
+        <button class="vac-desktop-action-icon" type="button" data-vac-desktop-account>
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg> Compte
+        </button>
+        <a class="vac-desktop-publish" href="espace-hote.html?host_signup=1">Déposer une annonce</a>
+      </div>
+    </div>
+  </header>
+
+  <section class="vac-desktop-hero" aria-label="Abracadeal Vacances">
+    <img src="assets/abracadeal-vacances-mobile.webp?v=20260919-3" alt="Abracadeal Vacances — Voyagez mieux. Hébergez simplement.">
+  </section>
+
+  <div class="vac-desktop-search-wrap">
+    <form class="vac-desktop-search-card" id="desktopVacationSearch">
+      <div class="vac-desktop-search-top">
+        <div>
+          <h1 class="vac-desktop-search-title">Trouvez votre prochain séjour en France</h1>
+          <p class="vac-desktop-search-subtitle">Des hébergements uniques pour des souvenirs inoubliables.</p>
+        </div>
+        <div class="vac-desktop-france-note">🇫🇷 <span>Pour le lancement, Abracadeal Vacances est disponible en France uniquement.</span></div>
+      </div>
+      <div class="vac-desktop-search-grid">
+        <div class="vac-desktop-field">
+          <svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+          <label for="desktopDestination">Destination</label>
+          <input id="desktopDestination" type="search" autocomplete="off" placeholder="Où voulez-vous aller ?">
+        </div>
+        <div class="vac-desktop-field">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg>
+          <label>Dates</label>
+          <div class="vac-desktop-date-pair">
+            <input id="desktopArrival" type="date" aria-label="Arrivée">
+            <span>→</span>
+            <input id="desktopDeparture" type="date" aria-label="Départ">
+          </div>
+        </div>
+        <div class="vac-desktop-field">
+          <svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 20c.4-4 2.5-6 5.5-6s5.1 2 5.5 6M14 15c2.7-.5 5.5 1 6.3 4"/></svg>
+          <label for="desktopGuests">Voyageurs</label>
+          <select id="desktopGuests">
+            <option value="1">1 voyageur</option>
+            <option value="2" selected>2 voyageurs</option>
+            <option value="3">3 voyageurs</option>
+            <option value="4">4 voyageurs</option>
+            <option value="5">5 voyageurs</option>
+            <option value="6">6 voyageurs</option>
+            <option value="7">7 voyageurs et +</option>
+          </select>
+        </div>
+        <button class="vac-desktop-search-btn" type="submit">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg>
+          Rechercher
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <section class="vac-desktop-popular vac-desktop-shell" id="desktopDestinations">
+    <div class="vac-desktop-section-head">
+      <div>
+        <h2>Destinations populaires</h2>
+        <p>Des lieux d’exception pour des souvenirs inoubliables.</p>
+      </div>
+      <a class="vac-desktop-seeall" href="recherche-vacances.html">Voir toutes les destinations →</a>
+    </div>
+    <div class="vac-desktop-destinations">
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Nice"><img src="https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=700&q=84" alt="Nice"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Nice</strong><small>Locations en France</small></span></a>
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Cannes"><img src="https://images.unsplash.com/photo-1560448075-bb485b067938?auto=format&fit=crop&w=700&q=84" alt="Cannes"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Cannes</strong><small>Locations en France</small></span></a>
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Marseille"><img src="https://images.unsplash.com/photo-1549144511-f099e773c147?auto=format&fit=crop&w=700&q=84" alt="Marseille"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Marseille</strong><small>Locations en France</small></span></a>
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Annecy"><img src="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=84" alt="Annecy"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Annecy</strong><small>Locations en France</small></span></a>
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Bordeaux"><img src="https://images.unsplash.com/photo-1584191650840-0a2b92f1b6c4?auto=format&fit=crop&w=700&q=84" alt="Bordeaux"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Bordeaux</strong><small>Locations en France</small></span></a>
+      <a class="vac-desktop-destination" href="recherche-vacances.html?destination=Lyon"><img src="https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=700&q=84" alt="Lyon"><span class="vac-desktop-heart">♡</span><span class="vac-desktop-destination-copy"><strong>⌖ Lyon</strong><small>Locations en France</small></span></a>
+    </div>
+  </section>
+
+  <section class="vac-desktop-promos vac-desktop-shell">
+    <a class="vac-desktop-promo" href="espace-hote.html?host_signup=1">
+      <img src="https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=84" alt="">
+      <span class="vac-desktop-promo-copy"><h3>Devenez hôte</h3><p>Louez facilement votre logement et touchez plus de voyageurs.</p><span>En savoir plus</span></span>
+    </a>
+    <a class="vac-desktop-promo blue" href="recherche-vacances.html">
+      <img src="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=84" alt="">
+      <span class="vac-desktop-promo-copy"><h3>Des séjours uniques<br>en France</h3><p>Maisons, appartements, villas, chalets… il y en a pour tous les goûts.</p><span>Découvrir</span></span>
+    </a>
+  </section>
+</div>
 <header class="topbar">
   <div class="container nav">
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><img class="brand-logo" src="data:image/jpeg;base64,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" alt="Logo Abracadeal Vacances"><b>Abracadeal</b><small>Vacances</small></a>
@@ -2871,5 +3349,27 @@ document.addEventListener('click',function(e){
   </div>
 </div>
 
+
+<script id="vacances-desktop-reference-js-20260919">
+(function(){
+  const form=document.getElementById('desktopVacationSearch');
+  if(form){
+    form.addEventListener('submit',function(e){
+      e.preventDefault();
+      const dest=document.getElementById('desktopDestination')?.value.trim()||'';
+      const arr=document.getElementById('desktopArrival')?.value||'';
+      const dep=document.getElementById('desktopDeparture')?.value||'';
+      const guests=document.getElementById('desktopGuests')?.value||'2';
+      const q=new URLSearchParams({destination:dest,arrival:arr,departure:dep,guests});
+      location.href='recherche-vacances.html?'+q.toString();
+    });
+  }
+  document.querySelectorAll('[data-vac-desktop-account]').forEach(btn=>{
+    btn.addEventListener('click',function(){
+      document.getElementById('vacLoginCta')?.click();
+    });
+  });
+})();
+</script>
 </body>
 </html>
