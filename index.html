@@ -4242,6 +4242,47 @@ header #flowErrorsBtn{
   }
 }
 </style>
+
+<style id="abraca-mobile-admin-menu-20260919">
+.admin-mobile-modal{width:min(560px,100%)!important}
+.admin-mobile-intro{margin:0 0 14px;color:#786980;font-size:.86rem;line-height:1.45}
+.admin-mobile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.admin-mobile-action{
+  position:relative;
+  min-height:104px;
+  padding:15px;
+  border:1px solid #eadcf0;
+  border-radius:17px;
+  background:linear-gradient(145deg,#fff 0%,#fbf6fd 100%);
+  color:#2f183a;
+  text-align:left;
+  cursor:pointer;
+  font:inherit;
+  box-shadow:0 7px 18px rgba(72,28,88,.07);
+}
+.admin-mobile-action:active{transform:scale(.985)}
+.admin-mobile-action-icon{display:block;font-size:25px;line-height:1;margin-bottom:10px}
+.admin-mobile-action strong{display:block;font-size:.96rem;color:#351542}
+.admin-mobile-action small{display:block;margin-top:4px;color:#806f87;font-size:.73rem;line-height:1.35}
+.admin-mobile-action-badge{
+  position:absolute;top:10px;right:10px;min-width:23px;height:23px;padding:0 6px;border-radius:999px;
+  display:none;align-items:center;justify-content:center;background:#ed338f;color:#fff;border:2px solid #fff;
+  font-size:.69rem;font-weight:900;box-shadow:0 3px 10px rgba(95,24,77,.2)
+}
+.admin-mobile-action-badge.show{display:flex}
+.mobile-admin-nav-badge{
+  position:absolute;top:-2px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+  display:none;align-items:center;justify-content:center;background:#ed338f;color:#fff;border:2px solid #180a26;
+  font-size:9px;font-weight:900;line-height:1
+}
+.mobile-admin-nav-badge.show{display:flex}
+@media(max-width:520px){
+  .admin-mobile-grid{grid-template-columns:1fr 1fr;gap:9px}
+  .admin-mobile-action{min-height:100px;padding:13px}
+  .admin-mobile-action strong{font-size:.9rem}
+  .admin-mobile-action small{font-size:.69rem}
+}
+</style>
 </head>
 <body>
 
@@ -10842,14 +10883,62 @@ document.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
+
+<div class="modal-backdrop" id="mobileAdminModal" aria-hidden="true">
+  <div class="modal admin-mobile-modal" role="dialog" aria-modal="true" aria-labelledby="mobileAdminTitle">
+    <div class="modal-head">
+      <h2 id="mobileAdminTitle">Administration</h2>
+      <a class="close-btn" data-close="mobileAdminModal" href="#" aria-label="Fermer">×</a>
+    </div>
+    <div class="modal-body">
+      <p class="admin-mobile-intro">Accès rapide aux outils d’administration Abracadeal.</p>
+      <div class="admin-mobile-grid">
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="moderation">
+          <span class="admin-mobile-action-icon" aria-hidden="true">🛡️</span>
+          <strong>Modération</strong>
+          <small>Annonces en attente et contrôles.</small>
+          <span class="admin-mobile-action-badge" id="mobileAdminModerationBadge">0</span>
+        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="flows">
+          <span class="admin-mobile-action-icon" aria-hidden="true">🔄</span>
+          <strong>Flux</strong>
+          <small>Erreurs et synchronisations actives.</small>
+          <span class="admin-mobile-action-badge" id="mobileAdminFlowBadge">0</span>
+        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="database">
+          <span class="admin-mobile-action-icon" aria-hidden="true">🗂️</span>
+          <strong>Base de données</strong>
+          <small>Rechercher une annonce ou un vendeur.</small>
+        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="stats">
+          <span class="admin-mobile-action-icon" aria-hidden="true">📊</span>
+          <strong>Statistiques</strong>
+          <small>Comptes, pros, plans et activité.</small>
+        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="b2b">
+          <span class="admin-mobile-action-icon" aria-hidden="true">🤝</span>
+          <strong>Pro / Pro</strong>
+          <small>Catalogue et relations professionnelles.</small>
+        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="messages">
+          <span class="admin-mobile-action-icon" aria-hidden="true">💬</span>
+          <strong>Messages</strong>
+          <small>Accéder rapidement à la messagerie.</small>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
   <button class="mobile-nav-item is-active" type="button" data-mobile-action="search">
     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
     <span>Rechercher</span>
   </button>
-  <button class="mobile-nav-item" type="button" data-mobile-action="favorites">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
-    <span>Favoris</span>
+  <button class="mobile-nav-item" id="mobileFavoritesAdminBtn" type="button" data-mobile-action="favorites">
+    <span id="mobileFavoritesAdminIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg></span>
+    <span id="mobileFavoritesAdminLabel">Favoris</span>
+    <span class="mobile-admin-nav-badge" id="mobileAdminNavBadge">0</span>
   </button>
   <button class="mobile-nav-item mobile-nav-publish" type="button" data-mobile-action="publish">
     <span class="mobile-publish-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
@@ -10932,6 +11021,112 @@ document.addEventListener('DOMContentLoaded',()=>{
     initUnreadObserver();initialTitle();
   }
   window.addEventListener('abracadeal:auth',syncUnread);
+})();
+</script>
+
+<script id="abraca-mobile-admin-menu-js-20260919">
+(function(){
+  const favoriteIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>';
+  const adminIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3Z"/><path d="M9 12l2 2 4-4"/></svg>';
+
+  function isAdmin(){
+    try{return !!currentProfile?.is_admin}catch(_){return false}
+  }
+  function navBtn(){return document.getElementById('mobileFavoritesAdminBtn')}
+  function syncAdminNav(){
+    const btn=navBtn(),label=document.getElementById('mobileFavoritesAdminLabel'),icon=document.getElementById('mobileFavoritesAdminIcon');
+    if(!btn||!label||!icon)return;
+    const admin=isAdmin();
+    btn.dataset.mobileAction=admin?'admin':'favorites';
+    label.textContent=admin?'Admin':'Favoris';
+    icon.innerHTML=admin?adminIcon:favoriteIcon;
+    syncAdminBadges();
+  }
+  function numberFrom(el){
+    if(!el)return 0;
+    const raw=el.getAttribute('data-count')||el.textContent||'0';
+    return parseInt(String(raw).replace(/\D/g,''),10)||0;
+  }
+  function paint(id,n){
+    const el=document.getElementById(id);if(!el)return;
+    el.textContent=n>99?'99+':String(n);
+    el.classList.toggle('show',n>0);
+  }
+  function syncAdminBadges(){
+    if(!isAdmin()){
+      paint('mobileAdminModerationBadge',0);paint('mobileAdminFlowBadge',0);paint('mobileAdminNavBadge',0);return;
+    }
+    const moderation=numberFrom(document.getElementById('moderationBtn'));
+    const flowBadge=document.getElementById('flowErrorsBadge');
+    const flows=flowBadge?.classList.contains('hidden')?0:numberFrom(flowBadge);
+    paint('mobileAdminModerationBadge',moderation);
+    paint('mobileAdminFlowBadge',flows);
+    paint('mobileAdminNavBadge',moderation+flows);
+  }
+  function openAccountSection(id){
+    closeModal('mobileAdminModal');
+    openModal('accountModal');
+    setTimeout(function(){
+      const target=document.getElementById(id);
+      if(target){
+        target.classList.remove('hidden');
+        target.scrollIntoView({behavior:'smooth',block:'start'});
+      }
+      if(id==='adminStatsPanel') window.loadAdminDashboardStats?.();
+      if(id==='adminDatabasePanel'){
+        window.loadAdminDashboardStats?.();
+        setTimeout(()=>document.getElementById('adminDbQuery')?.focus({preventScroll:true}),350);
+      }
+    },180);
+  }
+
+  document.addEventListener('click',function(e){
+    const nav=e.target.closest('#mobileFavoritesAdminBtn[data-mobile-action="admin"]');
+    if(nav){
+      e.preventDefault();e.stopImmediatePropagation();
+      if(!isAdmin()){syncAdminNav();return;}
+      document.querySelectorAll('.mobile-nav-item').forEach(el=>el.classList.toggle('is-active',el===nav));
+      openModal('mobileAdminModal');
+      syncAdminBadges();
+      return;
+    }
+    const action=e.target.closest('[data-admin-mobile-action]')?.getAttribute('data-admin-mobile-action');
+    if(!action)return;
+    e.preventDefault();
+    if(!isAdmin()){closeModal('mobileAdminModal');toast('Accès administrateur requis');return;}
+    if(action==='moderation'){
+      closeModal('mobileAdminModal');
+      window.toggleAdminModeration?.();
+    }else if(action==='flows'){
+      closeModal('mobileAdminModal');
+      window.openAdminFlowErrors?.();
+    }else if(action==='database'){
+      openAccountSection('adminDatabasePanel');
+    }else if(action==='stats'){
+      openAccountSection('adminStatsPanel');
+    }else if(action==='b2b'){
+      closeModal('mobileAdminModal');
+      document.getElementById('b2bNavBtn')?.click();
+    }else if(action==='messages'){
+      closeModal('mobileAdminModal');
+      window.openMessages?.();
+    }
+  },true);
+
+  function observeBadge(id){
+    const el=document.getElementById(id);
+    if(el&&window.MutationObserver)new MutationObserver(syncAdminBadges).observe(el,{subtree:true,childList:true,characterData:true,attributes:true});
+  }
+  function init(){
+    syncAdminNav();
+    observeBadge('moderationBtn');
+    observeBadge('flowErrorsBadge');
+    setTimeout(syncAdminNav,400);
+    setTimeout(syncAdminBadges,900);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+  else init();
+  window.addEventListener('abracadeal:auth',()=>setTimeout(syncAdminNav,80));
 })();
 </script>
 </body>
