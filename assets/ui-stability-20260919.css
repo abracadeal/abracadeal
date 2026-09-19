@@ -176,3 +176,17 @@ html{scrollbar-gutter:stable}
     0 0 0 1px rgba(255,235,167,.22),
     0 14px 34px rgba(216,170,66,.22)!important;
 }
+
+
+/* Header sans petit logo à gauche — 19/09/2026 19:11 */
+@media(min-width:1367px){
+  .desktop-brand-lamp,
+  .desktop-brand-lamp img,
+  .desktop-brand > img{
+    display:none!important;
+  }
+  .desktop-brand{
+    gap:0!important;
+    padding-left:8px!important;
+  }
+}
