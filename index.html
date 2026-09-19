@@ -3568,6 +3568,505 @@ header #flowErrorsBtn{
   .pro-billing-actions .btn{width:100%}
 }
 </style>
+
+<style id="abraca-mobile-redesign-20260919">
+/* Abracadeal mobile-first refresh — 2026-09-19
+   Desktop inchangé. Inspiré du mockup validé : plus compact, plus fluide, identité Abracadeal conservée. */
+.mobile-topbar,.mobile-bottom-nav{display:none}
+
+@media(max-width:760px){
+  :root{
+    --m-bg:#14091f;
+    --m-bg2:#1e0d2f;
+    --m-panel:#241038;
+    --m-panel2:#321449;
+    --m-pink:#f13da5;
+    --m-pink2:#ff62bf;
+    --m-purple:#8b2cb8;
+    --m-lilac:#cfa8ef;
+    --m-white:#fff;
+    --m-soft:#d8cbe3;
+  }
+
+  html{background:var(--m-bg)!important;scroll-padding-bottom:92px}
+  body{
+    background:
+      radial-gradient(70% 34% at 50% 0%,rgba(137,39,178,.28),transparent 70%),
+      linear-gradient(180deg,var(--m-bg) 0%,#1a0c29 52%,#160a23 100%)!important;
+    color:#fff!important;
+    padding-bottom:calc(82px + env(safe-area-inset-bottom))!important;
+    overflow-x:hidden!important;
+  }
+  body>header{display:none!important}
+  body>main#top{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    background:transparent!important;
+  }
+  main#top>.hero-shell{order:1}
+  main#top>#annonces{order:2}
+  main#top>#homeFeaturedSection{order:3}
+  main#top>#recentSearchSection{order:4}
+  main#top>#recentViewedSection{order:5}
+  main#top>#nearbySection{order:6}
+  main#top>#resultats{order:7}
+  main#top>#b2bDiscovery{order:8}
+  main#top>#vacancesDiscovery{order:9}
+  main#top>#pros{order:10}
+  main#top>.trust{order:11}
+
+  .container{width:calc(100% - 24px)!important;max-width:none!important}
+
+  /* Top bar dédiée mobile */
+  .mobile-topbar{
+    display:flex!important;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    position:sticky;
+    top:0;
+    z-index:10030;
+    min-height:72px;
+    padding:calc(10px + env(safe-area-inset-top)) 16px 10px;
+    background:linear-gradient(180deg,rgba(18,7,29,.98),rgba(20,8,31,.91));
+    border-bottom:1px solid rgba(255,255,255,.07);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  .mobile-brand{
+    min-width:0;
+    display:flex;
+    flex-direction:column;
+    line-height:1;
+    text-decoration:none;
+  }
+  .mobile-brand-name{
+    font-family:'Fraunces',serif;
+    font-size:clamp(26px,7.8vw,34px);
+    line-height:.98;
+    font-weight:700;
+    letter-spacing:-.04em;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .mobile-brand-name .deal{
+    background:linear-gradient(90deg,#fff 0%,#f6a6dd 25%,#ec409d 68%,#ffd06b 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .mobile-brand-tag{
+    margin-top:5px;
+    color:#d4c4df;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.34em;
+    text-transform:uppercase;
+  }
+  .mobile-top-actions{display:flex;align-items:center;gap:8px}
+  .mobile-icon-btn{
+    position:relative;
+    width:43px;height:43px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    color:#fff;
+    background:rgba(255,255,255,.055);
+    border:1px solid rgba(255,255,255,.12);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.07);
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-icon-btn svg{width:22px;height:22px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .mobile-notification-badge,.mobile-nav-badge{
+    position:absolute;
+    top:-3px;right:-3px;
+    min-width:19px;height:19px;
+    padding:0 5px;
+    border-radius:999px;
+    display:none;
+    align-items:center;justify-content:center;
+    background:linear-gradient(135deg,#ff4ba9,#ee2e8f);
+    color:#fff;
+    border:2px solid #180a26;
+    font-size:10px;font-weight:900;line-height:1;
+  }
+  .mobile-notification-badge.show,.mobile-nav-badge.show{display:flex}
+
+  /* Hero compacte */
+  .hero-shell{
+    background:transparent!important;
+    overflow:visible!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero{
+    padding:10px 12px 8px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:0!important;
+  }
+  .banner-frame{
+    order:1;
+    width:100%!important;
+    height:132px!important;
+    max-height:132px!important;
+    margin:0!important;
+    border-radius:20px!important;
+    overflow:hidden!important;
+    background:#250f38!important;
+    border:1px solid rgba(240,107,200,.22)!important;
+    box-shadow:0 15px 36px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.05)!important;
+  }
+  .banner-frame::before,.banner-frame::after{display:none!important}
+  .banner{
+    width:100%!important;
+    height:132px!important;
+    max-height:132px!important;
+    object-fit:cover!important;
+    object-position:center 45%!important;
+    border-radius:20px!important;
+    filter:saturate(1.08) contrast(1.02)!important;
+  }
+  .banner-hotspots{display:none!important}
+
+  .search-wrap{
+    order:2;
+    position:relative!important;
+    left:auto!important;right:auto!important;bottom:auto!important;
+    transform:none!important;
+    width:100%!important;
+    margin:12px 0 0!important;
+    z-index:5!important;
+  }
+  .search-card{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:8px!important;
+    padding:10px!important;
+    border-radius:20px!important;
+    background:rgba(255,255,255,.98)!important;
+    border:1px solid rgba(255,255,255,.84)!important;
+    box-shadow:0 16px 36px rgba(0,0,0,.22)!important;
+    backdrop-filter:none!important;
+  }
+  .search-card .field{
+    height:50px!important;
+    min-height:50px!important;
+    border-radius:13px!important;
+    padding:0 15px!important;
+    background:#f7f3f9!important;
+    border:1px solid #ebe1ef!important;
+    color:#261530!important;
+    font-size:16px!important;
+    box-shadow:none!important;
+  }
+  .search-card .field::placeholder{color:#9a8ba2!important;opacity:1}
+  .search-card .search-btn{
+    height:52px!important;
+    min-height:52px!important;
+    border-radius:14px!important;
+    color:#fff!important;
+    font-size:17px!important;
+    font-weight:900!important;
+    background:linear-gradient(105deg,#7525a1 0%,#b72fba 46%,#f13da5 100%)!important;
+    box-shadow:0 10px 22px rgba(199,48,173,.27)!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+  }
+  .search-card .search-nearby-btn{
+    min-height:46px!important;
+    border-radius:13px!important;
+    font-size:14px!important;
+  }
+
+  /* Catégories en ruban */
+  #annonces{
+    padding:4px 0 12px!important;
+    background:transparent!important;
+  }
+  #annonces .section-head{display:none!important}
+  #annonces .categories{
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:11px!important;
+    width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:5px 12px 10px!important;
+    margin:0!important;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  #annonces .categories::-webkit-scrollbar{display:none}
+  #annonces .cat{
+    flex:0 0 67px!important;
+    width:67px!important;
+    min-width:67px!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    border-radius:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    text-align:center!important;
+    scroll-snap-align:start;
+    overflow:visible!important;
+  }
+  #annonces .cat::before,#annonces .cat::after{display:none!important}
+  #annonces .cat:hover,#annonces .cat:active{transform:none!important;box-shadow:none!important}
+  #annonces .cat-icon{
+    width:56px!important;height:56px!important;
+    flex:0 0 56px!important;
+    border-radius:50%!important;
+    display:grid!important;place-items:center!important;
+    margin:0!important;
+    font-size:23px!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    background:linear-gradient(145deg,#3b1758,#762a96)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 8px 19px rgba(0,0,0,.21)!important;
+  }
+  #annonces .cat:nth-child(1) .cat-icon{background:linear-gradient(145deg,#7a1e7c,#cf2e98)!important}
+  #annonces .cat:nth-child(2) .cat-icon{background:linear-gradient(145deg,#5e1a8c,#912dc3)!important}
+  #annonces .cat:nth-child(3) .cat-icon{background:linear-gradient(145deg,#214d7c,#3c78ae)!important}
+  #annonces .cat:nth-child(4) .cat-icon{background:linear-gradient(145deg,#12634f,#299a72)!important}
+  #annonces .cat:nth-child(5) .cat-icon{background:linear-gradient(145deg,#4c3e8d,#6c5fc5)!important}
+  #annonces .cat:nth-child(6) .cat-icon{background:linear-gradient(145deg,#8a3f28,#c87e42)!important}
+  #annonces .cat:nth-child(7) .cat-icon{background:linear-gradient(145deg,#6e2b6c,#a54894)!important}
+  #annonces .cat:nth-child(8) .cat-icon{background:linear-gradient(145deg,#3d3b78,#655fb8)!important}
+  #annonces .cat h3{
+    margin:0!important;
+    color:#f8f1fb!important;
+    font-size:11.5px!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+  }
+  #annonces .cat small{display:none!important}
+
+  /* Sections de recommandations / annonces */
+  .home-featured-section,.personalized-section,.listing-section{
+    background:transparent!important;
+    color:#fff!important;
+  }
+  .home-featured-section{padding:10px 0 4px!important}
+  .personalized-section{padding:14px 0 4px!important}
+  .listing-section{padding:14px 0 24px!important}
+  .home-featured-head,.personalized-head,.listing-head{
+    margin-bottom:12px!important;
+    align-items:flex-end!important;
+    flex-direction:row!important;
+  }
+  .home-featured-head h2,.personalized-head h2,.listing-head h2{
+    color:#fff!important;
+    font-family:'DM Sans',sans-serif!important;
+    font-size:21px!important;
+    line-height:1.1!important;
+    font-weight:900!important;
+    letter-spacing:-.02em!important;
+  }
+  .home-featured-head p,.personalized-head p,.listing-head p{
+    margin-top:5px!important;
+    color:#b9a7c4!important;
+    font-size:12px!important;
+    line-height:1.35!important;
+  }
+
+  .home-featured-grid,.personalized-grid,.ads-grid{
+    display:flex!important;
+    grid-template-columns:none!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 10px!important;
+    scroll-snap-type:x proximity;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .home-featured-grid::-webkit-scrollbar,.personalized-grid::-webkit-scrollbar,.ads-grid::-webkit-scrollbar{display:none}
+  .home-featured-card,.personalized-card,.ad-card{
+    flex:0 0 min(72vw,270px)!important;
+    width:min(72vw,270px)!important;
+    min-width:min(72vw,270px)!important;
+    scroll-snap-align:start;
+    background:linear-gradient(180deg,#29133c 0%,#21102f 100%)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    border-radius:16px!important;
+    color:#fff!important;
+    box-shadow:0 10px 24px rgba(0,0,0,.19)!important;
+    overflow:hidden!important;
+  }
+  .home-featured-photo,.personalized-photo,.ad-photo{
+    height:168px!important;
+    background:#261437!important;
+  }
+  .home-featured-body,.personalized-body,.ad-body{padding:11px 12px 13px!important}
+  .home-featured-title,.personalized-title,.ad-title{
+    color:#fff!important;
+    font-size:15px!important;
+    min-height:0!important;
+    margin-bottom:5px!important;
+  }
+  .home-featured-price,.personalized-price,.ad-price{
+    color:#ff64bd!important;
+    font-size:18px!important;
+    font-weight:950!important;
+  }
+  .home-featured-city,.personalized-meta,.personalized-city,.ad-meta,.ad-city,.ad-specs{
+    color:#c5b5cf!important;
+  }
+  .favorite-btn{
+    background:rgba(23,9,34,.78)!important;
+    color:#fff!important;
+    border-color:rgba(255,255,255,.16)!important;
+    backdrop-filter:blur(7px);
+  }
+  .favorite-btn.active{color:#ff62b8!important}
+
+  .results-tools{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    margin-bottom:12px!important;
+  }
+  .filters-toggle,.sort-select,.filter-chip{
+    min-height:38px!important;
+    border-radius:11px!important;
+    background:#2b143e!important;
+    color:#f5edf8!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    box-shadow:none!important;
+  }
+  .filters-panel{
+    background:#fdfaff!important;
+    color:#2b1736!important;
+    border-radius:16px!important;
+    margin-bottom:12px!important;
+  }
+
+  /* Pro/Pro devient une carte secondaire compacte */
+  #pros{display:none!important}
+  #vacancesDiscovery{display:none!important}
+  .trust{display:none!important}
+  #b2bDiscovery{
+    width:calc(100% - 24px)!important;
+    margin:9px auto 26px!important;
+    padding:16px!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:12px!important;
+    border-radius:18px!important;
+    background:
+      radial-gradient(80% 120% at 100% 0%,rgba(221,70,182,.18),transparent 70%),
+      linear-gradient(120deg,#34124a,#5a1b70)!important;
+    color:#fff!important;
+    border:1px solid rgba(235,128,224,.28)!important;
+    box-shadow:0 14px 28px rgba(0,0,0,.19)!important;
+  }
+  #b2bDiscovery h2{color:#fff!important;font-family:'Fraunces',serif!important;font-size:20px!important;margin:0 0 4px!important}
+  #b2bDiscovery p{color:#d9c8e2!important;font-size:12px!important;line-height:1.35!important;margin:0!important}
+  #b2bDiscoveryLink{
+    margin:0!important;
+    min-height:40px!important;
+    padding:0 14px!important;
+    border-radius:999px!important;
+    background:linear-gradient(135deg,#a92bd0,#ec3fa4)!important;
+    color:#fff!important;
+    border:1px solid rgba(255,255,255,.23)!important;
+    white-space:nowrap!important;
+    font-size:12px!important;
+  }
+
+  /* Bottom navigation */
+  .mobile-bottom-nav{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr));
+    align-items:end;
+    position:fixed;
+    z-index:10025;
+    left:10px;right:10px;
+    bottom:calc(7px + env(safe-area-inset-bottom));
+    min-height:68px;
+    padding:7px 4px 6px;
+    border-radius:24px;
+    background:rgba(24,10,36,.94);
+    border:1px solid rgba(255,255,255,.13);
+    box-shadow:0 17px 40px rgba(0,0,0,.37),inset 0 1px 0 rgba(255,255,255,.05);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  }
+  .mobile-nav-item{
+    position:relative;
+    min-width:0;
+    min-height:54px;
+    padding:3px 2px 1px;
+    border:0;
+    background:transparent;
+    color:#ece4f1;
+    text-decoration:none;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    gap:4px;
+    font:inherit;
+    font-size:10.5px;
+    font-weight:750;
+    cursor:pointer;
+    -webkit-tap-highlight-color:transparent;
+  }
+  .mobile-nav-item svg{width:23px;height:23px;stroke:currentColor;stroke-width:1.9;fill:none;stroke-linecap:round;stroke-linejoin:round}
+  .mobile-nav-item.is-active{color:#ff58b5}
+  .mobile-nav-item.is-active::after{
+    content:"";
+    position:absolute;
+    left:27%;right:27%;bottom:-3px;
+    height:2px;border-radius:999px;
+    background:#ff58b5;
+    box-shadow:0 0 10px rgba(255,88,181,.65);
+  }
+  .mobile-nav-publish{transform:translateY(-8px)}
+  .mobile-nav-publish .mobile-publish-orb{
+    width:52px;height:52px;
+    margin-bottom:-2px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    background:linear-gradient(145deg,#ff62bd,#d42eab 56%,#8a27b7);
+    color:#fff;
+    border:2px solid rgba(255,255,255,.2);
+    box-shadow:0 8px 24px rgba(225,53,171,.42),0 0 0 5px rgba(119,33,149,.20);
+  }
+  .mobile-nav-publish .mobile-publish-orb svg{width:27px;height:27px;stroke-width:2.2}
+
+  footer{padding-bottom:calc(104px + env(safe-area-inset-bottom))!important}
+
+  /* Modales : toujours au-dessus de la navigation */
+  .modal-backdrop{z-index:10100!important}
+  #messagesModal.modal-backdrop{z-index:10120!important}
+}
+
+@media(max-width:390px){
+  .mobile-topbar{padding-left:13px;padding-right:13px}
+  .mobile-brand-name{font-size:28px}
+  .mobile-icon-btn{width:40px;height:40px}
+  .hero{padding-left:10px!important;padding-right:10px!important}
+  .banner-frame,.banner{height:124px!important;max-height:124px!important}
+  #annonces .categories{padding-left:10px!important;padding-right:10px!important}
+  .home-featured-card,.personalized-card,.ad-card{
+    flex-basis:74vw!important;width:74vw!important;min-width:74vw!important;
+  }
+  #b2bDiscovery{grid-template-columns:1fr!important}
+  #b2bDiscoveryLink{width:max-content!important;max-width:100%!important}
+  .mobile-bottom-nav{left:7px;right:7px;border-radius:21px}
+}
+</style>
 </head>
 <body>
 
@@ -3590,6 +4089,22 @@ header #flowErrorsBtn{
     </div>
   </div>
 </header>
+
+<div class="mobile-topbar" aria-label="Navigation mobile Abracadeal">
+  <a class="mobile-brand" href="#top" aria-label="Accueil Abracadeal">
+    <span class="mobile-brand-name">Abraca<span class="deal">deal</span><span aria-hidden="true">✦</span></span>
+    <span class="mobile-brand-tag">Fais ton vœu</span>
+  </a>
+  <div class="mobile-top-actions">
+    <a class="mobile-icon-btn" id="mobileMessagesTop" href="#messagesModal" aria-label="Messages">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21h4"/></svg>
+      <span class="mobile-notification-badge" id="mobileTopUnread">0</span>
+    </a>
+    <a class="mobile-icon-btn" id="mobileAccountTop" href="#accountModal" aria-label="Compte">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </a>
+  </div>
+</div>
 
 <main id="top">
   <section class="hero-shell">
@@ -10140,6 +10655,99 @@ document.addEventListener('DOMContentLoaded',()=>{
       handleBillingReturn();
     }
   },700);
+})();
+</script>
+
+<nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
+  <button class="mobile-nav-item is-active" type="button" data-mobile-action="search">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
+    <span>Rechercher</span>
+  </button>
+  <button class="mobile-nav-item" type="button" data-mobile-action="favorites">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
+    <span>Favoris</span>
+  </button>
+  <button class="mobile-nav-item mobile-nav-publish" type="button" data-mobile-action="publish">
+    <span class="mobile-publish-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg></span>
+    <span>Publier</span>
+  </button>
+  <button class="mobile-nav-item" type="button" data-mobile-action="messages">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg>
+    <span>Messages</span>
+    <span class="mobile-nav-badge" id="mobileBottomUnread">0</span>
+  </button>
+  <button class="mobile-nav-item" type="button" data-mobile-action="account">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    <span>Compte</span>
+  </button>
+</nav>
+
+<script id="abraca-mobile-redesign-js-20260919">
+(function(){
+  function q(s){return document.querySelector(s)}
+  function clickOrHash(el,hash){
+    if(el && typeof el.click==='function'){ el.click(); return; }
+    if(hash) location.hash=hash;
+  }
+  function setActive(action){
+    document.querySelectorAll('.mobile-nav-item').forEach(function(el){
+      el.classList.toggle('is-active',el.getAttribute('data-mobile-action')===action);
+    });
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('[data-mobile-action]');
+    if(!btn) return;
+    var action=btn.getAttribute('data-mobile-action');
+    if(action==='search'){
+      e.preventDefault();
+      setActive('search');
+      var top=q('#top'); if(top) top.scrollIntoView({behavior:'smooth',block:'start'});
+      setTimeout(function(){var s=q('#searchQuery'); if(s) s.focus({preventScroll:true});},360);
+    }else if(action==='favorites'){
+      e.preventDefault();
+      setActive('favorites');
+      clickOrHash(q('[data-home-route="favorites"]'),'#resultats');
+    }else if(action==='publish'){
+      e.preventDefault();
+      setActive('publish');
+      clickOrHash(q('header .publish-trigger') || q('.publish-trigger'),'#publishModal');
+    }else if(action==='messages'){
+      e.preventDefault();
+      setActive('messages');
+      clickOrHash(q('[data-home-route="messages"]') || q('#headerMessagesBtn'),'#messagesModal');
+    }else if(action==='account'){
+      e.preventDefault();
+      setActive('account');
+      clickOrHash(q('#accountBtn'),'#accountModal');
+    }
+  });
+
+  function syncUnread(){
+    var src=q('#headerMessagesUnread');
+    var n=src ? parseInt((src.textContent||'0').replace(/\D/g,''),10)||0 : 0;
+    ['#mobileTopUnread','#mobileBottomUnread'].forEach(function(sel){
+      var el=q(sel); if(!el) return;
+      el.textContent=n>99?'99+':String(n);
+      el.classList.toggle('show',n>0);
+    });
+  }
+  function initUnreadObserver(){
+    syncUnread();
+    var src=q('#headerMessagesUnread');
+    if(src && window.MutationObserver){
+      new MutationObserver(syncUnread).observe(src,{subtree:true,childList:true,characterData:true,attributes:true});
+    }
+  }
+  function initialTitle(){
+    var t=q('#resultTitle');
+    if(t && t.textContent.trim()==='Les annonces') t.textContent='À découvrir près de vous';
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',function(){initUnreadObserver();initialTitle();});
+  }else{
+    initUnreadObserver();initialTitle();
+  }
+  window.addEventListener('abracadeal:auth',syncUnread);
 })();
 </script>
 </body>
