@@ -5406,6 +5406,211 @@ header #flowErrorsBtn{
 <link rel="stylesheet" href="assets/abracadeal-main-banner-purple-20260919.css?v=20260919-1">
 <link rel="stylesheet" href="assets/ui-stability-20260919.css?v=20260919-7">
 <link rel="stylesheet" href="assets/propro-banner-20260919.css?v=20260919-3">
+
+<style id="abraca-gold-featured-uniform-cards-20260919">
+/* À LA UNE premium or brillant */
+.featured-badge{
+  position:absolute!important;
+  overflow:hidden!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  color:#4a3100!important;
+  background:linear-gradient(135deg,#fff8ce 0%,#f8dc79 20%,#d7ae31 43%,#fff0a3 62%,#b77c08 100%)!important;
+  border:1px solid rgba(255,228,135,.88)!important;
+  box-shadow:
+    0 4px 14px rgba(206,153,21,.34),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -2px 4px rgba(119,75,0,.18)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.55)!important;
+  letter-spacing:.045em!important;
+}
+.featured-badge::after{
+  content:""!important;
+  position:absolute!important;
+  top:-35%!important;
+  left:-65%!important;
+  width:42%!important;
+  height:170%!important;
+  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.06) 28%,rgba(255,255,255,.95) 50%,rgba(255,255,255,.08) 72%,transparent 100%)!important;
+  transform:skewX(-20deg)!important;
+  animation:abracaGoldShine 3.4s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+@keyframes abracaGoldShine{
+  0%,18%{left:-65%}
+  55%,100%{left:135%}
+}
+
+/* Cartes catalogue : dimensions et alignements réguliers */
+#resultats .ads-grid{
+  align-items:stretch!important;
+}
+#resultats .ad-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:400px!important;
+  min-height:400px!important;
+  max-height:400px!important;
+}
+#resultats .ad-photo,
+#resultats .ad-card.immo-card .ad-photo{
+  flex:0 0 158px!important;
+  height:158px!important;
+  min-height:158px!important;
+  max-height:158px!important;
+}
+#resultats .ad-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#resultats .ad-title{
+  min-height:2.4em!important;
+  max-height:2.4em!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#resultats .ad-city{
+  margin-top:auto!important;
+}
+#resultats .ad-actions{
+  flex:0 0 auto!important;
+}
+
+/* Les autres rangées d'annonces gardent également des cartes régulières */
+.home-featured-grid,
+.personalized-grid{
+  align-items:stretch!important;
+}
+.home-featured-card,
+.personalized-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:300px!important;
+  min-height:300px!important;
+  max-height:300px!important;
+}
+.home-featured-body,
+.personalized-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.home-featured-title,
+.personalized-title{
+  min-height:2.45em!important;
+  max-height:2.45em!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+.home-featured-city{
+  margin-top:auto!important;
+}
+
+/* Tablette */
+@media (min-width:761px) and (max-width:1100px){
+  #resultats .ad-card{
+    height:385px!important;
+    min-height:385px!important;
+    max-height:385px!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    flex-basis:150px!important;
+    height:150px!important;
+    min-height:150px!important;
+    max-height:150px!important;
+  }
+  .home-featured-card,
+  .personalized-card{
+    height:292px!important;
+    min-height:292px!important;
+    max-height:292px!important;
+  }
+}
+
+/* Mobile : mêmes dimensions dans le carrousel horizontal */
+@media (max-width:760px){
+  #resultats .ads-grid{
+    align-items:stretch!important;
+  }
+  #resultats .ad-card{
+    height:295px!important;
+    min-height:295px!important;
+    max-height:295px!important;
+    align-self:stretch!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    flex:0 0 112px!important;
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
+  }
+  #resultats .ad-body{
+    height:auto!important;
+  }
+  #resultats .ad-title{
+    min-height:29px!important;
+    max-height:29px!important;
+  }
+
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:260px!important;
+    min-height:260px!important;
+    max-height:260px!important;
+    align-self:stretch!important;
+  }
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    min-height:32px!important;
+    max-height:32px!important;
+  }
+}
+
+/* Très petits téléphones */
+@media (max-width:390px){
+  #resultats .ad-card{
+    height:282px!important;
+    min-height:282px!important;
+    max-height:282px!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    flex-basis:104px!important;
+    height:104px!important;
+    min-height:104px!important;
+    max-height:104px!important;
+  }
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:246px!important;
+    min-height:246px!important;
+    max-height:246px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .featured-badge::after{animation:none!important}
+}
+</style>
 </head>
 <body>
 
