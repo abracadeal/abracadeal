@@ -5430,8 +5430,7 @@ header #flowErrorsBtn{
         <a class="desktop-category-link" href="vacances.html"><span>🏝️</span>Vacances</a>
         <div class="desktop-submenu" aria-label="Sous-menu Vacances">
           <a class="desktop-subcategory-link" id="vacancesModeLink" href="vacances.html">Locations de vacances</a>
-          <a class="desktop-subcategory-link" id="vacancesHostLink" href="espace-hote.html?host_signup=1">Devenir hôte</a>
-          <a class="desktop-subcategory-link hidden" id="vacancesHostRequestsLink" href="demandes-hote.html">Demandes voyageurs</a>
+          <a class="desktop-subcategory-link" id="vacancesHostLink" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>
         </div>
       </div>
       <div class="desktop-nav-item">
@@ -6895,15 +6894,13 @@ window.setAuthTab = function(which,{clearPasswords=true}={}){
 async function syncVacancesAccountMenu(){
   const modeLink=document.getElementById('vacancesModeLink');
   const hostLink=document.getElementById('vacancesHostLink');
-  const requestsLink=document.getElementById('vacancesHostRequestsLink');
   if(!modeLink||!hostLink)return;
 
   // État par défaut : visiteur / compte non-hôte.
   modeLink.textContent='Locations de vacances';
   modeLink.href='vacances.html';
   hostLink.textContent='Devenir hôte';
-  hostLink.href='espace-hote.html?host_signup=1';
-  requestsLink?.classList.add('hidden');
+  hostLink.href='vacances.html?mode=hote&host_signup=1';
 
   if(!sb||!currentUser)return;
 
@@ -6926,9 +6923,8 @@ async function syncVacancesAccountMenu(){
     modeLink.textContent='Mode voyageur';
     modeLink.href='vacances.html';
     hostLink.textContent='Espace Hôte';
-    hostLink.href='espace-hote.html';
-    requestsLink?.classList.remove('hidden');
-  }catch(error){
+    hostLink.href='vacances.html?mode=hote';
+    }catch(error){
     console.warn('Menu Vacances non synchronisé',error);
   }
 }
