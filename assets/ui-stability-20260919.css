@@ -206,3 +206,17 @@ html{scrollbar-gutter:stable}
     -webkit-text-fill-color:transparent;
   }
 }
+
+
+/* Réserve l'espace À la une au chargement — évite le saut Pro/Pro */
+@media(min-width:1367px){
+  #homeFeaturedSection{
+    min-height:284px!important;
+  }
+  #homeFeaturedSection.hidden.home-featured-loading{
+    display:block!important;
+    visibility:hidden!important;
+    pointer-events:none!important;
+    min-height:284px!important;
+  }
+}
