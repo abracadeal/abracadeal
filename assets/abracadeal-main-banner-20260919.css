@@ -144,3 +144,8 @@
   .desktop-subcategory-link{font-size:11px!important}
   .desktop-submenu{min-width:195px!important}
 }
+
+/* APPROVED MAIN BANNER 2026-09-19 */
+:root{
+  --abraca-main-banner:url("abracadeal-banner-current.jpg")!important;
+}
