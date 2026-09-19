@@ -86,3 +86,40 @@ html{scrollbar-gutter:stable}
     max-height:calc(100dvh - 16px)!important;
   }
 }
+
+
+/* Contrastes connexion + noms vendeurs — 19/09/2026 18:05 */
+/* Onglets Connexion / Créer un compte : sélection très lisible */
+#accountModal #authLoginMode:checked ~ .auth-tabs #loginTab,
+#accountModal #authSignupMode:checked ~ .auth-tabs #signupTab{
+  background:linear-gradient(135deg,#6f2498 0%,#a92fae 52%,#ed3fa2 100%)!important;
+  color:#fff!important;
+  border-color:#8b2ca8!important;
+  box-shadow:0 7px 18px rgba(139,44,168,.22)!important;
+}
+#accountModal #authLoginMode:checked ~ .auth-tabs #signupTab,
+#accountModal #authSignupMode:checked ~ .auth-tabs #loginTab{
+  background:#fff!important;
+  color:#35183f!important;
+  border-color:#dfd2e6!important;
+  box-shadow:none!important;
+}
+#accountModal .auth-tab{
+  font-weight:900!important;
+}
+
+/* Noms / filigranes visibles sur les annonces et fiches vendeur */
+.photo-watermark{
+  color:#fff!important;
+  background:rgba(24,10,32,.72)!important;
+  padding:4px 8px!important;
+  border-radius:7px!important;
+  text-shadow:none!important;
+  -webkit-backdrop-filter:blur(3px)!important;
+  backdrop-filter:blur(3px)!important;
+}
+.seller-card h3,
+.seller-profile-name,
+#companySummary dd{
+  color:#2b153d!important;
+}
