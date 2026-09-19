@@ -4392,6 +4392,166 @@ header #flowErrorsBtn{
 }
 </style>
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
+<style id="abraca-home-mobile-cards-compact-20260919">
+/* Accueil mobile : cartes compactes, 2 visibles + amorce de la 3e */
+@media(max-width:760px){
+  #homeFeaturedSection .home-featured-grid,
+  #recentSearchSection .personalized-grid,
+  #recentViewedSection .personalized-grid,
+  #nearbySection .personalized-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:10px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 10px!important;
+    scroll-snap-type:x proximity!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+  }
+
+  #homeFeaturedSection .home-featured-grid::-webkit-scrollbar,
+  #recentSearchSection .personalized-grid::-webkit-scrollbar,
+  #recentViewedSection .personalized-grid::-webkit-scrollbar,
+  #nearbySection .personalized-grid::-webkit-scrollbar{
+    display:none!important;
+  }
+
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    flex:0 0 clamp(138px,42vw,180px)!important;
+    width:clamp(138px,42vw,180px)!important;
+    min-width:clamp(138px,42vw,180px)!important;
+    max-width:clamp(138px,42vw,180px)!important;
+    scroll-snap-align:start!important;
+    border-radius:15px!important;
+  }
+
+  #homeFeaturedSection .home-featured-photo,
+  #recentSearchSection .personalized-photo,
+  #recentViewedSection .personalized-photo,
+  #nearbySection .personalized-photo{
+    height:128px!important;
+    min-height:128px!important;
+    max-height:128px!important;
+  }
+
+  #homeFeaturedSection .home-featured-body,
+  #recentSearchSection .personalized-body,
+  #recentViewedSection .personalized-body,
+  #nearbySection .personalized-body{
+    padding:9px 10px 11px!important;
+  }
+
+  #homeFeaturedSection .home-featured-meta,
+  #recentSearchSection .personalized-meta,
+  #recentViewedSection .personalized-meta,
+  #nearbySection .personalized-meta{
+    font-size:10px!important;
+    line-height:1.25!important;
+    margin-bottom:4px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    font-size:13px!important;
+    line-height:1.22!important;
+    margin-bottom:5px!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+
+  #homeFeaturedSection .home-featured-price,
+  #recentSearchSection .personalized-price,
+  #recentViewedSection .personalized-price,
+  #nearbySection .personalized-price{
+    font-size:16px!important;
+    line-height:1.15!important;
+    margin-bottom:5px!important;
+  }
+
+  #homeFeaturedSection .home-featured-city{
+    font-size:11px!important;
+    line-height:1.25!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #homeFeaturedSection .card-action-btn,
+  #recentSearchSection .card-action-btn,
+  #recentViewedSection .card-action-btn,
+  #nearbySection .card-action-btn{
+    height:30px!important;
+    min-width:30px!important;
+    padding:0 7px!important;
+  }
+
+  #homeFeaturedSection .card-action-btn .share-node-icon,
+  #recentSearchSection .card-action-btn .share-node-icon,
+  #recentViewedSection .card-action-btn .share-node-icon,
+  #nearbySection .card-action-btn .share-node-icon{
+    width:15px!important;
+    height:15px!important;
+  }
+
+  #homeFeaturedSection .featured-badge{
+    top:7px!important;
+    left:7px!important;
+    padding:5px 7px!important;
+    font-size:9px!important;
+  }
+
+  #homeFeaturedSection .pro-card-badge,
+  #homeFeaturedSection .loa-badge,
+  #recentSearchSection .pro-card-badge,
+  #recentSearchSection .loa-badge,
+  #recentViewedSection .pro-card-badge,
+  #recentViewedSection .loa-badge,
+  #nearbySection .pro-card-badge,
+  #nearbySection .loa-badge{
+    font-size:9px!important;
+    padding:4px 7px!important;
+  }
+
+  #homeFeaturedSection .home-featured-section,
+  #recentSearchSection.personalized-section,
+  #recentViewedSection.personalized-section,
+  #nearbySection.personalized-section{
+    padding-top:16px!important;
+  }
+}
+
+@media(max-width:390px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    flex-basis:clamp(136px,41.5vw,162px)!important;
+    width:clamp(136px,41.5vw,162px)!important;
+    min-width:clamp(136px,41.5vw,162px)!important;
+    max-width:clamp(136px,41.5vw,162px)!important;
+  }
+
+  #homeFeaturedSection .home-featured-photo,
+  #recentSearchSection .personalized-photo,
+  #recentViewedSection .personalized-photo,
+  #nearbySection .personalized-photo{
+    height:120px!important;
+    min-height:120px!important;
+    max-height:120px!important;
+  }
+}
+</style>
 </head>
 <body>
 
