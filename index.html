@@ -4357,7 +4357,8 @@ header #flowErrorsBtn{
   opacity:1!important;
 }
 </style>
-<link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">\n</head>
+<link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
+</head>
 <body>
 
 <div class="portrait-only-overlay" aria-live="polite" aria-label="Mode portrait requis">
@@ -11155,6 +11156,14 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   document.addEventListener('click',function(e){
+    const adminClose=e.target.closest('#mobileAdminModal [data-close="mobileAdminModal"]');
+    if(adminClose || e.target?.id==='mobileAdminModal'){
+      e.preventDefault();
+      e.stopImmediatePropagation();
+      closeModal('mobileAdminModal');
+      document.querySelectorAll('.mobile-nav-item').forEach(el=>el.classList.toggle('is-active',el.getAttribute('data-mobile-action')==='search'));
+      return;
+    }
     const nav=e.target.closest('#mobileFavoritesAdminBtn[data-mobile-action="admin"]');
     if(nav){
       e.preventDefault();e.stopImmediatePropagation();
