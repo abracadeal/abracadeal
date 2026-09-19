@@ -256,3 +256,22 @@
     display:none!important;
   }
 }
+
+/* ===== iPad : forcer la bannière principale actuelle ===== */
+@media (min-width:761px) and (max-width:1366px){
+  /* Masque les anciennes images HTML (dont la bannière villa/piscine). */
+  .banner-frame .banner.banner-desktop,
+  .banner-frame .mobile-banner-img{
+    display:none!important;
+    opacity:0!important;
+    visibility:hidden!important;
+  }
+
+  /* Utilise uniquement la bannière principale actuelle définie dans --abraca-main-banner. */
+  .banner-frame{
+    background-image:var(--abraca-main-banner)!important;
+    background-size:100% 100%!important;
+    background-position:center center!important;
+    background-repeat:no-repeat!important;
+  }
+}
