@@ -6783,6 +6783,72 @@ header #flowErrorsBtn{
   }
 }
 </style>
+
+<style id="abraca-mobile-banner-definitive-fix-20260919">
+@media (max-width:760px){
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 10px 14px!important;
+  }
+
+  .banner-frame{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:1536 / 562!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border-radius:20px!important;
+    background-color:#14091f!important;
+    background-image:url('/assets/abracadeal-brand-banner.png?v=20260919-2020')!important;
+    background-size:contain!important;
+    background-position:center!important;
+    background-repeat:no-repeat!important;
+    box-shadow:none!important;
+  }
+
+  .banner-frame #homeBrandLink{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    z-index:3!important;
+  }
+
+  .banner-frame .banner-desktop,
+  .banner-frame .mobile-banner-img{
+    display:none!important;
+  }
+
+  .banner-frame::before,
+  .banner-frame::after,
+  .banner-hotspots{
+    display:none!important;
+    content:none!important;
+  }
+
+  .search-wrap{
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    margin:0!important;
+    transform:none!important;
+  }
+}
+@media (max-width:390px){
+  .hero.container{padding-left:8px!important;padding-right:8px!important}
+  .banner-frame{border-radius:18px!important}
+}
+</style>
+
 </head>
 <body>
 
