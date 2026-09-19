@@ -2688,106 +2688,116 @@ document.addEventListener('click',function(e){
 
 
 
+
 <script id="vacances-mobile-date-trigger-20260919">
 (function(){
-  const arrival=document.getElementById('arrival');
-  const departure=document.getElementById('departure');
-  const trigger=document.getElementById('vacDateTrigger');
-  const tile=document.querySelector('.vac-dates-tile');
-  const sheet=document.getElementById('vacDateSheet');
-  const sheetArrival=document.getElementById('vacSheetArrival');
-  const sheetDeparture=document.getElementById('vacSheetDeparture');
-  const confirm=document.getElementById('vacDateConfirm');
-  const error=document.getElementById('vacDateError');
-  if(!arrival||!departure||!trigger||!sheet||!sheetArrival||!sheetDeparture||!confirm)return;
+  function initVacDateSheet(){
+    const arrival=document.getElementById('arrival');
+    const departure=document.getElementById('departure');
+    const trigger=document.getElementById('vacDateTrigger');
+    const tile=document.querySelector('.vac-dates-tile');
+    const sheet=document.getElementById('vacDateSheet');
+    const sheetArrival=document.getElementById('vacSheetArrival');
+    const sheetDeparture=document.getElementById('vacSheetDeparture');
+    const confirm=document.getElementById('vacDateConfirm');
+    const error=document.getElementById('vacDateError');
+    if(!arrival||!departure||!trigger||!sheet||!sheetArrival||!sheetDeparture||!confirm)return;
 
-  const isoToday=()=>{
-    const d=new Date();
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,'0');
-    const day=String(d.getDate()).padStart(2,'0');
-    return y+'-'+m+'-'+day;
-  };
-  const addOneDay=value=>{
-    if(!value)return isoToday();
-    const d=new Date(value+'T12:00:00');
-    d.setDate(d.getDate()+1);
-    const y=d.getFullYear();
-    const m=String(d.getMonth()+1).padStart(2,'0');
-    const day=String(d.getDate()).padStart(2,'0');
-    return y+'-'+m+'-'+day;
-  };
-  const fmt=value=>{
-    if(!value)return '';
-    const d=new Date(value+'T12:00:00');
-    return Number.isNaN(d.getTime())?'':d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
-  };
-  function refresh(){
-    const a=fmt(arrival.value),d=fmt(departure.value);
-    trigger.textContent=a&&d ? a+' → '+d : a ? a+' → Départ' : 'Ajouter des dates';
-  }
-  function openSheet(){
-    const today=isoToday();
-    sheetArrival.min=today;
-    sheetArrival.value=arrival.value||'';
-    sheetDeparture.value=departure.value||'';
-    sheetDeparture.min=sheetArrival.value?addOneDay(sheetArrival.value):today;
-    error.textContent='';
-    sheet.classList.add('show');
-    sheet.setAttribute('aria-hidden','false');
-    document.body.classList.add('vac-date-open');
-  }
-  function closeSheet(){
-    sheet.classList.remove('show');
-    sheet.setAttribute('aria-hidden','true');
-    document.body.classList.remove('vac-date-open');
-  }
+    const isoToday=()=>{
+      const d=new Date();
+      const y=d.getFullYear();
+      const m=String(d.getMonth()+1).padStart(2,'0');
+      const day=String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    };
+    const addOneDay=value=>{
+      if(!value)return isoToday();
+      const d=new Date(value+'T12:00:00');
+      d.setDate(d.getDate()+1);
+      const y=d.getFullYear();
+      const m=String(d.getMonth()+1).padStart(2,'0');
+      const day=String(d.getDate()).padStart(2,'0');
+      return y+'-'+m+'-'+day;
+    };
+    const fmt=value=>{
+      if(!value)return '';
+      const d=new Date(value+'T12:00:00');
+      return Number.isNaN(d.getTime())?'':d.toLocaleDateString('fr-FR',{day:'2-digit',month:'2-digit'});
+    };
+    function refresh(){
+      const a=fmt(arrival.value),d=fmt(departure.value);
+      trigger.textContent=a&&d ? a+' → '+d : a ? a+' → Départ' : 'Ajouter des dates';
+    }
+    function openSheet(){
+      const today=isoToday();
+      sheetArrival.min=today;
+      sheetArrival.value=arrival.value||'';
+      sheetDeparture.value=departure.value||'';
+      sheetDeparture.min=sheetArrival.value?addOneDay(sheetArrival.value):today;
+      error.textContent='';
+      sheet.classList.add('show');
+      sheet.setAttribute('aria-hidden','false');
+      document.body.classList.add('vac-date-open');
+    }
+    function closeSheet(){
+      sheet.classList.remove('show');
+      sheet.setAttribute('aria-hidden','true');
+      document.body.classList.remove('vac-date-open');
+    }
 
-  trigger.addEventListener('click',function(e){
-    e.preventDefault();
-    e.stopPropagation();
-    openSheet();
-  });
-  tile?.addEventListener('click',function(e){
-    if(e.target.closest('button,input'))return;
-    openSheet();
-  });
-  document.querySelectorAll('[data-close-vac-date]').forEach(btn=>btn.addEventListener('click',closeSheet));
+    trigger.addEventListener('click',function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      openSheet();
+    });
+    tile?.addEventListener('click',function(e){
+      if(e.target.closest('button,input,select'))return;
+      openSheet();
+    });
+    document.querySelectorAll('[data-close-vac-date]').forEach(btn=>btn.addEventListener('click',closeSheet));
 
-  sheetArrival.addEventListener('change',function(){
-    sheetDeparture.min=sheetArrival.value?addOneDay(sheetArrival.value):isoToday();
-    if(sheetDeparture.value && sheetDeparture.value<=sheetArrival.value){
-      sheetDeparture.value='';
-    }
-    error.textContent='';
-  });
-  sheetDeparture.addEventListener('change',function(){error.textContent=''});
+    sheetArrival.addEventListener('change',function(){
+      sheetDeparture.min=sheetArrival.value?addOneDay(sheetArrival.value):isoToday();
+      if(sheetDeparture.value && sheetDeparture.value<=sheetArrival.value){
+        sheetDeparture.value='';
+      }
+      error.textContent='';
+    });
+    sheetDeparture.addEventListener('change',function(){error.textContent=''});
 
-  confirm.addEventListener('click',function(){
-    if(!sheetArrival.value){
-      error.textContent='Choisissez une date d’arrivée.';
-      return;
-    }
-    if(!sheetDeparture.value){
-      error.textContent='Choisissez une date de départ.';
-      return;
-    }
-    if(sheetDeparture.value<=sheetArrival.value){
-      error.textContent='Le départ doit être après l’arrivée.';
-      return;
-    }
-    arrival.value=sheetArrival.value;
-    departure.value=sheetDeparture.value;
+    confirm.addEventListener('click',function(){
+      if(!sheetArrival.value){
+        error.textContent='Choisissez une date d’arrivée.';
+        return;
+      }
+      if(!sheetDeparture.value){
+        error.textContent='Choisissez une date de départ.';
+        return;
+      }
+      if(sheetDeparture.value<=sheetArrival.value){
+        error.textContent='Le départ doit être après l’arrivée.';
+        return;
+      }
+      arrival.value=sheetArrival.value;
+      departure.value=sheetDeparture.value;
+      refresh();
+      closeSheet();
+    });
+
+    document.addEventListener('keydown',function(e){
+      if(e.key==='Escape'&&sheet.classList.contains('show'))closeSheet();
+    });
     refresh();
-    closeSheet();
-  });
+  }
 
-  document.addEventListener('keydown',function(e){
-    if(e.key==='Escape'&&sheet.classList.contains('show'))closeSheet();
-  });
-  refresh();
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',initVacDateSheet,{once:true});
+  }else{
+    initVacDateSheet();
+  }
 })();
 </script>
+
 
 
 
