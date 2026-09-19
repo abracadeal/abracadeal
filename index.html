@@ -10093,12 +10093,53 @@ document.addEventListener('DOMContentLoaded',()=>{
     }catch(_){}
   }
 
+  let proBillingDeepLinkRetries=0;
+  async function handleBillingDeepLink(){
+    const params=new URLSearchParams(location.search);
+    const action=params.get('billing');
+    if(!['manage','cancel'].includes(action))return;
+
+    if(!currentUser){
+      try{window.setAuthTab?.('login');openModal('accountModal');}catch(_){}
+      return;
+    }
+    if(!currentProfile){
+      if(proBillingDeepLinkRetries<8){
+        proBillingDeepLinkRetries++;
+        setTimeout(handleBillingDeepLink,250);
+      }
+      return;
+    }
+    if(currentProfile.account_type!=='professionnel'){
+      toast('Ce lien est réservé aux comptes professionnels');
+      return;
+    }
+
+    try{
+      const url=new URL(location.href);
+      url.searchParams.delete('billing');
+      history.replaceState({},document.title,url.pathname+(url.search||'')+(url.hash||''));
+    }catch(_){}
+
+    await openProBillingPortal(action==='cancel'?'cancel':'manage');
+  }
+
   window.loadProBillingPanel=loadProBillingPanel;
   byId('manageProBillingBtn')?.addEventListener('click',()=>openProBillingPortal('manage'));
   byId('cancelProSubscriptionBtn')?.addEventListener('click',()=>openProBillingPortal('cancel'));
   byId('accountBtn')?.addEventListener('click',()=>setTimeout(loadProBillingPanel,80));
-  window.addEventListener('abracadeal:auth',()=>setTimeout(()=>{loadProBillingPanel();handleBillingReturn();},120));
-  setTimeout(()=>{if(currentUser&&currentProfile?.account_type==='professionnel'){loadProBillingPanel();handleBillingReturn();}},700);
+  window.addEventListener('abracadeal:auth',()=>setTimeout(()=>{
+    loadProBillingPanel();
+    handleBillingReturn();
+    handleBillingDeepLink();
+  },120));
+  setTimeout(()=>{
+    handleBillingDeepLink();
+    if(currentUser&&currentProfile?.account_type==='professionnel'){
+      loadProBillingPanel();
+      handleBillingReturn();
+    }
+  },700);
 })();
 </script>
 </body>
