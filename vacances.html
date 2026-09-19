@@ -2253,6 +2253,28 @@ body.vac-date-open .vac-mobile-bottom-nav{
 }
 
 </style>
+<style id="abraca-vacances-unified-modes">
+.vac-host-mode-shell{
+  width:100%;
+  min-height:calc(100dvh - 82px);
+  background:#faf7fc;
+}
+.vac-host-mode-shell.auth-hidden{display:none!important}
+.vac-host-mode-frame{
+  display:block;
+  width:100%;
+  height:calc(100dvh - 82px);
+  min-height:760px;
+  border:0;
+  background:#faf7fc;
+}
+body.vac-host-mode .vac-mobile-banner-shell{display:none!important}
+body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
+@media(max-width:760px){
+  .vac-host-mode-shell{min-height:calc(100dvh - 68px)}
+  .vac-host-mode-frame{height:calc(100dvh - 68px);min-height:640px}
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -2261,8 +2283,8 @@ body.vac-date-open .vac-mobile-bottom-nav{
     <div class="nav-actions">
       <a class="btn premium" href="index.html">Abracadeal</a>
       <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
-      <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">S’inscrire</a>
-      <a class="btn primary" id="hostSignupCta" href="espace-hote.html?host_signup=1">Devenir hôte</a>
+      <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">Créer un compte</a>
+      <a class="btn primary" id="hostSignupCta" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>
     </div>
     <button class="vac-mobile-top-account" type="button" data-vac-mobile-action="account" aria-label="Mon compte">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
@@ -2316,14 +2338,18 @@ body.vac-date-open .vac-mobile-bottom-nav{
       <p class="auth-message" id="vacAuthMessage" aria-live="polite"></p>
     </div>
     <div class="auth-connected auth-hidden" id="authConnectedView">
-      <h2>Mon compte</h2>
+      <h2>Mon compte Abracadeal</h2>
       <div class="auth-connected-box">Connecté avec <strong id="authConnectedEmail"></strong></div>
       <button class="btn auth-secondary" id="vacLogoutBtn" type="button">Se déconnecter</button>
     </div>
   </div>
 </div>
 
-<main>
+<section id="vacHostMode" class="vac-host-mode-shell auth-hidden" aria-label="Espace Hôte Abracadeal">
+  <iframe id="vacHostFrame" class="vac-host-mode-frame" title="Espace Hôte Abracadeal" loading="eager"></iframe>
+</section>
+
+<main id="vacTravelerMain">
 <section class="hero">
   <div class="container hero-grid">
     <div>
@@ -2401,7 +2427,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
   </div>
 </section>
 
-<a class="vac-mobile-offer" href="espace-hote.html?host_signup=1" aria-label="Voir l'offre de lancement hôtes">
+<a class="vac-mobile-offer" href="vacances.html?mode=hote&host_signup=1" aria-label="Voir l'offre de lancement hôtes">
   <span class="vac-mobile-offer-icon" aria-hidden="true">🎁</span>
   <span><strong>Une offre spéciale pour les particuliers</strong><small>Les 500 premiers logements sont gratuits pendant 12 mois.</small></span>
   <span class="vac-mobile-offer-arrow" aria-hidden="true">›</span>
@@ -2412,7 +2438,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
     <div class="section-head"><div><h2>Un prix direct hôte</h2><p>L’hôte choisit librement son tarif. Sans commission Abracadeal sur la réservation, il peut proposer un prix plus attractif au voyageur tout en conservant davantage.</p></div></div>
     <div class="value-grid">
       <div class="value-card"><div class="icon">💬</div><h3>Contact direct</h3><p>Messagerie Abracadeal, appel, SMS ou WhatsApp prérempli pour que l’hôte sache immédiatement que le voyageur vient d’Abracadeal.</p></div>
-      <div class="value-card"><div class="icon">📅</div><h3>Calendrier & iCal</h3><p>Tarif à la nuit, périodes spéciales, séjour minimum et disponibilités. La synchronisation iCal permet d’importer les dates occupées depuis Airbnb, Booking, Abritel ou un autre calendrier compatible.</p><a class="mini-link" href="espace-hote.html">Ouvrir mon Espace Hôte →</a></div>
+      <div class="value-card"><div class="icon">📅</div><h3>Calendrier & iCal</h3><p>Tarif à la nuit, périodes spéciales, séjour minimum et disponibilités. La synchronisation iCal permet d’importer les dates occupées depuis Airbnb, Booking, Abritel ou un autre calendrier compatible.</p><a class="mini-link" href="vacances.html?mode=hote">Ouvrir mon Espace Hôte →</a></div>
       <div class="value-card"><div class="icon">🏷️</div><h3>0 % sur la réservation</h3><p>Abracadeal facture la publication du logement, pas le séjour. Aucun pourcentage n’est prélevé sur le montant payé à l’hôte.</p></div>
       <div class="value-card"><div class="icon">🔒</div><h3>Annonce encadrée</h3><p>La publication Vacances disposera de champs spécifiques : résidence principale, numéro de déclaration lorsqu’il est requis et déclaration sur l’honneur du loueur.</p></div>
     </div>
@@ -2433,7 +2459,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
       <div class="price-line"><span>Prix du séjour</span><strong>Vous décidez</strong></div>
       <div class="price-line"><span>Contact voyageur</span><strong>Direct</strong></div>
       <p class="legal">Les offres de lancement ci-dessus sont réservées aux particuliers, dans la limite des logements concernés par chaque palier. À l’issue de la période promotionnelle applicable, le tarif applicable est présenté clairement à l’hôte. L’abonnement reste sans engagement et peut être résilié à tout moment. Il concerne la publication du logement sur Abracadeal Vacances. Le contrat de location, la réservation et le paiement du séjour restent gérés directement entre l’hôte et le voyageur.</p>
-      <div class="host-actions"><a class="btn primary" href="espace-hote.html?host_signup=1">Devenir hôte</a><a class="btn secondary" href="espace-hote.html">Déjà hôte ? Ouvrir mon espace</a></div>
+      <div class="host-actions"><a class="btn primary" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a><a class="btn secondary" href="vacances.html?mode=hote">Déjà hôte ? Ouvrir mon espace</a></div>
     </div>
 
     <div class="calc">
@@ -2475,12 +2501,12 @@ body.vac-date-open .vac-mobile-bottom-nav{
   <div class="container">
     <h2>Devenez hôte sur Abracadeal Vacances</h2>
     <p><strong>Particuliers : 500 premiers logements = 12 mois gratuits • du 501e au 1000e = 4,99 €/mois pendant 6 mois.</strong><br>Puis 9,99 €/mois/logement • Sans engagement • 0 % de commission.</p>
-    <div class="cta-actions"><a class="btn primary" style="min-height:52px;padding:0 26px;font-size:1.02rem" href="espace-hote.html?host_signup=1">Devenir hôte</a><a class="btn ghost" href="espace-hote.html">Ouvrir mon Espace Hôte</a></div>
+    <div class="cta-actions"><a class="btn primary" style="min-height:52px;padding:0 26px;font-size:1.02rem" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a><a class="btn ghost" href="vacances.html?mode=hote">Ouvrir mon Espace Hôte</a></div>
   </div>
 </section>
 </main>
 
-<footer class="footer"><div class="container footer-row"><span>© Abracadeal</span><a href="index.html">Retour aux petites annonces</a></div></footer>
+<footer class="footer" id="vacTravelerFooter"><div class="container footer-row"><span>© Abracadeal</span><a href="index.html">Retour aux petites annonces</a></div></footer>
 
 <script>
 (()=>{
@@ -2545,6 +2571,47 @@ body.vac-date-open .vac-mobile-bottom-nav{
   const logoutBtn=root.getElementById('vacLogoutBtn');
   let authMode='login';
   let currentAuthUser=null;
+  const vacationPageParams=new URLSearchParams(location.search);
+  let vacationPageMode=vacationPageParams.get('mode')==='hote'?'hote':'voyageur';
+
+  function applyVacationPageMode({isHost=false,hasHost=false}={}){
+    const hostMode=vacationPageMode==='hote';
+    const travelerMain=root.getElementById('vacTravelerMain');
+    const travelerFooter=root.getElementById('vacTravelerFooter');
+    const hostShell=root.getElementById('vacHostMode');
+    const hostFrame=root.getElementById('vacHostFrame');
+    const mobileTop=root.getElementById('vacMobileTop');
+
+    document.body.classList.toggle('vac-host-mode',hostMode);
+    travelerMain?.classList.toggle('auth-hidden',hostMode);
+    travelerFooter?.classList.toggle('auth-hidden',hostMode);
+    mobileTop?.classList.toggle('auth-hidden',hostMode);
+    hostShell?.classList.toggle('auth-hidden',!hostMode);
+
+    if(hostMode&&hostFrame){
+      const signup=vacationPageParams.get('host_signup')==='1'||(!isHost&&!hasHost);
+      const src='espace-hote.html?embedded=1'+(signup?'&host_signup=1':'');
+      if(hostFrame.getAttribute('src')!==src)hostFrame.setAttribute('src',src);
+    }
+
+    if(hostSignupCta){
+      if(hostMode){
+        hostSignupCta.textContent='Mode voyageur';
+        hostSignupCta.href='vacances.html';
+      }else if(isHost){
+        hostSignupCta.textContent='Espace Hôte';
+        hostSignupCta.href='vacances.html?mode=hote';
+      }else if(hasHost){
+        hostSignupCta.textContent='Continuer inscription hôte';
+        hostSignupCta.href='vacances.html?mode=hote&host_signup=1';
+      }else{
+        hostSignupCta.textContent='Devenir hôte';
+        hostSignupCta.href='vacances.html?mode=hote&host_signup=1';
+      }
+    }
+  }
+
+  applyVacationPageMode();
 
   function setAuthMessage(message,type=''){
     authMessage.textContent=message||'';
@@ -2555,9 +2622,9 @@ body.vac-date-open .vac-mobile-bottom-nav{
     root.querySelectorAll('[data-auth-mode]').forEach(btn=>btn.classList.toggle('active',btn.dataset.authMode===authMode));
     authNameWrap.classList.toggle('auth-hidden',authMode!=='signup');
     authPhoneWrap.classList.toggle('auth-hidden',authMode!=='signup');
-    authTitle.textContent=authMode==='signup'?'Créer votre compte voyageur':'Connexion';
+    authTitle.textContent=authMode==='signup'?'Créer votre compte Abracadeal':'Connexion';
     authIntro.textContent=authMode==='signup'
-      ?'Créez votre compte voyageur. Le téléphone est obligatoire pour les échanges liés aux séjours.'
+      ?'Créez votre compte Abracadeal. Le même compte fonctionne pour les annonces, les vacances et, si vous le souhaitez, l’espace hôte.'
       :'Connectez-vous sans quitter Abracadeal Vacances.';
     authSubmit.textContent=authMode==='signup'?'S’inscrire':'Se connecter';
     authPassword.autocomplete=authMode==='signup'?'new-password':'current-password';
@@ -2627,7 +2694,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
         const displayName=authName.value.trim();
         const phone=authPhone.value.trim();
         if(!displayName){setAuthMessage('Indiquez votre nom ou prénom.','error');return}
-        if(!phone){setAuthMessage('Le numéro de téléphone est obligatoire pour un compte voyageur.','error');return}
+        if(!phone){setAuthMessage('Le numéro de téléphone est obligatoire pour créer votre compte.','error');return}
         const phoneCheck=await abracaVacPhoneAvailable(phone);
         if(!phoneCheck.ok){setAuthMessage(phoneCheck.message,'error');return}
         const normalizedPhone=phoneCheck.normalized;
@@ -2637,8 +2704,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
           options:{data:{
             display_name:displayName,
             phone:normalizedPhone,
-            account_type:'particulier',
-            vacation_role:'traveler'
+            account_type:'particulier'
           }}
         });
         if(error){setAuthMessage(error.message,'error');return}
@@ -2656,10 +2722,10 @@ body.vac-date-open .vac-mobile-bottom-nav{
           },{onConflict:'user_id'});
           await refreshVacationAuth();
           closeAuth();
-          state.textContent='Votre compte voyageur est créé.';
+          state.textContent='Votre compte Abracadeal est créé.';
           state.classList.add('show');
         }else{
-          setAuthMessage('Compte voyageur créé. Vérifiez votre e-mail pour confirmer votre inscription.','ok');
+          setAuthMessage('Compte Abracadeal créé. Vérifiez votre e-mail pour confirmer votre inscription.','ok');
         }
       }
     }finally{
@@ -2682,8 +2748,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
     vacLoginCta.textContent=user?'Mon compte':'Connexion';
     travelerSignupCta?.classList.toggle('auth-hidden',!!user);
     if(!user){
-      hostSignupCta.textContent='Devenir hôte';
-      hostSignupCta.href='espace-hote.html?host_signup=1';
+      applyVacationPageMode({isHost:false,hasHost:false});
       return;
     }
 
@@ -2713,8 +2778,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
       .eq('user_id',user.id)
       .maybeSingle();
     const isHost=!!hostProfile && hostProfile.status==='active' && hostProfile.onboarding_completed===true;
-    hostSignupCta.textContent=isHost?'Espace Hôte':'Devenir hôte';
-    hostSignupCta.href=isHost?'espace-hote.html':'espace-hote.html?host_signup=1';
+    applyVacationPageMode({isHost,hasHost:!!hostProfile});
   }
 
   if(sbVac){
@@ -2734,7 +2798,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg>
     <span>Favoris</span>
   </a>
-  <a class="vac-mobile-nav-item vac-mobile-host" href="espace-hote.html?host_signup=1">
+  <a class="vac-mobile-nav-item vac-mobile-host" href="vacances.html?mode=hote&host_signup=1">
     <span class="vac-mobile-host-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span>
     <span>Devenir hôte</span>
   </a>
