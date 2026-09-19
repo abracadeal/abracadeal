@@ -583,7 +583,31 @@ h1 span{
     font-size:1.45rem!important;
     margin-bottom:14px!important;
   }
-  .search-grid,.search-row{grid-template-columns:1fr!important}
+  .search-grid,.search-row{
+    grid-template-columns:minmax(0,1fr)!important;
+    min-width:0!important;
+    width:100%!important;
+  }
+  .search-grid .field-wrap,
+  .search-row .field-wrap{
+    min-width:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .search-grid .field,
+  .search-row .field{
+    min-width:0!important;
+    min-inline-size:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
+  .search-grid input[type="date"]{
+    display:block!important;
+    min-width:0!important;
+    min-inline-size:0!important;
+    width:100%!important;
+    max-width:100%!important;
+  }
   .search-row .btn.primary{
     width:100%!important;
     min-height:50px!important;
