@@ -6695,6 +6695,94 @@ header #flowErrorsBtn{
   }
 }
 </style>
+
+<style id="abraca-mobile-hero-exact-image-search-simple-20260919">
+@media (max-width:760px){
+  /* Même bannière exacte que le desktop : image complète, aucun recadrage */
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 10px 14px!important;
+  }
+  .banner-frame{
+    position:relative!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    border-radius:20px!important;
+    overflow:hidden!important;
+    background:none!important;
+    box-shadow:none!important;
+  }
+  .banner-frame #homeBrandLink{
+    position:static!important;
+    inset:auto!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+  }
+  .banner-frame .banner-desktop{display:none!important}
+  .banner-frame .mobile-banner-img{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center center!important;
+    border-radius:20px!important;
+    box-shadow:none!important;
+  }
+  .banner-frame::before,
+  .banner-frame::after,
+  .banner-hotspots{display:none!important}
+
+  /* Recherche mobile simplifiée : recherche + bouton uniquement */
+  #searchCity.desktop-search-city{
+    display:none!important;
+  }
+  .search-wrap{
+    width:100%!important;
+    margin:0!important;
+  }
+  .search-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:8px!important;
+    align-items:center!important;
+    padding:9px!important;
+  }
+  #searchQuery{
+    width:100%!important;
+    min-width:0!important;
+    height:46px!important;
+    min-height:46px!important;
+    font-size:16px!important;
+  }
+  #searchBtn{
+    width:auto!important;
+    min-width:112px!important;
+    height:46px!important;
+    min-height:46px!important;
+    padding:0 13px!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:390px){
+  .hero.container{padding-left:8px!important;padding-right:8px!important}
+  .banner-frame,
+  .banner-frame .mobile-banner-img{border-radius:18px!important}
+  #searchBtn{
+    min-width:104px!important;
+    padding:0 10px!important;
+    font-size:13px!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -6849,7 +6937,7 @@ header #flowErrorsBtn{
       <div class="banner-frame">
         <a id="homeBrandLink" href="/" data-home-brand aria-label="Retour à l’accueil" style="display:block;cursor:pointer">
         <img class="banner banner-desktop" src="assets/abracadeal-brand-banner.png" alt="Abracadeal">
-        <img class="mobile-banner-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Abracadeal">
+        <img class="mobile-banner-img" src="assets/abracadeal-desktop-hero.jpg" alt="Abracadeal">
         </a>
       <div class="banner-hotspots" aria-label="Catégories principales">
         <a class="banner-hotspot" href="#resultats" data-banner-category="vehicules" data-banner-sub="voitures" aria-label="Auto"></a>
