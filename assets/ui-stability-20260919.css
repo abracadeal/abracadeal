@@ -190,3 +190,19 @@ html{scrollbar-gutter:stable}
     padding-left:8px!important;
   }
 }
+
+
+/* Header Abracadeal en or — 19/09/2026 19:12 */
+@media(min-width:1367px){
+  .desktop-brand-copy strong,
+  .desktop-brand-copy small{
+    color:#e9bd55!important;
+    text-shadow:0 1px 8px rgba(233,189,85,.18)!important;
+  }
+  .desktop-brand-copy strong{
+    background:linear-gradient(180deg,#fff3ba 0%,#f4cf69 42%,#c98d22 100%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+}
