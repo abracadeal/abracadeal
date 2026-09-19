@@ -1,0 +1,92 @@
+/* Bannière principale Abracadeal — 20/09/2026 */
+.banner-frame.banner-main-live{
+  display:block!important;
+  width:min(1460px,100%)!important;
+  height:auto!important;
+  max-height:none!important;
+  margin:0 auto!important;
+  overflow:hidden!important;
+  border-radius:0!important;
+  background:#160922!important;
+  box-shadow:none!important;
+}
+.banner-frame.banner-main-live::before,
+.banner-frame.banner-main-live::after{
+  display:none!important;
+  content:none!important;
+}
+.banner-frame.banner-main-live .banner-main-image{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  max-width:none!important;
+  max-height:none!important;
+  object-fit:contain!important;
+  object-position:center!important;
+  border:0!important;
+  border-radius:0!important;
+  box-shadow:none!important;
+  filter:none!important;
+}
+.hero.container{
+  height:auto!important;
+  max-height:none!important;
+  padding-top:0!important;
+  padding-bottom:18px!important;
+}
+.hero-shell{
+  background:#11091b!important;
+  overflow:visible!important;
+}
+.search-wrap{
+  position:static!important;
+  left:auto!important;
+  right:auto!important;
+  bottom:auto!important;
+  transform:none!important;
+  width:min(1080px,calc(100% - 40px))!important;
+  margin:14px auto 0!important;
+}
+
+/* iPad / tablette : même bannière, simplement contenue */
+@media(min-width:761px) and (max-width:1366px){
+  .banner-frame.banner-main-live{
+    width:min(1100px,calc(100% - 24px))!important;
+  }
+  .search-wrap{
+    width:min(900px,calc(100% - 34px))!important;
+    margin-top:12px!important;
+  }
+}
+@media(min-width:761px) and (max-width:899px){
+  .banner-frame.banner-main-live{
+    width:calc(100% - 20px)!important;
+  }
+  .search-wrap{
+    width:calc(100% - 24px)!important;
+  }
+}
+
+/* Mobile */
+@media(max-width:760px){
+  .hero.container{
+    padding:8px 0 12px!important;
+  }
+  .banner-frame.banner-main-live{
+    display:block!important;
+    width:calc(100% - 16px)!important;
+    margin:0 auto!important;
+    overflow:hidden!important;
+    border-radius:12px!important;
+  }
+  .banner-frame.banner-main-live .banner-main-image{
+    width:100%!important;
+    height:auto!important;
+    border-radius:12px!important;
+  }
+  .search-wrap{
+    position:static!important;
+    width:calc(100% - 20px)!important;
+    margin:10px auto 0!important;
+  }
+}
