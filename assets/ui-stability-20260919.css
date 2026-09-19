@@ -469,3 +469,53 @@ html{scrollbar-gutter:stable}
     font-size:10px!important;
   }
 }
+
+
+
+/* ===== iPad / Tablette : bannière accueil mieux proportionnée ===== */
+@media (min-width:761px) and (max-width:1366px){
+  .hero-shell{
+    overflow:visible!important;
+  }
+
+  .hero.container{
+    height:auto!important;
+    padding:0 0 58px!important;
+  }
+
+  .banner-frame{
+    height:auto!important;
+    max-height:none!important;
+    aspect-ratio:25 / 4!important;
+    background-size:100% auto!important;
+    background-position:center center!important;
+    background-repeat:no-repeat!important;
+  }
+
+  .search-wrap{
+    bottom:14px!important;
+    width:min(920px,calc(100% - 64px))!important;
+  }
+
+  .search-card{
+    grid-template-columns:minmax(0,1fr) 150px!important;
+  }
+
+  #searchCity{
+    display:none!important;
+  }
+
+  .search-card .field{
+    height:48px!important;
+    min-height:48px!important;
+    font-size:13px!important;
+  }
+
+  #searchBtn{
+    width:150px!important;
+    min-width:150px!important;
+    height:48px!important;
+    min-height:48px!important;
+    font-size:13px!important;
+  }
+}
