@@ -1702,9 +1702,10 @@ h1 span{
 }
 </style>
 
+
 <style id="vacances-mobile-live-fix-20260919">
 @media(max-width:760px){
-  /* Safari already shows abracadeal.fr above the page: don't duplicate a second header. */
+  /* Safari affiche déjà le domaine au-dessus : pas de doublon dans la page. */
   .topbar{display:none!important}
 
   .vac-mobile-banner-shell{
@@ -1712,112 +1713,22 @@ h1 span{
     width:calc(100% - 20px)!important;
     margin:8px auto 10px!important;
   }
-  .vac-mobile-banner-exact{display:none!important}
-  .vac-mobile-banner-card{
-    position:relative!important;
-    display:grid!important;
-    grid-template-columns:96px minmax(0,1fr)!important;
-    grid-template-rows:1fr auto!important;
-    gap:8px 14px!important;
-    align-items:center!important;
+  .vac-mobile-banner-exact{
+    display:block!important;
     width:100%!important;
-    aspect-ratio:735/305!important;
-    min-height:0!important;
-    padding:18px 17px 13px!important;
-    overflow:hidden!important;
+    height:auto!important;
+    aspect-ratio:1000/563!important;
+    object-fit:cover!important;
+    object-position:center!important;
     border-radius:22px!important;
-    color:#35133f!important;
     border:1px solid rgba(145,72,154,.13)!important;
     box-shadow:0 12px 28px rgba(79,36,91,.10)!important;
-    background:
-      linear-gradient(90deg,rgba(255,238,249,.93) 0%,rgba(255,239,248,.77) 35%,rgba(255,247,243,.25) 68%),
-      url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1400&q=88') center 58%/cover no-repeat!important;
+    background:#f8e8f5!important;
   }
-  .vac-mobile-banner-card::before{
-    content:""!important;
-    position:absolute!important;
-    inset:0!important;
-    background:
-      radial-gradient(circle at 16% 32%,rgba(255,255,255,.74),transparent 28%),
-      linear-gradient(180deg,rgba(255,255,255,.03),rgba(242,154,214,.07))!important;
-    pointer-events:none!important;
-  }
-  .vac-mobile-banner-card::after{
-    content:"✦"!important;
-    position:absolute!important;
-    top:13px!important;right:16px!important;
-    color:#dc42a1!important;
-    font-size:19px!important;
-    text-shadow:-30px 30px 0 rgba(214,75,172,.38)!important;
-  }
-  .vac-mobile-lamp-wrap{
-    position:relative!important;
-    z-index:1!important;
-    width:90px!important;height:90px!important;
-    display:grid!important;place-items:center!important;
-    overflow:hidden!important;
-    border-radius:28px!important;
-    background:linear-gradient(145deg,#3b124f,#7c2d80)!important;
-    box-shadow:0 11px 27px rgba(83,30,99,.22),0 0 19px rgba(243,113,198,.24)!important;
-  }
-  .vac-mobile-lamp{
-    display:block!important;
-    width:100%!important;height:100%!important;
-    object-fit:cover!important;
-  }
-  .vac-mobile-banner-copy{
-    position:relative!important;z-index:1!important;min-width:0!important;
-  }
-  .vac-mobile-banner-copy strong{
-    display:block!important;
-    color:#32113d!important;
-    font:700 clamp(1.95rem,8.6vw,2.5rem)/.94 Fraunces,serif!important;
-    letter-spacing:-.04em!important;
-  }
-  .vac-mobile-banner-copy span{
-    display:block!important;
-    margin-top:7px!important;
-    color:#8f2488!important;
-    font-size:.9rem!important;
-    font-weight:900!important;
-    letter-spacing:.25em!important;
-    line-height:1!important;
-  }
-  .vac-mobile-banner-copy small{
-    display:block!important;
-    margin-top:11px!important;
-    color:#614e66!important;
-    font:500 .77rem/1.3 Fraunces,serif!important;
-  }
-  .vac-mobile-banner-benefits{
-    position:relative!important;
-    z-index:1!important;
-    grid-column:1/-1!important;
-    display:grid!important;
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-    gap:7px!important;
-    align-items:center!important;
-  }
-  .vac-mobile-banner-benefits span{
-    min-width:0!important;
-    padding:8px 5px!important;
-    border-radius:11px!important;
-    background:rgba(255,255,255,.68)!important;
-    border:1px solid rgba(120,53,128,.09)!important;
-    color:#5a2a65!important;
-    text-align:center!important;
-    font-size:.62rem!important;
-    line-height:1.15!important;
-    white-space:normal!important;
-    box-shadow:0 3px 10px rgba(75,31,86,.04)!important;
-  }
-  .vac-mobile-banner-benefits b{font-weight:750!important}
 
-  /* Keep the approved compact search directly under the banner. */
   .hero{padding-top:0!important}
   .search-box{margin-top:0!important}
 
-  /* Dock should sit at the bottom, not float too high over the content. */
   .vac-mobile-bottom-nav{
     bottom:0!important;
     left:8px!important;
@@ -1826,19 +1737,9 @@ h1 span{
   }
   body{padding-bottom:82px!important}
 }
-
 @media(max-width:390px){
   .vac-mobile-banner-shell{width:calc(100% - 16px)!important}
-  .vac-mobile-banner-card{
-    grid-template-columns:80px minmax(0,1fr)!important;
-    padding:14px 12px 11px!important;
-    border-radius:19px!important;
-  }
-  .vac-mobile-lamp-wrap{width:75px!important;height:75px!important;border-radius:22px!important}
-  .vac-mobile-banner-copy strong{font-size:1.78rem!important}
-  .vac-mobile-banner-copy span{font-size:.76rem!important}
-  .vac-mobile-banner-copy small{font-size:.67rem!important}
-  .vac-mobile-banner-benefits span{font-size:.55rem!important;padding:6px 3px!important}
+  .vac-mobile-banner-exact{border-radius:19px!important}
 }
 </style>
 </head>
@@ -1861,19 +1762,14 @@ h1 span{
 
 
 <div class="vac-mobile-banner-shell" id="vacMobileTop">
-  <div class="vac-mobile-banner-card" aria-label="Abracadeal Vacances">
-    <div class="vac-mobile-lamp-wrap"><img class="vac-mobile-lamp" alt="" aria-hidden="true"></div>
-    <div class="vac-mobile-banner-copy">
-      <strong>Abracadeal</strong>
-      <span>VACANCES</span>
-      <small>Voyagez mieux. Hébergez simplement.</small>
-    </div>
-    <div class="vac-mobile-banner-benefits" aria-hidden="true">
-      <span>⌂ <b>Séjours uniques</b></span>
-      <span>♡ <b>En direct avec les hôtes</b></span>
-      <span>✦ <b>Moins de frais</b></span>
-    </div>
-  </div>
+  <img
+    class="vac-mobile-banner-exact"
+    src="assets/abracadeal-vacances-mobile.webp"
+    alt="Abracadeal Vacances — Voyagez mieux. Hébergez simplement."
+    width="1000"
+    height="563"
+    decoding="async"
+    fetchpriority="high">
 </div>
 
 <div class="auth-modal" id="vacAuthModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="vacAuthTitle">
@@ -2419,16 +2315,5 @@ document.addEventListener('click',function(e){
 })();
 </script>
 
-<script id="vacances-mobile-banner-logo-sync-20260919">
-(function(){
-  function syncVacancesLamp(){
-    const source=document.querySelector('.topbar .brand-logo');
-    const target=document.querySelector('.vac-mobile-lamp');
-    if(source&&target&&source.src) target.src=source.src;
-  }
-  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',syncVacancesLamp);
-  else syncVacancesLamp();
-})();
-</script>
 </body>
 </html>
