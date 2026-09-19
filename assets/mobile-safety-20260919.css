@@ -72,6 +72,23 @@
     text-align:center;
   }
 
+  /* Diagnostic immobilier : toutes les classes restent visibles sans défilement horizontal. */
+  .diagnostic-scale{
+    display:grid!important;
+    grid-template-columns:repeat(7,minmax(0,1fr))!important;
+    gap:3px!important;
+    width:100%!important;
+    overflow:visible!important;
+    padding-inline:0!important;
+  }
+  .diagnostic-grade{
+    min-width:0!important;
+    width:auto!important;
+    flex:auto!important;
+    padding-inline:2px!important;
+    font-size:.72rem!important;
+  }
+
   /* Accueil principal : seules les cartes d'annonces restent en défilement horizontal. */
   #annonces .categories{
     display:grid!important;
