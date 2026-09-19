@@ -5032,6 +5032,556 @@ header #flowErrorsBtn{
 }
 
 </style>
+<style id="abraca-desktop-redesign-20260919">
+/* ===== ABRACADEAL DESKTOP PC / MAC =====
+   Version dédiée grands écrans. Mobile et tablette restent inchangés. */
+.desktop-brand,.desktop-category-nav,.desktop-featured-all{display:none}
+
+@media (min-width:1367px){
+  :root{
+    --desk-bg:#0d0719;
+    --desk-bg2:#150923;
+    --desk-panel:#1d0e2c;
+    --desk-panel2:#28113a;
+    --desk-line:rgba(255,255,255,.10);
+    --desk-soft:#cbbbd6;
+    --desk-pink:#f13daa;
+    --desk-purple:#8b2db6;
+  }
+
+  html{background:var(--desk-bg)!important}
+  body{
+    background:
+      radial-gradient(75% 34% at 50% 0%,rgba(116,37,154,.22),transparent 72%),
+      linear-gradient(180deg,var(--desk-bg) 0%,#12091e 58%,#0d0718 100%)!important;
+    color:#fff!important;
+  }
+
+  .container{
+    width:min(1500px,calc(100% - 56px))!important;
+    max-width:1500px!important;
+  }
+
+  /* Header desktop */
+  header{
+    position:sticky!important;
+    top:0!important;
+    z-index:10050!important;
+    background:rgba(11,6,19,.94)!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.22)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+  }
+  header .nav{
+    min-height:68px!important;
+    display:grid!important;
+    grid-template-columns:minmax(190px,245px) minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:18px!important;
+    padding:7px 0!important;
+  }
+
+  .desktop-brand{
+    min-width:0;
+    display:flex!important;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+  }
+  .desktop-brand-lamp{
+    width:48px;
+    height:48px;
+    overflow:hidden;
+    flex:0 0 48px;
+    border-radius:13px;
+    background:#260f37;
+    border:1px solid rgba(255,255,255,.09);
+    box-shadow:0 6px 18px rgba(0,0,0,.24);
+  }
+  .desktop-brand-lamp img{
+    display:block;
+    height:48px;
+    width:auto;
+    transform:translateX(-1px);
+  }
+  .desktop-brand-copy{display:flex;flex-direction:column;min-width:0;line-height:1}
+  .desktop-brand-copy strong{
+    font-family:Fraunces,serif;
+    font-size:25px;
+    line-height:1;
+    letter-spacing:-.025em;
+    color:#fff;
+    white-space:nowrap;
+  }
+  .desktop-brand-copy small{
+    margin-top:4px;
+    color:#bdaac8;
+    font-size:9.5px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+
+  .desktop-category-nav{
+    display:flex!important;
+    min-width:0;
+    justify-content:center;
+    align-items:center;
+    gap:4px;
+    overflow:hidden;
+  }
+  .desktop-category-link{
+    min-height:40px;
+    padding:0 8px;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:5px;
+    border-radius:11px;
+    color:#eee6f3;
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+    transition:background .15s ease,color .15s ease,transform .15s ease;
+  }
+  .desktop-category-link span{font-size:14px}
+  .desktop-category-link:hover{
+    background:rgba(255,255,255,.075);
+    color:#fff;
+    transform:translateY(-1px);
+  }
+
+  header .nav-actions{
+    display:flex!important;
+    justify-content:flex-end!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+    gap:6px!important;
+    min-width:0!important;
+  }
+  header .header-vacances-btn,
+  header #signupBtn{
+    display:none!important;
+  }
+  header .nav-actions .btn{
+    min-height:40px!important;
+    height:40px!important;
+    padding:0 12px!important;
+    border-radius:12px!important;
+    font-size:12px!important;
+    white-space:nowrap!important;
+  }
+  header #accountBtn{
+    min-width:108px!important;
+    max-width:180px!important;
+    background:rgba(255,255,255,.065)!important;
+    border:1px solid rgba(255,255,255,.12)!important;
+    color:#fff!important;
+  }
+  header .publish-trigger{
+    min-width:148px!important;
+    background:linear-gradient(135deg,#8c2ab9,#e637aa 58%,#ff4eb4)!important;
+    border-color:rgba(255,255,255,.15)!important;
+    box-shadow:0 8px 20px rgba(221,49,169,.28)!important;
+  }
+  header #b2bNavBtn,
+  header #headerStockBtn,
+  header #moderationBtn,
+  header #flowErrorsBtn,
+  header #headerMessagesBtn,
+  header #headerLogoutBtn{
+    min-width:0!important;
+    padding:0 9px!important;
+    font-size:11px!important;
+  }
+
+  /* Ordre général desktop */
+  main#top{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+  }
+  main#top>.hero-shell{order:1}
+  main#top>#homeFeaturedSection{order:2}
+  main#top>#recentSearchSection{order:3}
+  main#top>#recentViewedSection{order:4}
+  main#top>#nearbySection{order:5}
+  main#top>#b2bDiscovery{order:6}
+  main#top>#resultats{order:7}
+  main#top>.trust{order:8}
+  main#top>#pros{order:9}
+  main#top>#vacancesDiscovery{order:10}
+  main#top>#annonces{display:none!important}
+
+  /* Hero / bannière */
+  .hero-shell{
+    background:#10081b!important;
+    overflow:visible!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 0 76px!important;
+  }
+  .banner-frame{
+    width:100%!important;
+    margin:0!important;
+    border-radius:0!important;
+    overflow:hidden!important;
+    background:#180b29!important;
+    box-shadow:none!important;
+    max-height:390px!important;
+  }
+  .banner-frame::before{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    z-index:2!important;
+    pointer-events:none!important;
+    background:
+      linear-gradient(90deg,rgba(8,4,14,.16),transparent 12%,transparent 88%,rgba(8,4,14,.17)),
+      linear-gradient(180deg,transparent 66%,rgba(10,5,18,.22))!important;
+  }
+  .banner-frame::after{display:none!important}
+  .banner-desktop{
+    display:block!important;
+    width:100%!important;
+    height:390px!important;
+    max-height:390px!important;
+    object-fit:cover!important;
+    object-position:center center!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+  .mobile-banner-img{display:none!important}
+  .banner-hotspots{display:none!important}
+
+  .search-wrap{
+    position:absolute!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:22px!important;
+    width:min(1120px,calc(100% - 110px))!important;
+    transform:translateX(-50%)!important;
+    z-index:12!important;
+  }
+  .search-card{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:9px!important;
+    padding:8px!important;
+    border-radius:18px!important;
+    background:rgba(255,255,255,.985)!important;
+    border:1px solid rgba(255,255,255,.92)!important;
+    box-shadow:0 16px 44px rgba(0,0,0,.28)!important;
+  }
+  .search-card .field{
+    height:52px!important;
+    min-height:52px!important;
+    border-radius:12px!important;
+    background:#f8f5fa!important;
+    color:#25162f!important;
+    font-size:15px!important;
+    padding:0 17px!important;
+  }
+  #searchBtn{
+    width:auto!important;
+    min-width:165px!important;
+    height:52px!important;
+    min-height:52px!important;
+    padding:0 26px!important;
+    border-radius:12px!important;
+    font-size:15px!important;
+    background:linear-gradient(135deg,#7624a2,#d62dab 56%,#ef3eaa)!important;
+    box-shadow:0 8px 20px rgba(194,44,166,.28)!important;
+  }
+
+  /* Sections sur fond sombre */
+  .home-featured-section,
+  .personalized-section,
+  .listing-section,
+  .trust{
+    background:transparent!important;
+  }
+  .home-featured-section{padding:28px 0 10px!important}
+  .personalized-section{padding:18px 0 6px!important}
+  .listing-section{padding:26px 0 34px!important}
+  .home-featured-head,
+  .personalized-head,
+  .listing-head{
+    margin-bottom:14px!important;
+    align-items:flex-end!important;
+  }
+  .home-featured-head h2,
+  .personalized-head h2,
+  .listing-head h2{
+    color:#fff!important;
+    font-family:Fraunces,serif!important;
+    font-size:28px!important;
+    line-height:1.05!important;
+    letter-spacing:-.02em!important;
+  }
+  .home-featured-head p,
+  .personalized-head p,
+  .listing-head p{
+    color:#b9a9c4!important;
+    font-size:13px!important;
+  }
+  .desktop-featured-all{
+    display:inline-flex!important;
+    align-items:center;
+    color:#ded0e7;
+    font-size:12px;
+    font-weight:800;
+    white-space:nowrap;
+  }
+  .desktop-featured-all:hover{color:#ff63be}
+
+  /* Cartes desktop : 5 visibles */
+  .home-featured-grid,
+  .personalized-grid,
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    gap:12px!important;
+    overflow:visible!important;
+    padding:0!important;
+  }
+
+  .home-featured-card,
+  .personalized-card,
+  #resultats .ad-card{
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    background:linear-gradient(180deg,#21102f 0%,#180b26 100%)!important;
+    border:1px solid rgba(220,167,239,.13)!important;
+    border-radius:15px!important;
+    color:#fff!important;
+    box-shadow:0 9px 24px rgba(0,0,0,.19)!important;
+    overflow:hidden!important;
+  }
+  .home-featured-card:hover,
+  .personalized-card:hover,
+  #resultats .ad-card:hover{
+    transform:translateY(-3px)!important;
+    border-color:rgba(245,92,190,.34)!important;
+    box-shadow:0 14px 30px rgba(0,0,0,.28)!important;
+  }
+
+  .home-featured-photo,
+  .personalized-photo,
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:148px!important;
+    min-height:148px!important;
+    max-height:148px!important;
+    background:#261438!important;
+  }
+  .home-featured-body,
+  .personalized-body,
+  #resultats .ad-body{
+    padding:10px 11px 12px!important;
+  }
+  .home-featured-meta,
+  .personalized-meta,
+  #resultats .ad-meta{
+    color:#bbaac5!important;
+    font-size:10px!important;
+    line-height:1.2!important;
+    margin-bottom:4px!important;
+  }
+  .home-featured-title,
+  .personalized-title,
+  #resultats .ad-title{
+    color:#fff!important;
+    font-size:13px!important;
+    line-height:1.22!important;
+    min-height:0!important;
+    margin:0 0 5px!important;
+  }
+  .home-featured-price,
+  .personalized-price,
+  #resultats .ad-price{
+    color:#ff58b7!important;
+    font-size:17px!important;
+    line-height:1.1!important;
+    font-weight:950!important;
+    margin-bottom:5px!important;
+  }
+  .home-featured-city,
+  .personalized-city,
+  #resultats .ad-city,
+  #resultats .ad-specs{
+    color:#c7b7d0!important;
+  }
+
+  #resultats .ad-specs{
+    font-size:9.5px!important;
+    gap:3px 6px!important;
+    margin-bottom:6px!important;
+  }
+  #resultats .ad-city{font-size:10px!important}
+  #resultats .immo-card-location-extra{color:#9e8daa!important;font-size:10px!important}
+  #resultats .immo-card-unit-price,
+  #resultats .immo-card-charges{color:#9f8da9!important;font-size:10px!important}
+  #resultats .ad-actions{
+    gap:5px!important;
+    margin-top:8px!important;
+  }
+  #resultats .ad-actions .mini-btn{
+    min-height:31px!important;
+    height:31px!important;
+    padding:0 8px!important;
+    font-size:9.5px!important;
+    border-radius:8px!important;
+  }
+
+  /* Filtres */
+  .results-tools{
+    display:grid!important;
+    grid-template-columns:180px 220px!important;
+    justify-content:start!important;
+    gap:9px!important;
+    margin-bottom:13px!important;
+  }
+  .filters-toggle,
+  .sort-select,
+  .filter-chip{
+    min-height:40px!important;
+    border-radius:11px!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    background:#21102f!important;
+    color:#f5edf8!important;
+    box-shadow:none!important;
+  }
+  .filters-panel{
+    margin-bottom:16px!important;
+    background:#fdfaff!important;
+    color:#2c1737!important;
+    border:1px solid #eadff0!important;
+    border-radius:16px!important;
+  }
+
+  /* Pro/Pro au bon endroit, compact comme la maquette */
+  #b2bDiscovery{
+    width:min(1500px,calc(100% - 56px))!important;
+    max-width:1500px!important;
+    margin:20px auto 8px!important;
+    min-height:130px!important;
+    padding:24px 28px!important;
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:24px!important;
+    border:1px solid rgba(239,65,180,.38)!important;
+    border-radius:20px!important;
+    background:
+      radial-gradient(90% 130% at 0% 50%,rgba(205,38,171,.26),transparent 64%),
+      linear-gradient(120deg,#4a145f 0%,#321043 47%,#160a24 100%)!important;
+    box-shadow:0 14px 34px rgba(0,0,0,.22)!important;
+    color:#fff!important;
+  }
+  #b2bDiscovery h2{
+    margin:0 0 5px!important;
+    color:#fff!important;
+    font-family:Fraunces,serif!important;
+    font-size:28px!important;
+  }
+  #b2bDiscovery p{
+    margin:0!important;
+    max-width:660px!important;
+    color:#e1d2e8!important;
+  }
+  #b2bDiscoveryLink{
+    min-height:46px!important;
+    padding:0 22px!important;
+    border-radius:999px!important;
+    color:#fff!important;
+    background:linear-gradient(135deg,#a82bc4,#ed38ad)!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    box-shadow:0 8px 18px rgba(212,43,170,.26)!important;
+  }
+
+  /* Blocs utilitaires / offre pro plus bas */
+  .trust{padding:16px 0 12px!important}
+  .trust-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  .trust-card{
+    min-height:84px!important;
+    padding:14px 15px!important;
+    background:#180c25!important;
+    color:#fff!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:none!important;
+  }
+  .trust-card b{color:#fff!important;font-size:13px!important}
+  .trust-card span{color:#b9a8c4!important;font-size:11px!important}
+  .trust-icon{
+    background:linear-gradient(135deg,#4d176f,#8e26a9)!important;
+    color:#fff!important;
+  }
+
+  #pros{
+    padding:18px 0 10px!important;
+    background:transparent!important;
+  }
+  #pros .pro-block{
+    padding:24px 26px!important;
+    border-radius:20px!important;
+    grid-template-columns:minmax(0,1.25fr) minmax(260px,.75fr)!important;
+    background:linear-gradient(135deg,#241039,#321349)!important;
+    border:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:none!important;
+  }
+  #pros .pro-block h2{font-size:27px!important}
+  #pros .founder-simple-side{min-height:110px!important}
+
+  #vacancesDiscovery{
+    display:none!important;
+  }
+
+  /* Footer */
+  footer{
+    margin-top:20px!important;
+    padding:26px 0 30px!important;
+    background:#0b0613!important;
+    border-top:1px solid rgba(255,255,255,.08)!important;
+    color:#bcaac7!important;
+  }
+  footer .footer-row{
+    align-items:center!important;
+  }
+  footer .footer-links{
+    display:flex!important;
+    gap:20px!important;
+  }
+  footer a{color:#d8c9df!important}
+  footer a:hover{color:#ff63bd!important}
+
+  /* Les liens aide/légal restent dans Compte, mais ne sont pas dupliqués visuellement sur desktop */
+  #accountModal .account-info-links{display:none!important}
+}
+
+@media (min-width:1600px){
+  header .nav{
+    grid-template-columns:250px minmax(0,1fr) auto!important;
+    gap:22px!important;
+  }
+  .desktop-category-link{padding:0 10px;font-size:12.5px}
+  .banner-frame,.banner-desktop{height:410px!important;max-height:410px!important}
+  .home-featured-photo,.personalized-photo,
+  #resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{
+    height:158px!important;min-height:158px!important;max-height:158px!important;
+  }
+}
+
+</style>
 </head>
 <body>
 
@@ -5045,7 +5595,20 @@ header #flowErrorsBtn{
 
 <header>
   <div class="container nav">
-    <div></div>
+    <a class="desktop-brand" href="#top" aria-label="Accueil Abracadeal">
+      <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span>
+      <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez · Vendez · Louez · Voyagez</small></span>
+    </a>
+    <nav class="desktop-category-nav" aria-label="Catégories principales">
+      <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="voitures"><span>🚗</span>Auto</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="motos"><span>🏍️</span>Moto</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="immobilier"><span>🏠</span>Immobilier</a>
+      <a class="desktop-category-link" href="vacances.html"><span>🏝️</span>Vacances</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="hightech"><span>💻</span>High-tech</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="maison"><span>🛋️</span>Maison</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="mode"><span>👗</span>Mode</a>
+      <a class="desktop-category-link category-link" href="#resultats" data-category="emploi"><span>💼</span>Emploi</a>
+    </nav>
     <div class="nav-actions">
       <button class="btn b2b-entry hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">Pro/Pro<span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
       <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span class="header-lamp-crop" aria-hidden="true"><img src="assets/abracadeal-brand-banner.png" alt=""></span><span>Vacances</span></a>
@@ -5171,6 +5734,7 @@ header #flowErrorsBtn{
           <h2 id="homeFeaturedTitle">Sélection du moment</h2>
           <p>Des annonces mises en avant, choisies aléatoirement parmi toutes les catégories.</p>
         </div>
+        <a class="desktop-featured-all" href="#resultats">Voir toutes les annonces →</a>
       </div>
       <div class="home-featured-grid" id="homeFeaturedGrid"></div>
     </div>
