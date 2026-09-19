@@ -224,3 +224,42 @@
     width:100%!important;
   }
 }
+
+
+/* Desktop 2026-09-19 — ancien header retiré, fonctions regroupées dans les nouveaux accès */
+@media(min-width:1367px){
+  /* On garde uniquement les contrôles de la nouvelle maquette :
+     favoris, compte et publication. Les anciennes actions restent
+     accessibles depuis Compte / Vacances sans doubler le header. */
+  header #b2bNavBtn,
+  header #headerStockBtn,
+  header #moderationBtn,
+  header #flowErrorsBtn,
+  header #headerMessagesBtn,
+  header #headerLogoutBtn,
+  header .header-vacances-btn,
+  header .abraca-vacances-top,
+  header #signupBtn{
+    display:none!important;
+  }
+
+  header .nav-actions{
+    gap:8px!important;
+  }
+
+  header .account-auth-group{
+    display:flex!important;
+    align-items:center!important;
+    min-width:0!important;
+  }
+
+  header #accountBtn{
+    display:inline-flex!important;
+  }
+
+  header .desktop-favorites-btn,
+  header #accountBtn,
+  header .publish-trigger{
+    flex:0 0 auto!important;
+  }
+}
