@@ -10979,10 +10979,10 @@ $('#searchBtn').addEventListener('click',async()=>{
 });
 ['#searchQuery','#searchCity'].forEach(sel=>$(sel).addEventListener('keydown',e=>{if(e.key==='Enter')$('#searchBtn').click()}));
 $('#nearbySearchBtn')?.addEventListener('click',requestNearby);
-$('.category-link').forEach(a=>a.addEventListener('click',e=>{
+document.querySelectorAll('.category-link').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();navigateCatalogue(a.dataset.category||'',a.dataset.sub||'');
 }));
-$('.immo-menu-filter').forEach(a=>a.addEventListener('click',async e=>{
+document.querySelectorAll('.immo-menu-filter').forEach(a=>a.addEventListener('click',async e=>{
   e.preventDefault();
   resetSearchFilters();
   activeCategory='immobilier';
