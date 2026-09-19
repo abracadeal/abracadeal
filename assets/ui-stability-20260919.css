@@ -220,3 +220,42 @@ html{scrollbar-gutter:stable}
     min-height:284px!important;
   }
 }
+
+
+/* Pastille messages sur le nom du compte — 19/09/2026 19:15 */
+@media(min-width:761px){
+  header #accountBtn{
+    position:relative!important;
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:7px!important;
+    overflow:visible!important;
+  }
+  header #accountBtn #accountBtnLabel{
+    min-width:0!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  header #accountBtn .account-unread-badge{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-width:19px!important;
+    height:19px!important;
+    padding:0 5px!important;
+    border-radius:999px!important;
+    background:linear-gradient(135deg,#ff4f9d,#e42f7f)!important;
+    color:#fff!important;
+    border:2px solid #1c1029!important;
+    box-shadow:0 3px 10px rgba(228,47,127,.42)!important;
+    font-size:10px!important;
+    line-height:1!important;
+    font-weight:950!important;
+    flex:0 0 auto!important;
+  }
+  header #accountBtn .account-unread-badge.hidden{
+    display:none!important;
+  }
+}
