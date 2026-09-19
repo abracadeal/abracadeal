@@ -2573,8 +2573,10 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   let currentAuthUser=null;
   const vacationPageParams=new URLSearchParams(location.search);
   let vacationPageMode=vacationPageParams.get('mode')==='hote'?'hote':'voyageur';
+  let lastVacationHostState={isHost:false,hasHost:false};
 
   function applyVacationPageMode({isHost=false,hasHost=false}={}){
+    lastVacationHostState={isHost:!!isHost,hasHost:!!hasHost};
     const hostMode=vacationPageMode==='hote';
     const travelerMain=root.getElementById('vacTravelerMain');
     const travelerFooter=root.getElementById('vacTravelerFooter');
@@ -2627,6 +2629,7 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   }
 
   applyVacationPageMode();
+  document.addEventListener('DOMContentLoaded',()=>applyVacationPageMode(lastVacationHostState),{once:true});
 
   function setAuthMessage(message,type=''){
     authMessage.textContent=message||'';
