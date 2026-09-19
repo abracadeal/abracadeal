@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Abracadeal Vacances — Location saisonnière en direct</title>
 <meta name="description" content="Abracadeal Vacances : locations saisonnières en direct. Offre de lancement particuliers : 500 premiers logements gratuits pendant 12 mois, puis 4,99 € par mois du 501e au 1000e logement pendant 6 mois. Sans engagement, 0 % de commission.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1791,6 +1791,184 @@ h1 span{
   .vac-france-launch-note{font-size:.64rem!important}
 }
 </style>
+
+<style id="vacances-mobile-nozoom-controls-20260919">
+@media(max-width:760px){
+  html{-webkit-text-size-adjust:100%!important;text-size-adjust:100%!important}
+
+  .vac-mobile-banner-shell{
+    width:calc(100% - 20px)!important;
+    margin:8px auto 10px!important;
+  }
+  .vac-mobile-banner-exact{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    aspect-ratio:16/9!important;
+    object-fit:cover!important;
+    border-radius:22px!important;
+    background:#f8e8f5!important;
+  }
+
+  /* iOS zooms form controls below 16 px: keep every interactive value at 16 px. */
+  #vacationSearch input,
+  #vacationSearch select,
+  #vacationSearch button{
+    font-size:16px!important;
+    -webkit-text-size-adjust:100%!important;
+  }
+
+  #vacationSearch .search-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:10px!important;
+  }
+  #vacationSearch .vac-destination-tile{
+    grid-column:1/-1!important;
+  }
+
+  #vacationSearch .vac-search-tile{
+    position:relative!important;
+    min-width:0!important;
+    min-height:76px!important;
+    padding:12px 12px 10px 46px!important;
+    border:1px solid #e7dbe9!important;
+    border-radius:17px!important;
+    background:#fff!important;
+    box-shadow:0 5px 16px rgba(80,35,90,.055)!important;
+    overflow:visible!important;
+    transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease!important;
+  }
+  #vacationSearch .vac-search-tile:focus-within{
+    border-color:#c35ab5!important;
+    box-shadow:0 0 0 3px rgba(211,73,174,.10),0 6px 18px rgba(80,35,90,.07)!important;
+    transform:none!important;
+  }
+
+  #vacationSearch .vac-search-icon{
+    position:absolute!important;
+    left:13px!important;
+    top:22px!important;
+    width:24px!important;
+    height:24px!important;
+    display:grid!important;
+    place-items:center!important;
+    color:#74217e!important;
+    font-size:0!important;
+  }
+  #vacationSearch .vac-search-icon svg{
+    width:24px!important;
+    height:24px!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.8!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+  }
+
+  #vacationSearch .vac-search-tile label{
+    display:block!important;
+    margin:0 0 4px!important;
+    color:#44204f!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    font-weight:850!important;
+  }
+
+  #vacationSearch .vac-search-tile .field,
+  #vacationSearch .vac-date-trigger{
+    width:100%!important;
+    height:30px!important;
+    min-height:30px!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    outline:0!important;
+    background:transparent!important;
+    color:#645568!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+    line-height:30px!important;
+    text-align:left!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+  }
+  #vacationSearch .vac-search-tile .field::placeholder{
+    color:#8f8392!important;
+    opacity:1!important;
+  }
+
+  #vacationSearch .vac-guests-tile{
+    padding-right:15px!important;
+  }
+  #vacationSearch .vac-guests-tile select{
+    -webkit-appearance:auto!important;
+    appearance:auto!important;
+    padding-right:20px!important;
+  }
+
+  #vacationSearch .vac-date-fields{
+    position:absolute!important;
+    width:1px!important;
+    height:1px!important;
+    opacity:0!important;
+    pointer-events:none!important;
+    overflow:hidden!important;
+  }
+
+  #vacationSearch .search-row{
+    display:block!important;
+    margin-top:10px!important;
+  }
+  #vacationSearch .search-row .btn.primary{
+    width:100%!important;
+    min-height:54px!important;
+    border-radius:16px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:9px!important;
+    font-size:17px!important;
+    font-weight:850!important;
+    touch-action:manipulation!important;
+  }
+  #vacationSearch .vac-search-submit-icon{
+    width:22px!important;
+    height:22px!important;
+    display:inline-grid!important;
+    place-items:center!important;
+  }
+  #vacationSearch .vac-search-submit-icon svg{
+    width:21px!important;height:21px!important;
+    fill:none!important;stroke:currentColor!important;stroke-width:2!important;
+    stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+
+  /* Keep the dock out of the way while the iPhone keyboard is open. */
+  body.vac-keyboard-open .vac-mobile-bottom-nav{
+    opacity:0!important;
+    transform:translateY(120%)!important;
+    pointer-events:none!important;
+  }
+
+  .vac-mobile-bottom-nav{
+    transition:transform .18s ease,opacity .18s ease!important;
+  }
+}
+@media(max-width:390px){
+  .vac-mobile-banner-shell{width:calc(100% - 16px)!important}
+  #vacationSearch .search-grid{gap:8px!important}
+  #vacationSearch .vac-search-tile{
+    min-height:72px!important;
+    padding-left:43px!important;
+  }
+  #vacationSearch .vac-search-icon{
+    left:11px!important;
+    top:20px!important;
+  }
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -1813,7 +1991,7 @@ h1 span{
 <div class="vac-mobile-banner-shell" id="vacMobileTop">
   <img
     class="vac-mobile-banner-exact"
-    src="assets/abracadeal-vacances-mobile.webp?v=20260919-2"
+    src="assets/abracadeal-vacances-mobile.webp?v=20260919-3"
     alt="Abracadeal Vacances — Voyagez mieux. Hébergez simplement."
     width="1000"
     height="563"
@@ -1882,12 +2060,12 @@ h1 span{
       <p class="search-subtitle">Des hébergements uniques, partout en France.</p><p class="vac-france-launch-note">🇫🇷 Pour le lancement, Abracadeal Vacances est disponible en France uniquement.</p>
       <div class="search-grid">
         <div class="field-wrap vac-search-tile vac-destination-tile">
-          <span class="vac-search-icon" aria-hidden="true">⌖</span>
+          <span class="vac-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s6-5.2 6-11a6 6 0 1 0-12 0c0 5.8 6 11 6 11Z"/><circle cx="12" cy="10" r="2.2"/></svg></span>
           <label for="destination">Destination</label>
-          <input class="field" id="destination" placeholder="Où voulez-vous aller ?">
+          <input class="field" id="destination" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="Ville ou destination">
         </div>
         <div class="field-wrap vac-search-tile vac-dates-tile">
-          <span class="vac-search-icon" aria-hidden="true">▣</span>
+          <span class="vac-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4M17 3v4M3 10h18"/></svg></span>
           <label>Dates</label>
           <button class="vac-date-trigger" id="vacDateTrigger" type="button">Ajouter des dates</button>
           <div class="vac-date-fields">
@@ -1896,13 +2074,13 @@ h1 span{
           </div>
         </div>
         <div class="field-wrap vac-search-tile vac-guests-tile">
-          <span class="vac-search-icon" aria-hidden="true">♙</span>
+          <span class="vac-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 20c.4-4 2.5-6 5.5-6s5.1 2 5.5 6M14 15c2.7-.5 5.5 1 6.3 4"/></svg></span>
           <label for="guests">Voyageurs</label>
           <select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 voyageurs et +</option></select>
         </div>
       </div>
       <div class="search-row">
-        <button class="btn primary" type="submit"><span class="vac-search-submit-icon" aria-hidden="true">⌕</span> Rechercher</button>
+        <button class="btn primary" type="submit"><span class="vac-search-submit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="m20 20-4.3-4.3"/></svg></span> Rechercher</button>
       </div>
       <div class="search-note">La recherche tient compte des disponibilités Abracadeal et des calendriers iCal synchronisés.</div>
     </form>
@@ -2364,5 +2542,24 @@ document.addEventListener('click',function(e){
 })();
 </script>
 
+
+<script id="vacances-mobile-keyboard-guard-20260919">
+(function(){
+  const form=document.getElementById('vacationSearch');
+  if(!form)return;
+  form.addEventListener('focusin',function(e){
+    if(e.target.matches('input,textarea')) document.body.classList.add('vac-keyboard-open');
+  });
+  form.addEventListener('focusout',function(e){
+    if(e.target.matches('input,textarea')){
+      setTimeout(function(){
+        if(!form.contains(document.activeElement) || !document.activeElement.matches('input,textarea')){
+          document.body.classList.remove('vac-keyboard-open');
+        }
+      },120);
+    }
+  });
+})();
+</script>
 </body>
 </html>
