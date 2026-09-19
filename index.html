@@ -2,7 +2,9 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">\n<meta name="screen-orientation" content="portrait">\n<meta name="x5-orientation" content="portrait">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="screen-orientation" content="portrait">
+<meta name="x5-orientation" content="portrait">
 <title>Abracadeal</title>
 <script>
 // Toujours revenir en haut de l’accueil après un rafraîchissement/navigation restaurée.
@@ -4205,6 +4207,39 @@ header #flowErrorsBtn{
 }
 @media(max-width:390px){
   .banner-frame,.banner-frame .mobile-banner-img{border-radius:22px!important}
+}
+</style>
+
+<style id="abraca-mobile-banner-compact-20260919">
+@media(max-width:760px){
+  .banner-frame{
+    aspect-ratio:auto!important;
+    height:180px!important;
+    max-height:180px!important;
+    margin-bottom:12px!important;
+  }
+  .banner-frame #homeBrandLink{
+    width:100%!important;
+    height:180px!important;
+    overflow:hidden!important;
+    border-radius:24px!important;
+  }
+  .banner-frame .mobile-banner-img{
+    width:100%!important;
+    height:180px!important;
+    max-height:180px!important;
+    object-fit:cover!important;
+    object-position:center 50%!important;
+    border-radius:24px!important;
+  }
+}
+@media(max-width:390px){
+  .banner-frame,
+  .banner-frame #homeBrandLink,
+  .banner-frame .mobile-banner-img{
+    height:165px!important;
+    max-height:165px!important;
+  }
 }
 </style>
 </head>
