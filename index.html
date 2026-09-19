@@ -5611,6 +5611,103 @@ header #flowErrorsBtn{
   .featured-badge::after{animation:none!important}
 }
 </style>
+
+<style id="abraca-featured-strong-shine-fix-20260919">
+/* Badge À LA UNE : reflet nettement plus visible */
+.featured-badge{
+  position:absolute!important;
+  z-index:3!important;
+  overflow:hidden!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#4a3100!important;
+  background:linear-gradient(135deg,#fff9d7 0%,#ffe16e 18%,#d6a91f 40%,#fff2a4 58%,#b97b05 100%)!important;
+  border:1px solid rgba(255,235,165,.98)!important;
+  box-shadow:
+    0 0 0 1px rgba(255,219,94,.32),
+    0 0 16px rgba(255,197,45,.30),
+    0 6px 20px rgba(214,157,24,.48),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -2px 5px rgba(125,82,0,.24)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.68)!important;
+  letter-spacing:.05em!important;
+  text-transform:uppercase!important;
+}
+
+.featured-badge::after{
+  content:""!important;
+  position:absolute!important;
+  top:-65%!important;
+  left:-105%!important;
+  width:62%!important;
+  height:230%!important;
+  background:linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255,255,255,.10) 20%,
+    rgba(255,255,255,.98) 46%,
+    rgba(255,255,255,1) 54%,
+    rgba(255,255,255,.14) 80%,
+    transparent 100%
+  )!important;
+  transform:skewX(-22deg)!important;
+  filter:blur(.1px)!important;
+  animation:abracaFeaturedStrongShine 2.05s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+
+@keyframes abracaFeaturedStrongShine{
+  0%,12%{left:-105%}
+  68%,100%{left:165%}
+}
+
+/* Immobilier : sépare clairement le prix principal du prix au m² */
+#resultats .ad-card.immo-card .ad-price{
+  margin-bottom:10px!important;
+  line-height:1.08!important;
+}
+
+#resultats .ad-card.immo-card .immo-card-unit-price{
+  display:block!important;
+  margin-top:2px!important;
+  margin-bottom:9px!important;
+  line-height:1.3!important;
+  font-size:.78rem!important;
+  color:#bdaec7!important;
+}
+
+#resultats .ad-card.immo-card .immo-card-charges{
+  margin-top:2px!important;
+  margin-bottom:8px!important;
+  line-height:1.25!important;
+}
+
+@media(max-width:760px){
+  #resultats .ad-card.immo-card .ad-price{
+    margin-bottom:7px!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price{
+    margin-top:1px!important;
+    margin-bottom:6px!important;
+    line-height:1.25!important;
+  }
+
+  #resultats .featured-badge{
+    box-shadow:
+      0 0 0 1px rgba(255,219,94,.28),
+      0 0 13px rgba(255,197,45,.26),
+      0 5px 15px rgba(214,157,24,.40),
+      inset 0 1px 0 rgba(255,255,255,.96),
+      inset 0 -2px 4px rgba(125,82,0,.20)!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .featured-badge::after{animation:none!important}
+}
+</style>
 </head>
 <body>
 
