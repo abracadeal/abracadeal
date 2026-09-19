@@ -6089,6 +6089,37 @@ header #flowErrorsBtn{
 }
 </style>
 
+
+<style id="abraca-mobile-search-and-equal-cards-20260919">
+/* Recherche simplifiée : mot-clé + bouton uniquement. */
+@media(min-width:761px){
+  .search-card{
+    grid-template-columns:minmax(0,1fr) auto!important;
+  }
+}
+
+/* Résultats mobile : toutes les cartes prennent exactement la hauteur de la plus grande. */
+@media(max-width:760px){
+  #resultats .ads-grid{
+    align-items:stretch!important;
+  }
+  #resultats .ad-card{
+    align-self:stretch!important;
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+  }
+  #resultats .ad-body{
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #resultats .ad-actions{
+    margin-top:auto!important;
+  }
+}
+</style>
+
 </head>
 <body>
 
@@ -6261,7 +6292,7 @@ header #flowErrorsBtn{
       <div class="search-wrap">
         <div class="search-card">
           <input class="field" id="searchQuery" type="text" placeholder="Que recherchez-vous ?">
-          <input class="field desktop-search-city" id="searchCity" type="text" inputmode="search" placeholder="Ville, code postal..." value="">
+          <input id="searchCity" type="hidden" value="">
           <button class="search-btn" id="searchBtn" type="button">Rechercher</button>
           
         </div>
