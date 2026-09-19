@@ -118,9 +118,9 @@
     width:min(1000px,calc(100% - 28px))!important;
     height:auto!important;
     max-height:none!important;
-    aspect-ratio:25/4!important;
+    aspect-ratio:800 / 293!important;
     margin:0 auto!important;
-    background-image:var(--abraca-main-banner)!important;
+    background-image:url("abracadeal-banner-current.jpg")!important;
     background-size:100% 100%!important;
     background-position:center center!important;
     background-repeat:no-repeat!important;
@@ -269,7 +269,7 @@
 
   /* Utilise uniquement la bannière principale actuelle définie dans --abraca-main-banner. */
   .banner-frame{
-    background-image:var(--abraca-main-banner)!important;
+    background-image:url("abracadeal-banner-current.jpg")!important;
     background-size:100% 100%!important;
     background-position:center center!important;
     background-repeat:no-repeat!important;
