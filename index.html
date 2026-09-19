@@ -4552,6 +4552,49 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-sticky-search-20260919">
+/* Barre de recherche flottante : reste visible en haut pendant le scroll */
+@media(max-width:760px){
+  .search-wrap.search-sticky-floating{
+    position:fixed!important;
+    top:8px!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:auto!important;
+    width:auto!important;
+    max-width:none!important;
+    margin:0!important;
+    transform:none!important;
+    z-index:10080!important;
+  }
+  .search-wrap.search-sticky-floating .search-card{
+    margin:0!important;
+    padding:7px!important;
+    border-radius:16px!important;
+    background:rgba(255,255,255,.97)!important;
+    border:1px solid rgba(255,255,255,.9)!important;
+    box-shadow:0 10px 30px rgba(15,5,24,.32)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    backdrop-filter:blur(14px)!important;
+  }
+  .search-wrap.search-sticky-floating .field{
+    height:46px!important;
+    min-height:46px!important;
+    font-size:16px!important;
+    border-radius:12px!important;
+  }
+  .search-wrap.search-sticky-floating .search-btn{
+    height:46px!important;
+    min-height:46px!important;
+    border-radius:12px!important;
+  }
+  .sticky-search-placeholder{
+    width:100%!important;
+    pointer-events:none!important;
+    visibility:hidden!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -11422,6 +11465,82 @@ document.addEventListener('DOMContentLoaded',()=>{
       }catch(_){}
     },700);
   },{once:true});
+})();
+</script>
+<script id="abraca-sticky-search-script-20260919">
+(() => {
+  const mq = window.matchMedia('(max-width: 760px)');
+  let wrap = null;
+  let placeholder = null;
+  let triggerY = 0;
+  let floating = false;
+
+  function ensureRefs(){
+    wrap = document.querySelector('.search-wrap');
+    if (!wrap) return false;
+    if (!placeholder) {
+      placeholder = document.createElement('div');
+      placeholder.className = 'sticky-search-placeholder';
+      placeholder.setAttribute('aria-hidden','true');
+    }
+    return true;
+  }
+
+  function measure(){
+    if (!ensureRefs() || floating || !mq.matches) return;
+    const rect = wrap.getBoundingClientRect();
+    triggerY = window.scrollY + rect.top;
+    placeholder.style.height = Math.ceil(rect.height) + 'px';
+  }
+
+  function floatSearch(){
+    if (!ensureRefs() || floating || !mq.matches) return;
+    const rect = wrap.getBoundingClientRect();
+    placeholder.style.height = Math.ceil(rect.height) + 'px';
+    wrap.parentNode.insertBefore(placeholder, wrap);
+    document.body.appendChild(wrap);
+    wrap.classList.add('search-sticky-floating');
+    floating = true;
+  }
+
+  function restoreSearch(){
+    if (!ensureRefs() || !floating) return;
+    if (placeholder && placeholder.parentNode) {
+      placeholder.parentNode.insertBefore(wrap, placeholder);
+      placeholder.remove();
+    }
+    wrap.classList.remove('search-sticky-floating');
+    floating = false;
+    requestAnimationFrame(measure);
+  }
+
+  function update(){
+    if (!ensureRefs()) return;
+    if (!mq.matches) {
+      restoreSearch();
+      return;
+    }
+    if (!floating && window.scrollY > triggerY + 6) floatSearch();
+    else if (floating && window.scrollY <= triggerY + 6) restoreSearch();
+  }
+
+  function init(){
+    if (!ensureRefs()) return;
+    measure();
+    update();
+  }
+
+  window.addEventListener('load', init, {once:true});
+  window.addEventListener('pageshow', () => { requestAnimationFrame(() => { measure(); update(); }); });
+  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('resize', () => {
+    if (floating) restoreSearch();
+    requestAnimationFrame(() => { measure(); update(); });
+  });
+  if (mq.addEventListener) mq.addEventListener('change', () => {
+    if (!mq.matches) restoreSearch();
+    else requestAnimationFrame(() => { measure(); update(); });
+  });
 })();
 </script>
 </body>
