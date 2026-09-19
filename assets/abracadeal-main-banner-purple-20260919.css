@@ -3,13 +3,13 @@
 
 /* Nouvelle bannière principale Abracadeal */
 .banner-frame{
-  background-image:var(--abraca-main-banner-purple)!important;
+  background-image:var(--abraca-main-banner)!important;
   background-color:#160623!important;
   background-position:center center!important;
   background-repeat:no-repeat!important;
 }
 
-@media(min-width:1367px){
+@media(min-width:761px){
   .hero.container{
     height:370px!important;
     padding:0 0 70px!important;
@@ -25,14 +25,7 @@
   }
 }
 
-@media(min-width:901px) and (max-width:1366px){
-  .banner-frame{
-    background-size:cover!important;
-    background-position:center center!important;
-  }
-}
-
-@media(max-width:900px){
+@media(max-width:760px){
   .banner-frame{
     background-size:cover!important;
     background-position:center center!important;
