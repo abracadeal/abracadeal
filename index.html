@@ -4831,6 +4831,207 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-tablet-layout-20260919">
+
+/* ===== TABLETTE / iPad =====
+   Portrait : 761–1024px
+   Paysage : 1025–1366px
+*/
+
+/* iPad / tablette portrait */
+@media (min-width:761px) and (max-width:1024px) and (orientation:portrait){
+  .container{width:calc(100% - 32px)!important;max-width:none!important}
+
+  header .nav{
+    min-height:64px!important;
+    gap:10px!important;
+  }
+  header .nav-actions{
+    gap:7px!important;
+    flex-wrap:wrap!important;
+    justify-content:flex-end!important;
+  }
+  header .nav-actions .btn{
+    min-height:40px!important;
+    padding:0 11px!important;
+    font-size:.78rem!important;
+  }
+
+  .hero{
+    padding-top:10px!important;
+    padding-bottom:118px!important;
+  }
+  .banner-frame{
+    margin-left:0!important;
+    margin-right:0!important;
+    border-radius:22px!important;
+    overflow:hidden!important;
+    box-shadow:0 18px 46px rgba(25,8,38,.22)!important;
+  }
+  .banner-frame::before,
+  .banner-frame::after{border-radius:22px!important}
+  .banner{border-radius:22px!important}
+
+  .search-wrap{
+    width:calc(100% - 64px)!important;
+    bottom:24px!important;
+  }
+  .search-card{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:10px!important;
+    padding:10px!important;
+  }
+  .search-card .field,
+  .search-card .search-btn{
+    height:54px!important;
+    min-height:54px!important;
+  }
+  #searchBtn{
+    min-width:150px!important;
+    width:auto!important;
+  }
+
+  #annonces .categories{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:11px!important;
+  }
+  #annonces .cat{
+    min-height:118px!important;
+    padding:14px!important;
+  }
+
+  .home-featured-grid,
+  .personalized-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 10px!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-snap-type:x proximity!important;
+  }
+  .home-featured-grid::-webkit-scrollbar,
+  .personalized-grid::-webkit-scrollbar{display:none!important}
+
+  .home-featured-card,
+  .personalized-card{
+    flex:0 0 29vw!important;
+    width:29vw!important;
+    min-width:29vw!important;
+    max-width:29vw!important;
+    scroll-snap-align:start!important;
+  }
+  .home-featured-photo,
+  .personalized-photo{height:150px!important}
+
+  #resultats .ads-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:flex-start!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 12px!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+    scroll-snap-type:x proximity!important;
+  }
+  #resultats .ads-grid::-webkit-scrollbar{display:none!important}
+  #resultats .ad-card{
+    flex:0 0 29vw!important;
+    width:29vw!important;
+    min-width:29vw!important;
+    max-width:29vw!important;
+    align-self:flex-start!important;
+    scroll-snap-align:start!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:155px!important;
+  }
+
+  .listing-head{align-items:flex-end!important;flex-direction:row!important}
+  .results-tools{
+    grid-template-columns:minmax(0,1fr) minmax(210px,.6fr)!important;
+    gap:10px!important;
+  }
+
+  .pro-block{grid-template-columns:1fr!important}
+  .pro-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  .steps{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+}
+
+/* iPad / tablette paysage */
+@media (min-width:1025px) and (max-width:1366px) and (orientation:landscape){
+  .container{width:calc(100% - 48px)!important;max-width:1240px!important}
+
+  header .nav{min-height:66px!important}
+  header .nav-actions{gap:8px!important}
+  header .nav-actions .btn{
+    min-height:42px!important;
+    padding:0 13px!important;
+    font-size:.82rem!important;
+  }
+
+  .hero{padding-bottom:135px!important}
+  .banner-frame{
+    margin-left:0!important;
+    margin-right:0!important;
+    border-radius:24px!important;
+    overflow:hidden!important;
+  }
+  .banner{border-radius:24px!important}
+
+  .search-wrap{
+    width:calc(100% - 86px)!important;
+    bottom:28px!important;
+  }
+  .search-card{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:10px!important;
+  }
+  #searchBtn{width:auto!important;min-width:170px!important}
+
+  #annonces .categories{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .home-featured-grid,
+  .personalized-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:12px!important;
+    overflow:visible!important;
+  }
+  #resultats .ad-card{
+    width:auto!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{height:150px!important}
+}
+
+/* iPad 1024px en paysage : garde le mode tablette sans casser le layout */
+@media (min-width:761px) and (max-width:1024px) and (orientation:landscape){
+  .container{width:calc(100% - 36px)!important;max-width:none!important}
+  header .nav-actions{gap:6px!important;flex-wrap:wrap!important}
+  header .nav-actions .btn{min-height:40px!important;padding:0 10px!important;font-size:.76rem!important}
+  .search-card{grid-template-columns:minmax(0,1fr) auto!important}
+  #searchBtn{width:auto!important;min-width:148px!important}
+  #annonces .categories{grid-template-columns:repeat(4,minmax(0,1fr))!important}
+  .home-featured-grid,.personalized-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:12px!important;
+    overflow:visible!important;
+  }
+  #resultats .ad-card{width:auto!important;min-width:0!important;max-width:none!important}
+}
+
+</style>
 </head>
 <body>
 
