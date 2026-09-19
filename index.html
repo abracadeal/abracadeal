@@ -4786,6 +4786,51 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-mobile-footer-links-account-20260919">
+/* Aide / légal déplacés dans Compte sur mobile */
+.account-info-links{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid #eee4f1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.account-info-links a{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 10px;
+  border:1px solid #e5d8ea;
+  border-radius:12px;
+  background:#faf6fc;
+  color:#5b2a70;
+  font-size:.84rem;
+  font-weight:800;
+  text-align:center;
+}
+.account-info-links a:last-child:nth-child(odd){
+  grid-column:1/-1;
+}
+@media(max-width:760px){
+  footer{
+    padding-top:18px!important;
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
+  footer .footer-row{
+    justify-content:center!important;
+    text-align:center!important;
+  }
+  footer .footer-links{
+    display:none!important;
+  }
+  .account-info-links{
+    margin-top:16px;
+    padding-top:14px;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -5734,6 +5779,14 @@ header #flowErrorsBtn{
           <button class="btn ghost" id="logoutBtn" type="button">Se déconnecter</button>
         </div>
       </div>
+
+      <nav class="account-info-links" aria-label="Aide et informations">
+        <a href="#helpModal" data-info-modal="helpModal" onclick="closeModal('accountModal')">Aide</a>
+        <a href="#safetyModal" data-info-modal="safetyModal" onclick="closeModal('accountModal')">Sécurité</a>
+        <a href="#cguModal" data-info-modal="cguModal" onclick="closeModal('accountModal')">CGU</a>
+        <a href="#privacyModal" data-info-modal="privacyModal" onclick="closeModal('accountModal')">Confidentialité</a>
+        <a href="#contactModal" data-info-modal="contactModal" onclick="closeModal('accountModal')">Contact</a>
+      </nav>
     </div>
   </div>
 </div>
