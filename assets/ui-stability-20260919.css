@@ -123,3 +123,56 @@ html{scrollbar-gutter:stable}
 #companySummary dd{
   color:#2b153d!important;
 }
+
+
+/* Cartes annonces : bordure standard discrète + Boost OR — 19/09/2026 18:12 */
+/* Les annonces normales n'ont plus de liseré blanc. */
+#resultats .ad-card{
+  border:1px solid rgba(116,66,137,.34)!important;
+  outline:none!important;
+}
+#resultats .ad-card:hover{
+  border-color:rgba(162,83,190,.52)!important;
+}
+#resultats .ad-card:focus{
+  outline:none!important;
+}
+#resultats .ad-card:focus-visible{
+  outline:2px solid rgba(241,58,173,.58)!important;
+  outline-offset:2px!important;
+}
+
+/* Une annonce boostée est identifiable immédiatement : badge + encadrement OR. */
+#resultats .ad-card.featured-card{
+  border:2px solid #d8aa42!important;
+  box-shadow:
+    0 0 0 1px rgba(255,226,143,.18),
+    0 10px 28px rgba(216,170,66,.17)!important;
+}
+#resultats .ad-card.featured-card:hover{
+  border-color:#edc45d!important;
+  box-shadow:
+    0 0 0 1px rgba(255,235,167,.24),
+    0 14px 34px rgba(216,170,66,.24)!important;
+}
+#resultats .featured-badge,
+#homeFeaturedSection .featured-badge{
+  background:linear-gradient(135deg,#b77d16 0%,#e1b447 48%,#f3cf70 100%)!important;
+  color:#241407!important;
+  border:1px solid rgba(255,240,190,.72)!important;
+  box-shadow:0 5px 14px rgba(164,111,18,.28)!important;
+}
+
+/* La section "À la une" ne contient que des annonces boostées : même code OR. */
+#homeFeaturedSection .home-featured-card{
+  border:2px solid #d8aa42!important;
+  box-shadow:
+    0 0 0 1px rgba(255,226,143,.16),
+    0 10px 28px rgba(216,170,66,.15)!important;
+}
+#homeFeaturedSection .home-featured-card:hover{
+  border-color:#edc45d!important;
+  box-shadow:
+    0 0 0 1px rgba(255,235,167,.22),
+    0 14px 34px rgba(216,170,66,.22)!important;
+}
