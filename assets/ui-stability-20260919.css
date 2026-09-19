@@ -385,3 +385,87 @@ html{scrollbar-gutter:stable}
     font-size:10.5px!important;
   }
 }
+
+
+/* ===== iPad : barre catégories compacte ===== */
+@media(min-width:761px) and (max-width:1366px){
+  header{min-height:58px!important}
+  header .nav{
+    min-height:58px!important;
+    grid-template-columns:138px minmax(0,1fr) auto!important;
+    gap:6px!important;
+    padding:4px 0!important;
+  }
+
+  .desktop-brand{padding-left:0!important}
+  .desktop-brand-copy strong{
+    font-size:19px!important;
+    line-height:1!important;
+  }
+  .desktop-brand-copy small{
+    display:none!important;
+  }
+
+  .desktop-category-nav{
+    gap:0!important;
+    justify-content:center!important;
+    overflow:visible!important;
+  }
+  .desktop-category-link{
+    min-height:34px!important;
+    height:34px!important;
+    padding:0 4px!important;
+    gap:2px!important;
+    border-radius:8px!important;
+    font-size:9px!important;
+    line-height:1!important;
+    letter-spacing:-.01em!important;
+  }
+  .desktop-category-link span{
+    display:none!important;
+  }
+  .desktop-nav-item>.desktop-category-link::after{
+    font-size:7px!important;
+    margin-left:1px!important;
+  }
+
+  header .nav-actions{
+    gap:4px!important;
+  }
+  .desktop-favorites-btn{
+    width:30px!important;
+    height:34px!important;
+    flex:0 0 30px!important;
+    font-size:22px!important;
+  }
+  header #accountBtn{
+    min-width:76px!important;
+    max-width:92px!important;
+    height:34px!important;
+    min-height:34px!important;
+    padding:0 8px!important;
+    font-size:9.5px!important;
+    border-radius:10px!important;
+  }
+  header .publish-trigger,
+  header .abraca-publish-top{
+    min-width:104px!important;
+    width:auto!important;
+    height:34px!important;
+    min-height:34px!important;
+    padding:0 8px!important;
+    font-size:9px!important;
+    border-radius:10px!important;
+  }
+
+  .desktop-submenu{
+    min-width:178px!important;
+    max-width:245px!important;
+    padding:7px!important;
+  }
+  .desktop-subcategory-link{
+    min-height:30px!important;
+    padding:0 9px!important;
+    font-size:10px!important;
+  }
+}
