@@ -3495,6 +3495,79 @@ header #flowErrorsBtn{
   z-index:10040!important;
 }
 </style>
+
+<style id="abraca-pro-billing-ui-20260919">
+.pro-billing-panel{
+  margin:16px 0;
+  padding:18px;
+  border:1px solid #e8dbea;
+  border-radius:18px;
+  background:linear-gradient(135deg,#fff 0%,#fbf5fc 100%);
+  box-shadow:0 10px 28px rgba(80,36,96,.08);
+}
+.pro-billing-head{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:14px;
+  margin-bottom:14px;
+}
+.pro-billing-head h4{margin:0 0 4px;font-size:1.05rem;color:#3f1d4d}
+.pro-billing-head p{margin:0;color:#78667f;font-size:.86rem;line-height:1.45}
+.pro-billing-status{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-height:30px;
+  padding:5px 10px;
+  border-radius:999px;
+  background:#f0e6f4;
+  color:#672979;
+  font-size:.75rem;
+  font-weight:850;
+  white-space:nowrap;
+}
+.pro-billing-status.is-active{background:#e9f8ef;color:#19724a}
+.pro-billing-status.is-warning{background:#fff4dd;color:#8a5a00}
+.pro-billing-status.is-cancelled{background:#f7e8ed;color:#9a3558}
+.pro-billing-details{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:9px;
+  margin-bottom:14px;
+}
+.pro-billing-detail{
+  padding:11px 12px;
+  border:1px solid #eee3f0;
+  border-radius:12px;
+  background:#fff;
+}
+.pro-billing-detail span{display:block;color:#817187;font-size:.72rem;font-weight:750;margin-bottom:3px}
+.pro-billing-detail strong{display:block;color:#392043;font-size:.91rem}
+.pro-billing-actions{display:flex;gap:9px;flex-wrap:wrap}
+.pro-billing-actions .btn{min-height:44px}
+.btn.pro-billing-cancel{
+  color:#a12f55;
+  background:#fff;
+  border-color:#e9c8d3;
+}
+.btn.pro-billing-cancel:hover{background:#fff5f8;border-color:#dcaabd}
+.btn.pro-billing-cancel:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.pro-billing-note{
+  margin-top:11px;
+  color:#806f86;
+  font-size:.78rem;
+  line-height:1.45;
+}
+@media(max-width:620px){
+  .pro-billing-panel{padding:15px;border-radius:16px}
+  .pro-billing-head{flex-direction:column}
+  .pro-billing-details{grid-template-columns:1fr}
+  .pro-billing-actions{flex-direction:column}
+  .pro-billing-actions .btn{width:100%}
+}
+</style>
 </head>
 <body>
 
@@ -4358,6 +4431,21 @@ header #flowErrorsBtn{
         <section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <dl id="companySummary" class="profile-summary"></dl>
+<div id="proBillingPanel" class="pro-billing-panel hidden" aria-live="polite">
+  <div class="pro-billing-head">
+    <div>
+      <h4>Mon abonnement Pro</h4>
+      <p id="proBillingIntro">Chargement de votre abonnement…</p>
+    </div>
+    <span id="proBillingStatusBadge" class="pro-billing-status">—</span>
+  </div>
+  <div id="proBillingDetails" class="pro-billing-details"></div>
+  <div id="proBillingActions" class="pro-billing-actions hidden">
+    <button type="button" class="btn primary" id="manageProBillingBtn">Gérer mon abonnement</button>
+    <button type="button" class="btn pro-billing-cancel" id="cancelProSubscriptionBtn">Résilier mon abonnement</button>
+  </div>
+  <div id="proBillingNote" class="pro-billing-note"></div>
+</div>
 <div id="proBoostWallet" class="pro-boost-wallet hidden">
   <div class="pro-boost-wallet-head">
     <div><h4>Mes Boosts</h4><p>Vos crédits de mise en avant disponibles.</p></div>
@@ -4970,6 +5058,7 @@ function renderCompanyAccount(){
   const labels={yes:'Numéro de TVA renseigné',no:'Sans numéro de TVA / franchise en base',pending:'En cours d’attribution'};
   const rows=[['Raison sociale',data.company_name],['SIRET',data.siret],['SIREN',data.siren],['Situation TVA',labels[data.vat_status]],...(data.vat_number?[['Numéro de TVA',data.vat_number]]:[])];
   $('#companySummary').innerHTML=rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value||'À compléter')}</dd></div>`).join('');
+  setTimeout(()=>window.loadProBillingPanel?.(),0);
   for(const [suffix,key] of [['Company','company_name'],['Siret','siret'],['VatStatus','vat_status'],['Vat','vat_number']]) $('#account'+suffix).value=data[key]||'';
   syncCompanyFields('account');
 }
@@ -9814,6 +9903,200 @@ document.addEventListener('DOMContentLoaded',()=>{
   }else{
     setTimeout(()=>{loadAdminDashboardStats();ensureProPlanSelection();},700);
   }
+})();
+</script>
+
+<script id="abraca-pro-billing-portal-20260919">
+(()=>{
+  let proBillingState=null;
+  let proBillingBusy=false;
+  const byId=id=>document.getElementById(id);
+  const fmtDate=value=>{
+    if(!value)return '—';
+    const d=new Date(value);
+    return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('fr-FR');
+  };
+  const planLabels={
+    pro_20:'Jusqu’à 20 annonces',
+    pro_50:'Jusqu’à 50 annonces',
+    pro_100:'Jusqu’à 100 annonces',
+    pro_250:'Jusqu’à 250 annonces'
+  };
+  const statusLabels={
+    trialing:'Période gratuite',
+    active:'Actif',
+    past_due:'Paiement à régulariser',
+    unpaid:'Impayé',
+    incomplete:'À finaliser',
+    incomplete_expired:'Expiré',
+    paused:'En pause',
+    canceled:'Résilié'
+  };
+
+  function billingStatusClass(state){
+    if(!state)return '';
+    if(state.cancel_at_period_end||state.status==='canceled')return 'is-cancelled';
+    if(state.status==='active'||state.status==='trialing')return 'is-active';
+    if(['past_due','unpaid','incomplete'].includes(state.status))return 'is-warning';
+    return '';
+  }
+
+  async function loadProBillingPanel(){
+    const panel=byId('proBillingPanel');
+    if(!panel)return null;
+    const isPro=!!currentUser&&currentProfile?.account_type==='professionnel';
+    panel.classList.toggle('hidden',!isPro);
+    if(!isPro){proBillingState=null;return null;}
+
+    const intro=byId('proBillingIntro');
+    const badge=byId('proBillingStatusBadge');
+    const details=byId('proBillingDetails');
+    const actions=byId('proBillingActions');
+    const manageBtn=byId('manageProBillingBtn');
+    const cancelBtn=byId('cancelProSubscriptionBtn');
+    const note=byId('proBillingNote');
+
+    if(intro)intro.textContent='Chargement de votre abonnement…';
+    if(badge){badge.textContent='…';badge.className='pro-billing-status';}
+    if(details)details.innerHTML='';
+    actions?.classList.add('hidden');
+    if(note)note.textContent='';
+
+    try{
+      const {data,error}=await sb
+        .from('pro_subscriptions')
+        .select('plan_code,status,source,stripe_customer_id,stripe_subscription_id,current_period_start,current_period_end,cancel_at_period_end,free_until,billing_starts_at')
+        .eq('user_id',currentUser.id)
+        .maybeSingle();
+      if(error)throw error;
+      proBillingState=data||null;
+
+      if(!data){
+        if(intro)intro.textContent='Votre formule Pro est en cours de finalisation.';
+        if(badge)badge.textContent='À finaliser';
+        if(details)details.innerHTML='<div class="pro-billing-detail"><span>Abonnement</span><strong>Aucun abonnement actif pour le moment</strong></div>';
+        if(note)note.textContent='Dès que votre formule Stripe est validée, vous pourrez la gérer et la résilier ici.';
+        return null;
+      }
+
+      const scheduled=!!data.cancel_at_period_end;
+      const hasCustomer=!!data.stripe_customer_id;
+      const hasSubscription=!!data.stripe_subscription_id;
+      const cancelled=data.status==='canceled';
+      const endDate=data.current_period_end||data.free_until||null;
+      const billingStart=data.billing_starts_at||data.free_until||null;
+
+      if(intro){
+        intro.textContent=scheduled
+          ?'Votre résiliation est programmée. Vous conservez l’accès jusqu’à la date de fin indiquée.'
+          :(data.status==='trialing'
+            ?'Votre période gratuite est active. Vous pouvez gérer votre carte ou résilier avant le début de la facturation.'
+            :'Gérez votre moyen de paiement, vos factures et votre abonnement depuis Stripe.');
+      }
+      if(badge){
+        badge.textContent=scheduled?'Résiliation programmée':(statusLabels[data.status]||data.status||'—');
+        badge.className='pro-billing-status '+billingStatusClass(data);
+      }
+      if(details){
+        details.innerHTML=[
+          ['Formule',planLabels[data.plan_code]||data.plan_code||'—'],
+          ['Statut',scheduled?'Résiliation programmée':(statusLabels[data.status]||data.status||'—')],
+          ['Début de facturation',fmtDate(billingStart)],
+          [scheduled?'Fin de l’abonnement':'Prochaine échéance / fin de période',fmtDate(endDate)]
+        ].map(([label,value])=>'<div class="pro-billing-detail"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>').join('');
+      }
+
+      const canManage=hasCustomer&&data.source==='stripe';
+      actions?.classList.toggle('hidden',!canManage);
+      if(manageBtn)manageBtn.classList.toggle('hidden',!canManage);
+
+      const canCancel=canManage&&hasSubscription&&!cancelled&&!scheduled;
+      if(cancelBtn){
+        cancelBtn.classList.toggle('hidden',!hasSubscription||cancelled);
+        cancelBtn.disabled=scheduled;
+        cancelBtn.textContent=scheduled?'Résiliation programmée':'Résilier mon abonnement';
+        if(!canCancel&&scheduled)cancelBtn.classList.remove('hidden');
+      }
+
+      if(note){
+        if(scheduled){
+          note.textContent='Aucun renouvellement ne sera effectué après le '+fmtDate(endDate)+'.';
+        }else if(data.status==='trialing'){
+          note.textContent='Une résiliation pendant la période gratuite empêche le démarrage de la facturation à la fin de l’offre.';
+        }else if(canManage){
+          note.textContent='Le portail Stripe sécurisé permet aussi de modifier la carte enregistrée et de consulter les factures.';
+        }else if(data.source!=='stripe'){
+          note.textContent='Ce compte Pro n’est pas facturé via Stripe.';
+        }
+      }
+      return data;
+    }catch(error){
+      console.error('Abonnement Pro',error);
+      proBillingState=null;
+      if(intro)intro.textContent='Impossible de charger votre abonnement pour le moment.';
+      if(badge){badge.textContent='Indisponible';badge.className='pro-billing-status is-warning';}
+      if(note)note.textContent='Réessayez dans quelques instants.';
+      return null;
+    }
+  }
+
+  async function openProBillingPortal(action){
+    if(proBillingBusy||!sb||!currentUser)return;
+    proBillingBusy=true;
+    const manageBtn=byId('manageProBillingBtn');
+    const cancelBtn=byId('cancelProSubscriptionBtn');
+    const clicked=action==='cancel'?cancelBtn:manageBtn;
+    const oldText=clicked?.textContent||'';
+    try{
+      if(clicked){clicked.disabled=true;clicked.textContent=action==='cancel'?'Ouverture de la résiliation…':'Ouverture de Stripe…';}
+      const {data,error}=await sb.functions.invoke('create-pro-billing-portal',{body:{action}});
+      if(error){
+        let detail=null;
+        try{detail=await error.context?.json()}catch(_){}
+        throw new Error(detail?.error||detail?.message||error.message||'Portail Stripe indisponible');
+      }
+      if(!data?.portal_url)throw new Error(data?.error||'Portail Stripe indisponible');
+      location.href=data.portal_url;
+    }catch(error){
+      console.error(error);
+      toast(error.message||'Impossible d’ouvrir le portail Stripe');
+      await loadProBillingPanel();
+    }finally{
+      proBillingBusy=false;
+      if(clicked&&document.body.contains(clicked)){
+        clicked.disabled=action==='cancel'?!!proBillingState?.cancel_at_period_end:false;
+        clicked.textContent=action==='cancel'
+          ?(proBillingState?.cancel_at_period_end?'Résiliation programmée':'Résilier mon abonnement')
+          :(oldText||'Gérer mon abonnement');
+      }
+    }
+  }
+
+  async function handleBillingReturn(){
+    const params=new URLSearchParams(location.search);
+    const returned=params.get('billing_return')==='1';
+    const cancelled=params.get('billing_cancelled')==='1';
+    if(!returned&&!cancelled)return;
+    for(let attempt=0;attempt<6;attempt++){
+      const state=await loadProBillingPanel();
+      if(!cancelled||state?.cancel_at_period_end||state?.status==='canceled')break;
+      await new Promise(resolve=>setTimeout(resolve,550));
+    }
+    toast(cancelled?'Résiliation Stripe enregistrée':'Retour du portail Stripe');
+    try{
+      const url=new URL(location.href);
+      url.searchParams.delete('billing_return');
+      url.searchParams.delete('billing_cancelled');
+      history.replaceState({},document.title,url.pathname+(url.search||'')+(url.hash||''));
+    }catch(_){}
+  }
+
+  window.loadProBillingPanel=loadProBillingPanel;
+  byId('manageProBillingBtn')?.addEventListener('click',()=>openProBillingPortal('manage'));
+  byId('cancelProSubscriptionBtn')?.addEventListener('click',()=>openProBillingPortal('cancel'));
+  byId('accountBtn')?.addEventListener('click',()=>setTimeout(loadProBillingPanel,80));
+  window.addEventListener('abracadeal:auth',()=>setTimeout(()=>{loadProBillingPanel();handleBillingReturn();},120));
+  setTimeout(()=>{if(currentUser&&currentProfile?.account_type==='professionnel'){loadProBillingPanel();handleBillingReturn();}},700);
 })();
 </script>
 </body>
