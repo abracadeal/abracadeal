@@ -5416,13 +5416,13 @@ header #flowErrorsBtn{
         <a class="desktop-category-link category-link" href="#resultats" data-category="immobilier"><span>🏠</span>Immobilier</a>
         <div class="desktop-submenu" aria-label="Sous-catégories Immobilier">
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="">Tout l’immobilier</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="vente-appartement">Appartement à vendre</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="vente-maison">Maison à vendre</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="vente-terrain">Terrain à vendre</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="location">Location longue durée</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="saisonniere">Location saisonnière</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="parking-garage">Parking / Garage</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="immobilier" data-sub="bureaux-commerces">Bureaux / Commerces</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="appartement">Appartement à vendre</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="maison">Maison à vendre</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="terrain">Terrain à vendre</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="location" data-immo-property="">Location longue durée</a>
+          <a class="desktop-subcategory-link" href="vacances.html">Location saisonnière</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="" data-immo-property="parking-garage">Parking / Garage</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="" data-immo-property="bureaux-commerces">Bureaux / Commerces</a>
         </div>
       </div>
       <div class="desktop-nav-item">
@@ -10979,8 +10979,22 @@ $('#searchBtn').addEventListener('click',async()=>{
 });
 ['#searchQuery','#searchCity'].forEach(sel=>$(sel).addEventListener('keydown',e=>{if(e.key==='Enter')$('#searchBtn').click()}));
 $('#nearbySearchBtn')?.addEventListener('click',requestNearby);
-$$('.category-link').forEach(a=>a.addEventListener('click',e=>{
+$('.category-link').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();navigateCatalogue(a.dataset.category||'',a.dataset.sub||'');
+}));
+$('.immo-menu-filter').forEach(a=>a.addEventListener('click',async e=>{
+  e.preventDefault();
+  resetSearchFilters();
+  activeCategory='immobilier';
+  activeVehicleSubcategory='';
+  syncFilterCategory('immobilier','');
+  if($('#filterImmoTransaction')) $('#filterImmoTransaction').value=a.dataset.immoTransaction||'';
+  if($('#filterImmoPropertyType')) $('#filterImmoPropertyType').value=a.dataset.immoProperty||'';
+  updateRealEstateFilterLabels();
+  refreshFilterCount();
+  if(currentProfile?.is_admin) setModerationButtonLabel('Modérer');
+  await loadAds();
+  document.querySelector('#resultats')?.scrollIntoView({behavior:'smooth',block:'start'});
 }));
 $('#showAll').addEventListener('click',()=>{
   resetSearchFilters();
