@@ -5429,8 +5429,9 @@ header #flowErrorsBtn{
       <div class="desktop-nav-item">
         <a class="desktop-category-link" href="vacances.html"><span>🏝️</span>Vacances</a>
         <div class="desktop-submenu" aria-label="Sous-menu Vacances">
-          <a class="desktop-subcategory-link" href="vacances.html">Locations de vacances</a>
-          <a class="desktop-subcategory-link" href="espace-hote.html">Devenir hôte</a>
+          <a class="desktop-subcategory-link" id="vacancesModeLink" href="vacances.html">Locations de vacances</a>
+          <a class="desktop-subcategory-link" id="vacancesHostLink" href="espace-hote.html?host_signup=1">Devenir hôte</a>
+          <a class="desktop-subcategory-link hidden" id="vacancesHostRequestsLink" href="demandes-hote.html">Demandes voyageurs</a>
         </div>
       </div>
       <div class="desktop-nav-item">
@@ -6889,6 +6890,47 @@ window.setAuthTab = function(which,{clearPasswords=true}={}){
   if(body) requestAnimationFrame(()=>body.scrollTo({top:0,left:0,behavior:'auto'}));
 };
 
+async function syncVacancesAccountMenu(){
+  const modeLink=document.getElementById('vacancesModeLink');
+  const hostLink=document.getElementById('vacancesHostLink');
+  const requestsLink=document.getElementById('vacancesHostRequestsLink');
+  if(!modeLink||!hostLink)return;
+
+  // État par défaut : visiteur / compte non-hôte.
+  modeLink.textContent='Locations de vacances';
+  modeLink.href='vacances.html';
+  hostLink.textContent='Devenir hôte';
+  hostLink.href='espace-hote.html?host_signup=1';
+  requestsLink?.classList.add('hidden');
+
+  if(!sb||!currentUser)return;
+
+  try{
+    const {data,error}=await sb
+      .from('vacation_hosts')
+      .select('status,onboarding_completed')
+      .eq('user_id',currentUser.id)
+      .maybeSingle();
+
+    if(error){
+      console.warn('Statut hôte indisponible',error);
+      return;
+    }
+
+    const isHost=!!data && data.onboarding_completed===true;
+    if(!isHost)return;
+
+    // Un hôte garde l'accès à la recherche de séjours, mais on le présente comme un mode voyageur.
+    modeLink.textContent='Mode voyageur';
+    modeLink.href='vacances.html';
+    hostLink.textContent='Espace Hôte';
+    hostLink.href='espace-hote.html';
+    requestsLink?.classList.remove('hidden');
+  }catch(error){
+    console.warn('Menu Vacances non synchronisé',error);
+  }
+}
+
 async function applyAuthSession(session,{preserveEditing=true}={}){
   currentUser=session?.user||null;
   currentProfile=null;
@@ -6904,6 +6946,7 @@ async function applyAuthSession(session,{preserveEditing=true}={}){
 
   try{updateAuthUI(preserveEditing);}
   catch(error){console.error('Interface compte indisponible',error);}
+  syncVacancesAccountMenu();
   return !!currentUser;
 }
 
@@ -7304,6 +7347,7 @@ async function signOutUser(closeAccountModal=false){
   favoritesMode=false;
   favoriteIds=new Set();
   clearAuthPasswords();
+  syncVacancesAccountMenu();
   const loginForm=document.getElementById('loginForm');
   if(loginForm)loginForm.reset();
   window.setAuthTab('login',{clearPasswords:false});
