@@ -62,3 +62,45 @@
     height:45%!important;
   }
 }
+
+
+/* Ajustement taille Pro/Pro — compact sans cadre — 19/09/2026 */
+#b2bDiscovery{
+  width:min(1180px,calc(100% - 80px))!important;
+  max-width:1180px!important;
+  aspect-ratio:1200/171!important;
+  margin:14px auto 20px!important;
+  border:0!important;
+  outline:0!important;
+  border-radius:10px!important;
+  box-shadow:none!important;
+}
+#b2bDiscoveryLink{
+  background:transparent!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+#b2bDiscoveryLink:hover,
+#b2bDiscoveryLink:focus,
+#b2bDiscoveryLink:focus-visible,
+#b2bDiscoveryLink:active{
+  background:transparent!important;
+  border:0!important;
+  outline:0!important;
+  box-shadow:none!important;
+  transform:none!important;
+}
+
+@media(max-width:1200px){
+  #b2bDiscovery{
+    width:calc(100% - 36px)!important;
+  }
+}
+@media(max-width:640px){
+  #b2bDiscovery{
+    width:calc(100% - 20px)!important;
+    border-radius:8px!important;
+  }
+}
