@@ -260,72 +260,62 @@ html{scrollbar-gutter:stable}
   }
 }
 
-/* ===== TABLETTE : PC compact — bannière + catégories ===== */
+/* ===== TABLETTE : version PC, seulement ajustée en taille ===== */
 @media (min-width:761px) and (max-width:1366px){
-  /* Header PC conservé, simplement resserré pour tablette. */
-  header{
-    min-height:60px!important;
+  /* Ne change PAS le visuel de bannière : on garde exactement celui du PC. */
+  .hero.container{
+    height:auto!important;
+    padding-bottom:58px!important;
   }
-  header .nav{
-    min-height:60px!important;
-    grid-template-columns:150px minmax(0,1fr) auto!important;
-    gap:8px!important;
-    padding:5px 0!important;
+  .banner-frame{
+    height:190px!important;
+    max-height:190px!important;
+    aspect-ratio:auto!important;
   }
-  .desktop-brand{
-    min-width:0!important;
-    padding-left:0!important;
-  }
-  .desktop-brand-copy strong{
-    font-size:19px!important;
-    line-height:1!important;
-  }
-  .desktop-brand-copy small{
-    display:none!important;
+  .search-wrap{
+    bottom:9px!important;
   }
 
-  /* Catégories : 8 cases régulières, sans chevauchement. */
+  /* Même barre catégories PC, simplement resserrée. */
+  header .nav{
+    grid-template-columns:145px minmax(0,1fr) auto!important;
+    gap:7px!important;
+  }
   .desktop-category-nav{
-    display:grid!important;
-    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    display:flex!important;
     align-items:center!important;
-    justify-content:stretch!important;
-    gap:2px!important;
-    width:100%!important;
+    justify-content:center!important;
+    gap:0!important;
     min-width:0!important;
     overflow:visible!important;
   }
   .desktop-nav-item{
     min-width:0!important;
-    display:flex!important;
-    justify-content:center!important;
+    flex:0 1 auto!important;
   }
   .desktop-category-link{
-    width:100%!important;
-    min-width:0!important;
-    min-height:32px!important;
-    height:32px!important;
-    padding:0 3px!important;
+    min-height:34px!important;
+    height:34px!important;
+    padding:0 4px!important;
     gap:2px!important;
-    justify-content:center!important;
-    border-radius:8px!important;
-    font-size:9px!important;
-    line-height:1!important;
-    letter-spacing:-.015em!important;
+    font-size:9.5px!important;
     white-space:nowrap!important;
   }
   .desktop-category-link span{
-    display:none!important;
+    font-size:10px!important;
   }
   .desktop-nav-item>.desktop-category-link::after{
     margin-left:1px!important;
     font-size:7px!important;
   }
 
-  /* Actions du header plus compactes mais identiques au PC. */
-  header .nav-actions{
-    gap:5px!important;
+  .desktop-brand-copy strong{
+    font-size:19px!important;
   }
+  .desktop-brand-copy small{
+    display:none!important;
+  }
+
   .desktop-favorites-btn{
     width:32px!important;
     height:34px!important;
@@ -334,12 +324,10 @@ html{scrollbar-gutter:stable}
   }
   header #accountBtn{
     min-width:76px!important;
-    max-width:92px!important;
     height:34px!important;
     min-height:34px!important;
     padding:0 9px!important;
     font-size:10px!important;
-    border-radius:10px!important;
   }
   header .publish-trigger,
   header .abraca-publish-top{
@@ -348,76 +336,33 @@ html{scrollbar-gutter:stable}
     min-height:34px!important;
     padding:0 10px!important;
     font-size:9.5px!important;
-    border-radius:10px!important;
-  }
-
-  /* Bannière : même visuel PC, mais nettement moins haute sur tablette. */
-  .hero.container{
-    width:100%!important;
-    max-width:none!important;
-    height:auto!important;
-    padding:0 0 58px!important;
-  }
-  .banner-frame{
-    width:100%!important;
-    height:220px!important;
-    max-height:220px!important;
-    aspect-ratio:auto!important;
-    margin:0!important;
-    background:#160623!important;
-    overflow:hidden!important;
-  }
-  .banner-frame #homeBrandLink{
-    position:absolute!important;
-    inset:0!important;
-    display:block!important;
-    width:100%!important;
-    height:100%!important;
-  }
-  .banner-frame .banner-desktop{
-    display:block!important;
-    visibility:visible!important;
-    opacity:1!important;
-    width:100%!important;
-    height:100%!important;
-    max-height:none!important;
-    object-fit:cover!important;
-    object-position:center center!important;
-    border-radius:0!important;
-  }
-  .banner-frame .mobile-banner-img,
-  .banner-hotspots{
-    display:none!important;
-  }
-  .search-wrap{
-    bottom:9px!important;
-    width:min(900px,calc(100% - 54px))!important;
   }
 }
 
-/* Portrait tablette : catégories sur une vraie deuxième ligne propre. */
+/* Portrait : on garde le même style PC mais les catégories ont leur propre ligne. */
 @media (min-width:761px) and (max-width:899px){
   header .nav{
     grid-template-columns:minmax(130px,1fr) auto!important;
     grid-template-areas:
       "brand actions"
-      "categories categories"!important;
-    row-gap:4px!important;
-    padding:6px 0!important;
+      "cats cats"!important;
+    row-gap:3px!important;
   }
   .desktop-brand{grid-area:brand!important}
   header .nav-actions{grid-area:actions!important}
   .desktop-category-nav{
-    grid-area:categories!important;
-    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    grid-area:cats!important;
+    width:100%!important;
+    justify-content:flex-start!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
   }
-  .desktop-category-link{
-    font-size:8.5px!important;
-    min-height:30px!important;
-    height:30px!important;
-  }
+  .desktop-category-nav::-webkit-scrollbar{display:none!important}
+  .desktop-nav-item{flex:0 0 auto!important}
   .banner-frame{
-    height:190px!important;
-    max-height:190px!important;
+    height:170px!important;
+    max-height:170px!important;
   }
 }
