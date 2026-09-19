@@ -5385,7 +5385,7 @@ header #flowErrorsBtn{
 
 <header>
   <div class="container nav">
-    <a class="desktop-brand" href="#top" aria-label="Accueil Abracadeal">
+    <a class="desktop-brand" href="/" data-home-brand aria-label="Accueil Abracadeal">
       <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-lamp-icon.webp" alt=""></span>
       <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez · Vendez · Louez · Voyagez</small></span>
     </a>
@@ -5505,7 +5505,7 @@ header #flowErrorsBtn{
 </header>
 
 <div class="mobile-topbar" aria-label="Navigation mobile Abracadeal">
-  <a class="mobile-brand" href="#top" aria-label="Accueil Abracadeal">
+  <a class="mobile-brand" href="/" data-home-brand aria-label="Accueil Abracadeal">
     <span class="mobile-brand-name">Abraca<span class="deal">deal</span><span aria-hidden="true">✦</span></span>
     <span class="mobile-brand-tag">Fais ton vœu</span>
   </a>
@@ -5524,7 +5524,7 @@ header #flowErrorsBtn{
   <section class="hero-shell">
     <div class="hero container">
       <div class="banner-frame">
-        <a id="homeBrandLink" href="#top" aria-label="Retour à l’accueil" style="display:block;cursor:pointer">
+        <a id="homeBrandLink" href="/" data-home-brand aria-label="Retour à l’accueil" style="display:block;cursor:pointer">
         <img class="banner banner-desktop" src="assets/abracadeal-brand-banner.png" alt="Abracadeal">
         <img class="mobile-banner-img" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==" alt="Abracadeal">
         </a>
@@ -11560,14 +11560,28 @@ document.querySelectorAll('[data-home-route]').forEach(link=>link.addEventListen
  }
  else if(link.dataset.homeRoute==='messages')window.openMessages();
 }));
-document.getElementById('homeBrandLink')?.addEventListener('click',async event=>{
+document.querySelectorAll('[data-home-brand]').forEach(link=>link.addEventListener('click',async event=>{
  event.preventDefault();
  resetSearchFilters();
  if(currentProfile?.is_admin&&document.getElementById('moderationBtn')) setModerationButtonLabel('Modérer');
- await loadAds();
+
+ // Retour accueil = vrai haut de page. On évite #top qui positionnait le <main>
+ // sous l'en-tête et donnait l'impression que la page descendait.
  history.replaceState(null,'',location.pathname);
- document.getElementById('top')?.scrollIntoView({behavior:'smooth'});
-});
+ window.scrollTo({top:0,left:0,behavior:'auto'});
+ document.documentElement.scrollTop=0;
+ document.body.scrollTop=0;
+
+ await loadAds();
+
+ // Certains rendus d'annonces peuvent modifier la hauteur pendant le chargement.
+ // On reverrouille donc le viewport tout en haut après le rendu.
+ requestAnimationFrame(()=>{
+   window.scrollTo({top:0,left:0,behavior:'auto'});
+   document.documentElement.scrollTop=0;
+   document.body.scrollTop=0;
+ });
+}));
 document.getElementById('b2bDiscoveryLink').addEventListener('click',event=>{
  event.preventDefault();
  if(currentUser&&(currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id)){
