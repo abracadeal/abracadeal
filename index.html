@@ -5371,6 +5371,7 @@ header #flowErrorsBtn{
 
 </style>
 <link rel="stylesheet" href="assets/abracadeal-main-banner-20260919.css?v=20260919-3">
+<link rel="stylesheet" href="assets/ui-stability-20260919.css?v=20260919-1">
 </head>
 <body>
 
@@ -6265,16 +6266,16 @@ header #flowErrorsBtn{
         </div>
         <form id="loginForm" class="auth-panel auth-login-panel">
           <div class="form-grid">
-            <div class="form-row full"><label>E-mail</label><input class="input" id="loginEmail" type="email" required></div>
-            <div class="form-row full"><label>Mot de passe</label><input class="input" id="loginPassword" type="password" minlength="6" required></div>
+            <div class="form-row full"><label>E-mail</label><input class="input" id="loginEmail" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" required></div>
+            <div class="form-row full"><label>Mot de passe</label><input class="input" id="loginPassword" type="password" autocomplete="current-password" minlength="6" required></div>
           </div>
           <div class="form-actions"><button class="btn primary" type="submit">Se connecter</button><button class="btn ghost" id="forgotPasswordBtn" type="button">Mot de passe oublié ?</button></div>
         </form>
         <form id="signupForm" class="auth-panel auth-signup-panel">
           <div class="form-grid">
             <div class="form-row full"><label for="signupName">Nom public / pseudo</label><input class="input" id="signupName" required maxlength="80"></div>
-            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" required></div><div class="form-row full"><label for="signupPhone">Téléphone</label><input class="input" id="signupPhone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" maxlength="24" required><div class="note">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div></div>
-            <div class="form-row full"><label>Mot de passe</label><input class="input" id="signupPassword" type="password" minlength="6" required></div>
+            <div class="form-row full"><label>E-mail</label><input class="input" id="signupEmail" type="email" autocomplete="email" autocapitalize="none" spellcheck="false" required></div><div class="form-row full"><label for="signupPhone">Téléphone</label><input class="input" id="signupPhone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" maxlength="24" required><div class="note">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div></div>
+            <div class="form-row full"><label>Mot de passe</label><input class="input" id="signupPassword" type="password" autocomplete="new-password" minlength="6" required></div>
             <div class="form-row full"><label>Type de compte</label>
               <select class="select" id="signupType"><option value="particulier">Particulier</option><option value="professionnel">Professionnel</option></select>
             </div>
@@ -6816,6 +6817,7 @@ function openModal(id){
   }
   el.classList.add('open');
   el.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
 }
 function closeModal(id){
   const el=document.getElementById(id);
@@ -6826,7 +6828,13 @@ function closeModal(id){
   if(location.hash==='#'+id){
     history.replaceState(null,'',location.pathname+location.search);
   }
-  if(id==='accountModal')professionalSignupViewerId=null;
+  if(id==='accountModal'){
+    professionalSignupViewerId=null;
+    const loginPassword=document.getElementById('loginPassword');
+    const signupPassword=document.getElementById('signupPassword');
+    if(loginPassword)loginPassword.value='';
+    if(signupPassword)signupPassword.value='';
+  }
   if(id==='messagesModal'){
     stopMessagePolling();
     document.querySelector('.messages-shell')?.classList.remove('mobile-chat-open');
@@ -6864,11 +6872,21 @@ async function refreshModerationCount(){
   return n;
 }
 
-window.setAuthTab = function(which){
+function clearAuthPasswords(){
+  const loginPassword=document.getElementById('loginPassword');
+  const signupPassword=document.getElementById('signupPassword');
+  if(loginPassword)loginPassword.value='';
+  if(signupPassword)signupPassword.value='';
+}
+
+window.setAuthTab = function(which,{clearPasswords=true}={}){
   const signup = which === 'signup';
+  if(clearPasswords) clearAuthPasswords();
   const el = signup ? document.getElementById('authSignupMode') : document.getElementById('authLoginMode');
   if(el) el.checked = true;
   syncSignupCompany();
+  const body=document.querySelector('#accountModal .modal-body');
+  if(body) requestAnimationFrame(()=>body.scrollTo({top:0,left:0,behavior:'auto'}));
 };
 
 async function applyAuthSession(session,{preserveEditing=true}={}){
@@ -7285,6 +7303,7 @@ async function signOutUser(closeAccountModal=false){
   moderationMode=false;
   favoritesMode=false;
   favoriteIds=new Set();
+  clearAuthPasswords();
   if(closeAccountModal) closeModal('accountModal');
   try{updateAuthUI(false);}catch(uiError){console.error('Interface après déconnexion',uiError);}
   try{await loadAds();}catch(loadError){console.error('Catalogue après déconnexion',loadError);}
@@ -12475,5 +12494,78 @@ document.addEventListener('DOMContentLoaded',()=>{
   });
 })();
 </script>
+
+<script id="abraca-ui-stability-js">
+(()=>{
+  const loginTab=document.getElementById('loginTab');
+  const signupTab=document.getElementById('signupTab');
+  const loginEmail=document.getElementById('loginEmail');
+  const loginPassword=document.getElementById('loginPassword');
+
+  // Passage Connexion / Créer un compte : clic piloté par JS, sans saut du document.
+  loginTab?.addEventListener('click',event=>{
+    event.preventDefault();
+    window.setAuthTab('login');
+  });
+  signupTab?.addEventListener('click',event=>{
+    event.preventDefault();
+    window.setAuthTab('signup');
+  });
+
+  // Si l'adresse de connexion change, ne jamais conserver le mot de passe d'un autre compte.
+  let lastLoginEmail=loginEmail?.value||'';
+  loginEmail?.addEventListener('input',()=>{
+    const next=loginEmail.value;
+    if(next!==lastLoginEmail && loginPassword?.value) loginPassword.value='';
+    lastLoginEmail=next;
+  });
+
+  // Sous-menus desktop : délai de fermeture pour absorber les petits écarts de souris.
+  const desktop=window.matchMedia('(min-width:1367px)');
+  const items=[...document.querySelectorAll('.desktop-nav-item')];
+  let closeTimer=null;
+
+  const cancelClose=()=>{
+    if(closeTimer){clearTimeout(closeTimer);closeTimer=null;}
+  };
+  const closeAll=(except=null)=>{
+    items.forEach(item=>{if(item!==except)item.classList.remove('menu-open')});
+  };
+  const openItem=item=>{
+    cancelClose();
+    closeAll(item);
+    item.classList.add('menu-open');
+  };
+  const scheduleClose=item=>{
+    cancelClose();
+    closeTimer=setTimeout(()=>{
+      item.classList.remove('menu-open');
+      closeTimer=null;
+    },420);
+  };
+
+  items.forEach(item=>{
+    const submenu=item.querySelector('.desktop-submenu');
+    if(!submenu)return;
+    item.addEventListener('pointerenter',()=>{if(desktop.matches)openItem(item)});
+    item.addEventListener('pointerleave',()=>{if(desktop.matches)scheduleClose(item)});
+    submenu.addEventListener('pointerenter',cancelClose);
+    submenu.addEventListener('pointerleave',()=>{if(desktop.matches)scheduleClose(item)});
+    item.addEventListener('focusin',()=>{if(desktop.matches)openItem(item)});
+    item.addEventListener('focusout',event=>{
+      if(desktop.matches&&!item.contains(event.relatedTarget))scheduleClose(item);
+    });
+  });
+
+  document.addEventListener('pointerdown',event=>{
+    if(desktop.matches&&!event.target.closest('.desktop-nav-item'))closeAll();
+  });
+
+  window.addEventListener('resize',()=>{
+    if(!desktop.matches)closeAll();
+  },{passive:true});
+})();
+</script>
+
 </body>
 </html>
