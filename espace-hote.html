@@ -86,7 +86,7 @@ html.abraca-embedded-host body{background:#faf7fc!important}
       <div class="field wide"><label>Email</label><input id="loginEmail" type="email" autocomplete="email"></div>
       <div class="field wide"><label>Mot de passe</label><input id="loginPassword" type="password" autocomplete="current-password"></div>
     </div>
-    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="loginBtn" class="btn premium-action" type="button">Se connecter</button><button id="createHostAccountBtn" class="btn premium-action" type="button">Créer un compte hôte</button></div>
+    <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap"><button id="loginBtn" class="btn premium-action" type="button">Se connecter</button><button id="createHostAccountBtn" class="btn premium-action" type="button">Créer mon compte Abracadeal</button></div>
   </div>
 </div>
 
@@ -105,8 +105,8 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     <div id="onboardingNotice" class="notice"></div>
 
     <section id="hostAccountCreate" class="onboarding-section hidden">
-      <h2>Créer votre compte hôte</h2>
-      <div class="sub">Commencez par vos identifiants Abracadeal. Ensuite vous complétez votre profil, le logement et la carte bancaire.</div>
+      <h2>Créer votre compte Abracadeal</h2>
+      <div class="sub">Un seul compte Abracadeal pour tout le site. Ensuite vous activez simplement les fonctions Hôte, puis vous complétez votre profil, le logement et la carte bancaire.</div>
       <div class="formgrid">
         <div class="field"><label>E-mail <span class="req">*</span></label><input id="oAccountEmail" type="email" autocomplete="email" placeholder="vous@exemple.fr"></div>
         <div class="field"><label>Mot de passe <span class="req">*</span></label><input id="oAccountPassword" type="password" minlength="6" autocomplete="new-password" placeholder="6 caractères minimum"></div>
@@ -511,7 +511,7 @@ $('completeHostBtn').onclick=async()=>{
     const accountPassword=$('oAccountPassword')?.value||'';
     const accountPassword2=$('oAccountPassword2')?.value||'';
     if(!accountEmail||!accountPassword||!accountPassword2){
-      onboardingMsg('Renseignez votre e-mail et votre mot de passe pour créer le compte hôte.',true);return;
+      onboardingMsg('Renseignez votre e-mail et votre mot de passe pour créer votre compte Abracadeal.',true);return;
     }
     if(accountPassword.length<6){
       onboardingMsg('Le mot de passe doit contenir au moins 6 caractères.',true);return;
@@ -544,11 +544,10 @@ $('completeHostBtn').onclick=async()=>{
         email:accountEmail,
         password:accountPassword,
         options:{
-          emailRedirectTo:location.origin+'/espace-hote.html?host_signup=1',
+          emailRedirectTo:location.origin+'/vacances.html?mode=hote&host_signup=1',
           data:{
             display_name:(first+' '+last).trim(),
             account_type:requestedType,
-            vacation_role:'host',
             phone:normalizedPhone
           }
         }
@@ -556,7 +555,7 @@ $('completeHostBtn').onclick=async()=>{
       if(signupError){onboardingMsg(signupError.message,true);return}
 
       if(!signupData?.session){
-        onboardingMsg('Compte hôte créé. Confirmez votre adresse e-mail : votre formulaire est conservé et vous reprendrez ici après confirmation.');
+        onboardingMsg('Compte Abracadeal créé. Confirmez votre adresse e-mail : votre formulaire est conservé et vous reprendrez directement dans votre Espace Hôte après confirmation.');
         return;
       }
 
