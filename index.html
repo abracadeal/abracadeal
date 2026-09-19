@@ -4596,11 +4596,12 @@ header #flowErrorsBtn{
 }
 </style>
 <style id="abraca-catalog-mobile-cards-compact-20260919">
-/* Les annonces : cartes mobiles compactes, 2 visibles + début de la 3e */
+/* Résultats mobile : vraies cartes compactes, 2 visibles + début de la 3e */
 @media(max-width:760px){
-  #annonces .ads-grid{
+  #resultats .ads-grid{
     display:flex!important;
     flex-wrap:nowrap!important;
+    align-items:flex-start!important;
     gap:10px!important;
     overflow-x:auto!important;
     overflow-y:hidden!important;
@@ -4609,138 +4610,179 @@ header #flowErrorsBtn{
     -webkit-overflow-scrolling:touch!important;
     scrollbar-width:none!important;
   }
-  #annonces .ads-grid::-webkit-scrollbar{display:none!important}
+  #resultats .ads-grid::-webkit-scrollbar{display:none!important}
 
-  #annonces .ad-card{
-    flex:0 0 clamp(145px,43vw,184px)!important;
-    width:clamp(145px,43vw,184px)!important;
-    min-width:clamp(145px,43vw,184px)!important;
-    max-width:clamp(145px,43vw,184px)!important;
+  #resultats .ad-card{
+    flex:0 0 clamp(150px,42vw,184px)!important;
+    width:clamp(150px,42vw,184px)!important;
+    min-width:clamp(150px,42vw,184px)!important;
+    max-width:clamp(150px,42vw,184px)!important;
+    height:auto!important;
+    min-height:0!important;
+    align-self:flex-start!important;
     scroll-snap-align:start!important;
     border-radius:15px!important;
   }
 
-  #annonces .ad-photo{
-    height:126px!important;
-    min-height:126px!important;
-    max-height:126px!important;
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
   }
 
-  #annonces .ad-body{
-    padding:9px 10px 11px!important;
+  #resultats .ad-body{
+    padding:8px 9px 9px!important;
   }
 
-  #annonces .ad-meta{
-    font-size:10px!important;
-    line-height:1.25!important;
-    margin-bottom:4px!important;
+  #resultats .ad-meta{
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    margin-bottom:3px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
   }
 
-  #annonces .ad-title{
-    font-size:13px!important;
-    line-height:1.22!important;
-    min-height:32px!important;
-    margin:0 0 5px!important;
+  #resultats .ad-title{
+    font-size:12px!important;
+    line-height:1.2!important;
+    min-height:29px!important;
+    margin:0 0 4px!important;
     display:-webkit-box!important;
     -webkit-line-clamp:2!important;
     -webkit-box-orient:vertical!important;
     overflow:hidden!important;
   }
 
-  #annonces .ad-price{
-    font-size:16px!important;
+  #resultats .ad-price{
+    font-size:15px!important;
+    line-height:1.1!important;
+    margin-bottom:4px!important;
+  }
+
+  #resultats .immo-card-charges,
+  #resultats .immo-card-unit-price{
+    font-size:9px!important;
     line-height:1.15!important;
-    margin-bottom:5px!important;
+    margin:-1px 0 4px!important;
   }
 
-  #annonces .ad-specs{
-    grid-template-columns:1fr!important;
-    gap:2px!important;
-    margin:0 0 6px!important;
-    font-size:10px!important;
-    line-height:1.25!important;
+  #resultats .immo-card-location-extra{
+    display:none!important;
   }
 
-  #annonces .ad-city,
-  #annonces .immo-card-location-extra,
-  #annonces .immo-card-charges,
-  #annonces .immo-card-unit-price{
-    font-size:10px!important;
-    line-height:1.25!important;
-  }
-
-  #annonces .immo-card-dpe{
-    min-width:0!important;
-    width:auto!important;
-    height:22px!important;
-    padding:0 8px!important;
-    font-size:10px!important;
-  }
-
-  #annonces .card-photo-actions{
-    top:7px!important;
-    right:7px!important;
-    gap:5px!important;
-  }
-
-  #annonces .card-action-btn{
-    height:30px!important;
-    min-width:30px!important;
-    padding:0 7px!important;
-  }
-
-  #annonces .featured-badge{
-    top:7px!important;
-    left:7px!important;
-    padding:5px 7px!important;
-    font-size:9px!important;
-  }
-
-  #annonces .pro-card-badge,
-  #annonces .loa-badge{
-    font-size:9px!important;
-    padding:4px 7px!important;
-  }
-
-  #annonces .ad-actions{
-    display:grid!important;
+  #resultats .ad-specs{
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:6px!important;
-    margin-top:8px!important;
-    align-items:stretch!important;
+    gap:2px 5px!important;
+    margin:0 0 5px!important;
+    font-size:9px!important;
+    line-height:1.15!important;
   }
 
-  #annonces .ad-actions .mini-btn{
-    min-width:0!important;
-    min-height:32px!important;
-    height:32px!important;
-    padding:0 6px!important;
-    border-radius:9px!important;
-    font-size:10px!important;
-    line-height:1!important;
+  #resultats .ad-spec{
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #resultats .ad-city{
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    margin-top:3px!important;
     white-space:nowrap!important;
     overflow:hidden!important;
     text-overflow:ellipsis!important;
   }
 
-  #annonces .ad-actions .mini-btn.danger:last-child:nth-child(odd){
-    grid-column:1/-1!important;
+  #resultats .immo-card-dpe{
+    min-width:0!important;
     width:max-content!important;
     max-width:100%!important;
+    height:20px!important;
+    padding:0 7px!important;
+    font-size:9px!important;
+    border-radius:999px!important;
+  }
+
+  #resultats .card-photo-actions{
+    top:6px!important;
+    right:6px!important;
+    gap:4px!important;
+  }
+
+  #resultats .card-action-btn{
+    height:28px!important;
+    min-width:28px!important;
+    padding:0 6px!important;
+    font-size:10px!important;
+  }
+
+  #resultats .card-action-btn .share-node-icon{
+    width:14px!important;
+    height:14px!important;
+  }
+
+  #resultats .featured-badge{
+    top:6px!important;
+    left:6px!important;
+    padding:4px 6px!important;
+    font-size:8px!important;
+  }
+
+  #resultats .pro-card-badge,
+  #resultats .loa-badge{
+    font-size:8px!important;
+    padding:3px 6px!important;
+  }
+
+  #resultats .ad-actions{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    gap:4px!important;
+    margin-top:7px!important;
+    overflow:hidden!important;
+  }
+
+  #resultats .ad-actions .mini-btn{
+    flex:0 1 auto!important;
+    min-width:0!important;
+    min-height:28px!important;
+    height:28px!important;
+    padding:0 5px!important;
+    border-radius:8px!important;
+    font-size:8.5px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  #resultats .ad-actions .boost-btn{
+    box-shadow:none!important;
+  }
+
+  #resultats .ad-actions .mini-btn.danger:last-child:nth-child(odd){
+    grid-column:auto!important;
+    width:auto!important;
+    max-width:none!important;
   }
 }
 
 @media(max-width:390px){
-  #annonces .ad-card{
-    flex-basis:clamp(140px,42vw,164px)!important;
-    width:clamp(140px,42vw,164px)!important;
-    min-width:clamp(140px,42vw,164px)!important;
-    max-width:clamp(140px,42vw,164px)!important;
+  #resultats .ad-card{
+    flex-basis:clamp(145px,41.5vw,162px)!important;
+    width:clamp(145px,41.5vw,162px)!important;
+    min-width:clamp(145px,41.5vw,162px)!important;
+    max-width:clamp(145px,41.5vw,162px)!important;
   }
-  #annonces .ad-photo{
-    height:118px!important;
-    min-height:118px!important;
-    max-height:118px!important;
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:104px!important;
+    min-height:104px!important;
+    max-height:104px!important;
+  }
+  #resultats .ad-actions .mini-btn{
+    padding:0 4px!important;
+    font-size:8px!important;
   }
 }
 </style>
