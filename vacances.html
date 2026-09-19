@@ -2289,15 +2289,18 @@ body.vac-date-open .vac-mobile-bottom-nav{
   .vac-desktop-hero{
     position:relative;
     width:100%;
-    height:300px;
+    aspect-ratio:1672/276;
+    height:auto;
     overflow:hidden;
     background:#4c175e;
   }
   .vac-desktop-hero img{
     display:block;
-    width:100%;height:100%;
+    width:100%;
+    height:100%;
     object-fit:cover;
-    object-position:center 49%;
+    object-position:center;
+    image-rendering:auto;
   }
 
   .vac-desktop-search-wrap{
@@ -2542,7 +2545,10 @@ body.vac-date-open .vac-mobile-bottom-nav{
   .vac-desktop-destinations{grid-template-columns:repeat(3,1fr)}
   .vac-desktop-search-grid{grid-template-columns:1fr 1fr}
   .vac-desktop-search-btn{min-height:64px}
-  .vac-desktop-hero{height:270px}
+  .vac-desktop-hero{
+    aspect-ratio:1672/276;
+    height:auto;
+  }
 }
 @media(max-width:760px){
   .vac-desktop-home{display:none!important}
@@ -2580,7 +2586,7 @@ body.vac-date-open .vac-mobile-bottom-nav{
   </header>
 
   <section class="vac-desktop-hero" aria-label="Abracadeal Vacances">
-    <img src="assets/abracadeal-vacances-mobile.webp?v=20260919-3" alt="Abracadeal Vacances — Voyagez mieux. Hébergez simplement.">
+    <img src="assets/abracadeal-vacances-desktop-hero.webp?v=20260919-1" alt="Abracadeal Vacances — Voyagez mieux. Hébergez simplement.">
   </section>
 
   <div class="vac-desktop-search-wrap">
