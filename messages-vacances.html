@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<title>Messagerie Vacances — Abracadeal</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
+<style>
+:root{--ink:#2d1535;--muted:#7d6c82;--line:#eadfea;--pink:#ef4fb0;--purple:#6f2384;--bg:#fff9fc}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:linear-gradient(180deg,#fff 0%,#fff8fc 58%,#f9f1fa 100%);color:var(--ink)}
+body{padding-bottom:calc(92px + env(safe-area-inset-bottom))}
+button,input,textarea{font:inherit}
+a{color:inherit}
+.vac-msg-head{position:sticky;top:0;z-index:30;background:rgba(255,255,255,.96);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid rgba(92,42,105,.08)}
+.vac-msg-head-inner{height:64px;display:grid;grid-template-columns:44px 1fr 44px;align-items:center;gap:8px;padding:0 14px;max-width:900px;margin:auto}
+.vac-msg-back,.vac-msg-refresh{width:42px;height:42px;border-radius:50%;border:1px solid #eee3ef;background:#fff;display:grid;place-items:center;color:#522062;text-decoration:none;box-shadow:0 7px 18px rgba(67,29,78,.07)}
+.vac-msg-title{text-align:center;line-height:1.05}
+.vac-msg-title strong{display:block;font-size:1rem}
+.vac-msg-title span{display:block;margin-top:4px;font-size:.68rem;color:#9b5193;font-weight:800;letter-spacing:.12em}
+.vac-msg-wrap{width:min(900px,calc(100% - 20px));margin:12px auto 0}
+.vac-msg-intro{margin:0 0 10px;padding:12px 14px;border:1px solid #eddfea;border-radius:16px;background:#fff;color:#6f5d75;font-size:.78rem;line-height:1.4}
+.vac-msg-shell{height:calc(100dvh - 172px);min-height:500px;display:grid;grid-template-columns:300px minmax(0,1fr);overflow:hidden;border:1px solid #eadfea;border-radius:22px;background:#fff;box-shadow:0 15px 34px rgba(65,28,76,.09)}
+.vac-msg-list-panel{min-width:0;border-right:1px solid #eee5ef;display:flex;flex-direction:column;background:#fff}
+.vac-msg-list-head{padding:14px;border-bottom:1px solid #eee5ef}
+.vac-msg-list-head b{display:block;font-size:1rem}
+.vac-msg-list-head small{display:block;margin-top:3px;color:#89778e;font-size:.72rem}
+.vac-msg-list{min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.vac-conv{width:100%;padding:13px 14px;border:0;border-bottom:1px solid #f0e9f1;background:#fff;text-align:left;color:var(--ink);cursor:pointer}
+.vac-conv.active{background:#fff5fb}
+.vac-conv-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.vac-conv-name{font-weight:850;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vac-conv-unread{min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--pink);color:#fff;display:grid;place-items:center;font-size:.63rem;font-weight:900}
+.vac-conv-title{margin-top:4px;font-size:.75rem;font-weight:750;color:#5e4365;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vac-conv-preview{margin-top:4px;font-size:.7rem;color:#96869a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vac-msg-chat{min-width:0;min-height:0;display:flex;flex-direction:column;background:#fff}
+.vac-chat-mobile-back{display:none;width:100%;border:0;border-bottom:1px solid #eee4ef;background:#fff7fb;color:#6b267a;text-align:left;padding:10px 13px;font-weight:850}
+.vac-chat-head{padding:14px;border-bottom:1px solid #eee5ef;min-height:67px}
+.vac-chat-head b{display:block;font-size:.95rem}
+.vac-chat-head span{display:block;margin-top:4px;font-size:.72rem;color:#8b7b90}
+.vac-thread{flex:1;min-height:0;overflow-y:auto;padding:14px 12px 18px;background:linear-gradient(180deg,#fff 0%,#fffafd 100%)}
+.vac-empty{padding:28px 18px;color:#8c7b91;text-align:center;font-size:.82rem;line-height:1.5}
+.vac-bubble{width:max-content;max-width:84%;margin:0 0 9px;padding:10px 12px;border-radius:15px 15px 15px 4px;background:#f3eaf6;color:#40204a;font-size:.86rem;line-height:1.4;overflow-wrap:anywhere}
+.vac-bubble.mine{margin-left:auto;border-radius:15px 15px 4px 15px;background:linear-gradient(135deg,#a52eb7,#ef4fac);color:#fff}
+.vac-bubble-time{display:block;margin-top:5px;font-size:.58rem;opacity:.72}
+.vac-composer{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;padding:9px 10px calc(9px + env(safe-area-inset-bottom));border-top:1px solid #eee5ef;background:#fff}
+.vac-composer.hidden{display:none}
+.vac-composer textarea{min-height:46px;max-height:96px;resize:none;border:1px solid #e5d9e8;border-radius:13px;padding:11px 12px;font-size:16px;color:#35213d;background:#fff;outline:none}
+.vac-composer textarea:focus{border-color:#c67ac0;box-shadow:0 0 0 3px rgba(201,91,185,.1)}
+.vac-send{min-width:88px;border:0;border-radius:13px;padding:0 14px;background:linear-gradient(90deg,#a82fba,#ee4ead);color:#fff;font-weight:850}
+.vac-login-card{padding:30px 18px;text-align:center;border:1px solid #eadfea;border-radius:20px;background:#fff}
+.vac-login-card h2{margin:0 0 8px;font-family:Georgia,serif}
+.vac-login-card p{margin:0 auto 16px;color:#7f6e84;max-width:420px;line-height:1.5}
+.vac-login-card a{display:inline-flex;min-height:46px;align-items:center;justify-content:center;padding:0 18px;border-radius:13px;background:linear-gradient(90deg,#a62fb8,#ef4faf);color:#fff;text-decoration:none;font-weight:850}
+.vac-toast{position:fixed;left:50%;bottom:105px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:50000;padding:10px 14px;border-radius:999px;background:#32143f;color:#fff;font-size:.78rem;box-shadow:0 12px 28px rgba(0,0,0,.2);transition:.2s}
+.vac-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.vac-mobile-bottom-nav{position:fixed;left:8px;right:8px;bottom:0;z-index:30020;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;min-height:70px;padding:7px 4px 6px;border-radius:25px 25px 0 0;background:linear-gradient(90deg,rgba(43,13,57,.98),rgba(54,17,66,.98));border:1px solid rgba(255,255,255,.12);box-shadow:0 18px 42px rgba(41,13,56,.3)}
+.vac-mobile-nav-item{position:relative;min-width:0;min-height:54px;border:0;background:transparent;color:#f3ebf6;text-decoration:none;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;padding:3px 1px 1px;font-size:10px;font-weight:760}
+.vac-mobile-nav-item svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.vac-mobile-nav-item.is-active{color:#ff5db8}
+.vac-mobile-nav-item.is-active:after{content:"";position:absolute;left:28%;right:28%;bottom:-3px;height:2px;border-radius:999px;background:#ff5db8}
+.vac-mobile-host{transform:translateY(-9px)}
+.vac-mobile-host-orb{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;margin-bottom:-2px;background:linear-gradient(145deg,#ff67bd,#d93ead 55%,#8e2eae);color:#fff;border:2px solid rgba(255,255,255,.22);box-shadow:0 9px 25px rgba(224,57,171,.42),0 0 0 5px rgba(226,91,182,.12)}
+.vac-mobile-host-orb svg{width:27px;height:27px}
+@media(max-width:720px){
+ .vac-msg-wrap{width:calc(100% - 16px);margin-top:8px}
+ .vac-msg-intro{font-size:.72rem;padding:10px 12px}
+ .vac-msg-shell{height:calc(100dvh - 161px);min-height:0;display:block;border-radius:18px}
+ .vac-msg-list-panel,.vac-msg-chat{height:100%}
+ .vac-msg-chat{display:none}
+ .vac-msg-shell.mobile-chat-open .vac-msg-list-panel{display:none}
+ .vac-msg-shell.mobile-chat-open .vac-msg-chat{display:flex}
+ .vac-chat-mobile-back{display:block}
+ .vac-thread{padding:12px 10px 18px}
+ .vac-bubble{max-width:88%;font-size:.88rem}
+}
+</style>
+</head>
+<body>
+<header class="vac-msg-head">
+  <div class="vac-msg-head-inner">
+    <a class="vac-msg-back" href="vacances.html" aria-label="Retour à Vacances">‹</a>
+    <div class="vac-msg-title"><strong>Messagerie Vacances</strong><span>ABRACADEAL</span></div>
+    <button class="vac-msg-refresh" id="refreshBtn" type="button" aria-label="Actualiser">↻</button>
+  </div>
+</header>
+
+<main class="vac-msg-wrap">
+  <p class="vac-msg-intro">Cette messagerie affiche uniquement les conversations liées aux annonces <strong>Abracadeal Vacances</strong>.</p>
+  <section id="loggedOut" class="vac-login-card" hidden>
+    <h2>Connectez-vous pour voir vos messages</h2>
+    <p>Votre compte Abracadeal est commun au site, mais cette page garde uniquement les échanges Vacances.</p>
+    <a href="vacances.html">Retour à Abracadeal Vacances</a>
+  </section>
+
+  <section id="messagesShell" class="vac-msg-shell" hidden>
+    <aside class="vac-msg-list-panel">
+      <div class="vac-msg-list-head"><b>Conversations</b><small>Locations de vacances en France</small></div>
+      <div class="vac-msg-list" id="conversationList"></div>
+    </aside>
+    <section class="vac-msg-chat">
+      <button class="vac-chat-mobile-back" id="chatBack" type="button">‹ Conversations</button>
+      <div class="vac-chat-head" id="chatHead"><b>Sélectionnez une conversation</b><span>Vos échanges Vacances apparaissent ici.</span></div>
+      <div class="vac-thread" id="thread"><div class="vac-empty">Choisissez une conversation.</div></div>
+      <form class="vac-composer hidden" id="messageForm">
+        <textarea id="messageInput" maxlength="2000" placeholder="Écrire un message…" aria-label="Votre message"></textarea>
+        <button class="vac-send" type="submit">Envoyer</button>
+      </form>
+    </section>
+  </section>
+</main>
+
+<nav class="vac-mobile-bottom-nav" aria-label="Navigation Abracadeal Vacances">
+  <a class="vac-mobile-nav-item" href="vacances.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg><span>Explorer</span>
+  </a>
+  <a class="vac-mobile-nav-item" href="espace-voyageur.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg><span>Favoris</span>
+  </a>
+  <a class="vac-mobile-nav-item vac-mobile-host" href="espace-hote.html?host_signup=1">
+    <span class="vac-mobile-host-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span><span>Devenir hôte</span>
+  </a>
+  <a class="vac-mobile-nav-item is-active" href="messages-vacances.html">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg><span>Messages</span>
+  </a>
+  <a class="vac-mobile-nav-item" href="vacances.html#connexion-vacances">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Compte</span>
+  </a>
+</nav>
+
+<div class="vac-toast" id="toast"></div>
+
+<script>
+(()=>{
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=window.supabase?.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=s=>document.querySelector(s);
+let user=null,conversations=[],currentId=null,pollTimer=null;
+
+function esc(v=''){return String(v).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2200)}
+function fmt(v){try{return new Intl.DateTimeFormat('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}).format(new Date(v))}catch{return ''}}
+
+async function init(){
+  if(!sb){$('#loggedOut').hidden=false;return}
+  const {data}=await sb.auth.getSession();
+  user=data?.session?.user||null;
+  if(!user){$('#loggedOut').hidden=false;$('#messagesShell').hidden=true;return}
+  $('#loggedOut').hidden=true;$('#messagesShell').hidden=false;
+  await loadList();
+  startPolling();
+}
+
+async function loadList(preferred=null){
+  if(!user)return;
+  const {data,error}=await sb.rpc('get_my_conversations');
+  if(error){toast(error.message||'Messagerie indisponible');return}
+  const all=data||[];
+  if(!all.length){renderList([]);return}
+  const ids=[...new Set(all.map(x=>x.listing_id).filter(Boolean))];
+  let vacationIds=new Set();
+  if(ids.length){
+    const {data:rows,error:listError}=await sb.from('listings').select('id').eq('category','vacances').in('id',ids);
+    if(listError){console.warn(listError)}
+    else vacationIds=new Set((rows||[]).map(x=>x.id));
+  }
+  conversations=all.filter(x=>vacationIds.has(x.listing_id));
+  renderList(conversations);
+  const target=preferred||currentId||(!matchMedia('(max-width:720px)').matches?conversations[0]?.conversation_id:null);
+  if(target && conversations.some(x=>x.conversation_id===target)) await selectConversation(target,false);
+  else if(!conversations.length){
+    currentId=null;
+    $('#chatHead').innerHTML='<b>Aucun message Vacances</b><span>Vos futurs échanges avec voyageurs ou hôtes apparaîtront ici.</span>';
+    $('#thread').innerHTML='<div class="vac-empty">Aucune conversation Vacances pour le moment.</div>';
+    $('#messageForm').classList.add('hidden');
+  }
+}
+function renderList(rows){
+  const list=$('#conversationList');
+  if(!rows.length){list.innerHTML='<div class="vac-empty">Aucune conversation Vacances pour le moment.</div>';return}
+  list.innerHTML=rows.map(c=>{
+    const unread=Number(c.unread_count||0);
+    return '<button class="vac-conv '+(c.conversation_id===currentId?'active':'')+'" type="button" data-conv="'+esc(c.conversation_id)+'">'+
+      '<div class="vac-conv-top"><span class="vac-conv-name">'+esc(c.other_user_name||'Utilisateur Abracadeal')+'</span>'+(unread?'<span class="vac-conv-unread">'+Math.min(unread,99)+'</span>':'')+'</div>'+
+      '<div class="vac-conv-title">'+esc(c.listing_title||'Location de vacances')+'</div>'+
+      '<div class="vac-conv-preview">'+esc(c.last_message||'Nouvelle conversation')+'</div></button>';
+  }).join('');
+}
+async function selectConversation(id,scroll=true){
+  currentId=id;
+  document.querySelectorAll('.vac-conv').forEach(el=>el.classList.toggle('active',el.dataset.conv===id));
+  const conv=conversations.find(x=>x.conversation_id===id);
+  $('#chatHead').innerHTML='<b>'+esc(conv?.other_user_name||'Utilisateur Abracadeal')+'</b><span>'+esc(conv?.listing_title||'Location de vacances')+'</span>';
+  $('#messageForm').classList.remove('hidden');
+  $('#messagesShell').classList.add('mobile-chat-open');
+  await loadMessages(scroll);
+}
+async function loadMessages(scroll=true){
+  if(!currentId||!user)return;
+  const {data,error}=await sb.rpc('get_conversation_messages',{p_conversation_id:currentId});
+  if(error){toast(error.message||'Impossible de charger les messages');return}
+  const rows=data||[],thread=$('#thread');
+  thread.innerHTML=rows.length?rows.map(m=>'<div class="vac-bubble '+(m.sender_id===user.id?'mine':'')+'">'+esc(m.body)+'<span class="vac-bubble-time">'+esc(fmt(m.created_at))+'</span></div>').join(''):'<div class="vac-empty">Aucun message. Écrivez le premier.</div>';
+  if(scroll)thread.scrollTop=thread.scrollHeight;
+}
+document.addEventListener('click',e=>{
+  const btn=e.target.closest('[data-conv]');
+  if(btn)selectConversation(btn.dataset.conv,true);
+});
+$('#chatBack').addEventListener('click',()=>$('#messagesShell').classList.remove('mobile-chat-open'));
+$('#refreshBtn').addEventListener('click',()=>loadList(currentId));
+$('#messageForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(!currentId||!user)return;
+  const input=$('#messageInput'),body=input.value.trim();
+  if(!body)return;
+  const send=e.submitter;send.disabled=true;send.textContent='Envoi…';
+  const {error}=await sb.rpc('send_message',{p_conversation_id:currentId,p_body:body});
+  send.disabled=false;send.textContent='Envoyer';
+  if(error){toast(error.message||'Message non envoyé');return}
+  input.value='';
+  await loadMessages(true);
+  await loadList(currentId);
+});
+$('#messageInput').addEventListener('input',e=>{e.target.style.height='auto';e.target.style.height=Math.min(e.target.scrollHeight,96)+'px'});
+function startPolling(){
+  clearInterval(pollTimer);
+  pollTimer=setInterval(async()=>{if(document.visibilityState==='visible'){await loadList(currentId);if(currentId)await loadMessages(false)}},7000);
+}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')loadList(currentId)});
+init();
+})();
+</script>
+</body>
+</html>
