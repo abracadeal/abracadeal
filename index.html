@@ -2251,6 +2251,15 @@ a.btn{cursor:pointer}
 #b2bModal .input,#b2bModal .select{background:#fff;color:#36213f;border:1px solid #cbb9d3;box-sizing:border-box;max-width:100%}
 .b2b-photos{display:flex;gap:8px;overflow-x:auto;margin:12px 0}.b2b-photos img{width:220px;height:160px;object-fit:contain;border-radius:8px;background:#f0e9f3}
 .b2b-description{white-space:pre-wrap}.b2b-review-note{width:100%;min-height:70px}
+.b2b-listing-area{background:linear-gradient(145deg,#fff,#faf3fd);border-color:#d9b9e6}
+.b2b-listing-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:12px}
+.b2b-listing-head h3{margin:0 0 4px;color:#57206e}
+.b2b-listing-card{border:1px solid #e1d2e8;border-radius:15px;background:#fff;overflow:hidden;cursor:pointer;transition:.16s ease}
+.b2b-listing-card:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(85,34,103,.12)}
+.b2b-listing-photo{height:155px;background:#f2ebf5;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.b2b-listing-photo img{width:100%;height:100%;object-fit:cover}
+.b2b-listing-badge{position:absolute;left:9px;top:9px;background:#6d218d;color:#fff;border-radius:999px;padding:6px 9px;font-size:.68rem;font-weight:900}
+.b2b-listing-body{padding:13px}.b2b-listing-body h4{margin:5px 0 7px;font-size:1rem;color:#2c1736}.b2b-listing-price{font-size:1.08rem;font-weight:900;color:#7b2699}.b2b-listing-meta{font-size:.78rem;color:#7d6b85;margin-top:7px}
 @media(max-width:640px){.b2b-grid{grid-template-columns:1fr}.b2b-toolbar .btn{flex:1 1 140px}.b2b-modal .form-grid{grid-template-columns:1fr}.b2b-panel,.b2b-card{padding:14px}}
 /* TÉLÉPHONE EN HORIZONTAL — la bannière reste entière et la recherche passe dessous */
 @media (max-height: 520px) and (orientation: landscape){
@@ -5843,6 +5852,15 @@ header #flowErrorsBtn{
             </select>
           </div>
 
+          <div class="form-row pro-visibility-row hidden" id="proVisibilityRow">
+            <label>Diffusion de l’annonce</label>
+            <select class="select" id="listingVisibility">
+              <option value="public">Public · visible par tous</option>
+              <option value="pro">Pro/Pro · professionnels uniquement</option>
+            </select>
+            <small class="note">Pro/Pro réserve l’annonce à l’espace professionnel vérifié. Elle n’apparaît pas dans le catalogue public.</small>
+          </div>
+
           <div class="form-row full vehicle-subcategory-row hidden">
             <label id="subcategoryLabel">Sous-catégorie</label>
             <select class="select" id="vehicleSubcategory"><option value="">Choisir</option></select>
@@ -6635,6 +6653,14 @@ header #flowErrorsBtn{
    <div class="b2b-toolbar"><button class="btn ghost" id="b2bRefresh" type="button">Actualiser</button></div>
    <p id="b2bStatus" class="note" role="status" aria-live="polite"></p>
    <div id="b2bMarketplace" class="hidden">
+    <section id="b2bListingArea" class="b2b-panel b2b-listing-area">
+      <div class="b2b-listing-head">
+        <div><h3>Annonces réservées aux Pros</h3><p class="note">Annonces classiques publiées en mode Pro/Pro. Elles sont invisibles aux particuliers.</p></div>
+        <span class="status-pill">PRO/PRO</span>
+      </div>
+      <div id="b2bListingGrid" class="b2b-grid"></div>
+      <p id="b2bListingStatus" class="note"></p>
+    </section>
     <div class="b2b-toolbar"><button class="btn primary" id="b2bNewOffer" type="button">Déposer une offre</button><button class="btn ghost" id="b2bAllOffers" type="button">Toutes les offres</button><button class="btn ghost" id="b2bMyOffers" type="button">Mon stock</button><button class="btn ghost" id="b2bAccessBtn" type="button">Demandes et accès</button><button class="btn ghost hidden" id="b2bAdminRelationsBtn" type="button">Toutes les relations entre pros</button></div>
     <form id="b2bPriceRequestForm" class="hidden b2b-panel">
      <h3 id="b2bRequestHeading">Demander l’accès aux prix</h3><input id="b2bRequestSeller" type="hidden">
@@ -8526,6 +8552,13 @@ $('#adCategory').addEventListener('change', ()=>{
 $('#vehicleSubcategory').addEventListener('change', updatePublishFields);
 
 function accountAudience(){return currentProfile?.account_type==='professionnel'?'professionnel':'particulier'}
+function syncPublishVisibility(){
+  const row=$('#proVisibilityRow'),select=$('#listingVisibility');
+  if(!row||!select)return;
+  const canChoose=accountAudience()==='professionnel'||currentProfile?.is_admin===true;
+  row.classList.toggle('hidden',!canChoose);
+  if(!canChoose)select.value='public';
+}
 function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_until).getTime()>Date.now()}
 function basePhotoLimitForAudience(audience=accountAudience()){return audience==='professionnel'?15:3}
 function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:3;return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
@@ -8721,13 +8754,13 @@ function resetPublishForm(){
   $('#publishPackArea')?.classList.remove('hidden');
   $('#publishModal .modal-head h2').textContent='Publier une annonce';
   if($('#publishSubmitBtn')) $('#publishSubmitBtn').textContent='Mettre en ligne';
-  if($('#publishStatus')) $('#publishStatus').textContent=''; populateSubcategories(''); updatePublishFields();
+  if($('#publishStatus')) $('#publishStatus').textContent=''; populateSubcategories(''); updatePublishFields(); syncPublishVisibility();
 }
 $$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
   e.preventDefault();
   if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour publier');return}
   resetPublishForm();
-  $('#sellerType').value=currentProfile?.account_type==='professionnel'?'Professionnel':'Particulier'; $('#sellerType').disabled=true; renderPublishPackPicker();
+  $('#sellerType').value=currentProfile?.account_type==='professionnel'?'Professionnel':'Particulier'; $('#sellerType').disabled=true; syncPublishVisibility(); renderPublishPackPicker();
   $('#adPhone').value=currentProfile?.phone||'';
   openModal('publishModal');
 }));
@@ -8758,6 +8791,8 @@ window.openAdminEditAd=function(id){
   $('#itemCondition').value=a.item_condition||'';
   $('#sellerType').value=a.seller_type==='professionnel'?'Professionnel':'Particulier';
   $('#sellerType').disabled=true;
+  syncPublishVisibility();
+  if($('#listingVisibility'))$('#listingVisibility').value=a.visibility_scope||'public';
   $('#adShowPhone').checked=!!a.show_phone;
 
   $('#vehicleMake').value=a.vehicle_make||'';
@@ -8940,6 +8975,12 @@ $('#publishForm').addEventListener('submit',async e=>{
   e.preventDefault();
   if(!currentUser){toast('Connexion requise');return}
 
+  const requestedVisibility=$('#listingVisibility')?.value==='pro'?'pro':'public';
+  if(requestedVisibility==='pro'&&currentProfile?.is_admin!==true){
+    const {data:proOk,error:proError}=await sb.rpc('b2b_is_professional');
+    if(proError||proOk!==true){toast('Pro/Pro est réservé aux comptes professionnels vérifiés (SIRET).');return;}
+  }
+
   const btn=e.submitter || $('#publishSubmitBtn');
   if(btn.disabled) return;
 
@@ -8965,6 +9006,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     show_phone:!!$('#adShowPhone')?.checked,
     item_condition:$('#itemCondition')?.value||null,
     seller_type:wasEditing?(editingOriginalSellerType||normalizeType($('#sellerType').value)):normalizeType($('#sellerType').value),
+    visibility_scope:requestedVisibility,
     status:wasEditing?(editingOriginalStatus||'active'):'pending',
     vehicle_make:$('#vehicleMake').value.trim()||null,
     vehicle_model:$('#vehicleModel').value.trim()||null,
@@ -9464,7 +9506,7 @@ async function loadAds(){
   }else{
     let q=sb.from('listings').select('*,listing_photos(id,storage_path,position)');
     if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
-    else q=q.eq('status','active');
+    else q=q.eq('status','active').eq('visibility_scope','public');
     const {data,error}=await q.order('created_at',{ascending:false});
     if(error){console.error(error);toast('Impossible de charger les annonces');return}
     loadedAds=data||[];
@@ -10311,6 +10353,7 @@ async function renderDetailRecommendations(a){
       :sb.from('listings')
         .select('*,listing_photos(id,storage_path,position)')
         .eq('status','active')
+        .eq('visibility_scope','public')
         .eq('owner_id',a.owner_id)
         .neq('id',a.id)
         .order('created_at',{ascending:false})
@@ -10319,6 +10362,7 @@ async function renderDetailRecommendations(a){
     const relatedReq=sb.from('listings')
       .select('*,listing_photos(id,storage_path,position)')
       .eq('status','active')
+      .eq('visibility_scope','public')
       .eq('category',a.category)
       .neq('id',a.id)
       .order('created_at',{ascending:false})
@@ -10776,7 +10820,7 @@ window.openSellerProfile=async sellerId=>{
   const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult,proAccountSummaryResult]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
-    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').order('created_at',{ascending:false}).limit(8),
+    sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').eq('visibility_scope','public').order('created_at',{ascending:false}).limit(8),
     adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null}),
     adminViewing?sb.rpc('get_admin_pro_account_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
   ]);
@@ -11398,7 +11442,7 @@ window.addEventListener('pageshow',()=>{
  const sectorText=list=>(list||[]).map(x=>labels[x]||x).join(', ');
  const errorText=error=>/PGRST202|42P01/.test(error?.code||'')?'L’espace Pro/Pro n’est pas encore activé. Réessayez après son ouverture.':error?.message||'Action impossible. Réessayez.';
  function clearBlobs(){blobUrls.forEach(URL.revokeObjectURL);blobUrls=[];}
- function clearPrivate(){version++;clearBlobs();offers=[];incoming=[];isAdmin=false;node('b2bAdminRelationsList').replaceChildren();['b2bAdminRelationsBtn','b2bAdminRelationsArea','b2bAdminPager'].forEach(id=>show(id,false));['b2bOffers','b2bIncoming','b2bOutgoing'].forEach(id=>node(id).replaceChildren());['b2bMarketplace','b2bOfferForm','b2bAccessArea','b2bPriceRequestForm'].forEach(id=>show(id,false));}
+ function clearPrivate(){version++;clearBlobs();offers=[];incoming=[];isAdmin=false;node('b2bAdminRelationsList').replaceChildren();['b2bAdminRelationsBtn','b2bAdminRelationsArea','b2bAdminPager'].forEach(id=>show(id,false));['b2bOffers','b2bIncoming','b2bOutgoing','b2bListingGrid'].forEach(id=>node(id).replaceChildren());msg('b2bListingStatus','');['b2bMarketplace','b2bOfferForm','b2bAccessArea','b2bPriceRequestForm'].forEach(id=>show(id,false));}
  async function rpc(name,args){return requireResult(await sb.rpc(name,args));}
  function same(v){return v===version&&userId===currentUser?.id;}
  let roleCheckGeneration=0;
@@ -11452,13 +11496,33 @@ window.addEventListener('pageshow',()=>{
    if(!professional&&!isAdmin){msg('b2bStatus','Vérifiez et enregistrez votre SIRET dans Mon compte pour accéder à Pro/Pro.');return;}
    show('b2bMarketplace',true);show('b2bNewOffer',!!professional);show('b2bAdminRelationsBtn',isAdmin);
    msg('b2bStatus',isAdmin?'Mode administrateur : toutes les annonces Pro/Pro, tous les statuts et tous les prix sont accessibles sans accord des vendeurs.':'Chaque vendeur choisit si son prix est visible directement ou accessible sur accord. Lorsqu’un accès est accepté, contactez le vendeur pour conclure directement avec lui.');
-   await loadOffers();
+   await Promise.all([loadProListings(),loadOffers()]);
    if(same(v))await refreshPendingCount();
   }catch(error){if(same(v))msg('b2bStatus',errorText(error));}
  }
  async function open(){closeModal('accountModal');openModal('b2bModal');await load();}
  node('b2bNavBtn').addEventListener('click',open);node('b2bAccountBtn').addEventListener('click',open);node('b2bRefresh').addEventListener('click',load);
  window.addEventListener('abracadeal:auth',()=>{if(userId!==(currentUser?.id||null)){clearPrivate();userId=currentUser?.id||null;node('b2bPriceRequestForm').reset();node('b2bOfferForm').reset();if(node('b2bModal').classList.contains('open'))load();}});
+ async function loadProListings(){
+  const v=version;const grid=node('b2bListingGrid');grid.replaceChildren();msg('b2bListingStatus','Chargement des annonces Pro/Pro…');
+  try{
+   const {data,error}=await sb.from('listings')
+    .select('*,listing_photos(id,storage_path,position)')
+    .eq('status','active')
+    .eq('visibility_scope','pro')
+    .order('created_at',{ascending:false})
+    .limit(100);
+   if(error)throw error;if(!same(v))return;
+   const rows=data||[];cacheDetailAds(rows);
+   msg('b2bListingStatus',rows.length?rows.length+' annonce'+(rows.length>1?'s':'')+' réservée'+(rows.length>1?'s':'')+' aux professionnels.':'Aucune annonce Pro/Pro pour le moment.');
+   grid.innerHTML=rows.map(a=>{
+    const photos=visiblePhotosFor(a);const media=photos[0]?'<img src="'+photoUrl(photos[0].storage_path)+'" alt="'+esc(a.title||'Annonce')+'">':'✦';
+    return '<article class="b2b-listing-card" data-pro-listing="'+esc(a.id)+'" role="button" tabindex="0"><div class="b2b-listing-photo">'+media+'<span class="b2b-listing-badge">PRO/PRO</span></div><div class="b2b-listing-body"><div class="note">'+esc(catLabel(a.category))+'</div><h4>'+esc(a.title||'Annonce')+'</h4><div class="b2b-listing-price">'+cataloguePrice(a)+'</div><div class="b2b-listing-meta">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div></div></article>';
+   }).join('');
+  }catch(error){if(same(v))msg('b2bListingStatus',errorText(error));}
+ }
+ node('b2bListingGrid').addEventListener('click',event=>{const card=event.target.closest('[data-pro-listing]');if(card)openAd(card.dataset.proListing);});
+ node('b2bListingGrid').addEventListener('keydown',event=>{if((event.key==='Enter'||event.key===' ')&&event.target.closest('[data-pro-listing]')){event.preventDefault();openAd(event.target.closest('[data-pro-listing]').dataset.proListing);}});
  async function loadOffers(){
   const v=version;clearBlobs();node('b2bOffers').replaceChildren();msg('b2bStockStats','Chargement…');
   try{
