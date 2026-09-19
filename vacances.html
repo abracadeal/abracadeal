@@ -1099,6 +1099,341 @@ h1 span{
 }
 </style>
 
+
+<style id="vacances-mobile-mockup-match-20260919">
+.vac-mobile-top-account,.vac-mobile-popular{display:none}
+.vac-date-fields{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.search-subtitle{margin:-8px 0 16px;color:var(--muted);font-size:.9rem}
+.search-row .btn.primary{width:100%}
+
+@media(max-width:760px){
+  body{
+    background:
+      radial-gradient(circle at 18% 9%,rgba(248,175,222,.18),transparent 30%),
+      linear-gradient(180deg,#fffafd 0%,#fff8fc 46%,#fdf6fb 100%)!important;
+  }
+
+  .topbar{
+    min-height:58px!important;
+    background:#fff!important;
+    border:0!important;
+    box-shadow:none!important;
+  }
+  .topbar .nav{
+    min-height:58px!important;
+    justify-content:flex-end!important;
+    padding:7px 2px!important;
+  }
+  .topbar .brand{display:none!important}
+  .vac-mobile-top-account{
+    display:grid!important;
+    width:43px;height:43px;
+    place-items:center;
+    border-radius:50%;
+    border:1px solid #eadfea;
+    background:#fff;
+    color:#3d164d;
+    box-shadow:0 8px 22px rgba(88,30,106,.12);
+  }
+  .vac-mobile-top-account svg{
+    width:22px;height:22px;
+    fill:none;stroke:currentColor;stroke-width:1.9;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+
+  .vac-mobile-banner-shell{
+    width:calc(100% - 20px)!important;
+    margin:3px auto 10px!important;
+  }
+  .vac-mobile-banner-card{
+    min-height:170px!important;
+    grid-template-columns:92px minmax(0,1fr)!important;
+    grid-template-rows:minmax(105px,1fr) auto!important;
+    gap:7px 13px!important;
+    padding:15px 15px 12px!important;
+    border-radius:21px!important;
+    overflow:hidden!important;
+    background:
+      linear-gradient(90deg,rgba(255,231,247,.88) 0%,rgba(255,239,248,.70) 36%,rgba(255,255,255,.15) 70%),
+      url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1200&q=84') center 57%/cover no-repeat!important;
+    border:1px solid rgba(154,70,157,.15)!important;
+    box-shadow:0 12px 26px rgba(88,30,106,.12)!important;
+    color:#3b1647!important;
+  }
+  .vac-mobile-banner-card::before{
+    inset:0!important;width:auto!important;height:auto!important;right:0!important;bottom:0!important;
+    border-radius:inherit!important;
+    background:linear-gradient(180deg,rgba(255,255,255,.03),rgba(250,197,230,.10))!important;
+  }
+  .vac-mobile-banner-card::after{
+    content:"✦"!important;
+    right:14px!important;top:12px!important;
+    color:#df47a2!important;font-size:18px!important;
+    text-shadow:-28px 28px 0 rgba(215,86,180,.40)!important;
+  }
+  .vac-mobile-lamp-wrap{
+    width:84px!important;height:84px!important;
+    border-radius:26px!important;
+    border:0!important;
+    background:rgba(64,18,82,.92)!important;
+    box-shadow:0 10px 25px rgba(85,26,100,.22),0 0 18px rgba(244,126,202,.26)!important;
+  }
+  .vac-mobile-banner-copy strong{
+    color:#3a1647!important;
+    font-size:clamp(1.82rem,8.3vw,2.25rem)!important;
+    text-shadow:none!important;
+  }
+  .vac-mobile-banner-copy span{
+    color:#8e2d89!important;
+    font-size:.86rem!important;
+    letter-spacing:.22em!important;
+  }
+  .vac-mobile-banner-copy small{
+    color:#664b6b!important;
+    font-size:.74rem!important;
+  }
+  .vac-mobile-banner-benefits span{
+    background:rgba(255,255,255,.70)!important;
+    color:#552663!important;
+    border:1px solid rgba(119,54,129,.10)!important;
+    backdrop-filter:blur(9px);
+    -webkit-backdrop-filter:blur(9px);
+    box-shadow:0 3px 10px rgba(74,30,85,.05);
+  }
+
+  .hero{padding:0 0 8px!important}
+  .search-box{
+    width:calc(100% - 20px)!important;
+    padding:17px 14px 15px!important;
+    border-radius:21px!important;
+    box-shadow:0 10px 26px rgba(70,28,83,.09)!important;
+    border:1px solid #eadfea!important;
+  }
+  .search-title{
+    margin:0!important;
+    font-size:1.55rem!important;
+    line-height:1.03!important;
+  }
+  .search-subtitle{
+    display:block!important;
+    margin:7px 0 14px!important;
+    color:#7e7184!important;
+    font-size:.76rem!important;
+    line-height:1.35!important;
+  }
+  .search-grid{
+    display:grid!important;
+    grid-template-columns:1.08fr 1.02fr .9fr!important;
+    gap:7px!important;
+  }
+  .search-grid .field-wrap:first-child{grid-column:auto!important}
+  .vac-search-tile{
+    position:relative;
+    min-height:76px;
+    padding:11px 8px 8px 38px!important;
+    border:1px solid #eadfea;
+    border-radius:14px;
+    background:#fff;
+    box-shadow:0 4px 14px rgba(76,36,87,.04);
+    gap:2px!important;
+    overflow:hidden!important;
+  }
+  .vac-search-icon{
+    position:absolute;
+    left:10px;top:18px;
+    color:#6f1f79;
+    font-size:23px;
+    line-height:1;
+  }
+  .vac-search-tile label{
+    font-size:.68rem!important;
+    line-height:1.1!important;
+    color:#4c2358!important;
+    font-weight:850!important;
+  }
+  .vac-search-tile .field{
+    height:27px!important;
+    min-height:27px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    color:#5f5166!important;
+    font-size:.66rem!important;
+  }
+  .vac-search-tile .field::placeholder{color:#8d8291!important;opacity:1}
+  .vac-date-fields{
+    display:flex!important;
+    align-items:center;
+    gap:3px!important;
+    min-width:0!important;
+  }
+  .vac-date-fields .field{
+    width:50%!important;
+    max-width:50%!important;
+    min-width:0!important;
+    font-size:.54rem!important;
+  }
+  .vac-guests-tile .field{font-size:.66rem!important}
+
+  .search-row{
+    display:block!important;
+    margin-top:9px!important;
+  }
+  .search-row .btn.primary{
+    width:100%!important;
+    min-height:51px!important;
+    border-radius:13px!important;
+    font-size:1rem!important;
+    background:linear-gradient(90deg,#a32db7 0%,#dd3fa6 55%,#f05aaf 100%)!important;
+    box-shadow:0 8px 18px rgba(192,51,160,.22)!important;
+  }
+  .vac-search-submit-icon{font-size:1.35rem;line-height:1}
+  .search-note{display:none!important}
+
+  .vac-mobile-popular{
+    display:block!important;
+    width:calc(100% - 20px);
+    margin:12px auto 12px;
+  }
+  .vac-mobile-popular-head{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    align-items:end;
+    margin-bottom:11px;
+  }
+  .vac-mobile-popular h2{
+    margin:0;
+    font:700 1.55rem/1 Fraunces,serif;
+    color:#35143f;
+  }
+  .vac-mobile-popular p{
+    margin:5px 0 0;
+    color:#7f7285;
+    font-size:.74rem;
+  }
+  .vac-popular-seeall{
+    border:0;background:transparent;padding:0 1px 2px;
+    color:#7c217d;font-weight:850;font-size:.74rem;white-space:nowrap;
+  }
+  .vac-popular-seeall span{font-size:1.2rem;vertical-align:-1px}
+  .vac-destination-grid{
+    display:grid;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  .vac-destination-card{
+    position:relative;
+    min-width:0;
+    height:196px;
+    padding:0 9px 10px;
+    border:1px solid #eadfea;
+    border-radius:16px;
+    background:#fff;
+    color:#34163f;
+    overflow:hidden;
+    text-align:left;
+    box-shadow:0 7px 18px rgba(73,31,84,.07);
+  }
+  .vac-destination-card::before{
+    content:"";
+    position:absolute;
+    left:0;right:0;top:0;
+    height:126px;
+    background-image:var(--vac-img);
+    background-size:cover;
+    background-position:center;
+  }
+  .vac-destination-card::after{
+    content:"";
+    position:absolute;
+    left:0;right:0;top:92px;height:36px;
+    background:linear-gradient(180deg,transparent,#fff);
+  }
+  .vac-favorite{
+    position:absolute;
+    z-index:2;
+    right:7px;top:7px;
+    width:29px;height:29px;border-radius:50%;
+    display:grid;place-items:center;
+    background:rgba(255,255,255,.94);
+    color:#5b1d67;
+    font-size:18px;
+    box-shadow:0 4px 12px rgba(0,0,0,.10);
+  }
+  .vac-place-tag{
+    position:absolute;
+    z-index:2;
+    left:8px;top:103px;
+    padding:4px 7px;
+    border-radius:999px;
+    background:rgba(255,255,255,.96);
+    color:#54225e;
+    font-size:.56rem;
+    font-weight:800;
+    box-shadow:0 3px 10px rgba(0,0,0,.08);
+  }
+  .vac-destination-card strong{
+    position:absolute;left:9px;right:7px;top:137px;
+    font:700 .91rem/1.05 Fraunces,serif;
+  }
+  .vac-destination-card small{
+    position:absolute;left:9px;right:7px;top:158px;
+    color:#827486;
+    font-size:.64rem;
+    line-height:1.15;
+  }
+
+  .vac-mobile-offer{
+    width:calc(100% - 20px)!important;
+    margin:13px auto 13px!important;
+    min-height:62px;
+    border-radius:17px!important;
+    background:rgba(255,255,255,.92)!important;
+    box-shadow:0 7px 20px rgba(73,31,84,.07)!important;
+  }
+
+  .vac-mobile-bottom-nav{
+    left:7px!important;right:7px!important;
+    min-height:72px!important;
+    border-radius:25px!important;
+    background:linear-gradient(90deg,rgba(43,13,57,.97),rgba(53,17,66,.97))!important;
+    box-shadow:0 18px 42px rgba(41,13,56,.30),0 -4px 24px rgba(238,89,179,.08)!important;
+  }
+  .vac-mobile-host-orb{
+    width:56px!important;height:56px!important;
+    background:linear-gradient(145deg,#ff67bd,#d93ead 55%,#8e2eae)!important;
+    box-shadow:0 9px 25px rgba(224,57,171,.42),0 0 0 5px rgba(226,91,182,.12)!important;
+  }
+
+  /* Les longues sections d'explication restent accessibles mais passent après l'expérience de recherche. */
+  .vac-mobile-popular + .vac-mobile-offer + .section{margin-top:0}
+}
+
+@media(max-width:390px){
+  .vac-mobile-banner-card{
+    min-height:160px!important;
+    grid-template-columns:78px minmax(0,1fr)!important;
+    grid-template-rows:minmax(98px,1fr) auto!important;
+    padding:13px 12px 11px!important;
+  }
+  .vac-mobile-lamp-wrap{width:72px!important;height:72px!important}
+  .vac-mobile-banner-copy strong{font-size:1.72rem!important}
+  .vac-mobile-banner-copy span{font-size:.76rem!important}
+  .vac-mobile-banner-copy small{font-size:.67rem!important}
+  .vac-search-tile{padding-left:33px!important}
+  .vac-search-icon{left:8px;font-size:20px}
+  .vac-destination-card{height:184px}
+  .vac-destination-card::before{height:118px}
+  .vac-destination-card::after{top:86px}
+  .vac-place-tag{top:96px;font-size:.52rem}
+  .vac-destination-card strong{top:129px;font-size:.84rem}
+  .vac-destination-card small{top:150px;font-size:.59rem}
+}
+</style>
+
 </head>
 <body>
 <header class="topbar">
@@ -1110,6 +1445,9 @@ h1 span{
       <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">S’inscrire</a>
       <a class="btn primary" id="hostSignupCta" href="espace-hote.html?host_signup=1">Devenir hôte</a>
     </div>
+    <button class="vac-mobile-top-account" type="button" data-vac-mobile-action="account" aria-label="Mon compte">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+    </button>
   </div>
 </header>
 
@@ -1188,17 +1526,62 @@ h1 span{
 
     <form class="search-box" id="vacationSearch">
       <h2 class="search-title">Trouvez votre prochain séjour</h2>
+      <p class="search-subtitle">Des hébergements uniques, partout en France et ailleurs.</p>
       <div class="search-grid">
-        <div class="field-wrap"><label for="destination">Destination</label><input class="field" id="destination" placeholder="Cannes, Nice, Paris…"></div>
-        <div class="field-wrap"><label for="arrival">Arrivée</label><input class="field" id="arrival" type="date"></div>
-        <div class="field-wrap"><label for="departure">Départ</label><input class="field" id="departure" type="date"></div>
+        <div class="field-wrap vac-search-tile vac-destination-tile">
+          <span class="vac-search-icon" aria-hidden="true">⌖</span>
+          <label for="destination">Destination</label>
+          <input class="field" id="destination" placeholder="Où voulez-vous aller ?">
+        </div>
+        <div class="field-wrap vac-search-tile vac-dates-tile">
+          <span class="vac-search-icon" aria-hidden="true">▣</span>
+          <label>Dates</label>
+          <div class="vac-date-fields">
+            <input class="field" id="arrival" type="date" aria-label="Arrivée">
+            <input class="field" id="departure" type="date" aria-label="Départ">
+          </div>
+        </div>
+        <div class="field-wrap vac-search-tile vac-guests-tile">
+          <span class="vac-search-icon" aria-hidden="true">♙</span>
+          <label for="guests">Voyageurs</label>
+          <select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 voyageurs et +</option></select>
+        </div>
       </div>
       <div class="search-row">
-        <div class="field-wrap"><label for="guests">Voyageurs</label><select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 voyageurs et +</option></select></div>
-        <button class="btn primary" type="submit">Rechercher</button>
+        <button class="btn primary" type="submit"><span class="vac-search-submit-icon" aria-hidden="true">⌕</span> Rechercher</button>
       </div>
       <div class="search-note">La recherche tient compte des disponibilités Abracadeal et des calendriers iCal synchronisés.</div>
     </form>
+  </div>
+</section>
+
+<section class="vac-mobile-popular" aria-labelledby="vacPopularTitle">
+  <div class="vac-mobile-popular-head">
+    <div>
+      <h2 id="vacPopularTitle">Destinations populaires</h2>
+      <p>Des lieux d’exception pour des souvenirs inoubliables.</p>
+    </div>
+    <button type="button" class="vac-popular-seeall" data-vac-mobile-action="explore">Voir tout <span>›</span></button>
+  </div>
+  <div class="vac-destination-grid">
+    <button type="button" class="vac-destination-card" data-vac-destination="Côte d’Azur" style="--vac-img:url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=700&q=82')">
+      <span class="vac-favorite">♡</span>
+      <span class="vac-place-tag">⌖ France</span>
+      <strong>Côte d’Azur</strong>
+      <small>Soleil & Méditerranée</small>
+    </button>
+    <button type="button" class="vac-destination-card" data-vac-destination="Alpes" style="--vac-img:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=82')">
+      <span class="vac-favorite">♡</span>
+      <span class="vac-place-tag">⌖ France</span>
+      <strong>Alpes</strong>
+      <small>Nature & Grand air</small>
+    </button>
+    <button type="button" class="vac-destination-card" data-vac-destination="Bali" style="--vac-img:url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&q=82')">
+      <span class="vac-favorite">♡</span>
+      <span class="vac-place-tag">⌖ Étranger</span>
+      <strong>Bali</strong>
+      <small>Plages & Évasion</small>
+    </button>
   </div>
 </section>
 
@@ -1574,6 +1957,19 @@ h1 span{
     }
   });
 })();
+</script>
+
+<script id="vac-destination-click-handler-20260919">
+document.addEventListener('click',function(e){
+  const card=e.target.closest('[data-vac-destination]');
+  if(!card)return;
+  const input=document.getElementById('destination');
+  if(input){
+    input.value=card.getAttribute('data-vac-destination')||'';
+    document.getElementById('vacationSearch')?.scrollIntoView({behavior:'smooth',block:'center'});
+    setTimeout(()=>input.focus({preventScroll:true}),260);
+  }
+});
 </script>
 
 <script id="vacances-mobile-banner-logo-sync-20260919">
