@@ -364,13 +364,27 @@ html{scrollbar-gutter:stable}
     max-height:220px!important;
     aspect-ratio:auto!important;
     margin:0!important;
-    background-image:var(--abraca-main-banner)!important;
-    background-size:cover!important;
-    background-position:center center!important;
-    background-repeat:no-repeat!important;
+    background:#160623!important;
     overflow:hidden!important;
   }
-  .banner-frame .banner-desktop,
+  .banner-frame #homeBrandLink{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .banner-frame .banner-desktop{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    width:100%!important;
+    height:100%!important;
+    max-height:none!important;
+    object-fit:cover!important;
+    object-position:center center!important;
+    border-radius:0!important;
+  }
   .banner-frame .mobile-banner-img,
   .banner-hotspots{
     display:none!important;
