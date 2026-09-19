@@ -5615,7 +5615,7 @@ header #flowErrorsBtn{
     </div>
   </section>
 
-  <section class="home-featured-section hidden" id="homeFeaturedSection" aria-labelledby="homeFeaturedTitle">
+  <section class="home-featured-section hidden home-featured-loading" id="homeFeaturedSection" aria-labelledby="homeFeaturedTitle">
     <div class="container">
       <div class="home-featured-head">
         <div>
@@ -9716,7 +9716,12 @@ function renderHomeFeatured(){
   if(!section||!grid)return;
   // Tous les boosts actifs sont éligibles, sans restriction de catégorie.
   const candidates=(allAds||[]).filter(a=>a.status==='active'&&listingIsFeatured(a));
-  if(!candidates.length){section.classList.add('hidden');grid.innerHTML='';return;}
+  if(!candidates.length){
+    section.classList.remove('home-featured-loading');
+    section.classList.add('hidden');
+    grid.innerHTML='';
+    return;
+  }
   const picked=selectMixedFeatured(candidates,8);
   grid.innerHTML=picked.map(a=>{
     const photos=visiblePhotosFor(a);
@@ -9732,7 +9737,9 @@ function renderHomeFeatured(){
       </div>
     </article>`;
   }).join('');
-  section.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  section.classList.remove('home-featured-loading');
+  section.classList.remove('hidden');
+  queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 
 function renderAds(){
