@@ -366,3 +366,32 @@ html{scrollbar-gutter:stable}
     max-height:170px!important;
   }
 }
+
+
+/* ===== BANNER RESET 2026-09-20 ===== */
+/* All banner visuals removed. Keep only a clean search area. */
+.banner-frame,
+.banner-hotspots{
+  display:none!important;
+}
+@media(min-width:761px){
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    height:auto!important;
+    padding:18px 0 20px!important;
+  }
+  .hero-shell{
+    min-height:0!important;
+    background:#11091b!important;
+  }
+  .search-wrap{
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:none!important;
+    width:min(1080px,calc(100% - 60px))!important;
+    margin:0 auto!important;
+  }
+}
