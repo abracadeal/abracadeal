@@ -4,7 +4,7 @@
 html{scrollbar-gutter:stable}
 
 /* ===== Sous-menus desktop : zone continue + tolérance au déplacement de la souris ===== */
-@media(min-width:1367px){
+@media(min-width:761px){
   .desktop-nav-item{
     padding-bottom:10px!important;
     margin-bottom:-10px!important;
@@ -209,7 +209,7 @@ html{scrollbar-gutter:stable}
 
 
 /* Réserve l'espace À la une au chargement — évite le saut Pro/Pro */
-@media(min-width:1367px){
+@media(min-width:761px){
   #homeFeaturedSection{
     min-height:284px!important;
   }
