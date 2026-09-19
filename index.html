@@ -5699,6 +5699,7 @@ header #flowErrorsBtn{
               <option value="">Toutes les catégories</option>
               <option value="vehicules">Véhicules</option>
               <option value="immobilier">Immobilier</option>
+              <option value="vacances">Vacances</option>
               <option value="hightech">High-tech</option>
               <option value="maison">Maison</option>
               <option value="mode">Mode</option>
@@ -6844,7 +6845,8 @@ function closeModal(id){
 }
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
-function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
+function cataloguePrice(a){const base=money(a?.price);return a?.category==='vacances'&&a?.price!==null&&a?.price!==''?base+' / nuit':base}
+function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
 function photoUrl(path){
   if(!path) return '';
   if(/^https?:\/\//i.test(String(path))) return String(path);
@@ -9677,7 +9679,7 @@ function rememberSearch(){
 }
 function personalizedCard(a,extra=''){
   const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
-  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${esc(a.title)}</h3><div class="personalized-price">${money(a.price)}</div>${extra}</div></article>`;
+  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${esc(a.title)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${extra}</div></article>`;
 }
 function renderRecentViewed(){
   const sec=$('#recentViewedSection'),grid=$('#recentViewedGrid');if(!sec||!grid)return;
@@ -9727,7 +9729,7 @@ function renderHomeFeatured(){
       <div class="home-featured-body">
         <div class="home-featured-meta">${esc(category)} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}</div>
         <h3 class="home-featured-title">${esc(a.title)}</h3>
-        <div class="home-featured-price">${money(a.price)}</div>
+        <div class="home-featured-price">${cataloguePrice(a)}</div>
         <div class="home-featured-city">📍 ${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
@@ -9797,7 +9799,7 @@ function renderAds(){
         ${statusBadge}
         <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
         <h3 class="ad-title">${esc(a.title)}</h3>
-        <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):money(a.price)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
+        <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
         ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs">
@@ -10044,6 +10046,11 @@ async function renderApproxMap(a){
 
 window.openAd=id=>{
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);if(!a)return;
+  if(a.category==='vacances'){
+    rememberViewed(id);
+    location.href='logement-vacances.html?id='+encodeURIComponent(id);
+    return;
+  }
   rememberViewed(id);
   if(!onlyMine&&!favoritesMode&&!moderationMode)renderRecentViewed();
   const photos=visiblePhotosFor(a);
