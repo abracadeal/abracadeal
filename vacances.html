@@ -248,6 +248,7 @@ body.auth-open{overflow:hidden!important}
     margin-right:48px!important;
   }
 }
+</style>
 
 <style id="vacances-premium-redesign-20260919">
 :root{
@@ -583,31 +584,7 @@ h1 span{
     font-size:1.45rem!important;
     margin-bottom:14px!important;
   }
-  .search-grid,.search-row{
-    grid-template-columns:minmax(0,1fr)!important;
-    min-width:0!important;
-    width:100%!important;
-  }
-  .search-grid .field-wrap,
-  .search-row .field-wrap{
-    min-width:0!important;
-    width:100%!important;
-    max-width:100%!important;
-  }
-  .search-grid .field,
-  .search-row .field{
-    min-width:0!important;
-    min-inline-size:0!important;
-    width:100%!important;
-    max-width:100%!important;
-  }
-  .search-grid input[type="date"]{
-    display:block!important;
-    min-width:0!important;
-    min-inline-size:0!important;
-    width:100%!important;
-    max-width:100%!important;
-  }
+  .search-grid,.search-row{grid-template-columns:1fr!important}
   .search-row .btn.primary{
     width:100%!important;
     min-height:50px!important;
@@ -636,7 +613,62 @@ h1 span{
   .nav-actions .btn{font-size:.78rem!important}
 }
 </style>
-</style></head>
+
+<style id="vacances-mobile-date-overflow-fix-20260919">
+@media (max-width:620px){
+  #vacationSearch{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+
+  #vacationSearch .search-grid,
+  #vacationSearch .search-row{
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+  }
+
+  #vacationSearch .field-wrap{
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow:hidden !important;
+  }
+
+  #vacationSearch .field,
+  #vacationSearch input,
+  #vacationSearch select,
+  #vacationSearch input[type="date"],
+  #vacationSearch input[type="text"]{
+    display:block !important;
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    min-inline-size:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  #vacationSearch input[type="date"]{
+    -webkit-appearance:none !important;
+    appearance:none !important;
+  }
+
+  #arrival,
+  #departure{
+    padding-right:12px !important;
+  }
+
+  #vacationSearch button[type="submit"]{
+    width:100% !important;
+    max-width:100% !important;
+  }
+}
+</style>
+</head>
 <body>
 <header class="topbar">
   <div class="container nav">
