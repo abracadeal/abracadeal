@@ -9832,9 +9832,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(proPlanCheckBusy||!sb||!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return false;
     proPlanCheckBusy=true;
     try{
-      const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle();
+      const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status,current_period_end,free_until').eq('user_id',currentUser.id).maybeSingle();
       if(error && !/0 rows/i.test(error.message||''))console.warn('Abonnement Pro indisponible',error);
-      const complete=!!data && ['trialing','active'].includes(data.status);
+      const accessUntilRaw=data?.free_until||data?.current_period_end||null;
+      const accessUntil=accessUntilRaw?new Date(accessUntilRaw).getTime():0;
+      const canceledButStillEntitled=data?.status==='canceled'&&Number.isFinite(accessUntil)&&accessUntil>Date.now();
+      const complete=!!data && (['trialing','active'].includes(data.status)||canceledButStillEntitled);
       if(complete){
         try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
         if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
@@ -9979,30 +9982,30 @@ document.addEventListener('DOMContentLoaded',()=>{
         return null;
       }
 
-      const scheduled=!!data.cancel_at_period_end;
+      const legacyScheduled=!!data.cancel_at_period_end;
       const hasCustomer=!!data.stripe_customer_id;
       const hasSubscription=!!data.stripe_subscription_id;
-      const cancelled=data.status==='canceled';
-      const endDate=data.current_period_end||data.free_until||null;
+      const cancelled=data.status==='canceled'||legacyScheduled;
+      const accessEnd=data.free_until||data.current_period_end||null;
       const billingStart=data.billing_starts_at||data.free_until||null;
 
       if(intro){
-        intro.textContent=scheduled
-          ?'Votre résiliation est programmée. Vous conservez l’accès jusqu’à la date de fin indiquée.'
+        intro.textContent=cancelled
+          ?'Votre abonnement est résilié : aucun futur prélèvement ne sera effectué. Votre accès reste disponible jusqu’à la date indiquée.'
           :(data.status==='trialing'
-            ?'Votre période gratuite est active. Vous pouvez gérer votre carte ou résilier avant le début de la facturation.'
+            ?'Votre période gratuite est active. Vous pouvez gérer votre carte ou résilier immédiatement avant le début de la facturation.'
             :'Gérez votre moyen de paiement, vos factures et votre abonnement depuis Stripe.');
       }
       if(badge){
-        badge.textContent=scheduled?'Résiliation programmée':(statusLabels[data.status]||data.status||'—');
+        badge.textContent=cancelled?'Résilié':(statusLabels[data.status]||data.status||'—');
         badge.className='pro-billing-status '+billingStatusClass(data);
       }
       if(details){
         details.innerHTML=[
           ['Formule',planLabels[data.plan_code]||data.plan_code||'—'],
-          ['Statut',scheduled?'Résiliation programmée':(statusLabels[data.status]||data.status||'—')],
+          ['Statut',cancelled?'Résilié':(statusLabels[data.status]||data.status||'—')],
           ['Début de facturation',fmtDate(billingStart)],
-          [scheduled?'Fin de l’abonnement':'Prochaine échéance / fin de période',fmtDate(endDate)]
+          [cancelled?'Accès jusqu’au':'Prochaine échéance / fin de période',fmtDate(accessEnd)]
         ].map(([label,value])=>'<div class="pro-billing-detail"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>').join('');
       }
 
@@ -10010,19 +10013,18 @@ document.addEventListener('DOMContentLoaded',()=>{
       actions?.classList.toggle('hidden',!canManage);
       if(manageBtn)manageBtn.classList.toggle('hidden',!canManage);
 
-      const canCancel=canManage&&hasSubscription&&!cancelled&&!scheduled;
+      const canCancel=canManage&&hasSubscription&&!cancelled;
       if(cancelBtn){
-        cancelBtn.classList.toggle('hidden',!hasSubscription||cancelled);
-        cancelBtn.disabled=scheduled;
-        cancelBtn.textContent=scheduled?'Résiliation programmée':'Résilier mon abonnement';
-        if(!canCancel&&scheduled)cancelBtn.classList.remove('hidden');
+        cancelBtn.classList.toggle('hidden',!canCancel);
+        cancelBtn.disabled=false;
+        cancelBtn.textContent='Résilier mon abonnement';
       }
 
       if(note){
-        if(scheduled){
-          note.textContent='Aucun renouvellement ne sera effectué après le '+fmtDate(endDate)+'.';
+        if(cancelled){
+          note.textContent='La résiliation est effective côté Stripe. Aucun renouvellement ni nouveau prélèvement ne sera effectué.';
         }else if(data.status==='trialing'){
-          note.textContent='Une résiliation pendant la période gratuite empêche le démarrage de la facturation à la fin de l’offre.';
+          note.textContent='Une résiliation pendant la période gratuite annule immédiatement l’abonnement Stripe et empêche tout démarrage de facturation.';
         }else if(canManage){
           note.textContent='Le portail Stripe sécurisé permet aussi de modifier la carte enregistrée et de consulter les factures.';
         }else if(data.source!=='stripe'){
@@ -10064,9 +10066,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     }finally{
       proBillingBusy=false;
       if(clicked&&document.body.contains(clicked)){
-        clicked.disabled=action==='cancel'?!!proBillingState?.cancel_at_period_end:false;
+        clicked.disabled=false;
         clicked.textContent=action==='cancel'
-          ?(proBillingState?.cancel_at_period_end?'Résiliation programmée':'Résilier mon abonnement')
+          ?'Résilier mon abonnement'
           :(oldText||'Gérer mon abonnement');
       }
     }
@@ -10079,10 +10081,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!returned&&!cancelled)return;
     for(let attempt=0;attempt<6;attempt++){
       const state=await loadProBillingPanel();
-      if(!cancelled||state?.cancel_at_period_end||state?.status==='canceled')break;
+      if(!cancelled||state?.status==='canceled'||state?.cancel_at_period_end)break;
       await new Promise(resolve=>setTimeout(resolve,550));
     }
-    toast(cancelled?'Résiliation Stripe enregistrée':'Retour du portail Stripe');
+    toast(cancelled?'Abonnement résilié · aucun futur prélèvement':'Retour du portail Stripe');
     try{
       const url=new URL(location.href);
       url.searchParams.delete('billing_return');
