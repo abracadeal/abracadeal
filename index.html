@@ -1803,6 +1803,29 @@ a.btn{cursor:pointer}
 .header-messages-btn:hover{background:rgba(255,255,255,.06)}
 .header-messages-btn .header-message-label{font-weight:800}
 .header-message-badge{position:absolute;top:-7px;right:-7px;display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#ec409d;color:#fff;font-size:.72rem;font-weight:900;box-shadow:0 3px 10px rgba(0,0,0,.28);border:2px solid #1b0d2d}
+#accountBtn{position:relative;overflow:visible!important}
+.account-unread-badge{
+  position:absolute;
+  top:-7px;
+  right:-7px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:22px;
+  height:22px;
+  padding:0 6px;
+  border-radius:999px;
+  background:linear-gradient(135deg,#ff4ba9,#ee2e8f);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:900;
+  line-height:1;
+  box-shadow:0 3px 10px rgba(0,0,0,.28);
+  border:2px solid #1b0d2d;
+  z-index:3;
+  pointer-events:none;
+}
+.account-unread-badge.hidden{display:none!important}
 @media(max-width:720px){
   .nav{gap:8px}
   .nav-actions{gap:7px;min-width:0}
