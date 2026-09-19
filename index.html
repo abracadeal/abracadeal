@@ -11212,5 +11212,23 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('abracadeal:auth',()=>setTimeout(syncAdminNav,80));
 })();
 </script>
+
+<script id="abraca-open-messages-query-20260919">
+(function(){
+  const params=new URLSearchParams(location.search);
+  if(params.get('open')!=='messages')return;
+  window.addEventListener('load',function(){
+    setTimeout(function(){
+      const btn=document.getElementById('headerMessagesBtn') || document.querySelector('[data-home-route="messages"]');
+      btn?.click();
+      try{
+        params.delete('open');
+        const qs=params.toString();
+        history.replaceState({},document.title,location.pathname+(qs?'?'+qs:'')+location.hash);
+      }catch(_){}
+    },700);
+  },{once:true});
+})();
+</script>
 </body>
 </html>
