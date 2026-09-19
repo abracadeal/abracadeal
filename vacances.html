@@ -1742,6 +1742,55 @@ h1 span{
   .vac-mobile-banner-exact{border-radius:19px!important}
 }
 </style>
+
+<style id="vacances-france-search-fix-20260919">
+@media(max-width:760px){
+  .vac-france-launch-note{
+    margin:7px 0 12px!important;
+    padding:8px 10px!important;
+    border-radius:11px!important;
+    background:#fff4fb!important;
+    border:1px solid #efd8e9!important;
+    color:#6a4770!important;
+    font-size:.68rem!important;
+    line-height:1.3!important;
+    font-weight:700!important;
+  }
+  #vacationSearch .search-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+  }
+  #vacationSearch .vac-destination-tile{
+    grid-column:1/-1!important;
+    min-height:62px!important;
+  }
+  #vacationSearch .vac-dates-tile,
+  #vacationSearch .vac-guests-tile{
+    grid-column:auto!important;
+    min-height:70px!important;
+  }
+  #vacationSearch .vac-search-tile{
+    padding:11px 10px 9px 38px!important;
+  }
+  #vacationSearch .vac-search-icon{
+    left:11px!important;
+    top:18px!important;
+  }
+  #vacationSearch .vac-destination-tile .field{
+    font-size:.76rem!important;
+  }
+  #vacationSearch .vac-dates-tile .vac-date-trigger,
+  #vacationSearch .vac-guests-tile .field{
+    font-size:.72rem!important;
+  }
+}
+@media(max-width:390px){
+  #vacationSearch .search-grid{gap:7px!important}
+  #vacationSearch .vac-search-tile{padding-left:35px!important}
+  .vac-france-launch-note{font-size:.64rem!important}
+}
+</style>
 </head>
 <body>
 <header class="topbar">
@@ -1829,8 +1878,8 @@ h1 span{
     </div>
 
     <form class="search-box" id="vacationSearch">
-      <h2 class="search-title">Trouvez votre prochain séjour</h2>
-      <p class="search-subtitle">Des hébergements uniques, partout en France et ailleurs.</p>
+      <h2 class="search-title">Trouvez votre prochain séjour en France</h2>
+      <p class="search-subtitle">Des hébergements uniques, partout en France.</p><p class="vac-france-launch-note">🇫🇷 Pour le lancement, Abracadeal Vacances est disponible en France uniquement.</p>
       <div class="search-grid">
         <div class="field-wrap vac-search-tile vac-destination-tile">
           <span class="vac-search-icon" aria-hidden="true">⌖</span>
@@ -1881,11 +1930,11 @@ h1 span{
       <strong>Alpes</strong>
       <small>Nature & Grand air</small>
     </button>
-    <button type="button" class="vac-destination-card" data-vac-destination="Bali" style="--vac-img:url('https://images.unsplash.com/photo-1537996194471-e657df975ab4?auto=format&fit=crop&w=700&q=82')">
+    <button type="button" class="vac-destination-card" data-vac-destination="Paris" style="--vac-img:url('https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=700&q=82')">
       <span class="vac-favorite">♡</span>
-      <span class="vac-place-tag">⌖ Étranger</span>
-      <strong>Bali</strong>
-      <small>Plages & Évasion</small>
+      <span class="vac-place-tag">⌖ France</span>
+      <strong>Paris</strong>
+      <small>Culture & Escapade</small>
     </button>
   </div>
 </section>
@@ -2227,7 +2276,7 @@ h1 span{
     <span class="vac-mobile-host-orb"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span>
     <span>Devenir hôte</span>
   </a>
-  <a class="vac-mobile-nav-item" href="index.html?open=messages">
+  <a class="vac-mobile-nav-item" href="messages-vacances.html">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg>
     <span>Messages</span>
   </a>
