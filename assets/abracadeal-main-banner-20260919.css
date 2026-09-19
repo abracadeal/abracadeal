@@ -22,7 +22,7 @@
     var(--abraca-main-banner) center 58% / 150% auto no-repeat!important;
 }
 
-@media(max-width:1366px){
+@media(max-width:760px){
   .banner-frame{
     background-image:var(--abraca-main-banner)!important;
     background-size:cover!important;
@@ -33,7 +33,7 @@
 
 
 /* Ajustements 17h29 — bannière complète + sous-menus desktop */
-@media(min-width:1367px){
+@media(min-width:761px){
   /* Affiche la bannière complète sans zoom ni recadrage.
      L'image source fait 1500 × 240, soit un ratio 25:4. */
   .hero.container{
@@ -140,7 +140,7 @@
   }
 }
 
-@media(min-width:1367px) and (max-width:1550px){
+@media(min-width:761px) and (max-width:1550px){
   .desktop-subcategory-link{font-size:11px!important}
   .desktop-submenu{min-width:195px!important}
 }
