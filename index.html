@@ -4115,6 +4115,40 @@ header #flowErrorsBtn{
   .hero{padding-left:8px!important;padding-right:8px!important}
   .banner-frame,.banner{height:auto!important;max-height:none!important;border-radius:22px!important}
 }
+
+/* Recherche compacte : champ + bouton sur une seule ligne */
+#searchCity[type="hidden"]{display:none!important}
+.search-card{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+#searchBtn{
+  width:auto!important;
+}
+@media(max-width:620px){
+  .search-card{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:8px!important;
+  }
+  .search-card .field{
+    min-width:0!important;
+  }
+  .search-card .search-btn{
+    width:auto!important;
+    min-width:124px!important;
+    padding:0 14px!important;
+    font-size:15px!important;
+    white-space:nowrap!important;
+  }
+}
+@media(max-width:390px){
+  .search-card .search-btn{
+    min-width:112px!important;
+    padding:0 11px!important;
+    font-size:14px!important;
+  }
+}
+
 </style>
 
 <style id="portrait-only-mobile-lock">
@@ -4429,7 +4463,7 @@ header #flowErrorsBtn{
       <div class="search-wrap">
         <div class="search-card">
           <input class="field" id="searchQuery" type="text" placeholder="Que recherchez-vous ?">
-          <input class="field" id="searchCity" type="text" placeholder="Ville ou code postal">
+          <input id="searchCity" type="hidden" value="">
           <button class="search-btn" id="searchBtn" type="button">Rechercher</button>
           
         </div>
