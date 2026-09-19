@@ -227,7 +227,7 @@
 
 
 /* Desktop 2026-09-19 — ancien header retiré, fonctions regroupées dans les nouveaux accès */
-@media(min-width:1367px){
+@media(min-width:761px){
   /* On garde uniquement les contrôles de la nouvelle maquette :
      favoris, compte et publication. Les anciennes actions restent
      accessibles depuis Compte / Vacances sans doubler le header. */
