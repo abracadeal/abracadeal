@@ -13753,10 +13753,28 @@ document.addEventListener('DOMContentLoaded',()=>{
     requestAnimationFrame(measure);
   }
 
+  // Fix 20/09/2026 : barre de recherche "un peu buguee au scroll" (signale par Anthony).
+  // Cause trouvee : les deux tests d'entree/sortie utilisaient exactement le meme seuil
+  // (triggerY+6), donc aucune vraie zone morte n'existait entre les deux etats - au moindre
+  // micro-mouvement de la molette/trackpad pile a ce pixel-la (scroll inertiel, valeurs
+  // fractionnaires), la barre pouvait basculer flottante/statique plusieurs fois de suite
+  // (reinsertion DOM + reflow a chaque bascule = a-coups visibles). Corrige avec deux seuils
+  // separes par un vrai ecart (32px pour entrer, -10px pour sortir) : il faut scroller
+  // nettement au-dela du point de bascule dans un sens comme dans l'autre pour changer d'etat.
+  // Ajout aussi d'un throttle par requestAnimationFrame sur le scroll (au plus un calcul par
+  // frame) pour alleger le travail pendant un scroll rapide.
+  let ticking = false;
+
   function update(){
     if (!ensureRefs()) return;
-    if (!floating && window.scrollY > triggerY + 6) floatSearch();
-    else if (floating && window.scrollY <= triggerY + 6) restoreSearch();
+    if (!floating && window.scrollY > triggerY + 32) floatSearch();
+    else if (floating && window.scrollY <= triggerY - 10) restoreSearch();
+  }
+
+  function onScroll(){
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(() => { update(); ticking = false; });
   }
 
   function init(){
@@ -13767,7 +13785,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   window.addEventListener('load', init, {once:true});
   window.addEventListener('pageshow', () => { requestAnimationFrame(() => { measure(); update(); }); });
-  window.addEventListener('scroll', update, {passive:true});
+  window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', () => {
     if (floating) restoreSearch();
     requestAnimationFrame(() => { measure(); update(); });
