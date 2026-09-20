@@ -6085,10 +6085,24 @@ header #flowErrorsBtn{
   text-decoration:underline;
   text-underline-offset:2px;
   white-space:nowrap;
+  background:transparent;
+  border:0;
+  font:inherit;
+  font-weight:850;
+  cursor:pointer;
+  padding:0;
 }
 .founder-topbar-cta:hover{color:#f2d9ff}
 @media(max-width:760px){
   .founder-topbar{display:none!important}
+}
+
+/* Fix 20/09/2026 : le champ Ville et le bouton Filtres ajoutes a la recherche de l'accueil sont
+   reserves au desktop (demande initiale d'Anthony) ; sur mobile la barre redevient compacte
+   (mot-cle + bouton Rechercher uniquement), comme avant leur ajout. */
+@media(max-width:760px){
+  #searchCity.desktop-search-city{display:none!important}
+  .search-filters-link{display:none!important}
 }
 </style>
 
@@ -6237,7 +6251,7 @@ header #flowErrorsBtn{
     <div class="container founder-topbar-inner">
       <span class="founder-topbar-text">🎉 <strong>Offre Fondateurs</strong> · 12 mois gratuits pour les professionnels</span>
       <span class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></span>
-      <a href="#pros" class="founder-topbar-cta">Voir l'offre →</a>
+      <button type="button" class="founder-topbar-cta" onclick="openModal('founderOfferModal')">Voir l'offre →</button>
     </div>
   </div>
   <section class="hero-shell">
