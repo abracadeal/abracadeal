@@ -2574,6 +2574,11 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     background-size:11px!important;
   }
 }
+
+/* Fix 20/09/2026 : le visuel de la lampe (fond violet + lampe + etincelles) est plus charge/dense dans sa moitie basse, avec de l'espace vide en haut (etincelles fines) - une fois centre mathematiquement avec le texte "Abracadeal", l'oeil percoit un leger decalage (la lampe "pese" plus bas que le texte). Petit ajustement visuel pour re-equilibrer. */
+.brand-logo{
+  margin-top:-3px!important;
+}
 </style>
 </head>
 <body>
@@ -2689,7 +2694,7 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
         <div class="field-wrap vac-search-tile vac-guests-tile">
           <span class="vac-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.4"/><path d="M3.5 20c.4-4 2.5-6 5.5-6s5.1 2 5.5 6M14 15c2.7-.5 5.5 1 6.3 4"/></svg></span>
           <label for="guests">Voyageurs</label>
-          <select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 voyageurs et +</option></select>
+          <select class="field" id="guests"><option>1 voyageur</option><option selected>2 voyageurs</option><option>3 voyageurs</option><option>4 voyageurs</option><option>5 voyageurs</option><option>6 voyageurs</option><option>7 et +</option></select>
         </div>
       </div>
       <div class="search-row">
