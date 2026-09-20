@@ -2252,6 +2252,33 @@ body.vac-date-open .vac-mobile-bottom-nav{
   .steps{grid-template-columns:repeat(3,minmax(0,1fr))!important}
 }
 
+/* Fix 20/09/2026 : bug d icone de recherche en desktop/tablette. L icone (span+svg) n avait aucune taille fixee hors mobile, elle grossissait donc en flex-item et gonflait chaque case (destination/dates/voyageurs) a ~300px de haut. On la sort du flux (comme sur mobile) et on lui donne une taille fixe. */
+@media(min-width:761px){
+  #vacationSearch .vac-search-tile{
+    position:relative!important;
+    padding-left:34px!important;
+  }
+  #vacationSearch .vac-search-icon{
+    position:absolute!important;
+    left:0!important;
+    top:50%!important;
+    transform:translateY(-50%)!important;
+    display:inline-flex!important;
+    width:22px!important;
+    height:22px!important;
+    color:#7a3b88!important;
+  }
+  #vacationSearch .vac-search-icon svg{
+    width:22px!important;
+    height:22px!important;
+    display:block!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.8!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+  }
+}
 </style>
 <style id="abraca-vacances-unified-modes">
 .vac-host-mode-shell{
@@ -2436,7 +2463,7 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     <div>
       <span class="kicker">🎉 Offre de lancement particuliers</span>
       <h1>Le même séjour.<br><span>Moins de frais.</span></h1>
-      <p>Abracadeal Vacances met directement en relation voyageurs et hôtes. Pour le lancement, les <strong>500 premiers logements publiés par des particuliers sont gratuits pendant 12 mois</strong>. Du <strong>501e au 1000e logement</strong>, l’abonnement est de <strong>4,99 € par mois pendant 6 mois</strong>, puis le tarif standard est de <strong>9,99 € par mois et par logement</strong>. Les formules restent <strong>sans engagement</strong>.</p>
+      <p>Abracadeal Vacances met <strong>directement en relation voyageurs et hôtes</strong>, avec <strong>0 % de commission</strong>. Offre de lancement : les <strong>500 premiers logements sont gratuits pendant 12 mois</strong>.</p>
       <div class="hero-badges">
         <span class="hero-badge"><strong>500 premiers</strong> : 12 mois gratuits</span>
         <span class="hero-badge"><strong>501 à 1000</strong> : 4,99 €/mois pendant 6 mois</span>
