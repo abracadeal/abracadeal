@@ -2486,6 +2486,15 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     cursor:pointer!important;
   }
 }
+
+/* Fix 20/09/2026 : la carte logement (fond blanc, bordure tres claire #eee0ef, ombre a 8% d'opacite) etait quasi invisible sur le fond blanc de la page (desktop) - la pastille "A LA UNE" semblait flotter sans cadre. On renforce le contour et l'ombre pour qu'elle se detache nettement. */
+.vac-listing-card{
+  border:1.5px solid #ddc4e0!important;
+  box-shadow:0 10px 28px rgba(69,32,79,.16)!important;
+}
+.vac-listing-card:hover{
+  box-shadow:0 16px 36px rgba(69,32,79,.22)!important;
+}
 </style>
 </head>
 <body>
