@@ -43,4 +43,5 @@ async function run(){
 }
 $('form').onsubmit=e=>{e.preventDefault();const q=new URLSearchParams({destination:$('dest').value.trim(),arrival:$('start').value,departure:$('end').value,guests:$('guests').value});history.replaceState(null,'','?'+q.toString());run()};
 paramsToForm();run();
-</script></body></html>
+</script><script src="vacation-presence.js?v=20260920-1"></script>
+</body></html>
