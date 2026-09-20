@@ -2279,6 +2279,74 @@ body.vac-date-open .vac-mobile-bottom-nav{
     stroke-linejoin:round!important;
   }
 }
+
+/* Fix 20/09/2026 : vraie grille de logements (remplace les 3 cartes destinations statiques). Visible sur mobile ET desktop, alimentee par search_vacation_listings en direct. */
+#vacHomeListingsSection.vac-mobile-popular{
+  display:block!important;
+  width:min(1180px,calc(100% - 36px))!important;
+  margin:34px auto 30px!important;
+}
+.vac-listing-grid{
+  display:grid!important;
+  grid-template-columns:repeat(auto-fill,minmax(220px,1fr))!important;
+  gap:16px!important;
+}
+.vac-listing-grid.is-empty{grid-template-columns:1fr!important}
+.vac-listing-skeleton{
+  height:230px;
+  border-radius:18px;
+  background:linear-gradient(100deg,#f2e9f5 20%,#faf3fb 40%,#f2e9f5 60%);
+  background-size:200% 100%;
+  animation:vacListingShimmer 1.4s linear infinite;
+}
+@keyframes vacListingShimmer{0%{background-position:120% 0}100%{background-position:-20% 0}}
+.vac-listing-card{
+  display:flex!important;
+  flex-direction:column!important;
+  border:1px solid #eee0ef;
+  border-radius:18px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 10px 26px rgba(69,32,79,.08);
+  color:inherit;
+  text-decoration:none!important;
+  transition:transform .16s ease,box-shadow .16s ease;
+}
+.vac-listing-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(69,32,79,.14)}
+.vac-listing-photo{
+  display:block;height:150px;background:#f3eaf6;overflow:hidden;
+}
+.vac-listing-photo img{width:100%;height:100%;object-fit:cover;display:block}
+.vac-listing-photo-empty{
+  width:100%;height:100%;display:flex;align-items:center;justify-content:center;
+  font-size:2rem;color:#c79ed0;
+}
+.vac-listing-body{display:flex;flex-direction:column;gap:3px;padding:13px 14px 15px}
+.vac-listing-title{
+  font-size:.98rem;color:#2c1835;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.vac-listing-meta{font-size:.78rem;color:#7f7285}
+.vac-listing-price{margin-top:4px;font-weight:800;color:#4f245e}
+.vac-listing-price small{font-weight:600;color:#8d7d92}
+.vac-listing-host{margin-top:2px;font-size:.74rem;color:#8d7d92}
+.vac-listing-empty{
+  grid-column:1/-1;
+  text-align:center;
+  background:#fbf5fc;
+  border:1px dashed #ddc4e0;
+  border-radius:18px;
+  padding:34px 20px;
+  color:#6d5875;
+}
+.vac-listing-empty strong{display:block;color:#3a2245;font-size:1.05rem;margin-bottom:6px}
+.vac-listing-empty p{margin:0 0 16px;font-size:.9rem}
+.vac-listing-empty .btn{display:inline-flex}
+@media(max-width:760px){
+  #vacHomeListingsSection.vac-mobile-popular{width:calc(100% - 20px)!important;margin:12px auto 12px!important}
+  .vac-listing-grid{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))!important;gap:10px!important}
+  .vac-listing-photo{height:120px}
+}
 </style>
 <style id="abraca-vacances-unified-modes">
 .vac-host-mode-shell{
@@ -2505,33 +2573,18 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   </div>
 </section>
 
-<section class="vac-mobile-popular" aria-labelledby="vacPopularTitle">
+<section class="vac-mobile-popular" id="vacHomeListingsSection" aria-labelledby="vacPopularTitle">
   <div class="vac-mobile-popular-head">
     <div>
-      <h2 id="vacPopularTitle">Destinations populaires</h2>
-      <p>Des lieux d’exception pour des souvenirs inoubliables.</p>
+      <h2 id="vacPopularTitle">Logements disponibles</h2>
+      <p id="vacHomeListingsSubtitle">Des hébergements publiés en direct par nos hôtes.</p>
     </div>
-    <button type="button" class="vac-popular-seeall" data-vac-mobile-action="explore">Voir tout <span>›</span></button>
+    <a href="recherche-vacances.html" class="vac-popular-seeall">Voir tout <span>›</span></a>
   </div>
-  <div class="vac-destination-grid">
-    <button type="button" class="vac-destination-card" data-vac-destination="Côte d’Azur" style="--vac-img:url('https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=700&q=82')">
-      <span class="vac-favorite">♡</span>
-      <span class="vac-place-tag">⌖ France</span>
-      <strong>Côte d’Azur</strong>
-      <small>Soleil & Méditerranée</small>
-    </button>
-    <button type="button" class="vac-destination-card" data-vac-destination="Alpes" style="--vac-img:url('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=700&q=82')">
-      <span class="vac-favorite">♡</span>
-      <span class="vac-place-tag">⌖ France</span>
-      <strong>Alpes</strong>
-      <small>Nature & Grand air</small>
-    </button>
-    <button type="button" class="vac-destination-card" data-vac-destination="Paris" style="--vac-img:url('https://images.unsplash.com/photo-1499856871958-5b9627545d1a?auto=format&fit=crop&w=700&q=82')">
-      <span class="vac-favorite">♡</span>
-      <span class="vac-place-tag">⌖ France</span>
-      <strong>Paris</strong>
-      <small>Culture & Escapade</small>
-    </button>
+  <div class="vac-listing-grid" id="vacHomeListingsGrid" aria-live="polite">
+    <div class="vac-listing-skeleton"></div>
+    <div class="vac-listing-skeleton"></div>
+    <div class="vac-listing-skeleton"></div>
   </div>
 </section>
 
@@ -2965,16 +3018,62 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
 })();
 </script>
 
-<script id="vac-destination-click-handler-20260919">
-document.addEventListener('click',function(e){
-  const card=e.target.closest('[data-vac-destination]');
-  if(!card)return;
-  const input=document.getElementById('destination');
-  if(input){
-    input.value=card.getAttribute('data-vac-destination')||'';
-    document.getElementById('vacationSearch')?.scrollIntoView({behavior:'smooth',block:'center'});
+<script id="vac-home-listings-20260920">
+(function(){
+  const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+  const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+  function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+  function cardHtml(x,sb){
+    const url=x.photo_path?sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl:null;
+    const rating=x.host_rating?('⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis'):'Nouvel hôte';
+    const photo=url?'<img src="'+url+'" alt="" loading="lazy">':'<span class="vac-listing-photo-empty" aria-hidden="true">🏡</span>';
+    return '<a class="vac-listing-card" href="logement-vacances.html?id='+encodeURIComponent(x.id)+'">'
+      +'<span class="vac-listing-photo">'+photo+'</span>'
+      +'<span class="vac-listing-body">'
+        +'<strong class="vac-listing-title">'+esc(x.title)+'</strong>'
+        +'<span class="vac-listing-meta">'+esc(x.city||'France')+' · '+(x.max_guests||1)+' voyageur(s)'+(x.bedrooms?' · '+x.bedrooms+' ch.':'')+'</span>'
+        +'<span class="vac-listing-price">'+money(x.nightly_price)+' <small>/ nuit</small></span>'
+        +'<span class="vac-listing-host">'+esc(x.host_name||'Hôte Abracadeal')+' · '+rating+'</span>'
+      +'</span>'
+    +'</a>';
   }
-});
+  function emptyHtml(){
+    return '<div class="vac-listing-empty">'
+      +'<strong>Aucun logement publié pour le moment.</strong>'
+      +'<p>Les premiers hôtes arrivent bientôt — 500 logements gratuits pendant 12 mois pour le lancement.</p>'
+      +'<a class="btn primary" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>'
+    +'</div>';
+  }
+  async function loadHomeListings(){
+    const grid=document.getElementById('vacHomeListingsGrid');
+    const subtitle=document.getElementById('vacHomeListingsSubtitle');
+    if(!grid||!window.supabase)return;
+    try{
+      const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+      const {data,error}=await sb.rpc('search_vacation_listings',{p_destination:null,p_starts_on:null,p_ends_on:null,p_guests:null});
+      if(error)throw error;
+      const items=(data||[]).slice(0,6);
+      if(!items.length){
+        grid.innerHTML=emptyHtml();
+        grid.classList.add('is-empty');
+        if(subtitle)subtitle.textContent='Soyez parmi les premiers hôtes publiés sur Abracadeal Vacances.';
+        return;
+      }
+      grid.classList.remove('is-empty');
+      grid.innerHTML=items.map(x=>cardHtml(x,sb)).join('');
+      if(subtitle)subtitle.textContent=items.length+' hébergement(s) publié(s) en direct par nos hôtes.';
+    }catch(err){
+      grid.innerHTML=emptyHtml();
+      grid.classList.add('is-empty');
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',loadHomeListings);
+  }else{
+    loadHomeListings();
+  }
+})();
 </script>
 
 
