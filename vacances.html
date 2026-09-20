@@ -2335,6 +2335,26 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     background-position:50% 50%!important;
   }
 }
+
+/* Fix 20/09/2026 : la bannière Vacances (deja affichee sur mobile) s'affiche aussi en desktop/tablette, sous le header, avant le bloc de recherche */
+@media(min-width:761px){
+  .vac-mobile-banner-shell{
+    display:block!important;
+    width:min(980px,calc(100% - 40px))!important;
+    max-width:980px!important;
+    margin:20px auto 0!important;
+  }
+  .vac-mobile-banner-exact{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    aspect-ratio:1290/563!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    border-radius:22px!important;
+    box-shadow:0 16px 40px rgba(0,0,0,.22)!important;
+  }
+}
 </style>
 </head>
 <body>
