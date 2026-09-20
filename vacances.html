@@ -2579,6 +2579,20 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
 .brand-logo{
   margin-top:-3px!important;
 }
+
+/* Fix 20/09/2026 : la police Fraunces (utilisee pour tous les gros titres) accentue automatiquement ses fioritures (notamment le "j", le "y", le "g") a mesure que la taille de texte augmente (c'est l'axe variable "opsz" - optical size - qui monte automatiquement avec le font-size). On fixe cet axe a une valeur basse pour garder un rendu plus sobre/moins decoratif sur ces gros titres, meme en grande taille. */
+h1,
+.search-title,
+.section-head h2,
+.price-big,
+.calc h3,
+.cta h2,
+.auth-card h2,
+.brand,
+.vac-mobile-banner-copy strong{
+  font-optical-sizing:none!important;
+  font-variation-settings:"opsz" 20!important;
+}
 </style>
 </head>
 <body>
