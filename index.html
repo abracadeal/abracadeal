@@ -1014,7 +1014,7 @@ a.btn{cursor:pointer}
 .diagnostic-row{display:grid;grid-template-columns:minmax(160px,230px) 1fr;align-items:center;gap:18px;padding:12px 0}
 .diagnostic-label{display:flex;align-items:center;gap:10px;color:#65586a;font-weight:750}
 .diagnostic-icon{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;background:#f4f2f5;color:#645a69;font-weight:900;font-size:.88rem}
-.diagnostic-info{width:22px;height:22px;border:1px solid #cfc6d4;border-radius:50%;display:inline-grid;place-items:center;background:#fff;color:#74677a;font-size:.76rem;font-weight:900;line-height:1;cursor:pointer;padding:0;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}.diagnostic-info:hover{transform:translateY(-1px);border-color:#8b3bb0;box-shadow:0 4px 12px rgba(104,39,132,.14);color:#6d238d}.diagnostic-info:focus-visible{outline:3px solid rgba(139,59,176,.18);outline-offset:2px}#diagnosticInfoModal{z-index:10050!important;background:rgba(20,8,30,.62);backdrop-filter:blur(3px)}.diagnostic-info-modal{max-width:560px;border:1px solid rgba(129,48,158,.12);box-shadow:0 34px 100px rgba(24,8,34,.42)}.diagnostic-info-modal .modal-head{background:linear-gradient(135deg,#fbf7ff,#fff5fb)}.diagnostic-info-modal .modal-body{font-size:.96rem;line-height:1.55;color:#4f4554}.diagnostic-info-modal .modal-body strong{color:#3e2d48}
+.diagnostic-info{width:22px;height:22px;border:1px solid #cfc6d4;border-radius:50%;display:inline-grid;place-items:center;background:#fff;color:#74677a;font-size:.76rem;font-weight:900;line-height:1;cursor:pointer;padding:0;transition:transform .15s ease,border-color .15s ease,box-shadow .15s ease}.diagnostic-info:hover{transform:translateY(-1px);border-color:#8b3bb0;box-shadow:0 4px 12px rgba(104,39,132,.14);color:#6d238d}.diagnostic-info:focus-visible{outline:3px solid rgba(139,59,176,.18);outline-offset:2px}#diagnosticInfoModal{z-index:10090!important;background:rgba(20,8,30,.62);backdrop-filter:blur(3px)}.diagnostic-info-modal{max-width:560px;border:1px solid rgba(129,48,158,.12);box-shadow:0 34px 100px rgba(24,8,34,.42)}.diagnostic-info-modal .modal-head{background:linear-gradient(135deg,#fbf7ff,#fff5fb)}.diagnostic-info-modal .modal-body{font-size:.96rem;line-height:1.55;color:#4f4554}.diagnostic-info-modal .modal-body strong{color:#3e2d48}
 .diagnostic-scale{display:flex;align-items:center;gap:3px;min-height:44px;flex-wrap:nowrap}
 .diagnostic-grade{width:34px;height:28px;display:grid;place-items:center;border-radius:0;font-weight:900;font-size:.9rem;line-height:1;box-sizing:border-box;transition:transform .15s ease,box-shadow .15s ease}
 .diagnostic-grade:first-child{border-radius:6px 0 0 6px}.diagnostic-grade:last-child{border-radius:0 6px 6px 0}
@@ -1104,7 +1104,7 @@ a.btn{cursor:pointer}
 .detail-equipment-summary{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
 .detail-equipment-preview{display:flex;gap:8px;flex-wrap:wrap;flex:1}
 .detail-immo-equipment-block{margin-top:18px;padding-top:16px;border-top:1px solid #eee6f2}.detail-immo-equipment-title{margin:0 0 12px;font-size:16px;font-weight:850;color:#24182d}
-.detail-equipment-more{border:1px solid rgba(255,255,255,.2);background:linear-gradient(135deg,#64208f 0%,#8d2ab8 55%,#ec409d 100%);color:#fff;border-radius:999px;padding:11px 18px;font-weight:850;cursor:pointer;box-shadow:0 10px 24px rgba(112,34,145,.22);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.detail-equipment-more:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(112,34,145,.3);filter:brightness(1.04)}.detail-equipment-more:active{transform:translateY(0)}.detail-equipment-more:focus-visible{outline:3px solid rgba(236,64,157,.28);outline-offset:2px}#vehicleEquipmentModal{z-index:10040 !important;background:rgba(20,8,30,.62);backdrop-filter:blur(3px)}.vehicle-equipment-modal{border:1px solid rgba(129,48,158,.12);box-shadow:0 34px 100px rgba(24,8,34,.42)}.vehicle-equipment-modal .modal-head{background:linear-gradient(135deg,#fbf7ff,#fff5fb)}
+.detail-equipment-more{border:1px solid rgba(255,255,255,.2);background:linear-gradient(135deg,#64208f 0%,#8d2ab8 55%,#ec409d 100%);color:#fff;border-radius:999px;padding:11px 18px;font-weight:850;cursor:pointer;box-shadow:0 10px 24px rgba(112,34,145,.22);transition:transform .18s ease,box-shadow .18s ease,filter .18s ease}.detail-equipment-more:hover{transform:translateY(-1px);box-shadow:0 14px 30px rgba(112,34,145,.3);filter:brightness(1.04)}.detail-equipment-more:active{transform:translateY(0)}.detail-equipment-more:focus-visible{outline:3px solid rgba(236,64,157,.28);outline-offset:2px}#vehicleEquipmentModal{z-index:10090 !important;background:rgba(20,8,30,.62);backdrop-filter:blur(3px)}.vehicle-equipment-modal{border:1px solid rgba(129,48,158,.12);box-shadow:0 34px 100px rgba(24,8,34,.42)}.vehicle-equipment-modal .modal-head{background:linear-gradient(135deg,#fbf7ff,#fff5fb)}
 .vehicle-equipment-modal{width:min(680px,100%)}
 .vehicle-equipment-modal-list{display:grid;grid-template-columns:1fr 1fr;gap:12px 18px}
 .vehicle-equipment-modal-item{padding:10px 0;border-bottom:1px solid #eee7f3;color:#2a1b34;font-weight:650}
@@ -1652,19 +1652,31 @@ a.btn{cursor:pointer}
 .detail-main-wrap{
   cursor:zoom-in!important;
 }
-.detail-main-wrap:hover::after{
-  content:'Agrandir';
-  position:absolute;
-  left:50%;
-  bottom:16px;
-  transform:translateX(-50%);
-  background:rgba(29,16,37,.78);
-  color:#fff;
-  padding:7px 12px;
-  border-radius:999px;
-  font-size:.78rem;
-  font-weight:800;
-  pointer-events:none;
+/* Fix 20/09/2026 : la pastille "Agrandir" (affichee au survol de la photo principale de la
+   fiche annonce) chevauchait visuellement le badge "Abracadeal" en bas a droite de la photo,
+   signale par Anthony sur mobile. Verifie en direct sur abracadeal.fr (fiche "Bureaux 120 m2
+   - Cannes centre", 375px) : les deux badges se recouvrent bien sur ~20x25px des que le survol
+   est actif. Sur mobile/tablette tactile, appuyer sur la photo ouvre directement le zoom
+   (voir openPhotoLightbox), donc l'infobulle "Agrandir" n'apporte rien et peut en plus rester
+   "collee" apres un tap (comportement classique des navigateurs mobiles avec :hover). Solution :
+   n'afficher cette infobulle que sur les appareils qui ont un vrai survol a la souris
+   (media hover:hover + pointer:fine) - jamais sur tactile, donc plus aucun chevauchement mobile
+   et aucun changement sur desktop. */
+@media (hover:hover) and (pointer:fine){
+  .detail-main-wrap:hover::after{
+    content:'Agrandir';
+    position:absolute;
+    left:50%;
+    bottom:16px;
+    transform:translateX(-50%);
+    background:rgba(29,16,37,.78);
+    color:#fff;
+    padding:7px 12px;
+    border-radius:999px;
+    font-size:.78rem;
+    font-weight:800;
+    pointer-events:none;
+  }
 }
 
 
@@ -1764,20 +1776,28 @@ a.btn{cursor:pointer}
 
 
 /* Profil vendeur / avis : toujours au-dessus de la fiche annonce */
-/* Fix 20/09/2026 : ces deux fenetres (fiche annonce + profil vendeur) avaient un z-index
-   plus bas (10010/10020) que le header/topbar sticky (z-index:10050, toutes largeurs) -
-   header et bandeau du haut restaient donc visibles et non assombris PAR-DESSUS la fenetre
-   ouverte, a toutes les tailles d'ecran (mobile/tablette/desktop). Remontees juste au-dessus
-   du header, tout en restant sous le niveau des autres fenetres (connexion, messages,
-   publier...) pour qu'elles continuent de s'ouvrir par-dessus une fiche annonce deja ouverte
-   (verifie en direct : "Envoyer un message" depuis une fiche ouverte affiche bien "Mon compte"
-   par-dessus). Ecart de 10 conserve entre les deux pour garder sellerProfileModal au-dessus
-   de detailModal, comme prevu par le commentaire d'origine. */
+/* Fix 20/09/2026 (v1) : ces deux fenetres (fiche annonce + profil vendeur) avaient un
+   z-index plus bas (10010/10020) que le header/topbar sticky (z-index:10050, toutes
+   largeurs) - header et bandeau du haut restaient donc visibles et non assombris PAR-DESSUS
+   la fenetre ouverte, a toutes les tailles d'ecran. Remontees une premiere fois au-dessus
+   du header (10060/10070).
+   Fix 20/09/2026 (v2, audit mobile) : 10060/10070 restaient encore SOUS la barre de
+   recherche flottante mobile (.search-wrap.search-sticky-floating, z-index:10080), qui
+   se retrouvait donc visible par-dessus une fiche annonce ouverte au scroll sur mobile.
+   Remontees encore une fois (10085/10090), au-dessus de cette barre. Par la meme occasion,
+   vehicleEquipmentModal et diagnosticInfoModal (z-index 10040/10050) sont alignees sur
+   10090 : ces deux fenetres s'ouvrent PAR-DESSUS une fiche annonce deja ouverte (bouton
+   "voir plus" equipements / info DPE-GES dans detailModal), elles doivent donc rester
+   au-dessus de detailModal (10085) et non en dessous comme c'etait redevenu le cas apres
+   la v1. Verifie en direct par injection CSS sur abracadeal.fr avant application : barre de
+   recherche mobile ne recouvre plus la fiche annonce ouverte ; les deux sous-fenetres
+   restent visibles par-dessus une fiche annonce deja ouverte. Ecart de 5 conserve entre
+   detailModal et sellerProfileModal comme prevu par le commentaire d'origine. */
 #sellerProfileModal{
-  z-index:10070 !important;
+  z-index:10090 !important;
 }
 #detailModal{
-  z-index:10060 !important;
+  z-index:10085 !important;
 }
 
 /* ===== Messagerie Abracadeal ===== */
