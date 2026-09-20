@@ -1348,7 +1348,6 @@ a.btn{cursor:pointer}
 }
 
 
-
 /* Offre Fondateurs — uniquement dans le parcours d’inscription Pro */
 .signup-founder-offer{margin:14px 0 16px;border:1px solid rgba(118,42,150,.24);border-radius:20px;background:#fff;box-shadow:0 12px 30px rgba(74,30,91,.10);overflow:hidden;position:relative}
 .signup-founder-offer.hidden{display:none!important}
@@ -1968,7 +1967,6 @@ a.btn{cursor:pointer}
 @media(max-width:760px){.pro-import-source-grid,.pro-import-sync-options{grid-template-columns:1fr}.pro-import-source-row{align-items:stretch;flex-direction:column}.pro-import-source-row .btn{width:100%}}
 
 
-
 /* --- Modération automatique Abracadeal : score de risque --- */
 .moderation-risk{margin:0 0 10px;padding:10px 12px;border-radius:12px;border:1px solid;font-size:.82rem;line-height:1.35}
 .moderation-risk strong{display:flex;align-items:center;gap:7px;font-size:.88rem;margin-bottom:4px}
@@ -2068,7 +2066,6 @@ a.btn{cursor:pointer}
 }
 
 
-
 .header-flow-errors-btn{position:relative;color:#fff!important;border:1px solid rgba(255,255,255,.22)!important;background:linear-gradient(135deg,#6f2498 0%,#9a2db5 48%,#ec3d9d 100%)!important;box-shadow:0 10px 24px rgba(174,48,170,.30),inset 0 1px 0 rgba(255,255,255,.20);font-weight:800;transition:transform .16s ease,filter .16s ease,box-shadow .16s ease}
 .header-flow-errors-btn:hover{filter:brightness(1.08);transform:translateY(-1px);box-shadow:0 14px 30px rgba(174,48,170,.36),inset 0 1px 0 rgba(255,255,255,.24)}
 .header-flow-errors-btn .header-flow-errors-label{color:#fff!important;font-weight:900;letter-spacing:.01em}
@@ -2098,10 +2095,9 @@ a.btn{cursor:pointer}
 .search-nearby-btn:hover{transform:translateY(-1px);filter:brightness(1.06)}
 .search-nearby-btn:disabled{background:#d8d0dc!important;color:#7b6f82!important;border-color:#d1c7d6!important;box-shadow:none!important;cursor:wait;transform:none;filter:none}
 .search-card{grid-template-columns:1.45fr .85fr auto}
-@media(max-width:900px){.search-card{grid-template-columns:1fr}.search-nearby-btn{height:52px}}
+@media(max-width:900px){.search-nearby-btn{height:52px}}
 @media(max-width:980px){.personalized-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){.personalized-grid{grid-template-columns:1fr 1fr;gap:10px}.personalized-photo{height:115px}.personalized-body{padding:9px}.personalized-head h2{font-size:1.35rem}.nearby-cta{align-items:flex-start;flex-direction:column}}
-
 
 
 #publishModal .modal{overflow:hidden;border-radius:24px}
@@ -2287,7 +2283,6 @@ a.btn{cursor:pointer}
     height:72px !important;
   }
 }
-
 
 
 #b2bNavBtn,#b2bAccountBtn{background:linear-gradient(135deg,#742797,#9b2bb3);color:#fff;border:1px solid #b974d0;box-shadow:0 5px 16px rgba(91,29,116,.22);cursor:pointer;font:inherit;font-weight:700;white-space:nowrap}
@@ -2548,7 +2543,6 @@ header .publish-trigger:hover{
 }
 
 
-
 /* === Dernière finition premium : recherche, localisation et catégories bannière === */
 .search-btn{
   position:relative;
@@ -2706,10 +2700,6 @@ header .publish-trigger:hover{
     opacity:1 !important;
     transform:scale(1.04) !important;
   }
-  .banner-hotspot:hover::after{
-    opacity:.9 !important;
-    transform:scaleX(1) !important;
-  }
 }
 .banner-hotspot:focus-visible{
   outline:none !important;
@@ -2781,34 +2771,6 @@ header .publish-trigger:hover{
     margin-bottom:0 !important;
   }
 }
-
-/* TÉLÉPHONE EN HORIZONTAL — la bannière reste entière et la recherche passe dessous */
-@media (max-height: 520px) and (orientation: landscape){
-  .hero{
-    padding-bottom:20px !important;
-  }
-  .search-wrap{
-    position:relative !important;
-    left:auto !important;
-    bottom:auto !important;
-    transform:none !important;
-    width:100% !important;
-    margin:12px 0 0 !important;
-  }
-  .search-card{
-    grid-template-columns:1fr !important;
-  }
-  .banner-frame{
-    margin-bottom:0 !important;
-  }
-  .banner-frame::after{
-    height:18px !important;
-  }
-  .hero-shell::after{
-    height:72px !important;
-  }
-}
-
 
 
 @media(max-width:720px){
@@ -5311,9 +5273,6 @@ header #flowErrorsBtn{
   }
 }
 
-@media (prefers-reduced-motion:reduce){
-  .featured-badge::after{animation:none!important}
-}
 
 /* Effet À LA UNE renforcé et fiable sur Safari */
 .featured-badge{
@@ -5838,11 +5797,6 @@ header #flowErrorsBtn{
     width:42.5vw!important;
     min-width:42.5vw!important;
     max-width:42.5vw!important;
-  }
-  #resultats .ad-card{
-    height:282px!important;
-    min-height:282px!important;
-    max-height:282px!important;
   }
 }
 
@@ -6845,7 +6799,6 @@ header #flowErrorsBtn{
 </div>
 
 
-
 <div class="modal-backdrop" id="proPlanModal" aria-hidden="true">
   <div class="modal pro-plan-modal" role="dialog" aria-modal="true" aria-labelledby="proPlanTitle">
     <div class="modal-head"><h2 id="proPlanTitle">Choisissez votre formule Pro</h2></div>
@@ -7142,7 +7095,6 @@ header #flowErrorsBtn{
     </div>
   </div>
 </div>
-
 
 
 <div class="modal-backdrop" id="proImportModal" aria-hidden="true">
@@ -11066,7 +11018,6 @@ window.selectDetailPhoto=(button,url,index,total)=>{
 };
 
 
-
 function positionWatermarkOnContainedImage(img, watermark, container, inset=12){
   if(!img||!watermark||!container||!img.naturalWidth||!img.naturalHeight)return;
   const cw=container.clientWidth,ch=container.clientHeight;
@@ -11154,8 +11105,6 @@ document.addEventListener('keydown',e=>{
 document.getElementById('photoLightbox')?.addEventListener('click',e=>{
   if(e.target.id==='photoLightbox') closePhotoLightbox();
 });
-
-
 
 
 async function refreshFlowErrorsCount(){
@@ -12293,7 +12242,6 @@ window.addEventListener('pageshow',()=>{
    }
   }catch(error){if(same(v))toast(errorText(error));}finally{button.disabled=false;}
  });
-
 })();
 </script>
 <script>
