@@ -4463,6 +4463,25 @@ header #flowErrorsBtn{
   }
 }
 
+/* Fix 20/09/2026 : meme barre de recherche flottante, mais pour desktop/tablette (>760px) -
+   demande d'Anthony ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
+   top/left/width sont calcules et poses en inline par le script abraca-sticky-search-script
+   (pas de valeurs figees ici) pour rester juste sous le header sticky et parfaitement centree,
+   quelle que soit la largeur d'ecran. */
+@media(min-width:761px){
+  .search-wrap.search-sticky-floating{
+    position:fixed!important;
+    z-index:10040!important;
+    margin:0!important;
+    bottom:auto!important;
+  }
+  .search-wrap.search-sticky-floating .search-card{
+    box-shadow:0 14px 34px rgba(15,5,24,.22)!important;
+    border-radius:16px!important;
+    background:#fff!important;
+  }
+}
+
 /* Résultats mobile : vraies cartes compactes, 2 visibles + début de la 3e */
 @media(max-width:760px){
   #resultats .ads-grid{
@@ -13579,7 +13598,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 <script id="abraca-sticky-search-script-20260919">
 (() => {
-  const mq = window.matchMedia('(max-width: 760px)');
+  // Fix 20/09/2026 : la barre flottante s'applique desormais a toutes les largeurs (avant :
+  // mobile uniquement). Sur desktop/tablette, top/left/width sont calcules ici (pas de classe
+  // media-query figee) pour se caler juste sous le header sticky, largeur d'origine conservee.
   let wrap = null;
   let placeholder = null;
   let triggerY = 0;
@@ -13596,20 +13617,41 @@ document.addEventListener('DOMContentLoaded',()=>{
     return true;
   }
 
+  function headerBottom(){
+    const header = document.querySelector('header');
+    if (!header) return 0;
+    const cs = getComputedStyle(header);
+    if (cs.display === 'none' || cs.position !== 'sticky') return 0;
+    return Math.max(0, header.getBoundingClientRect().bottom);
+  }
+
   function measure(){
-    if (!ensureRefs() || floating || !mq.matches) return;
+    if (!ensureRefs() || floating) return;
     const rect = wrap.getBoundingClientRect();
     triggerY = window.scrollY + rect.top;
     placeholder.style.height = Math.ceil(rect.height) + 'px';
   }
 
   function floatSearch(){
-    if (!ensureRefs() || floating || !mq.matches) return;
+    if (!ensureRefs() || floating) return;
     const rect = wrap.getBoundingClientRect();
+    const isWide = window.innerWidth > 760;
     placeholder.style.height = Math.ceil(rect.height) + 'px';
     wrap.parentNode.insertBefore(placeholder, wrap);
     document.body.appendChild(wrap);
     wrap.classList.add('search-sticky-floating');
+    if (isWide){
+      // setProperty(...,'important') : deux feuilles de style externes chargees apres ce
+      // <style> inline (assets/ui-stability-*.css, assets/banner-live-*.css, ajoutees par
+      // ChatGPT) posent .search-wrap{left:auto!important} a partir de 761px. Un style inline
+      // normal perd face a un !important externe quelle que soit sa specificite : il faut
+      // aussi passer par !important ici pour gagner le bras de fer.
+      // (Sur mobile, <=760px, on ne touche a rien : le CSS existant gere deja top/left/right
+      // avec ses propres !important, calibres pour ce format compact - ne pas interferer.)
+      wrap.style.setProperty('top', (headerBottom() + 12) + 'px', 'important');
+      wrap.style.setProperty('left', rect.left + 'px', 'important');
+      wrap.style.setProperty('width', rect.width + 'px', 'important');
+    }
     floating = true;
   }
 
@@ -13620,16 +13662,15 @@ document.addEventListener('DOMContentLoaded',()=>{
       placeholder.remove();
     }
     wrap.classList.remove('search-sticky-floating');
+    wrap.style.removeProperty('top');
+    wrap.style.removeProperty('left');
+    wrap.style.removeProperty('width');
     floating = false;
     requestAnimationFrame(measure);
   }
 
   function update(){
     if (!ensureRefs()) return;
-    if (!mq.matches) {
-      restoreSearch();
-      return;
-    }
     if (!floating && window.scrollY > triggerY + 6) floatSearch();
     else if (floating && window.scrollY <= triggerY + 6) restoreSearch();
   }
@@ -13646,10 +13687,6 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('resize', () => {
     if (floating) restoreSearch();
     requestAnimationFrame(() => { measure(); update(); });
-  });
-  if (mq.addEventListener) mq.addEventListener('change', () => {
-    if (!mq.matches) restoreSearch();
-    else requestAnimationFrame(() => { measure(); update(); });
   });
 })();
 </script>
