@@ -3934,33 +3934,29 @@ header #flowErrorsBtn{
   #vacancesDiscovery{display:none!important}
   .trust{display:none!important}
   #b2bDiscovery{
-    width:calc(100% - 24px)!important;
-    margin:9px auto 26px!important;
-    padding:16px!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
-    align-items:center!important;
-    gap:12px!important;
+    position:relative!important;width:calc(100% - 24px)!important;
+    aspect-ratio:1086/738!important;height:auto!important;min-height:0!important;
+    margin:9px auto 26px!important;padding:0!important;overflow:hidden!important;
+    display:block!important;
     border-radius:18px!important;
-    background:
-      radial-gradient(80% 120% at 100% 0%,rgba(221,70,182,.18),transparent 70%),
-      linear-gradient(120deg,#34124a,#5a1b70)!important;
+    background:url('assets/b2b-discovery-banner-mobile.webp') center/cover no-repeat!important;
     color:#fff!important;
     border:1px solid rgba(235,128,224,.28)!important;
     box-shadow:0 14px 28px rgba(0,0,0,.19)!important;
   }
-  #b2bDiscovery h2{color:#fff!important;font-family:'Fraunces',serif!important;font-size:20px!important;margin:0 0 4px!important}
-  #b2bDiscovery p{color:#d9c8e2!important;font-size:12px!important;line-height:1.35!important;margin:0!important}
+  #b2bDiscovery>div{
+    position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+    overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+  }
   #b2bDiscoveryLink{
-    margin:0!important;
-    min-height:40px!important;
-    padding:0 14px!important;
-    border-radius:999px!important;
-    background:linear-gradient(135deg,#a92bd0,#ec3fa4)!important;
-    color:#fff!important;
-    border:1px solid rgba(255,255,255,.23)!important;
-    white-space:nowrap!important;
-    font-size:12px!important;
+    position:absolute!important;inset:0!important;z-index:3!important;
+    width:100%!important;height:100%!important;
+    margin:0!important;min-height:0!important;padding:0!important;
+    border-radius:18px!important;
+    background:transparent!important;
+    color:transparent!important;
+    border:none!important;
+    font-size:0!important;line-height:0!important;
   }
 
   /* Bottom navigation */
@@ -4041,8 +4037,6 @@ header #flowErrorsBtn{
   .home-featured-card,.personalized-card,.ad-card{
     flex-basis:74vw!important;width:74vw!important;min-width:74vw!important;
   }
-  #b2bDiscovery{grid-template-columns:1fr!important}
-  #b2bDiscoveryLink{width:max-content!important;max-width:100%!important}
   .mobile-bottom-nav{left:7px;right:7px;border-radius:21px}
 }
 
