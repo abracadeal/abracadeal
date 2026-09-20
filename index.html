@@ -5026,18 +5026,18 @@ header #flowErrorsBtn{
     color:#bbaac5!important;border-top:1px solid rgba(255,255,255,.08)!important;
   }
   footer .footer-row{
-    display:grid!important;grid-template-columns:280px minmax(0,1fr) auto!important;
+    display:grid!important;grid-template-columns:1fr auto 1fr!important;
     align-items:center!important;gap:22px!important;
   }
-  .desktop-footer-brand{display:flex!important;align-items:center!important;gap:10px!important;color:#fff!important}
-  .desktop-footer-brand img{width:58px!important;height:48px!important;object-fit:cover!important;border-radius:11px!important}
-  .desktop-footer-brand span{display:flex!important;flex-direction:column!important}
-  .desktop-footer-brand strong{font:700 23px/1 Fraunces,serif!important;color:#fff!important}
-  .desktop-footer-brand small{margin-top:4px!important;font-size:9px!important;color:#b8a8c2!important}
-  footer .footer-links{display:flex!important;justify-content:center!important;gap:22px!important;font-size:11px!important}
+  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande Anthony) ; grille
+     repassee en 1fr/auto/1fr (colonne 1 vide en miroir) pour que les liens restent
+     parfaitement centres sur la largeur du footer plutot que decales par l'ancienne
+     colonne fixe de 280px du logo. */
+  .desktop-footer-brand{display:none!important}
+  footer .footer-links{display:flex!important;justify-content:center!important;gap:22px!important;font-size:11px!important;grid-column:2!important}
   footer .footer-links a{color:#dfd3e5!important}
   footer .footer-links a:hover{color:#ff58b7!important}
-  .footer-copyright{order:3!important;color:#aa9ab4!important;font-size:10px!important;white-space:nowrap!important}
+  .footer-copyright{order:3!important;color:#aa9ab4!important;font-size:10px!important;white-space:nowrap!important;grid-column:3!important;justify-self:end!important}
   #accountModal .account-info-links{display:none!important}
 }
 
