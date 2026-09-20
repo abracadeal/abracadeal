@@ -127,7 +127,7 @@ code{background:#0f0a14;border:1px solid var(--line);padding:2px 6px;border-radi
       </div>
       <div class="field" style="max-width:170px">
         <label>Limite par jour</label>
-        <input id="dailyLimit" type="number" min="1" max="30" value="30">
+        <input id="dailyLimit" type="number" min="1" max="100" value="50">
       </div>
     </div>
     <div class="field" style="margin-top:10px">
@@ -153,7 +153,7 @@ code{background:#0f0a14;border:1px solid var(--line);padding:2px 6px;border-radi
         <option>Immobilier</option>
         <option>High-Tech</option>
       </select>
-      <span class="small" id="batchInfo">Maximum 30 e-mails/jour depuis cet outil.</span>
+      <span class="small" id="batchInfo">Maximum 100 e-mails/jour depuis cet outil.</span>
     </div>
     <div class="progress"><i id="progressBar"></i></div>
     <div id="sendMsg" class="notice" style="display:none"></div>
@@ -348,7 +348,7 @@ function saveLocal(){
   localStorage.setItem('abr_google_client_id',$('googleClientId').value.trim());
   localStorage.setItem('abr_prospect_subject',$('subjectTpl').value);
   localStorage.setItem('abr_prospect_body',$('bodyTpl').value);
-  localStorage.setItem('abr_prospect_daily_limit',String(Math.min(30,Math.max(1,Number($('dailyLimit').value)||30))));
+  localStorage.setItem('abr_prospect_daily_limit',String(Math.min(100,Math.max(1,Number($('dailyLimit').value)||50))));
 }
 
 function initGmail(){
@@ -400,7 +400,7 @@ async function sendBatch(){
   if(sending)return;
   if(!gmailToken){show('sendMsg','Connecte Gmail avant l’envoi.','err');return}
   const metrics=await loadMetrics();
-  const requested=Math.min(30,Math.max(1,Number($('dailyLimit').value)||30));
+  const requested=Math.min(100,Math.max(1,Number($('dailyLimit').value)||50));
   const remaining=Math.max(0,requested-metrics.today);
   if(!remaining){show('sendMsg','Limite du jour atteinte ('+requested+').','err');return}
   const cat=$('categoryFilter').value;
@@ -437,7 +437,7 @@ async function sendBatch(){
     await sleep(4000);
   }
   sending=false;$('sendBatchBtn').disabled=false;$('stopBatchBtn').disabled=true;
-  $('batchInfo').textContent='Maximum 30 e-mails/jour depuis cet outil.';
+  $('batchInfo').textContent='Maximum 100 e-mails/jour depuis cet outil.';
   show('sendMsg',sent+' envoyé(s), '+failed+' erreur(s)'+(stopRequested?', lot arrêté':'')+'.',failed?'err':'ok');
   await refresh();
 }
@@ -452,7 +452,7 @@ async function boot(){
   $('googleClientId').value=localStorage.getItem('abr_google_client_id')||'';
   $('subjectTpl').value=localStorage.getItem('abr_prospect_subject')||DEFAULT_SUBJECT;
   $('bodyTpl').value=localStorage.getItem('abr_prospect_body')||DEFAULT_BODY;
-  $('dailyLimit').value=localStorage.getItem('abr_prospect_daily_limit')||'30';
+  $('dailyLimit').value=localStorage.getItem('abr_prospect_daily_limit')||'50';
   await refresh();
 }
 
