@@ -3930,6 +3930,7 @@ header #flowErrorsBtn{
 
   /* Pro/Pro devient une carte secondaire compacte */
   #pros{display:none!important}
+  .b2b-discovery-badges{display:none!important}
   #vacancesDiscovery{display:none!important}
   .trust{display:none!important}
   #b2bDiscovery{
@@ -4898,14 +4899,41 @@ header #flowErrorsBtn{
   }
   #b2bDiscovery::after{
     content:""!important;position:absolute!important;right:0!important;top:0!important;bottom:0!important;width:50%!important;
-    background:
+    background-image:
       radial-gradient(circle at 50% 40%,rgba(255,255,255,.10),transparent 28%),
-      linear-gradient(120deg,rgba(92,30,115,.20),rgba(8,4,15,.18)),
-      none!important;
-    filter:saturate(.75) brightness(.58)!important;opacity:.66!important;
+      linear-gradient(120deg,rgba(92,30,115,.35),rgba(8,4,15,.32)),
+      url('assets/b2b-discovery-photo.webp')!important;
+    background-size:auto,auto,cover!important;
+    background-position:center,center,center!important;
+    background-repeat:no-repeat,no-repeat,no-repeat!important;
+    filter:saturate(.85) brightness(.72)!important;opacity:.85!important;
     -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
     mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
     pointer-events:none!important;
+  }
+  .b2b-discovery-badges{
+    position:absolute!important;z-index:2!important;right:3%!important;bottom:14px!important;width:47%!important;
+    display:flex!important;justify-content:space-around!important;align-items:flex-start!important;gap:6px!important;
+    pointer-events:none!important;
+  }
+  .b2b-discovery-badge{
+    display:flex!important;flex-direction:column!important;align-items:center!important;gap:5px!important;
+    text-align:center!important;flex:1 1 0!important;min-width:0!important;
+    padding:0 4px!important;position:relative!important;
+  }
+  .b2b-discovery-badge+.b2b-discovery-badge::before{
+    content:""!important;position:absolute!important;left:0!important;top:2px!important;bottom:14px!important;
+    width:1px!important;background:rgba(255,255,255,.22)!important;
+  }
+  .b2b-discovery-badge-icon{
+    width:30px!important;height:30px!important;border-radius:50%!important;flex:0 0 30px!important;
+    border:1.5px solid rgba(255,255,255,.55)!important;background:rgba(0,0,0,.18)!important;
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    font-size:13px!important;color:#fff!important;
+  }
+  .b2b-discovery-badge span{
+    display:block!important;font-size:9.5px!important;font-weight:800!important;color:#fff!important;
+    line-height:1.25!important;text-shadow:0 1px 4px rgba(0,0,0,.4)!important;
   }
   #b2bDiscovery>div{position:relative!important;z-index:2!important;max-width:460px!important}
   #b2bDiscovery h2{
@@ -6218,6 +6246,11 @@ header #flowErrorsBtn{
   <aside class="container b2b-discovery" id="b2bDiscovery" aria-labelledby="b2bDiscoveryTitle">
     <div><h2 id="b2bDiscoveryTitle">Découvrez Pro/Pro</h2><p>Des annonces entre professionnels, avec des prix accessibles sur accord du vendeur.</p></div>
     <a class="b2b-discovery-tag home-action" id="b2bDiscoveryLink" href="#accountModal">Un espace dédié aux pros →</a>
+    <div class="b2b-discovery-badges" aria-hidden="true">
+      <div class="b2b-discovery-badge"><span class="b2b-discovery-badge-icon">✓</span><span>Réseau vérifié</span></div>
+      <div class="b2b-discovery-badge"><span class="b2b-discovery-badge-icon">€</span><span>Meilleures opportunités</span></div>
+      <div class="b2b-discovery-badge"><span class="b2b-discovery-badge-icon">🤝</span><span>Entre pros, pour les pros</span></div>
+    </div>
   </aside>
 
   <section class="desktop-trust-strip" id="desktopTrustStrip" aria-label="Les avantages Abracadeal">
