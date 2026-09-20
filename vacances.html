@@ -2274,6 +2274,22 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   .vac-host-mode-shell{min-height:calc(100dvh - 68px)}
   .vac-host-mode-frame{height:calc(100dvh - 68px);min-height:640px}
 }
+
+/* Fix 20/09/2026 : nav basse mobile alignee sur le style Abracadeal (index.html), pour une continuite visuelle entre les deux */
+@media(max-width:760px){
+  .vac-mobile-bottom-nav{
+    background:rgba(15,7,23,.96)!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.36)!important;
+  }
+  .vac-mobile-nav-item{color:#c8b8d2!important}
+  .vac-mobile-nav-item.is-active{color:#ff61bd!important}
+  .vac-mobile-nav-item.is-active::after{background:#ff61bd!important;box-shadow:0 0 10px rgba(255,97,189,.65)!important}
+  .vac-mobile-host-orb{
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    box-shadow:0 6px 16px rgba(229,49,171,.34)!important;
+  }
+}
 </style>
 </head>
 <body>
