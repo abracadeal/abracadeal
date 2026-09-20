@@ -2529,6 +2529,42 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
 #vacBackMainBtn:hover{
   filter:brightness(1.06)!important;
 }
+
+/* Fix 20/09/2026 : sur desktop/tablette, les 3 cases de recherche (Destination/Dates/Voyageurs) n'avaient JAMAIS recu le cadre (bordure+fond+ombre) prevu - ces regles n'existaient que dans le @media(max-width:760px) mobile. Resultat : "Destination" et "Voyageurs" semblaient encadres seulement grace au style natif generique .field (bordure/fond #fbf8fd, 52px de haut), tandis que "Ajouter des dates" (un bouton, pas un .field) n'avait aucun cadre du tout, et le tout paraissait tasse/mal aligne. On applique le meme systeme qu'en mobile : un seul cadre par case (icone+label+valeur), coherent sur les 3. */
+@media(min-width:761px){
+  #vacationSearch .vac-search-tile{
+    min-height:76px!important;
+    padding:11px 8px 8px 38px!important;
+    border:1px solid #eadfea!important;
+    border-radius:14px!important;
+    background:#fff!important;
+    box-shadow:0 4px 14px rgba(76,36,87,.04)!important;
+    gap:2px!important;
+    overflow:hidden!important;
+  }
+  #vacationSearch .vac-search-tile label{
+    font-size:.72rem!important;
+    line-height:1.1!important;
+    color:#4c2358!important;
+    font-weight:850!important;
+    margin:0!important;
+  }
+  #vacationSearch .vac-search-tile .field{
+    height:27px!important;
+    min-height:27px!important;
+    padding:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    border-radius:0!important;
+    color:#5f5166!important;
+    font-size:.78rem!important;
+  }
+  #vacationSearch .vac-search-tile .field::placeholder{
+    color:#8d8291!important;
+    opacity:1!important;
+  }
+}
 </style>
 </head>
 <body>
