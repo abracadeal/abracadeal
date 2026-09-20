@@ -6015,6 +6015,31 @@ header #flowErrorsBtn{
     margin-top:auto!important;
   }
 }
+
+/* Fix 20/09/2026 : "Les annonces" doit defiler verticalement sur mobile (liste normale), pas en carrousel horizontal */
+@media (max-width:760px){
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    overflow-x:visible!important;
+    overflow-y:visible!important;
+    scroll-snap-type:none!important;
+    -webkit-overflow-scrolling:auto!important;
+  }
+  #resultats .ad-card{
+    flex:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+@media (max-width:390px){
+  #resultats .ad-card{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
@@ -6155,15 +6180,6 @@ header #flowErrorsBtn{
     <span class="mobile-brand-name">Abraca<span class="deal">deal</span><span aria-hidden="true">✦</span></span>
     <span class="mobile-brand-tag">Achetez · Vendez · Louez · Voyagez</span>
   </a>
-  <div class="mobile-top-actions">
-    <a class="mobile-icon-btn" id="mobileMessagesTop" href="#messagesModal" aria-label="Messages">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 7 3 9H3c0-2 3-2 3-9"/><path d="M10 21h4"/></svg>
-      <span class="mobile-notification-badge" id="mobileTopUnread">0</span>
-    </a>
-    <a class="mobile-icon-btn" id="mobileAccountTop" href="#accountModal" aria-label="Compte">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
-    </a>
-  </div>
 </div>
 
 <main id="top">
