@@ -4886,67 +4886,29 @@ header #flowErrorsBtn{
     color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;
   }
 
-  /* PRO/PRO — gros bloc comme la maquette */
+  /* PRO/PRO — bannière maquette (image complète, bords nets) */
   #b2bDiscovery{
     position:relative!important;width:min(1460px,calc(100% - 60px))!important;max-width:1460px!important;
-    min-height:145px!important;margin:14px auto 0!important;padding:25px 31px!important;overflow:hidden!important;
-    display:grid!important;grid-template-columns:minmax(0,42%) 1fr!important;align-items:center!important;
+    aspect-ratio:1900/323!important;min-height:0!important;height:auto!important;margin:14px auto 0!important;padding:0!important;overflow:hidden!important;
+    display:block!important;
     border:1px solid rgba(235,56,183,.42)!important;border-radius:19px!important;color:#fff!important;
-    background:
-      radial-gradient(75% 150% at 10% 50%,rgba(226,40,183,.30),transparent 62%),
-      linear-gradient(105deg,#501364 0%,#381044 48%,#14091f 100%)!important;
+    background:url('assets/b2b-discovery-banner.webp') center/cover no-repeat!important;
     box-shadow:0 12px 28px rgba(0,0,0,.20)!important;
   }
-  #b2bDiscovery::after{
-    content:""!important;position:absolute!important;right:0!important;top:0!important;bottom:0!important;width:50%!important;
-    background-image:
-      radial-gradient(circle at 50% 40%,rgba(255,255,255,.10),transparent 28%),
-      linear-gradient(120deg,rgba(92,30,115,.35),rgba(8,4,15,.32)),
-      url('assets/b2b-discovery-photo.webp')!important;
-    background-size:auto,auto,cover!important;
-    background-position:center,center,center!important;
-    background-repeat:no-repeat,no-repeat,no-repeat!important;
-    filter:saturate(.85) brightness(.72)!important;opacity:.85!important;
-    -webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
-    mask-image:linear-gradient(90deg,transparent 0%,#000 28%,#000 100%)!important;
-    pointer-events:none!important;
+  #b2bDiscovery::after{content:none!important}
+  #b2bDiscovery>.b2b-discovery-badges{display:none!important}
+  #b2bDiscovery>div{
+    position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+    overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
   }
-  #b2bDiscovery>.b2b-discovery-badges{
-    position:absolute!important;z-index:2!important;right:2%!important;bottom:14px!important;width:38%!important;
-    display:flex!important;justify-content:space-around!important;align-items:flex-start!important;gap:6px!important;
-    pointer-events:none!important;
-  }
-  .b2b-discovery-badge{
-    display:flex!important;flex-direction:column!important;align-items:center!important;gap:5px!important;
-    text-align:center!important;flex:1 1 0!important;min-width:0!important;
-    padding:0 4px!important;position:relative!important;
-  }
-  .b2b-discovery-badge+.b2b-discovery-badge::before{
-    content:""!important;position:absolute!important;left:0!important;top:2px!important;bottom:14px!important;
-    width:1px!important;background:rgba(255,255,255,.22)!important;
-  }
-  .b2b-discovery-badge-icon{
-    width:30px!important;height:30px!important;border-radius:50%!important;flex:0 0 30px!important;
-    border:1.5px solid rgba(255,255,255,.55)!important;background:rgba(0,0,0,.18)!important;
-    display:flex!important;align-items:center!important;justify-content:center!important;
-    font-size:13px!important;color:#fff!important;
-  }
-  .b2b-discovery-badge span{
-    display:block!important;font-size:9.5px!important;font-weight:800!important;color:#fff!important;
-    line-height:1.25!important;text-shadow:0 1px 4px rgba(0,0,0,.4)!important;
-  }
-  #b2bDiscovery>div{position:relative!important;z-index:2!important;max-width:460px!important}
-  #b2bDiscovery h2{
-    margin:0 0 7px!important;font:700 31px/.98 Fraunces,serif!important;color:#fff!important;
-  }
-  #b2bDiscovery p{margin:0!important;color:#eadced!important;font-size:14px!important;line-height:1.48!important}
   #b2bDiscoveryLink{
-    position:absolute!important;z-index:3!important;left:31%!important;top:50%!important;transform:translateY(-50%)!important;
-    min-height:46px!important;padding:0 23px!important;border-radius:999px!important;color:#fff!important;
-    background:linear-gradient(135deg,#a62ac4,#ef35ad)!important;border:1px solid rgba(255,255,255,.18)!important;
-    box-shadow:0 8px 20px rgba(212,43,171,.28)!important;font-size:12px!important;font-weight:900!important;
+    position:absolute!important;z-index:3!important;inset:0!important;left:0!important;top:0!important;
+    width:100%!important;height:100%!important;transform:none!important;
+    min-height:0!important;margin:0!important;padding:0!important;border-radius:19px!important;
+    background:transparent!important;border:none!important;box-shadow:none!important;
+    color:transparent!important;font-size:0!important;line-height:0!important;
   }
-  #b2bDiscoveryLink:hover{transform:translateY(calc(-50% - 2px))!important}
+  #b2bDiscoveryLink:hover{transform:none!important;background:rgba(255,255,255,.05)!important}
 
   /* Ligne de confiance */
   .desktop-trust-strip{display:block!important;padding:17px 0 20px!important;background:transparent!important}
