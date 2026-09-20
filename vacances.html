@@ -2495,6 +2495,40 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
 .vac-listing-card:hover{
   box-shadow:0 16px 36px rgba(69,32,79,.22)!important;
 }
+
+/* Fix 20/09/2026 : fusionne visuellement Connexion + Creer un compte en un seul bouton "pilule" (comme .account-auth-group sur index.html), au lieu de 2 boutons separes cote a cote. */
+.vac-account-auth-group{
+  display:flex;
+  align-items:stretch;
+  gap:0;
+  border-radius:14px;
+  overflow:hidden;
+  box-shadow:0 6px 16px rgba(91,36,111,.10);
+}
+.vac-account-auth-group .btn{
+  border-radius:0!important;
+  box-shadow:none!important;
+}
+.vac-account-auth-group #travelerSignupCta{
+  border-top-left-radius:14px!important;
+  border-bottom-left-radius:14px!important;
+  border-right:1px solid #e2d5e6!important;
+}
+.vac-account-auth-group #vacLoginCta{
+  border-top-right-radius:14px!important;
+  border-bottom-right-radius:14px!important;
+}
+
+/* Fix 20/09/2026 : le lien retour vers le site principal ("Abracadeal") heritait d'une regle .nav-actions .btn.premium qui l'aplatissait en pastille blanche/pale, peu visible/pas "flagrant". On restaure le degrade vif (identique au style .btn.premium d'origine) pour qu'il ressorte clairement comme le retour vers le site principal. */
+#vacBackMainBtn{
+  color:#fff!important;
+  background:linear-gradient(135deg,#6f218c 0%,#b72fb0 52%,#ec3fa4 100%)!important;
+  border-color:rgba(255,255,255,.18)!important;
+  box-shadow:0 10px 24px rgba(183,47,176,.28),inset 0 1px 0 rgba(255,255,255,.16)!important;
+}
+#vacBackMainBtn:hover{
+  filter:brightness(1.06)!important;
+}
 </style>
 </head>
 <body>
@@ -2502,10 +2536,12 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   <div class="container nav">
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><img class="brand-logo" src="assets/abracadeal-lamp-icon.webp" alt="Logo Abracadeal Vacances"><b>Abracadeal</b><small>Vacances</small></a>
     <div class="nav-actions">
-      <a class="btn premium" href="index.html">Abracadeal</a>
+      <a class="btn premium" id="vacBackMainBtn" href="index.html">Abracadeal</a>
       <a class="btn ghost" id="vacAdminLink" href="admin-vacances.html" style="display:none">Admin</a>
-      <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
-      <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">Créer un compte</a>
+      <div class="vac-account-auth-group" aria-label="Compte Abracadeal Vacances">
+        <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">Créer un compte</a>
+        <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
+      </div>
       <a class="btn primary" id="hostSignupCta" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>
     </div>
     <button class="vac-mobile-top-account" type="button" data-vac-mobile-action="account" aria-label="Mon compte">
