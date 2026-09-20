@@ -41,4 +41,5 @@ $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({
 $('confirmBtn').onclick=async()=>{const {error}=await sb.rpc('vacation_confirm_stay',{p_stay_id:stay.id});if(error){note(error.message,true);return}note('Séjour confirmé. Vous pouvez maintenant laisser votre avis.');await boot()};
 $('submitBtn').onclick=async()=>{if(!rating){note('Choisissez une note de 1 à 5 étoiles.',true);return}const c=$('comment').value.trim();if(c.length<3){note('Ajoutez un commentaire.',true);return}const {error}=await sb.rpc('vacation_submit_review',{p_stay_id:stay.id,p_rating:rating,p_comment:c});if(error){note(error.message,true);return}note('Avis enregistré.');await boot()};
 boot();
-</script></body></html>
+</script><script src="vacation-presence.js?v=20260920-1"></script>
+</body></html>
