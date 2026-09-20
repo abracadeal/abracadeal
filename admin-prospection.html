@@ -203,8 +203,7 @@ Abracadeal est une nouvelle plateforme de petites annonces ouverte aux particuli
 
 Pour le lancement, les 1 000 premiers Pros inscrits bénéficient de 12 mois d’abonnement offerts.
 
-Vous avez déjà un fichier de stock ?
-Aucun besoin de ressaisir vos véhicules un par un : votre stock peut être importé directement sur Abracadeal par fichier CSV/XML ou par flux.
+Vos annonces peuvent être importées directement par flux, CSV ou XML, sans ressaisie.
 
 Une carte bancaire est demandée lors de l’inscription uniquement pour assurer la continuité de l’abonnement après la période offerte. Aucun prélèvement n’est effectué pendant les 12 mois offerts.
 
@@ -447,10 +446,10 @@ async function boot(){
   $('app').style.display='block';$('lock').style.display='none';
 
   $('googleClientId').value=localStorage.getItem('abr_google_client_id')||'';
-  if(localStorage.getItem('abr_prospect_template_version')!=='4'){
+  if(localStorage.getItem('abr_prospect_template_version')!=='5'){
     localStorage.setItem('abr_prospect_subject',DEFAULT_SUBJECT);
     localStorage.setItem('abr_prospect_body',DEFAULT_BODY);
-    localStorage.setItem('abr_prospect_template_version','4');
+    localStorage.setItem('abr_prospect_template_version','5');
   }
   $('subjectTpl').value=localStorage.getItem('abr_prospect_subject')||DEFAULT_SUBJECT;
   $('bodyTpl').value=localStorage.getItem('abr_prospect_body')||DEFAULT_BODY;
