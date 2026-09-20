@@ -312,9 +312,6 @@ html{scrollbar-gutter:stable}
   .desktop-brand-copy strong{
     font-size:19px!important;
   }
-  .desktop-brand-copy small{
-    display:none!important;
-  }
 
   .desktop-favorites-btn{
     width:32px!important;
