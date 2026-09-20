@@ -2290,6 +2290,51 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     box-shadow:0 6px 16px rgba(229,49,171,.34)!important;
   }
 }
+
+/* Fix 20/09/2026 : nom Abracadeal du header desktop aligne sur le reflet dore de la page principale (index.html), pour une continuite de marque entre les deux */
+@media(min-width:761px){
+  .brand b{
+    display:inline-block!important;
+    color:#e8bb43!important;
+    background:
+      linear-gradient(
+        110deg,
+        #9f6800 0%,
+        #d7a51e 16%,
+        #ffe47b 29%,
+        #fff8cf 43%,
+        #ffffff 50%,
+        #fff0a0 57%,
+        #d9a722 72%,
+        #a66c00 100%
+      )!important;
+    background-size:320% 100%!important;
+    background-position:100% 50%;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaVacHeaderGoldShine 2.2s linear infinite!important;
+    -webkit-animation:abracaVacHeaderGoldShine 2.2s linear infinite!important;
+    filter:drop-shadow(0 0 5px rgba(255,196,55,.24));
+  }
+}
+@keyframes abracaVacHeaderGoldShine{
+  0%{background-position:100% 50%;filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+  45%{filter:drop-shadow(0 0 8px rgba(255,211,91,.52))}
+  100%{background-position:-120% 50%;filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+}
+@-webkit-keyframes abracaVacHeaderGoldShine{
+  0%{background-position:100% 50%;-webkit-filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+  45%{-webkit-filter:drop-shadow(0 0 8px rgba(255,211,91,.52))}
+  100%{background-position:-120% 50%;-webkit-filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+}
+@media(prefers-reduced-motion:reduce){
+  .brand b{
+    animation:none!important;
+    -webkit-animation:none!important;
+    background-position:50% 50%!important;
+  }
+}
 </style>
 </head>
 <body>
