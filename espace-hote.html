@@ -96,6 +96,7 @@ html.abraca-embedded-host body{background:#faf7fc!important}
         </button>
         <div id="accountMenuDropdown" class="hostaccountdropdown hidden">
           <a href="vacances.html">Mode voyageur</a>
+          <a href="espace-hote.html?billing=manage">Gérer l’abonnement</a>
           <button id="logoutTop" class="hidden" type="button">Déconnexion</button>
         </div>
       </div>
@@ -796,6 +797,28 @@ async function loadHostReviews(render=true){
 window.replyReview=async id=>{const t=prompt('Votre réponse à cet avis :');if(t===null)return;const {error}=await sb.rpc('vacation_reply_review',{p_review_id:id,p_reply:t});if(error){msg(error.message,true);return}msg('Réponse enregistrée.');loadHostReviews()}
 async function loadDashboardCounts(){await loadFeeds(false);await loadMessages(false)}
 
+let vacationBillingOpening=false;
+async function handleVacationBillingQuery(){
+  const action=new URLSearchParams(location.search).get('billing');
+  if(!['manage','cancel'].includes(action)||vacationBillingOpening)return;
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.user)return;
+  vacationBillingOpening=true;
+  try{
+    const {data,error}=await sb.functions.invoke('create-vacation-billing-portal',{body:{action}});
+    if(error||!data?.portal_url){
+      vacationBillingOpening=false;
+      alert(error?.message||data?.error||'Impossible d’ouvrir la gestion de l’abonnement.');
+      return;
+    }
+    location.href=data.portal_url;
+  }catch(e){
+    vacationBillingOpening=false;
+    alert(e?.message||'Impossible d’ouvrir la gestion de l’abonnement.');
+  }
+}
+sb.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>handleVacationBillingQuery(),0)});
+handleVacationBillingQuery();
 boot();
 </script>
 <script id="abraca-host-embedded-bridge">
@@ -809,5 +832,6 @@ boot();
   });
 })();
 </script>
+<script src="vacation-presence.js?v=20260920-1"></script>
 </body>
 </html>
