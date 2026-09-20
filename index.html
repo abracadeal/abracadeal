@@ -6156,6 +6156,28 @@ header #flowErrorsBtn{
   #searchCity.desktop-search-city{display:none!important}
   .search-filters-link{display:none!important}
 }
+
+/* Fix 20/09/2026 : textes plus grands sur la pastille des annonces (titre/prix/infos),
+   demande par Anthony ("texte prix info en plus gros, une belle pastille"). Verifie en
+   direct sur les 92 annonces reelles du site avant application (clone hors-ecran de
+   .ad-body avec overflow:visible pour mesurer la hauteur naturelle du contenu) : aucun
+   depassement du budget de hauteur fixe des cartes en desktop
+   (#resultats .ad-card{height:420px}), marge restante d'au moins +34px sur le pire cas
+   parmi les 92. Sur mobile les cartes sont en height:auto (aucun risque de troncature). */
+@media(min-width:761px){
+  #resultats .ad-title{font-size:14.5px!important;line-height:1.25!important;margin-bottom:5px!important}
+  #resultats .ad-price{font-size:19px!important;line-height:1.15!important}
+  #resultats .ad-meta{font-size:10.5px!important}
+  #resultats .ad-city,#resultats .ad-specs{font-size:11px!important}
+  #resultats .immo-card-location-extra,#resultats .immo-card-unit-price,#resultats .immo-card-charges{font-size:10.5px!important}
+}
+@media(max-width:760px){
+  #resultats .ad-title{font-size:13px!important}
+  #resultats .ad-price{font-size:16.5px!important}
+  #resultats .ad-meta{font-size:10px!important}
+  #resultats .ad-city{font-size:10px!important}
+  #resultats .ad-specs{font-size:9.5px!important}
+}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
