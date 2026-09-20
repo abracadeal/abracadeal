@@ -1764,11 +1764,20 @@ a.btn{cursor:pointer}
 
 
 /* Profil vendeur / avis : toujours au-dessus de la fiche annonce */
+/* Fix 20/09/2026 : ces deux fenetres (fiche annonce + profil vendeur) avaient un z-index
+   plus bas (10010/10020) que le header/topbar sticky (z-index:10050, toutes largeurs) -
+   header et bandeau du haut restaient donc visibles et non assombris PAR-DESSUS la fenetre
+   ouverte, a toutes les tailles d'ecran (mobile/tablette/desktop). Remontees juste au-dessus
+   du header, tout en restant sous le niveau des autres fenetres (connexion, messages,
+   publier...) pour qu'elles continuent de s'ouvrir par-dessus une fiche annonce deja ouverte
+   (verifie en direct : "Envoyer un message" depuis une fiche ouverte affiche bien "Mon compte"
+   par-dessus). Ecart de 10 conserve entre les deux pour garder sellerProfileModal au-dessus
+   de detailModal, comme prevu par le commentaire d'origine. */
 #sellerProfileModal{
-  z-index:10020 !important;
+  z-index:10070 !important;
 }
 #detailModal{
-  z-index:10010 !important;
+  z-index:10060 !important;
 }
 
 /* ===== Messagerie Abracadeal ===== */
