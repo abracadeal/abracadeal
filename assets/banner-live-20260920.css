@@ -98,3 +98,12 @@
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* Fix : grille "Les annonces" en 5 colonnes trop etroite en tablette portrait
+   (iPad), badge "A LA UNE" et icones partage/favori se chevauchaient avec le
+   titre/prix des annonces - 20/09/2026 */
+@media (min-width:761px) and (max-width:1023px){
+  #resultats .ads-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+}
