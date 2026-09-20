@@ -6060,6 +6060,36 @@ header #flowErrorsBtn{
   padding:0 14px;
   min-height:36px;
 }
+
+/* Fix 20/09/2026 : l'offre Fondateurs (#pros) existait deja juste sous le hero sur desktop, mais restait
+   discrete (necessitait de scroller sous la banniere). Ajout d'un bandeau compact et visible en haut de
+   page, desktop uniquement, avec le compteur de places existant et un lien qui scrolle vers #pros. */
+.founder-topbar{
+  background:linear-gradient(135deg,#24123b,#3c1d61);
+  color:#fff;
+}
+.founder-topbar-inner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:9px 16px;
+  font-size:.82rem;
+}
+.founder-topbar-text{font-weight:700}
+.founder-topbar-text strong{color:#f2d9ff}
+.founder-topbar-cta{
+  color:#fff;
+  font-weight:850;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  white-space:nowrap;
+}
+.founder-topbar-cta:hover{color:#f2d9ff}
+@media(max-width:760px){
+  .founder-topbar{display:none!important}
+}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
@@ -6203,6 +6233,13 @@ header #flowErrorsBtn{
 </div>
 
 <main id="top">
+  <div class="founder-topbar" id="founderTopbar">
+    <div class="container founder-topbar-inner">
+      <span class="founder-topbar-text">🎉 <strong>Offre Fondateurs</strong> · 12 mois gratuits pour les professionnels</span>
+      <span class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></span>
+      <a href="#pros" class="founder-topbar-cta">Voir l'offre →</a>
+    </div>
+  </div>
   <section class="hero-shell">
     <div class="hero container">
       <div class="banner-frame banner-main-live">
