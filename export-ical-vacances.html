@@ -29,4 +29,5 @@ async function boot(){const {data:{user:u}}=await sb.auth.getUser();if(!u){locat
 $('generate').onclick=async()=>{const id=$('listing').value;if(!id){alert('Ajoutez d’abord un logement.');return}const {data,error}=await sb.rpc('ensure_vacation_export_token',{p_listing_id:id});if(error){alert(error.message);return}const url='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/export-vacation-ical?token='+data;$('url').value=url;$('result').classList.remove('hidden')}
 $('copy').onclick=async()=>{await navigator.clipboard.writeText($('url').value);$('copy').textContent='Copié ✓';setTimeout(()=>$('copy').textContent='Copier',1500)}
 boot();
-</script></body></html>
+</script><script src="vacation-presence.js?v=20260920-1"></script>
+</body></html>
