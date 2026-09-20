@@ -2575,12 +2575,7 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   }
 }
 
-/* Fix 20/09/2026 : le visuel de la lampe (fond violet + lampe + etincelles) est plus charge/dense dans sa moitie basse, avec de l'espace vide en haut (etincelles fines) - une fois centre mathematiquement avec le texte "Abracadeal", l'oeil percoit un leger decalage (la lampe "pese" plus bas que le texte). Petit ajustement visuel pour re-equilibrer. */
-.brand-logo{
-  margin-top:-3px!important;
-}
-
-/* Fix 20/09/2026 : la police Fraunces (utilisee pour tous les gros titres) accentue automatiquement ses fioritures (notamment le "j", le "y", le "g") a mesure que la taille de texte augmente (c'est l'axe variable "opsz" - optical size - qui monte automatiquement avec le font-size). On fixe cet axe a une valeur basse pour garder un rendu plus sobre/moins decoratif sur ces gros titres, meme en grande taille. */
+/* Fix 20/09/2026 : la police Fraunces (utilisee pour tous les gros titres) accentue automatiquement ses fioritures (notamment le "j", le "y", le "g") a mesure que la taille de texte augmente (c'est l'axe variable "opsz" - optical size - qui monte automatiquement avec le font-size). On fixe cet axe a une valeur basse pour garder un rendu plus sobre/moins decoratif sur ces gros titres, meme en grande taille. Applique sur .brand b (le mot "Abracadeal") plutot que .brand entier, pour ne pas perturber la boite flex du logo. */
 h1,
 .search-title,
 .section-head h2,
@@ -2588,10 +2583,24 @@ h1,
 .calc h3,
 .cta h2,
 .auth-card h2,
-.brand,
+.brand b,
 .vac-mobile-banner-copy strong{
   font-optical-sizing:none!important;
   font-variation-settings:"opsz" 20!important;
+}
+
+/* Fix 20/09/2026 (v2) : le logo (lampe) et le texte "Abracadeal VACANCES" n'etaient pas alignes sur Safari desktop - le "line-height:normal" par defaut donne des boites de ligne de hauteurs differentes entre la police Fraunces (grand mot) et Inter (petit mot VACANCES), et Safari les calcule differemment de Chrome, ce qui decale le tout par rapport a l'icone. On fixe une hauteur de ligne identique (= hauteur de l'icone) et un centrage flex explicite sur les 2 mots, pour un alignement fiable quel que soit le navigateur. Annule aussi le decalage manuel precedent du logo (non justifie une fois ce vrai probleme corrige). */
+@media(min-width:761px){
+  .brand-logo{
+    margin-top:0!important;
+  }
+  .brand b,
+  .brand small{
+    display:inline-flex!important;
+    align-items:center!important;
+    height:44px!important;
+    line-height:normal!important;
+  }
 }
 </style>
 </head>
