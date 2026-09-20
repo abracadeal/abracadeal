@@ -2458,6 +2458,7 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><img class="brand-logo" src="assets/abracadeal-lamp-icon.webp" alt="Logo Abracadeal Vacances"><b>Abracadeal</b><small>Vacances</small></a>
     <div class="nav-actions">
       <a class="btn premium" href="index.html">Abracadeal</a>
+      <a class="btn ghost" id="vacAdminLink" href="admin-vacances.html" style="display:none">Admin</a>
       <a class="btn ghost" id="vacLoginCta" href="#connexion-vacances">Connexion</a>
       <a class="btn ghost" id="travelerSignupCta" href="#inscription-voyageur">Créer un compte</a>
       <a class="btn primary" id="hostSignupCta" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>
@@ -2958,6 +2959,12 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
       .maybeSingle();
     const isHost=!!hostProfile && hostProfile.status==='active' && hostProfile.onboarding_completed===true;
     applyVacationPageMode({isHost,hasHost:!!hostProfile});
+
+    const adminLink=root.getElementById('vacAdminLink');
+    if(adminLink){
+      const {data:profile}=await sbVac.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
+      adminLink.style.display=profile?.is_admin?'inline-flex':'none';
+    }
   }
 
   if(sbVac){

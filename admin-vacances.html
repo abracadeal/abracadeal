@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abracadeal — Admin Vacances</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{
+  --bg:#0d0812;--panel:#17101f;--panel2:#201329;--line:#382642;
+  --text:#f8f4fb;--muted:#b9a8c2;--purple:#7b2aa8;--pink:#ec3fa4;
+  --green:#3bd18b;--orange:#f2ae58;--red:#ff6c7d;--gold:#f1bf5f;
+  --shadow:0 20px 60px rgba(0,0,0,.35)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 15% 0%,rgba(123,42,168,.22),transparent 38%),
+radial-gradient(circle at 90% 10%,rgba(236,63,164,.14),transparent 32%),var(--bg);color:var(--text)}
+button,input,select{font:inherit}
+.wrap{width:min(1180px,calc(100% - 28px));margin:auto}
+.top{position:sticky;top:0;z-index:20;background:rgba(13,8,18,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topin{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.02em}.brand span{color:#f354b5}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:14px;padding:11px 16px;font-weight:800;cursor:pointer;color:#fff;background:#2a1a34;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:.18s}
+.btn:hover{transform:translateY(-1px)}
+.btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn.primary{background:linear-gradient(135deg,var(--purple),var(--pink))}
+.btn.danger{background:rgba(255,108,125,.14);color:#ffb0b8;border:1px solid rgba(255,108,125,.3)}
+.btn.gold{background:linear-gradient(135deg,#c98a1f,var(--gold));color:#241305}
+.btn.small{padding:8px 12px;font-size:.82rem;border-radius:11px}
+main{padding:30px 0 70px}
+.hero{margin-bottom:22px}
+h1{margin:0;font-size:clamp(1.7rem,3vw,2.6rem);letter-spacing:-.03em}
+.sub{color:var(--muted);margin:8px 0 0;max-width:800px;line-height:1.5}
+.card{background:linear-gradient(180deg,rgba(32,19,41,.98),rgba(23,16,31,.98));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:20px;margin-bottom:20px}
+.card h2{margin:0 0 4px;font-size:1.2rem}
+.card .note{color:var(--muted);font-size:.86rem;margin:0 0 16px;line-height:1.5}
+.status-line{color:var(--muted);margin:10px 0}
+.list{display:grid;gap:12px}
+.item{border:1px solid var(--line);border-radius:16px;padding:16px;background:#150e1c;display:grid;grid-template-columns:1fr auto;gap:14px;align-items:center}
+.item h3{margin:0 0 6px;font-size:1.05rem}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0 0}
+.badge{padding:5px 10px;border-radius:999px;font-size:.74rem;font-weight:900;border:1px solid transparent}
+.badge.active{color:#9df0c5;background:rgba(59,209,139,.1);border-color:rgba(59,209,139,.27)}
+.badge.archived{color:#ffc77f;background:rgba(242,174,88,.09);border-color:rgba(242,174,88,.25)}
+.badge.featured{color:#241305;background:linear-gradient(135deg,#c98a1f,var(--gold));border-color:transparent}
+.meta{color:var(--muted);font-size:.86rem}
+.price{font-weight:900;color:#fff}
+.side{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:200px}
+.boost-row{display:flex;gap:6px}
+.boost-row select{flex:1;border-radius:11px;border:1px solid #4a3157;background:#0f0a14;color:#fff;padding:0 10px;min-height:38px}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.lock{display:none;max-width:640px;margin:80px auto;text-align:center;padding:30px}
+.lock h2{margin-top:0}
+.msg{margin-top:6px;font-size:.82rem;min-height:18px}
+.msg.ok{color:#9df0c5}
+.msg.err{color:#ffacb5}
+@media(max-width:760px){
+  .item{grid-template-columns:1fr}
+  .side{min-width:0}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand">Abracadeal <span>Admin</span> · Vacances</div>
+    <div class="actions">
+      <button class="btn" onclick="location.href='vacances.html'">Retour Vacances</button>
+      <button class="btn" id="logoutBtn">Déconnexion</button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap" id="app" style="display:none">
+  <section class="hero">
+    <h1>Gestion des logements Vacances</h1>
+    <p class="sub">Retire une annonce du site, ou offre un boost « à la une » gratuit à un hôte (cadeau de lancement). Les actions passent par les fonctions admin sécurisées du site.</p>
+  </section>
+
+  <section class="card">
+    <h2>Logements (catégorie Vacances)</h2>
+    <p class="note">Toutes les annonces publiées côté Abracadeal Vacances, quel que soit leur statut.</p>
+    <div class="status-line" id="status">Chargement…</div>
+    <div class="list" id="results"></div>
+  </section>
+</main>
+
+<section class="card lock" id="lock">
+  <h2>Accès administrateur uniquement</h2>
+  <p id="lockText">Vérification de ton compte…</p>
+  <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
+</section>
+
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=id=>document.getElementById(id);
+let rows=[];
+
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
+function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+function fmtDate(v){if(!v)return '—';return new Intl.DateTimeFormat('fr-FR',{dateStyle:'medium'}).format(new Date(v))}
+function isFeatured(r){return !!r.featured_until && new Date(r.featured_until).getTime()>Date.now()}
+
+function statusLabel(r){
+  if(r.status==='archived')return 'Retirée du site';
+  if(r.status==='pending')return 'À modérer';
+  if(r.status==='rejected')return 'Refusée';
+  return 'En ligne';
+}
+
+function render(){
+  const host=$('results');
+  if(!rows.length){
+    host.innerHTML='<div class="empty">Aucun logement Vacances pour le moment.</div>';
+    return;
+  }
+  host.innerHTML=rows.map(r=>{
+    const archived=r.status==='archived';
+    const featured=isFeatured(r);
+    return `<article class="item" data-id="${r.id}">
+      <div>
+        <h3>${esc(r.title||'Logement')}</h3>
+        <div class="meta">${esc(r.city||'—')} · ${money(r.price)} / nuit · publiée le ${fmtDate(r.created_at)}</div>
+        <div class="badges">
+          <span class="badge ${archived?'archived':'active'}">${esc(statusLabel(r))}</span>
+          ${featured?`<span class="badge featured">À la une jusqu'au ${fmtDate(r.featured_until)}</span>`:''}
+        </div>
+        <div class="msg" id="msg-${r.id}"></div>
+      </div>
+      <div class="side">
+        <button class="btn small" type="button" onclick="window.open('logement-vacances.html?id=${r.id}','_blank')">Voir l'annonce</button>
+        ${archived
+          ? `<button class="btn small" type="button" disabled title="Réactivation : à faire depuis Espace Hôte pour le moment">Retirée du site</button>`
+          : `<button class="btn small danger" type="button" onclick="removeListing('${r.id}')">Retirer du site</button>`
+        }
+        <div class="boost-row">
+          <select id="boostDays-${r.id}">
+            <option value="7">Boost 7 jours</option>
+            <option value="30">Boost 30 jours</option>
+          </select>
+          <button class="btn small gold" type="button" onclick="giftBoost('${r.id}','${r.owner_id}')">Offrir</button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+function setMsg(id,text,ok){
+  const el=$('msg-'+id);
+  if(!el)return;
+  el.textContent=text;
+  el.className='msg '+(ok?'ok':'err');
+}
+
+async function loadListings(){
+  $('status').textContent='Chargement…';
+  const {data,error}=await sb.from('listings')
+    .select('id,title,city,price,status,featured_until,owner_id,created_at')
+    .eq('category','vacances')
+    .order('created_at',{ascending:false});
+  if(error){
+    $('status').textContent='Impossible de charger les logements : '+error.message;
+    $('results').innerHTML='';
+    return;
+  }
+  rows=data||[];
+  $('status').textContent=rows.length+' logement(s)';
+  render();
+}
+
+window.removeListing=async function(id){
+  if(!confirm('Retirer cette annonce du site ? Elle reste consultable dans la base admin, ce n’est pas une suppression définitive.'))return;
+  const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
+  if(error){setMsg(id,'Erreur : '+error.message,false);return}
+  setMsg(id,'Retirée du site.',true);
+  await loadListings();
+};
+
+window.giftBoost=async function(id,ownerId){
+  const days=Number($('boostDays-'+id).value)||7;
+  if(!confirm('Offrir un crédit de boost '+days+' jours à l’hôte de cette annonce ? Il pourra l’activer depuis son Espace Hôte pour mettre ce logement (ou un autre) à la une.'))return;
+  const {error}=await sb.rpc('admin_grant_pro_boosts',{p_user_id:ownerId,p_duration_days:days,p_credits:1,p_note:'Cadeau de lancement Abracadeal Vacances'});
+  if(error){setMsg(id,'Erreur : '+error.message,false);return}
+  setMsg(id,'Crédit de boost '+days+' jours offert à l’hôte.',true);
+};
+
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.user){
+    $('lock').style.display='block';$('lockText').textContent='Connecte-toi avec ton compte administrateur (depuis le site principal), puis reviens sur cette page.';
+    return;
+  }
+  const {data:profile,error}=await sb.from('profiles').select('is_admin').eq('id',session.user.id).maybeSingle();
+  if(error||!profile?.is_admin){
+    $('lock').style.display='block';$('lockText').textContent='Ce compte ne possède pas les droits administrateur.';
+    return;
+  }
+  $('app').style.display='block';
+  $('lock').style.display='none';
+  loadListings();
+}
+
+$('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.href='index.html'});
+boot();
+</script>
+</body>
+</html>
