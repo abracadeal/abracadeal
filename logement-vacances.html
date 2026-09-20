@@ -24,6 +24,16 @@
       <div id="chips" class="chips"></div>
       <div class="card">
         <div class="price"><span id="price"></span> / nuit</div>
+        <div id="adminBoostBox" class="notice hidden" style="background:#fff7e6;color:#7a4d00;border:1px solid #f0d9a0">
+          <div id="adminBoostStatus" style="margin-bottom:8px;font-weight:800"></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <select id="adminBoostDays" style="border:1px solid #f0d9a0;border-radius:10px;padding:8px 10px">
+              <option value="7">7 jours</option>
+              <option value="30">30 jours</option>
+            </select>
+            <button id="adminBoostBtn" class="btn" style="background:linear-gradient(135deg,#c98a1f,#f1bf5f);color:#241305">🎁 Booster cette annonce (admin)</button>
+          </div>
+        </div>
         <div id="desc" class="section"></div>
         <div class="section"><h2>Équipements</h2><div id="amenities" class="chips"></div></div>
         <div class="section"><h2>Règles et arrivée</h2><div id="rules"></div></div>
@@ -58,7 +68,7 @@ function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currenc
 async function boot(){
  const id=new URLSearchParams(location.search).get('id');if(!id){$('loading').textContent='Logement introuvable.';return}
  const [{data:l,error},{data:d},{data:photos}]=await Promise.all([
-  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status').eq('id',id).eq('category','vacances').maybeSingle(),
+  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status,featured_until').eq('id',id).eq('category','vacances').maybeSingle(),
   sb.from('vacation_listing_details').select('*').eq('listing_id',id).maybeSingle(),
   sb.from('listing_photos').select('*').eq('listing_id',id).order('position')
  ]);
@@ -83,6 +93,16 @@ async function boot(){
  const max=Math.max(1,Number(detail.max_guests||2));$('guests').innerHTML=Array.from({length:max},(_,i)=>'<option value="'+(i+1)+'">'+(i+1)+' voyageur'+(i?'s':'')+'</option>').join('');
  const today=new Date().toISOString().slice(0,10);$('start').min=today;$('end').min=today;
  $('loading').classList.add('hidden');$('content').classList.remove('hidden');
+ if(user){
+   const {data:profile}=await sb.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();
+   if(profile?.is_admin){
+     $('adminBoostBox').classList.remove('hidden');
+     const featuredUntil=l.featured_until?new Date(l.featured_until):null;
+     $('adminBoostStatus').textContent=(featuredUntil&&featuredUntil.getTime()>Date.now())
+       ?('À la une jusqu’au '+featuredUntil.toLocaleDateString('fr-FR'))
+       :'Pas de mise à la une en cours.';
+   }
+ }
 }
 $('requestBtn').onclick=async()=>{
  const {data:{user:u}}=await sb.auth.getUser();user=u||null;if(!user){$('loginBox').classList.remove('hidden');return}
@@ -92,6 +112,15 @@ $('requestBtn').onclick=async()=>{
 }
 $('loginBtn').onclick=async()=>{const {error}=await sb.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});if(error){showNotice(error.message);return}$('loginBox').classList.add('hidden');showNotice('Connecté. Vous pouvez envoyer votre demande.',true)}
 function showNotice(t,ok=false){$('requestNotice').textContent=t;$('requestNotice').className='notice'+(ok?' ok':'')}
+$('adminBoostBtn').onclick=async()=>{
+  const days=Number($('adminBoostDays').value)||7;
+  if(!confirm('Mettre ce logement à la une pendant '+days+' jours et prévenir l’hôte ?'))return;
+  $('adminBoostBtn').disabled=true;
+  const {error}=await sb.rpc('admin_feature_listing_now',{p_listing_id:listing.id,p_days:days});
+  $('adminBoostBtn').disabled=false;
+  if(error){alert('Erreur : '+error.message);return}
+  $('adminBoostStatus').textContent='Boosté ! À la une pendant '+days+' jours. L’hôte a été prévenu.';
+}
 boot();
 </script>
 </body></html>

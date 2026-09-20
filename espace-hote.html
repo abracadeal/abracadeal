@@ -237,6 +237,7 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     </section>
 
     <section id="view-dashboard" class="view">
+      <div id="giftNoticeBox"></div>
       <div class="grid4">
         <div class="metric"><span>Logements</span><strong id="mListings">0</strong><div class="kpiNote">publiés ou en cours</div></div>
         <div class="metric"><span>En ligne</span><strong id="mActive">0</strong><div class="kpiNote">visibles aux voyageurs</div></div>
@@ -436,7 +437,19 @@ async function boot(){
   $('hello').textContent='Bonjour'+(profile?.display_name?' '+profile.display_name:'');
   await loadListings();
   $('hostPublicProfile').href='profil-vacances.html?user='+currentUser.id;
-  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false)]);if(new URLSearchParams(location.search).get('new')==='1'){showView('listings');openListingForm();}
+  await Promise.all([loadDashboardCounts(),loadFeeds(false),loadMessages(false),loadHostReviews(false),loadGiftNotices()]);if(new URLSearchParams(location.search).get('new')==='1'){showView('listings');openListingForm();}
+}
+
+async function loadGiftNotices(){
+  const box=document.getElementById('giftNoticeBox');
+  if(!box||!currentUser)return;
+  const {data,error}=await sb.from('vacation_gift_notices').select('id,message,created_at').eq('owner_id',currentUser.id).is('read_at',null).order('created_at',{ascending:false});
+  if(error||!data||!data.length){box.innerHTML='';return}
+  box.innerHTML=data.map(n=>'<div class="card" style="background:linear-gradient(135deg,#fff7e6,#fff);border:1px solid #f0d9a0;display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:14px"><div><strong>🎁 '+esc(n.message)+'</strong></div><button class="btn soft" onclick="dismissGiftNotice(\''+n.id+'\')">J’ai vu, merci !</button></div>').join('');
+}
+window.dismissGiftNotice=async function(id){
+  await sb.from('vacation_gift_notices').update({read_at:new Date().toISOString()}).eq('id',id);
+  loadGiftNotices();
 }
 
 function getHostDraft(){

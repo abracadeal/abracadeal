@@ -29,6 +29,7 @@ button,input,select{font:inherit}
 .btn.danger{background:rgba(255,108,125,.14);color:#ffb0b8;border:1px solid rgba(255,108,125,.3)}
 .btn.gold{background:linear-gradient(135deg,#c98a1f,var(--gold));color:#241305}
 .btn.small{padding:8px 12px;font-size:.82rem;border-radius:11px}
+.btn.link{background:transparent;box-shadow:none;color:#c9a8e0;padding:4px 2px;text-decoration:underline;font-weight:700;font-size:.78rem}
 main{padding:30px 0 70px}
 .hero{margin-bottom:22px}
 h1{margin:0;font-size:clamp(1.7rem,3vw,2.6rem);letter-spacing:-.03em}
@@ -47,7 +48,7 @@ h1{margin:0;font-size:clamp(1.7rem,3vw,2.6rem);letter-spacing:-.03em}
 .badge.featured{color:#241305;background:linear-gradient(135deg,#c98a1f,var(--gold));border-color:transparent}
 .meta{color:var(--muted);font-size:.86rem}
 .price{font-weight:900;color:#fff}
-.side{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:200px}
+.side{display:flex;flex-direction:column;gap:8px;align-items:stretch;min-width:210px}
 .boost-row{display:flex;gap:6px}
 .boost-row select{flex:1;border-radius:11px;border:1px solid #4a3157;background:#0f0a14;color:#fff;padding:0 10px;min-height:38px}
 .empty{padding:30px;text-align:center;color:var(--muted)}
@@ -76,7 +77,7 @@ h1{margin:0;font-size:clamp(1.7rem,3vw,2.6rem);letter-spacing:-.03em}
 <main class="wrap" id="app" style="display:none">
   <section class="hero">
     <h1>Gestion des logements Vacances</h1>
-    <p class="sub">Retire une annonce du site, ou offre un boost « à la une » gratuit à un hôte (cadeau de lancement). Les actions passent par les fonctions admin sécurisées du site.</p>
+    <p class="sub">Retire une annonce du site, réactive-la, ou mets-la à la une en un clic (cadeau de lancement) — l'hôte reçoit un message l'informant du cadeau.</p>
   </section>
 
   <section class="card">
@@ -134,16 +135,17 @@ function render(){
       <div class="side">
         <button class="btn small" type="button" onclick="window.open('logement-vacances.html?id=${r.id}','_blank')">Voir l'annonce</button>
         ${archived
-          ? `<button class="btn small" type="button" disabled title="Réactivation : à faire depuis Espace Hôte pour le moment">Retirée du site</button>`
+          ? `<button class="btn small" type="button" onclick="reactivateListing('${r.id}')">Réactiver</button>`
           : `<button class="btn small danger" type="button" onclick="removeListing('${r.id}')">Retirer du site</button>`
         }
         <div class="boost-row">
           <select id="boostDays-${r.id}">
-            <option value="7">Boost 7 jours</option>
-            <option value="30">Boost 30 jours</option>
+            <option value="7">7 jours</option>
+            <option value="30">30 jours</option>
           </select>
-          <button class="btn small gold" type="button" onclick="giftBoost('${r.id}','${r.owner_id}')">Offrir</button>
+          <button class="btn small gold" type="button" onclick="boostNow('${r.id}')">🎁 Booster (1 clic)</button>
         </div>
+        <button class="btn link" type="button" onclick="giftBoostCredit('${r.id}','${r.owner_id}')">ou offrir un crédit à utiliser plus tard</button>
       </div>
     </article>`;
   }).join('');
@@ -180,9 +182,25 @@ window.removeListing=async function(id){
   await loadListings();
 };
 
-window.giftBoost=async function(id,ownerId){
+window.reactivateListing=async function(id){
+  const {error}=await sb.rpc('admin_reactivate_listing',{p_listing_id:id});
+  if(error){setMsg(id,'Erreur : '+error.message+' (fonction admin_reactivate_listing à installer, voir instructions)',false);return}
+  setMsg(id,'Réactivée.',true);
+  await loadListings();
+};
+
+window.boostNow=async function(id){
   const days=Number($('boostDays-'+id).value)||7;
-  if(!confirm('Offrir un crédit de boost '+days+' jours à l’hôte de cette annonce ? Il pourra l’activer depuis son Espace Hôte pour mettre ce logement (ou un autre) à la une.'))return;
+  if(!confirm('Mettre cette annonce à la une pendant '+days+' jours dès maintenant, et prévenir l’hôte ?'))return;
+  const {error}=await sb.rpc('admin_feature_listing_now',{p_listing_id:id,p_days:days});
+  if(error){setMsg(id,'Erreur : '+error.message+' (fonction admin_feature_listing_now à installer, voir instructions)',false);return}
+  setMsg(id,'Boosté ! À la une pendant '+days+' jours. L’hôte a été prévenu.',true);
+  await loadListings();
+};
+
+window.giftBoostCredit=async function(id,ownerId){
+  const days=Number($('boostDays-'+id).value)||7;
+  if(!confirm('Offrir un crédit de boost '+days+' jours à l’hôte de cette annonce ? Il pourra l’activer lui-même depuis son Espace Hôte, sur ce logement ou un autre.'))return;
   const {error}=await sb.rpc('admin_grant_pro_boosts',{p_user_id:ownerId,p_duration_days:days,p_credits:1,p_note:'Cadeau de lancement Abracadeal Vacances'});
   if(error){setMsg(id,'Erreur : '+error.message,false);return}
   setMsg(id,'Crédit de boost '+days+' jours offert à l’hôte.',true);
