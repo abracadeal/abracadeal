@@ -6990,6 +6990,13 @@ header #flowErrorsBtn{
         <div><b>12 mois gratuits</b><span>Diffusion et synchronisation du stock gratuites pendant les 12 premiers mois pour les comptes éligibles.</span></div>
       </div>
       <p class="note">Une carte bancaire sera demandée pour activer l’offre. Aucun débit pendant les 12 mois gratuits. À l’issue de cette période, la formule choisie devient payante au tarif affiché lors de l’activation ; elle peut être résiliée avant la fin de la période gratuite. Les options de visibilité, boosts et autres services payants restent distincts.</p>
+      <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par Anthony, pour convertir directement
+           depuis la modale au lieu de forcer un aller-retour manuel vers l'inscription.
+           Reutilise openProfessionalSignup() (deja utilisee par #proAccountBtn) qui bascule
+           sur l'onglet inscription, preselectionne "Professionnel" et ouvre accountModal. -->
+      <div class="form-actions" style="margin-top:18px">
+        <button type="button" class="btn primary" onclick="closeModal('founderOfferModal');openProfessionalSignup();">S’inscrire</button>
+      </div>
     </div>
   </div>
 </div>
