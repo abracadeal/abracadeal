@@ -6178,6 +6178,17 @@ header #flowErrorsBtn{
   #resultats .ad-city{font-size:10px!important}
   #resultats .ad-specs{font-size:9.5px!important}
 }
+
+/* Fix 20/09/2026 : boutons Modifier/Booster/Supprimer plus compacts sur la pastille
+   en desktop (vue admin/gestion des annonces), demande par Anthony. Verifie en direct
+   sur abracadeal.fr avant application : la taille de base (.ad-actions .mini-btn,
+   sans !important, ligne ~2534) passe de 36px de hauteur / 12px de padding / 12px de
+   police a 29px / 9px / 11px sur desktop uniquement (>=761px) ; le mobile (regles
+   !important dans les @media max-width:760px) n'est pas touche. */
+@media(min-width:761px){
+  #resultats .ad-actions{gap:6px}
+  #resultats .ad-actions .mini-btn{min-height:29px!important;padding:0 9px!important;font-size:11px!important;border-radius:8px!important}
+}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
