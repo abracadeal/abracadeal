@@ -5026,10 +5026,11 @@ header #flowErrorsBtn{
 #resultats .ad-card{
   display:flex!important;
   flex-direction:column!important;
-  height:400px!important;
-  min-height:400px!important;
-  max-height:400px!important;
+  height:420px!important;
+  min-height:420px!important;
+  max-height:420px!important;
 }
+/* Fix 20/09/2026 : hauteur fixe des cartes remontee de 400 a 420px (desktop) car en vue Admin la 3e action (Modifier + Booster + Supprimer) faisait deborder le bloc .ad-body en overflow:hidden, ce qui rongeait le bas du bouton "Supprimer" */
 #resultats .ad-photo,
 #resultats .ad-card.immo-card .ad-photo{
   flex:0 0 158px!important;
