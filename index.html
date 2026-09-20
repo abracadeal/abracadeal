@@ -10034,6 +10034,26 @@ window.hydrateFavoriteCounts=async(root=document)=>{
   await Promise.all(ids.map(async id=>paintFavoriteCount(id,await getListingFavoriteCount(id))));
 };
 window.refreshDetailFavoriteCount=async id=>{favoriteCountCache.delete(id);paintFavoriteCount(id,await getListingFavoriteCount(id,true));};
+
+/* Fix 20/09/2026 : affiche le nom du vendeur professionnel sur la pastille (public_profiles.display_name),
+   sur le meme principe d'hydratation asynchrone que les compteurs de favoris ci-dessus. */
+const proNameCache=new Map();
+function paintProName(ownerId,name){
+  document.querySelectorAll('[data-pro-name-owner]').forEach(el=>{if(el.dataset.proNameOwner===ownerId&&name)el.textContent=' · '+name;});
+}
+window.hydrateProNames=async(root=document)=>{
+  const ids=[...new Set([...root.querySelectorAll('[data-pro-name-owner]')].map(el=>el.dataset.proNameOwner).filter(Boolean))];
+  const missing=ids.filter(id=>!proNameCache.has(id));
+  if(missing.length){
+    try{
+      const {data,error}=await sb.from('public_profiles').select('id,display_name').in('id',missing);
+      if(error) throw error;
+      missing.forEach(id=>proNameCache.set(id,null));
+      (data||[]).forEach(p=>proNameCache.set(p.id,p.display_name||null));
+    }catch(e){console.warn('Nom professionnel indisponible',e);missing.forEach(id=>proNameCache.set(id,null));}
+  }
+  ids.forEach(id=>paintProName(id,proNameCache.get(id)));
+};
 function listingCardActions(a){
   const active=favoriteIds.has(a.id);
   const share=`<button type="button" class="card-action-btn share-action" data-share-listing="${a.id}" aria-label="Partager l’annonce" title="Partager" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg></button>`;
@@ -10504,7 +10524,7 @@ function renderAds(){
       <div class="ad-body">
         ${moderationRiskHTML(a)}
         ${statusBadge}
-        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
+        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}${(a.seller_type==='professionnel'&&a.owner_id)?`<span class="ad-pro-name" data-pro-name-owner="${a.owner_id}"></span>`:''}</div>
         <h3 class="ad-title">${esc(a.title)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
@@ -10525,6 +10545,7 @@ function renderAds(){
       </div></article>`;
   }).join('');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  queueMicrotask(()=>hydrateProNames(grid));
 }
 
 $('#promotionPayBtn')?.addEventListener('click',async()=>{
