@@ -176,7 +176,7 @@ async function loadListings(){
 
 window.removeListing=async function(id){
   if(!confirm('Retirer cette annonce du site ? Elle reste consultable dans la base admin, ce n’est pas une suppression définitive.'))return;
-  const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
+  const {error}=await sb.rpc('admin_remove_vacation_listing',{p_listing_id:id});
   if(error){setMsg(id,'Erreur : '+error.message,false);return}
   setMsg(id,'Retirée du site.',true);
   await loadListings();
