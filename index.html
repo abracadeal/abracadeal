@@ -6034,6 +6034,18 @@ header #flowErrorsBtn{
     max-width:none!important;
   }
 }
+
+/* Fix 20/09/2026 : bouton "Se deconnecter" remonte en haut du panneau Compte, juste sous les raccourcis, pour etre visible sans avoir a tout faire defiler */
+.account-logout-row{
+  margin:2px 0 16px;
+  display:flex;
+  justify-content:flex-end;
+}
+.account-logout-row #logoutBtn{
+  font-size:.82rem;
+  padding:0 14px;
+  min-height:36px;
+}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
@@ -6973,6 +6985,7 @@ header #flowErrorsBtn{
             <button class="btn ghost admin-account-shortcut hidden" id="accountModerationBtn" type="button">Modérer</button>
             <button class="btn ghost admin-account-shortcut hidden" id="accountFlowBtn" type="button">Flux</button>
           </nav>
+          <div class="account-logout-row"><button class="btn ghost" id="logoutBtn" type="button">Se déconnecter</button></div>
           <section class="profile-edit-box"><h3>Mes informations</h3><dl id="profileSummary" class="profile-summary"></dl>
             <button class="btn primary" id="editProfileBtn" type="button">Modifier mes informations</button>
           </section>
@@ -7085,7 +7098,6 @@ header #flowErrorsBtn{
         <div class="form-actions">
           <button class="btn b2b-entry hidden" id="b2bAccountBtn" type="button" aria-label="Pro/Pro">Pro/Pro<span id="b2bAccountBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
           <button class="btn ghost hidden" id="proImportBtn" type="button">Importer mon stock</button>
-          <button class="btn ghost" id="logoutBtn" type="button">Se déconnecter</button>
         </div>
       </div>
 
