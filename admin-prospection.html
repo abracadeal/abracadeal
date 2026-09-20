@@ -195,32 +195,22 @@ const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 
-const DEFAULT_SUBJECT='Abracadeal — {{societe}}';
+const DEFAULT_SUBJECT='Petite question concernant {{societe}}';
 const DEFAULT_BODY=`Bonjour,
 
 Je me permets de vous contacter au sujet de {{societe}}.
-Abracadeal est une nouvelle plateforme de petites annonces ouverte aux particuliers comme aux professionnels.
 
-Pour le lancement, les 1 000 premiers Pros inscrits bénéficient de 12 mois d’abonnement offerts.
+Je travaille sur Abracadeal, une nouvelle plateforme de petites annonces, et nous ouvrons actuellement l’accès aux professionnels.
 
-Vous avez déjà un fichier de stock ou un flux d’annonces ?
-Aucun besoin de tout ressaisir : vos annonces peuvent être importées directement sur Abracadeal par fichier CSV/XML ou par flux.
+Vous avez déjà un fichier de stock ou un flux d’annonces ? Nous pouvons éviter la ressaisie et importer directement votre stock sur Abracadeal.
 
-Une carte bancaire est demandée lors de l’inscription uniquement pour assurer la continuité de l’abonnement après la période offerte. Aucun prélèvement n’est effectué pendant les 12 mois offerts.
-
-Ensuite, l’abonnement démarre à partir de 29,90 € HT/mois, selon le nombre d’annonces de votre formule.
-
-Découvrir l’offre Fondateurs :
-https://abracadeal.fr/pro-fondateur.html
-
-Les places Fondateurs restantes sont affichées directement sur le site. Si vous avez une question, vous pouvez simplement répondre à ce mail.
+Est-ce que je peux vous envoyer les détails de l’accès réservé aux premiers professionnels inscrits ?
 
 Bien cordialement,
 Service Pros Abracadeal
 contact@abracadeal.fr
 
-Si vous ne souhaitez plus recevoir de messages de notre part, répondez simplement STOP.
-Politique de confidentialité : https://abracadeal.fr/confidentialite.html`;
+Si vous préférez ne plus être contacté, dites-le-moi simplement par retour de mail.`;
 
 let gmailToken=null,gmailEmail=null,tokenClient=null,stopRequested=false,sending=false,allRows=[];
 
@@ -450,6 +440,11 @@ async function boot(){
   $('app').style.display='block';$('lock').style.display='none';
 
   $('googleClientId').value=localStorage.getItem('abr_google_client_id')||'';
+  if(localStorage.getItem('abr_prospect_template_version')!=='2'){
+    localStorage.setItem('abr_prospect_subject',DEFAULT_SUBJECT);
+    localStorage.setItem('abr_prospect_body',DEFAULT_BODY);
+    localStorage.setItem('abr_prospect_template_version','2');
+  }
   $('subjectTpl').value=localStorage.getItem('abr_prospect_subject')||DEFAULT_SUBJECT;
   $('bodyTpl').value=localStorage.getItem('abr_prospect_body')||DEFAULT_BODY;
   $('dailyLimit').value=localStorage.getItem('abr_prospect_daily_limit')||'50';
