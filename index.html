@@ -6474,7 +6474,7 @@ header #flowErrorsBtn{
             <div class="immo-filter-shortcuts"><button class="immo-nearby-filter-btn" id="immoNearbyFilterBtn" type="button">📍 Voir les biens autour de moi</button><span class="immo-filter-hint">Pour un rayon autour d’une ville, renseignez d’abord « Ville ou code postal » en haut de la page.</span></div>
           </div>
         </div>
-        <div class="filters-actions"><button class="filter-reset" id="resetFilters" type="button">Réinitialiser les filtres</button></div>
+        <div class="filters-actions"><button class="filter-reset" id="resetFilters" type="button">Réinitialiser les filtres</button><button class="btn ghost" id="createAlertBtn" type="button">🔔 Créer une alerte avec ces critères</button></div>
       </div>
 
       <div class="ads-grid" id="adsGrid"></div>
@@ -6895,6 +6895,43 @@ header #flowErrorsBtn{
   </div>
 </div>
 
+<!-- Fix 20/09/2026 : nouvelle fonctionnalité "alerte" (recherche sauvegardée + email quand une annonce correspond). -->
+<div class="modal-backdrop" id="alertsModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="alertsModalTitle">
+    <div class="modal-head"><h2 id="alertsModalTitle">Mes alertes</h2><a class="close-btn" data-close="alertsModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body">
+      <p class="note">Recevez un e-mail dès qu’une nouvelle annonce correspond à vos critères.</p>
+      <form id="createAlertForm">
+        <div class="form-grid">
+          <div class="form-row"><label>Nom de l’alerte (optionnel)</label><input id="alertLabel" type="text" placeholder="Ex. Appartement Cannes"></div>
+          <div class="form-row"><label>Mot-clé</label><input id="alertKeyword" type="text" placeholder="Ex. Mercedes Classe A"></div>
+          <div class="form-row">
+            <label>Catégorie</label>
+            <select id="alertCategory">
+              <option value="">Toutes les catégories</option>
+              <option value="vehicules">Véhicules</option>
+              <option value="immobilier">Immobilier</option>
+              <option value="hightech">High-tech</option>
+              <option value="maison">Maison</option>
+              <option value="mode">Mode</option>
+              <option value="emploi">Emploi</option>
+              <option value="services">Services</option>
+              <option value="autres">Autres</option>
+            </select>
+          </div>
+          <div class="form-row"><label>Ville</label><input id="alertCity" type="text" placeholder="Ex. Cannes"></div>
+          <div class="form-row"><label>Prix maximum</label><input id="alertPriceMax" type="number" min="0" placeholder="Sans maximum"></div>
+        </div>
+        <div class="form-actions"><button class="btn primary" type="submit">Créer l’alerte</button></div>
+        <div id="createAlertStatus" class="note" style="margin-top:8px"></div>
+      </form>
+      <hr style="margin:22px 0;border:0;border-top:1px solid #eee">
+      <h3 style="margin:0 0 10px">Alertes enregistrées</h3>
+      <div id="myAlertsList"><p class="note">Chargement…</p></div>
+    </div>
+  </div>
+</div>
+
 <!-- Pages d’information : compléter les mentions avant finalisation. -->
 <div class="modal-backdrop" id="contactModal" aria-hidden="true"><div class="modal legal-modal" role="dialog" aria-modal="true" aria-labelledby="contactTitle"><div class="modal-head"><h2 id="contactTitle">Contact</h2><a class="close-btn" data-close="contactModal" href="#" aria-label="Fermer">×</a></div><div class="modal-body"><p class="legal-draft"><strong>Version de préparation.</strong> Les mentions « à compléter » devront être renseignées avant la mise en service définitive de ces textes.</p><p>Une question sur votre compte, une annonce ou l’utilisation du site ? Cette page rassemble les moyens de contacter Abracadeal.</p>
 <h3>Assistance Abracadeal</h3><p><strong>Adresse e-mail :</strong> <a href="mailto:contact@abracadeal.fr">contact@abracadeal.fr</a>.</p><p>Cliquez sur l’adresse pour ouvrir votre application de messagerie et écrire à Abracadeal.</p>
@@ -7033,6 +7070,7 @@ header #flowErrorsBtn{
             <button class="btn ghost" id="accountAdsBtn" type="button">Mes annonces</button>
             <button class="btn ghost" id="accountFavoritesBtn" type="button">Mes favoris</button>
             <button class="btn ghost" id="accountMessagesBtn" type="button">Mes messages</button>
+            <button class="btn ghost" id="accountAlertsBtn" type="button">🔔 Mes alertes</button>
             <button class="btn ghost admin-account-shortcut hidden" id="accountModerationBtn" type="button">Modérer</button>
             <button class="btn ghost admin-account-shortcut hidden" id="accountFlowBtn" type="button">Flux</button>
           </nav>
@@ -8117,6 +8155,85 @@ $('#cancelProfileBtn').addEventListener('click',()=>{updateAuthUI();$('#editProf
 $('#accountAdsBtn').addEventListener('click',()=>{closeModal('accountModal');openMyAds();});
 $('#accountFavoritesBtn').addEventListener('click',()=>{closeModal('accountModal');openFavorites();});
 $('#accountMessagesBtn').addEventListener('click',()=>{closeModal('accountModal');openMessages()});
+
+/* Fix 20/09/2026 : fonctionnalité "alerte" — recherche sauvegardée + email quand une annonce correspond.
+   Table saved_alerts créée côté Supabase (voir Claude outputs/saved_alerts.sql). Tant que la table n'existe
+   pas encore, les appels échouent proprement et affichent un message neutre plutôt qu'une erreur brute. */
+function fillAlertFormFromCurrentSearch(){
+  if($('#alertKeyword')) $('#alertKeyword').value=$('#searchQuery')?.value?.trim()||'';
+  if($('#alertCategory')) $('#alertCategory').value=$('#filterCategory')?.value||activeCategory||'';
+  if($('#alertCity')) $('#alertCity').value=$('#searchCity')?.value?.trim()||'';
+  if($('#alertPriceMax')) $('#alertPriceMax').value=$('#filterPriceMax')?.value||'';
+}
+function renderMyAlertsList(alerts){
+  const box=$('#myAlertsList');
+  if(!box) return;
+  if(!alerts||!alerts.length){box.innerHTML='<p class="note">Aucune alerte enregistrée pour le moment.</p>';return;}
+  box.innerHTML=alerts.map(a=>{
+    const parts=[a.keyword,a.category?catLabel(a.category):'',a.city,(a.price_max!==null&&a.price_max!==undefined&&a.price_max!=='')?`≤ ${Number(a.price_max).toLocaleString('fr-FR')} €`:''].filter(Boolean);
+    return `<div class="alert-row" style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid #f0eaf3">
+      <div><strong>${esc(a.label||'Alerte')}</strong><div style="font-size:.8rem;color:#7a6d84;margin-top:2px">${esc(parts.join(' · ')||'Tous les critères')}</div></div>
+      <button class="mini-btn danger" type="button" onclick="deleteSavedAlert('${a.id}')">Supprimer</button>
+    </div>`;
+  }).join('');
+}
+async function loadMyAlerts(){
+  const box=$('#myAlertsList');
+  if(!box) return;
+  if(!currentUser){box.innerHTML='<p class="note">Connectez-vous pour voir vos alertes.</p>';return;}
+  if(!sb){box.innerHTML='<p class="note">Service indisponible pour le moment.</p>';return;}
+  try{
+    const {data,error}=await sb.from('saved_alerts').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+    if(error) throw error;
+    renderMyAlertsList(data||[]);
+  }catch(e){
+    console.warn('Alertes indisponibles',e);
+    box.innerHTML='<p class="note">Fonctionnalité en cours de mise en place, revenez bientôt.</p>';
+  }
+}
+window.deleteSavedAlert=async(id)=>{
+  if(!sb) return;
+  const {error}=await sb.from('saved_alerts').delete().eq('id',id);
+  if(error){toast('Impossible de supprimer cette alerte pour le moment');console.warn(error);return;}
+  toast('Alerte supprimée');
+  loadMyAlerts();
+};
+$('#createAlertBtn')?.addEventListener('click',()=>{
+  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
+  fillAlertFormFromCurrentSearch();
+  openModal('alertsModal');
+  loadMyAlerts();
+});
+$('#accountAlertsBtn')?.addEventListener('click',()=>{closeModal('accountModal');openModal('alertsModal');loadMyAlerts();});
+$('#createAlertForm')?.addEventListener('submit',async(e)=>{
+  e.preventDefault();
+  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
+  if(!sb) return;
+  const status=$('#createAlertStatus');
+  if(status) status.textContent='Enregistrement…';
+  const priceMaxRaw=$('#alertPriceMax')?.value;
+  const payload={
+    user_id:currentUser.id,
+    label:$('#alertLabel')?.value.trim()||null,
+    keyword:$('#alertKeyword')?.value.trim()||null,
+    category:$('#alertCategory')?.value||null,
+    city:$('#alertCity')?.value.trim()||null,
+    price_max:priceMaxRaw?Number(priceMaxRaw):null
+  };
+  try{
+    const {error}=await sb.from('saved_alerts').insert(payload);
+    if(error) throw error;
+    if(status) status.textContent='Alerte enregistrée ✓';
+    $('#createAlertForm')?.reset();
+    toast('Alerte enregistrée, vous serez prévenu par e-mail');
+    loadMyAlerts();
+  }catch(e){
+    console.warn('Création alerte impossible',e);
+    if(status) status.textContent='';
+    toast('Fonctionnalité en cours de mise en place, réessayez bientôt');
+  }
+});
+
 $('#accountModerationBtn')?.addEventListener('click',()=>{
   closeModal('accountModal');
   window.toggleAdminModeration?.();
