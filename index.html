@@ -3145,6 +3145,12 @@ header #signupBtn{display:none!important}
 .modal-backdrop:target{
   display:flex!important;
 }
+/* Fix 20/09/2026 : le lien "Voir les conditions" ouvre founderOfferModal depuis l'interieur de accountModal (deja ouvert).
+   Les deux backdrops partageaient le meme z-index:30000, donc a egalite l'ordre du DOM tranchait et accountModal
+   (place apres dans le HTML) passait devant, cachant la fenetre des conditions. On la fait passer au-dessus. */
+#founderOfferModal.modal-backdrop{
+  z-index:30010!important;
+}
 
 .modal-backdrop > .modal{
   width:min(960px,calc(100vw - 40px))!important;
