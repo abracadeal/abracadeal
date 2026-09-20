@@ -2314,7 +2314,12 @@ body.vac-date-open .vac-mobile-bottom-nav{
 }
 .vac-listing-card:hover{transform:translateY(-3px);box-shadow:0 16px 34px rgba(69,32,79,.14)}
 .vac-listing-photo{
-  display:block;height:150px;background:#f3eaf6;overflow:hidden;
+  position:relative;display:block;height:150px;background:#f3eaf6;overflow:hidden;
+}
+.vac-listing-featured-badge{
+  position:absolute;left:9px;top:9px;z-index:3;
+  background:#32163f;color:#fff;border-radius:999px;padding:6px 9px;
+  font-size:.7rem;font-weight:950;box-shadow:0 4px 13px rgba(23,8,31,.25);
 }
 .vac-listing-photo img{width:100%;height:100%;object-fit:cover;display:block}
 .vac-listing-photo-empty{
@@ -3031,12 +3036,13 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
   const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
   function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
-  function cardHtml(x,sb){
+  function cardHtml(x,sb,featuredIds){
     const url=x.photo_path?sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl:null;
     const rating=x.host_rating?('⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis'):'Nouvel hôte';
     const photo=url?'<img src="'+url+'" alt="" loading="lazy">':'<span class="vac-listing-photo-empty" aria-hidden="true">🏡</span>';
+    const badge=featuredIds&&featuredIds.has(x.id)?'<span class="vac-listing-featured-badge">À LA UNE</span>':'';
     return '<a class="vac-listing-card" href="logement-vacances.html?id='+encodeURIComponent(x.id)+'">'
-      +'<span class="vac-listing-photo">'+photo+'</span>'
+      +'<span class="vac-listing-photo">'+photo+badge+'</span>'
       +'<span class="vac-listing-body">'
         +'<strong class="vac-listing-title">'+esc(x.title)+'</strong>'
         +'<span class="vac-listing-meta">'+esc(x.city||'France')+' · '+(x.max_guests||1)+' voyageur(s)'+(x.bedrooms?' · '+x.bedrooms+' ch.':'')+'</span>'
@@ -3068,7 +3074,13 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
         return;
       }
       grid.classList.remove('is-empty');
-      grid.innerHTML=items.map(x=>cardHtml(x,sb)).join('');
+      let featuredIds=new Set();
+      try{
+        const {data:featuredRows}=await sb.from('listings').select('id,featured_until').in('id',items.map(x=>x.id));
+        const now=Date.now();
+        featuredIds=new Set((featuredRows||[]).filter(r=>r.featured_until&&new Date(r.featured_until).getTime()>now).map(r=>r.id));
+      }catch(e){}
+      grid.innerHTML=items.map(x=>cardHtml(x,sb,featuredIds)).join('');
       if(subtitle)subtitle.textContent=items.length+' hébergement(s) publié(s) en direct par nos hôtes.';
     }catch(err){
       grid.innerHTML=emptyHtml();
