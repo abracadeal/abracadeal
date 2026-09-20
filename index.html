@@ -1904,8 +1904,30 @@ a.btn{cursor:pointer}
 @media(min-width:721px){.message-mobile-back{display:none}}
 
 /* ===== Filtres & tri Abracadeal ===== */
-.results-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}
+.results-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px;flex-wrap:wrap}
 .filters-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #d9cce0;background:#fff;border-radius:12px;padding:10px 14px;font-weight:850;color:#4e2c62;cursor:pointer}
+
+/* Fix 20/09/2026 : barre de "quick filters" (Ville / Prix / champ selon categorie / Filtres),
+   inspiree du retour d'Anthony (recherche pas assez fluide, comparee a leboncoin). Chaque puce
+   ouvre un petit popover avec un champ "miroir" synchronise en direct avec le vrai champ du
+   panneau de filtres complet (aucune duplication de logique de filtrage : filteredAds() continue
+   de lire uniquement les champs d'origine #searchCity/#filterPriceMin.../#filterVehicleMake/
+   #filterImmoPropertyType). Scrollable horizontalement sur mobile comme sur leboncoin.*/
+.quick-filters-bar{display:flex;align-items:center;gap:8px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding:2px 2px 8px;margin:0 0 4px}
+.quick-filters-bar::-webkit-scrollbar{display:none}
+.quick-filter-chip-wrap{position:relative;flex:none}
+.quick-filter-chip{display:inline-flex;align-items:center;gap:6px;border:1px solid #d9cce0;background:#fff;border-radius:999px;padding:9px 14px;font-weight:800;color:#4e2c62;cursor:pointer;white-space:nowrap;font-size:.85rem;font-family:inherit}
+.quick-filter-chip:hover{background:#faf6fc}
+.quick-filter-chip.active{border-color:#7d2db8;background:#f7eefb;color:#5f2279}
+.quick-filter-popover{position:fixed;top:0;left:0;z-index:1000;background:#fff;border:1px solid #e5d5ed;border-radius:14px;box-shadow:0 12px 30px rgba(41,18,65,.18);padding:14px;min-width:220px;max-width:calc(100vw - 24px);display:flex;flex-direction:column;gap:8px}
+.quick-filter-popover label{font-size:.78rem;font-weight:850;color:#5e4965}
+.quick-filter-popover input,.quick-filter-popover select{border:1px solid #ddd0e4;border-radius:10px;padding:9px 11px;font:inherit;min-height:38px}
+.quick-filter-popover .qf-popover-ok{margin-top:4px;align-self:flex-end;padding:8px 16px;min-height:36px}
+/* position:fixed + placement calculee en JS (positionQuickFilterPopover) car .quick-filters-bar
+   a un overflow-x:auto qui, sinon, decoupe (clip) tout popover positionne en absolute a l'interieur. */
+@media(max-width:760px){
+  .quick-filters-bar{width:100%}
+}
 .filters-toggle:hover{background:#faf6fc}
 .filter-count{display:inline-flex;align-items:center;justify-content:center;min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:#7d2db8;color:#fff;font-size:.72rem;font-weight:900}
 .sort-select{height:42px;border:1px solid #d9cce0;border-radius:12px;background:#fff;padding:0 36px 0 12px;font:inherit;font-weight:750;color:#4b3853}
@@ -6404,6 +6426,50 @@ header #flowErrorsBtn{
           <button class="filter-chip hidden" id="backToAllAds" type="button">Voir toutes les annonces</button>
         </div>
       </div>
+      <div class="quick-filters-bar" id="quickFiltersBar">
+        <div class="quick-filter-chip-wrap">
+          <button class="quick-filter-chip" id="qfCityChip" type="button">📍 <span id="qfCityLabel">Ville</span></button>
+          <div class="quick-filter-popover hidden" id="qfCityPopover">
+            <label for="qfCityInput">Ville ou code postal</label>
+            <input type="text" id="qfCityInput" placeholder="Ex. Cannes">
+            <button type="button" class="btn primary qf-popover-ok">OK</button>
+          </div>
+        </div>
+        <div class="quick-filter-chip-wrap">
+          <button class="quick-filter-chip" id="qfPriceChip" type="button">💰 <span id="qfPriceLabel">Prix</span></button>
+          <div class="quick-filter-popover hidden" id="qfPricePopover">
+            <label for="qfPriceMinInput">Prix minimum</label>
+            <input type="number" min="0" inputmode="numeric" id="qfPriceMinInput" placeholder="0 €">
+            <label for="qfPriceMaxInput">Prix maximum</label>
+            <input type="number" min="0" inputmode="numeric" id="qfPriceMaxInput" placeholder="Sans maximum">
+            <button type="button" class="btn primary qf-popover-ok">OK</button>
+          </div>
+        </div>
+        <div class="quick-filter-chip-wrap hidden" id="qfVehicleWrap">
+          <button class="quick-filter-chip" id="qfVehicleChip" type="button">🚗 <span id="qfVehicleLabel">Marque</span></button>
+          <div class="quick-filter-popover hidden" id="qfVehiclePopover">
+            <label for="qfVehicleMakeInput">Marque</label>
+            <input type="text" id="qfVehicleMakeInput" placeholder="Ex. Mercedes">
+            <button type="button" class="btn primary qf-popover-ok">OK</button>
+          </div>
+        </div>
+        <div class="quick-filter-chip-wrap hidden" id="qfImmoWrap">
+          <button class="quick-filter-chip" id="qfImmoChip" type="button">🏠 <span id="qfImmoLabel">Type de bien</span></button>
+          <div class="quick-filter-popover hidden" id="qfImmoPopover">
+            <label for="qfImmoPropertyInput">Type de bien</label>
+            <select id="qfImmoPropertyInput">
+              <option value="">Tous les biens</option>
+              <option value="appartement">Appartement / Studio</option>
+              <option value="maison">Maison / Villa</option>
+              <option value="terrain">Terrain</option>
+              <option value="parking-garage">Parking / Garage</option>
+              <option value="bureaux-commerces">Bureaux / Commerces</option>
+              <option value="autre">Autre</option>
+            </select>
+            <button type="button" class="btn primary qf-popover-ok">OK</button>
+          </div>
+        </div>
+      </div>
       <div class="results-tools">
         <button class="filters-toggle" id="filtersToggle" type="button">☰ Filtres <span class="filter-count hidden" id="filterCount">0</span></button>
         <select class="sort-select" id="sortAds" aria-label="Trier les annonces">
@@ -10714,6 +10780,7 @@ function renderAds(){
   }).join('');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
   queueMicrotask(()=>hydrateProNames(grid));
+  updateQuickFilterLabels();
 }
 
 $('#promotionPayBtn')?.addEventListener('click',async()=>{
@@ -12007,6 +12074,105 @@ $('#sortAds')?.addEventListener('change',renderAds);
 $('#resetFilters')?.addEventListener('click',()=>{resetSearchFilters({keepMode:true});renderAds();});
 updateFilterSubcategories('');
 refreshFilterCount();
+
+/* Fix 20/09/2026 : barre de "filtres rapides" (Ville / Prix / Marque ou Type de bien / Filtres),
+   demandee par Anthony pour une recherche plus fluide (reference : leboncoin). Chaque puce ouvre
+   un petit popover avec un champ "miroir" : filteredAds() continue de lire uniquement les champs
+   d'origine (#searchCity, #filterPriceMin/Max, #filterVehicleMake, #filterImmoPropertyType), les
+   miroirs se contentent de pousser leur valeur dedans et de redeclencher les evenements existants -
+   aucune duplication de logique de filtrage. */
+function updateQuickFilterVisibility(){
+  const cat=$('#filterCategory')?.value||activeCategory||'';
+  $('#qfVehicleWrap')?.classList.toggle('hidden',cat!=='vehicules');
+  $('#qfImmoWrap')?.classList.toggle('hidden',cat!=='immobilier');
+}
+function updateQuickFilterLabels(){
+  updateQuickFilterVisibility();
+  const city=($('#searchCity')?.value||'').trim();
+  if($('#qfCityLabel')) $('#qfCityLabel').textContent=city||'Ville';
+  $('#qfCityChip')?.classList.toggle('active',!!city);
+
+  const min=$('#filterPriceMin')?.value||'',max=$('#filterPriceMax')?.value||'';
+  let priceText='Prix';
+  if(min&&max) priceText=`${Number(min).toLocaleString('fr-FR')}-${Number(max).toLocaleString('fr-FR')} €`;
+  else if(max) priceText=`Jusqu'à ${Number(max).toLocaleString('fr-FR')} €`;
+  else if(min) priceText=`Dès ${Number(min).toLocaleString('fr-FR')} €`;
+  if($('#qfPriceLabel')) $('#qfPriceLabel').textContent=priceText;
+  $('#qfPriceChip')?.classList.toggle('active',!!(min||max));
+
+  const make=($('#filterVehicleMake')?.value||'').trim();
+  if($('#qfVehicleLabel')) $('#qfVehicleLabel').textContent=make||'Marque';
+  $('#qfVehicleChip')?.classList.toggle('active',!!make);
+
+  const immoSelect=$('#filterImmoPropertyType');
+  const immoType=immoSelect?.value||'';
+  const immoText=immoType?(immoSelect.selectedOptions[0]?.textContent||'Type de bien'):'Type de bien';
+  if($('#qfImmoLabel')) $('#qfImmoLabel').textContent=immoText;
+  $('#qfImmoChip')?.classList.toggle('active',!!immoType);
+}
+function closeAllQuickFilterPopovers(except){
+  document.querySelectorAll('.quick-filter-popover').forEach(p=>{if(p!==except)p.classList.add('hidden')});
+}
+document.addEventListener('click',()=>closeAllQuickFilterPopovers());
+function positionQuickFilterPopover(chip,pop){
+  const r=chip.getBoundingClientRect();
+  const margin=12;
+  let left=r.left;
+  const maxLeft=window.innerWidth-pop.offsetWidth-margin;
+  if(left>maxLeft) left=maxLeft;
+  if(left<margin) left=margin;
+  let top=r.bottom+8;
+  const maxTop=window.innerHeight-pop.offsetHeight-margin;
+  if(top>maxTop) top=Math.max(margin,r.top-pop.offsetHeight-8);
+  pop.style.left=left+'px';
+  pop.style.top=top+'px';
+}
+function setupQuickFilterChip(chipId,popoverId,onOpen,onConfirm){
+  const chip=$('#'+chipId),pop=$('#'+popoverId);
+  if(!chip||!pop) return;
+  chip.addEventListener('click',(e)=>{
+    e.stopPropagation();
+    const willOpen=pop.classList.contains('hidden');
+    closeAllQuickFilterPopovers(willOpen?pop:null);
+    pop.classList.toggle('hidden',!willOpen);
+    if(willOpen){
+      if(onOpen) onOpen();
+      positionQuickFilterPopover(chip,pop);
+    }
+  });
+  pop.addEventListener('click',e=>e.stopPropagation());
+  pop.querySelector('.qf-popover-ok')?.addEventListener('click',()=>{if(onConfirm)onConfirm();pop.classList.add('hidden');});
+}
+window.addEventListener('scroll',()=>closeAllQuickFilterPopovers(),true);
+window.addEventListener('resize',()=>closeAllQuickFilterPopovers());
+setupQuickFilterChip('qfCityChip','qfCityPopover',()=>{if($('#qfCityInput'))$('#qfCityInput').value=$('#searchCity')?.value||'';},()=>$('#searchBtn')?.click());
+setupQuickFilterChip('qfPriceChip','qfPricePopover',()=>{
+  if($('#qfPriceMinInput'))$('#qfPriceMinInput').value=$('#filterPriceMin')?.value||'';
+  if($('#qfPriceMaxInput'))$('#qfPriceMaxInput').value=$('#filterPriceMax')?.value||'';
+});
+setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{if($('#qfVehicleMakeInput'))$('#qfVehicleMakeInput').value=$('#filterVehicleMake')?.value||'';});
+setupQuickFilterChip('qfImmoChip','qfImmoPopover',()=>{if($('#qfImmoPropertyInput'))$('#qfImmoPropertyInput').value=$('#filterImmoPropertyType')?.value||'';});
+$('#qfCityInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#searchBtn')?.click();$('#qfCityPopover')?.classList.add('hidden');}});
+function mirrorToOriginal(mirrorId,originalId){
+  const mirror=$('#'+mirrorId),original=$('#'+originalId);
+  if(!mirror||!original) return;
+  const push=()=>{
+    original.value=mirror.value;
+    original.dispatchEvent(new Event('input',{bubbles:true}));
+    original.dispatchEvent(new Event('change',{bubbles:true}));
+    updateQuickFilterLabels();
+  };
+  mirror.addEventListener('input',push);
+  mirror.addEventListener('change',push);
+}
+mirrorToOriginal('qfCityInput','searchCity');
+mirrorToOriginal('qfPriceMinInput','filterPriceMin');
+mirrorToOriginal('qfPriceMaxInput','filterPriceMax');
+mirrorToOriginal('qfVehicleMakeInput','filterVehicleMake');
+mirrorToOriginal('qfImmoPropertyInput','filterImmoPropertyType');
+$('#filtersToggle')?.addEventListener('click',()=>closeAllQuickFilterPopovers());
+$('#heroFiltersBtn')?.addEventListener('click',()=>closeAllQuickFilterPopovers());
+updateQuickFilterLabels();
 
 async function openMyAds(){
   if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos annonces');return;}
