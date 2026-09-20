@@ -2455,6 +2455,37 @@ body.vac-host-mode .vac-mobile-bottom-nav{display:none!important}
     box-shadow:0 16px 40px rgba(0,0,0,.22)!important;
   }
 }
+
+/* Fix 20/09/2026 : sur desktop/tablette, les 2 champs date natifs (arrivee/depart) etaient affiches cote a cote dans un tres petit espace (grid 1fr 1fr), trop etroit pour un input[type=date] complet : le navigateur ne montrait/n'autorisait a modifier que le segment "jour" (ex: "20"), mois et annee etant coupes. On reutilise le meme systeme que sur mobile : un bouton compact "Ajouter des dates" qui ouvre la fenetre de selection de dates (#vacDateSheet), les inputs natifs restant fonctionnels mais visuellement masques. */
+@media(min-width:761px){
+  #vacationSearch .vac-dates-tile{cursor:pointer!important}
+  #vacationSearch .vac-dates-tile .vac-date-fields{
+    position:absolute!important;
+    width:1px!important;
+    height:1px!important;
+    overflow:hidden!important;
+    opacity:0!important;
+    pointer-events:none!important;
+  }
+  #vacationSearch .vac-date-trigger{
+    display:block!important;
+    width:100%!important;
+    height:27px!important;
+    min-height:27px!important;
+    margin:0!important;
+    padding:0!important;
+    border:0!important;
+    outline:0!important;
+    background:transparent!important;
+    color:#5f5166!important;
+    font:500 .66rem/27px Inter,sans-serif!important;
+    text-align:left!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    cursor:pointer!important;
+  }
+}
 </style>
 </head>
 <body>
