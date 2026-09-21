@@ -4472,7 +4472,8 @@ header #flowErrorsBtn{
     width:auto!important;
     max-width:none!important;
     margin:0!important;
-    transform:none!important;
+    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par Anthony : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
+    transform:translateZ(0)!important;
     z-index:10080!important;
   }
   .search-wrap.search-sticky-floating .search-card{
@@ -5844,6 +5845,9 @@ header #flowErrorsBtn{
 
   /* Navigation inférieure */
   .mobile-bottom-nav{
+    /* Fix 22/09/2026 : meme precaution que sur la barre de recherche flottante ci-dessus - ce bandeau combine lui aussi position:fixed et backdrop-filter, cible potentielle du meme bug de scintillement/disparition Safari iOS pendant le scroll. */
+    transform:translateZ(0)!important;
+    -webkit-transform:translateZ(0)!important;
     display:grid!important;
     position:fixed!important;
     left:8px!important;
@@ -6278,7 +6282,7 @@ header #flowErrorsBtn{
   .search-card{grid-template-columns:1.25fr 1fr 50px!important;gap:6px!important}
   #searchQuery{grid-column:auto!important}
   .search-card .field{padding:0 10px!important}
-  #searchCity.desktop-search-city{padding-left:26px!important;background-position:12px 22px!important}
+  #searchCity.desktop-search-city{padding-left:26px!important;background-position:12px 50%!important}
   #searchBtn{padding:0!important;min-width:0!important;font-size:0!important}
   #searchBtn::before{content:"\1F50D";font-size:19px!important;line-height:1!important}
 }
