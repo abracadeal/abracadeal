@@ -7554,6 +7554,66 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-stable-main-actions-20260922">
+/* Desktop : garde une barre supérieure stable après restauration de session.
+   Les boutons techniques qui apparaissaient après l'authentification poussaient
+   Vacances hors de la zone visible. Ils restent accessibles dans Compte/Admin. */
+@media (min-width:1024px) and (pointer:fine){
+  header #b2bNavBtn,
+  header #headerStockBtn,
+  header #moderationBtn,
+  header #flowErrorsBtn,
+  header #headerMessagesBtn,
+  header #headerLogoutBtn{
+    display:none!important;
+  }
+
+  header .nav-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:6px!important;
+    min-width:0!important;
+    width:auto!important;
+    overflow:visible!important;
+  }
+
+  header .desktop-favorites-btn{
+    display:flex!important;
+    flex:0 0 34px!important;
+    width:34px!important;
+  }
+
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    flex:0 0 94px!important;
+    width:94px!important;
+    min-width:94px!important;
+    max-width:94px!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  header .account-auth-group{
+    flex:0 0 auto!important;
+  }
+
+  header #accountBtn{
+    flex:0 0 92px!important;
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
+  }
+
+  header .publish-trigger{
+    flex:0 0 158px!important;
+    width:158px!important;
+    min-width:158px!important;
+    max-width:158px!important;
+  }
+}
+</style>
 </head>
 <body>
 
