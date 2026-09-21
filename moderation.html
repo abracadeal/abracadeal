@@ -103,6 +103,30 @@ a{color:inherit;text-decoration:none}
   .photo{width:128px;height:112px}
   .actions{max-width:520px}
 }
+/* Fix 22/09/2026 : desktop/tablette pour la page de moderation dediee (moderation.html, nouvelle
+   depuis le 21/09). La modale de verification (.preview-modal/.preview-sheet) reprenait telle
+   quelle la presentation "bottom-sheet mobile" (largeur plafonnee a 760px, ancree en bas) meme sur
+   un grand ecran - meme defaut que la fiche Pro/Pro corrigee le meme jour. Desormais fiche premium
+   centree, galerie a gauche / infos a droite sur desktop large ; la liste de cartes passe aussi sur
+   2 colonnes en desktop pour mieux exploiter la largeur. Le format tablette (701-1023px) reste a une
+   colonne mais avec une modale centree et confortable plutot qu'un bandeau bas. */
+@media(min-width:701px){
+  .shell{width:min(100% - 32px,720px)}
+  .preview-modal{align-items:center;padding:24px}
+  .preview-sheet{width:min(880px,100%);max-height:88dvh;border-radius:22px;box-shadow:0 30px 90px rgba(0,0,0,.5)}
+  .preview-head{border-radius:22px 22px 0 0}
+}
+@media(min-width:1024px){
+  .shell{width:min(100% - 48px,1180px)}
+  .list{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .card-main{grid-template-columns:140px minmax(0,1fr)}
+  .photo{width:140px;height:124px}
+  .preview-sheet{width:min(1040px,100%)}
+  .preview-body{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);overflow:hidden}
+  .preview-gallery{flex-direction:column;overflow-x:hidden;overflow-y:auto;scroll-snap-type:y proximity;padding:18px}
+  .preview-gallery img{flex:none;width:100%;height:260px;scroll-snap-align:start}
+  .preview-content{padding:20px 22px;overflow-y:auto}
+}
 </style>
 </head>
 <body>
