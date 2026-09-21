@@ -14142,6 +14142,27 @@ document.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
+<script id="abraca-admin-preview-return-20260921">
+(function(){
+  const params=new URLSearchParams(location.search);
+  if(!params.get('admin_preview'))return;
+
+  function backToModeration(event){
+    if(event){
+      event.preventDefault();
+      event.stopPropagation();
+      if(typeof event.stopImmediatePropagation==='function')event.stopImmediatePropagation();
+    }
+    location.replace('moderation.html');
+  }
+
+  document.addEventListener('click',function(event){
+    const close=event.target.closest?.('#detailModal .close-btn');
+    if(close)backToModeration(event);
+  },true);
+})();
+</script>
+
 <script id="abraca-open-messages-query-20260919">
 (function(){
   const params=new URLSearchParams(location.search);
