@@ -6218,6 +6218,74 @@ header #flowErrorsBtn{
   #resultats .ad-actions{gap:6px}
   #resultats .ad-actions .mini-btn{min-height:29px!important;padding:0 9px!important;font-size:11px!important;border-radius:8px!important}
 }
+
+/* Fix 21/09/2026 : les pastilles des carrousels "Selection du moment" / "D'apres vos
+   recherches recentes" / "Recemment consultees" avaient des tailles differentes sur mobile
+   (signale par Anthony) - une regle plus tardive dans la cascade, destinee a la grille de
+   resultats #resultats .ad-card, avait ete etendue par erreur a ces 3 carrousels et annulait
+   leur hauteur fixe d'origine (260px/246px) + le line-clamp a 2 lignes du titre. Restaure ici
+   uniquement pour ces carrousels (jamais pour #resultats .ad-card, qui garde son height:auto
+   deja verifie). Verifie que le contenu reel (photo+meta+titre 2 lignes+prix) tient largement
+   dans 246-260px avant application (marge d'au moins 25px sur les annonces reelles du 21/09). */
+@media(max-width:760px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:260px!important;min-height:260px!important;max-height:260px!important;align-self:auto!important;
+  }
+  #homeFeaturedSection .home-featured-body,
+  #recentSearchSection .personalized-body,
+  #recentViewedSection .personalized-body,
+  #nearbySection .personalized-body{
+    height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;
+  }
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:normal!important;
+    min-height:31px!important;
+    max-height:31px!important;
+  }
+}
+@media(max-width:390px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:246px!important;min-height:246px!important;max-height:246px!important;
+  }
+}
+
+/* Fix 21/09/2026 : sur mobile, le champ "Ville ou code postal" de la barre de recherche
+   d'accueil avait ete re-masque (display:none, regle #searchCity.desktop-search-city plus
+   tardive que celle qui l'affichait) - Anthony demande de le remettre, mais a cote du champ
+   de recherche/bouton plutot qu'en pleine largeur sur sa propre ligne, pour ne pas agrandir
+   la barre de recherche. Nouvelle disposition mobile : "Que recherchez-vous ?" occupe toute
+   la largeur (1ere ligne), "Ville ou code postal" et le bouton "Rechercher" se partagent la
+   largeur cote a cote (2eme ligne). */
+@media(max-width:760px){
+  #searchCity.desktop-search-city{display:block!important}
+  .search-card{grid-template-columns:1fr 104px!important}
+  #searchQuery{grid-column:1/-1!important}
+  .search-card .search-btn{padding:0 6px!important;font-size:13px!important;white-space:nowrap!important}
+}
+
+/* Fix 21/09/2026 : sur mobile, ouvrir le popover d'un filtre rapide ("Ville"/"Prix" sous
+   "Les annonces") pouvait laisser une pastille "A LA UNE" (bordure doree) visible juste a
+   cote du popover, si pres du bord de l'ecran que ca donnait l'impression que le popover
+   s'affichait derriere/mele aux pastilles d'annonces (signale par Anthony). Ajoute un fond
+   assombri plein ecran derriere le popover, sur le meme principe que .modal-backdrop deja
+   utilise par les autres fenetres du site : plus aucune pastille visible autour du popover
+   pendant qu'il est ouvert, et un tap en dehors le referme (deja gere par le js existant,
+   closeAllQuickFilterPopovers). z-index:999, juste sous le popover (1000). */
+.quick-filter-popover-backdrop{position:fixed;inset:0;background:rgba(20,8,30,.45);z-index:999}
 </style>
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20260920-2">
@@ -6518,7 +6586,8 @@ header #flowErrorsBtn{
           <button class="filter-chip hidden" id="backToAllAds" type="button">Voir toutes les annonces</button>
         </div>
       </div>
-      <div class="quick-filters-bar" id="quickFiltersBar">
+      <div class="quick-filter-popover-backdrop hidden" id="qfPopoverBackdrop"></div>
+        <div class="quick-filters-bar" id="quickFiltersBar">
         <div class="quick-filter-chip-wrap">
           <button class="quick-filter-chip" id="qfCityChip" type="button">📍 <span id="qfCityLabel">Ville</span></button>
           <div class="quick-filter-popover hidden" id="qfCityPopover">
@@ -12244,6 +12313,7 @@ function updateQuickFilterLabels(){
 }
 function closeAllQuickFilterPopovers(except){
   document.querySelectorAll('.quick-filter-popover').forEach(p=>{if(p!==except)p.classList.add('hidden')});
+  if(!except) $('#qfPopoverBackdrop')?.classList.add('hidden');
 }
 document.addEventListener('click',()=>closeAllQuickFilterPopovers());
 function positionQuickFilterPopover(chip,pop){
@@ -12270,10 +12340,11 @@ function setupQuickFilterChip(chipId,popoverId,onOpen,onConfirm){
     if(willOpen){
       if(onOpen) onOpen();
       positionQuickFilterPopover(chip,pop);
+      $('#qfPopoverBackdrop')?.classList.remove('hidden');
     }
   });
   pop.addEventListener('click',e=>e.stopPropagation());
-  pop.querySelector('.qf-popover-ok')?.addEventListener('click',()=>{if(onConfirm)onConfirm();pop.classList.add('hidden');});
+  pop.querySelector('.qf-popover-ok')?.addEventListener('click',()=>{if(onConfirm)onConfirm();pop.classList.add('hidden');$('#qfPopoverBackdrop')?.classList.add('hidden');});
 }
 window.addEventListener('scroll',()=>closeAllQuickFilterPopovers(),true);
 window.addEventListener('resize',()=>closeAllQuickFilterPopovers());
@@ -12284,7 +12355,7 @@ setupQuickFilterChip('qfPriceChip','qfPricePopover',()=>{
 });
 setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{if($('#qfVehicleMakeInput'))$('#qfVehicleMakeInput').value=$('#filterVehicleMake')?.value||'';});
 setupQuickFilterChip('qfImmoChip','qfImmoPopover',()=>{if($('#qfImmoPropertyInput'))$('#qfImmoPropertyInput').value=$('#filterImmoPropertyType')?.value||'';});
-$('#qfCityInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#searchBtn')?.click();$('#qfCityPopover')?.classList.add('hidden');}});
+$('#qfCityInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#searchBtn')?.click();$('#qfCityPopover')?.classList.add('hidden');$('#qfPopoverBackdrop')?.classList.add('hidden');}});
 function mirrorToOriginal(mirrorId,originalId){
   const mirror=$('#'+mirrorId),original=$('#'+originalId);
   if(!mirror||!original) return;
