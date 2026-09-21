@@ -7186,6 +7186,29 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-account-name-fit-20260921">
+/* Desktop uniquement : le nom du compte ne doit jamais pousser Favoris / Emploi. */
+@media (min-width:1024px){
+  header #accountBtn{
+    width:auto!important;
+    min-width:0!important;
+    max-width:210px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+    overflow:hidden!important;
+  }
+  header #accountBtn #accountBtnLabel{
+    display:block!important;
+    min-width:0!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:nowrap!important;
+    font-size:13px!important;
+    line-height:1!important;
+  }
+}
+</style>
 </head>
 <body>
 
