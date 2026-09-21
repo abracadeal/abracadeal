@@ -6263,18 +6263,24 @@ header #flowErrorsBtn{
   }
 }
 
-/* Fix 21/09/2026 : sur mobile, le champ "Ville ou code postal" de la barre de recherche
-   d'accueil avait ete re-masque (display:none, regle #searchCity.desktop-search-city plus
-   tardive que celle qui l'affichait) - Anthony demande de le remettre, mais a cote du champ
-   de recherche/bouton plutot qu'en pleine largeur sur sa propre ligne, pour ne pas agrandir
-   la barre de recherche. Nouvelle disposition mobile : "Que recherchez-vous ?" occupe toute
-   la largeur (1ere ligne), "Ville ou code postal" et le bouton "Rechercher" se partagent la
-   largeur cote a cote (2eme ligne). */
+/* Fix 22/09/2026 : la disposition mobile en 2 lignes (recherche pleine largeur, puis
+   ville+bouton en dessous - fix du 21/09) rendait la barre de recherche trop haute sur
+   mobile, surtout une fois flottante au scroll (signale par Anthony : "trop grande pour
+   mobile"). Repassee sur une seule ligne : les 3 elements (recherche, ville, bouton) sont
+   maintenant cote a cote. Le bouton est reduit a une icone loupe (le texte "Rechercher"
+   reste dans le DOM pour l'accessibilite/lecteurs d'ecran, seulement masque visuellement via
+   font-size:0) pour laisser assez de place aux deux champs de texte sur un ecran etroit.
+   Remplace le fix du 21/09 ci-dessus (barre sur 2 lignes). Voir aussi le fix JS dans
+   abraca-sticky-search-script-20260919 pour le bug de blocage au scroll signale en meme
+   temps. */
 @media(max-width:760px){
   #searchCity.desktop-search-city{display:block!important}
-  .search-card{grid-template-columns:1fr 104px!important}
-  #searchQuery{grid-column:1/-1!important}
-  .search-card .search-btn{padding:0 6px!important;font-size:13px!important;white-space:nowrap!important}
+  .search-card{grid-template-columns:1.25fr 1fr 50px!important;gap:6px!important}
+  #searchQuery{grid-column:auto!important}
+  .search-card .field{padding:0 10px!important}
+  #searchCity.desktop-search-city{padding-left:26px!important;background-position:12px 22px!important}
+  #searchBtn{padding:0!important;min-width:0!important;font-size:0!important}
+  #searchBtn::before{content:"\1F50D";font-size:19px!important;line-height:1!important}
 }
 
 /* Fix 21/09/2026 : sur mobile, ouvrir le popover d'un filtre rapide ("Ville"/"Prix" sous
@@ -13865,8 +13871,29 @@ document.addEventListener('DOMContentLoaded',()=>{
   // frame) pour alleger le travail pendant un scroll rapide.
   let ticking = false;
 
+  // Fix 22/09/2026 : bug signale par Anthony ("quand on est dans le scroll et qu'on veut
+  // faire une recherche ca bloque"). Cause probable : sur mobile, l'ouverture du clavier
+  // virtuel apres un tap dans un champ de la barre de recherche peut a elle seule faire
+  // varier window.scrollY (le navigateur ajuste la page pour garder le champ visible), ce
+  // qui pouvait faire franchir le seuil et declencher floatSearch()/restoreSearch() PENDANT
+  // la saisie. Or ces deux fonctions deplacent le noeud DOM de la barre (insertBefore /
+  // appendChild) - deplacer un champ qui a le focus lui fait perdre ce focus (et ferme le
+  // clavier) sur la plupart des navigateurs mobiles, ce qui donnait l'impression que la
+  // recherche "bloquait" en pleine saisie. Corrige en suspendant tout basculement flottant/
+  // statique tant qu'un champ a l'interieur de la barre a le focus.
+  let searchFieldFocused = false;
+  document.addEventListener('focusin', e => {
+    if (e.target.closest && e.target.closest('.search-wrap')) searchFieldFocused = true;
+  });
+  document.addEventListener('focusout', e => {
+    if (e.target.closest && e.target.closest('.search-wrap')) {
+      searchFieldFocused = false;
+      requestAnimationFrame(update);
+    }
+  });
+
   function update(){
-    if (!ensureRefs()) return;
+    if (!ensureRefs() || searchFieldFocused) return;
     if (!floating && window.scrollY > triggerY + 32) floatSearch();
     else if (floating && window.scrollY <= triggerY - 10) restoreSearch();
   }
