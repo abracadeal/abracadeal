@@ -6554,6 +6554,52 @@ header #flowErrorsBtn{
   }
 }
 </style>
+
+<style id="abraca-desktop-propro-admin-cards-20260921">
+/* Desktop/tablette : accès Pro/Pro juste à côté des favoris.
+   La visibilité reste pilotée par syncB2bEntryVisibility() : Pro + Admin uniquement. */
+@media(min-width:761px){
+  header #b2bNavBtn.desktop-propro-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    min-height:46px;
+    padding:0 13px 0 9px;
+    border-radius:14px;
+    white-space:nowrap;
+  }
+  header #b2bNavBtn.desktop-propro-btn.hidden{
+    display:none!important;
+  }
+  .desktop-propro-icon{
+    width:30px;
+    height:30px;
+    flex:0 0 30px;
+    display:grid;
+    place-items:center;
+    border-radius:10px;
+    background:linear-gradient(145deg,#f2be58,#ef4baa 58%,#8d31bc);
+    color:#fff;
+    border:1px solid rgba(255,255,255,.24);
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 12px rgba(0,0,0,.18);
+    font-size:10px;
+    line-height:1;
+    font-weight:950;
+    letter-spacing:-.06em;
+  }
+  .desktop-propro-label{
+    font-weight:900;
+    letter-spacing:-.015em;
+  }
+
+  /* Sur les pastilles du catalogue, un Admin ne garde que son action Boost.
+     Modifier / Supprimer restent disponibles dans la fiche complète. */
+  #resultats .ad-actions .boost-btn{
+    flex:1 1 auto;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -6669,9 +6715,13 @@ header #flowErrorsBtn{
       </div>
     </nav>
     <div class="nav-actions">
-      <button class="btn b2b-entry hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">Pro/Pro<span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span></button>
       <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span>Vacances</span></a>
       <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
+      <button class="btn b2b-entry desktop-propro-btn hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">
+        <span class="desktop-propro-icon" aria-hidden="true">P/P</span>
+        <span class="desktop-propro-label">Pro/Pro</span>
+        <span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span>
+      </button>
       <div class="account-auth-group" aria-label="Compte Abracadeal">
         <a class="btn ghost" id="signupBtn" href="#accountModal">Créer un compte</a>
         <a class="btn ghost" id="accountBtn" href="#accountModal"><span id="accountBtnLabel">Compte</span><span class="account-unread-badge hidden" id="accountUnreadBadge" aria-label="0 message non lu">0</span></a>
@@ -11398,9 +11448,9 @@ function renderAds(){
         <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
-          ${(!moderationMode&&canDelete)?`${currentProfile?.is_admin?`<button class="mini-btn" onclick="event.stopPropagation();openAdminEditAd('${a.id}')">Modifier</button>`:''}${(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)&&!currentProfile?.is_admin)?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}`:''}
-          ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>Boost actif</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
-          ${(!moderationMode&&canDelete)?`<button class="mini-btn danger" onclick="event.stopPropagation();${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>`:''}
+          ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}
+          ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
+          ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
   }).join('');
