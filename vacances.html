@@ -6391,7 +6391,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
   function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
   function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
   function cardHtml(x,sb,featuredIds){
-    const url=x.photo_path?sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl:null;
+    const url=x.photo_path?(String(x.photo_path).startsWith('http')?x.photo_path:sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl):null;
     const rating=x.host_rating?('⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis'):'Nouvel hôte';
     const photo=url?'<img src="'+url+'" alt="" loading="lazy">':'<span class="vac-listing-photo-empty" aria-hidden="true">🏡</span>';
     const badge=featuredIds&&featuredIds.has(x.id)?'<span class="vac-listing-featured-badge">À LA UNE</span>':'';
