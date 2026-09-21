@@ -6559,7 +6559,7 @@ header #flowErrorsBtn{
 /* Desktop/tablette : accès Pro/Pro juste à côté des favoris.
    La visibilité reste pilotée par syncB2bEntryVisibility() : Pro + Admin uniquement. */
 @media(min-width:761px){
-  header #b2bNavBtn.desktop-propro-btn{
+  header #desktopProProBtn.desktop-propro-btn{
     display:inline-flex;
     align-items:center;
     justify-content:center;
@@ -6569,7 +6569,7 @@ header #flowErrorsBtn{
     border-radius:14px;
     white-space:nowrap;
   }
-  header #b2bNavBtn.desktop-propro-btn.hidden{
+  header #desktopProProBtn.desktop-propro-btn.hidden{
     display:none!important;
   }
   .desktop-propro-icon{
@@ -6717,9 +6717,11 @@ header #flowErrorsBtn{
     <div class="nav-actions">
       <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span>Vacances</span></a>
       <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
-      <button class="btn b2b-entry desktop-propro-btn hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro">
+      <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
         <span class="desktop-propro-icon" aria-hidden="true">P/P</span>
         <span class="desktop-propro-label">Pro/Pro</span>
+      </a>
+      <button class="hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro" style="display:none!important">
         <span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span>
       </button>
       <div class="account-auth-group" aria-label="Compte Abracadeal">
@@ -8485,7 +8487,7 @@ let displayedAccountId=null;
 let b2bServerAdminUserId=null;
 function syncB2bEntryVisibility(){
   const isProfessional=!!currentUser && (currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id);
-  for(const id of ['b2bNavBtn','b2bAccountBtn']) document.getElementById(id)?.classList.toggle('hidden',!isProfessional);
+  for(const id of ['b2bNavBtn','b2bAccountBtn','desktopProProBtn']) document.getElementById(id)?.classList.toggle('hidden',!isProfessional);
 }
 function syncHomeMarketingVisibility(){
   const proExperience=!!currentUser && (currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id);
@@ -8505,6 +8507,8 @@ function updateAuthUI(preserveEditing=false){
   renderProfileSummary();
   renderCompanyAccount();
   const isAdminAccount=!!currentUser&&currentProfile?.is_admin===true;
+  const isProOrAdminAccount=!!currentUser&&(currentProfile?.account_type==='professionnel'||isAdminAccount||b2bServerAdminUserId===currentUser.id);
+  document.getElementById('desktopProProBtn')?.classList.toggle('hidden',!isProOrAdminAccount);
   document.querySelectorAll('.admin-account-shortcut').forEach(btn=>btn.classList.toggle('hidden',!isAdminAccount));
   const profileCityRow=document.getElementById('profileCity')?.closest('.form-row');
   const profilePhoneRow=document.getElementById('profilePhone')?.closest('.form-row');
