@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0714">
+<title>Abracadeal — Modération</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#0b0714;--panel:#171022;--panel2:#21122f;--line:rgba(255,255,255,.10);--text:#fff;--muted:#b9a9c5;--pink:#ff59b7;--gold:#e8bd54;--green:#70e36f;--red:#ff6a78;--orange:#ffbe56}
+*{box-sizing:border-box}
+html{background:var(--bg);color-scheme:dark}
+body{margin:0;font-family:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:radial-gradient(100% 30% at 50% 0,rgba(104,35,137,.24),transparent 70%),linear-gradient(180deg,#0b0714,#10081b 65%,#09050f);color:var(--text);min-height:100vh;padding-bottom:92px}
+button,a{font:inherit}
+button{cursor:pointer}
+a{color:inherit;text-decoration:none}
+.shell{width:min(100% - 24px,900px);margin:auto}
+.topbar{position:sticky;top:0;z-index:40;background:rgba(9,5,16,.94);backdrop-filter:blur(15px);border-bottom:1px solid var(--line);padding:10px 0}
+.toprow{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font:700 29px/1 Fraunces,Georgia,serif;letter-spacing:-.03em;background:linear-gradient(110deg,#b77b08,#ffe48b 45%,#d7a632 80%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.back{min-height:40px;padding:0 13px;border:1px solid var(--line);border-radius:12px;background:#1b1026;color:#fff;font-weight:800}
+.hero{padding:26px 0 16px}
+.hero h1{font:700 clamp(2.1rem,9vw,3.6rem)/1 Fraunces,Georgia,serif;margin:0}
+.hero p{margin:9px 0 0;color:var(--muted);line-height:1.45}
+.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 18px}
+.tab{min-height:48px;border:1px solid rgba(154,67,192,.35);border-radius:14px;background:#1a0e28;color:#f1e8f6;font-weight:850;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 5px}
+.tab.active{background:linear-gradient(135deg,#edbd55,#f2cf74);color:#24150a;border-color:#f2cf74}
+.count{display:inline-flex;min-width:23px;height:23px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;background:rgba(255,255,255,.12);font-size:11px;font-weight:950}
+.tab.active .count{background:#211526;color:#fff}
+.statusbar{min-height:24px;margin:0 0 10px;color:#b9a9c5;font-size:13px}
+.list{display:grid;gap:12px}
+.card{border:1px solid var(--line);border-radius:19px;background:linear-gradient(180deg,rgba(31,18,44,.98),rgba(18,11,28,.98));box-shadow:0 12px 28px rgba(0,0,0,.20);overflow:hidden}
+.card-main{display:grid;grid-template-columns:104px minmax(0,1fr);gap:12px;padding:12px}
+.photo{width:104px;height:104px;border-radius:14px;overflow:hidden;background:#2a163b;position:relative}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.pro{position:absolute;top:7px;left:7px;padding:4px 7px;border-radius:999px;background:#321a43;color:#fff;font-size:9px;font-weight:900;letter-spacing:.04em}
+.info{min-width:0}
+.rowtop{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.title{margin:0;color:#fff;font-size:16px;line-height:1.18;font-weight:900;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.when{flex:none;color:#9d8aa9;font-size:10px;padding-top:2px}
+.meta{margin-top:6px;color:#c5b5cf;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.price{margin-top:7px;color:var(--gold);font-size:18px;font-weight:950}
+.seller{margin-top:6px;color:#bba9c5;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.review-state{margin:0 12px 11px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:6px;min-height:30px;padding:5px 9px;border-radius:10px;font-size:11px;font-weight:850;border:1px solid var(--line)}
+.chip.green{background:rgba(45,149,63,.13);border-color:rgba(80,225,101,.35);color:#8af28b}
+.chip.orange{background:rgba(190,119,19,.13);border-color:rgba(255,190,86,.38);color:#ffd080}
+.chip.red{background:rgba(172,43,58,.15);border-color:rgba(255,106,120,.38);color:#ff9ca6}
+.chip.gray{background:rgba(255,255,255,.06);color:#d3c6db}
+.chip.live{background:rgba(51,166,91,.14);border-color:rgba(96,225,134,.28);color:#9af0ae}
+.reasons{margin:0 12px 11px;padding:10px 12px;border-radius:12px;background:rgba(255,255,255,.04);color:#cbbdd4;font-size:11px;line-height:1.4}
+.reasons div+div{margin-top:3px}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 12px 12px}
+.action{min-height:42px;border-radius:12px;border:1px solid var(--line);font-weight:900;font-size:12px;background:#1b1127;color:#fff}
+.action.ok{background:linear-gradient(135deg,#206f38,#2e9149);border-color:#64dc7a}
+.action.no{background:linear-gradient(135deg,#61242e,#842c39);border-color:#ff6675}
+.action.delete{background:#16101e;border-color:#7d7087}
+.action:disabled{opacity:.5;cursor:wait}
+.history-actions{display:flex;justify-content:flex-end;padding:0 12px 12px}
+.history-actions .action{min-width:120px;padding:0 14px}
+.empty,.lock{padding:28px 18px;border:1px dashed rgba(255,255,255,.16);border-radius:18px;text-align:center;color:#c8b8d2;background:rgba(255,255,255,.035)}
+.lock{margin-top:30px}
+.lock h2{margin:0 0 8px;color:#fff}
+.lock .back{margin-top:12px}
+.toast{position:fixed;left:50%;bottom:104px;transform:translateX(-50%) translateY(20px);opacity:0;pointer-events:none;z-index:100;padding:11px 14px;border-radius:999px;background:#31143f;color:#fff;font-size:12px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.28);transition:.2s}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.bottom{position:fixed;left:10px;right:10px;bottom:0;z-index:50;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));min-height:76px;padding:7px 4px calc(6px + env(safe-area-inset-bottom));border-radius:24px 24px 0 0;background:rgba(16,9,25,.97);border:1px solid var(--line);box-shadow:0 -7px 30px rgba(0,0,0,.3)}
+.nav{min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:4px;color:#c7b7d1;font-size:10px;font-weight:760}
+.nav svg{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nav.active{color:var(--pink)}
+.nav.publish{margin-top:-21px}
+.orb{width:53px;height:53px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6);color:#fff;box-shadow:0 7px 18px rgba(229,49,173,.32)}
+.nav.publish svg{width:28px;height:28px}
+@media(min-width:700px){
+  body{padding-bottom:30px}
+  .bottom{display:none}
+  .card-main{grid-template-columns:128px minmax(0,1fr)}
+  .photo{width:128px;height:112px}
+  .actions{max-width:520px}
+}
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="shell toprow">
+    <a class="brand" href="index.html">Abracadeal</a>
+    <button class="back" type="button" onclick="location.href='index.html'">← Retour</button>
+  </div>
+</header>
+
+<main class="shell">
+  <section class="hero">
+    <h1>Modération</h1>
+    <p>Les annonces à contrôler sont séparées du catalogue public pour garder les cartes du site propres et uniformes.</p>
+  </section>
+
+  <div id="app" hidden>
+    <nav class="tabs" aria-label="Filtres de modération">
+      <button class="tab active" type="button" data-tab="pending">À modérer <span class="count" id="countPending">0</span></button>
+      <button class="tab" type="button" data-tab="validated">Validées <span class="count" id="countValidated">0</span></button>
+      <button class="tab" type="button" data-tab="rejected">Refusées <span class="count" id="countRejected">0</span></button>
+    </nav>
+    <div class="statusbar" id="status">Chargement…</div>
+    <section class="list" id="list"></section>
+  </div>
+
+  <section class="lock" id="lock" hidden>
+    <h2>Accès administrateur</h2>
+    <p id="lockText">Connectez-vous avec le compte administrateur Abracadeal.</p>
+    <button class="back" type="button" onclick="location.href='index.html#accountModal'">Retour au compte</button>
+  </section>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<nav class="bottom" aria-label="Navigation Abracadeal">
+  <a class="nav" href="index.html">
+    <svg viewBox="0 0 24 24"><path d="M3 11 12 3l9 8v10h-6v-6H9v6H3Z"/></svg><span>Accueil</span>
+  </a>
+  <a class="nav active" href="moderation.html">
+    <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.6-2.8 8.2-7 10-4.2-1.8-7-5.4-7-10V6l7-3Z"/><path d="m9 12 2 2 4-4"/></svg><span>Admin</span>
+  </a>
+  <a class="nav publish" href="index.html#publishModal">
+    <span class="orb"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span><span>Publier</span>
+  </a>
+  <a class="nav" href="index.html?open=messages">
+    <svg viewBox="0 0 24 24"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/><path d="M8 9h8M8 13h5"/></svg><span>Messages</span>
+  </a>
+  <a class="nav" href="index.html#accountModal">
+    <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>Compte</span>
+  </a>
+</nav>
+
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const SUPABASE_AUTH_STORAGE_KEY='sb-jplzvxmpbpjssyinozap-auth-token';
+const storage={
+  getItem(k){try{return localStorage.getItem(k)||sessionStorage.getItem(k)}catch{return null}},
+  setItem(k,v){try{localStorage.setItem(k,v)}catch{} try{sessionStorage.setItem(k,v)}catch{}},
+  removeItem(k){try{localStorage.removeItem(k)}catch{} try{sessionStorage.removeItem(k)}catch{}}
+};
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:SUPABASE_AUTH_STORAGE_KEY}});
+const $=s=>document.querySelector(s);
+const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false};
+
+function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
+function cat(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Annonce'}
+function ago(v){if(!v)return'';const d=Date.now()-new Date(v).getTime(),h=Math.floor(d/3600000);if(h<1)return"À l'instant";if(h<24)return'Il y a '+h+' h';const j=Math.floor(h/24);return'Il y a '+j+' j'}
+function photoUrl(path){if(!path)return'assets/default-listing-photo-20260921.jpg';if(/^https?:\/\//i.test(path))return path;return sb.storage.from('listing-images').getPublicUrl(path).data.publicUrl||'assets/default-listing-photo-20260921.jpg'}
+function firstPhoto(a){return [...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0))[0]?.storage_path||''}
+function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
+function setStatus(t){$('#status').textContent=t}
+function setBusy(v){state.busy=v;document.querySelectorAll('.action').forEach(b=>b.disabled=v)}
+
+function riskMarkup(a){
+  const m=state.mods.get(a.id);
+  if(!m)return '<span class="chip gray">⚪ Analyse en attente</span>';
+  const level=['green','orange','red'].includes(m.risk_level)?m.risk_level:'gray';
+  const icon=level==='green'?'🟢':level==='orange'?'🟠':level==='red'?'🔴':'⚪';
+  const label=level==='green'?'Risque faible':level==='orange'?'À vérifier':level==='red'?'Risque élevé':'Analyse';
+  return '<span class="chip '+level+'">'+icon+' '+label+' · '+Number(m.risk_score||0)+'/100</span>';
+}
+function reasonsMarkup(a){
+  const m=state.mods.get(a.id),reasons=Array.isArray(m?.reasons)?m.reasons.filter(Boolean).slice(0,3):[];
+  if(!reasons.length)return'';
+  return '<div class="reasons">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>';
+}
+function sellerName(a){const p=state.profiles.get(a.owner_id);return p?.display_name|| (a.seller_type==='professionnel'?'Professionnel':'Particulier')}
+function isSecondCheck(a){const m=state.mods.get(a.id);return a.status==='active'&&m?.auto_published===true&&m?.admin_reviewed!==true}
+
+function card(a){
+  const pending=state.tab==='pending';
+  const validated=state.tab==='validated';
+  const p=photoUrl(firstPhoto(a));
+  const statusChip=pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'';
+  const actions=pending
+    ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
+    : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
+  return '<article class="card">'+
+    '<div class="card-main">'+
+      '<div class="photo"><img src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
+      '<div class="info"><div class="rowtop"><h2 class="title">'+esc(a.title||'Annonce')+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
+      '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
+      '<div class="price">'+esc(money(a.price))+'</div>'+
+      '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
+    '</div>'+
+    '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
+    reasonsMarkup(a)+actions+
+  '</article>';
+}
+
+async function loadProfiles(rows){
+  const ids=[...new Set(rows.map(x=>x.owner_id).filter(Boolean))];
+  state.profiles.clear();
+  if(!ids.length)return;
+  const {data}=await sb.from('public_profiles').select('id,display_name,account_type,city').in('id',ids);
+  (data||[]).forEach(p=>state.profiles.set(p.id,p));
+}
+async function loadMods(ids){
+  state.mods.clear();
+  if(!ids.length)return;
+  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,reviewed_at,reviewed_by').in('listing_id',ids);
+  if(error)console.warn(error);
+  (data||[]).forEach(m=>state.mods.set(m.listing_id,m));
+}
+
+async function pendingRows(){
+  const {data:pending,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','pending').order('created_at',{ascending:false});
+  if(error)throw error;
+  const {data:autoMods,error:autoErr}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
+  if(autoErr)throw autoErr;
+  const ids=(autoMods||[]).map(x=>x.listing_id).filter(Boolean);
+  let active=[];
+  if(ids.length){
+    const r=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').in('id',ids).eq('status','active').order('created_at',{ascending:false});
+    if(r.error)throw r.error; active=r.data||[];
+  }
+  const seen=new Set((pending||[]).map(x=>x.id));
+  return [...(pending||[]),...active.filter(x=>!seen.has(x.id))];
+}
+async function validatedRows(){
+  const {data:mods,error}=await sb.from('listing_moderation').select('listing_id,reviewed_at').eq('admin_reviewed',true).order('reviewed_at',{ascending:false}).limit(150);
+  if(error)throw error;
+  const ids=(mods||[]).map(x=>x.listing_id).filter(Boolean);
+  if(!ids.length)return[];
+  const {data,error:e}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').in('id',ids).eq('status','active');
+  if(e)throw e;
+  const order=new Map((mods||[]).map((m,i)=>[m.listing_id,i]));
+  return (data||[]).sort((a,b)=>(order.get(a.id)??999)-(order.get(b.id)??999));
+}
+async function rejectedRows(){
+  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','rejected').order('updated_at',{ascending:false}).limit(150);
+  if(error)throw error;return data||[];
+}
+
+async function refreshCounts(){
+  const p=await pendingRows();
+  $('#countPending').textContent=p.length>99?'99+':p.length;
+  const {data:mods}=await sb.from('listing_moderation').select('listing_id').eq('admin_reviewed',true).limit(500);
+  const ids=(mods||[]).map(x=>x.listing_id);
+  let valid=0;
+  if(ids.length){
+    const r=await sb.from('listings').select('id',{count:'exact',head:true}).in('id',ids).eq('status','active');
+    valid=Number(r.count||0);
+  }
+  $('#countValidated').textContent=valid>99?'99+':valid;
+  const rr=await sb.from('listings').select('id',{count:'exact',head:true}).eq('status','rejected');
+  const rejected=Number(rr.count||0);
+  $('#countRejected').textContent=rejected>99?'99+':rejected;
+}
+
+async function load(){
+  if(state.busy)return;
+  setStatus('Chargement…');
+  $('#list').innerHTML='';
+  try{
+    let rows=state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():await rejectedRows();
+    state.rows=rows;
+    await Promise.all([loadProfiles(rows),loadMods(rows.map(x=>x.id))]);
+    $('#list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Aucune annonce dans cette section.</div>';
+    setStatus(rows.length+' annonce'+(rows.length>1?'s':'')+(state.tab==='pending'?' à traiter':''));
+    refreshCounts().catch(console.warn);
+  }catch(err){
+    console.error(err);setStatus('Impossible de charger cette section.');$('#list').innerHTML='<div class="empty">Une erreur est survenue pendant le chargement.</div>';
+  }
+}
+
+async function removeListing(id){
+  const {data:photos}=await sb.from('listing_photos').select('storage_path').eq('listing_id',id);
+  const paths=(photos||[]).map(x=>x.storage_path).filter(Boolean);
+  if(paths.length){const r=await sb.storage.from('listing-images').remove(paths);if(r.error)console.warn(r.error)}
+  const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
+  if(error)throw error;
+}
+
+document.addEventListener('click',async e=>{
+  const tab=e.target.closest('[data-tab]');
+  if(tab){
+    state.tab=tab.dataset.tab;
+    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===tab));
+    await load();return;
+  }
+  const btn=e.target.closest('[data-action]');
+  if(!btn||state.busy)return;
+  const id=btn.dataset.id,action=btn.dataset.action,a=state.rows.find(x=>x.id===id);
+  if(!a)return;
+  if(action==='reject'&&!confirm('Refuser cette annonce ?'))return;
+  if(action==='delete'&&!confirm('Supprimer cette annonce du site ?'))return;
+  setBusy(true);
+  try{
+    if(action==='validate'){
+      const {error}=isSecondCheck(a)
+        ? await sb.rpc('validate_auto_published_listing',{p_listing_id:id})
+        : await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'active'});
+      if(error)throw error;toast('Annonce validée');
+    }else if(action==='reject'){
+      const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'rejected'});
+      if(error)throw error;toast('Annonce refusée');
+    }else if(action==='delete'){
+      await removeListing(id);toast('Annonce supprimée');
+    }
+    await load();
+  }catch(err){console.error(err);toast(err.message||'Action impossible');}
+  finally{setBusy(false)}
+});
+
+async function boot(){
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session?.user){
+    $('#lock').hidden=false;$('#lockText').textContent='Connectez-vous avec le compte administrateur Abracadeal.';return;
+  }
+  const {data:profile,error}=await sb.from('profiles').select('is_admin').eq('id',session.user.id).maybeSingle();
+  if(error||!profile?.is_admin){
+    $('#lock').hidden=false;$('#lockText').textContent="Ce compte n'a pas les droits administrateur.";return;
+  }
+  $('#app').hidden=false;
+  await load();
+}
+boot();
+</script>
+</body>
+</html>
