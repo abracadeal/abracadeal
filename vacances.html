@@ -6187,7 +6187,11 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     const {data}=await sbVac.auth.getSession();
     const user=data?.session?.user||null;
     currentAuthUser=user;
-    vacLoginCta.textContent='Compte';
+    if(vacLoginCta){
+      const rawName=String(user?.user_metadata?.display_name||user?.email||'').trim();
+      const shortName=rawName ? rawName.split(/\s+|@/)[0] : '';
+      vacLoginCta.textContent=user ? (shortName||'Compte') : 'Connexion';
+    }
     travelerSignupCta?.classList.toggle('auth-hidden',!!user);
     if(!user){
       applyVacationPageMode({isHost:false,hasHost:false});
@@ -6534,6 +6538,16 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     return el;
   }
 
+  function syncVacDesktopAccountLabel(){
+    const target = document.querySelector('.vac-desktop-actions-v2 .vac-dnav-compte span');
+    if(!target) return;
+    const source = document.getElementById('vacLoginCta');
+    const label = (source?.textContent || 'Connexion').trim() || 'Connexion';
+    target.textContent = label;
+    const account = document.querySelector('.vac-desktop-actions-v2 .vac-dnav-compte');
+    if(account) account.setAttribute('aria-label',label);
+  }
+
   function syncBadge(){
     const badge = document.querySelector('.vac-desktop-actions-v2 .vac-dnav-badge');
     if(!badge) return;
@@ -6550,6 +6564,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     if(!actions) return;
     if(actions.querySelector('.vac-desktop-actions-v2')){
       syncBadge();
+      syncVacDesktopAccountLabel();
       return;
     }
 
@@ -6587,6 +6602,12 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     bar.append(vacances,favoris,messages,compte);
     actions.appendChild(bar);
     syncBadge();
+    syncVacDesktopAccountLabel();
+
+    const accountLabelSource=document.getElementById('vacLoginCta');
+    if(accountLabelSource && window.MutationObserver){
+      new MutationObserver(syncVacDesktopAccountLabel).observe(accountLabelSource,{subtree:true,childList:true,characterData:true});
+    }
 
     const source = document.querySelector(
       '#vacMessagesUnread, .vac-message-badge, .messages-unread-badge, .account-unread-badge'
