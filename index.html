@@ -14022,7 +14022,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const searchIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>';
   const proIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg>';
   function isProfessionalAccount(){
-    try{return !!currentUser&&currentProfile?.account_type==='professionnel'}catch(_){return false}
+    try{return !!currentUser&&(currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true)}catch(_){return false}
   }
   function syncPrimaryMobileNav(){
     var btn=q('#mobileSearchProBtn'),label=q('#mobileSearchProLabel'),icon=q('#mobileSearchProIcon');
