@@ -231,7 +231,10 @@ async function loadRelations(){
 }
 $('#relationsPrevious').onclick=()=>{if(relationsPage>0){relationsPage--;loadRelations()}};$('#relationsNext').onclick=()=>{relationsPage++;loadRelations()};
 
+let initRunning=false;
 async function init(){
+  if(initRunning)return;
+  initRunning=true;
   try{
     const {data:{session}}=await sb.auth.getSession();currentUser=session?.user||null;
     if(!currentUser){show('#locked',true);$('#lockText').textContent='Connectez-vous avec un compte professionnel vérifié pour accéder à Entre Pro.';setStatus('Connexion requise');return}
@@ -241,8 +244,26 @@ async function init(){
     show('#app',true);show('#locked',false);$('#relationsTab').classList.toggle('hidden',!isAdmin);setStatus(isAdmin?'Mode administrateur Entre Pro':'Compte professionnel vérifié · accès Entre Pro actif');
     await Promise.all([loadListings(),loadAccess()]);setView('catalogue');
   }catch(err){console.error(err);show('#locked',true);$('#lockText').textContent='Impossible de vérifier votre accès pour le moment.';setStatus('Erreur de chargement')}
+  finally{initRunning=false}
 }
-sb.auth.onAuthStateChange(()=>setTimeout(()=>location.reload(),50));
+sb.auth.onAuthStateChange((event,session)=>{
+  // Ne jamais recharger sur INITIAL_SESSION / TOKEN_REFRESHED :
+  // Safari/iPhone déclenche ces événements au chargement et cela créait une boucle infinie.
+  if(event==='SIGNED_OUT'){
+    currentUser=null;
+    currentProfile=null;
+    isAdmin=false;
+    isProfessional=false;
+    show('#app',false);
+    show('#locked',true);
+    $('#lockText').textContent='Connectez-vous avec un compte professionnel vérifié pour accéder à Entre Pro.';
+    setStatus('Connexion requise');
+    return;
+  }
+  if(event==='SIGNED_IN' && session?.user && session.user.id!==currentUser?.id){
+    setTimeout(()=>init(),0);
+  }
+});
 init();
 </script>
 </body>
