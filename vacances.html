@@ -5751,14 +5751,16 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
 }
 </style>
 
+
 <style id="abraca-vacances-tablet-banner-fix-20260922">
-/* Tablette uniquement : conserver le vrai ratio de la bannière Vacances.
-   Évite le crop à 170px hérité du mobile. */
+/* Tablette : reprendre le format ORIGINAL de la bannière Vacances,
+   même si elle est plus haute. Aucun écrasement / crop compact. */
 @media (min-width:761px) and (max-width:1366px) and (any-pointer:coarse){
   html.abraca-vacances-tablet-mobile .vac-mobile-banner-shell{
-    width:calc(100% - 28px)!important;
+    display:block!important;
+    width:calc(100% - 20px)!important;
     max-width:820px!important;
-    margin:8px auto 12px!important;
+    margin:8px auto 10px!important;
     overflow:visible!important;
   }
 
@@ -5768,23 +5770,28 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     height:auto!important;
     min-height:0!important;
     max-height:none!important;
-    aspect-ratio:1290 / 563!important;
+    aspect-ratio:1000 / 563!important;
     object-fit:cover!important;
-    object-position:center center!important;
+    object-position:center!important;
     border-radius:22px!important;
   }
 }
 
-/* Sécurité iPad/Safari si la classe tablette est appliquée après le CSS. */
+/* iPad Safari : même format original. */
 @supports (-webkit-touch-callout:none){
   @media (min-width:761px) and (max-width:1366px){
+    html.abraca-vacances-tablet-mobile .vac-mobile-banner-shell{
+      width:calc(100% - 20px)!important;
+      max-width:820px!important;
+    }
     html.abraca-vacances-tablet-mobile .vac-mobile-banner-exact{
+      width:100%!important;
       height:auto!important;
       min-height:0!important;
       max-height:none!important;
-      aspect-ratio:1290 / 563!important;
+      aspect-ratio:1000 / 563!important;
       object-fit:cover!important;
-      object-position:center center!important;
+      object-position:center!important;
     }
   }
 }
