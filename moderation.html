@@ -214,7 +214,9 @@ function card(a){
   const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
-    : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
+    : validated
+      ? '<div class="history-actions"><button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button></div>'
+      : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
   return '<article class="card">'+
     '<div class="card-main">'+
       '<div class="photo"><img src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
@@ -288,6 +290,9 @@ function openPreview(id){
       '<button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button>'+
       '<button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button>'+
       '<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
+  }else if(state.tab==='validated'){
+    $('#previewActions').innerHTML='<button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button>';
+    $('#previewActions').style.gridTemplateColumns='1fr';
   }else{
     $('#previewActions').innerHTML='<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
     $('#previewActions').style.gridTemplateColumns='1fr';
@@ -308,7 +313,7 @@ async function loadProfiles(rows){
 async function loadMods(ids){
   state.mods.clear();
   if(!ids.length)return;
-  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,reviewed_at,reviewed_by').in('listing_id',ids);
+  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
   if(error)console.warn(error);
   (data||[]).forEach(m=>state.mods.set(m.listing_id,m));
 }
@@ -328,7 +333,7 @@ async function pendingRows(){
   return [...(pending||[]),...active.filter(x=>!seen.has(x.id))];
 }
 async function validatedRows(){
-  const {data:mods,error}=await sb.from('listing_moderation').select('listing_id,reviewed_at').eq('admin_reviewed',true).order('reviewed_at',{ascending:false}).limit(150);
+  const {data:mods,error}=await sb.from('listing_moderation').select('listing_id,reviewed_at').eq('admin_reviewed',true).eq('hidden_from_admin_history',false).order('reviewed_at',{ascending:false}).limit(150);
   if(error)throw error;
   const ids=(mods||[]).map(x=>x.listing_id).filter(Boolean);
   if(!ids.length)return[];
@@ -345,7 +350,7 @@ async function rejectedRows(){
 async function refreshCounts(){
   const p=await pendingRows();
   $('#countPending').textContent=p.length>99?'99+':p.length;
-  const {data:mods}=await sb.from('listing_moderation').select('listing_id').eq('admin_reviewed',true).limit(500);
+  const {data:mods}=await sb.from('listing_moderation').select('listing_id').eq('admin_reviewed',true).eq('hidden_from_admin_history',false).limit(500);
   const ids=(mods||[]).map(x=>x.listing_id);
   let valid=0;
   if(ids.length){
@@ -400,6 +405,7 @@ document.addEventListener('click',async e=>{
   if(!a)return;
   if(action==='reject'&&!confirm('Refuser cette annonce ?'))return;
   if(action==='delete'&&!confirm('Supprimer cette annonce du site ?'))return;
+  if(action==='dismiss'&&!confirm('Retirer cette annonce de la liste Validées ? Elle restera publiée sur le site.'))return;
   setBusy(true);
   try{
     if(action==='validate'){
@@ -412,6 +418,10 @@ document.addEventListener('click',async e=>{
       if(error)throw error;toast('Annonce refusée');
     }else if(action==='delete'){
       await removeListing(id);toast('Annonce supprimée');
+    }else if(action==='dismiss'){
+      const {error}=await sb.rpc('dismiss_validated_from_moderation',{p_listing_id:id});
+      if(error)throw error;
+      toast('Annonce retirée de la liste Validées');
     }
     closePreview();
     setBusy(false);
