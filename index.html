@@ -11041,7 +11041,7 @@ function renderHomeFeatured(){
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
       <div class="home-featured-body">
-        <div class="home-featured-meta">${esc(category)}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}${(a.seller_type==='professionnel'&&a.owner_id)?`<span class="ad-pro-name" data-pro-name-owner="${a.owner_id}"></span>`:''}</div>
+        <div class="home-featured-meta">${esc(category)}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}</div>
         <h3 class="home-featured-title">${esc(a.title)}</h3>
         <div class="home-featured-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
@@ -11059,7 +11059,6 @@ function renderHomeFeatured(){
   section.classList.remove('home-featured-loading');
   section.classList.remove('hidden');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
-  queueMicrotask(()=>hydrateProNames(grid));
 }
 
 function renderAds(){
@@ -11125,7 +11124,7 @@ function renderAds(){
       <div class="ad-body">
         ${moderationRiskHTML(a)}
         ${statusBadge}
-        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}${(a.seller_type==='professionnel'&&a.owner_id)?`<span class="ad-pro-name" data-pro-name-owner="${a.owner_id}"></span>`:''}</div>
+        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
         <h3 class="ad-title">${esc(a.title)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
@@ -11146,7 +11145,6 @@ function renderAds(){
       </div></article>`;
   }).join('');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
-  queueMicrotask(()=>hydrateProNames(grid));
   updateQuickFilterLabels();
 }
 
