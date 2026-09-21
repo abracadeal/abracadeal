@@ -13992,9 +13992,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 </div>
 
 <nav class="mobile-bottom-nav" aria-label="Navigation principale mobile">
-  <button class="mobile-nav-item is-active" type="button" data-mobile-action="search">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
-    <span>Rechercher</span>
+  <button class="mobile-nav-item is-active" id="mobileSearchProBtn" type="button" data-mobile-action="search" aria-label="Rechercher">
+    <span id="mobileSearchProIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
+    <span id="mobileSearchProLabel">Rechercher</span>
   </button>
   <button class="mobile-nav-item" id="mobileFavoritesAdminBtn" type="button" data-mobile-action="favorites">
     <span id="mobileFavoritesAdminIcon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.6a5.4 5.4 0 0 0-7.6 0L12 5.8l-1.2-1.2a5.4 5.4 0 1 0-7.6 7.6L12 21l8.8-8.8a5.4 5.4 0 0 0 0-7.6Z"/></svg></span>
@@ -14019,6 +14019,23 @@ document.addEventListener('DOMContentLoaded',()=>{
 <script id="abraca-mobile-redesign-js-20260919">
 (function(){
   function q(s){return document.querySelector(s)}
+  const searchIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>';
+  const proIcon='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 12h18M10 12v2h4v-2"/></svg>';
+  function isProfessionalAccount(){
+    try{return !!currentUser&&currentProfile?.account_type==='professionnel'}catch(_){return false}
+  }
+  function syncPrimaryMobileNav(){
+    var btn=q('#mobileSearchProBtn'),label=q('#mobileSearchProLabel'),icon=q('#mobileSearchProIcon');
+    if(!btn||!label||!icon)return;
+    var pro=isProfessionalAccount();
+    btn.dataset.mobileAction=pro?'b2b':'search';
+    btn.setAttribute('aria-label',pro?'Pro/Pro':'Rechercher');
+    btn.title=pro?'Pro/Pro':'Rechercher';
+    label.textContent=pro?'Pro/Pro':'Rechercher';
+    icon.innerHTML=pro?proIcon:searchIcon;
+    if(pro)btn.classList.remove('is-active');
+    else if(!document.querySelector('.mobile-nav-item.is-active'))btn.classList.add('is-active');
+  }
   function clickOrHash(el,hash){
     if(el && typeof el.click==='function'){ el.click(); return; }
     if(hash) location.hash=hash;
@@ -14032,7 +14049,10 @@ document.addEventListener('DOMContentLoaded',()=>{
     var btn=e.target.closest('[data-mobile-action]');
     if(!btn) return;
     var action=btn.getAttribute('data-mobile-action');
-    if(action==='search'){
+    if(action==='b2b'){
+      e.preventDefault();
+      location.href='pro-pro.html';
+    }else if(action==='search'){
       e.preventDefault();
       setActive('search');
       var top=q('#top'); if(top) top.scrollIntoView({behavior:'smooth',block:'start'});
@@ -14077,11 +14097,14 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(t && t.textContent.trim()==='Les annonces') t.textContent='À découvrir près de vous';
   }
   if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',function(){initUnreadObserver();initialTitle();});
+    document.addEventListener('DOMContentLoaded',function(){initUnreadObserver();initialTitle();syncPrimaryMobileNav();});
   }else{
-    initUnreadObserver();initialTitle();
+    initUnreadObserver();initialTitle();syncPrimaryMobileNav();
   }
-  window.addEventListener('abracadeal:auth',syncUnread);
+  window.addEventListener('abracadeal:auth',function(){
+    syncUnread();
+    syncPrimaryMobileNav();
+  });
 })();
 </script>
 
