@@ -13112,7 +13112,7 @@ window.addEventListener('pageshow',()=>{
    if(same(v))await refreshPendingCount();
   }catch(error){if(same(v))msg('b2bStatus',errorText(error));}
  }
- async function open(){closeModal('accountModal');openModal('b2bModal');await load();}
+ async function open(){location.href='pro-pro.html';}
  node('b2bNavBtn').addEventListener('click',open);node('b2bAccountBtn').addEventListener('click',open);node('b2bRefresh').addEventListener('click',load);
  window.addEventListener('abracadeal:auth',()=>{if(userId!==(currentUser?.id||null)){clearPrivate();userId=currentUser?.id||null;node('b2bPriceRequestForm').reset();node('b2bOfferForm').reset();if(node('b2bModal').classList.contains('open'))load();}});
  async function loadProListings(){
