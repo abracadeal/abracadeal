@@ -47,10 +47,24 @@ jobs:
               width:100%!important;
               justify-content:center!important;
               min-height:28px!important;
-              margin-top:-8px!important;
+              margin-top:-11px!important;
               margin-bottom:-2px!important;
               padding-top:0!important;
               padding-bottom:0!important;
+              overflow:visible!important;
+              position:relative!important;
+              z-index:120!important;
+            }
+            header,
+            header .nav{
+              overflow:visible!important;
+            }
+            header .desktop-nav-item{
+              position:relative!important;
+              z-index:121!important;
+            }
+            header .desktop-submenu{
+              z-index:15000!important;
             }
             header .desktop-category-link{
               min-height:28px!important;
@@ -317,5 +331,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: remonter les categories et la barre Fondateurs"
+          git commit -m "Desktop: remonter encore les categories et restaurer les sous-menus"
           git push
