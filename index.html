@@ -6465,6 +6465,27 @@ header #flowErrorsBtn{
 }
 </style>
 
+<style id="abraca-mobile-admin-card-actions-20260921">
+/* Mobile accueil : sur les pastilles admin, garder uniquement le Boost.
+   Modifier / Supprimer restent disponibles dans la fiche complète de l'annonce. */
+@media(max-width:760px){
+  #resultats .ad-actions .mini-btn:not(.boost-btn){
+    display:none!important;
+  }
+  #resultats .ad-actions{
+    display:flex!important;
+    width:100%!important;
+  }
+  #resultats .ad-actions .boost-btn{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    flex:1 1 100%!important;
+    margin:0!important;
+  }
+}
+</style>
 </head>
 <body>
 
