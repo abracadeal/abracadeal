@@ -14098,7 +14098,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!isAdmin()){closeModal('mobileAdminModal');toast('Accès administrateur requis');return;}
     if(action==='moderation'){
       closeModal('mobileAdminModal');
-      window.toggleAdminModeration?.();
+      location.href='moderation.html';
     }else if(action==='flows'){
       closeModal('mobileAdminModal');
       window.openAdminFlowErrors?.();
