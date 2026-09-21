@@ -7429,6 +7429,63 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-brand-propro-vacances-layout-20260922">
+/* Desktop uniquement :
+   Pro/Pro à gauche, juste après Abracadeal.
+   Vacances prend l'ancienne place de Pro/Pro à droite, près du coeur. */
+@media (min-width:1024px) and (pointer:fine){
+  header .nav{
+    grid-template-columns:330px minmax(0,1fr) auto!important;
+  }
+
+  header .desktop-brand-zone{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+  }
+
+  header .desktop-brand-zone .desktop-brand{
+    flex:0 1 auto!important;
+    min-width:0!important;
+  }
+
+  header #desktopProProBtn.desktop-propro-btn{
+    flex:0 0 auto!important;
+    min-width:82px!important;
+    height:38px!important;
+    min-height:38px!important;
+    padding:0 13px!important;
+    border-radius:12px!important;
+    font-size:12px!important;
+  }
+
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-width:94px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:0 14px!important;
+    border-radius:13px!important;
+    white-space:nowrap!important;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
+    border:1px solid rgba(255,210,244,.32)!important;
+    box-shadow:0 7px 18px rgba(101,31,130,.24)!important;
+    font-size:12px!important;
+    font-weight:900!important;
+  }
+
+  header .header-vacances-btn:hover{
+    transform:translateY(-1px)!important;
+    filter:brightness(1.06)!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -7442,10 +7499,15 @@ header #flowErrorsBtn{
 
 <header>
   <div class="container nav">
-    <a class="desktop-brand" href="/" data-home-brand aria-label="Accueil Abracadeal">
-      <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-lamp-icon.webp" alt=""></span>
-      <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez - Vendez</small></span>
-    </a>
+    <div class="desktop-brand-zone">
+      <a class="desktop-brand" href="/" data-home-brand aria-label="Accueil Abracadeal">
+        <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-lamp-icon.webp" alt=""></span>
+        <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez - Vendez</small></span>
+      </a>
+      <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
+        <span class="desktop-propro-label">Pro/Pro</span>
+      </a>
+    </div>
     <nav class="desktop-category-nav" aria-label="Catégories principales">
       <div class="desktop-nav-item">
         <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="voitures">Auto</a>
@@ -7544,11 +7606,8 @@ header #flowErrorsBtn{
       </div>
     </nav>
     <div class="nav-actions">
-      <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span>Vacances</span></a>
       <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
-      <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
-        <span class="desktop-propro-label">Pro/Pro</span>
-      </a>
+      <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span>Vacances</span></a>
       <button class="hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro" style="display:none!important">
         <span id="b2bNavBadge" class="b2b-pending-badge hidden" aria-hidden="true"></span>
       </button>
