@@ -47,12 +47,13 @@ jobs:
               width:100%!important;
               justify-content:center!important;
               gap:10px!important;
-              min-height:32px!important;
-              margin-top:-8px!important;
-              margin-bottom:-1px!important;
+              min-height:30px!important;
+              margin-top:-16px!important;
+              margin-bottom:-5px!important;
               padding-top:0!important;
               padding-bottom:0!important;
               align-items:center!important;
+              transform:translateY(-2px)!important;
               overflow:visible!important;
               position:relative!important;
               z-index:120!important;
@@ -69,13 +70,13 @@ jobs:
               z-index:15000!important;
             }
             header .desktop-category-link{
-              min-height:32px!important;
-              height:32px!important;
+              min-height:30px!important;
+              height:30px!important;
               padding-top:0!important;
               padding-bottom:0!important;
               padding-left:9px!important;
               padding-right:9px!important;
-              line-height:32px!important;
+              line-height:30px!important;
               display:flex!important;
               align-items:center!important;
               justify-content:center!important;
@@ -338,5 +339,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: espacer davantage et centrer verticalement les categories"
+          git commit -m "Desktop: remonter et centrer verticalement les categories"
           git push
