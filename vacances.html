@@ -5707,6 +5707,49 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
   }
 }
 </style>
+
+<style id="vac-desktop-host-center-style-20260922">
+@media (min-width:1024px) and (pointer:fine){
+  .topbar .nav{
+    position:relative!important;
+  }
+  .vac-desktop-host-center{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    transform:translate(-50%,-50%)!important;
+    z-index:30!important;
+    min-height:42px!important;
+    padding:0 20px!important;
+    border-radius:14px!important;
+    display:none!important;
+    align-items:center!important;
+    justify-content:center!important;
+    white-space:nowrap!important;
+    text-decoration:none!important;
+    font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important;
+    font-size:12px!important;
+    font-weight:850!important;
+    letter-spacing:-.01em!important;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7b2f90 0%,#b8459d 56%,#ec64ad 100%)!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    box-shadow:0 8px 20px rgba(152,55,137,.24)!important;
+  }
+  .vac-desktop-host-center:hover{
+    transform:translate(-50%,calc(-50% - 1px))!important;
+    box-shadow:0 10px 24px rgba(152,55,137,.28)!important;
+  }
+  .vac-desktop-host-center.is-visible{
+    display:inline-flex!important;
+  }
+}
+@media (max-width:1023px), (pointer:coarse){
+  .vac-desktop-host-center{
+    display:none!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="vac-mobile-main-return">
@@ -5716,6 +5759,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
 <header class="topbar">
   <div class="container nav">
     <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><b>Abracadeal</b><small>Louez - Voyagez</small></a>
+    <a class="vac-desktop-host-center" id="vacDesktopBecomeHost" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>
     <div class="nav-actions">
       <a class="btn premium" id="vacBackMainBtn" href="index.html">Abracadeal</a>
       <a class="btn ghost" id="vacAdminLink" href="admin-vacances.html" style="display:none">Admin</a>
@@ -6002,6 +6046,12 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
   function applyVacationPageMode({isHost=false,hasHost=false}={}){
     lastVacationHostState={isHost:!!isHost,hasHost:!!hasHost};
     document.body.dataset.vacSpace=isHost?'host':(hasHost?'host-pending':'traveler');
+    const desktopBecomeHost=root.getElementById('vacDesktopBecomeHost');
+    if(desktopBecomeHost){
+      desktopBecomeHost.classList.toggle('is-visible',!isHost);
+      desktopBecomeHost.href='vacances.html?mode=hote&host_signup=1';
+      desktopBecomeHost.textContent='Devenir hôte';
+    }
     document.dispatchEvent(new CustomEvent('abraca:vac-space-change',{
       detail:{isHost:!!isHost,hasHost:!!hasHost}
     }));
