@@ -7490,6 +7490,70 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-header-no-overlap-20260922">
+/* Desktop : empêche la navigation centrale de recouvrir le coeur / Vacances.
+   Le bouton Vacances était bien présent mais passait sous les catégories. */
+@media (min-width:1024px){
+  header .nav{
+    display:grid!important;
+    grid-template-columns:320px minmax(0,1fr) auto!important;
+    gap:10px!important;
+    align-items:center!important;
+  }
+
+  header .desktop-category-nav{
+    position:static!important;
+    left:auto!important;
+    top:auto!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    justify-self:stretch!important;
+    justify-content:center!important;
+    gap:0!important;
+    overflow:hidden!important;
+    z-index:1!important;
+  }
+
+  header .desktop-category-link{
+    min-height:38px!important;
+    padding-left:5px!important;
+    padding-right:5px!important;
+    font-size:12px!important;
+  }
+
+  header .nav-actions{
+    position:relative!important;
+    z-index:4!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:5px!important;
+    min-width:max-content!important;
+    overflow:visible!important;
+  }
+
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    position:relative!important;
+    z-index:5!important;
+    flex:0 0 94px!important;
+    width:94px!important;
+    min-width:94px!important;
+    max-width:94px!important;
+  }
+
+  header .desktop-favorites-btn{
+    position:relative!important;
+    z-index:5!important;
+    flex:0 0 34px!important;
+  }
+}
+</style>
 </head>
 <body>
 
