@@ -7804,6 +7804,7 @@ header #flowErrorsBtn{
   }
   .search-card .field,
   #searchCity.desktop-search-city{
+    font-size:16px!important;
     height:32px!important;
     min-height:32px!important;
     line-height:32px!important;
@@ -7817,11 +7818,12 @@ header #flowErrorsBtn{
     line-height:30px!important;
     white-space:nowrap!important;
   }
+  #searchBtn::before,
+  #searchBtn::after,
   #searchBtn .search-emoji,
   #searchBtn svg{
-    width:14px!important;
-    height:14px!important;
-    font-size:14px!important;
+    display:none!important;
+    content:none!important;
   }
 }
 @media (max-width:430px){
