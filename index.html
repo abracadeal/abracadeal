@@ -7106,6 +7106,34 @@ header #flowErrorsBtn{
     stroke-linecap:round!important;stroke-linejoin:round!important;
   }
   .mobile-nav-item.is-active{color:#ff58b5!important}
+
+  /* Compteur Messages tablette : aucune valeur 0 visible.
+     Même pastille que le compteur Admin, collée à l'icône. */
+  #mobileBottomUnread.mobile-nav-badge{
+    display:none!important;
+    position:absolute!important;
+    top:5px!important;
+    left:calc(50% + 2px)!important;
+    right:auto!important;
+    transform:none!important;
+    min-width:18px!important;
+    height:18px!important;
+    padding:0 5px!important;
+    border-radius:999px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#ed338f!important;
+    color:#fff!important;
+    border:2px solid #180a26!important;
+    font-size:9px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    z-index:3!important;
+  }
+  #mobileBottomUnread.mobile-nav-badge.show{
+    display:flex!important;
+  }
+
   .mobile-nav-publish{transform:translateY(-8px)!important}
   .mobile-nav-publish .mobile-publish-orb{
     width:52px!important;height:52px!important;
