@@ -4284,9 +4284,15 @@ header #flowErrorsBtn{
    les notifications est ronger"). Meme position que .mobile-nav-badge (coin haut-droit du
    bouton entier, hors de l'icone/texte). */
 .mobile-admin-nav-badge{
-  position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+  position:absolute;
+  top:4px;
+  left:calc(50% + 8px);
+  right:auto;
+  transform:translateX(0);
+  min-width:18px;height:18px;padding:0 5px;border-radius:999px;
   display:none;align-items:center;justify-content:center;background:#ed338f;color:#fff;border:2px solid #180a26;
-  font-size:9px;font-weight:900;line-height:1
+  font-size:9px;font-weight:900;line-height:1;
+  z-index:3;
 }
 .mobile-admin-nav-badge.show{display:flex}
 @media(max-width:520px){
