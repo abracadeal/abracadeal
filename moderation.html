@@ -128,8 +128,8 @@ a{color:inherit;text-decoration:none}
   .preview-content{padding:20px 22px;overflow-y:auto}
 }
 
-/* iPhone Safari: barre mobile verrouillée au viewport, sans déplacement au scroll. */
-@media(max-width:699px){
+/* Mobile + tablette en interface mobile : barre verrouillée au viewport. */
+@media(max-width:1023px), (max-width:1366px) and (any-pointer:coarse){
   html,body{overflow-x:hidden!important}
   .bottom{
     position:fixed!important;
