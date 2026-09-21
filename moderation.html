@@ -140,7 +140,7 @@ a{color:inherit;text-decoration:none}
   <section class="preview-sheet" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
     <header class="preview-head">
       <strong id="previewModalTitle">Vérifier l’annonce</strong>
-      <button class="preview-close" type="button" data-close-preview aria-label="Fermer">×</button>
+      <button class="preview-close" type="button" data-close-preview aria-label="Fermer" onclick="event.preventDefault();event.stopPropagation();closePreview();">×</button>
     </header>
     <div class="preview-body" id="previewBody"></div>
     <div class="preview-moderation-actions" id="previewActions"></div>
