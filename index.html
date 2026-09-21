@@ -7749,8 +7749,8 @@ let selectedPublishPack='free', publishPhotoLimit=3;
 let promoSelectedPack=null, promoPreselectedListingId=null;
 let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={
-  photo_12:{code:'photo_12',audience:'particulier',title:'Pack Photos · jusqu’à 12',price:'4,99 €',days:0,max:1,photos:12,link:'https://buy.stripe.com/test_6oU00b5hk2r35wDbLHgrS07'},
-  photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'4,99 €',days:0,max:1,photos:30,link:'https://buy.stripe.com/test_eVq9ALaBE0iV9MT2b7grS08'},
+  photo_12:{code:'photo_12',audience:'particulier',title:'Pack Photos · jusqu’à 12',price:'2,99 €',days:0,max:1,photos:12,link:'https://buy.stripe.com/test_6oU00b5hk2r35wDbLHgrS07'},
+  photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'2,99 €',days:0,max:1,photos:30,link:'https://buy.stripe.com/test_eVq9ALaBE0iV9MT2b7grS08'},
   private_7d:{code:'private_7d',audience:'particulier',title:'Boost 7 jours',price:'9,99 €',days:7,max:1,photos:null,link:'https://buy.stripe.com/test_6oUfZ9bFI1mZ6AH7vrgrS00'},
   private_30d:{code:'private_30d',audience:'particulier',title:'Boost 30 jours',price:'19,99 €',days:30,max:1,photos:null,link:'https://buy.stripe.com/test_8x27sD4dg8Pr6AHbLHgrS01'},
   pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 7 jours',price:'39,90 € HT',days:7,max:5,photos:null,link:'https://buy.stripe.com/test_00w3cn1140iV9MTcPLgrS0t'},
@@ -9619,7 +9619,7 @@ function renderPublishPackPicker(){
     const items=[{code:'free',title:'Standard Pro',price:'Gratuit',desc:'Jusqu’à 15 photos incluses'},PROMOTION_PACKS.photo_30_pro];
     picker.innerHTML=items.map(p=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:'Jusqu’à 30 photos · sans mise en avant'}</div></button>`).join('');
     picker.querySelectorAll('[data-publish-pack]').forEach(b=>b.addEventListener('click',()=>{selectedPublishPack=b.dataset.publishPack;renderPublishPackPicker();setPublishPhotoLimit();}));
-    if(help)help.textContent='Jusqu’à 15 photos sont incluses gratuitement. Le Pack Photos Pro débloque jusqu’à 30 photos pour 4,99 €, sans mise en avant. Les boosts restent séparés.';
+    if(help)help.textContent='Jusqu’à 15 photos sont incluses gratuitement. Le Pack Photos Pro débloque jusqu’à 30 photos pour 2,99 €, sans mise en avant. Les boosts restent séparés.';
   }else{
     const items=[{code:'free',title:'Gratuit',price:'0 €',desc:'Jusqu’à 3 photos · annonce classique'},PROMOTION_PACKS.photo_12,PROMOTION_PACKS.private_7d,PROMOTION_PACKS.private_30d];
     picker.innerHTML=items.map((p,i)=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title||'Gratuit'}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:(p.code==='photo_12'?'Jusqu’à 12 photos · sans mise en avant':`Mise en avant pendant ${p.days} jours · quota photo inchangé`)}</div></button>`).join('');
@@ -11354,7 +11354,7 @@ window.openAd=id=>{
             ${canDelete?`
               <div class="detail-owner-actions">
                 ${currentProfile?.is_admin?`<button class="mini-btn" onclick="closeModal('detailModal');openAdminEditAd('${a.id}')">Modifier</button>`:''}
-                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à ${a.seller_type==='professionnel'?'30':'12'} photos · 4,99 €</button>`:''}
+                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à ${a.seller_type==='professionnel'?'30':'12'} photos · 2,99 €</button>`:''}
                 <button class="mini-btn danger" onclick="closeModal('detailModal');${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>
               </div>`:''}
 
