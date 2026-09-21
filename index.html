@@ -2078,6 +2078,12 @@ a.btn{cursor:pointer}
 .moderation-notice{padding:16px;margin:0 0 12px;border:1px solid #eadff0;border-radius:14px;background:#faf5fc;color:#3d2254}
 .moderation-notice p{margin:8px 0}
 .moderation-notice small{opacity:.65}
+/* Fix 21/09/2026 : bloc de moderation duplique dans la fiche annonce complete (voir openAd()),
+   accessible meme quand les boutons de la pastille sont recouverts par la barre de recherche
+   flottante pendant le scroll. */
+.detail-moderation-actions{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:0 0 18px;padding:14px 16px;border:1px solid #eadff0;border-radius:14px;background:#faf5fc}
+.detail-moderation-actions .moderation-risk{flex:1 1 100%;margin:0}
+.moderation-second-check-badge{display:inline-flex;padding:5px 9px;border-radius:999px;background:#d4edda;color:#155724;font-size:.74rem;font-weight:850}
 .message-safety{padding:14px 18px;margin-bottom:16px;border:1px solid #e1c9ef;border-radius:14px;background:#f7f0fb;color:#3d2254;font-size:14px;line-height:1.5}
 .message-safety p{margin:6px 0 0}
 .message-chat-head .report-link{display:block;font-size:13px;text-align:left}
@@ -4248,8 +4254,13 @@ header #flowErrorsBtn{
   font-size:.69rem;font-weight:900;box-shadow:0 3px 10px rgba(95,24,77,.2)
 }
 .admin-mobile-action-badge.show{display:flex}
+/* Fix 21/09/2026 : right:12px placait ce badge par-dessus l'icone du bouton (au lieu du coin
+   exterieur du bouton comme .mobile-nav-badge juste au-dessus, deja correct) - il "rongeait"
+   visuellement l'icone Admin (signale par Anthony : "le compteur sur le nom d'utilisateur pour
+   les notifications est ronger"). Meme position que .mobile-nav-badge (coin haut-droit du
+   bouton entier, hors de l'icone/texte). */
 .mobile-admin-nav-badge{
-  position:absolute;top:-2px;right:12px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;
+  position:absolute;top:-3px;right:-3px;min-width:18px;height:18px;padding:0 5px;border-radius:999px;
   display:none;align-items:center;justify-content:center;background:#ed338f;color:#fff;border:2px solid #180a26;
   font-size:9px;font-weight:900;line-height:1
 }
@@ -5259,6 +5270,16 @@ header #flowErrorsBtn{
 .home-featured-card .ad-specs,
 .home-featured-card .ad-spec:not(.immo-card-dpe){
   color:#c5b5cf!important;
+}
+/* Fix 21/09/2026 : le prix au m2/les charges (margin-top:-4px d'origine, pensee pour un texte
+   plus petit sur fond blanc) chevauchait presque le prix principal au-dessus, plus grand ici
+   (1.12rem contre les cartes normales) - signale par Anthony ("le prix au m2 est trop pres du
+   prix presque l'un sur l'autre"). Meme correctif que #resultats .ad-card.immo-card deja plus
+   bas dans le fichier, applique ici a .home-featured-card qui ne l'avait pas. */
+.home-featured-card .immo-card-unit-price,
+.home-featured-card .immo-card-charges{
+  margin-top:3px!important;
+  display:block!important;
 }
 .home-featured-body,
 .personalized-body{
@@ -7991,10 +8012,27 @@ async function refreshModerationCount(){
   const btn=$('#moderationBtn');
   if(!btn) return 0;
   if(!sb || !currentProfile?.is_admin){btn.removeAttribute('data-count');btn.removeAttribute('aria-label');return 0;}
-  // Pilotage par exception : seules les annonces encore pending demandent réellement une action admin.
+  // Pilotage par exception : seules les annonces encore pending, ou auto-publiées pas encore
+  // revérifiées par un admin, demandent réellement une action admin.
   const {count,error}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('status','pending');
   if(error){console.error('Compteur modération indisponible',error);return null;}
-  const n=Number(count||0);
+  // Fix 21/09/2026 : le compteur (bouton "Modérer" + badge "Admin" du menu mobile, cf.
+  // syncAdminBadges()) ne comptait que les pending, alors que la file de modération inclut
+  // aussi, depuis ce même jour, les annonces auto-publiées en attente d'une deuxième
+  // vérification manuelle (voir loadAds()) - demande d'Anthony : "mettre un compteur pour le
+  // nombre a moderer" doit refléter le vrai total affiché dans la file.
+  let autoActiveCount=0;
+  const {data:autoRows,error:autoError}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
+  if(autoError){console.error('Compteur modération (auto-publiées) indisponible',autoError);}
+  else{
+    const autoIds=(autoRows||[]).map(r=>r.listing_id);
+    if(autoIds.length){
+      const {count:autoCount,error:autoCountError}=await sb.from('listings').select('id',{count:'exact',head:true}).in('id',autoIds).eq('status','active');
+      if(autoCountError)console.error('Compteur modération (auto-publiées actives) indisponible',autoCountError);
+      autoActiveCount=Number(autoCount||0);
+    }
+  }
+  const n=Number(count||0)+autoActiveCount;
   if(n>0)btn.dataset.count=String(n);else btn.removeAttribute('data-count');
   btn.setAttribute('aria-label',n>0?`${n} annonce${n>1?'s':''} à modérer`:'Aucune annonce à modérer');
   return n;
@@ -11432,6 +11470,21 @@ window.openAd=id=>{
     ?subcategoryLabel(a.category,vehicleSubcategoryOf(a))
     :catLabel(a.category);
   const created=listingDateLabel(a);
+  // Fix 21/09/2026 : la barre de recherche flottante (position:fixed, z-index superieur au
+  // contenu de la grille) peut recouvrir les boutons de moderation d'une pastille pendant le
+  // scroll, les rendant inaccessibles (signale par Anthony : "ya des annonces impossible a
+  // moderer les touches sont inaccessible"). On duplique donc l'action de moderation ici, dans
+  // la fiche annonce complete (z-index du #detailModal deja au-dessus de tout le reste du site),
+  // qui reste toujours accessible quel que soit le defilement de la grille.
+  const modInfoForDetail=moderationRiskById.get(a.id);
+  const needsSecondCheckDetail=!!(moderationMode && currentProfile?.is_admin && a.status==='active' && modInfoForDetail?.auto_published && !modInfoForDetail?.admin_reviewed);
+  const detailModerationActions=(moderationMode && currentProfile?.is_admin)
+    ? (a.status==='pending'
+        ? `<div class="detail-moderation-actions">${moderationRiskHTML(a)}<button class="btn primary" type="button" onclick="approveAd('${a.id}').then(()=>closeModal('detailModal'))">Accepter</button><button class="btn ghost danger" type="button" onclick="rejectAd('${a.id}').then(()=>closeModal('detailModal'))">Refuser</button></div>`
+        : (needsSecondCheckDetail
+            ? `<div class="detail-moderation-actions">${moderationRiskHTML(a)}<div class="moderation-second-check-badge">Déjà en ligne · à revérifier</div><button class="btn primary" type="button" onclick="validateAutoPublishedAd('${a.id}').then(()=>closeModal('detailModal'))">✓ Vérifiée, garder en ligne</button><button class="btn ghost danger" type="button" onclick="rejectAd('${a.id}').then(()=>closeModal('detailModal'))">Refuser</button></div>`
+            : ''))
+    : '';
 
   const gallery=photos.length
     ?`<div class="detail-gallery">
@@ -11463,6 +11516,8 @@ window.openAd=id=>{
               <div class="detail-meta-line">${esc(categoryLabel)}${created?' · Publiée le '+esc(created):''}</div>
             </div>
           </div>
+
+          ${detailModerationActions}
 
           ${specs.length?`
           <section class="detail-section">
@@ -13236,18 +13291,11 @@ document.addEventListener('DOMContentLoaded',()=>{
     const card=document.getElementById('statPendingModerationCard');
     const el=document.getElementById('statPendingModeration');
     if(!el)return;
-    const {count:pendingCount,error:pendingError}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('status','pending');
-    if(pendingError){console.error('Compteur modération (pending) indisponible',pendingError);return}
-    const {data:autoRows,error:autoError}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
-    if(autoError)console.error('Compteur modération (auto-publiées) indisponible',autoError);
-    const autoIds=(autoRows||[]).map(r=>r.listing_id);
-    let autoActiveCount=0;
-    if(autoIds.length){
-      const {count,error}=await sb.from('listings').select('id',{count:'exact',head:true}).in('id',autoIds).eq('status','active');
-      if(error)console.error('Compteur modération (auto-publiées actives) indisponible',error);
-      autoActiveCount=Number(count||0);
-    }
-    const total=Number(pendingCount||0)+autoActiveCount;
+    // Réutilise refreshModerationCount() (fonction globale définie plus haut) plutôt que de
+    // dupliquer les mêmes requêtes - garantit que ce chiffre et celui du bouton "Modérer"/badge
+    // "Admin" du menu mobile restent toujours identiques.
+    const total=await refreshModerationCount();
+    if(total===null)return;
     el.textContent=String(total);
     card?.classList.toggle('has-pending',total>0);
   }
