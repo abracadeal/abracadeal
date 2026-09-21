@@ -5241,6 +5241,18 @@ header #flowErrorsBtn{
   min-height:158px!important;
   max-height:158px!important;
 }
+/* Fix 21/09/2026 (v2) : la carte "A LA UNE" affiche desormais les memes infos completes que
+   les annonces normales (specs, DPE, prix au m2/loyer+charges, quartier) - certains de ces
+   textes secondaires sont trop sombres sur le fond fonce de la carte a la une (prevus a
+   l'origine pour un fond blanc), on les eclaircit ici pour rester lisibles. */
+.home-featured-card .immo-card-unit-price,
+.home-featured-card .immo-card-charges,
+.home-featured-card .immo-card-price-suffix,
+.home-featured-card .immo-card-location-extra,
+.home-featured-card .ad-specs,
+.home-featured-card .ad-spec:not(.immo-card-dpe){
+  color:#c5b5cf!important;
+}
 .home-featured-body,
 .personalized-body{
   flex:1 1 auto!important;
@@ -11029,9 +11041,17 @@ function renderHomeFeatured(){
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
       <div class="home-featured-body">
-        <div class="home-featured-meta">${esc(category)} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}</div>
+        <div class="home-featured-meta">${esc(category)}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}${(a.seller_type==='professionnel'&&a.owner_id)?`<span class="ad-pro-name" data-pro-name-owner="${a.owner_id}"></span>`:''}</div>
         <h3 class="home-featured-title">${esc(a.title)}</h3>
-        <div class="home-featured-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
+        <div class="home-featured-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
+        ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
+        ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
+        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs">
+          ${a.vehicle_year?`<span class="ad-spec">📅 ${esc(a.vehicle_year)}</span>`:''}
+          ${(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?`<span class="ad-spec">🛣️ ${Number(a.mileage).toLocaleString('fr-FR')} km</span>`:''}
+          ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
+          ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
+        </div>`:''}
         <div class="home-featured-city">📍 ${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
@@ -11039,6 +11059,7 @@ function renderHomeFeatured(){
   section.classList.remove('home-featured-loading');
   section.classList.remove('hidden');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  queueMicrotask(()=>hydrateProNames(grid));
 }
 
 function renderAds(){
