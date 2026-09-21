@@ -6594,6 +6594,22 @@ header #flowErrorsBtn{
   }
 }
 </style>
+
+<style id="abraca-desktop-category-center-20260921">
+/* Desktop large : recentrer visuellement les catégories dans le viewport.
+   Le header a plus de largeur à droite (compte/Pro-Pro/publier) qu'à gauche,
+   donc le centre de la colonne CSS était trop à gauche. */
+@media(min-width:1250px){
+  header .desktop-category-nav{
+    transform:translateX(72px)!important;
+    gap:1px!important;
+  }
+  header .desktop-category-link{
+    padding-left:6px!important;
+    padding-right:6px!important;
+  }
+}
+</style>
 </head>
 <body>
 
