@@ -4483,6 +4483,15 @@ header #flowErrorsBtn{
     background:rgba(255,255,255,.97)!important;
     border:1px solid rgba(255,255,255,.9)!important;
     box-shadow:0 10px 30px rgba(15,5,24,.32)!important;
+    /* Fix 22/09/2026 (v2) : le fix precedent (transform:translateZ(0)) avait ete pose sur
+       .search-wrap (le parent position:fixed) mais backdrop-filter est ici, sur .search-card
+       (l'enfant). Sur Safari iOS, c'est l'element qui porte backdrop-filter lui-meme qui doit
+       avoir son propre calque GPU dedie pour ne pas le perdre pendant un scroll (signale par
+       Anthony : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
+       temps la barre disparait"). Meme traitement que .mobile-bottom-nav, ou transform et
+       backdrop-filter sont deja sur le meme element. */
+    transform:translateZ(0)!important;
+    -webkit-transform:translateZ(0)!important;
     -webkit-backdrop-filter:blur(14px)!important;
     backdrop-filter:blur(14px)!important;
   }
@@ -13918,6 +13927,18 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('pageshow', () => { requestAnimationFrame(() => { measure(); update(); }); });
   window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', () => {
+    // Fix 22/09/2026 (v2) : bug signale par Anthony ("quand on se positionne sur la barre
+    // de recherche et qu'on scroll en meme temps la barre disparait"). Cause trouvee : sur
+    // mobile, taper dans un champ ouvre le clavier virtuel, ce qui declenche un evenement
+    // 'resize' - or ce handler appelait restoreSearch() sans verifier searchFieldFocused
+    // (contrairement a update(), corrige le 22/09 pour le meme probleme cote scroll).
+    // restoreSearch() remet la barre dans le flux normal de la page ; si l'utilisateur a
+    // deja scrolle bien plus bas que la position d'origine de la barre, elle se retrouve
+    // hors ecran (au-dessus) - donc "disparait". Et comme le champ garde le focus,
+    // searchFieldFocused reste vrai : update() (appele juste apres) refusait alors de la
+    // refaire flotter, la laissant coincee hors-champ jusqu'a la perte du focus. Corrige en
+    // ignorant aussi ce resize tant qu'un champ de la barre a le focus.
+    if (searchFieldFocused) return;
     if (floating) restoreSearch();
     requestAnimationFrame(() => { measure(); update(); });
   });
