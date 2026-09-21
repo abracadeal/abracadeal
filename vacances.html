@@ -2809,10 +2809,9 @@ h1,
   }
 }
 </style>
-<style id="abraca-vacances-tablet-mobile-ui-20260922">
-/* TABLETTE UNIQUEMENT — rejoue la vraie interface mobile Vacances.
-   Téléphone inchangé, desktop/laptop inchangé. */
-@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+<style id="abraca-vacances-tablet-mobile-ui-20260922" media="not all">
+/* Activé uniquement par JavaScript lorsqu'un vrai appareil tablette est détecté.
+   On rejoue alors le CSS mobile Vacances à l'identique, même si Safari demande le site desktop. */
 
   #vacAuthModal.auth-modal{
     padding:0!important;
@@ -4162,43 +4161,44 @@ h1,
   .topbar .brand b{font-size:25px!important}
 
 
-  /* Ajustements de largeur pour garder l'esprit mobile sur un écran tablette. */
-  .vac-mobile-main-return,
-  .vac-mobile-banner-shell,
-  .search-box,
-  .vac-mobile-offer,
-  .vac-mobile-popular,
-  .vac-home-listings,
-  .vac-destinations{
-    max-width:820px!important;
-    margin-left:auto!important;
-    margin-right:auto!important;
-  }
-
-  .vac-mobile-bottom-nav{
-    left:50%!important;
-    right:auto!important;
-    width:min(720px,calc(100% - 28px))!important;
-    transform:translateX(-50%) translateZ(0)!important;
-  }
-
-  /* Le bandeau/retour mobile reste visible sur tablette. */
-  .vac-mobile-main-return{
-    display:flex!important;
-  }
-
-  /* La recherche reste tactile et lisible en portrait comme en paysage. */
-  #vacationSearch{
-    width:100%!important;
-    max-width:100%!important;
-  }
-
-  /* Pas de retour vers la version desktop quand on tourne l'iPad. */
-  html,body{
-    overflow-x:hidden!important;
-  }
+/* Ajustements de largeur uniquement pour la tablette. */
+.vac-mobile-main-return,
+.vac-mobile-banner-shell,
+.search-box,
+.vac-mobile-offer,
+.vac-mobile-popular{
+  max-width:820px!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
 }
+.vac-mobile-bottom-nav{
+  left:50%!important;
+  right:auto!important;
+  width:min(720px,calc(100% - 28px))!important;
+  transform:translateX(-50%) translateZ(0)!important;
+}
+.vac-mobile-main-return{display:flex!important}
+html,body{overflow-x:hidden!important}
 </style>
+<script id="abraca-vacances-tablet-force-mobile-20260922">
+(function(){
+  function isRealTablet(){
+    var ua=navigator.userAgent||'';
+    var platform=navigator.platform||'';
+    var touch=navigator.maxTouchPoints||0;
+    var isIPad=/iPad/i.test(ua)||(platform==='MacIntel'&&touch>1);
+    var isAndroidTablet=/Android/i.test(ua)&&!/Mobile/i.test(ua);
+    var minSide=Math.min(screen.width||0,screen.height||0);
+    var maxSide=Math.max(screen.width||0,screen.height||0);
+    var genericTouchTablet=touch>1 && minSide>=600 && maxSide<=1600 && !/iPhone|iPod/i.test(ua);
+    return isIPad||isAndroidTablet||genericTouchTablet;
+  }
+  if(!isRealTablet())return;
+  document.documentElement.classList.add('abraca-vacances-tablet-mobile');
+  var mobileTabletStyle=document.getElementById('abraca-vacances-tablet-mobile-ui-20260922');
+  if(mobileTabletStyle) mobileTabletStyle.media='all';
+})();
+</script>
 </head>
 <body>
 <div class="vac-mobile-main-return">
