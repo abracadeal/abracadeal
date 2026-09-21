@@ -109,14 +109,17 @@ html{scrollbar-gutter:stable}
 }
 
 /* Noms / filigranes visibles sur les annonces et fiches vendeur */
+/* Fix 21/09/2026 : Anthony souhaite garder uniquement l'ecriture "Abracadeal" en filigrane sur
+   les photos, sans le fond assombri derriere. On retire le fond/padding/arrondi/flou et on
+   renforce l'ombre portee du texte pour qu'il reste lisible sur n'importe quelle photo. */
 .photo-watermark{
   color:#fff!important;
-  background:rgba(24,10,32,.72)!important;
-  padding:4px 8px!important;
-  border-radius:7px!important;
-  text-shadow:none!important;
-  -webkit-backdrop-filter:blur(3px)!important;
-  backdrop-filter:blur(3px)!important;
+  background:none!important;
+  padding:0!important;
+  border-radius:0!important;
+  text-shadow:0 1px 4px rgba(0,0,0,.75),0 1px 8px rgba(0,0,0,.55)!important;
+  -webkit-backdrop-filter:none!important;
+  backdrop-filter:none!important;
 }
 .seller-card h3,
 .seller-profile-name,

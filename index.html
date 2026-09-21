@@ -591,6 +591,8 @@ footer{
 .ad-photo{position:relative}.favorite-btn{position:absolute;top:9px;right:9px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(60,30,80,.12);background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 3px 12px rgba(35,17,48,.12);color:#5d4868}.favorite-btn.active{color:#e8328a}.favorite-btn:hover{transform:scale(1.04)}
 .ad-body{padding:12px 13px 13px}
 .ad-meta{font-size:.7rem;color:#8a7b93;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* Fix 21/09/2026 : le nom du pro (ajoute apres coup en JS) etait concatene sur la meme ligne que la categorie et se faisait couper au milieu du mot (ex. "...Elite Prest..."), ce qui donnait l'impression que le libelle categorie 'rongeait' l'espace (signale par Anthony). Le nom du pro passe desormais sur sa propre ligne, avec sa propre troncature. */
+.ad-pro-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#a08bad;font-weight:700;margin-top:1px}
 .ad-title{font-size:.96rem;font-weight:800;margin:0 0 6px;color:#24162d;line-height:1.25;min-height:2.4em}
 .ad-price{font-size:1.08rem;font-weight:900;color:#7c259e;margin-bottom:7px}
 .ad-specs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 8px;margin:0 0 8px;color:#5f5368;font-size:.73rem}
@@ -5214,13 +5216,30 @@ header #flowErrorsBtn{
 .personalized-grid{
   align-items:stretch!important;
 }
-.home-featured-card,
+/* Fix 21/09/2026 : les cartes "A LA UNE" (home-featured-card) avaient une hauteur/photo plus
+   petites que les cartes normales des resultats (300px vs 420px, photo 150px vs 158px), ce qui
+   les faisait paraitre plus petites au milieu des autres annonces (signale par Anthony :
+   "mets les annonces a la une de la meme taille que les annonces normales"). Separee de
+   .personalized-card (qui garde sa taille propre, utilisee ailleurs : recherches recentes,
+   consultees, a proximite) et alignee sur #resultats .ad-card. */
 .personalized-card{
   display:flex!important;
   flex-direction:column!important;
   height:300px!important;
   min-height:300px!important;
   max-height:300px!important;
+}
+.home-featured-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:420px!important;
+  min-height:420px!important;
+  max-height:420px!important;
+}
+.home-featured-photo{
+  height:158px!important;
+  min-height:158px!important;
+  max-height:158px!important;
 }
 .home-featured-body,
 .personalized-body{
@@ -10567,7 +10586,7 @@ window.refreshDetailFavoriteCount=async id=>{favoriteCountCache.delete(id);paint
    sur le meme principe d'hydratation asynchrone que les compteurs de favoris ci-dessus. */
 const proNameCache=new Map();
 function paintProName(ownerId,name){
-  document.querySelectorAll('[data-pro-name-owner]').forEach(el=>{if(el.dataset.proNameOwner===ownerId&&name)el.textContent=' · '+name;});
+  document.querySelectorAll('[data-pro-name-owner]').forEach(el=>{if(el.dataset.proNameOwner===ownerId&&name)el.textContent=name;});
 }
 window.hydrateProNames=async(root=document)=>{
   const ids=[...new Set([...root.querySelectorAll('[data-pro-name-owner]')].map(el=>el.dataset.proNameOwner).filter(Boolean))];
@@ -11623,7 +11642,16 @@ async function renderDetailRecommendations(a){
 
 window.selectDetailPhoto=(button,url,index,total)=>{
   const main=document.getElementById('detailMainPhoto');
-  if(main){main.onload=refreshDetailWatermark;main.src=url;if(main.complete)setTimeout(refreshDetailWatermark,0);}
+  if(main){
+    /* Fix 21/09/2026 : reinitialise l'etat de secours a chaque changement de miniature, sinon
+       une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher sur
+       une autre photo cassee ensuite (le garde-fou anti-boucle restait arme). */
+    main.dataset.abracaFallback='';
+    main.classList.remove('abraca-default-photo');
+    main.onload=refreshDetailWatermark;
+    main.src=url;
+    if(main.complete)setTimeout(refreshDetailWatermark,0);
+  }
   const count=document.getElementById('detailPhotoCount');
   if(count) count.textContent=`${index} / ${total}`;
   document.querySelectorAll('.detail-thumbs button').forEach(b=>b.classList.remove('active'));
@@ -14135,15 +14163,26 @@ document.addEventListener('DOMContentLoaded',()=>{
 </script>
 
 
-<script id="abraca-card-image-fallback-20260919">
+<script id="abraca-card-image-fallback-20260921">
 (function(){
-  const selector='.ad-photo img,.home-featured-photo img,.personalized-photo img';
+  /* Fix 21/09/2026 : certaines annonces (notamment immobilier) avaient une photo enregistree
+     mais dont l'URL est cassee/inaccessible (ex. domaine de test invalide) - l'ancienne version
+     masquait juste la photo (display:none) et n'affichait l'etoile de secours que sur mobile,
+     donc sur desktop la pastille restait vide (signale par Anthony : "les photos par defaut
+     n'apparaissent pas dans les pastilles immobilier"). Desormais on bascule vers la vraie
+     photo de secours Abracadeal (meme visuel que quand il n'y a aucune photo), sur toutes les
+     tailles d'ecran et sur toutes les zones photo du site. */
+  const selector='.ad-photo img,.home-featured-photo img,.personalized-photo img,.detail-main-photo,.detail-thumbs img,.detail-related-photo img,.b2b-listing-photo img';
   function mark(img){
     if(!img || !img.matches || !img.matches(selector)) return;
+    if(img.dataset.abracaFallback) return;
+    img.dataset.abracaFallback='1';
+    img.onerror=null;
+    img.src=(typeof ABRACA_DEFAULT_LISTING_PHOTO!=='undefined'?ABRACA_DEFAULT_LISTING_PHOTO:'assets/default-listing-photo-20260921.jpg');
+    img.alt='Abracadeal';
+    img.classList.add('abraca-default-photo');
     const box=img.parentElement;
-    if(!box) return;
-    img.style.display='none';
-    box.classList.add('image-fallback');
+    if(box){const wm=box.querySelector('.photo-watermark');if(wm)wm.remove();}
   }
   document.addEventListener('error',function(e){ mark(e.target); },true);
   function sweep(){
