@@ -1331,6 +1331,12 @@ a.btn{cursor:pointer}
   color:#8a7795;
   font-size:3rem;
 }
+/* Fix 21/09/2026 : image de fallback Abracadeal (annonces sans photo, demande Anthony).
+   Purement visuelle, pas de zoom/lightbox puisqu'il n'y a pas de vraie photo derriere. */
+.abraca-default-photo{
+  cursor:default!important;
+}
+
 @media(max-width:760px){
   .detail-modal{
     width:min(100%,760px);
@@ -3226,6 +3232,10 @@ header #signupBtn{display:none!important}
    Les deux backdrops partageaient le meme z-index:30000, donc a egalite l'ordre du DOM tranchait et accountModal
    (place apres dans le HTML) passait devant, cachant la fenetre des conditions. On la fait passer au-dessus. */
 #founderOfferModal.modal-backdrop{
+  z-index:30010!important;
+}
+/* Fix 21/09/2026 : noPhotoConfirmModal s'ouvre depuis publishModal (deja ouvert), meme raison que founderOfferModal ci-dessus. */
+#noPhotoConfirmModal.modal-backdrop{
   z-index:30010!important;
 }
 
@@ -7111,6 +7121,7 @@ header #flowErrorsBtn{
             <div class="photo-footer-info">
               <div><strong id="photoQuotaTitle">Jusqu’à 3 photos incluses</strong><div id="photoCount" class="muted">0 / 3 ajoutée</div></div>
               <div class="note photo-help">La première photo sera la photo principale · compression et filigrane automatiques.</div>
+              <div class="note photo-help abraca-default-photo-note">Pour de meilleurs résultats, ajoutez au moins une photo à votre annonce. Sans photo, Abracadeal affichera automatiquement une image par défaut.</div>
             </div>
           </div>
           </div>
@@ -7157,6 +7168,20 @@ header #flowErrorsBtn{
            sur l'onglet inscription, preselectionne "Professionnel" et ouvre accountModal. -->
       <div class="form-actions" style="margin-top:18px">
         <button type="button" class="btn primary" onclick="closeModal('founderOfferModal');openProfessionalSignup();">S’inscrire</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony). -->
+<div class="modal-backdrop" id="noPhotoConfirmModal" aria-hidden="true">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="noPhotoConfirmTitle">
+    <div class="modal-head"><h2 id="noPhotoConfirmTitle">Aucune photo ajoutée</h2><a class="close-btn" data-close="noPhotoConfirmModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body">
+      <p>Votre annonce ne contient aucune photo. Pour de meilleurs résultats, nous vous recommandons d’en ajouter au moins une. Si vous continuez, une image Abracadeal sera affichée par défaut.</p>
+      <div class="form-actions" style="margin-top:18px">
+        <button type="button" class="btn ghost" id="noPhotoAddPhotoBtn">Ajouter une photo</button>
+        <button type="button" class="btn primary" id="noPhotoPublishAnywayBtn">Publier quand même</button>
       </div>
     </div>
   </div>
@@ -7762,7 +7787,7 @@ const sb = (window.supabase && window.supabase.createClient)
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 let professionalSignupViewerId=null;
-let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[];
+let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false;
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
 let selectedPublishPack='free', publishPhotoLimit=3;
 let promoSelectedPack=null, promoPreselectedListingId=null;
@@ -7875,6 +7900,9 @@ function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
 function cataloguePrice(a){const base=money(a?.price);return a?.category==='vacances'&&a?.price!==null&&a?.price!==''?base+' / nuit':base}
 function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
+// Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande Anthony).
+// Purement visuel cote frontend : ne touche jamais listing_photos, ni les limites/packs de photos.
+const ABRACA_DEFAULT_LISTING_PHOTO = 'assets/default-listing-photo-20260921.jpg';
 function photoUrl(path){
   if(!path) return '';
   if(/^https?:\/\//i.test(String(path))) return String(path);
@@ -9804,7 +9832,7 @@ function openPromotionForListing(id){
 async function buyPhotoPackForListing(id){try{const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);const pack=a?.seller_type==='professionnel'?'photo_30_pro':'photo_12';const url=await createPromotionOrder(pack,[id]);location.href=url}catch(err){toast(err.message||'Impossible de préparer le paiement')}}
 
 function resetPublishForm(){
-  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; showAllPhotoSlots=false;
+  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
   editingOriginalOwnerId=null; editingOriginalStatus=null; editingOriginalSellerType=null; editingOriginalPhotoLimit=null;
   hideLocationSuggestions();
   $('#photoPreview').innerHTML=''; renderPublishPackPicker(); renderSelectedPhotos();
@@ -9822,6 +9850,17 @@ $$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
   openModal('publishModal');
 }));
 
+// Fix 21/09/2026 : boutons de la confirmation "annonce sans photo" (demande Anthony).
+document.getElementById('noPhotoPublishAnywayBtn')?.addEventListener('click',()=>{
+  pendingNoPhotoConfirm=true;
+  closeModal('noPhotoConfirmModal');
+  $('#publishSubmitBtn')?.click();
+});
+document.getElementById('noPhotoAddPhotoBtn')?.addEventListener('click',()=>{
+  closeModal('noPhotoConfirmModal');
+  $('#photoAddBtn')?.click();
+});
+
 
 window.openAdminEditAd=function(id){
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
@@ -9833,6 +9872,7 @@ window.openAdminEditAd=function(id){
   editingOriginalStatus=a.status||'active';
   editingOriginalSellerType=a.seller_type||'particulier';
   editingOriginalPhotoLimit=Number(a.photo_limit||((a.seller_type==='professionnel')?15:3));
+  existingPhotoPaths=(a.listing_photos||[]).map(p=>p.storage_path);
 
   $('#adCategory').value=a.category||'';
   const sub=vehicleSubcategoryOf(a)||'';
@@ -10042,6 +10082,17 @@ $('#publishForm').addEventListener('submit',async e=>{
   if(btn.disabled) return;
 
   const wasEditing=!!editingId;
+
+  // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony).
+  // Ne bloque jamais la publication : si l'utilisateur choisit "Publier quand meme",
+  // pendingNoPhotoConfirm passe a true et on laisse continuer normalement.
+  const hasAnyPhoto = selectedPhotos.length>0 || existingPhotoPaths.length>0;
+  if(!hasAnyPhoto && !pendingNoPhotoConfirm){
+    openModal('noPhotoConfirmModal');
+    return;
+  }
+  pendingNoPhotoConfirm=false;
+
   const status=$('#publishStatus');
   btn.disabled=true;
   btn.classList.add('loading');
@@ -10849,7 +10900,7 @@ function rememberSearch(){
   old.unshift(item);writeLocalList(RECENT_SEARCH_KEY,old.slice(0,8));
 }
 function personalizedCard(a,extra=''){
-  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
+  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${esc(a.title)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${extra}</div></article>`;
 }
 function renderRecentViewed(){
@@ -10898,7 +10949,7 @@ function renderHomeFeatured(){
   const picked=selectMixedFeatured(candidates,8);
   grid.innerHTML=picked.map(a=>{
     const photos=visiblePhotosFor(a);
-    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
+    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div><span class="featured-badge">À LA UNE</span>${listingCardActions(a)}</div>
@@ -10955,7 +11006,7 @@ function renderAds(){
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone};
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
-    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt=""><span class="photo-watermark">Abracadeal</span>`:'✦';
+    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
     const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button><div class="carousel-dots">${photoUrls.map((_,i)=>`<span class="carousel-dot${i===0?' active':''}"></span>`).join('')}</div>`:'';
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
@@ -11262,7 +11313,7 @@ window.openAd=id=>{
           ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})"><img src="${photoUrl(p.storage_path)}" alt="Photo ${i+1}"></button>`).join('')}
         </div>`:''}
       </div>`
-    :`<div class="detail-gallery"><div class="detail-main-wrap"><div class="no-photo-detail">✦</div></div></div>`;
+    :`<div class="detail-gallery"><div class="detail-main-wrap"><img class="detail-main-photo abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal"></div></div>`;
 
   $('#detailTitle').textContent='Annonce';
   $('#detailBody').innerHTML=`
@@ -11416,7 +11467,7 @@ function cacheDetailAds(items){
 }
 function relatedCardHtml(a){
   const photos=[...(a.listing_photos||[])].sort((x,y)=>x.position-y.position);
-  const media=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title||'Annonce')}">`:'✦';
+  const media=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title||'Annonce')}">`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="detail-related-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')">
     <div class="detail-related-photo">
       ${media}${listingCardActions(a)}
@@ -12730,7 +12781,7 @@ window.addEventListener('pageshow',()=>{
    const rows=data||[];cacheDetailAds(rows);
    msg('b2bListingStatus',rows.length?rows.length+' annonce'+(rows.length>1?'s':'')+' réservée'+(rows.length>1?'s':'')+' aux professionnels.':'Aucune annonce Pro/Pro pour le moment.');
    grid.innerHTML=rows.map(a=>{
-    const photos=visiblePhotosFor(a);const media=photos[0]?'<img src="'+photoUrl(photos[0].storage_path)+'" alt="'+esc(a.title||'Annonce')+'">':'✦';
+    const photos=visiblePhotosFor(a);const media=photos[0]?'<img src="'+photoUrl(photos[0].storage_path)+'" alt="'+esc(a.title||'Annonce')+'">':'<img src="'+ABRACA_DEFAULT_LISTING_PHOTO+'" alt="Abracadeal" class="abraca-default-photo">';
     return '<article class="b2b-listing-card" data-pro-listing="'+esc(a.id)+'" role="button" tabindex="0"><div class="b2b-listing-photo">'+media+'<span class="b2b-listing-badge">PRO/PRO</span></div><div class="b2b-listing-body"><div class="note">'+esc(catLabel(a.category))+'</div><h4>'+esc(a.title||'Annonce')+'</h4><div class="b2b-listing-price">'+cataloguePrice(a)+'</div><div class="b2b-listing-meta">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div></div></article>';
    }).join('');
   }catch(error){if(same(v))msg('b2bListingStatus',errorText(error));}
