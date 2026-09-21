@@ -244,6 +244,16 @@ jobs:
               return el;
             }
 
+            function syncAccountLabel(){
+              const target=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-account span');
+              if(!target) return;
+              const source=document.querySelector('#accountBtnLabel');
+              const label=(source?.textContent||'Connexion').trim()||'Connexion';
+              target.textContent=label;
+              const account=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-account');
+              if(account) account.setAttribute('aria-label',label);
+            }
+
             function syncBadge(){
               const target=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-messages .abraca-dnav-badge');
               if(!target) return;
@@ -260,7 +270,7 @@ jobs:
               if(!visibleDesktop()) return;
               cleanupLegacyDesktopActions();
               const actions=document.querySelector('header .nav-actions');
-              if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); return; }
+              if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); syncAccountLabel(); return; }
 
               const bar=document.createElement('nav');
               bar.className='abraca-desktop-actions-v2';
@@ -294,6 +304,12 @@ jobs:
               bar.append(vac,fav,msg,acct);
               actions.appendChild(bar);
               syncBadge();
+              syncAccountLabel();
+
+              const accountLabelSource=document.querySelector('#accountBtnLabel');
+              if(accountLabelSource && window.MutationObserver){
+                new MutationObserver(syncAccountLabel).observe(accountLabelSource,{subtree:true,childList:true,characterData:true});
+              }
 
               const source=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesBtn .unread-badge, .messages-unread-badge');
               if(source && window.MutationObserver){
@@ -317,6 +333,19 @@ jobs:
           })();
           </script>'''
 
+          # abracaDynamicAccountLabelPatch: expose the connected user's short name
+          # through the original hidden account label so the custom desktop nav can mirror it.
+          s = s.replace(
+              "$('#accountBtnLabel').textContent='Compte';",
+              "$('#accountBtnLabel').textContent=(currentProfile?.display_name||currentUser?.email||'Compte').split(/\\s+|@/)[0]||'Compte';",
+              1
+          )
+          s = s.replace(
+              "$('#accountBtnLabel').textContent='Compte';",
+              "$('#accountBtnLabel').textContent='Connexion';",
+              1
+          )
+
           if 'id="abraca-desktop-icon-nav-patch"' in s:
               s = re.sub(r'<style id="abraca-desktop-icon-nav-patch">[\s\S]*?</style>', css, s, count=1)
           else:
@@ -339,5 +368,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: remonter et centrer verticalement les categories"
+          git commit -m "Desktop: afficher Connexion ou le prenom dans Compte"
           git push
