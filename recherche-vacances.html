@@ -36,7 +36,7 @@ async function run(){
  if(error){$('results').innerHTML='<div class="empty">'+esc(error.message)+'</div>';return}
  $('subtitle').textContent=(data||[]).length+' logement(s)'+(d?' à '+d:'')+(s&&e?' pour vos dates':'');
  $('results').innerHTML=(data||[]).length?(data||[]).map(x=>{
-   const url=x.photo_path?sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl:null;
+   const url=x.photo_path?(String(x.photo_path).startsWith('http')?x.photo_path:sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl):null;
    const rating=x.host_rating?'⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis':'Nouvel hôte';
    return '<a class="card" href="logement-vacances.html?id='+x.id+'"><div class="photo">'+(url?'<img src="'+url+'" alt="">':'Aucune photo')+'</div><div class="body"><h2>'+esc(x.title)+'</h2><div class="meta">'+esc(x.city)+' · '+x.max_guests+' voyageur(s) · '+x.bedrooms+' chambre(s)</div><div class="price">'+money(x.nightly_price)+' / nuit</div><div class="host">'+esc(x.host_name||'Hôte Abracadeal')+' · '+rating+'</div></div></a>'
  }).join(''):'<div class="empty">Aucun logement disponible avec ces critères.</div>';
