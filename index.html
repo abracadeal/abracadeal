@@ -601,7 +601,7 @@ footer{
 .mini-btn.danger{color:#a02b45}
 .empty-state{border:1px dashed #d9cde1;background:#fff;border-radius:20px;padding:36px 22px;text-align:center;color:#73657c}
 .empty-state b{display:block;color:#2c1b36;font-size:1.05rem;margin-bottom:6px}
-.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:1200;background:#24142f;color:#fff;padding:12px 16px;border-radius:999px;font-weight:700;transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;z-index:100060;/* Fix 21/09/2026 : le toast passait derriere les modales (accountModal etc a 30000, mobile a 10100/10120) donc un message d'erreur (ex. mot de passe incorrect) s'affichait mais restait invisible. Remonte au-dessus de tout, y compris la lightbox photo (100001). */background:#24142f;color:#fff;padding:12px 16px;border-radius:999px;font-weight:700;transition:.25s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.2)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 .account-box{background:#faf7fc;border:1px solid #eadff0;border-radius:16px;padding:16px;margin-bottom:16px}
 .account-box strong{display:block;margin-bottom:3px}
