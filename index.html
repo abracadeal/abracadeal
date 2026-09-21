@@ -1336,6 +1336,20 @@ a.btn{cursor:pointer}
 .abraca-default-photo{
   cursor:default!important;
 }
+/* Fix 21/09/2026 (suite) : dans les grilles de cartes, les conteneurs de photo ont des hauteurs
+   tres variables (158/190/220/235/128px selon categorie et support) et forcent object-fit:cover,
+   ce qui rogne l'image de fallback de facon imprevisible (parfois au point de masquer le logo,
+   d'ou l'impression qu'elle "n'apparait pas" sur certaines annonces/categories, ex. immobilier).
+   On force object-fit:contain uniquement pour cette image de secours, avec un fond assorti a son
+   propre arriere-plan sombre pour un rendu "letterbox" propre quel que soit le conteneur. */
+.ad-photo img.abraca-default-photo,
+.personalized-photo img.abraca-default-photo,
+.home-featured-photo img.abraca-default-photo,
+.detail-related-photo img.abraca-default-photo,
+.b2b-listing-photo img.abraca-default-photo{
+  object-fit:contain!important;
+  background:#1b052f!important;
+}
 
 @media(max-width:760px){
   .detail-modal{
@@ -2184,7 +2198,7 @@ a.btn{cursor:pointer}
 
 /* Publication : footer et quotas photo */
 .photo-footer-info{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-top:14px;padding:14px 16px;border:1px solid #eadff0;background:#faf7fc;border-radius:14px}
-.photo-footer-info strong{display:block;color:#2b153d;font-size:.95rem;margin-bottom:2px}.photo-help{text-align:right;max-width:520px}
+.photo-footer-info strong{display:block;color:#2b153d;font-size:.95rem;margin-bottom:2px}.photo-help-stack{display:flex;flex-direction:column;gap:4px;max-width:520px}.photo-help{text-align:right}
 #publishModal .form-actions{position:sticky;bottom:12px;z-index:12;margin:18px 0 12px;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:rgba(255,255,255,.985);border:1px solid #eadff0;border-radius:16px;box-shadow:0 10px 28px rgba(35,17,48,.12);align-items:center}
 @media(max-width:620px){#publishModal .form-actions{bottom:10px;margin:16px 0 10px;padding:11px 12px calc(11px + env(safe-area-inset-bottom));border-radius:14px}}
 #publishModal .publish-status{order:-1;margin:0 auto 0 0;text-align:left;width:auto;min-height:0}
@@ -2262,6 +2276,8 @@ a.btn{cursor:pointer}
 .b2b-price-visibility input{accent-color:#8d2bb0}
 
 .card-bottom-badges{position:absolute;left:10px;bottom:10px;z-index:4;display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:calc(100% - 20px)}
+.card-top-badges{position:absolute;left:9px;top:9px;z-index:3;display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:calc(100% - 20px)}
+.card-top-badges .featured-badge{position:static!important}
 .pro-card-badge,.loa-badge{display:inline-flex;align-items:center;justify-content:center;color:#fff;padding:6px 10px;border-radius:999px;font-size:.78rem;font-weight:900;letter-spacing:.04em;box-shadow:0 4px 14px rgba(0,0,0,.18)}
 .pro-card-badge{background:#2f1a3d}
 .loa-badge{background:#6d28d9}
@@ -4430,6 +4446,11 @@ header #flowErrorsBtn{
     font-size:9px!important;
   }
 
+  #homeFeaturedSection .card-top-badges{
+    top:7px!important;
+    left:7px!important;
+  }
+
   #homeFeaturedSection .pro-card-badge,
   #homeFeaturedSection .loa-badge,
   #recentSearchSection .pro-card-badge,
@@ -4673,6 +4694,11 @@ header #flowErrorsBtn{
     left:6px!important;
     padding:4px 6px!important;
     font-size:8px!important;
+  }
+
+  #resultats .card-top-badges{
+    top:6px!important;
+    left:6px!important;
   }
 
   #resultats .pro-card-badge,
@@ -7120,8 +7146,10 @@ header #flowErrorsBtn{
             <div id="photoPreview" hidden></div>
             <div class="photo-footer-info">
               <div><strong id="photoQuotaTitle">Jusqu’à 3 photos incluses</strong><div id="photoCount" class="muted">0 / 3 ajoutée</div></div>
-              <div class="note photo-help">La première photo sera la photo principale · compression et filigrane automatiques.</div>
-              <div class="note photo-help abraca-default-photo-note">Pour de meilleurs résultats, ajoutez au moins une photo à votre annonce. Sans photo, Abracadeal affichera automatiquement une image par défaut.</div>
+              <div class="photo-help-stack">
+                <div class="note photo-help">La première photo sera la photo principale · compression et filigrane automatiques.</div>
+                <div class="note photo-help abraca-default-photo-note">Pour de meilleurs résultats, ajoutez au moins une photo à votre annonce. Sans photo, Abracadeal affichera automatiquement une image par défaut.</div>
+              </div>
             </div>
           </div>
           </div>
@@ -10441,12 +10469,27 @@ function listingShareText(id){
   return a?`${a.title}${a.price!==null&&a.price!==''?' - '+money(a.price):''} sur Abracadeal`:'Annonce Abracadeal';
 }
 let sharedListingHandled=false;
-function openSharedListingFromUrl(){
+async function openSharedListingFromUrl(){
   if(sharedListingHandled) return;
   const id=new URLSearchParams(location.search).get('annonce');
   if(!id) return;
-  const ad=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
   sharedListingHandled=true;
+  let ad=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
+  /* Fix 21/09/2026 : le lien partage (sms/whatsapp/...) pouvait afficher a tort
+     "annonce introuvable" si le catalogue local (allAds) n'avait pas encore fini
+     de charger au moment ou ce lien s'ouvre (course avec le chargement initial /
+     l'auth Supabase). On va chercher l'annonce directement en base avant d'abandonner. */
+  if(!ad && sb){
+    try{
+      const {data,error}=await sb.from('listings')
+        .select('*,listing_photos(id,storage_path,position)')
+        .eq('id',id)
+        .eq('status','active')
+        .eq('visibility_scope','public')
+        .maybeSingle();
+      if(!error && data){ad=data;detailAdsCache.set(id,data);}
+    }catch(err){console.error('Recherche directe de l’annonce partagée impossible',err);}
+  }
   if(ad){setTimeout(()=>openAd(id),0);return;}
   toast('Cette annonce est introuvable ou n’est plus en ligne');
 }
@@ -10474,15 +10517,26 @@ function positionShareMenu(pop,anchor){
   const below=r.bottom+8,above=r.top-h-8;const top=(below+h<=innerHeight-10)?below:Math.max(10,above);
   pop.style.left=left+'px';pop.style.top=top+'px';
 }
+/* Fix 21/09/2026 : sur certains mobiles, un appui sur une icone de partage pouvait
+   declencher deux fois la meme action (double ouverture SMS/WhatsApp/etc.), a cause d'un
+   double declenchement de l'evenement clic. On ignore tout second appel identique tres
+   rapproche (moins d'1 seconde) pour la meme annonce et le meme canal. */
+let lastShareActionKey='',lastShareActionAt=0;
+function shareActionOnce(key){
+  const now=Date.now();
+  if(key===lastShareActionKey && (now-lastShareActionAt)<1000) return false;
+  lastShareActionKey=key;lastShareActionAt=now;return true;
+}
 window.copyListingLink=async(id)=>{
+  if(!shareActionOnce('copy:'+id))return;
   const url=publicListingUrl(id);
   try{await navigator.clipboard.writeText(url);toast('Lien copié');}
   catch{prompt('Copiez ce lien :',url);}
 };
-window.shareListingWhatsApp=id=>{const text=encodeURIComponent(listingShareText(id)+' '+publicListingUrl(id));window.open('https://wa.me/?text='+text,'_blank','noopener');};
-window.shareListingFacebook=id=>{const url=encodeURIComponent(publicListingUrl(id));window.open('https://www.facebook.com/sharer/sharer.php?u='+url,'_blank','noopener,width=700,height=600');};
-window.shareListingSms=id=>{const body=encodeURIComponent(listingShareText(id)+' '+publicListingUrl(id));location.href='sms:?&body='+body;};
-window.shareListingNative=async id=>{const url=publicListingUrl(id),text=listingShareText(id);if(navigator.share){try{await navigator.share({title:'Abracadeal',text,url})}catch(e){if(e?.name!=='AbortError')console.warn(e)}}else{await copyListingLink(id)}closeShareMenu();};
+window.shareListingWhatsApp=id=>{if(!shareActionOnce('whatsapp:'+id))return;const text=encodeURIComponent(listingShareText(id)+' '+publicListingUrl(id));window.open('https://wa.me/?text='+text,'_blank','noopener');};
+window.shareListingFacebook=id=>{if(!shareActionOnce('facebook:'+id))return;const url=encodeURIComponent(publicListingUrl(id));window.open('https://www.facebook.com/sharer/sharer.php?u='+url,'_blank','noopener,width=700,height=600');};
+window.shareListingSms=id=>{if(!shareActionOnce('sms:'+id))return;const body=encodeURIComponent(listingShareText(id)+' '+publicListingUrl(id));location.href='sms:?&body='+body;};
+window.shareListingNative=async id=>{if(!shareActionOnce('native:'+id))return;const url=publicListingUrl(id),text=listingShareText(id);if(navigator.share){try{await navigator.share({title:'Abracadeal',text,url})}catch(e){if(e?.name!=='AbortError')console.warn(e)}}else{await copyListingLink(id)}closeShareMenu();};
 window.shareListingSmart=(id,event)=>{
   if(event){event.preventDefault();event.stopPropagation();}
   const pop=ensureGlobalSharePopover();
@@ -10901,7 +10955,7 @@ function rememberSearch(){
 }
 function personalizedCard(a,extra=''){
   const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
-  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${esc(a.title)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${extra}</div></article>`;
+  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${esc(a.title)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
 }
 function renderRecentViewed(){
   const sec=$('#recentViewedSection'),grid=$('#recentViewedGrid');if(!sec||!grid)return;
@@ -10952,11 +11006,11 @@ function renderHomeFeatured(){
     const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
-      <div class="home-featured-photo">${img}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div><span class="featured-badge">À LA UNE</span>${listingCardActions(a)}</div>
+      <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
       <div class="home-featured-body">
         <div class="home-featured-meta">${esc(category)} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}</div>
         <h3 class="home-featured-title">${esc(a.title)}</h3>
-        <div class="home-featured-price">${cataloguePrice(a)}</div>
+        <div class="home-featured-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         <div class="home-featured-city">📍 ${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
@@ -11025,7 +11079,7 @@ function renderAds(){
     const moderationActions=(moderationMode && currentProfile?.is_admin && a.status==='pending')?`<button class="mini-btn" onclick="approveAd('${a.id}')">Accepter</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`:'';
     const featured=listingIsFeatured(a);
     return `<article class="ad-card ${a.category==='immobilier'?'immo-card':''} ${featured?'featured-card':''}" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}">
-      <div class="ad-photo"${photoAttrs}>${img}${carouselHtml}<div class="card-bottom-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}${a.loa?`<span class="loa-badge">LOA</span>`:''}</div>${featured?`<span class="featured-badge">À LA UNE</span>`:''}${!moderationMode?listingCardActions(a):''}</div>
+      <div class="ad-photo"${photoAttrs}>${img}${carouselHtml}<div class="card-top-badges">${featured?`<span class="featured-badge">À LA UNE</span>`:''}${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${!moderationMode?listingCardActions(a):''}</div>
       <div class="ad-body">
         ${moderationRiskHTML(a)}
         ${statusBadge}
@@ -12599,7 +12653,7 @@ if(sb){
     catch(error){console.error('Favoris indisponibles',error);}
     try{await loadAds();}
     catch(error){console.error('Catalogue indisponible',error);}
-    try{openSharedListingFromUrl();}
+    try{await openSharedListingFromUrl();}
     catch(error){console.error('Ouverture du lien partagé impossible',error);}
 
     setTimeout(async()=>{
