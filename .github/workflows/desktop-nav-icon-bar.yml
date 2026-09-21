@@ -46,6 +46,7 @@ jobs:
               grid-area:cats!important;
               width:100%!important;
               justify-content:center!important;
+              gap:6px!important;
               min-height:28px!important;
               margin-top:-11px!important;
               margin-bottom:-2px!important;
@@ -71,6 +72,8 @@ jobs:
               height:28px!important;
               padding-top:0!important;
               padding-bottom:0!important;
+              padding-left:7px!important;
+              padding-right:7px!important;
               line-height:28px!important;
             }
 
@@ -331,5 +334,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: remonter encore les categories et restaurer les sous-menus"
+          git commit -m "Desktop: espacer legerement les categories"
           git push
