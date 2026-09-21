@@ -10621,27 +10621,37 @@ function listingShareText(id){
 let sharedListingHandled=false;
 async function openSharedListingFromUrl(){
   if(sharedListingHandled) return;
-  const id=new URLSearchParams(location.search).get('annonce');
+  const params=new URLSearchParams(location.search);
+  const adminPreviewId=params.get('admin_preview');
+  const publicId=params.get('annonce');
+  const id=adminPreviewId||publicId;
   if(!id) return;
+
+  // Aperçu admin : autorise la fiche complète quel que soit le statut,
+  // mais uniquement après confirmation du rôle administrateur.
+  if(adminPreviewId && !currentProfile?.is_admin){
+    toast('Accès administrateur requis');
+    return;
+  }
+
   sharedListingHandled=true;
   let ad=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
-  /* Fix 21/09/2026 : le lien partage (sms/whatsapp/...) pouvait afficher a tort
-     "annonce introuvable" si le catalogue local (allAds) n'avait pas encore fini
-     de charger au moment ou ce lien s'ouvre (course avec le chargement initial /
-     l'auth Supabase). On va chercher l'annonce directement en base avant d'abandonner. */
+
   if(!ad && sb){
     try{
-      const {data,error}=await sb.from('listings')
+      let query=sb.from('listings')
         .select('*,listing_photos(id,storage_path,position)')
-        .eq('id',id)
-        .eq('status','active')
-        .eq('visibility_scope','public')
-        .maybeSingle();
+        .eq('id',id);
+      if(!adminPreviewId){
+        query=query.eq('status','active').eq('visibility_scope','public');
+      }
+      const {data,error}=await query.maybeSingle();
       if(!error && data){ad=data;detailAdsCache.set(id,data);}
-    }catch(err){console.error('Recherche directe de l’annonce partagée impossible',err);}
+    }catch(err){console.error('Recherche directe de l’annonce impossible',err);}
   }
+
   if(ad){setTimeout(()=>openAd(id),0);return;}
-  toast('Cette annonce est introuvable ou n’est plus en ligne');
+  toast(adminPreviewId?'Annonce introuvable':'Cette annonce est introuvable ou n’est plus en ligne');
 }
 let activeShareListingId=null;
 function closeShareMenu(){const pop=document.getElementById('globalSharePopover');if(pop)pop.classList.add('hidden');activeShareListingId=null;}
