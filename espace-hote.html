@@ -84,6 +84,7 @@ html.abraca-embedded-host body{background:#faf7fc!important}
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
 <style id="abraca-host-mobile-nav-fix-20260921">
 /* Espace Hôte : sur téléphone, un seul bouton Menu ouvre toutes les rubriques. */
+.host-mobile-toolbar{display:none}
 .host-mobile-menu-btn{display:none}
 
 @media (min-width:621px) and (max-width:900px){
@@ -129,6 +130,27 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     gap:10px!important;
   }
 
+  .host-mobile-toolbar{
+    display:grid!important;
+    grid-template-columns:auto minmax(0,1fr)!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .host-mobile-back-vac{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:50px!important;
+    padding:0 14px!important;
+    border:1px solid #dfd0e6!important;
+    border-radius:16px!important;
+    background:#fff!important;
+    color:#5b1a77!important;
+    font-size:.9rem!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    box-shadow:0 8px 20px rgba(49,17,61,.07)!important;
+  }
   .host-mobile-menu-btn{
     display:flex!important;
     align-items:center!important;
@@ -354,7 +376,10 @@ html.abraca-embedded-host body{background:#faf7fc!important}
 </div>
 
 <div id="appView" class="shell hidden">
-  <button id="hostMobileMenuBtn" class="host-mobile-menu-btn" type="button" aria-expanded="false" aria-controls="hostSideMenu">☰ Menu hôte</button>
+  <div class="host-mobile-toolbar">
+    <a class="host-mobile-back-vac" href="vacances.html" target="_top" aria-label="Retour à Abracadeal Vacances">← Vacances</a>
+    <button id="hostMobileMenuBtn" class="host-mobile-menu-btn" type="button" aria-expanded="false" aria-controls="hostSideMenu">☰ Menu hôte</button>
+  </div>
   <aside class="side" id="hostSideMenu">
     <h3>Espace Hôte</h3>
     <button class="navbtn active" data-view="dashboard">Vue d’ensemble</button>
