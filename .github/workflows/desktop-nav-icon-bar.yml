@@ -28,9 +28,10 @@ jobs:
               grid-template-areas:
                 "brand actions"
                 "cats cats"!important;
-              row-gap:4px!important;
-              padding-top:5px!important;
-              padding-bottom:5px!important;
+              row-gap:0!important;
+              min-height:0!important;
+              padding-top:2px!important;
+              padding-bottom:0!important;
             }
             header .desktop-brand{grid-area:brand!important}
             header .nav-actions{
@@ -45,6 +46,18 @@ jobs:
               grid-area:cats!important;
               width:100%!important;
               justify-content:center!important;
+              min-height:28px!important;
+              margin-top:-8px!important;
+              margin-bottom:-2px!important;
+              padding-top:0!important;
+              padding-bottom:0!important;
+            }
+            header .desktop-category-link{
+              min-height:28px!important;
+              height:28px!important;
+              padding-top:0!important;
+              padding-bottom:0!important;
+              line-height:28px!important;
             }
 
             /* Remplace visuellement l'ancien bloc d'actions desktop sans supprimer ses triggers JS. */
@@ -57,13 +70,13 @@ jobs:
               align-items:center!important;
               justify-content:flex-end!important;
               gap:4px!important;
-              min-height:58px!important;
+              min-height:48px!important;
               white-space:nowrap!important;
             }
             .abraca-desktop-actions-v2 .abraca-dnav-item{
               position:relative!important;
               min-width:72px!important;
-              height:56px!important;
+              height:46px!important;
               padding:4px 9px 3px!important;
               border:0!important;
               border-radius:12px!important;
@@ -304,5 +317,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: remove old Vacances pill and search icon"
+          git commit -m "Desktop: remonter les categories et la barre Fondateurs"
           git push
