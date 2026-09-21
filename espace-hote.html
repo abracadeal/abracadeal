@@ -526,6 +526,16 @@ let currentUser=null, profile=null, listings=[], details=new Map(), privateDetai
 
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
+
+function confirmVacationLowPrice(price){
+  if(!Number.isFinite(price)||price>=10)return true;
+  const amount=price.toLocaleString('fr-FR',{minimumFractionDigits:0,maximumFractionDigits:2});
+  return confirm(
+    'Vérifiez votre tarif avant publication.\n\n'
+    +'Vous avez indiqué '+amount+' € par nuit, soit moins de 10 €.\n\n'
+    +'Si ce prix est volontaire, confirmez-le pour continuer. Abracadeal affichera alors ce tarif tel que vous l’avez validé.'
+  );
+}
 function msg(t,err=false){const n=$('notice');n.textContent=t;n.className='notice show'+(err?' err':'');window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>{n.classList.remove('show')},5000)}
 function closeHostMobileMenu(){
   const menu=$('hostSideMenu'),btn=$('hostMobileMenuBtn');
@@ -738,6 +748,9 @@ $('completeHostBtn').onclick=async()=>{
   }
   if(!/^\d{14}$/.test(siret)){onboardingMsg('Le numéro SIRET doit contenir exactement 14 chiffres.',true);return}
   if(!$('oLegalCheck').checked){onboardingMsg('Vous devez confirmer la déclaration sur l’honneur.',true);return}
+  if(price<10&&!confirmVacationLowPrice(price)){
+    onboardingMsg('Tarif non confirmé. Vérifiez le prix par nuit avant de continuer.',true);return;
+  }
 
   const btn=$('completeHostBtn');btn.disabled=true;
   try{
@@ -795,7 +808,9 @@ $('completeHostBtn').onclick=async()=>{
 
     const listingPayload={
       owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:postal,
-      seller_type:type,status:'pending',phone,contact_email:currentUser.email||null
+      seller_type:type,status:'pending',phone,contact_email:currentUser.email||null,
+      vacation_low_price_confirmed_at:price<10?now:null,
+      vacation_low_price_confirmed_value:price<10?price:null
     };
 
     const {data:hostState,error:hostStateErr}=await sb.from('vacation_hosts')
@@ -892,7 +907,7 @@ function listingOptions(){return listings.map(l=>'<option value="'+l.id+'">'+esc
 function refreshSelects(){['cListing','pListing','iListing'].forEach(id=>$(id).innerHTML=listingOptions()||'<option value="">Aucun logement</option>')}
 
 async function loadListings(){
-  const {data,error}=await sb.from('listings').select('id,title,description,price,city,postal_code,status,created_at,updated_at').eq('owner_id',currentUser.id).eq('category','vacances').order('created_at',{ascending:false});
+  const {data,error}=await sb.from('listings').select('id,title,description,price,city,postal_code,status,created_at,updated_at,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value').eq('owner_id',currentUser.id).eq('category','vacances').order('created_at',{ascending:false});
   if(error){msg(error.message,true);return}
   listings=data||[];
   const ids=listings.map(x=>x.id);
@@ -914,7 +929,13 @@ window.editListing=id=>{const l=listings.find(x=>x.id===id),d=details.get(id)||{
 $('saveListingBtn').onclick=async()=>{
   const id=$('editListingId').value;const title=$('lTitle').value.trim(),city=$('lCity').value.trim(),description=$('lDescription').value.trim(),price=Number($('lPrice').value);
   if(!title||!city||!description||!Number.isFinite(price)){msg('Titre, ville, description et prix sont obligatoires.',true);return}
-  const listingPayload={owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:$('lPostal').value.trim()||null,seller_type:profile?.account_type==='professionnel'?'professionnel':'particulier'};
+  const existingListing=id?listings.find(x=>x.id===id):null;
+  const lowPriceAlreadyConfirmed=!!(existingListing?.vacation_low_price_confirmed_at&&Number(existingListing?.vacation_low_price_confirmed_value)===price);
+  if(price<10&&!lowPriceAlreadyConfirmed&&!confirmVacationLowPrice(price)){
+    msg('Tarif non confirmé. Vérifiez le prix par nuit avant d’enregistrer.',true);return;
+  }
+  const lowPriceConfirmedAt=price<10?(lowPriceAlreadyConfirmed?existingListing.vacation_low_price_confirmed_at:new Date().toISOString()):null;
+  const listingPayload={owner_id:currentUser.id,category:'vacances',title,description,price,city,postal_code:$('lPostal').value.trim()||null,seller_type:profile?.account_type==='professionnel'?'professionnel':'particulier',vacation_low_price_confirmed_at:lowPriceConfirmedAt,vacation_low_price_confirmed_value:price<10?price:null};
   let listingId=id;
   if(id){const {error}=await sb.from('listings').update({...listingPayload,updated_at:new Date().toISOString()}).eq('id',id);if(error){msg(error.message,true);return}}
   else{listingPayload.status='pending';const {data,error}=await sb.from('listings').insert(listingPayload).select('id').single();if(error){msg(error.message,true);return}listingId=data.id}
@@ -934,7 +955,7 @@ $('cListing').onchange=loadCalendar;
 async function loadCalendar(){const id=$('cListing').value;if(!id){$('calendarList').innerHTML='<div class="empty">Ajoutez d’abord un logement.</div>';return}const [m,i]=await Promise.all([sb.from('vacation_manual_blocks').select('*').eq('listing_id',id).order('starts_on'),sb.from('vacation_calendar_blocks').select('*').eq('listing_id',id).order('starts_on')]);const rows=[];(m.data||[]).forEach(x=>rows.push({kind:'Manuel',...x}));(i.data||[]).forEach(x=>rows.push({kind:'iCal',...x}));rows.sort((a,b)=>a.starts_on.localeCompare(b.starts_on));$('calendarList').innerHTML=rows.length?rows.map(x=>'<div class="calendarRow"><div class="cardhead" style="margin:0"><div><b>'+esc(x.kind)+'</b> · '+new Date(x.starts_on+'T12:00').toLocaleDateString('fr-FR')+' → '+new Date(x.ends_on+'T12:00').toLocaleDateString('fr-FR')+(x.note?'<div class="sub">'+esc(x.note)+'</div>':'')+'</div>'+(x.kind==='Manuel'?'<button class="btn danger" onclick="deleteBlock(\''+x.id+'\')">Supprimer</button>':'')+'</div></div>').join(''):'<div class="empty">Aucune date bloquée.</div>'}
 window.deleteBlock=async id=>{await sb.from('vacation_manual_blocks').delete().eq('id',id);loadCalendar()}
 
-$('addRuleBtn').onclick=async()=>{const listing_id=$('pListing').value,starts_on=$('pStart').value,ends_on=$('pEnd').value,nightly_price=Number($('pPrice').value);if(!listing_id||!starts_on||!ends_on||ends_on<=starts_on||!Number.isFinite(nightly_price)){msg('Complétez la période et le prix.',true);return}const {error}=await sb.from('vacation_price_rules').insert({owner_id:currentUser.id,listing_id,label:$('pLabel').value.trim()||'Période spéciale',starts_on,ends_on,nightly_price,min_nights:$('pMin').value?Number($('pMin').value):null});if(error){msg(error.message,true);return}msg('Règle tarifaire ajoutée.');loadPricing()}
+$('addRuleBtn').onclick=async()=>{const listing_id=$('pListing').value,starts_on=$('pStart').value,ends_on=$('pEnd').value,nightly_price=Number($('pPrice').value);if(!listing_id||!starts_on||!ends_on||ends_on<=starts_on||!Number.isFinite(nightly_price)){msg('Complétez la période et le prix.',true);return}if(nightly_price<10&&!confirmVacationLowPrice(nightly_price)){msg('Tarif non confirmé. Vérifiez le prix par nuit avant d’ajouter cette période.',true);return}const {error}=await sb.from('vacation_price_rules').insert({owner_id:currentUser.id,listing_id,label:$('pLabel').value.trim()||'Période spéciale',starts_on,ends_on,nightly_price,min_nights:$('pMin').value?Number($('pMin').value):null,low_price_confirmed_at:nightly_price<10?new Date().toISOString():null});if(error){msg(error.message,true);return}msg('Règle tarifaire ajoutée.');loadPricing()}
 $('pListing').onchange=loadPricing;
 async function loadPricing(){const id=$('pListing').value;if(!id){$('pricingList').innerHTML='<div class="empty">Ajoutez d’abord un logement.</div>';return}const {data}=await sb.from('vacation_price_rules').select('*').eq('listing_id',id).order('starts_on');$('pricingList').innerHTML=data?.length?data.map(x=>'<div class="ruleRow"><div class="cardhead" style="margin:0"><div><b>'+esc(x.label)+'</b><div class="sub">'+new Date(x.starts_on+'T12:00').toLocaleDateString('fr-FR')+' → '+new Date(x.ends_on+'T12:00').toLocaleDateString('fr-FR')+' · '+money(x.nightly_price)+'/nuit'+(x.min_nights?' · min. '+x.min_nights+' nuit(s)':'')+'</div></div><button class="btn danger" onclick="deleteRule(\''+x.id+'\')">Supprimer</button></div></div>').join(''):'<div class="empty">Aucune règle spéciale. Le prix de base de l’annonce s’applique.</div>'}
 window.deleteRule=async id=>{await sb.from('vacation_price_rules').delete().eq('id',id);loadPricing()}
