@@ -83,8 +83,9 @@ html.abraca-embedded-host body{background:#faf7fc!important}
 </style>
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
 <style id="abraca-host-mobile-nav-fix-20260921">
-/* Espace Hôte : tablette = barre horizontale scrollable.
-   iPhone vertical = grille 2 colonnes pour éviter tout chevauchement. */
+/* Espace Hôte : sur téléphone, un seul bouton Menu ouvre toutes les rubriques. */
+.host-mobile-menu-btn{display:none}
+
 @media (min-width:621px) and (max-width:900px){
   .shell{
     grid-template-columns:1fr!important;
@@ -110,13 +111,9 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     flex:0 0 auto!important;
     width:auto!important;
     min-width:130px!important;
-    max-width:none!important;
     margin:0!important;
     padding:11px 14px!important;
     white-space:nowrap!important;
-    overflow:hidden!important;
-    text-overflow:ellipsis!important;
-    line-height:1.1!important;
     text-align:center!important;
     border-radius:12px!important;
   }
@@ -129,23 +126,46 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     max-width:calc(100% - 18px)!important;
     margin:10px auto 28px!important;
     grid-template-columns:1fr!important;
-    gap:14px!important;
+    gap:10px!important;
+  }
+
+  .host-mobile-menu-btn{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-height:50px!important;
+    margin:0!important;
+    padding:0 16px!important;
+    border:1px solid rgba(255,255,255,.13)!important;
+    border-radius:16px!important;
+    background:linear-gradient(135deg,#24102f,#421554)!important;
+    color:#fff!important;
+    font-size:1rem!important;
+    font-weight:900!important;
+    cursor:pointer!important;
+    box-shadow:0 10px 24px rgba(49,17,61,.15)!important;
   }
 
   .side,
   html.abraca-embedded-host .side{
+    display:none!important;
     position:static!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:7px!important;
     width:100%!important;
     max-width:100%!important;
     min-width:0!important;
-    padding:8px!important;
     margin:0!important;
-    border-radius:18px!important;
+    padding:8px!important;
+    border-radius:16px!important;
+    background:#251033!important;
     overflow:visible!important;
-    white-space:normal!important;
+  }
+
+  .side.mobile-open,
+  html.abraca-embedded-host .side.mobile-open{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    gap:6px!important;
   }
 
   .side h3{display:none!important}
@@ -154,23 +174,24 @@ html.abraca-embedded-host body{background:#faf7fc!important}
   html.abraca-embedded-host .side .navbtn{
     display:flex!important;
     align-items:center!important;
-    justify-content:center!important;
+    justify-content:flex-start!important;
     width:100%!important;
     min-width:0!important;
     max-width:100%!important;
-    min-height:42px!important;
+    min-height:44px!important;
     margin:0!important;
-    padding:9px 7px!important;
+    padding:10px 13px!important;
     white-space:normal!important;
-    overflow:hidden!important;
+    overflow:visible!important;
     overflow-wrap:normal!important;
     word-break:normal!important;
-    text-overflow:clip!important;
+    text-align:left!important;
+    font-size:.88rem!important;
     line-height:1.15!important;
-    text-align:center!important;
-    font-size:.78rem!important;
     border-radius:11px!important;
   }
+
+  .main{min-width:0!important}
 }
 </style>
 </head>
@@ -333,7 +354,8 @@ html.abraca-embedded-host body{background:#faf7fc!important}
 </div>
 
 <div id="appView" class="shell hidden">
-  <aside class="side">
+  <button id="hostMobileMenuBtn" class="host-mobile-menu-btn" type="button" aria-expanded="false" aria-controls="hostSideMenu">☰ Menu hôte</button>
+  <aside class="side" id="hostSideMenu">
     <h3>Espace Hôte</h3>
     <button class="navbtn active" data-view="dashboard">Vue d’ensemble</button>
     <button class="navbtn" data-view="listings">Mes logements</button>
@@ -480,9 +502,39 @@ let currentUser=null, profile=null, listings=[], details=new Map(), privateDetai
 function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]))}
 function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
 function msg(t,err=false){const n=$('notice');n.textContent=t;n.className='notice show'+(err?' err':'');window.scrollTo({top:0,behavior:'smooth'});setTimeout(()=>{n.classList.remove('show')},5000)}
-function showView(v){document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));$('view-'+v).classList.remove('hidden');document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));if(v==='calendar')loadCalendar();if(v==='pricing')loadPricing();if(v==='ical')loadFeeds();if(v==='messages')loadMessages();if(v==='reviews')loadHostReviews()}
+function closeHostMobileMenu(){
+  const menu=$('hostSideMenu'),btn=$('hostMobileMenuBtn');
+  menu?.classList.remove('mobile-open');
+  btn?.setAttribute('aria-expanded','false');
+}
+function showView(v){
+  if(!v)return;
+  document.querySelectorAll('.view').forEach(x=>x.classList.add('hidden'));
+  const target=$('view-'+v);
+  if(!target)return;
+  target.classList.remove('hidden');
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.toggle('active',b.dataset.view===v));
+  if(v==='calendar')loadCalendar();
+  if(v==='pricing')loadPricing();
+  if(v==='ical')loadFeeds();
+  if(v==='messages')loadMessages();
+  if(v==='reviews')loadHostReviews();
+  closeHostMobileMenu();
+}
 window.showView=showView;
-document.querySelectorAll('.navbtn').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+
+document.querySelectorAll('.navbtn[data-view]').forEach(b=>{
+  b.addEventListener('click',()=>showView(b.dataset.view));
+});
+document.querySelectorAll('.navbtn:not([data-view])').forEach(b=>{
+  b.addEventListener('click',()=>closeHostMobileMenu());
+});
+$('hostMobileMenuBtn')?.addEventListener('click',()=>{
+  const menu=$('hostSideMenu'),btn=$('hostMobileMenuBtn');
+  const open=menu?.classList.toggle('mobile-open');
+  btn?.setAttribute('aria-expanded',open?'true':'false');
+  if(btn)btn.textContent=open?'✕ Fermer le menu':'☰ Menu hôte';
+});
 
 async function boot(){
   const params=new URLSearchParams(location.search);
