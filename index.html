@@ -7187,24 +7187,34 @@ header #flowErrorsBtn{
 }
 </style>
 <style id="abraca-desktop-account-name-fit-20260921">
-/* Desktop uniquement : le nom du compte ne doit jamais pousser Favoris / Emploi. */
+/* Desktop uniquement : libérer de la place dans le header.
+   Le compte garde toujours le libellé fixe "Compte" et le coeur est plus discret. */
 @media (min-width:1024px){
   header #accountBtn{
-    width:auto!important;
-    min-width:0!important;
-    max-width:210px!important;
-    padding-left:14px!important;
-    padding-right:14px!important;
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:0 10px!important;
     overflow:hidden!important;
   }
   header #accountBtn #accountBtnLabel{
     display:block!important;
-    min-width:0!important;
+    width:100%!important;
     max-width:100%!important;
     overflow:hidden!important;
-    text-overflow:ellipsis!important;
+    text-overflow:clip!important;
     white-space:nowrap!important;
-    font-size:13px!important;
+    text-align:center!important;
+    font-size:12px!important;
+    line-height:1!important;
+  }
+  header .desktop-favorites-btn{
+    width:34px!important;
+    height:40px!important;
+    flex:0 0 34px!important;
+    font-size:25px!important;
     line-height:1!important;
   }
 }
@@ -9204,7 +9214,7 @@ function updateAuthUI(preserveEditing=false){
   if($('#profileCity')) $('#profileCity').required=!isAdminAccount;
   if($('#profilePhone')) $('#profilePhone').required=!isAdminAccount;
   if(currentUser){
-    $('#accountBtnLabel').textContent=currentProfile?.is_admin?'Admin':(currentProfile?.display_name||'Compte');
+    $('#accountBtnLabel').textContent='Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.remove('hidden');
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
     $('#accountUserBox').innerHTML=`<strong>${esc(currentProfile?.display_name||currentUser.email)}</strong>
