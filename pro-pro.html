@@ -1,0 +1,249 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Entre Pro · Abracadeal</title>
+<meta name="theme-color" content="#0b0714">
+<link rel="icon" href="assets/abracadeal-lamp-icon.webp">
+<style>
+:root{--bg:#0b0714;--panel:#160d21;--panel2:#21102f;--line:rgba(255,255,255,.11);--text:#fff;--muted:#bcaec7;--pink:#ff57b5;--gold:#e8bd54;--purple:#8d35bd;--ok:#35c985;--danger:#ef476f}
+*{box-sizing:border-box}html{background:var(--bg);color-scheme:dark}body{margin:0;background:radial-gradient(circle at 50% -10%,#321241 0,#0b0714 38%,#08050d 100%);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;min-height:100vh}
+button,input,select,textarea{font:inherit}.hidden{display:none!important}
+a{color:inherit;text-decoration:none}.wrap{width:min(1180px,calc(100% - 28px));margin:auto}
+.top{position:sticky;top:0;z-index:30;background:rgba(11,7,20,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--line)}
+.topin{min-height:66px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{font-weight:950;font-size:21px;letter-spacing:-.03em}.brand .deal{color:var(--pink)}.back{border:1px solid var(--line);background:#1d1029;color:#fff;border-radius:12px;padding:10px 13px;font-weight:850}
+.hero{padding:30px 0 18px}.eyebrow{color:var(--gold);font-size:12px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.hero h1{font-size:clamp(32px,7vw,54px);line-height:1;margin:7px 0 10px;letter-spacing:-.04em}.hero p{color:var(--muted);max-width:760px;line-height:1.55;margin:0}
+.statusbar{margin:12px 0 18px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.035);color:#e8deed;font-size:14px}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:3px 0 14px;scrollbar-width:none}.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;border:1px solid var(--line);background:#1c0e29;color:#fff;border-radius:999px;padding:10px 14px;font-weight:850}.tab.active{background:linear-gradient(135deg,#77299b,#a735ba);border-color:#bd74d6}.badge{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#ef3f8f;font-size:11px;margin-left:5px}
+.panel{border:1px solid var(--line);background:linear-gradient(180deg,rgba(31,16,45,.98),rgba(18,9,27,.98));border-radius:20px;padding:18px;margin-bottom:18px;box-shadow:0 12px 34px rgba(0,0,0,.22)}
+.panelhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}.panelhead h2{margin:0;font-size:22px}.note{color:var(--muted);font-size:13px;line-height:1.45}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.card{border:1px solid var(--line);border-radius:16px;background:#130a1d;overflow:hidden;min-width:0}.photo{height:170px;background:#261432;position:relative}.photo img{width:100%;height:100%;object-fit:cover;display:block}.chip{position:absolute;left:9px;top:9px;border-radius:999px;padding:6px 9px;background:#3c1a52;font-size:10px;font-weight:950;letter-spacing:.05em}.body{padding:12px}.body h3{margin:4px 0 6px;font-size:16px}.price{font-size:19px;color:var(--pink);font-weight:950}.meta{font-size:12px;color:var(--muted);margin-top:7px}.desc{color:#dfd2e5;font-size:13px;line-height:1.45;white-space:pre-wrap;max-height:6.2em;overflow:hidden}
+.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}.btn{border:1px solid var(--line);background:#291338;color:#fff;border-radius:11px;min-height:42px;padding:0 13px;font-weight:850;cursor:pointer}.btn.primary{background:linear-gradient(135deg,#ee3c9e,#b832c6);border-color:rgba(255,255,255,.14)}.btn.gold{background:linear-gradient(135deg,#d6a935,#f0cc69);color:#2d2100}.btn.danger{color:#ff9db6}.btn:disabled{opacity:.5;cursor:not-allowed}
+.form{border:1px solid var(--line);background:#12091c;border-radius:16px;padding:15px;margin:14px 0}.form h3{margin-top:0}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.field{display:flex;flex-direction:column;gap:6px}.field.full{grid-column:1/-1}.field label,.legend{font-size:12px;color:#d8c9df;font-weight:800}.input{width:100%;border:1px solid rgba(255,255,255,.14);background:#0d0713;color:#fff;border-radius:11px;padding:11px 12px;outline:none}.input:focus{border-color:#a852c6;box-shadow:0 0 0 3px rgba(168,82,198,.14)}textarea.input{min-height:110px;resize:vertical}
+.options{display:flex;gap:12px;flex-wrap:wrap}.options label{display:flex;gap:7px;align-items:center;font-size:13px}
+.access-card{border:1px solid var(--line);background:#140b1e;border-radius:14px;padding:14px;margin:10px 0}.access-card h3{margin:3px 0 8px}.status-pill{display:inline-flex;border:1px solid rgba(255,255,255,.12);background:#2a1638;border-radius:999px;padding:5px 8px;font-size:10px;font-weight:900}
+.photos{display:flex;gap:8px;overflow-x:auto;margin-top:10px}.photos img{width:190px;height:130px;object-fit:cover;border-radius:10px;background:#24142f}
+.empty{padding:28px 12px;text-align:center;color:var(--muted)}
+.lock{padding:30px 18px;text-align:center}.lock h2{margin:0 0 9px}.lock p{color:var(--muted);line-height:1.5}.lock .btn{margin-top:10px}
+.sheet[hidden]{display:none!important}.sheet{position:fixed;inset:0;z-index:60;background:rgba(5,3,9,.87);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(8px)}.sheetin{width:min(760px,100%);max-height:93dvh;background:#140b1d;border:1px solid var(--line);border-radius:23px 23px 0 0;overflow:auto}.sheethead{position:sticky;top:0;z-index:2;background:#180d23;border-bottom:1px solid var(--line);padding:10px 12px;display:flex;justify-content:space-between;align-items:center}.close{width:42px;height:42px;border:1px solid var(--line);background:#261432;color:#fff;border-radius:12px;font-size:24px}.gallery{display:flex;gap:8px;overflow-x:auto;padding:12px}.gallery img{flex:0 0 88%;height:280px;object-fit:cover;border-radius:15px;background:#25152f}.sheetbody{padding:4px 16px 28px}.sheetbody h2{font-size:28px;margin:8px 0}.sheetprice{font-size:26px;color:var(--pink);font-weight:950}.sheetdesc{white-space:pre-wrap;line-height:1.55;color:#e3d6e8}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:100;background:#2a1438;border:1px solid var(--line);border-radius:999px;padding:10px 15px;box-shadow:0 12px 30px #0008;font-size:13px;opacity:0;pointer-events:none;transition:.2s}.toast.show{opacity:1}
+@media(max-width:820px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){.wrap{width:min(100% - 20px,1180px)}.topin{min-height:58px}.hero{padding-top:20px}.panel{padding:13px;border-radius:17px}.panelhead{display:block}.grid{grid-template-columns:1fr}.photo{height:210px}.formgrid{grid-template-columns:1fr}.field.full{grid-column:auto}.tabs{margin-right:-10px}.gallery img{height:235px}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<header class="top"><div class="wrap topin"><a class="brand" href="index.html">Abraca<span class="deal">deal</span> ✦</a><a class="back" href="index.html">← Accueil</a></div></header>
+<main class="wrap">
+<section class="hero"><div class="eyebrow">Espace professionnel</div><h1>Entre Pro</h1><p>Le marché Abracadeal réservé aux professionnels : annonces Pro/Pro, offres privées, prix accessibles sur accord et gestion des relations entre entreprises.</p></section>
+<div class="statusbar" id="status">Vérification de votre accès…</div>
+
+<div id="locked" class="panel lock hidden"><h2>Accès réservé aux professionnels</h2><p id="lockText">Connectez-vous avec un compte professionnel vérifié pour accéder à Entre Pro.</p><a class="btn primary" href="index.html#accountModal">Mon compte</a></div>
+
+<div id="app" class="hidden">
+<nav class="tabs" aria-label="Navigation Entre Pro">
+<button class="tab active" data-view="catalogue">Catalogue Pro</button>
+<button class="tab" data-view="offers">Offres privées</button>
+<button class="tab" data-view="stock">Mon stock</button>
+<button class="tab" data-view="access">Demandes <span class="badge hidden" id="accessBadge">0</span></button>
+<button class="tab hidden" data-view="relations" id="relationsTab">Relations · Admin</button>
+</nav>
+
+<section class="panel" data-section="catalogue">
+<div class="panelhead"><div><h2>Annonces réservées aux Pros</h2><div class="note">Annonces classiques publiées en visibilité Pro/Pro. Elles sont invisibles aux particuliers.</div></div><button class="btn" id="refreshListings">Actualiser</button></div>
+<div class="grid" id="listingGrid"></div><div class="note" id="listingStatus"></div>
+</section>
+
+<section class="panel hidden" data-section="offers">
+<div class="panelhead"><div><h2>Offres privées Pro/Pro</h2><div class="note">Le vendeur choisit si le prix est visible immédiatement ou après accord.</div></div><button class="btn primary" id="newOffer">Déposer une offre</button></div>
+<div class="note" id="offersStatus"></div><div class="grid" id="offersGrid"></div>
+<div class="toolbar hidden" id="adminPager"><button class="btn" id="adminPrevious">Précédente</button><span class="note" id="adminPage"></span><button class="btn" id="adminNext">Suivante</button></div>
+</section>
+
+<section class="panel hidden" data-section="stock">
+<div class="panelhead"><div><h2>Mon stock</h2><div class="note">Gérez vos offres privées publiées, vendues ou retirées.</div></div><button class="btn primary" id="newOfferStock">Déposer une offre</button></div>
+<div class="note" id="stockStatus"></div><div class="grid" id="stockGrid"></div>
+</section>
+
+<section class="panel hidden" data-section="access">
+<div class="panelhead"><div><h2>Demandes et accès</h2><div class="note">Un accord donne accès à tous les prix privés et coordonnées du vendeur.</div></div><button class="btn" id="refreshAccess">Actualiser</button></div>
+<h3>Demandes reçues</h3><div id="incoming"></div><h3>Mes demandes envoyées</h3><div id="outgoing"></div>
+</section>
+
+<section class="panel hidden" data-section="relations" id="relationsSection">
+<div class="panelhead"><div><h2>Relations entre professionnels</h2><div class="note">Vue administrateur.</div></div></div>
+<div id="relationsList"></div><div class="toolbar"><button class="btn" id="relationsPrevious">Précédente</button><span class="note" id="relationsPage"></span><button class="btn" id="relationsNext">Suivante</button></div>
+</section>
+
+<form id="requestForm" class="form hidden">
+<h3 id="requestHeading">Demander l’accès aux prix</h3><input id="requestSeller" type="hidden">
+<div class="field"><label>Votre activité professionnelle</label><input class="input" id="buyerActivity" required minlength="3" maxlength="200" placeholder="Ex. : chauffeur VTC, achat et revente automobile…"></div>
+<div class="note" id="requestMessage"></div><div class="toolbar"><button class="btn primary" type="submit">Envoyer au vendeur</button><button class="btn" type="button" id="cancelRequest">Annuler</button></div>
+</form>
+
+<form id="offerForm" class="form hidden">
+<h3 id="offerHeading">Nouvelle offre Pro/Pro</h3><input type="hidden" id="offerId">
+<div class="formgrid">
+<div class="field full"><label>Titre</label><input class="input" id="offerTitle" required minlength="3" maxlength="160"></div>
+<div class="field"><label>Prix</label><input class="input" id="offerPrice" type="number" min="0" max="9999999999" step="0.01" required></div>
+<div class="field"><label>Base</label><select class="input" id="offerBasis"><option>HT</option><option>TTC</option></select></div>
+<div class="field full"><span class="legend">Visibilité du prix</span><div class="options"><label><input type="radio" name="priceVisibility" value="visible"> Prix visible</label><label><input type="radio" name="priceVisibility" value="request" checked> Prix sur accord</label></div></div>
+<div class="field"><label>Ville</label><input class="input" id="offerCity" required minlength="2" maxlength="120"></div>
+<div class="field"><label>Téléphone</label><input class="input" id="offerPhone" type="tel" required minlength="6" maxlength="40"></div>
+<div class="field"><label>E-mail</label><input class="input" id="offerEmail" type="email" required maxlength="254"></div>
+<div class="field full"><span class="legend">Catégories de l’offre</span><div class="options"><label><input name="offerAudience" type="checkbox" value="automobile"> Automobile</label><label><input name="offerAudience" type="checkbox" value="transport"> Transport / VTC</label></div></div>
+<div class="field full"><label>Description et état du bien — sans prix ni coordonnées</label><textarea class="input" id="offerDescription" required minlength="10" maxlength="10000"></textarea></div>
+<div class="field full"><label>Photos — 5 maximum par envoi, 5 Mo par photo</label><input class="input" id="offerPhotos" type="file" multiple accept="image/jpeg,image/png,image/webp"></div>
+</div>
+<div class="note" id="offerMessage"></div><div class="toolbar"><button class="btn primary" type="submit" id="offerSubmit">Publier l’offre</button><button class="btn" type="button" id="cancelOffer">Annuler</button></div>
+</form>
+</div>
+</main>
+
+<div class="sheet" id="detailSheet" hidden aria-hidden="true"><div class="sheetin"><div class="sheethead"><strong>Annonce Pro/Pro</strong><button class="close" type="button" id="closeDetail">×</button></div><div id="detailContent"></div></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{storageKey:'sb-jplzvxmpbpjssyinozap-auth-token',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const money=v=>Number(v||0).toLocaleString('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0});
+const catLabel=v=>({vehicules:'Véhicules',immobilier:'Immobilier',hightech:'High-tech',maison:'Maison',mode:'Mode',services:'Services',emploi:'Emploi',vacances:'Vacances'}[v]||v||'Annonce');
+const photoUrl=p=>p?sb.storage.from('listing-images').getPublicUrl(p).data.publicUrl:'assets/default-listing-photo-20260921.jpg';
+const toast=t=>{const x=$('#toast');x.textContent=t;x.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>x.classList.remove('show'),2400)};
+const show=(sel,yes=true)=>$(sel)?.classList.toggle('hidden',!yes);
+const rpc=async(name,args)=>{const r=await sb.rpc(name,args);if(r.error)throw r.error;return r.data};
+const labels={automobile:'Automobile',transport:'Transport / VTC'},statusLabels={draft:'Brouillon',active:'En ligne',sold:'Vendu',archived:'Retiré'},accessLabels={pending:'En attente',accepted:'Accepté',rejected:'Refusé / retiré'};
+let currentUser=null,currentProfile=null,isAdmin=false,isProfessional=false,offers=[],stockOffers=[],proListings=[],incoming=[],adminPage=0,relationsPage=0,blobUrls=[];
+
+function setStatus(t){$('#status').textContent=t}
+function setView(view){
+  $$('.tab').forEach(x=>x.classList.toggle('active',x.dataset.view===view));
+  $$('[data-section]').forEach(x=>x.classList.toggle('hidden',x.dataset.section!==view));
+  $('#offerForm').classList.add('hidden');$('#requestForm').classList.add('hidden');
+  if(view==='offers')loadOffers(false);
+  if(view==='stock')loadOffers(true);
+  if(view==='access')loadAccess();
+  if(view==='relations')loadRelations();
+}
+$$('.tab').forEach(b=>b.addEventListener('click',()=>setView(b.dataset.view)));
+
+function listingCard(a){
+  const p=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0))[0];
+  return '<article class="card" data-listing="'+esc(a.id)+'"><div class="photo"><img src="'+esc(photoUrl(p?.storage_path))+'" alt=""><span class="chip">PRO/PRO</span></div><div class="body"><div class="note">'+esc(catLabel(a.category))+'</div><h3>'+esc(a.title||'Annonce')+'</h3><div class="price">'+esc(money(a.price))+'</div><div class="meta">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div></div></article>';
+}
+async function loadListings(){
+  $('#listingGrid').innerHTML='<div class="empty">Chargement…</div>';
+  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','active').eq('visibility_scope','pro').order('created_at',{ascending:false}).limit(100);
+  if(error){$('#listingGrid').innerHTML='<div class="empty">Impossible de charger les annonces.</div>';return}
+  proListings=data||[];$('#listingStatus').textContent=proListings.length?proListings.length+' annonce'+(proListings.length>1?'s':'')+' réservée'+(proListings.length>1?'s':'')+' aux professionnels.':'Aucune annonce Pro/Pro pour le moment.';
+  $('#listingGrid').innerHTML=proListings.length?proListings.map(listingCard).join(''):'<div class="empty">Aucune annonce Pro/Pro pour le moment.</div>';
+}
+$('#refreshListings').onclick=loadListings;
+$('#listingGrid').onclick=e=>{const c=e.target.closest('[data-listing]');if(c)openListing(c.dataset.listing)};
+
+function openListing(id){
+  const a=proListings.find(x=>x.id===id);if(!a)return;
+  const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));
+  const gal=photos.length?'<div class="gallery">'+photos.map(p=>'<img src="'+esc(photoUrl(p.storage_path))+'" alt="">').join('')+'</div>':'<div class="gallery"><img src="assets/default-listing-photo-20260921.jpg" alt=""></div>';
+  $('#detailContent').innerHTML=gal+'<div class="sheetbody"><div class="note">'+esc(catLabel(a.category))+' · PRO/PRO</div><h2>'+esc(a.title||'Annonce')+'</h2><div class="sheetprice">'+esc(money(a.price))+'</div><div class="meta">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div><p class="sheetdesc">'+esc(a.description||'')+'</p></div>';
+  $('#detailSheet').hidden=false;$('#detailSheet').setAttribute('aria-hidden','false');document.body.style.overflow='hidden';
+}
+function closeDetail(){ $('#detailSheet').hidden=true;$('#detailSheet').setAttribute('aria-hidden','true');document.body.style.overflow='';}
+$('#closeDetail').onclick=closeDetail;$('#detailSheet').onclick=e=>{if(e.target.id==='detailSheet')closeDetail()};
+
+function offerCard(o,stock=false){
+  const priceVisible=isAdmin||o.prices_allowed,contactVisible=isAdmin||(o.contacts_allowed??(o.contact_phone||o.contact_email)),canManage=isAdmin||o.seller_id===currentUser.id;
+  return '<article class="card"><div class="body"><span class="status-pill">PRO · '+esc(statusLabels[o.status]||o.status)+'</span><h3>'+esc(o.title)+'</h3><div class="price">'+(priceVisible?esc(money(o.price))+' '+esc(o.price_basis):'Prix sur accord')+'</div><div class="meta">'+esc(o.company_name||'Professionnel')+' · '+esc(o.city||'')+'</div><p class="desc">'+esc(o.description||'')+'</p>'+(contactVisible?'<p class="note">Contact : '+esc(o.contact_phone||'—')+'<br>'+esc(o.contact_email||'—')+'</p>':(o.seller_id===currentUser.id?'':o.access_status?'<p class="note">'+esc(accessLabels[o.access_status]||o.access_status)+'</p>':'<button class="btn primary" type="button" data-request="'+esc(o.seller_id)+'">Demander l’accès</button>'))+'<div class="toolbar"><button class="btn" type="button" data-photos="'+esc(o.id)+'">Photos</button>'+(canManage?'<button class="btn" type="button" data-edit="'+esc(o.id)+'">Modifier</button>'+(o.status==='active'?'<button class="btn" type="button" data-status="sold" data-id="'+esc(o.id)+'">Vendu</button>':'')+(o.status!=='archived'?'<button class="btn" type="button" data-status="archived" data-id="'+esc(o.id)+'">Retirer</button>':'')+(isAdmin?'<button class="btn danger" type="button" data-delete="'+esc(o.id)+'">Supprimer</button>':''):'')+'</div><div class="photos" id="photos-'+esc(o.id)+'"></div></div></article>';
+}
+async function loadOffers(mine){
+  const grid=mine?$('#stockGrid'):$('#offersGrid'),status=mine?$('#stockStatus'):$('#offersStatus');grid.innerHTML='<div class="empty">Chargement…</div>';
+  try{
+    let data;
+    if(isAdmin&&!mine)data=await rpc('b2b_admin_catalog',{page_number:adminPage});
+    else data=await rpc('b2b_catalog',{own_only:mine});
+    const rows=(data||[]);if(isAdmin&&!mine){offers=rows.slice(0,100).map(o=>({...o,prices_allowed:true}));$('#adminPager').classList.remove('hidden');$('#adminPrevious').disabled=adminPage===0;$('#adminNext').disabled=rows.length<=100;$('#adminPage').textContent='Page '+(adminPage+1)}
+    else{$('#adminPager').classList.add('hidden');if(mine)stockOffers=rows;else offers=rows}
+    const arr=mine?stockOffers:offers;status.textContent=mine?(arr.length+' offre'+(arr.length>1?'s':'')+' dans votre stock'):(arr.length+' offre'+(arr.length>1?'s':'')+' Pro/Pro');
+    grid.innerHTML=arr.length?arr.map(o=>offerCard(o,mine)).join(''):'<div class="empty">'+(mine?'Votre stock Pro/Pro est vide.':'Aucune offre pour le moment.')+'</div>';
+  }catch(e){grid.innerHTML='<div class="empty">'+esc(e.message||'Chargement impossible')+'</div>'}
+}
+$('#adminPrevious').onclick=()=>{if(adminPage>0){adminPage--;loadOffers(false)}};$('#adminNext').onclick=()=>{adminPage++;loadOffers(false)};
+
+function editOffer(o){
+  $('#offerForm').reset();$('#offerId').value=o?.id||'';$('#offerTitle').value=o?.title||'';$('#offerPrice').value=o?.price??'';$('#offerBasis').value=o?.price_basis||'TTC';$('#offerCity').value=o?.city||currentProfile?.city||'';$('#offerDescription').value=o?.description||'';$('#offerPhone').value=o?.contact_phone||currentProfile?.phone||'';$('#offerEmail').value=o?.contact_email||currentUser?.email||'';
+  $$('input[name="priceVisibility"]').forEach(x=>x.checked=x.value===(o?.price_visibility||'request'));$$('input[name="offerAudience"]').forEach(x=>x.checked=(o?.audiences||['automobile']).includes(x.value));$('#offerHeading').textContent=o?'Modifier l’offre':'Nouvelle offre Pro/Pro';$('#offerMessage').textContent='';$('#offerForm').classList.remove('hidden');$('#offerForm').scrollIntoView({behavior:'smooth',block:'start'});
+}
+$('#newOffer').onclick=()=>editOffer(null);$('#newOfferStock').onclick=()=>editOffer(null);$('#cancelOffer').onclick=()=>$('#offerForm').classList.add('hidden');
+
+$('#offerForm').onsubmit=async e=>{
+  e.preventDefault();const btn=$('#offerSubmit');btn.disabled=true;$('#offerMessage').textContent='Enregistrement…';
+  try{
+    const files=Array.from($('#offerPhotos').files),types={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'};if(files.length>5)throw new Error('5 photos maximum par envoi.');if(files.some(f=>!types[f.type]||f.size>5242880||!f.size))throw new Error('Photos JPG, PNG ou WebP de 5 Mo maximum.');
+    const audiences=$$('input[name="offerAudience"]:checked').map(x=>x.value);if(!audiences.length)throw new Error('Choisissez au moins une catégorie.');
+    const payload={id:$('#offerId').value||null,title:$('#offerTitle').value.trim(),description:$('#offerDescription').value.trim(),price:$('#offerPrice').value,price_basis:$('#offerBasis').value,price_visibility:$('input[name="priceVisibility"]:checked')?.value||'request',city:$('#offerCity').value.trim(),audiences,contact_phone:$('#offerPhone').value.trim(),contact_email:$('#offerEmail').value.trim(),status:'draft'};
+    const existing=[...offers,...stockOffers].find(o=>o.id===payload.id),adminEditingOther=!!(isAdmin&&existing&&existing.seller_id!==currentUser.id);
+    let id=adminEditingOther?await rpc('b2b_save_offer_visibility',{payload:{...payload,status:'active'},admin_edit:true}):await rpc('b2b_save_offer',{payload});
+    const owner=adminEditingOther?existing.seller_id:currentUser.id;
+    for(const file of files){const r=await sb.storage.from('b2b-images').upload(owner+'/'+id+'/'+crypto.randomUUID()+'.'+types[file.type],file,{contentType:file.type,upsert:false});if(r.error)throw r.error}
+    if(!adminEditingOther)await rpc('b2b_save_offer',{payload:{...payload,id,status:'active'}});
+    $('#offerForm').classList.add('hidden');toast('Offre Pro/Pro publiée');await loadOffers(false);await loadOffers(true);
+  }catch(err){$('#offerMessage').textContent=err.message||'Impossible d’enregistrer l’offre.'}finally{btn.disabled=false}
+};
+
+async function offerAction(e,source){
+  const b=e.target.closest('button');if(!b)return;const arr=source==='stock'?stockOffers:offers;
+  if(b.dataset.request){const o=arr.find(x=>x.seller_id===b.dataset.request);$('#requestSeller').value=o.seller_id;$('#requestHeading').textContent='Demander l’accès au vendeur '+(o.company_name||'');$('#requestMessage').textContent='';$('#requestForm').classList.remove('hidden');$('#requestForm').scrollIntoView({behavior:'smooth'});return}
+  if(b.dataset.edit){editOffer(arr.find(x=>x.id===b.dataset.edit));return}
+  b.disabled=true;
+  try{
+    if(b.dataset.delete){if(!confirm('Supprimer définitivement cette offre Pro/Pro ?'))return;await rpc('b2b_admin_delete_offer',{offer_id:b.dataset.delete});toast('Offre supprimée')}
+    else if(b.dataset.status){if(!confirm(b.dataset.status==='sold'?'Marquer cette offre comme vendue ?':'Retirer cette offre ?'))return;if(isAdmin)await rpc('b2b_admin_offer_status',{offer_id:b.dataset.id,new_status:b.dataset.status});else await rpc('b2b_offer_status',{offer_id:b.dataset.id,new_status:b.dataset.status})}
+    else if(b.dataset.photos){const o=arr.find(x=>x.id===b.dataset.photos),host=$('#photos-'+o.id);host.innerHTML='';const path=o.seller_id+'/'+o.id;const list=await sb.storage.from('b2b-images').list(path,{limit:100});if(list.error)throw list.error;for(const item of list.data||[]){const d=await sb.storage.from('b2b-images').download(path+'/'+item.name);if(d.error)throw d.error;const url=URL.createObjectURL(d.data);blobUrls.push(url);host.insertAdjacentHTML('beforeend','<img src="'+url+'" alt="'+esc(o.title)+'">')}return}
+    await loadOffers(source==='stock');
+  }catch(err){toast(err.message||'Action impossible')}finally{b.disabled=false}
+}
+$('#offersGrid').onclick=e=>offerAction(e,'offers');$('#stockGrid').onclick=e=>offerAction(e,'stock');
+
+$('#cancelRequest').onclick=()=>$('#requestForm').classList.add('hidden');
+$('#requestForm').onsubmit=async e=>{e.preventDefault();const btn=e.submitter;btn.disabled=true;$('#requestMessage').textContent='Envoi…';try{await rpc('b2b_request_prices',{seller:$('#requestSeller').value,activity:$('#buyerActivity').value.trim()});$('#requestForm').classList.add('hidden');toast('Demande transmise');await loadOffers(false);await loadAccess()}catch(err){$('#requestMessage').textContent=err.message||'Envoi impossible'}finally{btn.disabled=false}};
+
+async function loadAccess(){
+  $('#incoming').innerHTML='Chargement…';$('#outgoing').innerHTML='Chargement…';
+  const [r1,r2]=await Promise.all([sb.from('b2b_price_access').select('*').eq('seller_id',currentUser.id).order('updated_at',{ascending:false}).limit(100),sb.from('b2b_price_access').select('*').eq('buyer_id',currentUser.id).order('updated_at',{ascending:false}).limit(100)]);
+  if(r1.error||r2.error){$('#incoming').textContent='Chargement impossible.';return}
+  incoming=r1.data||[];const out=r2.data||[];const pending=incoming.filter(x=>x.status==='pending').length;$('#accessBadge').textContent=pending;$('#accessBadge').classList.toggle('hidden',!pending);
+  $('#incoming').innerHTML=incoming.length?incoming.map(r=>'<article class="access-card"><span class="status-pill">'+esc(accessLabels[r.status]||r.status)+'</span><h3>'+esc(r.buyer_company||'Professionnel')+'</h3><p class="note">SIRET : '+esc(r.buyer_siret||'')+'<br>Activité : '+esc(r.buyer_activity||'')+'</p><div class="toolbar">'+(r.status!=='accepted'?'<button class="btn primary" data-decision="accepted" data-buyer="'+esc(r.buyer_id)+'">Accepter</button>':'')+'<button class="btn" data-decision="rejected" data-buyer="'+esc(r.buyer_id)+'">'+(r.status==='accepted'?'Retirer l’accès':'Refuser')+'</button></div></article>').join(''):'<div class="empty">Aucune demande reçue.</div>';
+  $('#outgoing').innerHTML=out.length?out.map(r=>'<article class="access-card"><strong>Vendeur · SIRET '+esc(r.seller_siret||'')+'</strong><p class="note">'+esc(accessLabels[r.status]||r.status)+'</p></article>').join(''):'<div class="empty">Aucune demande envoyée.</div>';
+}
+$('#refreshAccess').onclick=loadAccess;
+$('#incoming').onclick=async e=>{const b=e.target.closest('[data-decision]');if(!b)return;const r=incoming.find(x=>x.buyer_id===b.dataset.buyer);if(!r)return;if(b.dataset.decision==='rejected'&&!confirm('Refuser ou retirer l’accès de ce professionnel ?'))return;b.disabled=true;try{await rpc('b2b_decide_prices',{buyer:r.buyer_id,decision:b.dataset.decision,expected_updated_at:r.updated_at});toast(b.dataset.decision==='accepted'?'Accès accordé':'Accès retiré');await loadAccess()}catch(err){toast(err.message||'Action impossible')}finally{b.disabled=false}};
+
+async function loadRelations(){
+  if(!isAdmin)return;$('#relationsList').innerHTML='Chargement…';
+  try{const rows=await rpc('b2b_admin_relations',{page_number:relationsPage});$('#relationsPage').textContent='Page '+(relationsPage+1);$('#relationsPrevious').disabled=relationsPage===0;$('#relationsNext').disabled=(rows||[]).length<=100;$('#relationsList').innerHTML=(rows||[]).slice(0,100).map(r=>'<article class="access-card"><strong>'+esc(r.buyer_company||'Professionnel')+'</strong><p class="note">Acheteur : SIRET '+esc(r.buyer_siret||'')+'<br>Vendeur : SIRET '+esc(r.seller_siret||'')+'<br>Activité : '+esc(r.buyer_activity||'')+'</p><span class="status-pill">'+esc(accessLabels[r.status]||r.status)+'</span></article>').join('')||'<div class="empty">Aucune relation enregistrée.</div>'}catch(err){$('#relationsList').textContent=err.message||'Chargement impossible'}
+}
+$('#relationsPrevious').onclick=()=>{if(relationsPage>0){relationsPage--;loadRelations()}};$('#relationsNext').onclick=()=>{relationsPage++;loadRelations()};
+
+async function init(){
+  try{
+    const {data:{session}}=await sb.auth.getSession();currentUser=session?.user||null;
+    if(!currentUser){show('#locked',true);$('#lockText').textContent='Connectez-vous avec un compte professionnel vérifié pour accéder à Entre Pro.';setStatus('Connexion requise');return}
+    const p=await sb.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();currentProfile=p.data||{};
+    [isProfessional,isAdmin]=await Promise.all([rpc('b2b_is_professional'),rpc('b2b_is_admin')]);
+    if(!isProfessional&&!isAdmin){show('#locked',true);$('#lockText').textContent='Votre compte doit être professionnel et votre SIRET vérifié pour accéder à Entre Pro.';setStatus('Accès professionnel requis');return}
+    show('#app',true);show('#locked',false);$('#relationsTab').classList.toggle('hidden',!isAdmin);setStatus(isAdmin?'Mode administrateur Entre Pro':'Compte professionnel vérifié · accès Entre Pro actif');
+    await Promise.all([loadListings(),loadAccess()]);setView('catalogue');
+  }catch(err){console.error(err);show('#locked',true);$('#lockText').textContent='Impossible de vérifier votre accès pour le moment.';setStatus('Erreur de chargement')}
+}
+sb.auth.onAuthStateChange(()=>setTimeout(()=>location.reload(),50));
+init();
+</script>
+</body>
+</html>
