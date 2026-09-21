@@ -6700,6 +6700,452 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-tablet-mobile-ui-20260921">
+/* =========================================================
+   TABLETTE UNIQUEMENT
+   - téléphone inchangé
+   - desktop / laptop inchangé
+   - tablette tactile : interface mobile adaptée en portrait ET paysage
+   ========================================================= */
+@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  html{background:#0b0714!important}
+  body{
+    background:
+      radial-gradient(90% 24% at 50% 0%,rgba(117,36,151,.21),transparent 72%),
+      linear-gradient(180deg,#0b0714 0%,#11081c 60%,#090510 100%)!important;
+    color:#fff!important;
+    padding-bottom:94px!important;
+    overflow-x:hidden!important;
+  }
+
+  /* On retire exclusivement le header desktop sur tablette. */
+  body>header{display:none!important}
+
+  /* Barre type mobile, mais dimensionnée tablette. */
+  .mobile-topbar{
+    display:flex!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:10050!important;
+    min-height:66px!important;
+    padding:9px 20px!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:14px!important;
+    background:rgba(9,5,16,.97)!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 7px 22px rgba(0,0,0,.22)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    backdrop-filter:blur(16px)!important;
+  }
+  .mobile-brand{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    min-width:0!important;
+    line-height:1!important;
+  }
+  .mobile-brand-name{
+    display:inline-block!important;
+    font:700 30px/1 Fraunces,serif!important;
+    letter-spacing:-.035em!important;
+    background:linear-gradient(110deg,#9e6700 0%,#d7a51f 16%,#ffe477 31%,#fffbe0 48%,#ffd85b 60%,#d6a31f 76%,#a66d00 100%)!important;
+    background-size:320% 100%!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    -webkit-animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    white-space:nowrap!important;
+  }
+  .mobile-brand-name .deal{
+    background:none!important;
+    color:inherit!important;
+    -webkit-text-fill-color:inherit!important;
+  }
+  .mobile-brand-tag{
+    display:block!important;
+    width:max-content!important;
+    margin-top:4px!important;
+    color:#d4c4df!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:800!important;
+    letter-spacing:.10em!important;
+    text-transform:uppercase!important;
+    white-space:nowrap!important;
+  }
+  .mobile-vacances-shortcut{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-height:44px!important;
+    padding:0 16px!important;
+    border-radius:14px!important;
+    border:1px solid rgba(255,255,255,.14)!important;
+    background:linear-gradient(135deg,#7d269e,#d934ac 65%,#ef48aa)!important;
+    color:#fff!important;
+    font-size:.86rem!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    box-shadow:0 8px 20px rgba(203,48,171,.24)!important;
+  }
+
+  /* Même ordre général que le téléphone. */
+  body>main#top{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    background:transparent!important;
+  }
+  main#top>.hero-shell{order:1!important}
+  main#top>#annonces{order:2!important}
+  main#top>#homeFeaturedSection{order:3!important}
+  main#top>#recentSearchSection{order:4!important}
+  main#top>#recentViewedSection{order:5!important}
+  main#top>#nearbySection{order:6!important}
+  main#top>#resultats{order:7!important}
+  main#top>#b2bDiscovery{order:8!important}
+  main#top>#vacancesDiscovery{order:9!important}
+  main#top>#pros{order:10!important}
+  main#top>.trust{order:11!important}
+  .founder-topbar{display:none!important}
+
+  .container{
+    width:calc(100% - 32px)!important;
+    max-width:1100px!important;
+  }
+
+  /* Hero / bannière : logique mobile, sans compression. */
+  .hero-shell{
+    background:#11091b!important;
+    overflow:visible!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero.container{
+    width:min(100% - 24px,1050px)!important;
+    max-width:1050px!important;
+    margin:0 auto!important;
+    padding:12px 0 16px!important;
+    display:block!important;
+  }
+  .banner-frame{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border-radius:22px!important;
+    background:none!important;
+    box-shadow:none!important;
+  }
+  .banner-frame .banner,
+  .banner-frame .banner-main-image{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    border-radius:22px!important;
+    box-shadow:none!important;
+  }
+  .banner-frame::before,.banner-frame::after,.banner-hotspots{display:none!important}
+
+  /* Recherche tablette : même style mobile, un peu plus large. */
+  .search-wrap{
+    position:static!important;
+    inset:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  .search-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    gap:9px!important;
+    width:100%!important;
+    padding:10px!important;
+    overflow:visible!important;
+    border-radius:17px!important;
+    background:#fff!important;
+    border:1px solid rgba(255,255,255,.94)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.24)!important;
+  }
+  .search-card .field{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:0 14px!important;
+    border:1px solid #ece5f0!important;
+    border-radius:12px!important;
+    background:#fff!important;
+    color:#25172d!important;
+    font-size:16px!important;
+    box-shadow:none!important;
+  }
+  #searchCity.desktop-search-city{display:none!important}
+  .search-filters-link{display:none!important}
+  #searchBtn{
+    width:auto!important;
+    min-width:150px!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:0 22px!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    font-size:14px!important;
+    font-weight:900!important;
+    box-shadow:0 6px 15px rgba(223,45,172,.24)!important;
+  }
+
+  /* Catégories : ruban tactile identique à l'esprit téléphone. */
+  #annonces{
+    padding:5px 0 13px!important;
+    background:transparent!important;
+  }
+  #annonces .section-head{display:none!important}
+  #annonces .categories{
+    display:flex!important;
+    gap:14px!important;
+    width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:7px 20px 12px!important;
+    margin:0!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  #annonces .categories::-webkit-scrollbar{display:none!important}
+  #annonces .cat{
+    flex:0 0 78px!important;
+    width:78px!important;
+    min-width:78px!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    gap:8px!important;
+    text-align:center!important;
+    scroll-snap-align:start!important;
+    overflow:visible!important;
+  }
+  #annonces .cat::before,#annonces .cat::after{display:none!important}
+  #annonces .cat-icon{
+    width:62px!important;
+    height:62px!important;
+    flex:0 0 62px!important;
+    border-radius:50%!important;
+    display:grid!important;
+    place-items:center!important;
+    margin:0!important;
+    font-size:25px!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    background:linear-gradient(145deg,#3b1758,#762a96)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 8px 19px rgba(0,0,0,.21)!important;
+  }
+  #annonces .cat h3{
+    margin:0!important;
+    color:#f8f1fb!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+  }
+  #annonces .cat small{display:none!important}
+
+  /* Sections / cartes dans le style mobile. */
+  .home-featured-section,.personalized-section,.listing-section{background:transparent!important}
+  .home-featured-head h2,.personalized-head h2,.listing-head h2{
+    color:#fff!important;
+    font-family:Fraunces,serif!important;
+  }
+  .home-featured-head p,.personalized-head p,.listing-head p{color:#b9a8c4!important}
+
+  .home-featured-grid,.personalized-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 12px!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .home-featured-grid::-webkit-scrollbar,.personalized-grid::-webkit-scrollbar{display:none!important}
+  .home-featured-card,.personalized-card{
+    flex:0 0 clamp(230px,30vw,310px)!important;
+    width:clamp(230px,30vw,310px)!important;
+    min-width:clamp(230px,30vw,310px)!important;
+    max-width:clamp(230px,30vw,310px)!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+    scroll-snap-align:start!important;
+  }
+
+  /* Les annonces passent en grille tactile, 2 colonnes par défaut. */
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+    overflow:visible!important;
+    padding:2px 0 14px!important;
+  }
+  #resultats .ad-card{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+  }
+  #resultats .ad-body{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  #resultats .ad-title{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    color:#fff!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  #resultats .ad-price{color:#ff64bd!important}
+  #resultats .ad-meta,#resultats .ad-city,#resultats .ad-specs{color:#c5b5cf!important}
+
+  .results-tools{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:9px!important;
+    width:100%!important;
+  }
+
+  /* Barre inférieure identique au téléphone, centrée sur tablette. */
+  .mobile-bottom-nav{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:end!important;
+    position:fixed!important;
+    z-index:10040!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:calc(9px + env(safe-area-inset-bottom))!important;
+    width:min(720px,calc(100% - 28px))!important;
+    min-height:68px!important;
+    padding:7px 5px 6px!important;
+    transform:translateX(-50%) translateZ(0)!important;
+    border-radius:22px!important;
+    background:rgba(15,7,23,.96)!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.36)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+  }
+  .mobile-nav-item{
+    position:relative!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:3px 2px 1px!important;
+    border:0!important;
+    background:transparent!important;
+    color:#ece4f1!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    font:inherit!important;
+    font-size:11px!important;
+    font-weight:750!important;
+    cursor:pointer!important;
+  }
+  .mobile-nav-item svg{
+    width:23px!important;height:23px!important;
+    stroke:currentColor!important;stroke-width:1.9!important;fill:none!important;
+    stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  .mobile-nav-item.is-active{color:#ff58b5!important}
+  .mobile-nav-publish{transform:translateY(-8px)!important}
+  .mobile-nav-publish .mobile-publish-orb{
+    width:52px!important;height:52px!important;
+    margin-bottom:-2px!important;
+    border-radius:50%!important;
+    display:grid!important;place-items:center!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    border:2px solid rgba(255,255,255,.2)!important;
+    box-shadow:0 6px 16px rgba(229,49,173,.34)!important;
+  }
+
+  footer{padding-bottom:112px!important}
+  .modal-backdrop{z-index:10100!important}
+  #messagesModal.modal-backdrop{z-index:10120!important}
+}
+
+/* Tablette horizontale : davantage de largeur utile, sans basculer en desktop. */
+@media (min-width:900px) and (max-width:1366px) and (min-height:550px) and (orientation:landscape) and (any-pointer:coarse){
+  #resultats .ads-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .hero.container{
+    width:min(100% - 36px,1180px)!important;
+  }
+  .search-card{
+    grid-template-columns:minmax(0,1fr) 180px!important;
+  }
+  .home-featured-card,.personalized-card{
+    flex-basis:260px!important;
+    width:260px!important;
+    min-width:260px!important;
+    max-width:260px!important;
+  }
+}
+
+/* Si une petite tablette fait exactement ~600px de haut en paysage,
+   elle ne doit pas hériter du verrouillage "téléphone horizontal". */
+@media (min-width:900px) and (min-height:550px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
+  .portrait-only-overlay{display:none!important}
+  body > :not(.portrait-only-overlay){
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  html,body{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -8952,7 +9398,8 @@ $('#createAlertForm')?.addEventListener('submit',async(e)=>{
 
 $('#accountModerationBtn')?.addEventListener('click',()=>{
   closeModal('accountModal');
-  if(window.matchMedia('(min-width:761px)').matches){
+  const tabletMobileUi=window.matchMedia('(min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse)').matches;
+  if(window.matchMedia('(min-width:761px)').matches && !tabletMobileUi){
     location.href='moderation.html';
     return;
   }
@@ -13012,7 +13459,8 @@ $('#backToAllAds').addEventListener('click',()=>$('#showAll').click());
 window.toggleAdminModeration=async()=>{
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
   // Sur desktop, la modération doit vivre sur sa page dédiée et non sous le catalogue.
-  if(window.matchMedia('(min-width:761px)').matches){
+  const tabletMobileUi=window.matchMedia('(min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse)').matches;
+  if(window.matchMedia('(min-width:761px)').matches && !tabletMobileUi){
     location.href='moderation.html';
     return;
   }
@@ -14494,8 +14942,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     placeholder.style.height = Math.ceil(rect.height) + 'px';
   }
 
+  function isTabletMobileUi(){
+    return window.matchMedia('(min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse)').matches;
+  }
+
   function floatSearch(){
-    if (!ensureRefs() || floating) return;
+    if (!ensureRefs() || floating || isTabletMobileUi()) return;
     const rect = wrap.getBoundingClientRect();
     const isWide = window.innerWidth > 760;
     placeholder.style.height = Math.ceil(rect.height) + 'px';
@@ -14566,6 +15018,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   function update(){
     if (!ensureRefs() || searchFieldFocused) return;
+    if(isTabletMobileUi()){
+      if(floating)restoreSearch();
+      return;
+    }
     if (!floating && window.scrollY > triggerY + 32) floatSearch();
     else if (floating && window.scrollY <= triggerY - 10) restoreSearch();
   }
