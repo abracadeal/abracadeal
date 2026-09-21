@@ -52,6 +52,29 @@ a{color:inherit;text-decoration:none}
 .reasons div+div{margin-top:3px}
 .preview-row{padding:0 12px 8px}
 .preview-link{width:100%;min-height:40px;border-radius:12px;border:1px solid rgba(232,189,84,.38);background:rgba(232,189,84,.08);color:#f3d77e;font-weight:900;font-size:12px;display:flex;align-items:center;justify-content:center}
+.preview-modal[hidden]{display:none!important}
+.preview-modal{position:fixed;inset:0;z-index:120;background:rgba(7,4,12,.88);backdrop-filter:blur(9px);display:flex;align-items:flex-end;justify-content:center}
+.preview-sheet{width:100%;max-width:760px;max-height:94dvh;background:#130b1d;border:1px solid rgba(255,255,255,.12);border-radius:24px 24px 0 0;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 -22px 70px rgba(0,0,0,.5)}
+.preview-head{min-height:58px;padding:10px 12px 10px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:12px;background:#160d21}
+.preview-head strong{font-size:15px}
+.preview-close{width:42px;height:42px;border-radius:12px;border:1px solid var(--line);background:#24152f;color:#fff;font-size:24px;line-height:1}
+.preview-body{overflow:auto;-webkit-overflow-scrolling:touch;padding-bottom:calc(18px + env(safe-area-inset-bottom))}
+.preview-gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;padding:12px}
+.preview-gallery img{flex:0 0 88%;height:260px;object-fit:cover;border-radius:16px;background:#251532;scroll-snap-align:center}
+.preview-content{padding:2px 16px 18px}
+.preview-kicker{color:#bba9c5;font-size:12px;margin-bottom:7px}
+.preview-title{font-size:24px;line-height:1.1;margin:0;color:#fff}
+.preview-price{font-size:26px;font-weight:950;color:var(--gold);margin-top:10px}
+.preview-location{color:#cabbd3;font-size:13px;margin-top:6px}
+.preview-section{margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.preview-section h3{margin:0 0 10px;font-size:15px}
+.preview-description{white-space:pre-wrap;color:#e2d8e8;font-size:14px;line-height:1.55}
+.preview-spec-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.preview-spec{padding:10px 11px;border-radius:12px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.07)}
+.preview-spec span{display:block;color:#a998b5;font-size:10px;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.preview-spec strong{font-size:13px;overflow-wrap:anywhere}
+.preview-seller{padding:12px;border-radius:13px;background:rgba(255,255,255,.045);color:#ddd1e4;font-size:13px;line-height:1.45}
+.preview-moderation-actions{position:sticky;bottom:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:10px 12px calc(10px + env(safe-area-inset-bottom));background:rgba(19,11,29,.96);border-top:1px solid var(--line);backdrop-filter:blur(12px)}
 .actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;padding:0 12px 12px}
 .action{min-height:42px;border-radius:12px;border:1px solid var(--line);font-weight:900;font-size:12px;background:#1b1127;color:#fff}
 .action.ok{background:linear-gradient(135deg,#206f38,#2e9149);border-color:#64dc7a}
@@ -112,6 +135,17 @@ a{color:inherit;text-decoration:none}
     <button class="back" type="button" onclick="location.href='index.html#accountModal'">Retour au compte</button>
   </section>
 </main>
+
+<div class="preview-modal" id="previewModal" hidden aria-hidden="true">
+  <section class="preview-sheet" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle">
+    <header class="preview-head">
+      <strong id="previewModalTitle">Vérifier l’annonce</strong>
+      <button class="preview-close" type="button" data-close-preview aria-label="Fermer">×</button>
+    </header>
+    <div class="preview-body" id="previewBody"></div>
+    <div class="preview-moderation-actions" id="previewActions"></div>
+  </section>
+</div>
 
 <div class="toast" id="toast"></div>
 
@@ -177,7 +211,7 @@ function card(a){
   const validated=state.tab==='validated';
   const p=photoUrl(firstPhoto(a));
   const statusChip=pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'';
-  const preview='<div class="preview-row"><a class="preview-link" href="index.html?admin_preview='+encodeURIComponent(a.id)+'">Voir l’annonce complète</a></div>';
+  const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
     : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
@@ -192,6 +226,76 @@ function card(a){
     '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
     reasonsMarkup(a)+preview+actions+
   '</article>';
+}
+
+function cleanDescription(a){
+  return String(a?.description||'')
+    .replace(/^\[ABRACA_[A-Z]+:[^\]]+\]\s*/gm,'')
+    .trim();
+}
+function previewSpecs(a){
+  const rows=[];
+  const add=(label,value)=>{if(value!==null&&value!==undefined&&String(value).trim()!=='')rows.push([label,String(value)])};
+  if(a.category==='vehicules'){
+    add('Marque',a.vehicle_make);
+    add('Modèle',a.vehicle_model);
+    add('Année',a.vehicle_year);
+    add('Kilométrage',a.mileage!==null&&a.mileage!==undefined?Number(a.mileage).toLocaleString('fr-FR')+' km':'');
+    add('Carburant',a.fuel);
+    add('Boîte',a.transmission);
+    add('Crit’Air',a.crit_air);
+    if(a.loa_available||a.loa_monthly)add('LOA',a.loa_monthly?Number(a.loa_monthly).toLocaleString('fr-FR')+' €/mois':'Oui');
+  }else{
+    add('État',a.item_condition);
+  }
+  add('Référence',a.listing_reference);
+  return rows;
+}
+function closePreview(){
+  const modal=$('#previewModal');
+  modal.hidden=true;
+  modal.setAttribute('aria-hidden','true');
+  document.body.style.overflow='';
+  $('#previewBody').innerHTML='';
+  $('#previewActions').innerHTML='';
+}
+function openPreview(id){
+  const a=state.rows.find(x=>x.id===id);
+  if(!a)return;
+  const modal=$('#previewModal');
+  const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));
+  const gallery=photos.length
+    ? '<div class="preview-gallery">'+photos.map(p=>'<img src="'+esc(photoUrl(p.storage_path))+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">').join('')+'</div>'
+    : '<div class="preview-gallery"><img src="assets/default-listing-photo-20260921.jpg" alt="Abracadeal"></div>';
+  const specs=previewSpecs(a);
+  const m=state.mods.get(a.id);
+  const reasons=Array.isArray(m?.reasons)?m.reasons.filter(Boolean):[];
+  const profile=state.profiles.get(a.owner_id);
+  $('#previewBody').innerHTML=
+    gallery+
+    '<div class="preview-content">'+
+      '<div class="preview-kicker">'+esc(cat(a.category))+' · '+esc(a.seller_type==='professionnel'?'Professionnel':'Particulier')+'</div>'+
+      '<h2 class="preview-title">'+esc(a.title||'Annonce')+'</h2>'+
+      '<div class="preview-price">'+esc(money(a.price))+'</div>'+
+      '<div class="preview-location">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
+      (specs.length?'<section class="preview-section"><h3>Informations de l’annonce</h3><div class="preview-spec-grid">'+specs.map(x=>'<div class="preview-spec"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('')+'</div></section>':'')+
+      '<section class="preview-section"><h3>Description</h3><div class="preview-description">'+esc(cleanDescription(a)||'Aucune description.')+'</div></section>'+
+      '<section class="preview-section"><h3>Vendeur</h3><div class="preview-seller"><strong>'+esc(profile?.display_name||sellerName(a))+'</strong><br>'+esc(profile?.city||a.city||'')+(a.contact_email?'<br>'+esc(a.contact_email):'')+(a.phone?'<br>'+esc(a.phone):'')+'</div></section>'+
+      '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
+    '</div>';
+  if(state.tab==='pending'){
+    $('#previewActions').innerHTML=
+      '<button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button>'+
+      '<button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button>'+
+      '<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
+  }else{
+    $('#previewActions').innerHTML='<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
+    $('#previewActions').style.gridTemplateColumns='1fr';
+  }
+  if(state.tab==='pending')$('#previewActions').style.gridTemplateColumns='repeat(3,minmax(0,1fr))';
+  modal.hidden=false;
+  modal.setAttribute('aria-hidden','false');
+  document.body.style.overflow='hidden';
 }
 
 async function loadProfiles(rows){
@@ -279,6 +383,11 @@ async function removeListing(id){
 }
 
 document.addEventListener('click',async e=>{
+  const closePreviewBtn=e.target.closest('[data-close-preview]');
+  if(closePreviewBtn){closePreview();return;}
+  if(e.target.id==='previewModal'){closePreview();return;}
+  const previewBtn=e.target.closest('[data-preview-id]');
+  if(previewBtn){openPreview(previewBtn.dataset.previewId);return;}
   const tab=e.target.closest('[data-tab]');
   if(tab){
     state.tab=tab.dataset.tab;
@@ -304,6 +413,7 @@ document.addEventListener('click',async e=>{
     }else if(action==='delete'){
       await removeListing(id);toast('Annonce supprimée');
     }
+    closePreview();
     setBusy(false);
     await load();
   }catch(err){console.error(err);toast(err.message||'Action impossible');}
