@@ -301,6 +301,7 @@ document.addEventListener('click',async e=>{
     }else if(action==='delete'){
       await removeListing(id);toast('Annonce supprimée');
     }
+    setBusy(false);
     await load();
   }catch(err){console.error(err);toast(err.message||'Action impossible');}
   finally{setBusy(false)}
