@@ -6486,6 +6486,39 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-mobile-card-info-cleanup-20260921">
+/* Mobile uniquement : cartes allégées.
+   Véhicules : masquer la LOA sur les pastilles.
+   Immobilier : garder uniquement surface (m²) + DPE comme infos secondaires. */
+@media(max-width:760px){
+  #resultats .ad-card .loa-detail,
+  #homeFeaturedSection .home-featured-card .loa-detail,
+  #recentSearchSection .personalized-card .loa-detail,
+  #recentViewedSection .personalized-card .loa-detail,
+  #nearbySection .personalized-card .loa-detail{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price,
+  #resultats .ad-card.immo-card .immo-card-charges,
+  #resultats .ad-card.immo-card .immo-card-location-extra,
+  #resultats .ad-card.immo-card .immo-card-extra-spec,
+  #homeFeaturedSection .home-featured-card .immo-card-unit-price,
+  #homeFeaturedSection .home-featured-card .immo-card-charges,
+  #homeFeaturedSection .home-featured-card .immo-card-location-extra,
+  #homeFeaturedSection .home-featured-card .immo-card-extra-spec{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .ad-specs,
+  #homeFeaturedSection .home-featured-card .ad-specs{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -10527,11 +10560,11 @@ function realEstateCardPriceHtml(a){
 function realEstateCardSpecsHtml(a){
   const im=realEstateMetaOf(a),parts=[];
   const type=realEstatePropertyTypeOf(a);
-  if(im.surface!==undefined)parts.push(`<span class="ad-spec">${Number(im.surface).toLocaleString('fr-FR')} m²</span>`);
-  else if(im.landSurface!==undefined)parts.push(`<span class="ad-spec">${Number(im.landSurface).toLocaleString('fr-FR')} m² terrain</span>`);
-  if(im.rooms!==undefined)parts.push(`<span class="ad-spec">${im.rooms} pièce${Number(im.rooms)>1?'s':''}</span>`);
-  if(im.bedrooms!==undefined)parts.push(`<span class="ad-spec">${im.bedrooms} ch.</span>`);
-  if(type==='appartement'&&im.floor!==undefined)parts.push(`<span class="ad-spec">Étage ${im.floor}</span>`);
+  if(im.surface!==undefined)parts.push(`<span class="ad-spec immo-card-surface">${Number(im.surface).toLocaleString('fr-FR')} m²</span>`);
+  else if(im.landSurface!==undefined)parts.push(`<span class="ad-spec immo-card-surface">${Number(im.landSurface).toLocaleString('fr-FR')} m² terrain</span>`);
+  if(im.rooms!==undefined)parts.push(`<span class="ad-spec immo-card-extra-spec">${im.rooms} pièce${Number(im.rooms)>1?'s':''}</span>`);
+  if(im.bedrooms!==undefined)parts.push(`<span class="ad-spec immo-card-extra-spec">${im.bedrooms} ch.</span>`);
+  if(type==='appartement'&&im.floor!==undefined)parts.push(`<span class="ad-spec immo-card-extra-spec">Étage ${im.floor}</span>`);
   if(im.dpe){const grade=esc(String(im.dpe).toUpperCase());parts.push(`<span class="ad-spec immo-card-dpe ${energyGradeClass(im.dpe)}">DPE ${grade}</span>`);}
   return parts.length?`<div class="ad-specs">${parts.join('')}</div>`:'';
 }
