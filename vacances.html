@@ -2605,24 +2605,25 @@ h1,
 </style>
 
 <style id="abraca-vacances-brand-tagline-fit-20260921">
-/* Logo Vacances : même montage que le site principal.
-   "Louez - Voyagez" tient proprement sous "Abracadeal". */
+/* Logo Vacances : aligné à gauche comme le site principal. */
 .brand{
   display:inline-flex!important;
   flex-direction:column!important;
-  align-items:center!important;
+  align-items:flex-start!important;
   justify-content:center!important;
   gap:0!important;
   width:max-content!important;
+  text-align:left!important;
 }
 .brand b{
   line-height:1!important;
 }
 .brand small{
   display:block!important;
-  width:100%!important;
+  width:max-content!important;
+  max-width:100%!important;
   margin-top:4px!important;
-  text-align:center!important;
+  text-align:left!important;
   font-size:8px!important;
   line-height:1.05!important;
   letter-spacing:.08em!important;
@@ -2631,6 +2632,7 @@ h1,
 @media(max-width:760px){
   .brand{
     align-items:flex-start!important;
+    text-align:left!important;
   }
   .brand small{
     width:max-content!important;
