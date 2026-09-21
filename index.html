@@ -7430,10 +7430,38 @@ header #flowErrorsBtn{
 }
 </style>
 <style id="abraca-desktop-brand-propro-vacances-layout-20260922">
-/* Desktop uniquement :
+/* Desktop :
    Pro/Pro à gauche, juste après Abracadeal.
-   Vacances prend l'ancienne place de Pro/Pro à droite, près du coeur. */
-@media (min-width:1024px) and (pointer:fine){
+   Vacances reste toujours visible dans les actions à droite. */
+@media (min-width:761px){
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-width:94px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:0 14px!important;
+    border-radius:13px!important;
+    white-space:nowrap!important;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
+    border:1px solid rgba(255,210,244,.32)!important;
+    box-shadow:0 7px 18px rgba(101,31,130,.24)!important;
+    font-size:12px!important;
+    font-weight:900!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  header .header-vacances-btn:hover{
+    transform:translateY(-1px)!important;
+    filter:brightness(1.06)!important;
+  }
+}
+
+/* Position Pro/Pro à gauche sur le vrai layout desktop large. */
+@media (min-width:1024px){
   header .nav{
     grid-template-columns:330px minmax(0,1fr) auto!important;
   }
@@ -7459,30 +7487,6 @@ header #flowErrorsBtn{
     padding:0 13px!important;
     border-radius:12px!important;
     font-size:12px!important;
-  }
-
-  header .header-vacances-btn{
-    display:inline-flex!important;
-    align-items:center!important;
-    justify-content:center!important;
-    flex:0 0 auto!important;
-    min-width:94px!important;
-    height:40px!important;
-    min-height:40px!important;
-    padding:0 14px!important;
-    border-radius:13px!important;
-    white-space:nowrap!important;
-    color:#fff!important;
-    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
-    border:1px solid rgba(255,210,244,.32)!important;
-    box-shadow:0 7px 18px rgba(101,31,130,.24)!important;
-    font-size:12px!important;
-    font-weight:900!important;
-  }
-
-  header .header-vacances-btn:hover{
-    transform:translateY(-1px)!important;
-    filter:brightness(1.06)!important;
   }
 }
 </style>
