@@ -6519,6 +6519,41 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-tablet-card-info-cleanup-20260922">
+/* Fix 22/09/2026 : desktop/tablette - meme principe de decongestion des pastilles que sur mobile
+   (abraca-mobile-card-info-cleanup-20260921, ci-dessus) : vehicules -> plus de LOA en pastille,
+   immobilier -> uniquement surface + DPE comme infos secondaires (prix/m2, charges, quartier,
+   pieces/chambres/etage restent dans la fiche complete). Demande explicite d'Anthony : "conserver
+   le meme principe de lisibilite : cartes propres, peu chargees" pour desktop/tablette aussi. */
+@media(min-width:761px){
+  #resultats .ad-card .loa-detail,
+  #homeFeaturedSection .home-featured-card .loa-detail,
+  #recentSearchSection .personalized-card .loa-detail,
+  #recentViewedSection .personalized-card .loa-detail,
+  #nearbySection .personalized-card .loa-detail{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price,
+  #resultats .ad-card.immo-card .immo-card-charges,
+  #resultats .ad-card.immo-card .immo-card-location-extra,
+  #resultats .ad-card.immo-card .immo-card-extra-spec,
+  #homeFeaturedSection .home-featured-card .immo-card-unit-price,
+  #homeFeaturedSection .home-featured-card .immo-card-charges,
+  #homeFeaturedSection .home-featured-card .immo-card-location-extra,
+  #homeFeaturedSection .home-featured-card .immo-card-extra-spec{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .ad-specs,
+  #homeFeaturedSection .home-featured-card .ad-specs{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+  }
+}
+</style>
 </head>
 <body>
 
