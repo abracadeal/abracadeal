@@ -7614,6 +7614,150 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-icon-nav-patch">
+@media (min-width:1024px){
+  header .nav{
+    grid-template-columns:minmax(170px,1fr) auto!important;
+    grid-template-areas:
+      "brand actions"
+      "cats cats"!important;
+    row-gap:4px!important;
+    padding-top:5px!important;
+    padding-bottom:5px!important;
+  }
+  header .desktop-brand{grid-area:brand!important}
+  header .nav-actions{
+    grid-area:actions!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    min-width:0!important;
+    gap:0!important;
+  }
+  header .desktop-category-nav{
+    grid-area:cats!important;
+    width:100%!important;
+    justify-content:center!important;
+  }
+
+  /* Remplace visuellement l'ancien bloc d'actions desktop sans supprimer ses triggers JS. */
+  header .nav-actions > :not(.abraca-desktop-actions-v2){
+    display:none!important;
+  }
+
+  .abraca-desktop-actions-v2{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    min-height:58px!important;
+    white-space:nowrap!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item{
+    position:relative!important;
+    min-width:72px!important;
+    height:56px!important;
+    padding:4px 9px 3px!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:transparent!important;
+    color:#f6eef9!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    font-family:'DM Sans',sans-serif!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:700!important;
+    text-decoration:none!important;
+    cursor:pointer!important;
+    transition:background .15s ease,color .15s ease,transform .15s ease!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item:hover{
+    background:rgba(255,255,255,.075)!important;
+    color:#fff!important;
+    transform:translateY(-1px)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item svg{
+    width:24px!important;
+    height:24px!important;
+    display:block!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.9!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+    flex:0 0 auto!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search{
+    min-width:54px!important;
+    width:54px!important;
+    height:48px!important;
+    margin-right:5px!important;
+    padding:0!important;
+    border-radius:14px!important;
+    background:linear-gradient(135deg,#f15b45 0%,#ec409d 100%)!important;
+    color:#fff!important;
+    box-shadow:0 8px 20px rgba(236,64,157,.24)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search svg{
+    width:23px!important;
+    height:23px!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search span{
+    display:none!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-vacances{
+    color:#f3cf70!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-vacances::after{
+    content:""!important;
+    position:absolute!important;
+    left:13px!important;
+    right:13px!important;
+    bottom:0!important;
+    height:2px!important;
+    border-radius:999px!important;
+    background:linear-gradient(90deg,#f3cf70,#ec409d)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-badge{
+    position:absolute!important;
+    top:2px!important;
+    right:14px!important;
+    min-width:17px!important;
+    height:17px!important;
+    padding:0 4px!important;
+    border-radius:999px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#ec409d!important;
+    color:#fff!important;
+    border:2px solid #1b0d2d!important;
+    font-size:9px!important;
+    line-height:1!important;
+    font-weight:900!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-badge:empty{
+    display:none!important;
+  }
+}
+@media (min-width:1024px) and (max-width:1180px){
+  .abraca-desktop-actions-v2{gap:0!important}
+  .abraca-desktop-actions-v2 .abraca-dnav-item{
+    min-width:64px!important;
+    padding-left:6px!important;
+    padding-right:6px!important;
+    font-size:10px!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search{
+    min-width:48px!important;
+    width:48px!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -15651,5 +15795,116 @@ document.addEventListener('DOMContentLoaded',()=>{
 })();
 </script>
 
+<script id="abraca-desktop-icon-nav-script">
+(() => {
+  const icon = {
+    search:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path></svg>',
+    vacations:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17h16"></path><path d="M7 17c1.2-3.4 2.9-5.4 5-6"></path><path d="M12 11c2.3.3 4.2 1.6 5.5 4"></path><path d="M12 11V5"></path><path d="M9 7c1.1-1.5 2-2.2 3-2"></path><path d="M15 7c-1.1-1.5-2-2.2-3-2"></path></svg>',
+    heart:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.3 5.3 0 0 0-7.5 0L12 6.1l-1.3-1.3a5.3 5.3 0 1 0-7.5 7.5L12 21l8.8-8.7a5.3 5.3 0 0 0 0-7.5Z"></path></svg>',
+    messages:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path><path d="M8 9h8M8 13h5"></path></svg>',
+    account:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>'
+  };
+
+  function visibleDesktop(){
+    return window.matchMedia('(min-width:1024px)').matches;
+  }
+  function original(sel){
+    return document.querySelector(sel);
+  }
+  function clickOriginal(selectors){
+    for(const sel of selectors){
+      const el=original(sel);
+      if(el){
+        try{ el.click(); return true; }catch(_){}
+      }
+    }
+    return false;
+  }
+  function openModal(id){
+    const modal=document.getElementById(id);
+    if(!modal) return false;
+    modal.removeAttribute('hidden');
+    modal.setAttribute('aria-hidden','false');
+    modal.classList.add('show','open','active');
+    if(getComputedStyle(modal).display==='none') modal.style.display='flex';
+    return true;
+  }
+  function make(tag, cls, label, svg){
+    const el=document.createElement(tag);
+    if(tag==='button') el.type='button';
+    el.className='abraca-dnav-item '+cls;
+    el.setAttribute('aria-label',label);
+    el.innerHTML=svg+'<span>'+label+'</span>';
+    return el;
+  }
+
+  function syncBadge(){
+    const target=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-messages .abraca-dnav-badge');
+    if(!target) return;
+    const source=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesBtn .unread-badge, .messages-unread-badge');
+    const txt=source && !source.classList.contains('hidden') ? (source.textContent||'').trim() : '';
+    target.textContent=txt;
+  }
+
+  function build(){
+    if(!visibleDesktop()) return;
+    const actions=document.querySelector('header .nav-actions');
+    if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); return; }
+
+    const bar=document.createElement('nav');
+    bar.className='abraca-desktop-actions-v2';
+    bar.setAttribute('aria-label','Navigation rapide');
+
+    const search=make('button','abraca-dnav-search','Rechercher',icon.search);
+    search.addEventListener('click',()=>{
+      const area=document.querySelector('.search-wrap,.search-card,#recherche,#search');
+      if(area) area.scrollIntoView({behavior:'smooth',block:'center'});
+      setTimeout(()=>{
+        const input=document.querySelector('.search-card input:not([type="hidden"]), input[type="search"], input[placeholder*="Recherch" i]');
+        if(input){ try{input.focus({preventScroll:true})}catch(_){input.focus()} }
+      },260);
+    });
+
+    const vac=make('a','abraca-dnav-vacances','Vacances',icon.vacations);
+    vac.href='vacances.html';
+
+    const fav=make('button','abraca-dnav-favorites','Favoris',icon.heart);
+    fav.addEventListener('click',()=>{
+      if(!clickOriginal(['.desktop-favorites-btn','#favoritesBtn','#headerFavoritesBtn'])){
+        const target=[...document.querySelectorAll('button,a')].find(el=>/favoris/i.test((el.getAttribute('aria-label')||'')+' '+(el.textContent||'')) && !el.closest('.abraca-desktop-actions-v2'));
+        if(target) try{target.click()}catch(_){}
+      }
+    });
+
+    const msg=make('button','abraca-dnav-messages','Messages',icon.messages);
+    const badge=document.createElement('i');
+    badge.className='abraca-dnav-badge';
+    badge.setAttribute('aria-hidden','true');
+    msg.appendChild(badge);
+    msg.addEventListener('click',()=>{
+      if(!clickOriginal(['#headerMessagesBtn','#messagesBtn','.header-messages-btn'])) openModal('messagesModal');
+    });
+
+    const acct=make('button','abraca-dnav-account','Compte',icon.account);
+    acct.addEventListener('click',()=>{
+      if(!clickOriginal(['#accountBtn','.abraca-account-trigger','#loginBtn','#signupBtn'])) openModal('accountModal');
+    });
+
+    bar.append(search,vac,fav,msg,acct);
+    actions.appendChild(bar);
+    syncBadge();
+
+    const source=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesBtn .unread-badge, .messages-unread-badge');
+    if(source && window.MutationObserver){
+      new MutationObserver(syncBadge).observe(source,{subtree:true,childList:true,attributes:true,characterData:true});
+    }
+  }
+
+  const start=()=>{ build(); requestAnimationFrame(build); setTimeout(build,120); setTimeout(build,700); };
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
+  else start();
+  window.addEventListener('resize',build,{passive:true});
+})();
+</script>
 </body>
 </html>
