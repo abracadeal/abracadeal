@@ -2659,8 +2659,8 @@ h1,
 }
 </style>
 <style id="abraca-vacances-brand-tight-center-20260921">
-/* Header Vacances : resserrer Abracadeal et la baseline,
-   puis centrer Louez - Voyagez sous le nom. */
+/* Header Vacances : Abracadeal juste au-dessus de "Louez - Voyagez",
+   sans l'ancien espace vertical imposé par les hauteurs de 44 px. */
 @media(min-width:761px){
   .topbar .brand{
     display:inline-flex!important;
@@ -2673,14 +2673,18 @@ h1,
   }
   .topbar .brand b{
     display:block!important;
-    line-height:.96!important;
+    height:auto!important;
+    min-height:0!important;
+    line-height:.94!important;
     margin:0!important;
     padding:0!important;
   }
   .topbar .brand small{
     display:block!important;
+    height:auto!important;
+    min-height:0!important;
     width:100%!important;
-    margin:1px 0 0!important;
+    margin:2px 0 0!important;
     padding:0!important;
     text-align:center!important;
     font-size:8px!important;
