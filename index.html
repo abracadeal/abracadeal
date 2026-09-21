@@ -2071,8 +2071,13 @@ a.btn{cursor:pointer}
 #accountModal .btn:focus-visible{outline:3px solid #ad4dc5;outline-offset:3px}
 #accountModal .btn:disabled{opacity:.5;cursor:not-allowed}
 .banner-hotspot.selected{box-shadow:none;background:transparent}
-.moderation-notice{padding:16px;margin:0 0 12px;border:1px solid #eadff0;border-radius:14px;background:#faf5fc}
+/* Fix 21/09/2026 : sur desktop/tablette/mobile, body{color:...!important} (theme sombre du
+   site) rendait ce texte blanc sur son propre fond clair, donc illisible (signale par Anthony :
+   "message du moderateur illisible"). On fixe une couleur sombre explicite, comme pour
+   .message-safety juste au-dessus dans la meme modale. */
+.moderation-notice{padding:16px;margin:0 0 12px;border:1px solid #eadff0;border-radius:14px;background:#faf5fc;color:#3d2254}
 .moderation-notice p{margin:8px 0}
+.moderation-notice small{opacity:.65}
 .message-safety{padding:14px 18px;margin-bottom:16px;border:1px solid #e1c9ef;border-radius:14px;background:#f7f0fb;color:#3d2254;font-size:14px;line-height:1.5}
 .message-safety p{margin:6px 0 0}
 .message-chat-head .report-link{display:block;font-size:13px;text-align:left}
@@ -3452,6 +3457,8 @@ header #signupBtn{display:none!important}
 .admin-stats-head p{margin:4px 0 0;color:#806f87;font-size:.8rem}
 .admin-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
 .admin-stat-card{min-width:0;padding:14px;border:1px solid #eadff0;border-radius:15px;background:#fff}
+.admin-stat-card.has-pending{background:#fff3cd;border-color:#ffdd80}
+.admin-stat-card.has-pending .admin-stat-value{color:#7a5a00}
 .admin-stat-value{display:block;color:#451657;font-size:1.7rem;line-height:1;font-weight:950;letter-spacing:-.03em}
 .admin-stat-label{display:block;margin-top:7px;color:#78667f;font-size:.74rem;font-weight:800;line-height:1.25}
 .admin-plan-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin-top:11px}
@@ -7438,6 +7445,7 @@ header #flowErrorsBtn{
     <button type="button" class="btn ghost" id="refreshAdminStatsBtn">Actualiser</button>
   </div>
   <div class="admin-stat-grid">
+    <div class="admin-stat-card" id="statPendingModerationCard"><span class="admin-stat-value" id="statPendingModeration">—</span><span class="admin-stat-label">Annonces à modérer</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statTotalAccounts">—</span><span class="admin-stat-label">Total comptes</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statProfessionals">—</span><span class="admin-stat-label">Professionnels</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statPrivateAccounts">—</span><span class="admin-stat-label">Particuliers</span></div>
@@ -10739,6 +10747,30 @@ async function loadAds(){
     if(!isCurrent()) return;
     if(pendingError){console.error(pendingError);toast('Impossible de charger la modération');return}
     loadedAds=pending||[];
+
+    // Fix 21/09/2026 : deuxieme verification manuelle des annonces deja publiees
+    // automatiquement. Elles restent en ligne (status active) pendant qu'elles
+    // apparaissent ici pour un controle a posteriori (Anthony : "laisse les
+    // annonces moderer automatiquement pour une deuxieme verification manuelle").
+    const {data:autoRows,error:autoRowsError}=await sb.from('listing_moderation')
+      .select('listing_id')
+      .eq('auto_published',true)
+      .or('admin_reviewed.is.null,admin_reviewed.eq.false');
+    if(!isCurrent()) return;
+    if(autoRowsError)console.error('Annonces auto-publiées à revérifier indisponibles',autoRowsError);
+    const pendingIds=new Set(loadedAds.map(a=>a.id));
+    const autoIds=(autoRows||[]).map(r=>r.listing_id).filter(id=>id&&!pendingIds.has(id));
+    if(autoIds.length){
+      const {data:autoAds,error:autoAdsError}=await sb.from('listings')
+        .select('*,listing_photos(id,storage_path,position)')
+        .in('id',autoIds)
+        .eq('status','active')
+        .order('created_at',{ascending:false});
+      if(!isCurrent()) return;
+      if(autoAdsError)console.error('Annonces auto-publiées indisponibles',autoAdsError);
+      loadedAds=[...loadedAds,...(autoAds||[])];
+    }
+
     const ids=loadedAds.map(a=>a.id);
     if(ids.length){
       const {data:mods,error:modsError}=await sb.from('listing_moderation')
@@ -11117,13 +11149,21 @@ function renderAds(){
       ?`<div style="display:inline-flex;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:${a.status==='pending'?'#fff3cd':'#f8d7da'};color:${a.status==='pending'?'#7a5a00':'#842029'};font-size:.74rem;font-weight:850">${a.status==='pending'?'En attente de validation':'Refusée'}</div>`
       :'';
     const moderationInfo=moderationRiskById.get(a.id);
-    const moderationActions=(moderationMode && currentProfile?.is_admin && a.status==='pending')?`<button class="mini-btn" onclick="approveAd('${a.id}')">Accepter</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`:'';
+    // Fix 21/09/2026 : une annonce active mais auto_published && !admin_reviewed
+    // attend seulement une deuxieme verification manuelle (elle reste en ligne
+    // entre-temps), contrairement a une annonce pending qui attend sa premiere decision.
+    const needsSecondCheck=!!(moderationMode && currentProfile?.is_admin && a.status==='active' && moderationInfo?.auto_published && !moderationInfo?.admin_reviewed);
+    const secondCheckBadge=needsSecondCheck?`<div style="display:inline-flex;margin-bottom:8px;padding:5px 9px;border-radius:999px;background:#d4edda;color:#155724;font-size:.74rem;font-weight:850">Déjà en ligne · à revérifier</div>`:'';
+    const moderationActions=(moderationMode && currentProfile?.is_admin && a.status==='pending')
+      ?`<button class="mini-btn" onclick="approveAd('${a.id}')">Accepter</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`
+      :(needsSecondCheck?`<button class="mini-btn" onclick="validateAutoPublishedAd('${a.id}')">✓ Vérifiée, garder en ligne</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`:'');
     const featured=listingIsFeatured(a);
     return `<article class="ad-card ${a.category==='immobilier'?'immo-card':''} ${featured?'featured-card':''}" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}">
       <div class="ad-photo"${photoAttrs}>${img}${carouselHtml}<div class="card-top-badges">${featured?`<span class="featured-badge">À LA UNE</span>`:''}${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${!moderationMode?listingCardActions(a):''}</div>
       <div class="ad-body">
         ${moderationRiskHTML(a)}
         ${statusBadge}
+        ${secondCheckBadge}
         <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
         <h3 class="ad-title">${esc(a.title)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
@@ -13188,6 +13228,31 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   const moneyFromCents=cents=>(Number(cents||0)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
 
+  // Fix 21/09/2026 : compteur "Annonces à modérer" dans le tableau de bord admin.
+  // Compte les annonces pending (premiere decision) + les annonces deja publiees
+  // automatiquement mais pas encore relues par un admin (deuxieme verification
+  // manuelle demandee par Anthony), sans jamais les depublier en attendant.
+  async function refreshPendingModerationStat(){
+    const card=document.getElementById('statPendingModerationCard');
+    const el=document.getElementById('statPendingModeration');
+    if(!el)return;
+    const {count:pendingCount,error:pendingError}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('status','pending');
+    if(pendingError){console.error('Compteur modération (pending) indisponible',pendingError);return}
+    const {data:autoRows,error:autoError}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
+    if(autoError)console.error('Compteur modération (auto-publiées) indisponible',autoError);
+    const autoIds=(autoRows||[]).map(r=>r.listing_id);
+    let autoActiveCount=0;
+    if(autoIds.length){
+      const {count,error}=await sb.from('listings').select('id',{count:'exact',head:true}).in('id',autoIds).eq('status','active');
+      if(error)console.error('Compteur modération (auto-publiées actives) indisponible',error);
+      autoActiveCount=Number(count||0);
+    }
+    const total=Number(pendingCount||0)+autoActiveCount;
+    el.textContent=String(total);
+    card?.classList.toggle('has-pending',total>0);
+  }
+  window.refreshPendingModerationStat=refreshPendingModerationStat;
+
   async function loadAdminDashboardStats(){
     const panel=document.getElementById('adminStatsPanel');
     if(!panel)return;
@@ -13195,6 +13260,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     panel.classList.toggle('hidden',!isAdmin);
     document.getElementById('adminDatabasePanel')?.classList.toggle('hidden',!isAdmin);
     if(!isAdmin)return;
+    refreshPendingModerationStat();
     const {data,error}=await sb.rpc('get_admin_dashboard_stats');
     if(error){console.error('Stats Admin indisponibles',error);return}
     const stats=data||{};
