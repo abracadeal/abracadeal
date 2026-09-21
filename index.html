@@ -6563,30 +6563,24 @@ header #flowErrorsBtn{
     display:inline-flex;
     align-items:center;
     justify-content:center;
-    gap:8px;
-    min-height:46px;
-    padding:0 13px 0 9px;
-    border-radius:14px;
+    gap:0;
+    min-height:40px;
+    height:40px;
+    padding:0 16px;
+    border-radius:13px;
     white-space:nowrap;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
+    border:1px solid rgba(255,210,244,.42)!important;
+    box-shadow:0 0 14px rgba(236,64,157,.38),0 7px 18px rgba(101,31,130,.28)!important;
+  }
+  header #desktopProProBtn.desktop-propro-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+    box-shadow:0 0 18px rgba(236,64,157,.52),0 9px 22px rgba(101,31,130,.34)!important;
   }
   header #desktopProProBtn.desktop-propro-btn.hidden{
     display:none!important;
-  }
-  .desktop-propro-icon{
-    width:30px;
-    height:30px;
-    flex:0 0 30px;
-    display:grid;
-    place-items:center;
-    border-radius:10px;
-    background:linear-gradient(145deg,#f2be58,#ef4baa 58%,#8d31bc);
-    color:#fff;
-    border:1px solid rgba(255,255,255,.24);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.22),0 4px 12px rgba(0,0,0,.18);
-    font-size:10px;
-    line-height:1;
-    font-weight:950;
-    letter-spacing:-.06em;
   }
   .desktop-propro-label{
     font-weight:900;
@@ -6718,7 +6712,6 @@ header #flowErrorsBtn{
       <a class="btn header-vacances-btn" href="vacances.html" aria-label="Abracadeal Vacances"><span>Vacances</span></a>
       <a class="desktop-favorites-btn home-action" data-home-route="favorites" href="#resultats" aria-label="Mes favoris">♡</a>
       <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
-        <span class="desktop-propro-icon" aria-hidden="true">P/P</span>
         <span class="desktop-propro-label">Pro/Pro</span>
       </a>
       <button class="hidden" id="b2bNavBtn" type="button" aria-label="Pro/Pro" style="display:none!important">
