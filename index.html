@@ -6322,7 +6322,13 @@ header #flowErrorsBtn{
    reserves au desktop (demande initiale d'Anthony) ; sur mobile la barre redevient compacte
    (mot-cle + bouton Rechercher uniquement), comme avant leur ajout. */
 @media(max-width:760px){
-  #searchCity.desktop-search-city{display:none!important}
+  #searchCity.desktop-search-city{
+    display:block!important;
+    min-width:0!important;
+    padding-left:36px!important;
+    background-image:radial-gradient(circle at 18px 24px,#6c2d88 0 3.5px,transparent 4.5px)!important;
+    background-repeat:no-repeat!important;
+  }
   .search-filters-link{display:none!important}
 }
 
@@ -6875,7 +6881,7 @@ header #flowErrorsBtn{
   }
   .search-card{
     display:grid!important;
-    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-columns:minmax(0,1.25fr) minmax(190px,.8fr) auto!important;
     gap:9px!important;
     width:100%!important;
     padding:10px!important;
@@ -7126,7 +7132,7 @@ header #flowErrorsBtn{
     width:min(100% - 36px,1180px)!important;
   }
   .search-card{
-    grid-template-columns:minmax(0,1fr) 180px!important;
+    grid-template-columns:minmax(0,1.35fr) minmax(240px,.85fr) 180px!important;
   }
   .home-featured-card,.personalized-card{
     flex-basis:260px!important;
