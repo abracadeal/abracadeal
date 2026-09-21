@@ -9713,7 +9713,7 @@ function updateAuthUI(preserveEditing=false){
   if($('#profileCity')) $('#profileCity').required=!isAdminAccount;
   if($('#profilePhone')) $('#profilePhone').required=!isAdminAccount;
   if(currentUser){
-    $('#accountBtnLabel').textContent='Compte';
+    $('#accountBtnLabel').textContent=(currentProfile?.display_name||currentUser?.email||'Compte').split(/\s+|@/)[0]||'Compte';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.remove('hidden');
     $('#loggedOutAccount').classList.add('hidden'); $('#loggedInAccount').classList.remove('hidden');
     $('#accountUserBox').innerHTML=`<strong>${esc(currentProfile?.display_name||currentUser.email)}</strong>
@@ -9744,7 +9744,7 @@ function updateAuthUI(preserveEditing=false){
     else{proBoostWalletState={7:0,30:0};renderProBoostWallet();}
   }else{
     proBoostWalletState={7:0,30:0};renderProBoostWallet();
-    $('#accountBtnLabel').textContent='Compte';
+    $('#accountBtnLabel').textContent='Connexion';
     if($('#headerLogoutBtn')) $('#headerLogoutBtn').classList.add('hidden');
     if($('#moderationBtn')) { $('#moderationBtn').classList.add('hidden'); $('#moderationBtn').removeAttribute('data-count'); }
     if($('#flowErrorsBtn')) $('#flowErrorsBtn').classList.add('hidden');
@@ -15873,6 +15873,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     return el;
   }
 
+  function syncAccountLabel(){
+    const target=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-account span');
+    if(!target) return;
+    const source=document.querySelector('#accountBtnLabel');
+    const label=(source?.textContent||'Connexion').trim()||'Connexion';
+    target.textContent=label;
+    const account=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-account');
+    if(account) account.setAttribute('aria-label',label);
+  }
+
   function syncBadge(){
     const target=document.querySelector('.abraca-desktop-actions-v2 .abraca-dnav-messages .abraca-dnav-badge');
     if(!target) return;
@@ -15889,7 +15899,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!visibleDesktop()) return;
     cleanupLegacyDesktopActions();
     const actions=document.querySelector('header .nav-actions');
-    if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); return; }
+    if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); syncAccountLabel(); return; }
 
     const bar=document.createElement('nav');
     bar.className='abraca-desktop-actions-v2';
@@ -15923,6 +15933,12 @@ document.addEventListener('DOMContentLoaded',()=>{
     bar.append(vac,fav,msg,acct);
     actions.appendChild(bar);
     syncBadge();
+    syncAccountLabel();
+
+    const accountLabelSource=document.querySelector('#accountBtnLabel');
+    if(accountLabelSource && window.MutationObserver){
+      new MutationObserver(syncAccountLabel).observe(accountLabelSource,{subtree:true,childList:true,characterData:true});
+    }
 
     const source=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesBtn .unread-badge, .messages-unread-badge');
     if(source && window.MutationObserver){
