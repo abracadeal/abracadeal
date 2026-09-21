@@ -15846,24 +15846,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     target.textContent=txt;
   }
 
+  function cleanupLegacyDesktopActions(){
+    document.querySelectorAll('header .header-vacances-btn, header .abraca-vacances-top').forEach(el=>el.remove());
+  }
+
   function build(){
     if(!visibleDesktop()) return;
+    cleanupLegacyDesktopActions();
     const actions=document.querySelector('header .nav-actions');
     if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); return; }
 
     const bar=document.createElement('nav');
     bar.className='abraca-desktop-actions-v2';
     bar.setAttribute('aria-label','Navigation rapide');
-
-    const search=make('button','abraca-dnav-search','Rechercher',icon.search);
-    search.addEventListener('click',()=>{
-      const area=document.querySelector('.search-wrap,.search-card,#recherche,#search');
-      if(area) area.scrollIntoView({behavior:'smooth',block:'center'});
-      setTimeout(()=>{
-        const input=document.querySelector('.search-card input:not([type="hidden"]), input[type="search"], input[placeholder*="Recherch" i]');
-        if(input){ try{input.focus({preventScroll:true})}catch(_){input.focus()} }
-      },260);
-    });
 
     const vac=make('a','abraca-dnav-vacances','Vacances',icon.vacations);
     vac.href='vacances.html';
@@ -15890,7 +15885,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(!clickOriginal(['#accountBtn','.abraca-account-trigger','#loginBtn','#signupBtn'])) openModal('accountModal');
     });
 
-    bar.append(search,vac,fav,msg,acct);
+    bar.append(vac,fav,msg,acct);
     actions.appendChild(bar);
     syncBadge();
 
@@ -15900,7 +15895,16 @@ document.addEventListener('DOMContentLoaded',()=>{
     }
   }
 
-  const start=()=>{ build(); requestAnimationFrame(build); setTimeout(build,120); setTimeout(build,700); };
+  const start=()=>{
+    build();
+    requestAnimationFrame(build);
+    setTimeout(build,120);
+    setTimeout(build,700);
+    const header=document.querySelector('header');
+    if(header && window.MutationObserver){
+      new MutationObserver(()=>cleanupLegacyDesktopActions()).observe(header,{childList:true,subtree:true});
+    }
+  };
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
   window.addEventListener('resize',build,{passive:true});
