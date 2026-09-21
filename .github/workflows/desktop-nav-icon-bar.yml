@@ -47,13 +47,13 @@ jobs:
               width:100%!important;
               justify-content:center!important;
               gap:10px!important;
-              min-height:30px!important;
-              margin-top:-16px!important;
-              margin-bottom:-5px!important;
+              min-height:28px!important;
+              margin-top:-20px!important;
+              margin-bottom:-6px!important;
               padding-top:0!important;
               padding-bottom:0!important;
               align-items:center!important;
-              transform:translateY(-2px)!important;
+              transform:translateY(-4px)!important;
               overflow:visible!important;
               position:relative!important;
               z-index:120!important;
@@ -70,13 +70,13 @@ jobs:
               z-index:15000!important;
             }
             header .desktop-category-link{
-              min-height:30px!important;
-              height:30px!important;
+              min-height:28px!important;
+              height:28px!important;
               padding-top:0!important;
               padding-bottom:0!important;
               padding-left:9px!important;
               padding-right:9px!important;
-              line-height:30px!important;
+              line-height:28px!important;
               display:flex!important;
               align-items:center!important;
               justify-content:center!important;
@@ -368,5 +368,5 @@ jobs:
           git config user.name "Abracadeal Bot"
           git config user.email "actions@users.noreply.github.com"
           git add index.html
-          git commit -m "Desktop: afficher Connexion ou le prenom dans Compte"
+          git commit -m "Desktop: remonter encore les categories principales"
           git push
