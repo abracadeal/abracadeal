@@ -8952,6 +8952,10 @@ $('#createAlertForm')?.addEventListener('submit',async(e)=>{
 
 $('#accountModerationBtn')?.addEventListener('click',()=>{
   closeModal('accountModal');
+  if(window.matchMedia('(min-width:761px)').matches){
+    location.href='moderation.html';
+    return;
+  }
   window.toggleAdminModeration?.();
 });
 $('#accountFlowBtn')?.addEventListener('click',()=>{
@@ -13007,6 +13011,11 @@ async function openFavorites(){
 $('#backToAllAds').addEventListener('click',()=>$('#showAll').click());
 window.toggleAdminModeration=async()=>{
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+  // Sur desktop, la modération doit vivre sur sa page dédiée et non sous le catalogue.
+  if(window.matchMedia('(min-width:761px)').matches){
+    location.href='moderation.html';
+    return;
+  }
   moderationMode=!moderationMode;
   favoritesMode=false;
   onlyMine=false;
