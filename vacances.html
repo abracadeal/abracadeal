@@ -6001,6 +6001,10 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
 
   function applyVacationPageMode({isHost=false,hasHost=false}={}){
     lastVacationHostState={isHost:!!isHost,hasHost:!!hasHost};
+    document.body.dataset.vacSpace=isHost?'host':(hasHost?'host-pending':'traveler');
+    document.dispatchEvent(new CustomEvent('abraca:vac-space-change',{
+      detail:{isHost:!!isHost,hasHost:!!hasHost}
+    }));
     const hostMode=vacationPageMode==='hote';
     const travelerMain=root.getElementById('vacTravelerMain');
     const travelerFooter=root.getElementById('vacTravelerFooter');
@@ -6538,6 +6542,26 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     return el;
   }
 
+  function syncVacDesktopSpace(){
+    const link=document.querySelector('.vac-desktop-actions-v2 .vac-dnav-favoris');
+    if(!link) return;
+    const label=link.querySelector('span');
+    const state=document.body.dataset.vacSpace||'traveler';
+    if(state==='host'){
+      if(label) label.textContent='Espace Hôte';
+      link.href='vacances.html?mode=hote';
+      link.setAttribute('aria-label','Espace Hôte');
+    }else if(state==='host-pending'){
+      if(label) label.textContent='Espace Hôte';
+      link.href='vacances.html?mode=hote&host_signup=1';
+      link.setAttribute('aria-label','Espace Hôte');
+    }else{
+      if(label) label.textContent='Espace voyageur';
+      link.href='espace-voyageur.html';
+      link.setAttribute('aria-label','Espace voyageur');
+    }
+  }
+
   function syncVacDesktopAccountLabel(){
     const target = document.querySelector('.vac-desktop-actions-v2 .vac-dnav-compte span');
     if(!target) return;
@@ -6565,6 +6589,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     if(actions.querySelector('.vac-desktop-actions-v2')){
       syncBadge();
       syncVacDesktopAccountLabel();
+      syncVacDesktopSpace();
       return;
     }
 
@@ -6575,7 +6600,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     const vacances = item('a','vac-dnav-vacances','Abracadeal',icons.vacances);
     vacances.href = 'index.html';
 
-    const favoris = item('a','vac-dnav-favoris','Favoris',icons.favoris);
+    const favoris = item('a','vac-dnav-favoris','Espace voyageur',icons.favoris);
     favoris.href = 'espace-voyageur.html';
 
     const messages = item('a','vac-dnav-messages','Messages',icons.messages);
@@ -6603,6 +6628,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
     actions.appendChild(bar);
     syncBadge();
     syncVacDesktopAccountLabel();
+    syncVacDesktopSpace();
 
     const accountLabelSource=document.getElementById('vacLoginCta');
     if(accountLabelSource && window.MutationObserver){
@@ -6631,6 +6657,7 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
   }else{
     start();
   }
+  document.addEventListener('abraca:vac-space-change',syncVacDesktopSpace);
   window.addEventListener('resize',build,{passive:true});
 })();
 </script>
