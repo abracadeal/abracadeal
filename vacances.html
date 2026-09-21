@@ -2731,6 +2731,84 @@ h1,
   }
 }
 </style>
+<style id="abraca-vacances-mobile-tablet-brand-desktop-look-20260921">
+/* Vacances mobile + tablette : même écriture dorée que le logo Vacances desktop. */
+@media (max-width:760px),
+       (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .topbar .brand{
+    display:inline-flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    gap:0!important;
+    width:max-content!important;
+    text-align:left!important;
+  }
+  .topbar .brand b{
+    display:block!important;
+    height:auto!important;
+    min-height:0!important;
+    margin:0!important;
+    padding:0!important;
+    font-family:Fraunces,serif!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:-.025em!important;
+    color:#e8bb43!important;
+    background:
+      linear-gradient(
+        110deg,
+        #9f6800 0%,
+        #d7a51e 16%,
+        #ffe47b 29%,
+        #fff8cf 43%,
+        #ffffff 50%,
+        #fff0a0 57%,
+        #d9a722 72%,
+        #a66c00 100%
+      )!important;
+    background-size:320% 100%!important;
+    background-position:100% 50%;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaVacHeaderGoldShine 2.2s linear infinite!important;
+    -webkit-animation:abracaVacHeaderGoldShine 2.2s linear infinite!important;
+    filter:drop-shadow(0 0 5px rgba(255,196,55,.24))!important;
+    white-space:nowrap!important;
+  }
+  .topbar .brand small{
+    display:block!important;
+    height:auto!important;
+    min-height:0!important;
+    width:max-content!important;
+    max-width:100%!important;
+    margin:4px 0 0!important;
+    padding:0!important;
+    text-align:left!important;
+    color:#bdadc7!important;
+    font-family:Inter,sans-serif!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:760px){
+  .topbar .brand b{font-size:25px!important}
+}
+@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .topbar .brand b{font-size:28px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .topbar .brand b{
+    animation:none!important;
+    -webkit-animation:none!important;
+    background-position:50% 50%!important;
+  }
+}
+</style>
 </head>
 <body>
 <div class="vac-mobile-main-return">
