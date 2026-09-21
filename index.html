@@ -2325,6 +2325,30 @@ a.btn{cursor:pointer}
   box-shadow:0 3px 10px rgba(63,25,83,.22);
   z-index:2;
 }
+/* Fix 22/09/2026 : meme pastille de compteur que #moderationBtn (ci-dessus), pour le raccourci
+   "Modérer" de la modale Mon compte - seul point d'accès réel à la modération sur desktop. */
+#accountModerationBtn{position:relative;}
+#accountModerationBtn[data-count]::after{
+  content:attr(data-count);
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  min-width:20px;
+  height:20px;
+  padding:0 5px;
+  border-radius:999px;
+  background:#ef3f8f;
+  color:#fff;
+  border:2px solid #fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:.7rem;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 3px 10px rgba(63,25,83,.22);
+  z-index:2;
+}
 
 /* Autocomplétion marque / modèle et localisation */
 .autocomplete-wrap{position:relative;width:100%}
@@ -8010,8 +8034,16 @@ function setModerationButtonLabel(label='Modérer'){
 
 async function refreshModerationCount(){
   const btn=$('#moderationBtn');
-  if(!btn) return 0;
-  if(!sb || !currentProfile?.is_admin){btn.removeAttribute('data-count');btn.removeAttribute('aria-label');return 0;}
+  // Fix 22/09/2026 : #moderationBtn est masque en desktop (voir commentaire CSS plus haut),
+  // donc alimente aussi #accountModerationBtn (raccourci "Moderer" de la modale Mon compte),
+  // seul acces reel a la moderation sur cette largeur - signale par Anthony
+  // ("ya pas de compteurs disponible sur desktop").
+  const accountBtn=$('#accountModerationBtn');
+  if(!btn && !accountBtn) return 0;
+  if(!sb || !currentProfile?.is_admin){
+    [btn,accountBtn].forEach(el=>{if(el){el.removeAttribute('data-count');el.removeAttribute('aria-label');}});
+    return 0;
+  }
   // Pilotage par exception : seules les annonces encore pending, ou auto-publiées pas encore
   // revérifiées par un admin, demandent réellement une action admin.
   const {count,error}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('status','pending');
@@ -8033,8 +8065,11 @@ async function refreshModerationCount(){
     }
   }
   const n=Number(count||0)+autoActiveCount;
-  if(n>0)btn.dataset.count=String(n);else btn.removeAttribute('data-count');
-  btn.setAttribute('aria-label',n>0?`${n} annonce${n>1?'s':''} à modérer`:'Aucune annonce à modérer');
+  [btn,accountBtn].forEach(el=>{
+    if(!el)return;
+    if(n>0)el.dataset.count=String(n);else el.removeAttribute('data-count');
+    el.setAttribute('aria-label',n>0?`${n} annonce${n>1?'s':''} à modérer`:'Aucune annonce à modérer');
+  });
   return n;
 }
 
@@ -10677,6 +10712,15 @@ window.carouselStep=function(el,dir){
   if(img){
     img.style.display='';
     el.classList.remove('image-fallback');
+    // Fix 22/09/2026 : meme correctif que selectDetailPhoto (fiche annonce) plus bas dans le
+    // fichier - reinitialise l'etat de secours a chaque navigation carousel sur la pastille,
+    // sinon une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher
+    // sur une autre photo cassee ensuite (signale par Anthony : "une photo par defaut et une
+    // autre invisible, celle par defaut ne revient jamais").
+    img.dataset.abracaFallback='';
+    img.classList.remove('abraca-default-photo');
+    const wm=el.querySelector('.photo-watermark');
+    if(wm)wm.classList.remove('hidden');
     img.src=urls[idx];
   }
   el.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
@@ -11762,6 +11806,8 @@ window.selectDetailPhoto=(button,url,index,total)=>{
        une autre photo cassee ensuite (le garde-fou anti-boucle restait arme). */
     main.dataset.abracaFallback='';
     main.classList.remove('abraca-default-photo');
+    const detailWm=document.getElementById('detailPhotoWatermark');
+    if(detailWm)detailWm.classList.remove('hidden');
     main.onload=refreshDetailWatermark;
     main.src=url;
     if(main.complete)setTimeout(refreshDetailWatermark,0);
@@ -14315,7 +14361,9 @@ document.addEventListener('DOMContentLoaded',()=>{
     img.alt='Abracadeal';
     img.classList.add('abraca-default-photo');
     const box=img.parentElement;
-    if(box){const wm=box.querySelector('.photo-watermark');if(wm)wm.remove();}
+    // Fix 22/09/2026 : .remove() supprimait le filigrane pour de bon, l'empechant de revenir
+    // meme si une navigation ulterieure (carousel/miniatures) affiche une vraie photo qui charge.
+    if(box){const wm=box.querySelector('.photo-watermark');if(wm)wm.classList.add('hidden');}
   }
   document.addEventListener('error',function(e){ mark(e.target); },true);
   function sweep(){
