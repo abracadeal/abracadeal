@@ -9976,7 +9976,7 @@ async function openBoostCreditForListing(id){
   if(!currentUser||(!isAdmin&&currentProfile?.account_type!=='professionnel')){toast('Compte professionnel requis');return;}
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
   if(!a||(!isAdmin&&a.owner_id!==currentUser.id)){toast('Annonce introuvable');return;}
-  if(a.seller_type!=='professionnel'){toast('Le Boost Pro est réservé aux annonces professionnelles');return;}
+  if(!isAdmin&&a.seller_type!=='professionnel'){toast('Le Boost Pro est réservé aux annonces professionnelles');return;}
   if(listingIsFeatured(a)){toast('Cette annonce est déjà boostée');return;}
   boostCreditListingId=id;
   if($('#boostCreditTitle'))$('#boostCreditTitle').textContent='Booster · '+(a.title||'Annonce');
@@ -11288,10 +11288,13 @@ function renderAds(){
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
     const canUseProBoost=!!(
       currentUser &&
-      a.seller_type==='professionnel' &&
       (
         currentProfile?.is_admin===true ||
-        (currentProfile?.account_type==='professionnel' && (onlyMine || a.owner_id===currentUser.id))
+        (
+          a.seller_type==='professionnel' &&
+          currentProfile?.account_type==='professionnel' &&
+          (onlyMine || a.owner_id===currentUser.id)
+        )
       )
     );
     const statusBadge=(onlyMine && a.status!=='active')
