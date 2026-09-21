@@ -83,9 +83,9 @@ html.abraca-embedded-host body{background:#faf7fc!important}
 </style>
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
 <style id="abraca-host-mobile-nav-fix-20260921">
-/* Espace Hôte mobile : le menu horizontal ne doit jamais compresser
-   ses boutons, sinon les libellés se superposent sur iPhone. */
-@media(max-width:900px){
+/* Espace Hôte : tablette = barre horizontale scrollable.
+   iPhone vertical = grille 2 colonnes pour éviter tout chevauchement. */
+@media (min-width:621px) and (max-width:900px){
   .shell{
     grid-template-columns:1fr!important;
     gap:12px!important;
@@ -97,46 +97,79 @@ html.abraca-embedded-host body{background:#faf7fc!important}
     gap:7px!important;
     width:100%!important;
     max-width:100%!important;
-    min-width:0!important;
     padding:9px!important;
-    margin:0!important;
     border-radius:20px!important;
     overflow-x:auto!important;
     overflow-y:hidden!important;
     -webkit-overflow-scrolling:touch!important;
     scrollbar-width:none!important;
-    white-space:nowrap!important;
-    scroll-snap-type:x proximity!important;
   }
   .side::-webkit-scrollbar{display:none!important}
   .side h3{display:none!important}
   .side .navbtn{
     flex:0 0 auto!important;
     width:auto!important;
-    min-width:max-content!important;
+    min-width:130px!important;
     max-width:none!important;
     margin:0!important;
     padding:11px 14px!important;
     white-space:nowrap!important;
-    overflow:visible!important;
-    text-overflow:clip!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
     line-height:1.1!important;
+    text-align:center!important;
     border-radius:12px!important;
-    scroll-snap-align:start!important;
   }
 }
+
 @media(max-width:620px){
+  .shell,
   html.abraca-embedded-host .shell{
     width:calc(100% - 18px)!important;
+    max-width:calc(100% - 18px)!important;
     margin:10px auto 28px!important;
+    grid-template-columns:1fr!important;
+    gap:14px!important;
   }
+
+  .side,
   html.abraca-embedded-host .side{
-    border-radius:18px!important;
+    position:static!important;
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:7px!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
     padding:8px!important;
+    margin:0!important;
+    border-radius:18px!important;
+    overflow:visible!important;
+    white-space:normal!important;
   }
+
+  .side h3{display:none!important}
+
+  .side .navbtn,
   html.abraca-embedded-host .side .navbtn{
-    font-size:.86rem!important;
-    padding:10px 12px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    min-height:42px!important;
+    margin:0!important;
+    padding:9px 7px!important;
+    white-space:normal!important;
+    overflow:hidden!important;
+    overflow-wrap:normal!important;
+    word-break:normal!important;
+    text-overflow:clip!important;
+    line-height:1.15!important;
+    text-align:center!important;
+    font-size:.78rem!important;
+    border-radius:11px!important;
   }
 }
 </style>
