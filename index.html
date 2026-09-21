@@ -7209,6 +7209,82 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-mobile-tablet-brand-desktop-look-20260921">
+/* Mobile + tablette : même identité typographique/dorée que le logo desktop.
+   Les dimensions restent adaptées au support ; desktop inchangé. */
+@media (max-width:760px),
+       (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .mobile-brand{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    justify-content:center!important;
+    gap:0!important;
+    line-height:1!important;
+  }
+  .mobile-brand-name{
+    display:inline-block!important;
+    font-family:Fraunces,serif!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:-.025em!important;
+    color:#e8bb43!important;
+    background:
+      linear-gradient(
+        110deg,
+        #9f6800 0%,
+        #d7a51e 16%,
+        #ffe47b 29%,
+        #fff8cf 43%,
+        #ffffff 50%,
+        #fff0a0 57%,
+        #d9a722 72%,
+        #a66c00 100%
+      )!important;
+    background-size:320% 100%!important;
+    background-position:100% 50%;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    -webkit-animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    filter:drop-shadow(0 0 5px rgba(255,196,55,.24))!important;
+    white-space:nowrap!important;
+  }
+  .mobile-brand-name .deal{
+    background:none!important;
+    color:inherit!important;
+    -webkit-text-fill-color:inherit!important;
+  }
+  .mobile-brand-tag{
+    display:block!important;
+    width:max-content!important;
+    max-width:100%!important;
+    margin-top:4px!important;
+    padding:0!important;
+    color:#bdadc7!important;
+    font-family:'DM Sans',Inter,sans-serif!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:760px){
+  .mobile-brand-name{font-size:25px!important}
+}
+@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .mobile-brand-name{font-size:28px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .mobile-brand-name{
+    animation:none!important;
+    -webkit-animation:none!important;
+    background-position:50% 50%!important;
+  }
+}
+</style>
 </head>
 <body>
 
