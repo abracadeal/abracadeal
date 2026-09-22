@@ -7053,5 +7053,37 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   window.addEventListener('resize',build,{passive:true});
 })();
 </script>
+
+<script id="vac-tablet-host-single-scroll-20260922">
+(function(){
+  function isTablet(){return matchMedia('(min-width:621px) and (max-width:1366px)').matches && (matchMedia('(pointer:coarse)').matches||matchMedia('(any-pointer:coarse)').matches);}
+  function fitHostFrame(){
+    if(!isTablet()) return;
+    const frame=document.getElementById('vacHostFrame');
+    if(!frame) return;
+    try{
+      const doc=frame.contentDocument;
+      if(!doc) return;
+      const resize=()=>{
+        const h=Math.max(doc.documentElement.scrollHeight,doc.body?doc.body.scrollHeight:0);
+        if(h>0){frame.style.setProperty('height',h+'px','important');frame.style.setProperty('min-height','0','important');}
+      };
+      resize();
+      if(frame._abracaResizeObserver) frame._abracaResizeObserver.disconnect();
+      frame._abracaResizeObserver=new ResizeObserver(resize);
+      frame._abracaResizeObserver.observe(doc.documentElement);
+      if(doc.body) frame._abracaResizeObserver.observe(doc.body);
+      setTimeout(resize,250);setTimeout(resize,900);
+    }catch(e){}
+  }
+  document.addEventListener('DOMContentLoaded',()=>{
+    const frame=document.getElementById('vacHostFrame');
+    if(frame) frame.addEventListener('load',fitHostFrame);
+    setTimeout(fitHostFrame,500);
+  });
+  addEventListener('resize',()=>setTimeout(fitHostFrame,100));
+})();
+</script>
+
 </body>
 </html>
