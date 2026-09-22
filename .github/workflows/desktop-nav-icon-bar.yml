@@ -356,6 +356,10 @@ jobs:
           else:
               s = s.replace("</body>", js + "\n</body>", 1)
 
+          share_script = '<script src="assets/share-listing-20260922.js?v=20260922-1"></script>'
+          if share_script not in s:
+              s = s.replace("</body>", share_script + "\\n</body>", 1)
+
           p.write_text(s, encoding="utf-8")
           PY
 
