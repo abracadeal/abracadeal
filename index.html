@@ -7859,6 +7859,29 @@ header #flowErrorsBtn{
   header .desktop-submenu{pointer-events:auto!important;z-index:240!important}
 }
 </style>
+<style id="abraca-desktop-floating-category-buttons-20260922">
+/* Catégories desktop : boutons individuels flottants, sans déplacer les menus déroulants. */
+@media (min-width:1024px) and (pointer:fine){
+  header .desktop-category-nav{gap:8px!important;padding:7px 0 12px!important;min-height:58px!important;overflow:visible!important}
+  header .desktop-nav-item{overflow:visible!important}
+  header .desktop-category-link{
+    background:rgba(255,255,255,.065)!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+    border-radius:999px!important;
+    box-shadow:0 5px 13px rgba(0,0,0,.16)!important;
+    min-height:40px!important;height:40px!important;
+    padding:0 14px!important;
+    transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important;
+  }
+  header .desktop-category-link:hover,
+  header .desktop-category-link:focus-visible{
+    transform:translateY(-3px)!important;
+    background:rgba(255,255,255,.15)!important;
+    box-shadow:0 9px 20px rgba(0,0,0,.27)!important;
+  }
+  header .desktop-category-link:focus-visible{outline:2px solid #f3cf70!important;outline-offset:2px!important}
+}
+</style>
 <style id="abraca-mobile-search-thinner-20260922">
 /* Mobile uniquement : recherche compacte, surtout le bouton. */
 @media (max-width:760px){
