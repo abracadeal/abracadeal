@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Disallow: /backups/
+Disallow: /admin-prospection.html
+Disallow: /admin-recherche.html
+Disallow: /admin-vacances.html
+Disallow: /moderation.html
+Disallow: /espace-hote.html
+Disallow: /espace-voyageur.html
+Disallow: /messages-vacances.html
+Disallow: /demandes-hote.html
+Disallow: /gestion-sejour.html
+Disallow: /profil-vacances.html
+Disallow: /photos-vacances.html
+Disallow: /pro-pro.html
+
+Sitemap: https://abracadeal.fr/sitemap.xml
