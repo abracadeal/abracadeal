@@ -12338,6 +12338,9 @@ function updateFilterSubcategories(keepValue=''){
   select.innerHTML='<option value="">Toutes</option>'+items.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join('');
   select.disabled=!category||!items.length;
   if(keepValue && items.some(([v])=>v===keepValue)) select.value=keepValue;
+  const motoPlaceholder=select?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Mercedes';
+  if($('#filterVehicleMake'))$('#filterVehicleMake').placeholder=motoPlaceholder;
+  if($('#qfVehicleMakeInput'))$('#qfVehicleMakeInput').placeholder=motoPlaceholder;
   const showVehicles=category==='vehicules';
   const showRealEstate=category==='immobilier';
   $('#vehicleFilterFields')?.classList.toggle('hidden',!showVehicles);
@@ -14108,7 +14111,7 @@ setupQuickFilterChip('qfPriceChip','qfPricePopover',()=>{
   if($('#qfPriceMinInput'))$('#qfPriceMinInput').value=$('#filterPriceMin')?.value||'';
   if($('#qfPriceMaxInput'))$('#qfPriceMaxInput').value=$('#filterPriceMax')?.value||'';
 });
-setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{if($('#qfVehicleMakeInput'))$('#qfVehicleMakeInput').value=$('#filterVehicleMake')?.value||'';});
+setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{const input=$('#qfVehicleMakeInput');if(input){input.value=$('#filterVehicleMake')?.value||'';input.placeholder=$('#filterSubcategory')?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Mercedes';}});
 setupQuickFilterChip('qfImmoChip','qfImmoPopover',()=>{if($('#qfImmoPropertyInput'))$('#qfImmoPropertyInput').value=$('#filterImmoPropertyType')?.value||'';});
 $('#qfCityInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#searchBtn')?.click();$('#qfCityPopover')?.classList.add('hidden');$('#qfPopoverBackdrop')?.classList.add('hidden');}});
 function mirrorToOriginal(mirrorId,originalId){
