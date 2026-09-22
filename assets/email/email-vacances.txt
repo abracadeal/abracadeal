@@ -1,5 +1,5 @@
 OBJET : Votre logement visible partout en France : 0 % de commission
-APERÇU : Offre Fondateurs à 4,99 € HT/mois — réservée aux 1 000 premiers inscrits.
+APERÇU : 500 premiers logements gratuits 12 mois, puis 4,99 €/mois. Dès le 501e : 4,99 €/mois.
 
 ---
 
@@ -12,7 +12,7 @@ Vous proposez un ou plusieurs logements en location saisonnière ? Nous lançons
 - Sans engagement : vous arrêtez quand vous voulez
 - Publication rapide de vos annonces
 
-OFFRE FONDATEURS : 4,99 € HT / mois par logement, pendant 12 mois. Réservée aux 1 000 premiers inscrits.
+OFFRE DE LANCEMENT : les 500 premiers logements bénéficient de 12 mois gratuits, puis de 4,99 €/mois par logement. À partir du 501e logement : 4,99 €/mois dès l'inscription, sans augmentation programmée.
 
 Découvrir l'offre : https://abracadeal.fr
 
