@@ -851,6 +851,9 @@ a.btn{cursor:pointer}
   align-items:center;
   justify-content:center;
 }
+/* Navigation directe entre les photos dans la fiche desktop, sans ouvrir le zoom */
+@media(min-width:981px){.detail-gallery-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:7;width:44px;height:44px;border:1px solid rgba(40,20,52,.12);border-radius:50%;background:rgba(255,255,255,.95);color:#382047;font-size:24px;font-weight:800;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.18)}.detail-gallery-prev{left:14px}.detail-gallery-next{right:14px}.detail-gallery-arrow:hover{background:#f6eafa;color:#a324b6}}
+@media(max-width:980px){.detail-gallery-arrow{display:none}}
 .detail-main-photo{
   width:100%;
   height:100%;
@@ -12988,6 +12991,7 @@ window.openAd=id=>{
             <button type="button" class="detail-photo-tool" data-share-listing="${a.id}" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg><span>Partager</span></button>
             <button type="button" id="detailFavoriteBtn-${a.id}" data-favorite-id="${a.id}" class="detail-photo-tool heart ${favoriteIds.has(a.id)?'active':''}" aria-label="${favoriteIds.has(a.id)?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${favoriteIds.has(a.id)?'♥':'♡'}</span><span class="fav-count" id="detailFavoriteCount-${a.id}" data-fav-count-id="${a.id}"></span></button>
           </div>
+          ${photos.length>1?`<button type="button" class="detail-gallery-arrow detail-gallery-prev" aria-label="Photo précédente" onclick="event.stopPropagation();changeDetailPhoto(-1)">&#10094;</button><button type="button" class="detail-gallery-arrow detail-gallery-next" aria-label="Photo suivante" onclick="event.stopPropagation();changeDetailPhoto(1)">&#10095;</button>`:""}
           <span class="photo-watermark" id="detailPhotoWatermark">Abracadeal</span><div class="detail-photo-count" id="detailPhotoCount">1 / ${photos.length}</div>
         </div>
         ${photos.length>1?`<div class="detail-thumbs">
@@ -13248,6 +13252,7 @@ async function renderDetailRecommendations(a){
   }
 }
 
+window.changeDetailPhoto=(direction)=>{const thumbs=[...document.querySelectorAll('.detail-thumbs button')];if(thumbs.length<2)return;const active=thumbs.findIndex(b=>b.classList.contains('active'));const next=(Math.max(0,active)+direction+thumbs.length)%thumbs.length;thumbs[next].click();};
 window.selectDetailPhoto=(button,url,index,total)=>{
   const main=document.getElementById('detailMainPhoto');
   if(main){
