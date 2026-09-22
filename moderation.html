@@ -27,6 +27,13 @@ a{color:inherit;text-decoration:none}
 .tab.active{background:linear-gradient(135deg,#edbd55,#f2cf74);color:#24150a;border-color:#f2cf74}
 .count{display:inline-flex;min-width:23px;height:23px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;background:rgba(255,255,255,.12);font-size:11px;font-weight:950}
 .tab.active .count{background:#211526;color:#fff}
+.bulkbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 14px;padding:11px 13px;border:1px solid var(--line);border-radius:14px;background:#21122f}
+.bulkbar[hidden]{display:none!important}
+.bulkselect{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:800}
+.bulkselect input,.card-select input{width:19px;height:19px;accent-color:var(--gold);cursor:pointer}
+.bulkdelete{min-height:39px;padding:0 13px;border:1px solid #ff6675;border-radius:11px;background:#61242e;color:#fff;font-size:12px;font-weight:850}
+.bulkdelete:disabled{opacity:.45;cursor:not-allowed}
+.card-select{display:flex;align-items:center;gap:8px;margin:0 12px 10px;color:#e9dced;font-size:12px;font-weight:800}
 .statusbar{min-height:24px;margin:0 0 10px;color:#b9a9c5;font-size:13px}
 .list{display:grid;gap:12px}
 .card{border:1px solid var(--line);border-radius:19px;background:linear-gradient(180deg,rgba(31,18,44,.98),rgba(18,11,28,.98));box-shadow:0 12px 28px rgba(0,0,0,.20);overflow:hidden}
@@ -170,6 +177,10 @@ a{color:inherit;text-decoration:none}
       <button class="tab" type="button" data-tab="validated">Validées <span class="count" id="countValidated">0</span></button>
       <button class="tab" type="button" data-tab="rejected">Refusées <span class="count" id="countRejected">0</span></button>
     </nav>
+    <div class="bulkbar" id="bulkbar" hidden>
+      <label class="bulkselect"><input type="checkbox" id="selectAll"> Tout sélectionner <span id="selectionCount">(0)</span></label>
+      <button class="bulkdelete" id="bulkDelete" type="button" disabled>Supprimer la sélection</button>
+    </div>
     <div class="statusbar" id="status">Chargement…</div>
     <section class="list" id="list"></section>
   </div>
@@ -223,7 +234,7 @@ const storage={
 };
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:SUPABASE_AUTH_STORAGE_KEY}});
 const $=s=>document.querySelector(s);
-const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false};
+const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set()};
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
@@ -233,7 +244,20 @@ function photoUrl(path){if(!path)return'assets/default-listing-photo-20260921.jp
 function firstPhoto(a){return [...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0))[0]?.storage_path||''}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
 function setStatus(t){$('#status').textContent=t}
-function setBusy(v){state.busy=v;document.querySelectorAll('.action').forEach(b=>b.disabled=v)}
+function setBusy(v){state.busy=v;document.querySelectorAll('.action').forEach(b=>b.disabled=v);updateBulkUI()}
+function updateBulkUI(){
+  const history=state.tab==='validated'||state.tab==='rejected';
+  $('#bulkbar').hidden=!history;
+  if(!history)return;
+  const ids=state.rows.map(x=>x.id);
+  const n=ids.filter(id=>state.selected.has(id)).length;
+  $('#selectionCount').textContent='('+n+'/'+ids.length+')';
+  $('#selectAll').checked=ids.length>0&&n===ids.length;
+  $('#selectAll').indeterminate=n>0&&n<ids.length;
+  $('#selectAll').disabled=state.busy||!ids.length;
+  $('#bulkDelete').disabled=state.busy||!n;
+  $('#bulkDelete').textContent=state.tab==='validated'?'Retirer de la liste ('+n+')':'Supprimer ('+n+')';
+}
 
 function riskMarkup(a){
   const m=state.mods.get(a.id);
@@ -263,6 +287,7 @@ function card(a){
       ? '<div class="history-actions"><button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button></div>'
       : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
   return '<article class="card">'+
+    (!pending?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
       '<div class="photo"><img src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
       '<div class="info"><div class="rowtop"><h2 class="title">'+esc(a.title||'Annonce')+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
@@ -415,9 +440,12 @@ async function load(){
   try{
     let rows=state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():await rejectedRows();
     state.rows=rows;
+    state.selected.clear();
+    updateBulkUI();
     await Promise.all([loadProfiles(rows),loadMods(rows.map(x=>x.id))]);
     $('#list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Aucune annonce dans cette section.</div>';
     setStatus(rows.length+' annonce'+(rows.length>1?'s':'')+(state.tab==='pending'?' à traiter':''));
+    updateBulkUI();
     refreshCounts().catch(console.warn);
   }catch(err){
     console.error(err);setStatus('Impossible de charger cette section.');$('#list').innerHTML='<div class="empty">Une erreur est survenue pendant le chargement.</div>';
@@ -432,6 +460,48 @@ async function removeListing(id){
   if(error)throw error;
 }
 
+$('#selectAll').addEventListener('change',e=>{
+  if(state.busy)return;
+  state.selected.clear();
+  if(e.target.checked)state.rows.forEach(a=>state.selected.add(a.id));
+  document.querySelectorAll('[data-select-id]').forEach(input=>input.checked=e.target.checked);
+  updateBulkUI();
+});
+document.addEventListener('change',e=>{
+  const input=e.target.closest('[data-select-id]');
+  if(!input||state.busy)return;
+  if(input.checked)state.selected.add(input.dataset.selectId);
+  else state.selected.delete(input.dataset.selectId);
+  updateBulkUI();
+});
+$('#bulkDelete').addEventListener('click',async()=>{
+  if(state.busy||!['validated','rejected'].includes(state.tab))return;
+  const tab=state.tab;
+  const ids=state.rows.map(a=>a.id).filter(id=>state.selected.has(id));
+  if(!ids.length)return;
+  const message=tab==='validated'
+    ? 'Retirer '+ids.length+' annonce(s) de la liste Validées ? Elles resteront publiées sur le site.'
+    : 'Supprimer définitivement '+ids.length+' annonce(s) refusée(s) du site ? Cette action est irréversible.';
+  if(!confirm(message))return;
+  setBusy(true);
+  let done=0;
+  try{
+    for(const id of ids){
+      try{
+        if(tab==='validated'){
+          const {error}=await sb.rpc('dismiss_validated_from_moderation',{p_listing_id:id});
+          if(error)throw error;
+        }else await removeListing(id);
+        done++;
+        state.selected.delete(id);
+      }catch(err){console.error('Suppression groupée',id,err)}
+    }
+    toast(done===ids.length?done+' annonce(s) traitée(s)':done+'/'+ids.length+' annonce(s) traitée(s) — vérifiez les autres');
+  }finally{
+    setBusy(false);
+    await load();
+  }
+});
 document.addEventListener('click',async e=>{
   const closePreviewBtn=e.target.closest('[data-close-preview]');
   if(closePreviewBtn){closePreview();return;}
@@ -441,6 +511,7 @@ document.addEventListener('click',async e=>{
   const tab=e.target.closest('[data-tab]');
   if(tab){
     state.tab=tab.dataset.tab;
+    state.selected.clear();
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===tab));
     await load();return;
   }
