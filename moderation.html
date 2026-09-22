@@ -274,12 +274,13 @@ function reasonsMarkup(a){
 }
 function sellerName(a){const p=state.profiles.get(a.owner_id);return p?.display_name|| (a.seller_type==='professionnel'?'Professionnel':'Particulier')}
 function isSecondCheck(a){const m=state.mods.get(a.id);return a.status==='active'&&m?.auto_published===true&&m?.admin_reviewed!==true}
+function needsEditReview(a){const m=state.mods.get(a.id);return m?.edit_review_pending===true&&m?.admin_reviewed!==true}
 
 function card(a){
   const pending=state.tab==='pending';
   const validated=state.tab==='validated';
   const p=photoUrl(firstPhoto(a));
-  const statusChip=pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'';
+  const statusChip=(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
   const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
@@ -353,7 +354,7 @@ function openPreview(id){
       (specs.length?'<section class="preview-section"><h3>Informations de l’annonce</h3><div class="preview-spec-grid">'+specs.map(x=>'<div class="preview-spec"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('')+'</div></section>':'')+
       '<section class="preview-section"><h3>Description</h3><div class="preview-description">'+esc(cleanDescription(a)||'Aucune description.')+'</div></section>'+
       '<section class="preview-section"><h3>Vendeur</h3><div class="preview-seller"><strong>'+esc(profile?.display_name||sellerName(a))+'</strong><br>'+esc(profile?.city||a.city||'')+(a.contact_email?'<br>'+esc(a.contact_email):'')+(a.phone?'<br>'+esc(a.phone):'')+'</div></section>'+
-      '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
+      '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
     '</div>';
   if(state.tab==='pending'){
     $('#previewActions').innerHTML=
@@ -383,7 +384,7 @@ async function loadProfiles(rows){
 async function loadMods(ids){
   state.mods.clear();
   if(!ids.length)return;
-  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
+  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,edit_review_pending,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
   if(error)console.warn(error);
   (data||[]).forEach(m=>state.mods.set(m.listing_id,m));
 }
