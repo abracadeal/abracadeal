@@ -8171,7 +8171,7 @@ header #flowErrorsBtn{
           <button class="quick-filter-chip" id="qfVehicleChip" type="button">🚗 <span id="qfVehicleLabel">Marque</span></button>
           <div class="quick-filter-popover hidden" id="qfVehiclePopover">
             <label for="qfVehicleMakeInput">Marque</label>
-            <input type="text" id="qfVehicleMakeInput" placeholder="Ex. Mercedes">
+            <input type="text" id="qfVehicleMakeInput" placeholder="Ex. Renault, Peugeot, Mercedes">
             <button type="button" class="btn primary qf-popover-ok">OK</button>
           </div>
         </div>
@@ -8252,7 +8252,7 @@ header #flowErrorsBtn{
             </select>
           </div>
           <div class="vehicle-filter-fields hidden" id="vehicleFilterFields">
-            <div class="filter-field"><label>Marque</label><input id="filterVehicleMake" type="text" placeholder="Ex. Mercedes"></div>
+            <div class="filter-field"><label>Marque</label><input id="filterVehicleMake" type="text" placeholder="Ex. Renault, Peugeot, Mercedes"></div>
             <div class="filter-field"><label>Modèle</label><input id="filterVehicleModel" type="text" placeholder="Ex. Classe V"></div>
             <div class="filter-field"><label>Année minimum</label><input id="filterYearMin" type="number" min="1900" max="2100" placeholder="2018"></div>
             <div class="filter-field"><label>Année maximum</label><input id="filterYearMax" type="number" min="1900" max="2100" placeholder="2026"></div>
@@ -12338,7 +12338,7 @@ function updateFilterSubcategories(keepValue=''){
   select.innerHTML='<option value="">Toutes</option>'+items.map(([v,l])=>`<option value="${v}">${esc(l)}</option>`).join('');
   select.disabled=!category||!items.length;
   if(keepValue && items.some(([v])=>v===keepValue)) select.value=keepValue;
-  const motoPlaceholder=select?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Mercedes';
+  const motoPlaceholder=select?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Renault, Peugeot, Mercedes';
   if($('#filterVehicleMake'))$('#filterVehicleMake').placeholder=motoPlaceholder;
   if($('#qfVehicleMakeInput'))$('#qfVehicleMakeInput').placeholder=motoPlaceholder;
   const showVehicles=category==='vehicules';
@@ -14111,7 +14111,7 @@ setupQuickFilterChip('qfPriceChip','qfPricePopover',()=>{
   if($('#qfPriceMinInput'))$('#qfPriceMinInput').value=$('#filterPriceMin')?.value||'';
   if($('#qfPriceMaxInput'))$('#qfPriceMaxInput').value=$('#filterPriceMax')?.value||'';
 });
-setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{const input=$('#qfVehicleMakeInput');if(input){input.value=$('#filterVehicleMake')?.value||'';input.placeholder=$('#filterSubcategory')?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Mercedes';}});
+setupQuickFilterChip('qfVehicleChip','qfVehiclePopover',()=>{const input=$('#qfVehicleMakeInput');if(input){input.value=$('#filterVehicleMake')?.value||'';input.placeholder=$('#filterSubcategory')?.value==='motos'?'Ex. Yamaha, Honda, BMW':'Ex. Renault, Peugeot, Mercedes';}});
 setupQuickFilterChip('qfImmoChip','qfImmoPopover',()=>{if($('#qfImmoPropertyInput'))$('#qfImmoPropertyInput').value=$('#filterImmoPropertyType')?.value||'';});
 $('#qfCityInput')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();$('#searchBtn')?.click();$('#qfCityPopover')?.classList.add('hidden');$('#qfPopoverBackdrop')?.classList.add('hidden');}});
 function mirrorToOriginal(mirrorId,originalId){
