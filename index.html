@@ -7819,6 +7819,46 @@ header #flowErrorsBtn{
   header .desktop-brand-zone .desktop-brand{position:relative!important;z-index:222!important}
 }
 </style>
+<style id="abraca-desktop-category-hitboxes-20260922">
+/* Desktop : la rangée catégories ne chevauche plus les actions.
+   Toute la surface du lien reçoit les clics, sans changer les sous-menus. */
+@media (min-width:1024px) and (pointer:fine){
+  header .nav{row-gap:4px!important}
+  header .desktop-category-nav{
+    margin-top:0!important;
+    margin-bottom:0!important;
+    transform:none!important;
+    min-height:44px!important;
+    padding:0!important;
+    position:relative!important;
+    z-index:230!important;
+    pointer-events:auto!important;
+    overflow:visible!important;
+  }
+  header .desktop-nav-item{
+    display:flex!important;
+    align-items:center!important;
+    min-height:44px!important;
+    position:relative!important;
+    z-index:231!important;
+    pointer-events:auto!important;
+  }
+  header .desktop-category-link{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:44px!important;
+    height:44px!important;
+    line-height:1.2!important;
+    padding:0 12px!important;
+    position:relative!important;
+    z-index:232!important;
+    pointer-events:auto!important;
+    cursor:pointer!important;
+  }
+  header .desktop-submenu{pointer-events:auto!important;z-index:240!important}
+}
+</style>
 <style id="abraca-mobile-search-thinner-20260922">
 /* Mobile uniquement : recherche compacte, surtout le bouton. */
 @media (max-width:760px){
