@@ -5797,25 +5797,36 @@ html.abraca-vacances-tablet-mobile .vac-mobile-main-return{display:flex!importan
 }
 </style>
 
-<style id="vac-tablet-banner-fit-v2-20260922">
+
+
+
+<style id="vac-tablet-use-mobile-layout-20260922">
+/* Tablette : reprendre exactement la mise en page mobile, simplement élargie. */
 @media (min-width:621px) and (max-width:1023px){
   .vac-mobile-banner-shell{
-    width:calc(100% - 32px)!important;
-    max-width:760px!important;
-    margin:10px auto 10px!important;
-    aspect-ratio:16 / 6!important;
-    overflow:hidden!important;
-    border-radius:18px!important;
-    background:#1b0b31!important;
+    display:block!important;
+    width:calc(100% - 20px)!important;
+    margin:10px auto 8px!important;
+    max-width:none!important;
+    aspect-ratio:auto!important;
+    overflow:visible!important;
+    background:transparent!important;
+    border-radius:22px!important;
   }
   .vac-mobile-banner{
+    display:block!important;
     width:100%!important;
-    height:100%!important;
+    height:auto!important;
     max-height:none!important;
-    object-fit:contain!important;
-    object-position:center center!important;
-    border-radius:18px!important;
+    object-fit:initial!important;
+    object-position:initial!important;
+    border-radius:22px!important;
   }
+  .hero{padding:7px 0 12px!important;background:transparent!important;border:0!important;}
+  .hero-grid{display:block!important;}
+  .hero-grid>div:first-child{display:none!important;}
+  .search-box{width:calc(100% - 20px)!important;margin:0 auto!important;}
+  .vac-mobile-offer{width:calc(100% - 20px)!important;}
 }
 </style>
 
