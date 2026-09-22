@@ -5965,6 +5965,34 @@ html.abraca-vacances-tablet-mobile .vac-mobile-banner-exact{
 }
 </style>
 
+
+<style id="vac-tablet-banner-contain-20260922">
+/* Tablette Vacances : ne plus recadrer. Réduire l'image entière dans le bloc. */
+@media (min-width:761px) and (max-width:1366px) and (pointer:coarse),
+       (min-width:761px) and (max-width:1366px) and (any-pointer:coarse){
+  #vacMobileTop.vac-mobile-banner-shell{
+    height:170px!important;
+    min-height:170px!important;
+    max-height:170px!important;
+    background:#171331!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+  #vacMobileTop > img.vac-mobile-banner-exact{
+    width:auto!important;
+    max-width:100%!important;
+    height:100%!important;
+    min-height:0!important;
+    max-height:100%!important;
+    aspect-ratio:auto!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    margin:auto!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="vac-mobile-main-return">
