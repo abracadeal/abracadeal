@@ -7803,6 +7803,22 @@ header #flowErrorsBtn{
 }
 </style>
 
+<style id="abraca-desktop-header-click-targets-20260922">
+/* Les zones transparentes du menu categories chevauchaient les actions en haut.
+   Ne rendre cliquables que les liens/sous-menus reels et agrandir les cibles. */
+@media (min-width:1024px) and (pointer:fine){
+  header .nav{position:relative!important}
+  header .desktop-brand-zone{position:relative!important;z-index:220!important}
+  header .nav-actions{position:relative!important;z-index:220!important}
+  header .abraca-desktop-actions-v2{position:relative!important;z-index:221!important}
+  header .desktop-category-nav{pointer-events:none!important;z-index:120!important}
+  header .desktop-nav-item,header .desktop-category-link,header .desktop-submenu,header .desktop-submenu a{pointer-events:auto!important}
+  header #desktopProProBtn.desktop-propro-btn{position:relative!important;z-index:222!important;min-height:46px!important;padding:0 18px!important;cursor:pointer!important}
+  header .abraca-desktop-actions-v2 .abraca-dnav-item{min-height:54px!important;height:54px!important;min-width:78px!important;padding:6px 12px!important;position:relative!important;z-index:222!important;cursor:pointer!important}
+  header .abraca-desktop-actions-v2 .abraca-dnav-item svg,header .abraca-desktop-actions-v2 .abraca-dnav-item span,header .abraca-desktop-actions-v2 .abraca-dnav-item i{pointer-events:none!important}
+  header .desktop-brand-zone .desktop-brand{position:relative!important;z-index:222!important}
+}
+</style>
 <style id="abraca-mobile-search-thinner-20260922">
 /* Mobile uniquement : recherche compacte, surtout le bouton. */
 @media (max-width:760px){
