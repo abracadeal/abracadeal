@@ -240,7 +240,7 @@ function listingCard(a){
 }
 async function loadListings(){
   $('#listingGrid').innerHTML='<div class="empty">Chargement…</div>';
-  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','active').eq('visibility_scope','pro').order('created_at',{ascending:false}).limit(100);
+  const {data,error}=await sb.from('listings').select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)').eq('status','active').eq('visibility_scope','pro').order('created_at',{ascending:false}).limit(100);
   if(error){$('#listingGrid').innerHTML='<div class="empty">Impossible de charger les annonces.</div>';return}
   proListings=data||[];$('#listingStatus').textContent=proListings.length?proListings.length+' annonce'+(proListings.length>1?'s':'')+' réservée'+(proListings.length>1?'s':'')+' aux professionnels.':'Aucune annonce Pro/Pro pour le moment.';
   $('#listingGrid').innerHTML=proListings.length?proListings.map(listingCard).join(''):'<div class="empty">Aucune annonce Pro/Pro pour le moment.</div>';
