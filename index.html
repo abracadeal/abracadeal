@@ -7938,6 +7938,17 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-actions-v2-tablet-safety-20260923">
+/* Filet de securite : la barre d'icones desktop (Vacances/Favoris/Messages/Compte)
+   ne doit jamais rester visible en dessous de 1024px. Sans cette regle, une
+   rotation d'iPad (passage par une largeur >=1024px puis retour en dessous)
+   pouvait laisser la barre affichee en double avec les boutons tablette. */
+@media(max-width:1023px){
+  header .abraca-desktop-actions-v2{
+    display:none!important;
+  }
+}
+</style>
 </head>
 <body>
 
@@ -16046,7 +16057,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   }
 
   function build(){
-    if(!visibleDesktop()) return;
+    if(!visibleDesktop()){
+      /* Retour tablette/mobile (ex: rotation d'iPad) : retirer la barre d'icones
+         desktop pour ne pas la laisser affichee en double avec les boutons tablette. */
+      const existingBar=document.querySelector('header .nav-actions .abraca-desktop-actions-v2');
+      if(existingBar) existingBar.remove();
+      return;
+    }
     cleanupLegacyDesktopActions();
     const actions=document.querySelector('header .nav-actions');
     if(!actions || actions.querySelector('.abraca-desktop-actions-v2')){ syncBadge(); syncAccountLabel(); return; }
