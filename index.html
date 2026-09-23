@@ -10202,13 +10202,10 @@ $('#createAlertForm')?.addEventListener('submit',async(e)=>{
 });
 
 $('#accountModerationBtn')?.addEventListener('click',()=>{
+  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
   closeModal('accountModal');
-  const tabletMobileUi=window.matchMedia('(min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse)').matches;
-  if(window.matchMedia('(min-width:761px)').matches && !tabletMobileUi){
-    location.href='moderation.html';
-    return;
-  }
-  window.toggleAdminModeration?.();
+  // Même page dédiée que le raccourci Admin, sur mobile, tablette et desktop.
+  location.href='moderation.html';
 });
 $('#accountFlowBtn')?.addEventListener('click',()=>{
   closeModal('accountModal');
