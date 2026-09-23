@@ -13299,7 +13299,7 @@ async function renderDetailRecommendations(a){
     const sellerReq=a.is_showroom
       ?Promise.resolve({data:[],error:null})
       :sb.from('listings')
-        .select('*,listing_photos(id,storage_path,position)')
+        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
         .eq('status','active')
         .eq('visibility_scope','public')
         .eq('owner_id',a.owner_id)
@@ -13308,7 +13308,7 @@ async function renderDetailRecommendations(a){
         .limit(6);
 
     const relatedReq=sb.from('listings')
-      .select('*,listing_photos(id,storage_path,position)')
+      .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
       .eq('status','active')
       .eq('visibility_scope','public')
       .eq('category',a.category)
@@ -14575,7 +14575,7 @@ window.addEventListener('pageshow',()=>{
   const v=version;const grid=node('b2bListingGrid');grid.replaceChildren();msg('b2bListingStatus','Chargement des annonces Pro/Pro…');
   try{
    const {data,error}=await sb.from('listings')
-    .select('*,listing_photos(id,storage_path,position)')
+    .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
     .eq('status','active')
     .eq('visibility_scope','pro')
     .order('created_at',{ascending:false})
