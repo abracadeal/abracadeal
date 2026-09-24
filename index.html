@@ -7948,6 +7948,40 @@ header #flowErrorsBtn{
     display:none!important;
   }
 }
+/* Recherche IA : deux colonnes, champ souple et bouton ancré à droite. */
+.search-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+.search-card #searchCity{display:none!important}
+.search-card #searchQuery{
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.search-card #searchBtn{
+  grid-column:2!important;
+  justify-self:end!important;
+  width:auto!important;
+  min-width:145px!important;
+  max-width:none!important;
+  margin:0!important;
+}
+@media(max-width:760px){
+  .search-card{grid-template-columns:minmax(0,1fr) auto!important}
+  .search-card #searchBtn{
+    min-width:88px!important;
+    width:auto!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    font-size:12px!important;
+  }
+}
+@media(max-width:360px){
+  .search-card #searchBtn{min-width:78px!important;font-size:11px!important;padding-left:6px!important;padding-right:6px!important}
+}
 </style>
 </head>
 <body>
