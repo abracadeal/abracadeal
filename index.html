@@ -9320,7 +9320,7 @@ header #flowErrorsBtn{
           <div class="message-chat-head" id="messageChatHead"><b>Sélectionnez une conversation</b><span>Retrouvez ici vos échanges acheteur / vendeur.</span></div>
           <div class="message-thread" id="messageThread"><div class="message-placeholder">Choisissez une conversation à gauche, ou démarrez un échange depuis une annonce.</div></div>
           <form class="message-composer hidden" id="messageForm">
-            <textarea id="messageInput" maxlength="2000" placeholder="Écrivez votre message…" required></textarea>
+            <textarea id="messageInput" maxlength="2000" placeholder="Écrivez votre message…" required></textarea> <small style="font-size:.78rem;color:#8b3544">Liens de paiement interdits dans les messages.</small>
             <button class="btn primary" type="submit">Envoyer</button>
           </form>
         </section>
@@ -13757,6 +13757,9 @@ $('#messageForm')?.addEventListener('submit',async e=>{
   if(!currentConversationId||!currentUser) return;
   const input=$('#messageInput'), body=input.value.trim();
   if(!body) return;
+  const hasLink=/(https?:\/\/|www\.|[\w-]+\.(?:com|fr|net|org|io|me|app|link|ly|co|eu|be|de|uk|es|it)(?:\/|\?|\s|$))/i.test(body);
+  const paymentTerms=/(stripe|paypal|sumup|revolut|paylib|lyfpay|lydia|leetchi|gofundme|wise|checkout|payment|paiement|payer|payez|versement|acompte|virement|carte bancaire|\bcb\b|pay\.)/i.test(body);
+  if(hasLink&&paymentTerms){toast('Les liens de paiement sont interdits dans la messagerie Abracadeal.');return;}
   const btn=e.submitter; if(btn){btn.disabled=true;btn.textContent='Envoi…'}
   const {error}=await sb.rpc('send_message',{p_conversation_id:currentConversationId,p_body:body});
   if(btn){btn.disabled=false;btn.textContent='Envoyer'}
