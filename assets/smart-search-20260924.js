@@ -29,14 +29,22 @@ function interpret(input){
 }
 function apply(id,value){const el=$(id);if(el&&value!==undefined&&value!==null){el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}}
 function init(){
- const query=$('searchQuery'),search=$('searchBtn');if(!query||!search||$('abracaSmartSearch'))return;
- const btn=document.createElement('button');btn.id='abracaSmartSearch';btn.type='button';btn.textContent='✦ Recherche intelligente';btn.setAttribute('aria-label','Comprendre votre recherche et appliquer les filtres automatiquement');
- btn.style.cssText='border:1px solid #9d7bda;border-radius:12px;padding:10px 15px;background:#f6f0ff;color:#6036a1;font-weight:700;cursor:pointer;white-space:nowrap;max-width:100%';
- const info=document.createElement('div');info.id='abracaSmartSearchInfo';info.setAttribute('role','status');info.style.cssText='font-size:12px;margin-top:5px;min-height:16px;color:inherit';
- const wrapper=document.createElement('div');wrapper.style.cssText='display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:9px';wrapper.append(btn);const host=query.closest('.search-card');host?.insertAdjacentElement('afterend',wrapper);wrapper.insertAdjacentElement('afterend',info);
- btn.addEventListener('click',()=>{
-  const original=query.value.trim();if(!original){query.focus();info.textContent='Décrivez ce que vous recherchez.';return;}
-  const f=interpret(original);if(!Object.keys(f).some(k=>k!=='query')){info.textContent='Aucun critère précis reconnu : recherche classique lancée.';search.click();return;}
+ const query=$('searchQuery'),search=$('searchBtn');
+ if(!query||!search||search.dataset.smartSearchAuto)return;
+ search.dataset.smartSearchAuto='1';
+ const info=document.createElement('div');
+ info.id='abracaSmartSearchInfo';
+ info.setAttribute('role','status');
+ info.style.cssText='font-size:12px;margin-top:5px;min-height:16px;color:inherit';
+ const host=query.closest('.search-card');
+ host?.insertAdjacentElement('afterend',info);
+ // Capture phase: interpret before the site's existing click handler reads filters.
+ // Enter already triggers search.click() in the site's own keydown handler.
+ search.addEventListener('click',()=>{
+  const original=query.value.trim();
+  if(!original){info.textContent='';return;}
+  const f=interpret(original);
+  if(!Object.keys(f).some(k=>k!=='query')){info.textContent='';return;}
   if(f.category)apply('filterCategory',f.category);
   if(f.sub)apply('filterSubcategory',f.sub);
   if(f.maxPrice)apply('filterPriceMax',f.maxPrice);
@@ -47,9 +55,8 @@ function init(){
   if(f.city)apply('searchCity',f.city);
   query.value=f.query;
   const labels=[f.category,f.brand,f.city,f.maxPrice?'≤ '+f.maxPrice.toLocaleString('fr-FR')+' €':'',f.maxKm?'≤ '+f.maxKm.toLocaleString('fr-FR')+' km':'',f.minArea?'≥ '+f.minArea+' m²':''].filter(Boolean);
-  info.textContent='Critères détectés : '+labels.join(' · ')+(f.query?' · Mots-clés : '+f.query:'');
-  search.click();
- });
+  info.textContent='✦ Recherche intelligente : '+labels.join(' · ')+(f.query?' · Mots-clés : '+f.query:'');
+ },true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
 })();
