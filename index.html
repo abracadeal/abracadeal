@@ -11356,8 +11356,9 @@ $('#adCategory').addEventListener('change', ()=>{
   updatePublishFields();
 });
 $('#vehicleSubcategory').addEventListener('change', updatePublishFields);
+$('#sellerType').addEventListener('change',()=>{if(currentProfile?.is_admin!==true)return;syncPublishVisibility();renderPublishPackPicker();updatePublishFields();});
 
-function accountAudience(){return currentProfile?.account_type==='professionnel'?'professionnel':'particulier'}
+function accountAudience(){return currentProfile?.is_admin===true?($('#sellerType')?.value==='Professionnel'?'professionnel':'particulier'):(currentProfile?.account_type==='professionnel'?'professionnel':'particulier')}
 function syncPublishVisibility(){
   const row=$('#proVisibilityRow'),select=$('#listingVisibility');
   if(!row||!select)return;
@@ -11566,7 +11567,7 @@ $$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
   e.preventDefault();
   if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour publier');return}
   resetPublishForm();
-  $('#sellerType').value=currentProfile?.account_type==='professionnel'?'Professionnel':'Particulier'; $('#sellerType').disabled=true; syncPublishVisibility(); renderPublishPackPicker();
+  $('#sellerType').value=currentProfile?.account_type==='professionnel'?'Professionnel':'Particulier'; $('#sellerType').disabled=currentProfile?.is_admin!==true; syncPublishVisibility(); renderPublishPackPicker();
   $('#adPhone').value=currentProfile?.phone||'';
   openModal('publishModal');
 }));
