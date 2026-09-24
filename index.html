@@ -14112,6 +14112,10 @@ $$('.banner-hotspot').forEach(el=>el.addEventListener('click',e=>{
 }));
 $('#searchBtn').addEventListener('click',async()=>{
   rememberSearch();
+  const marketQuery=($('#searchQuery')?.value||'').trim();
+  if(marketQuery.length>=2 && marketQuery.length<=100){
+    sb.rpc('record_market_search',{p_query:marketQuery,p_category:$('#filterCategory')?.value||activeCategory||null,p_city:($('#searchCity')?.value||'').trim()||null}).then(({error})=>{if(error)console.warn('Search analytics unavailable');});
+  }
   onlyMine=false;favoritesMode=false;moderationMode=false;
   if(currentProfile?.is_admin) setModerationButtonLabel('Modérer');
   await loadAds();document.querySelector('#resultats').scrollIntoView({behavior:'smooth'});
