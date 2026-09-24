@@ -7983,6 +7983,13 @@ header #flowErrorsBtn{
   .search-card #searchBtn{min-width:78px!important;font-size:11px!important;padding-left:6px!important;padding-right:6px!important}
 }
 </style>
+<style>
+/* Appel à publier visible dès l'arrivée, directement sur la bannière. */
+.hero{position:relative}
+.hero-publish-button{position:absolute;z-index:9;top:20px;right:22px;display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:13px 23px;border-radius:16px;background:linear-gradient(120deg,#ffd77a,#ffa82f);color:#30153e!important;font-weight:850;font-size:1.02rem;text-decoration:none;box-shadow:0 8px 27px rgba(23,5,32,.45);border:2px solid rgba(255,246,210,.95);transition:transform .15s,filter .15s;white-space:nowrap}
+.hero-publish-button:hover,.hero-publish-button:focus-visible{transform:translateY(-2px);filter:brightness(1.08)}
+@media(max-width:700px){.hero-publish-button{top:10px;right:10px;left:10px;min-height:46px;padding:10px 12px;font-size:.91rem;white-space:normal;text-align:center;border-radius:13px}}
+</style>
 </head>
 <body>
 
@@ -8143,6 +8150,7 @@ header #flowErrorsBtn{
       <div class="banner-frame banner-main-live">
         <img class="banner banner-main-image" src="assets/abracadeal-banner-main.webp" alt="Abracadeal — de bonnes affaires près de chez vous et partout ailleurs">
       </div>
+      <a class="hero-publish-button publish-trigger" href="#publishModal" aria-label="Déposer une annonce gratuitement">＋ Déposer une annonce gratuitement</a>
       <div class="search-wrap">
         <div class="search-card">
           <input class="field" id="searchQuery" type="text" placeholder="✦ Recherche intelligente IA : décrivez ce que vous cherchez…" aria-label="Recherche intelligente IA">
