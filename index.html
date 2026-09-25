@@ -11679,51 +11679,32 @@ window.openAdminEditAd=function(id){
 };
 
 async function compressImage(file){
+  // Adaptive WebP: keep detail while avoiding oversized uploads.
   return new Promise((resolve,reject)=>{
-    const img=new Image();
-    const url=URL.createObjectURL(file);
-    img.onload=()=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=async()=>{
       try{
-        const MAX_W=1600, MAX_H=1200;
-        let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
-        const scale=Math.min(1,MAX_W/w,MAX_H/h);
-        w=Math.round(w*scale); h=Math.round(h*scale);
-
-        const canvas=document.createElement('canvas');
-        canvas.width=w; canvas.height=h;
-        const ctx=canvas.getContext('2d');
+        const category=($('#listingCategory')?.value||'').toLowerCase();
+        const detail=/immo|vacances/.test(category);
+        const maxSide=detail?1800:1500;
+        const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
+        const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
+        const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+        const ctx=canvas.getContext('2d');if(!ctx)throw Error('Compression indisponible');
         ctx.drawImage(img,0,0,w,h);
-
-        /* Filigrane Abracadeal discret, fondu et semi-transparent */
-        const text='Abracadeal';
-        const fontSize=Math.max(38,Math.round(Math.min(w,h)*0.070));
-        const pad=Math.max(18,Math.round(fontSize*.72));
-
-        ctx.save();
-        ctx.font=`700 ${fontSize}px Georgia, "Times New Roman", serif`;
-        ctx.textAlign='right';
-        ctx.textBaseline='bottom';
-        ctx.globalAlpha=.30;
-        ctx.fillStyle='rgba(255,255,255,.92)';
-        ctx.shadowColor='rgba(0,0,0,.22)';
-        ctx.shadowBlur=Math.max(2,Math.round(fontSize*.08));
-        ctx.fillText(text,w-pad,h-pad);
-        ctx.restore();
-
-        canvas.toBlob(blob=>{
-          URL.revokeObjectURL(url);
-          if(!blob){reject(new Error("Impossible de préparer l'image"));return;}
-          resolve(blob);
-        },'image/webp',.84);
-      }catch(err){
-        URL.revokeObjectURL(url);
-        reject(err);
-      }
+        const text='Abracadeal',fontSize=Math.max(24,Math.round(Math.min(w,h)*.05)),pad=Math.max(12,Math.round(fontSize*.72));
+        ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.30;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=3;ctx.fillText(text,w-pad,h-pad);ctx.restore();
+        const target=detail?420*1024:260*1024;
+        let best=null;
+        for(const quality of [.82,.73,.64,.55]){
+          const blob=await new Promise(ok=>canvas.toBlob(ok,'image/webp',quality));
+          if(!blob)throw Error('Impossible de compresser cette photo');
+          best=blob;if(blob.size<=target)break;
+        }
+        resolve(best);
+      }catch(err){reject(err)}finally{URL.revokeObjectURL(url)}
     };
-    img.onerror=()=>{
-      URL.revokeObjectURL(url);
-      reject(new Error("Image illisible"));
-    };
+    img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Image illisible'))};
     img.src=url;
   });
 }
