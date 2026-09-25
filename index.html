@@ -11710,7 +11710,7 @@ async function compressImage(file){
         // Target 120 KiB for all images; allow 200 KiB if stronger compression visibly harms detail.
         const target=120*1024;
         const qualityFloor=.60;
-        let best=null;
+        let best=null,bestUnderCap=null;
         for(let pass=0;pass<3;pass++){
           for(const quality of [.85,.78,.70,.60]){
             const blob=await new Promise(ok=>canvas.toBlob(ok,'image/webp',quality));
@@ -11718,7 +11718,7 @@ async function compressImage(file){
             if(!best||blob.size<best.size)best=blob;
             if(blob.size<=target){resolve(blob);return}
             // Keep detailed photos readable rather than forcing all images down to 120 KiB.
-            if(blob.size<=200*1024 && quality>=qualityFloor){resolve(blob);return}
+            if(blob.size<=200*1024 && quality>=qualityFloor && !bestUnderCap)bestUnderCap=blob;
           }
           if(pass<2){
             const smaller=document.createElement('canvas');
@@ -11729,7 +11729,7 @@ async function compressImage(file){
             canvas.getContext('2d').drawImage(smaller,0,0);
           }
         }
-        resolve(best);
+        resolve(bestUnderCap||best);
       }catch(err){reject(err)}finally{URL.revokeObjectURL(url)}
     };
     img.onerror=()=>{URL.revokeObjectURL(url);reject(Error('Image illisible'))};
