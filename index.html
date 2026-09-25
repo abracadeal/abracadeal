@@ -7989,8 +7989,8 @@ header #flowErrorsBtn{
 .hero-publish-button{position:absolute;z-index:9;top:20px;right:22px;display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:13px 23px;border-radius:16px;background:linear-gradient(120deg,#ffd77a,#ffa82f);color:#30153e!important;font-weight:850;font-size:1.02rem;text-decoration:none;box-shadow:0 8px 27px rgba(23,5,32,.45);border:2px solid rgba(255,246,210,.95);transition:transform .15s,filter .15s;white-space:nowrap}
 .hero-publish-button:hover,.hero-publish-button:focus-visible{transform:translateY(-2px);filter:brightness(1.08)}
 @media(max-width:700px){.hero-publish-button{top:10px;right:10px;left:10px;min-height:46px;padding:10px 12px;font-size:.91rem;white-space:normal;text-align:center;border-radius:13px}}
-/* Mobile : bouton affiné sous la bannière pour ne plus cacher le visuel. */
-@media(max-width:700px){
+/* Mobile et tablette : bouton sous la bannière, sans masquer le visuel. */
+@media(max-width:1180px){
   .hero .hero-publish-button{
     position:relative!important;top:auto!important;right:auto!important;left:auto!important;
     z-index:9;display:flex!important;width:max-content!important;max-width:calc(100% - 24px)!important;
@@ -7999,6 +7999,9 @@ header #flowErrorsBtn{
     border-radius:22px!important;box-shadow:0 4px 13px rgba(23,5,32,.25)!important;
     white-space:normal!important;text-align:center!important;
   }
+}
+@media(min-width:701px) and (max-width:1180px){
+  .hero .hero-publish-button{min-height:45px!important;font-size:.96rem!important;padding:10px 22px!important;margin:12px auto 4px!important}
 }
 </style>
 </head>
