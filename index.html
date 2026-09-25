@@ -11698,9 +11698,8 @@ async function compressImage(file){
     const img=new Image(),url=URL.createObjectURL(file);
     img.onload=async()=>{
       try{
-        const category=($('#listingCategory')?.value||'').toLowerCase();
-        const detail=/immo|vacances/.test(category);
-        const maxSide=detail?1600:1400;
+        // Identical quality policy for every category and subscription.
+        const maxSide=1600;
         const scale=Math.min(1,maxSide/Math.max(img.naturalWidth,img.naturalHeight));
         const w=Math.max(1,Math.round(img.naturalWidth*scale)),h=Math.max(1,Math.round(img.naturalHeight*scale));
         const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
@@ -11708,15 +11707,18 @@ async function compressImage(file){
         ctx.drawImage(img,0,0,w,h);
         const text='Abracadeal',fontSize=Math.max(24,Math.round(Math.min(w,h)*.05)),pad=Math.max(12,Math.round(fontSize*.72));
         ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.30;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=3;ctx.fillText(text,w-pad,h-pad);ctx.restore();
-        // Target 120 KiB for ordinary listings, allow up to 200 KiB for detailed property and vacation photos.
-        const target=detail?200*1024:120*1024;
+        // Target 120 KiB for all images; allow 200 KiB if stronger compression visibly harms detail.
+        const target=120*1024;
+        const qualityFloor=.60;
         let best=null;
         for(let pass=0;pass<3;pass++){
-          for(const quality of [.80,.70,.60,.50,.42]){
+          for(const quality of [.85,.78,.70,.60]){
             const blob=await new Promise(ok=>canvas.toBlob(ok,'image/webp',quality));
             if(!blob)throw Error('Impossible de compresser cette photo');
             if(!best||blob.size<best.size)best=blob;
             if(blob.size<=target){resolve(blob);return}
+            // Keep detailed photos readable rather than forcing all images down to 120 KiB.
+            if(blob.size<=200*1024 && quality>=qualityFloor){resolve(blob);return}
           }
           if(pass<2){
             const smaller=document.createElement('canvas');
