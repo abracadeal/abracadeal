@@ -9542,7 +9542,7 @@ async function loadFounderOfferCounter(){
     counters.forEach(el=>{
       el.dataset.state='fallback';
       const label=el.querySelector('span:last-child');
-      if(label)label.textContent='1 000 places Fondateurs au lancement';
+      if(label)label.textContent='500 places Fondateurs au lancement';
     });
   }
 }
@@ -11391,7 +11391,7 @@ function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
 function setPublishPhotoLimit(){
   const pro=accountAudience()==='professionnel';
-  publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:(proPaidPhotoAllowance?15:10)):(selectedPublishPack==='photo_12'?12:3);
+  publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:15):(selectedPublishPack==='photo_12'?12:3);
   if(selectedPhotos.length>publishPhotoLimit) selectedPhotos=selectedPhotos.slice(0,publishPhotoLimit);
   if(selectedPhotos.length<=6)showAllPhotoSlots=false;
   const l=$('#photoLimitLabel');if(l)l.innerHTML=`Photos <span class="note">(${publishPhotoLimit} maximum)</span>`;
@@ -11416,7 +11416,7 @@ function renderPublishPackPicker(){
     const items=[{code:'free',title:'Standard Pro',price:'Gratuit',desc:proPaidPhotoAllowance?'Jusqu’à 15 photos incluses':'Fondateurs : 15 photos par annonce'},...(proPaidPhotoAllowance?[PROMOTION_PACKS.photo_30_pro]:[])];
     picker.innerHTML=items.map(p=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:'Jusqu’à 30 photos · sans mise en avant'}</div></button>`).join('');
     picker.querySelectorAll('[data-publish-pack]').forEach(b=>b.addEventListener('click',()=>{selectedPublishPack=b.dataset.publishPack;renderPublishPackPicker();setPublishPhotoLimit();}));
-    if(help)help.textContent=proPaidPhotoAllowance?'15 photos incluses avec un forfait payant. Le Pack Photos Pro débloque jusqu’à 30 photos pour 2,99 €.':'Offre Fondateurs : 10 photos maximum par annonce. Les forfaits payants incluent 15 photos.';
+    if(help)help.textContent=proPaidPhotoAllowance?'15 photos incluses avec un forfait payant. Le Pack Photos Pro débloque jusqu’à 30 photos pour 2,99 €.':'Offre Fondateurs : 15 photos par annonce. Les forfaits payants incluent aussi 15 photos.';
   }else{
     const items=[{code:'free',title:'Gratuit',price:'0 €',desc:'Jusqu’à 3 photos · annonce classique'},PROMOTION_PACKS.photo_12,PROMOTION_PACKS.private_7d,PROMOTION_PACKS.private_30d];
     picker.innerHTML=items.map((p,i)=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title||'Gratuit'}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:(p.code==='photo_12'?'Jusqu’à 12 photos · sans mise en avant':`Mise en avant pendant ${p.days} jours · quota photo inchangé`)}</div></button>`).join('');
@@ -11708,8 +11708,8 @@ async function compressImage(file){
         ctx.drawImage(img,0,0,w,h);
         const text='Abracadeal',fontSize=Math.max(24,Math.round(Math.min(w,h)*.05)),pad=Math.max(12,Math.round(fontSize*.72));
         ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.30;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=3;ctx.fillText(text,w-pad,h-pad);ctx.restore();
-        // Target 150–200 KiB; resize once more only when quality reduction is insufficient.
-        const target=detail?200*1024:160*1024;
+        // Target 120 KiB for ordinary listings, allow up to 200 KiB for detailed property and vacation photos.
+        const target=detail?200*1024:120*1024;
         let best=null;
         for(let pass=0;pass<3;pass++){
           for(const quality of [.80,.70,.60,.50,.42]){
