@@ -8856,9 +8856,9 @@ header #flowErrorsBtn{
       <div class="founder-progress" aria-hidden="true"><span data-founder-progress></span></div>
       <div class="founder-progress-note" data-founder-progress-note>Le compteur se base sur les professionnels vérifiés.</div>
       <div class="founder-steps">
-        <div><b>12 mois gratuits</b><span>Diffusion et synchronisation du stock gratuites pendant les 12 premiers mois pour les comptes éligibles.</span></div>
+        <div><b>12 mois gratuits</b><span>Jusqu’à 50 annonces actives, avec 10 photos par annonce, gratuites pendant 12 mois pour les comptes éligibles. Au-delà de 50 annonces, le forfait 100 annonces à 99,99 € HT/mois est payant immédiatement.</span></div>
       </div>
-      <p class="note">Offre sans engagement : une carte bancaire est demandée pour assurer le démarrage automatique de la formule choisie à l’issue des 12 mois gratuits, sans interruption de service. Aucun prélèvement pendant les 12 mois offerts. Le tarif applicable après cette période est affiché avant la validation. Résiliation possible à tout moment, notamment avant le premier prélèvement. Les options de visibilité, boosts et autres services payants restent distincts.</p>
+      <p class="note">Offre sans engagement : une carte bancaire est demandée pour assurer le démarrage automatique de la formule choisie à l’issue des 12 mois gratuits, sans interruption de service. Aucun prélèvement sur les 50 annonces offertes pendant 12 mois. Un passage à 100 annonces (99,99 € HT/mois) ou 250 annonces (199,90 € HT/mois) déclenche un abonnement payant immédiat. Le tarif est affiché avant validation. Résiliation possible à tout moment, notamment avant le premier prélèvement. Les options de visibilité, boosts et autres services payants restent distincts.</p>
       <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par Anthony, pour convertir directement
            depuis la modale au lieu de forcer un aller-retour manuel vers l'inscription.
            Reutilise openProfessionalSignup() (deja utilisee par #proAccountBtn) qui bascule
@@ -9034,7 +9034,7 @@ header #flowErrorsBtn{
                 </div>
                 <div class="signup-founder-chip">1 000 premiers pros</div>
               </div>
-              <p class="signup-founder-copy"><strong>Offre de lancement :</strong> 50 annonces actives gratuites pendant 12 mois. Au-delà de 50 annonces, abonnement payant immédiat (100 annonces : 99,99 € HT/mois). <span style="display:block;margin-top:5px;font-size:.78rem;color:#7a6a80">Sans engagement · Carte enregistrée pour démarrer automatiquement l’abonnement après les 12 mois gratuits, sans interruption · Aucun prélèvement tant que vous restez dans les 50 annonces offertes · Résiliation possible à tout moment.</span></p>
+              <p class="signup-founder-copy"><strong>Offre de lancement :</strong> 50 annonces actives gratuites et 10 photos par annonce pendant 12 mois. Au-delà de 50 annonces, abonnement payant immédiat (100 annonces : 99,99 € HT/mois). <span style="display:block;margin-top:5px;font-size:.78rem;color:#7a6a80">Sans engagement · Carte enregistrée pour démarrer automatiquement l’abonnement après les 12 mois gratuits, sans interruption · Aucun prélèvement tant que vous restez dans les 50 annonces offertes · Résiliation possible à tout moment.</span></p>
               <div class="signup-founder-footer">
                 <span class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></span>
                 <button type="button" class="founder-terms-link" onclick="openModal('founderOfferModal')">Voir les conditions</button>
@@ -10703,7 +10703,7 @@ function importPayload(r){
 [ABRACA_REF:${r.ref}]
 [ABRACA_SOURCE:${String(proImportSourceLabel).slice(0,350)}]
 ${realEstateMetaMarker(meta)}`;
-    return {owner_id:currentUser.id,category:'immobilier',title:r.title,description:marker+r.description,price:r.price,city:r.city,postal_code:r.postal||'',show_phone:r.showPhone,item_condition:null,seller_type:'professionnel',status:'pending',vehicle_make:null,vehicle_model:null,vehicle_year:null,mileage:null,fuel:null,transmission:null,crit_air:null,photo_limit:15};
+    return {owner_id:currentUser.id,category:'immobilier',title:r.title,description:marker+r.description,price:r.price,city:r.city,postal_code:r.postal||'',show_phone:r.showPhone,item_condition:null,seller_type:'professionnel',status:'pending',vehicle_make:null,vehicle_model:null,vehicle_year:null,mileage:null,fuel:null,transmission:null,crit_air:null,photo_limit:proPaidPhotoAllowance?15:10};
   }
   const meta=compactVehicleMeta({
     firstRegistration:r.firstRegistration,body:r.body,doors:r.doors,seats:r.seats,permit:r.permit,finish:r.finish,version:r.version,
@@ -10717,6 +10717,9 @@ ${vehicleMetaMarker(meta)}`;
   return {owner_id:currentUser.id,category:'vehicules',title:r.title,description:marker+r.description,price:r.price,city:r.city,postal_code:r.postal||'',show_phone:r.showPhone,item_condition:r.condition,seller_type:'professionnel',status:'pending',vehicle_make:r.make,vehicle_model:r.model,vehicle_year:r.year===null?null:Math.round(r.year),mileage:r.mileage===null?null:Math.round(r.mileage),fuel:r.fuel,transmission:r.transmission,crit_air:r.critAir||null,photo_limit:15};
 }
 async function replaceImportedPhotos(listingId,photos,limit=15){
+  const {data:listing,error:limitError}=await sb.from('listings').select('photo_limit').eq('id',listingId).single();
+  if(limitError)throw limitError;
+  limit=Math.min(limit,Number(listing?.photo_limit||10));
   if(!photos.length)return;
   const {error:delError}=await sb.from('listing_photos').delete().eq('listing_id',listingId); if(delError)throw delError;
   const rows=photos.slice(0,limit).map((url,index)=>({listing_id:listingId,storage_path:url,position:index+1})); const {error}=await sb.from('listing_photos').insert(rows); if(error)throw error;
@@ -11381,8 +11384,8 @@ function syncPublishVisibility(){
   if(!canChoose)select.value='public';
 }
 function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_until).getTime()>Date.now()}
-function basePhotoLimitForAudience(audience=accountAudience()){return audience==='professionnel'?15:3}
-function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:3;return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
+function basePhotoLimitForAudience(audience=accountAudience()){return audience==='professionnel'?(proPaidPhotoAllowance?15:10):3}
+function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?10:3;return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
 function listingHasPhotoPack(a){return a?.seller_type==='professionnel'?listingPhotoLimit(a)>=30:listingPhotoLimit(a)>=12}
 function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return photos.slice(0,listingPhotoLimit(a))}
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
