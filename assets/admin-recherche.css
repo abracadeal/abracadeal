@@ -1,0 +1,68 @@
+
+:root{
+  --bg:#0d0812;--panel:#17101f;--panel2:#201329;--line:#382642;
+  --text:#f8f4fb;--muted:#b9a8c2;--purple:#7b2aa8;--pink:#ec3fa4;
+  --green:#3bd18b;--orange:#f2ae58;--red:#ff6c7d;--blue:#6ca8ff;
+  --shadow:0 20px 60px rgba(0,0,0,.35)
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:
+radial-gradient(circle at 15% 0%,rgba(123,42,168,.22),transparent 38%),
+radial-gradient(circle at 90% 10%,rgba(236,63,164,.14),transparent 32%),var(--bg);color:var(--text)}
+button,input{font:inherit}
+.wrap{width:min(1320px,calc(100% - 28px));margin:auto}
+.top{position:sticky;top:0;z-index:20;background:rgba(13,8,18,.88);backdrop-filter:blur(14px);border-bottom:1px solid rgba(255,255,255,.08)}
+.topin{min-height:74px;display:flex;align-items:center;justify-content:space-between;gap:14px}
+.brand{font-size:1.35rem;font-weight:900;letter-spacing:-.02em}.brand span{color:#f354b5}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn{border:0;border-radius:14px;padding:12px 16px;font-weight:800;cursor:pointer;color:#fff;background:#2a1a34;box-shadow:0 8px 24px rgba(0,0,0,.18);transition:.18s}
+.btn:hover{transform:translateY(-1px)}
+.btn.primary{background:linear-gradient(135deg,var(--purple),var(--pink))}
+main{padding:34px 0 70px}
+.hero{display:grid;grid-template-columns:1fr auto;gap:18px;align-items:end;margin-bottom:22px}
+h1{margin:0;font-size:clamp(1.8rem,3vw,3rem);letter-spacing:-.04em}
+.sub{color:var(--muted);margin:8px 0 0;max-width:800px;line-height:1.5}
+.card{background:linear-gradient(180deg,rgba(32,19,41,.98),rgba(23,16,31,.98));border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow)}
+.searchbox{padding:18px;display:grid;grid-template-columns:1fr auto;gap:12px}
+.searchbox input{width:100%;min-height:54px;border-radius:16px;border:1px solid #4a3157;background:#0f0a14;color:#fff;padding:0 18px;outline:none}
+.searchbox input:focus{border-color:#b34bd6;box-shadow:0 0 0 3px rgba(179,75,214,.13)}
+.help{padding:0 18px 18px;color:var(--muted);font-size:.9rem}
+.filters{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}
+.filter{border:1px solid var(--line);color:#d9cbe0;background:#17101f;border-radius:999px;padding:9px 13px;font-weight:800;cursor:pointer}
+.filter.active{border-color:#9d4ec1;background:#321a40;color:#fff}
+.status{margin:14px 0;color:var(--muted)}
+.results{display:grid;gap:14px}
+.item{padding:18px;display:grid;grid-template-columns:1fr auto;gap:18px}
+.item h3{margin:0 0 6px;font-size:1.13rem}
+.ref{font:800 .82rem ui-monospace,SFMono-Regular,Menlo,monospace;color:#d9b5ef}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0 12px}
+.badge{padding:6px 9px;border-radius:999px;font-size:.78rem;font-weight:900;border:1px solid transparent}
+.badge.live{color:#9df0c5;background:rgba(59,209,139,.1);border-color:rgba(59,209,139,.27)}
+.badge.archive{color:#ffc77f;background:rgba(242,174,88,.09);border-color:rgba(242,174,88,.25)}
+.badge.sold{color:#ffc77f;background:rgba(242,174,88,.09);border-color:rgba(242,174,88,.25)}
+.badge.active{color:#9df0c5;background:rgba(59,209,139,.1);border-color:rgba(59,209,139,.27)}
+.badge.pending{color:#a9caff;background:rgba(108,168,255,.1);border-color:rgba(108,168,255,.25)}
+.badge.rejected{color:#ffacb5;background:rgba(255,108,125,.1);border-color:rgba(255,108,125,.25)}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px}
+.kv{background:#120c18;border:1px solid rgba(255,255,255,.06);border-radius:14px;padding:11px;min-width:0}
+.k{display:block;color:#937f9e;font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}
+.v{display:block;color:#f5eef8;font-size:.9rem;overflow-wrap:anywhere}
+.side{text-align:right;min-width:150px}
+.price{font-weight:900;font-size:1.12rem;margin-bottom:6px}
+.date{color:var(--muted);font-size:.82rem;line-height:1.45}
+.empty{padding:40px;text-align:center;color:var(--muted)}
+.lock{display:none;max-width:680px;margin:80px auto;text-align:center;padding:30px}
+.lock h2{margin-top:0}
+@media(max-width:900px){
+  .hero{grid-template-columns:1fr}
+  .item{grid-template-columns:1fr}
+  .side{text-align:left}
+  .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:580px){
+  .wrap{width:min(100% - 18px,1320px)}
+  .topin{align-items:flex-start;padding:12px 0;flex-direction:column}
+  .searchbox{grid-template-columns:1fr}
+  .grid{grid-template-columns:1fr}
+  .item{padding:14px}
+}
