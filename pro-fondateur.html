@@ -64,7 +64,13 @@ document.querySelectorAll('[data-plan]').forEach(btn=>{
     try{
       await verifyPlanPrice(btn.dataset.plan);
       const {data,error}=await sb.functions.invoke('create-pro-subscription-order',{body:{plan_code:btn.dataset.plan}});
-      if(error||!data?.checkout_url){msg(error?.message||data?.error||'Impossible de préparer l’abonnement.',true);return}
+      if(error||!data?.checkout_url){
+        let detail=data?.error||'';
+        if(!detail&&error?.context&&typeof error.context.json==='function'){
+          try{const responseBody=await error.context.json();detail=typeof responseBody?.error==='string'?responseBody.error:''}catch(_){}
+        }
+        msg(detail||error?.message||'Impossible de préparer l’abonnement.',true);return;
+      }
       const start=data.billing_starts_at?new Date(data.billing_starts_at).toLocaleDateString('fr-FR'):'';
       msg(data.founder?('Aucun débit aujourd’hui. Première facturation prévue le '+start+'.'):'Redirection vers Stripe…');
       location.href=data.checkout_url;
