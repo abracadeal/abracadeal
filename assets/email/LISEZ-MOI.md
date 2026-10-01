@@ -23,7 +23,7 @@ URL directe de la bannière (déjà utilisée dans les HTML) :
 ## Faits à respecter
 
 - **Espace Pro** : Auto, Moto, Immobilier, High-Tech. Les premiers pros ont 12 mois gratuits, sans engagement. Signature : « L'équipe Abracadeal ».
-- **Abracadeal Vacances** : locations saisonnières, France uniquement, 0 % de commission, mise en relation directe. Offre de lancement : 500 premiers logements gratuits 12 mois puis 4,99 €/mois ; dès le 501e logement, 4,99 €/mois dès l'inscription, sans augmentation programmée. Conciergeries : tarifs dégressifs sur demande, sans publier de grille. Signature : « Service Pros Abracadeal ».
+- **Abracadeal Vacances** : locations saisonnières, France uniquement, 0 % de commission, mise en relation directe. Offre de lancement : 500 premiers logements gratuits 12 mois ; du 501e au 1000e logement, 4,99 €/mois pendant 6 mois ; dès le 1001e logement, 9,99 €/mois. Conciergeries : tarifs dégressifs sur demande, sans publier de grille. Signature : « Service Pros Abracadeal ».
 - Contact : contact@abracadeal.fr. Pas de nom de personne dans la signature.
 - Prévoir un rappel avant le premier prélèvement pour les bénéficiaires des 12 mois gratuits ; vérifier l'envoi réel avant le lancement commercial.
 - Ton : chaleureux, direct, court. Vouvoiement.
