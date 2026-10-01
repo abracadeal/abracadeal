@@ -68,7 +68,7 @@ async function loadFounderOfferCounter(){
     const {data,error}=await sb.rpc('get_founder_offer_status');
     if(error)throw error;
     const row=Array.isArray(data)?data[0]:data;
-    const total=Math.max(1,Number(row?.total_places||1000));
+    const total=Math.max(1,Number(row?.total_places||500));
     const claimed=Math.max(0,Number(row?.claimed_places||0));
     const remaining=Math.max(0,Number(row?.remaining_places??(total-claimed)));
     const text=remaining>0
