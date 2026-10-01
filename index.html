@@ -12017,7 +12017,9 @@ $('#publishForm').addEventListener('submit',async e=>{
 
     if(wasEditing){
       if(status) status.textContent='Enregistrement des modifications…';
-      const {error}=await sb.from('listings').update(payload).eq('id',editingId);
+      let editQuery=sb.from('listings').update(payload).eq('id',editingId);
+      if(currentProfile?.is_admin!==true) editQuery=editQuery.eq('owner_id',currentUser.id);
+      const {error}=await editQuery;
       if(error) throw error;
 
       if(selectedPhotos.length){
@@ -14263,11 +14265,14 @@ window.adminDeleteAd=async id=>{
 };
 
 window.deleteAd=async id=>{
+  if(!currentUser){toast('Connexion requise');return;}
   if(!confirm('Supprimer définitivement cette annonce ?'))return;
+  const {data:owned,error:ownerError}=await sb.from('listings').select('id').eq('id',id).eq('owner_id',currentUser.id).maybeSingle();
+  if(ownerError||!owned){toast('Cette annonce ne vous appartient pas ou n’est plus disponible.');return;}
   const {data:rows}=await sb.from('listing_photos').select('storage_path').eq('listing_id',id);
   const paths=(rows||[]).map(x=>x.storage_path);
   if(paths.length) await removePhotoPaths(paths);
-  const {error}=await sb.from('listings').delete().eq('id',id);
+  const {error}=await sb.from('listings').delete().eq('id',id).eq('owner_id',currentUser.id);
   if(error)toast(error.message);else{await loadAds();toast('Annonce supprimée')}
 };
 
