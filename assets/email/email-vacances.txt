@@ -1,5 +1,5 @@
 OBJET : Votre logement visible partout en France : 0 % de commission
-APERÇU : 500 premiers logements gratuits 12 mois. Du 501e au 1000e : 4,99 €/mois pendant 6 mois. Dès le 1001e : 9,99 €/mois.
+APERÇU : 500 premiers logements gratuits 12 mois puis 4,99 €/mois. À partir du 501e : 4,99 €/mois dès l’inscription.
 
 ---
 
@@ -12,7 +12,7 @@ Vous proposez un ou plusieurs logements en location saisonnière ? Nous lançons
 - Sans engagement : vous arrêtez quand vous voulez
 - Publication rapide de vos annonces
 
-OFFRE DE LANCEMENT : les 500 premiers logements bénéficient de 12 mois gratuits. Du 501e au 1000e logement : 4,99 €/mois pendant 6 mois. À partir du 1001e logement : 9,99 €/mois.
+OFFRE DE LANCEMENT : les 500 premiers logements bénéficient de 12 mois gratuits puis passent à 4,99 €/mois. À partir du 501e logement : 4,99 €/mois dès l’inscription.
 
 Découvrir l'offre : https://abracadeal.fr
 
