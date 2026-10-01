@@ -8,12 +8,37 @@
 <title>Abracadeal — Annonces Auto, Moto, Immobilier, High-Tech et Vacances</title>
 <meta name="description" content="Abracadeal : publiez et découvrez des annonces de particuliers et de professionnels partout en France. Automobile, moto, immobilier, high-tech et locations saisonnières.">
 <link rel="canonical" href="https://abracadeal.fr/">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1b0d2d">
+<meta name="robots" content="index,follow,max-image-preview:large">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="Abracadeal — De bonnes affaires partout en France">
 <meta property="og:description" content="Annonces Auto, Moto, Immobilier, High-Tech et locations saisonnières de particuliers et de professionnels.">
 <meta property="og:url" content="https://abracadeal.fr/">
 <meta property="og:image" content="https://abracadeal.fr/assets/abracadeal-banner-main.webp">
+<script type="application/ld+json">
+{
+  "@context":"https://schema.org",
+  "@graph":[
+    {
+      "@type":"Organization",
+      "@id":"https://abracadeal.fr/#organization",
+      "name":"Abracadeal",
+      "url":"https://abracadeal.fr/",
+      "logo":"https://abracadeal.fr/assets/abracadeal-lamp-icon.webp"
+    },
+    {
+      "@type":"WebSite",
+      "@id":"https://abracadeal.fr/#website",
+      "url":"https://abracadeal.fr/",
+      "name":"Abracadeal",
+      "publisher":{"@id":"https://abracadeal.fr/#organization"},
+      "inLanguage":"fr-FR"
+    }
+  ]
+}
+</script>
 <script>
 // Toujours revenir en haut de l’accueil après un rafraîchissement/navigation restaurée.
 if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
