@@ -1657,3 +1657,104 @@
     border-radius:999px!important;
   }
 }
+
+
+/* Footer info modals cleanup — 2026-10-01 */
+#helpModal > .modal,
+#safetyModal > .modal,
+#contactModal > .modal,
+#cguModal > .modal,
+#privacyModal > .modal{
+  width:min(820px,calc(100vw - 48px))!important;
+  max-width:820px!important;
+  max-height:min(82dvh,760px)!important;
+  border-radius:20px!important;
+  background:#fff!important;
+}
+#helpModal .modal-head,
+#safetyModal .modal-head,
+#contactModal .modal-head,
+#cguModal .modal-head,
+#privacyModal .modal-head{
+  min-height:62px!important;
+  padding:17px 58px 17px 24px!important;
+  background:linear-gradient(180deg,#fff,#fcf8fe)!important;
+}
+#helpModal .modal-head h2,
+#safetyModal .modal-head h2,
+#contactModal .modal-head h2,
+#cguModal .modal-head h2,
+#privacyModal .modal-head h2{
+  display:block!important;
+  opacity:1!important;
+  visibility:visible!important;
+  color:#2d1638!important;
+  font-size:1.35rem!important;
+  font-weight:900!important;
+  line-height:1.2!important;
+}
+#helpModal .modal-body,
+#safetyModal .modal-body,
+#contactModal .modal-body,
+#cguModal .modal-body,
+#privacyModal .modal-body{
+  display:block!important;
+  padding:24px 26px 30px!important;
+  color:#45364d!important;
+  background:#fff!important;
+  font-size:.96rem!important;
+  line-height:1.62!important;
+  text-align:left!important;
+}
+#helpModal .modal-body h3,
+#safetyModal .modal-body h3,
+#contactModal .modal-body h3,
+#cguModal .modal-body h3,
+#privacyModal .modal-body h3{
+  margin:22px 0 7px!important;
+  color:#5a246d!important;
+  font-size:1rem!important;
+  font-weight:900!important;
+  text-align:left!important;
+}
+#helpModal .modal-body p,
+#safetyModal .modal-body p,
+#contactModal .modal-body p,
+#cguModal .modal-body p,
+#privacyModal .modal-body p{
+  margin:7px 0 12px!important;
+  text-align:left!important;
+}
+#helpModal .modal-body > :first-child,
+#safetyModal .modal-body > :first-child,
+#contactModal .modal-body > :first-child,
+#cguModal .modal-body > :first-child,
+#privacyModal .modal-body > :first-child{
+  margin-top:0!important;
+}
+#contactModal .legal-draft,
+#cguModal .legal-draft,
+#privacyModal .legal-draft{
+  margin:0 0 18px!important;
+  padding:13px 15px!important;
+}
+@media(max-width:760px){
+  #helpModal > .modal,
+  #safetyModal > .modal,
+  #contactModal > .modal,
+  #cguModal > .modal,
+  #privacyModal > .modal{
+    width:100%!important;
+    max-width:none!important;
+    height:100dvh!important;
+    max-height:100dvh!important;
+    border-radius:0!important;
+  }
+  #helpModal .modal-body,
+  #safetyModal .modal-body,
+  #contactModal .modal-body,
+  #cguModal .modal-body,
+  #privacyModal .modal-body{
+    padding:18px 17px calc(24px + env(safe-area-inset-bottom))!important;
+  }
+}
