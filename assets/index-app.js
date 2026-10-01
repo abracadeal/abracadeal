@@ -542,12 +542,35 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(document.getElementById('adminDbQuery')?.value?.trim())searchAdminDatabase();
   });
 
+  const PRO_PLAN_EXPECTED={
+    pro_20:{listing_limit:20,amount_cents:2990},
+    pro_50:{listing_limit:50,amount_cents:5990},
+    pro_100:{listing_limit:100,amount_cents:9990},
+    pro_250:{listing_limit:250,amount_cents:19990}
+  };
+  function validateProPlans(plans){
+    const seen=new Set();
+    for(const plan of plans){
+      const expected=PRO_PLAN_EXPECTED[plan?.code];
+      if(!expected)throw new Error('Formule Pro inconnue : '+String(plan?.code||'—'));
+      if(Number(plan.listing_limit)!==expected.listing_limit||Number(plan.amount_cents)!==expected.amount_cents){
+        throw new Error('Configuration tarifaire Pro incohérente pour '+plan.code+'. Paiement bloqué par sécurité.');
+      }
+      seen.add(plan.code);
+    }
+    for(const code of Object.keys(PRO_PLAN_EXPECTED)){
+      if(!seen.has(code))throw new Error('Formule Pro manquante : '+code);
+    }
+    return true;
+  }
+
   async function loadProPlans(){
     const grid=document.getElementById('proPlanGrid');
     if(!grid)return [];
     const {data,error}=await sb.rpc('get_pro_subscription_plans');
     if(error){grid.innerHTML='<div class="note">Impossible de charger les formules pour le moment.</div>';throw error}
     const plans=Array.isArray(data)?data:[];
+    validateProPlans(plans);
     grid.innerHTML=plans.map(p=>`
       <button type="button" class="pro-plan-card" data-pro-plan="${p.code}">
         <h3>${Number(p.listing_limit).toLocaleString('fr-FR')} annonces</h3>
@@ -561,6 +584,10 @@ document.addEventListener('DOMContentLoaded',()=>{
 
   async function startProPlanCheckout(planCode,button){
     if(proPlanCheckoutBusy)return;
+    if(!PRO_PLAN_EXPECTED[planCode]){
+      toast('Formule Pro invalide');
+      return;
+    }
     proPlanCheckoutBusy=true;
     const status=document.getElementById('proPlanStatus');
     const old=button?.querySelector('.pro-plan-choose')?.textContent;
