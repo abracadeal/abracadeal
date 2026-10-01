@@ -8,7 +8,7 @@ Bannière et mails de prospection d'Abracadeal (fond violet, lampe dorée, sloga
 |---|---|
 | `banner-pro.jpg` | Bannière (1200×441), utilisée par les deux mails |
 | `email-pros.html` / `email-pros.txt` | Mail **Espace Pro** (garages, agences, high-tech) : 12 mois gratuits |
-| `email-vacances.html` / `email-vacances.txt` | Mail **Abracadeal Vacances** : 500 premiers logements gratuits 12 mois, puis 4,99 €/mois ; dès le 501e : 4,99 €/mois |
+| `email-vacances.html` / `email-vacances.txt` | Mail **Abracadeal Vacances** : 500 premiers logements gratuits 12 mois puis 9,99 €/mois ; du 501e au 1000e : 4,99 €/mois pendant 6 mois ; dès le 1001e : 9,99 €/mois |
 
 URL directe de la bannière (déjà utilisée dans les HTML) :
 `https://raw.githubusercontent.com/abracadeal/abracadeal/main/assets/email/banner-pro.jpg`
