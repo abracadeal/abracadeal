@@ -1,0 +1,1659 @@
+
+/* Mobile uniquement : "Sélection du moment" reprend le gabarit des cartes normales. */
+@media(max-width:760px){
+  #homeFeaturedSection .home-featured-card{
+    flex:0 0 calc((100% - 10px)/2)!important;
+    width:calc((100% - 10px)/2)!important;
+    min-width:calc((100% - 10px)/2)!important;
+    max-width:calc((100% - 10px)/2)!important;
+    height:295px!important;
+    min-height:295px!important;
+    max-height:295px!important;
+    align-self:stretch!important;
+  }
+  #homeFeaturedSection .home-featured-photo{
+    flex:0 0 112px!important;
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
+  }
+}
+@media(max-width:390px){
+  #homeFeaturedSection .home-featured-card{
+    height:282px!important;
+    min-height:282px!important;
+    max-height:282px!important;
+  }
+  #homeFeaturedSection .home-featured-photo{
+    flex-basis:104px!important;
+    height:104px!important;
+    min-height:104px!important;
+    max-height:104px!important;
+  }
+}
+
+
+
+/* Mobile accueil : sur les pastilles admin, garder uniquement le Boost.
+   Modifier / Supprimer restent disponibles dans la fiche complète de l'annonce. */
+@media(max-width:760px){
+  #resultats .ad-actions .mini-btn:not(.boost-btn){
+    display:none!important;
+  }
+  #resultats .ad-actions{
+    display:flex!important;
+    width:100%!important;
+  }
+  #resultats .ad-actions .boost-btn{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    width:100%!important;
+    flex:1 1 100%!important;
+    margin:0!important;
+  }
+}
+
+
+
+/* Mobile uniquement : cartes allégées.
+   Véhicules : masquer la LOA sur les pastilles.
+   Immobilier : garder uniquement surface (m²) + DPE comme infos secondaires. */
+@media(max-width:760px){
+  #resultats .ad-card .loa-detail,
+  #homeFeaturedSection .home-featured-card .loa-detail,
+  #recentSearchSection .personalized-card .loa-detail,
+  #recentViewedSection .personalized-card .loa-detail,
+  #nearbySection .personalized-card .loa-detail{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price,
+  #resultats .ad-card.immo-card .immo-card-charges,
+  #resultats .ad-card.immo-card .immo-card-location-extra,
+  #resultats .ad-card.immo-card .immo-card-extra-spec,
+  #homeFeaturedSection .home-featured-card .immo-card-unit-price,
+  #homeFeaturedSection .home-featured-card .immo-card-charges,
+  #homeFeaturedSection .home-featured-card .immo-card-location-extra,
+  #homeFeaturedSection .home-featured-card .immo-card-extra-spec{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .ad-specs,
+  #homeFeaturedSection .home-featured-card .ad-specs{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+  }
+}
+
+
+
+/* Fix 22/09/2026 : desktop/tablette - meme principe de decongestion des pastilles que sur mobile
+   (abraca-mobile-card-info-cleanup-20260921, ci-dessus) : vehicules -> plus de LOA en pastille,
+   immobilier -> uniquement surface + DPE comme infos secondaires (prix/m2, charges, quartier,
+   pieces/chambres/etage restent dans la fiche complete). Demande explicite d'Anthony : "conserver
+   le meme principe de lisibilite : cartes propres, peu chargees" pour desktop/tablette aussi. */
+@media(min-width:761px){
+  #resultats .ad-card .loa-detail,
+  #homeFeaturedSection .home-featured-card .loa-detail,
+  #recentSearchSection .personalized-card .loa-detail,
+  #recentViewedSection .personalized-card .loa-detail,
+  #nearbySection .personalized-card .loa-detail{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price,
+  #resultats .ad-card.immo-card .immo-card-charges,
+  #resultats .ad-card.immo-card .immo-card-location-extra,
+  #resultats .ad-card.immo-card .immo-card-extra-spec,
+  #homeFeaturedSection .home-featured-card .immo-card-unit-price,
+  #homeFeaturedSection .home-featured-card .immo-card-charges,
+  #homeFeaturedSection .home-featured-card .immo-card-location-extra,
+  #homeFeaturedSection .home-featured-card .immo-card-extra-spec{
+    display:none!important;
+  }
+
+  #resultats .ad-card.immo-card .ad-specs,
+  #homeFeaturedSection .home-featured-card .ad-specs{
+    display:flex!important;
+    gap:8px!important;
+    align-items:center!important;
+    flex-wrap:wrap!important;
+  }
+}
+
+
+
+/* Desktop/tablette : accès Pro/Pro juste à côté des favoris.
+   La visibilité reste pilotée par syncB2bEntryVisibility() : Pro + Admin uniquement. */
+@media(min-width:761px){
+  header #desktopProProBtn.desktop-propro-btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    min-height:40px;
+    height:40px;
+    padding:0 16px;
+    border-radius:13px;
+    white-space:nowrap;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
+    border:1px solid rgba(255,210,244,.42)!important;
+    box-shadow:0 0 14px rgba(236,64,157,.38),0 7px 18px rgba(101,31,130,.28)!important;
+  }
+  header #desktopProProBtn.desktop-propro-btn:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+    box-shadow:0 0 18px rgba(236,64,157,.52),0 9px 22px rgba(101,31,130,.34)!important;
+  }
+  header #desktopProProBtn.desktop-propro-btn.hidden{
+    display:none!important;
+  }
+  .desktop-propro-label{
+    font-weight:900;
+    letter-spacing:-.015em;
+  }
+
+  /* Sur les pastilles du catalogue, un Admin ne garde que son action Boost.
+     Modifier / Supprimer restent disponibles dans la fiche complète. */
+  #resultats .ad-actions .boost-btn{
+    flex:1 1 auto;
+  }
+}
+
+
+
+/* Desktop large : catégories centrées exactement au milieu du header,
+   indépendamment de la largeur du logo à gauche et des actions à droite. */
+@media(min-width:1250px){
+  header .nav{
+    position:relative!important;
+  }
+  header .desktop-category-nav{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    transform:translate(-50%,-50%)!important;
+    width:max-content!important;
+    max-width:calc(100% - 650px)!important;
+    justify-content:center!important;
+    gap:2px!important;
+    overflow:visible!important;
+    z-index:2!important;
+  }
+  header .desktop-category-link{
+    padding-left:7px!important;
+    padding-right:7px!important;
+  }
+}
+
+
+
+/* Baseline du logo principal : "Achetez - Vendez" doit rester plus petite
+   et tenir proprement sous "Abracadeal". */
+@media (min-width:761px){
+  .desktop-brand-copy{
+    align-items:center!important;
+  }
+  .desktop-brand-copy small{
+    display:block!important;
+    width:100%!important;
+    margin-top:4px!important;
+    text-align:center!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+  }
+  .desktop-footer-brand span{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+  }
+  .desktop-footer-brand small{
+    display:block!important;
+    width:100%!important;
+    text-align:center!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:760px){
+  .mobile-brand{
+    align-items:flex-start!important;
+  }
+  .mobile-brand-tag{
+    display:block!important;
+    width:max-content!important;
+    max-width:100%!important;
+    margin-top:4px!important;
+    padding-left:2px!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    letter-spacing:.10em!important;
+    white-space:nowrap!important;
+  }
+}
+
+
+
+.mobile-vacances-shortcut{display:none}
+@media(max-width:760px){
+  .mobile-topbar{
+    justify-content:space-between!important;
+  }
+  .mobile-vacances-shortcut{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-height:42px!important;
+    padding:0 13px!important;
+    border-radius:14px!important;
+    border:1px solid rgba(255,255,255,.14)!important;
+    background:linear-gradient(135deg,#7d269e,#d934ac 65%,#ef48aa)!important;
+    color:#fff!important;
+    font-size:.82rem!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    box-shadow:0 8px 20px rgba(203,48,171,.24)!important;
+  }
+}
+@media(max-width:390px){
+  .mobile-vacances-shortcut{
+    min-height:40px!important;
+    padding:0 10px!important;
+    font-size:.76rem!important;
+  }
+}
+
+
+
+/* =========================================================
+   TABLETTE UNIQUEMENT
+   - téléphone inchangé
+   - desktop / laptop inchangé
+   - tablette tactile : interface mobile adaptée en portrait ET paysage
+   ========================================================= */
+@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  html{background:#0b0714!important}
+  body{
+    background:
+      radial-gradient(90% 24% at 50% 0%,rgba(117,36,151,.21),transparent 72%),
+      linear-gradient(180deg,#0b0714 0%,#11081c 60%,#090510 100%)!important;
+    color:#fff!important;
+    padding-bottom:94px!important;
+    overflow-x:hidden!important;
+  }
+
+  /* On retire exclusivement le header desktop sur tablette. */
+  body>header{display:none!important}
+
+  /* Barre type mobile, mais dimensionnée tablette. */
+  .mobile-topbar{
+    display:flex!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:10050!important;
+    min-height:66px!important;
+    padding:9px 20px!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:14px!important;
+    background:rgba(9,5,16,.97)!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 7px 22px rgba(0,0,0,.22)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    backdrop-filter:blur(16px)!important;
+  }
+  .mobile-brand{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:flex-start!important;
+    min-width:0!important;
+    line-height:1!important;
+  }
+  .mobile-brand-name{
+    display:inline-block!important;
+    font:700 30px/1 Fraunces,serif!important;
+    letter-spacing:-.035em!important;
+    background:linear-gradient(110deg,#9e6700 0%,#d7a51f 16%,#ffe477 31%,#fffbe0 48%,#ffd85b 60%,#d6a31f 76%,#a66d00 100%)!important;
+    background-size:320% 100%!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    -webkit-animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    white-space:nowrap!important;
+  }
+  .mobile-brand-name .deal{
+    background:none!important;
+    color:inherit!important;
+    -webkit-text-fill-color:inherit!important;
+  }
+  .mobile-brand-tag{
+    display:block!important;
+    width:max-content!important;
+    margin-top:4px!important;
+    color:#d4c4df!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:800!important;
+    letter-spacing:.10em!important;
+    text-transform:uppercase!important;
+    white-space:nowrap!important;
+  }
+  .mobile-vacances-shortcut{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-height:44px!important;
+    padding:0 16px!important;
+    border-radius:14px!important;
+    border:1px solid rgba(255,255,255,.14)!important;
+    background:linear-gradient(135deg,#7d269e,#d934ac 65%,#ef48aa)!important;
+    color:#fff!important;
+    font-size:.86rem!important;
+    font-weight:900!important;
+    white-space:nowrap!important;
+    box-shadow:0 8px 20px rgba(203,48,171,.24)!important;
+  }
+
+  /* Même ordre général que le téléphone. */
+  body>main#top{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    min-width:0!important;
+    background:transparent!important;
+  }
+  main#top>.hero-shell{order:1!important}
+  main#top>#annonces{order:2!important}
+  main#top>#homeFeaturedSection{order:3!important}
+  main#top>#recentSearchSection{order:4!important}
+  main#top>#recentViewedSection{order:5!important}
+  main#top>#nearbySection{order:6!important}
+  main#top>#resultats{order:7!important}
+  main#top>#b2bDiscovery{order:8!important}
+  main#top>#vacancesDiscovery{order:9!important}
+  main#top>#pros{order:10!important}
+  main#top>.trust{order:11!important}
+  .founder-topbar{display:none!important}
+
+  .container{
+    width:calc(100% - 32px)!important;
+    max-width:1100px!important;
+  }
+
+  /* Hero / bannière : logique mobile, sans compression. */
+  .hero-shell{
+    background:#11091b!important;
+    overflow:visible!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero.container{
+    width:min(100% - 24px,1050px)!important;
+    max-width:1050px!important;
+    margin:0 auto!important;
+    padding:12px 0 16px!important;
+    display:block!important;
+  }
+  .banner-frame{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border-radius:22px!important;
+    background:none!important;
+    box-shadow:none!important;
+  }
+  .banner-frame .banner,
+  .banner-frame .banner-main-image{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center!important;
+    border-radius:22px!important;
+    box-shadow:none!important;
+  }
+  .banner-frame::before,.banner-frame::after,.banner-hotspots{display:none!important}
+
+  /* Recherche tablette : même style mobile, un peu plus large. */
+  .search-wrap{
+    position:static!important;
+    inset:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  .search-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.25fr) minmax(190px,.8fr) auto!important;
+    gap:9px!important;
+    width:100%!important;
+    padding:10px!important;
+    overflow:visible!important;
+    border-radius:17px!important;
+    background:#fff!important;
+    border:1px solid rgba(255,255,255,.94)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.24)!important;
+  }
+  .search-card .field{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:0 14px!important;
+    border:1px solid #ece5f0!important;
+    border-radius:12px!important;
+    background:#fff!important;
+    color:#25172d!important;
+    font-size:16px!important;
+    box-shadow:none!important;
+  }
+  #searchCity.desktop-search-city{display:none!important}
+  .search-filters-link{display:none!important}
+  #searchBtn{
+    width:auto!important;
+    min-width:150px!important;
+    height:48px!important;
+    min-height:48px!important;
+    padding:0 22px!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    font-size:14px!important;
+    font-weight:900!important;
+    box-shadow:0 6px 15px rgba(223,45,172,.24)!important;
+  }
+
+  /* Catégories : ruban tactile identique à l'esprit téléphone. */
+  #annonces{
+    padding:5px 0 13px!important;
+    background:transparent!important;
+  }
+  #annonces .section-head{display:none!important}
+  #annonces .categories{
+    display:flex!important;
+    gap:14px!important;
+    width:100%!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:7px 20px 12px!important;
+    margin:0!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  #annonces .categories::-webkit-scrollbar{display:none!important}
+  #annonces .cat{
+    flex:0 0 78px!important;
+    width:78px!important;
+    min-width:78px!important;
+    min-height:0!important;
+    height:auto!important;
+    padding:0!important;
+    margin:0!important;
+    border:0!important;
+    background:transparent!important;
+    box-shadow:none!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    gap:8px!important;
+    text-align:center!important;
+    scroll-snap-align:start!important;
+    overflow:visible!important;
+  }
+  #annonces .cat::before,#annonces .cat::after{display:none!important}
+  #annonces .cat-icon{
+    width:62px!important;
+    height:62px!important;
+    flex:0 0 62px!important;
+    border-radius:50%!important;
+    display:grid!important;
+    place-items:center!important;
+    margin:0!important;
+    font-size:25px!important;
+    border:1px solid rgba(255,255,255,.18)!important;
+    background:linear-gradient(145deg,#3b1758,#762a96)!important;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.10),0 8px 19px rgba(0,0,0,.21)!important;
+  }
+  #annonces .cat h3{
+    margin:0!important;
+    color:#f8f1fb!important;
+    font-size:12px!important;
+    line-height:1.15!important;
+    font-weight:800!important;
+    white-space:nowrap!important;
+  }
+  #annonces .cat small{display:none!important}
+
+  /* Sections / cartes dans le style mobile. */
+  .home-featured-section,.personalized-section,.listing-section{background:transparent!important}
+  .home-featured-head h2,.personalized-head h2,.listing-head h2{
+    color:#fff!important;
+    font-family:Fraunces,serif!important;
+  }
+  .home-featured-head p,.personalized-head p,.listing-head p{color:#b9a8c4!important}
+
+  .home-featured-grid,.personalized-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:12px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 12px!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .home-featured-grid::-webkit-scrollbar,.personalized-grid::-webkit-scrollbar{display:none!important}
+  .home-featured-card,.personalized-card{
+    flex:0 0 clamp(230px,30vw,310px)!important;
+    width:clamp(230px,30vw,310px)!important;
+    min-width:clamp(230px,30vw,310px)!important;
+    max-width:clamp(230px,30vw,310px)!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+    scroll-snap-align:start!important;
+  }
+
+  /* Les annonces passent en grille tactile, 2 colonnes par défaut. */
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:14px!important;
+    overflow:visible!important;
+    padding:2px 0 14px!important;
+  }
+  #resultats .ad-card{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+    height:auto!important;
+    min-height:0!important;
+    border-radius:16px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+  }
+  #resultats .ad-body{
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  #resultats .ad-title{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    color:#fff!important;
+    white-space:normal!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+  }
+  #resultats .ad-price{color:#ff64bd!important}
+  #resultats .ad-meta,#resultats .ad-city,#resultats .ad-specs{color:#c5b5cf!important}
+
+  .results-tools{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:9px!important;
+    width:100%!important;
+  }
+
+  /* Barre inférieure identique au téléphone, centrée sur tablette. */
+  .mobile-bottom-nav{
+    display:grid!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    align-items:end!important;
+    position:fixed!important;
+    z-index:10040!important;
+    left:50%!important;
+    right:auto!important;
+    bottom:calc(9px + env(safe-area-inset-bottom))!important;
+    width:min(720px,calc(100% - 28px))!important;
+    min-height:68px!important;
+    padding:7px 5px 6px!important;
+    transform:translateX(-50%) translateZ(0)!important;
+    border-radius:22px!important;
+    background:rgba(15,7,23,.96)!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.36)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+  }
+  .mobile-nav-item{
+    position:relative!important;
+    min-width:0!important;
+    min-height:54px!important;
+    padding:3px 2px 1px!important;
+    border:0!important;
+    background:transparent!important;
+    color:#ece4f1!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    font:inherit!important;
+    font-size:11px!important;
+    font-weight:750!important;
+    cursor:pointer!important;
+  }
+  .mobile-nav-item svg{
+    width:23px!important;height:23px!important;
+    stroke:currentColor!important;stroke-width:1.9!important;fill:none!important;
+    stroke-linecap:round!important;stroke-linejoin:round!important;
+  }
+  .mobile-nav-item.is-active{color:#ff58b5!important}
+
+  /* Compteur Messages tablette : aucune valeur 0 visible.
+     Même pastille que le compteur Admin, collée à l'icône. */
+  #mobileBottomUnread.mobile-nav-badge{
+    display:none!important;
+    position:absolute!important;
+    top:5px!important;
+    left:calc(50% + 2px)!important;
+    right:auto!important;
+    transform:none!important;
+    min-width:18px!important;
+    height:18px!important;
+    padding:0 5px!important;
+    border-radius:999px!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#ed338f!important;
+    color:#fff!important;
+    border:2px solid #180a26!important;
+    font-size:9px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    z-index:3!important;
+  }
+  #mobileBottomUnread.mobile-nav-badge.show{
+    display:flex!important;
+  }
+
+  .mobile-nav-publish{transform:translateY(-8px)!important}
+  .mobile-nav-publish .mobile-publish-orb{
+    width:52px!important;height:52px!important;
+    margin-bottom:-2px!important;
+    border-radius:50%!important;
+    display:grid!important;place-items:center!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    border:2px solid rgba(255,255,255,.2)!important;
+    box-shadow:0 6px 16px rgba(229,49,173,.34)!important;
+  }
+
+  footer{padding-bottom:112px!important}
+  .modal-backdrop{z-index:10100!important}
+  #messagesModal.modal-backdrop{z-index:10120!important}
+}
+
+/* Tablette horizontale : davantage de largeur utile, sans basculer en desktop. */
+@media (min-width:900px) and (max-width:1366px) and (min-height:550px) and (orientation:landscape) and (any-pointer:coarse){
+  #resultats .ads-grid{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  }
+  .hero.container{
+    width:min(100% - 36px,1180px)!important;
+  }
+  .search-card{
+    grid-template-columns:minmax(0,1.35fr) minmax(240px,.85fr) 180px!important;
+  }
+  .home-featured-card,.personalized-card{
+    flex-basis:260px!important;
+    width:260px!important;
+    min-width:260px!important;
+    max-width:260px!important;
+  }
+}
+
+/* Si une petite tablette fait exactement ~600px de haut en paysage,
+   elle ne doit pas hériter du verrouillage "téléphone horizontal". */
+@media (min-width:900px) and (min-height:550px) and (max-width:1366px) and (orientation:landscape) and (any-pointer:coarse){
+  .portrait-only-overlay{display:none!important}
+  body > :not(.portrait-only-overlay){
+    visibility:visible!important;
+    pointer-events:auto!important;
+  }
+  html,body{
+    height:auto!important;
+    min-height:100%!important;
+    overflow-x:hidden!important;
+    overflow-y:auto!important;
+  }
+}
+
+
+
+/* Desktop uniquement : libérer de la place dans le header.
+   Le compte garde toujours le libellé fixe "Compte" et le coeur est plus discret. */
+@media (min-width:1024px){
+  header #accountBtn{
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:0 10px!important;
+    overflow:hidden!important;
+  }
+  header #accountBtn #accountBtnLabel{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    overflow:hidden!important;
+    text-overflow:clip!important;
+    white-space:nowrap!important;
+    text-align:center!important;
+    font-size:12px!important;
+    line-height:1!important;
+  }
+  header .desktop-favorites-btn{
+    width:34px!important;
+    height:40px!important;
+    flex:0 0 34px!important;
+    font-size:25px!important;
+    line-height:1!important;
+  }
+}
+
+
+
+/* Mobile + tablette : même identité typographique/dorée que le logo desktop.
+   Les dimensions restent adaptées au support ; desktop inchangé. */
+@media (max-width:760px),
+       (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .mobile-brand{
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:0!important;
+    line-height:1!important;
+  }
+  .mobile-brand-name{
+    display:inline-block!important;
+    font-family:Fraunces,serif!important;
+    font-weight:700!important;
+    line-height:1!important;
+    letter-spacing:-.025em!important;
+    color:#e8bb43!important;
+    background:
+      linear-gradient(
+        110deg,
+        #9f6800 0%,
+        #d7a51e 16%,
+        #ffe47b 29%,
+        #fff8cf 43%,
+        #ffffff 50%,
+        #fff0a0 57%,
+        #d9a722 72%,
+        #a66c00 100%
+      )!important;
+    background-size:320% 100%!important;
+    background-position:100% 50%;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    -webkit-animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    filter:drop-shadow(0 0 5px rgba(255,196,55,.24))!important;
+    white-space:nowrap!important;
+  }
+  .mobile-brand-name .deal{
+    background:none!important;
+    color:inherit!important;
+    -webkit-text-fill-color:inherit!important;
+  }
+  .mobile-brand-tag{
+    display:block!important;
+    width:100%!important;
+    max-width:100%!important;
+    margin-top:4px!important;
+    padding:0!important;
+    text-align:center!important;
+    color:#bdadc7!important;
+    font-family:'DM Sans',Inter,sans-serif!important;
+    font-size:8px!important;
+    line-height:1.05!important;
+    font-weight:700!important;
+    letter-spacing:.08em!important;
+    white-space:nowrap!important;
+  }
+}
+@media (max-width:760px){
+  .mobile-brand-name{font-size:25px!important}
+}
+@media (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+  .mobile-brand-name{font-size:28px!important}
+}
+@media (prefers-reduced-motion:reduce){
+  .mobile-brand-name{
+    animation:none!important;
+    -webkit-animation:none!important;
+    background-position:50% 50%!important;
+  }
+}
+
+
+
+/* Mobile + tablette : même barre de recherche que le desktop, adaptée sur UNE seule ligne.
+   Desktop inchangé. */
+@media (max-width:760px),
+       (min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse){
+
+  .search-wrap{
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:10px 0 0!important;
+    z-index:5!important;
+  }
+
+  .search-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1.28fr) minmax(0,.92fr) auto!important;
+    align-items:center!important;
+    gap:0!important;
+    width:100%!important;
+    min-width:0!important;
+    padding:6px!important;
+    border-radius:17px!important;
+    background:#fff!important;
+    border:1px solid rgba(255,255,255,.92)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.22)!important;
+    overflow:hidden!important;
+  }
+
+  .search-card .field{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:100%!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    padding:0 12px!important;
+    border:0!important;
+    border-radius:0!important;
+    background:#fff!important;
+    color:#25172d!important;
+    box-shadow:none!important;
+    outline:none!important;
+    font-size:13px!important;
+    line-height:44px!important;
+  }
+
+  .search-card #searchQuery{
+    border-right:1px solid #ebe4ee!important;
+  }
+
+  #searchCity.desktop-search-city{
+    display:block!important;
+    padding-left:12px!important;
+    border-right:1px solid #ebe4ee!important;
+    background:#fff!important;
+    background-image:none!important;
+  }
+
+  .search-card .field::placeholder{
+    color:#9b8ea2!important;
+    opacity:1!important;
+  }
+
+  #searchBtn{
+    width:auto!important;
+    min-width:104px!important;
+    height:44px!important;
+    min-height:44px!important;
+    margin:0!important;
+    padding:0 15px!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    font-size:12px!important;
+    font-weight:900!important;
+    line-height:1!important;
+    box-shadow:0 6px 15px rgba(223,45,172,.24)!important;
+    white-space:nowrap!important;
+  }
+
+  .search-filters-link{
+    display:none!important;
+  }
+}
+
+/* Téléphone étroit : toujours les 3 éléments sur une seule ligne. */
+@media (max-width:430px){
+  .search-card{
+    grid-template-columns:minmax(0,1.18fr) minmax(0,.88fr) auto!important;
+    padding:5px!important;
+    border-radius:15px!important;
+  }
+  .search-card .field{
+    height:42px!important;
+    min-height:42px!important;
+    padding:0 8px!important;
+    font-size:11px!important;
+    line-height:42px!important;
+  }
+  #searchBtn{
+    min-width:82px!important;
+    height:42px!important;
+    min-height:42px!important;
+    padding:0 9px!important;
+    border-radius:11px!important;
+    font-size:10px!important;
+  }
+}
+
+/* Très petit téléphone : compacte encore sans repasser sur deux lignes. */
+@media (max-width:360px){
+  .search-card{
+    grid-template-columns:minmax(0,1.15fr) minmax(0,.82fr) 72px!important;
+  }
+  .search-card .field{
+    padding:0 6px!important;
+    font-size:10px!important;
+  }
+  #searchBtn{
+    min-width:72px!important;
+    width:72px!important;
+    padding:0 5px!important;
+    font-size:9px!important;
+  }
+}
+
+
+
+/* Desktop :
+   Pro/Pro à gauche, juste après Abracadeal.
+   Vacances reste toujours visible dans les actions à droite. */
+@media (min-width:761px){
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    flex:0 0 auto!important;
+    min-width:94px!important;
+    height:40px!important;
+    min-height:40px!important;
+    padding:0 14px!important;
+    border-radius:13px!important;
+    white-space:nowrap!important;
+    color:#fff!important;
+    background:linear-gradient(135deg,#7f29a7,#c72cae 58%,#f03bab)!important;
+    border:1px solid rgba(255,210,244,.32)!important;
+    box-shadow:0 7px 18px rgba(101,31,130,.24)!important;
+    font-size:12px!important;
+    font-weight:900!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+  header .header-vacances-btn:hover{
+    transform:translateY(-1px)!important;
+    filter:brightness(1.06)!important;
+  }
+}
+
+/* Position Pro/Pro à gauche sur le vrai layout desktop large. */
+@media (min-width:1024px){
+  header .nav{
+    grid-template-columns:330px minmax(0,1fr) auto!important;
+  }
+
+  header .desktop-brand-zone{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-width:0!important;
+    white-space:nowrap!important;
+  }
+
+  header .desktop-brand-zone .desktop-brand{
+    flex:0 1 auto!important;
+    min-width:0!important;
+  }
+
+  header #desktopProProBtn.desktop-propro-btn{
+    flex:0 0 auto!important;
+    min-width:82px!important;
+    height:38px!important;
+    min-height:38px!important;
+    padding:0 13px!important;
+    border-radius:12px!important;
+    font-size:12px!important;
+  }
+}
+
+
+
+/* Desktop : empêche la navigation centrale de recouvrir le coeur / Vacances.
+   Le bouton Vacances était bien présent mais passait sous les catégories. */
+@media (min-width:1024px){
+  header .nav{
+    display:grid!important;
+    grid-template-columns:320px minmax(0,1fr) auto!important;
+    gap:10px!important;
+    align-items:center!important;
+  }
+
+  header .desktop-category-nav{
+    position:static!important;
+    left:auto!important;
+    top:auto!important;
+    transform:none!important;
+    width:100%!important;
+    max-width:100%!important;
+    min-width:0!important;
+    justify-self:stretch!important;
+    justify-content:center!important;
+    gap:0!important;
+    overflow:hidden!important;
+    z-index:1!important;
+  }
+
+  header .desktop-category-link{
+    min-height:38px!important;
+    padding-left:5px!important;
+    padding-right:5px!important;
+    font-size:12px!important;
+  }
+
+  header .nav-actions{
+    position:relative!important;
+    z-index:4!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:5px!important;
+    min-width:max-content!important;
+    overflow:visible!important;
+  }
+
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    visibility:visible!important;
+    opacity:1!important;
+    position:relative!important;
+    z-index:5!important;
+    flex:0 0 94px!important;
+    width:94px!important;
+    min-width:94px!important;
+    max-width:94px!important;
+  }
+
+  header .desktop-favorites-btn{
+    position:relative!important;
+    z-index:5!important;
+    flex:0 0 34px!important;
+  }
+}
+
+
+
+/* Desktop : garde une barre supérieure stable après restauration de session.
+   Les boutons techniques qui apparaissaient après l'authentification poussaient
+   Vacances hors de la zone visible. Ils restent accessibles dans Compte/Admin. */
+@media (min-width:1024px) and (pointer:fine){
+  header #b2bNavBtn,
+  header #headerStockBtn,
+  header #moderationBtn,
+  header #flowErrorsBtn,
+  header #headerMessagesBtn,
+  header #headerLogoutBtn{
+    display:none!important;
+  }
+
+  header .nav-actions{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    flex-wrap:nowrap!important;
+    gap:6px!important;
+    min-width:0!important;
+    width:auto!important;
+    overflow:visible!important;
+  }
+
+  header .desktop-favorites-btn{
+    display:flex!important;
+    flex:0 0 34px!important;
+    width:34px!important;
+  }
+
+  header .header-vacances-btn{
+    display:inline-flex!important;
+    flex:0 0 94px!important;
+    width:94px!important;
+    min-width:94px!important;
+    max-width:94px!important;
+    visibility:visible!important;
+    opacity:1!important;
+  }
+
+  header .account-auth-group{
+    flex:0 0 auto!important;
+  }
+
+  header #accountBtn{
+    flex:0 0 92px!important;
+    width:92px!important;
+    min-width:92px!important;
+    max-width:92px!important;
+  }
+
+  header .publish-trigger{
+    flex:0 0 158px!important;
+    width:158px!important;
+    min-width:158px!important;
+    max-width:158px!important;
+  }
+}
+
+
+
+@media (min-width:1024px){
+  header .nav{
+    grid-template-columns:minmax(170px,1fr) auto!important;
+    grid-template-areas:
+      "brand actions"
+      "cats cats"!important;
+    row-gap:0!important;
+    min-height:0!important;
+    padding-top:2px!important;
+    padding-bottom:0!important;
+  }
+  header .desktop-brand{grid-area:brand!important}
+  header .nav-actions{
+    grid-area:actions!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    min-width:0!important;
+    gap:0!important;
+  }
+  header .desktop-category-nav{
+    grid-area:cats!important;
+    width:100%!important;
+    justify-content:center!important;
+    gap:10px!important;
+    min-height:28px!important;
+    margin-top:-28px!important;
+    margin-bottom:-4px!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+    align-items:center!important;
+    transform:translateY(-5px)!important;
+    overflow:visible!important;
+    position:relative!important;
+    z-index:120!important;
+  }
+  header,
+  header .nav{
+    overflow:visible!important;
+  }
+  header .desktop-nav-item{
+    position:relative!important;
+    z-index:121!important;
+  }
+  header .desktop-submenu{
+    z-index:15000!important;
+  }
+  header .desktop-category-link{
+    min-height:28px!important;
+    height:28px!important;
+    padding-top:0!important;
+    padding-bottom:0!important;
+    padding-left:9px!important;
+    padding-right:9px!important;
+    line-height:28px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+  }
+
+  /* Remplace visuellement l'ancien bloc d'actions desktop sans supprimer ses triggers JS. */
+  header .nav-actions > :not(.abraca-desktop-actions-v2){
+    display:none!important;
+  }
+
+  .abraca-desktop-actions-v2{
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    min-height:48px!important;
+    white-space:nowrap!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item{
+    position:relative!important;
+    min-width:72px!important;
+    height:46px!important;
+    padding:4px 9px 3px!important;
+    border:0!important;
+    border-radius:12px!important;
+    background:transparent!important;
+    color:#f6eef9!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:3px!important;
+    font-family:'DM Sans',sans-serif!important;
+    font-size:11px!important;
+    line-height:1!important;
+    font-weight:700!important;
+    text-decoration:none!important;
+    cursor:pointer!important;
+    transition:background .15s ease,color .15s ease,transform .15s ease!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item:hover{
+    background:rgba(255,255,255,.075)!important;
+    color:#fff!important;
+    transform:translateY(-1px)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-item svg{
+    width:24px!important;
+    height:24px!important;
+    display:block!important;
+    fill:none!important;
+    stroke:currentColor!important;
+    stroke-width:1.9!important;
+    stroke-linecap:round!important;
+    stroke-linejoin:round!important;
+    flex:0 0 auto!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search{
+    min-width:54px!important;
+    width:54px!important;
+    height:48px!important;
+    margin-right:5px!important;
+    padding:0!important;
+    border-radius:14px!important;
+    background:linear-gradient(135deg,#f15b45 0%,#ec409d 100%)!important;
+    color:#fff!important;
+    box-shadow:0 8px 20px rgba(236,64,157,.24)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search svg{
+    width:23px!important;
+    height:23px!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search span{
+    display:none!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-vacances{
+    color:#f3cf70!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-vacances::after{
+    content:""!important;
+    position:absolute!important;
+    left:13px!important;
+    right:13px!important;
+    bottom:0!important;
+    height:2px!important;
+    border-radius:999px!important;
+    background:linear-gradient(90deg,#f3cf70,#ec409d)!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-badge{
+    position:absolute!important;
+    top:2px!important;
+    right:14px!important;
+    min-width:17px!important;
+    height:17px!important;
+    padding:0 4px!important;
+    border-radius:999px!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    background:#ec409d!important;
+    color:#fff!important;
+    border:2px solid #1b0d2d!important;
+    font-size:9px!important;
+    line-height:1!important;
+    font-weight:900!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-badge:empty{
+    display:none!important;
+  }
+}
+@media (min-width:1024px) and (max-width:1180px){
+  .abraca-desktop-actions-v2{gap:0!important}
+  .abraca-desktop-actions-v2 .abraca-dnav-item{
+    min-width:64px!important;
+    padding-left:6px!important;
+    padding-right:6px!important;
+    font-size:10px!important;
+  }
+  .abraca-desktop-actions-v2 .abraca-dnav-search{
+    min-width:48px!important;
+    width:48px!important;
+  }
+}
+
+
+
+@media (min-width:1024px){
+  header .nav{
+    display:grid!important;
+    grid-template-columns:220px minmax(0,1fr) auto!important;
+    grid-template-areas:"brand cats actions"!important;
+    align-items:center!important;
+    column-gap:12px!important;
+    row-gap:0!important;
+    min-height:70px!important;
+    padding:6px 0!important;
+  }
+  header .desktop-brand-zone{
+    grid-area:brand!important;
+    min-width:0!important;
+  }
+  header .desktop-category-nav{
+    grid-area:cats!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:6px!important;
+    min-width:0!important;
+    width:100%!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    transform:none!important;
+    overflow:visible!important;
+    position:relative!important;
+    z-index:120!important;
+  }
+  header .desktop-nav-item{
+    min-width:0!important;
+    flex:0 1 auto!important;
+  }
+  header .desktop-category-link{
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 10px!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    border-radius:999px!important;
+  }
+  header .nav-actions{
+    grid-area:actions!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    min-width:max-content!important;
+    position:relative!important;
+    z-index:220!important;
+  }
+}
+
+
+
+/* Les zones transparentes du menu categories chevauchaient les actions en haut.
+   Ne rendre cliquables que les liens/sous-menus reels et agrandir les cibles. */
+@media (min-width:1024px) and (pointer:fine){
+  header .nav{position:relative!important}
+  header .desktop-brand-zone{position:relative!important;z-index:220!important}
+  header .nav-actions{position:relative!important;z-index:220!important}
+  header .abraca-desktop-actions-v2{position:relative!important;z-index:221!important}
+  header .desktop-category-nav{pointer-events:none!important;z-index:120!important}
+  header .desktop-nav-item,header .desktop-category-link,header .desktop-submenu,header .desktop-submenu a{pointer-events:auto!important}
+  header #desktopProProBtn.desktop-propro-btn{position:relative!important;z-index:222!important;min-height:46px!important;padding:0 18px!important;cursor:pointer!important}
+  header .abraca-desktop-actions-v2 .abraca-dnav-item{min-height:54px!important;height:54px!important;min-width:78px!important;padding:6px 12px!important;position:relative!important;z-index:222!important;cursor:pointer!important}
+  header .abraca-desktop-actions-v2 .abraca-dnav-item svg,header .abraca-desktop-actions-v2 .abraca-dnav-item span,header .abraca-desktop-actions-v2 .abraca-dnav-item i{pointer-events:none!important}
+  header .desktop-brand-zone .desktop-brand{position:relative!important;z-index:222!important}
+}
+
+
+
+/* Desktop : la rangée catégories ne chevauche plus les actions.
+   Toute la surface du lien reçoit les clics, sans changer les sous-menus. */
+@media (min-width:1024px) and (pointer:fine){
+  header .nav{row-gap:4px!important}
+  header .desktop-category-nav{
+    margin-top:0!important;
+    margin-bottom:0!important;
+    transform:none!important;
+    min-height:44px!important;
+    padding:0!important;
+    position:relative!important;
+    z-index:230!important;
+    pointer-events:auto!important;
+    overflow:visible!important;
+  }
+  header .desktop-nav-item{
+    display:flex!important;
+    align-items:center!important;
+    min-height:44px!important;
+    position:relative!important;
+    z-index:231!important;
+    pointer-events:auto!important;
+  }
+  header .desktop-category-link{
+    display:inline-flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    min-height:44px!important;
+    height:44px!important;
+    line-height:1.2!important;
+    padding:0 12px!important;
+    position:relative!important;
+    z-index:232!important;
+    pointer-events:auto!important;
+    cursor:pointer!important;
+  }
+  header .desktop-submenu{pointer-events:auto!important;z-index:240!important}
+}
+
+
+
+/* Catégories desktop : boutons individuels flottants, sans déplacer les menus déroulants. */
+@media (min-width:1024px) and (pointer:fine){
+  header .desktop-category-nav{gap:8px!important;padding:0 0 2px!important;min-height:42px!important;overflow:visible!important;transform:translateY(-7px)!important;margin-bottom:-7px!important}
+  header .desktop-nav-item{overflow:visible!important}
+  header .desktop-category-link{
+    background:rgba(255,255,255,.065)!important;
+    border:1px solid rgba(255,255,255,.16)!important;
+    border-radius:999px!important;
+    box-shadow:0 5px 13px rgba(0,0,0,.16)!important;
+    min-height:40px!important;height:40px!important;
+    padding:0 14px!important;
+    transition:transform .16s ease,box-shadow .16s ease,background .16s ease!important;
+  }
+  header .desktop-category-link:hover,
+  header .desktop-category-link:focus-visible{
+    transform:translateY(-3px)!important;
+    background:rgba(255,255,255,.15)!important;
+    box-shadow:0 9px 20px rgba(0,0,0,.27)!important;
+  }
+  header .desktop-category-link:focus-visible{outline:2px solid #f3cf70!important;outline-offset:2px!important}
+}
+
+
+
+/* Mobile uniquement : recherche compacte, surtout le bouton. */
+@media (max-width:760px){
+  .search-card{
+    padding:3px!important;
+    border-radius:13px!important;
+    gap:0!important;
+  }
+  .search-card .field,
+  #searchCity.desktop-search-city{
+    font-size:16px!important;
+    height:32px!important;
+    min-height:32px!important;
+    line-height:32px!important;
+  }
+  #searchBtn{
+    height:30px!important;
+    min-height:30px!important;
+    padding:0 9px!important;
+    border-radius:9px!important;
+    font-size:12px!important;
+    line-height:30px!important;
+    white-space:nowrap!important;
+  }
+  #searchBtn::before,
+  #searchBtn::after,
+  #searchBtn .search-emoji,
+  #searchBtn svg{
+    display:none!important;
+    content:none!important;
+  }
+}
+@media (max-width:430px){
+  .search-card .field,
+  #searchCity.desktop-search-city{
+    height:30px!important;
+    min-height:30px!important;
+    line-height:30px!important;
+  }
+  #searchBtn{
+    height:28px!important;
+    min-height:28px!important;
+    padding:0 8px!important;
+    font-size:11px!important;
+    line-height:28px!important;
+  }
+}
+
+
+
+/* Filet de securite : la barre d'icones desktop (Vacances/Favoris/Messages/Compte)
+   ne doit jamais rester visible en dessous de 1024px. Sans cette regle, une
+   rotation d'iPad (passage par une largeur >=1024px puis retour en dessous)
+   pouvait laisser la barre affichee en double avec les boutons tablette. */
+@media(max-width:1023px){
+  header .abraca-desktop-actions-v2{
+    display:none!important;
+  }
+}
+/* Recherche IA : deux colonnes, champ souple et bouton ancré à droite. */
+.search-card{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+}
+.search-card #searchCity{display:none!important}
+.search-card #searchQuery{
+  grid-column:1!important;
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.search-card #searchBtn{
+  grid-column:2!important;
+  justify-self:end!important;
+  width:auto!important;
+  min-width:145px!important;
+  max-width:none!important;
+  margin:0!important;
+}
+@media(max-width:760px){
+  .search-card{grid-template-columns:minmax(0,1fr) auto!important}
+  .search-card #searchBtn{
+    min-width:88px!important;
+    width:auto!important;
+    padding-left:10px!important;
+    padding-right:10px!important;
+    font-size:12px!important;
+  }
+}
+@media(max-width:360px){
+  .search-card #searchBtn{min-width:78px!important;font-size:11px!important;padding-left:6px!important;padding-right:6px!important}
+}
+
+
+
+/* Appel à publier visible dès l'arrivée, directement sur la bannière. */
+.hero{position:relative}
+.hero-publish-button{position:absolute;z-index:9;top:20px;right:22px;display:inline-flex;align-items:center;justify-content:center;min-height:56px;padding:13px 23px;border-radius:16px;background:linear-gradient(120deg,#ffd77a,#ffa82f);color:#30153e!important;font-weight:850;font-size:1.02rem;text-decoration:none;box-shadow:0 8px 27px rgba(23,5,32,.45);border:2px solid rgba(255,246,210,.95);transition:transform .15s,filter .15s;white-space:nowrap}
+.hero-publish-button:hover,.hero-publish-button:focus-visible{transform:translateY(-2px);filter:brightness(1.08)}
+@media(max-width:700px){.hero-publish-button{top:10px;right:10px;left:10px;min-height:46px;padding:10px 12px;font-size:.91rem;white-space:normal;text-align:center;border-radius:13px}}
+/* Mobile et tablette : bouton sous la bannière, sans masquer le visuel. */
+@media(max-width:1180px){
+  .hero .hero-publish-button{
+    position:relative!important;top:auto!important;right:auto!important;left:auto!important;
+    z-index:9;display:flex!important;width:max-content!important;max-width:calc(100% - 24px)!important;
+    min-height:39px!important;margin:9px auto 2px!important;padding:8px 17px!important;
+    font-size:.83rem!important;line-height:1.2!important;border-width:1px!important;
+    border-radius:22px!important;box-shadow:0 4px 13px rgba(23,5,32,.25)!important;
+    white-space:normal!important;text-align:center!important;
+  }
+}
+@media(min-width:701px) and (max-width:1180px){
+  .hero .hero-publish-button{min-height:45px!important;font-size:.96rem!important;padding:10px 22px!important;margin:12px auto 4px!important}
+}
+
+
+
+/* Barre catégories centrée sur le viewport, indépendamment du logo et des actions. */
+@media (min-width:1250px){
+  header .nav{
+    position:relative!important;
+  }
+  header .desktop-category-nav{
+    position:fixed!important;
+    left:50vw!important;
+    top:20px!important;
+    transform:translateX(-50%)!important;
+    width:max-content!important;
+    max-width:calc(100vw - 560px)!important;
+    margin:0!important;
+    padding:0!important;
+    justify-content:center!important;
+    gap:6px!important;
+    overflow:visible!important;
+    z-index:120!important;
+  }
+}
+
+
+
+@media (min-width:1024px){
+  header .desktop-propro-nav-item{
+    display:flex!important;
+    align-items:center!important;
+    min-height:40px!important;
+  }
+  header .desktop-propro-nav-item #desktopProProBtn.desktop-propro-btn{
+    margin:0!important;
+    min-height:40px!important;
+    height:40px!important;
+    padding:0 16px!important;
+    border-radius:999px!important;
+  }
+}
