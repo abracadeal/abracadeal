@@ -122,6 +122,8 @@ function openModal(id){
   }
   el.classList.add('open');
   el.setAttribute('aria-hidden','false');
+  const modalBody=el.querySelector('.modal-body');
+  if(modalBody) modalBody.scrollTop=0;
   document.body.style.overflow='hidden';
 }
 function closeModal(id){
