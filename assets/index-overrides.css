@@ -1763,6 +1763,10 @@
 /* Alignement vertical Vacances desktop — 2026-10-01 */
 @media (min-width:1024px) and (pointer:fine){
   header .abraca-desktop-actions-v2 .abraca-dnav-vacances{
-    top:-4px!important;
+    top:auto!important;
+    transform:translateY(-7px)!important;
+  }
+  header .abraca-desktop-actions-v2 .abraca-dnav-vacances:hover{
+    transform:translateY(-8px)!important;
   }
 }
