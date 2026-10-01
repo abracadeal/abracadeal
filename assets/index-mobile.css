@@ -1,0 +1,803 @@
+
+/* Bloc fusionne le 20/09/2026 (nettoyage) - regroupe 5 blocs precedemment separes, ordre et contenu inchanges : abraca-home-mobile-cards-compact-20260919, abraca-sticky-search-20260919, abraca-catalog-mobile-cards-compact-20260919, abraca-mobile-footer-links-account-20260919, abraca-desktop-redesign-20260919 */
+
+/* Accueil mobile : cartes compactes, 2 visibles + amorce de la 3e */
+@media(max-width:760px){
+  #homeFeaturedSection .home-featured-grid,
+  #recentSearchSection .personalized-grid,
+  #recentViewedSection .personalized-grid,
+  #nearbySection .personalized-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    gap:10px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 10px!important;
+    scroll-snap-type:x proximity!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+  }
+
+  #homeFeaturedSection .home-featured-grid::-webkit-scrollbar,
+  #recentSearchSection .personalized-grid::-webkit-scrollbar,
+  #recentViewedSection .personalized-grid::-webkit-scrollbar,
+  #nearbySection .personalized-grid::-webkit-scrollbar{
+    display:none!important;
+  }
+
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    flex:0 0 clamp(138px,42vw,180px)!important;
+    width:clamp(138px,42vw,180px)!important;
+    min-width:clamp(138px,42vw,180px)!important;
+    max-width:clamp(138px,42vw,180px)!important;
+    scroll-snap-align:start!important;
+    border-radius:15px!important;
+  }
+
+  #homeFeaturedSection .home-featured-photo,
+  #recentSearchSection .personalized-photo,
+  #recentViewedSection .personalized-photo,
+  #nearbySection .personalized-photo{
+    height:128px!important;
+    min-height:128px!important;
+    max-height:128px!important;
+  }
+
+  #homeFeaturedSection .home-featured-body,
+  #recentSearchSection .personalized-body,
+  #recentViewedSection .personalized-body,
+  #nearbySection .personalized-body{
+    padding:9px 10px 11px!important;
+  }
+
+  #homeFeaturedSection .home-featured-meta,
+  #recentSearchSection .personalized-meta,
+  #recentViewedSection .personalized-meta,
+  #nearbySection .personalized-meta{
+    font-size:10px!important;
+    line-height:1.25!important;
+    margin-bottom:4px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    font-size:13px!important;
+    line-height:1.22!important;
+    margin-bottom:5px!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+
+  #homeFeaturedSection .home-featured-price,
+  #recentSearchSection .personalized-price,
+  #recentViewedSection .personalized-price,
+  #nearbySection .personalized-price{
+    font-size:16px!important;
+    line-height:1.15!important;
+    margin-bottom:5px!important;
+  }
+
+  #homeFeaturedSection .home-featured-city{
+    font-size:11px!important;
+    line-height:1.25!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #homeFeaturedSection .card-action-btn,
+  #recentSearchSection .card-action-btn,
+  #recentViewedSection .card-action-btn,
+  #nearbySection .card-action-btn{
+    height:30px!important;
+    min-width:30px!important;
+    padding:0 7px!important;
+  }
+
+  #homeFeaturedSection .card-action-btn .share-node-icon,
+  #recentSearchSection .card-action-btn .share-node-icon,
+  #recentViewedSection .card-action-btn .share-node-icon,
+  #nearbySection .card-action-btn .share-node-icon{
+    width:15px!important;
+    height:15px!important;
+  }
+
+  #homeFeaturedSection .featured-badge{
+    top:7px!important;
+    left:7px!important;
+    padding:5px 7px!important;
+    font-size:9px!important;
+  }
+
+  #homeFeaturedSection .card-top-badges{
+    top:7px!important;
+    left:7px!important;
+    max-width:calc(100% - 75px)!important;
+  }
+
+  #homeFeaturedSection .pro-card-badge,
+  #homeFeaturedSection .loa-badge,
+  #recentSearchSection .pro-card-badge,
+  #recentSearchSection .loa-badge,
+  #recentViewedSection .pro-card-badge,
+  #recentViewedSection .loa-badge,
+  #nearbySection .pro-card-badge,
+  #nearbySection .loa-badge{
+    font-size:9px!important;
+    padding:4px 7px!important;
+  }
+
+  #homeFeaturedSection .home-featured-section,
+  #recentSearchSection.personalized-section,
+  #recentViewedSection.personalized-section,
+  #nearbySection.personalized-section{
+    padding-top:16px!important;
+  }
+}
+
+@media(max-width:390px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    flex-basis:clamp(136px,41.5vw,162px)!important;
+    width:clamp(136px,41.5vw,162px)!important;
+    min-width:clamp(136px,41.5vw,162px)!important;
+    max-width:clamp(136px,41.5vw,162px)!important;
+  }
+
+  #homeFeaturedSection .home-featured-photo,
+  #recentSearchSection .personalized-photo,
+  #recentViewedSection .personalized-photo,
+  #nearbySection .personalized-photo{
+    height:120px!important;
+    min-height:120px!important;
+    max-height:120px!important;
+  }
+}
+
+/* Barre de recherche flottante : reste visible en haut pendant le scroll */
+@media(max-width:760px){
+  .search-wrap.search-sticky-floating{
+    position:fixed!important;
+    top:8px!important;
+    left:10px!important;
+    right:10px!important;
+    bottom:auto!important;
+    width:auto!important;
+    max-width:none!important;
+    margin:0!important;
+    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par Anthony : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
+    transform:translateZ(0)!important;
+    z-index:10080!important;
+  }
+  .search-wrap.search-sticky-floating .search-card{
+    margin:0!important;
+    padding:7px!important;
+    border-radius:16px!important;
+    background:rgba(255,255,255,.97)!important;
+    border:1px solid rgba(255,255,255,.9)!important;
+    box-shadow:0 10px 30px rgba(15,5,24,.32)!important;
+    /* Fix 22/09/2026 (v2) : le fix precedent (transform:translateZ(0)) avait ete pose sur
+       .search-wrap (le parent position:fixed) mais backdrop-filter est ici, sur .search-card
+       (l'enfant). Sur Safari iOS, c'est l'element qui porte backdrop-filter lui-meme qui doit
+       avoir son propre calque GPU dedie pour ne pas le perdre pendant un scroll (signale par
+       Anthony : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
+       temps la barre disparait"). Meme traitement que .mobile-bottom-nav, ou transform et
+       backdrop-filter sont deja sur le meme element. */
+    transform:translateZ(0)!important;
+    -webkit-transform:translateZ(0)!important;
+    -webkit-backdrop-filter:blur(14px)!important;
+    backdrop-filter:blur(14px)!important;
+  }
+  .search-wrap.search-sticky-floating .field{
+    height:46px!important;
+    min-height:46px!important;
+    font-size:16px!important;
+    border-radius:12px!important;
+  }
+  .search-wrap.search-sticky-floating .search-btn{
+    height:46px!important;
+    min-height:46px!important;
+    border-radius:12px!important;
+  }
+  .sticky-search-placeholder{
+    width:100%!important;
+    pointer-events:none!important;
+    visibility:hidden!important;
+  }
+}
+
+/* Fix 20/09/2026 : meme barre de recherche flottante, mais pour desktop/tablette (>760px) -
+   demande d'Anthony ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
+   top/left/width sont calcules et poses en inline par le script abraca-sticky-search-script
+   (pas de valeurs figees ici) pour rester juste sous le header sticky et parfaitement centree,
+   quelle que soit la largeur d'ecran. */
+@media(min-width:761px){
+  .search-wrap.search-sticky-floating{
+    position:fixed!important;
+    z-index:10040!important;
+    margin:0!important;
+    bottom:auto!important;
+  }
+  .search-wrap.search-sticky-floating .search-card{
+    box-shadow:0 14px 34px rgba(15,5,24,.22)!important;
+    border-radius:16px!important;
+    background:#fff!important;
+  }
+}
+
+/* Résultats mobile : vraies cartes compactes, 2 visibles + début de la 3e */
+@media(max-width:760px){
+  #resultats .ads-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:flex-start!important;
+    gap:10px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 12px!important;
+    scroll-snap-type:x proximity!important;
+    -webkit-overflow-scrolling:touch!important;
+    scrollbar-width:none!important;
+  }
+  #resultats .ads-grid::-webkit-scrollbar{display:none!important}
+
+  #resultats .ad-card{
+    flex:0 0 clamp(150px,42vw,184px)!important;
+    width:clamp(150px,42vw,184px)!important;
+    min-width:clamp(150px,42vw,184px)!important;
+    max-width:clamp(150px,42vw,184px)!important;
+    height:auto!important;
+    min-height:0!important;
+    align-self:flex-start!important;
+    scroll-snap-align:start!important;
+    border-radius:15px!important;
+  }
+
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
+  }
+
+  #resultats .ad-body{
+    padding:8px 9px 9px!important;
+  }
+
+  #resultats .ad-meta{
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    margin-bottom:3px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #resultats .ad-title{
+    font-size:12px!important;
+    line-height:1.2!important;
+    min-height:29px!important;
+    margin:0 0 4px!important;
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+  }
+
+  #resultats .ad-price{
+    font-size:15px!important;
+    line-height:1.1!important;
+    margin-bottom:4px!important;
+  }
+
+  #resultats .immo-card-charges,
+  #resultats .immo-card-unit-price{
+    font-size:9px!important;
+    line-height:1.15!important;
+    margin:-1px 0 4px!important;
+  }
+
+  #resultats .immo-card-location-extra{
+    display:none!important;
+  }
+
+  #resultats .ad-specs{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:2px 5px!important;
+    margin:0 0 5px!important;
+    font-size:9px!important;
+    line-height:1.15!important;
+  }
+
+  #resultats .ad-spec{
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #resultats .ad-city{
+    font-size:9.5px!important;
+    line-height:1.2!important;
+    margin-top:3px!important;
+    white-space:nowrap!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+  }
+
+  #resultats .immo-card-dpe{
+    min-width:0!important;
+    width:max-content!important;
+    max-width:100%!important;
+    height:20px!important;
+    padding:0 7px!important;
+    font-size:9px!important;
+    border-radius:999px!important;
+  }
+
+  #resultats .card-photo-actions{
+    top:6px!important;
+    right:6px!important;
+    gap:4px!important;
+  }
+
+  #resultats .card-action-btn{
+    height:28px!important;
+    min-width:28px!important;
+    padding:0 6px!important;
+    font-size:10px!important;
+  }
+
+  #resultats .card-action-btn .share-node-icon{
+    width:14px!important;
+    height:14px!important;
+  }
+
+  #resultats .featured-badge{
+    top:6px!important;
+    left:6px!important;
+    padding:4px 6px!important;
+    font-size:8px!important;
+  }
+
+  #resultats .card-top-badges{
+    top:6px!important;
+    left:6px!important;
+    max-width:calc(100% - 66px)!important;
+  }
+
+  #resultats .pro-card-badge,
+  #resultats .loa-badge{
+    font-size:8px!important;
+    padding:3px 6px!important;
+  }
+
+  #resultats .ad-actions{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:center!important;
+    gap:4px!important;
+    margin-top:7px!important;
+    overflow:hidden!important;
+  }
+
+  #resultats .ad-actions .mini-btn{
+    flex:0 1 auto!important;
+    min-width:0!important;
+    min-height:28px!important;
+    height:28px!important;
+    padding:0 5px!important;
+    border-radius:8px!important;
+    font-size:8.5px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+
+  #resultats .ad-actions .boost-btn{
+    box-shadow:none!important;
+  }
+
+  #resultats .ad-actions .mini-btn.danger:last-child:nth-child(odd){
+    grid-column:auto!important;
+    width:auto!important;
+    max-width:none!important;
+  }
+}
+
+@media(max-width:390px){
+  #resultats .ad-card{
+    flex-basis:clamp(145px,41.5vw,162px)!important;
+    width:clamp(145px,41.5vw,162px)!important;
+    min-width:clamp(145px,41.5vw,162px)!important;
+    max-width:clamp(145px,41.5vw,162px)!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:104px!important;
+    min-height:104px!important;
+    max-height:104px!important;
+  }
+  #resultats .ad-actions .mini-btn{
+    padding:0 4px!important;
+    font-size:8px!important;
+  }
+}
+
+/* Aide / légal déplacés dans Compte sur mobile */
+.account-info-links{
+  margin-top:18px;
+  padding-top:16px;
+  border-top:1px solid #eee4f1;
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.account-info-links a{
+  min-height:42px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:8px 10px;
+  border:1px solid #e5d8ea;
+  border-radius:12px;
+  background:#faf6fc;
+  color:#5b2a70;
+  font-size:.84rem;
+  font-weight:800;
+  text-align:center;
+}
+.account-info-links a:last-child:nth-child(odd){
+  grid-column:1/-1;
+}
+@media(max-width:760px){
+  footer{
+    padding-top:18px!important;
+    padding-bottom:calc(104px + env(safe-area-inset-bottom))!important;
+  }
+  footer .footer-row{
+    justify-content:center!important;
+    text-align:center!important;
+  }
+  footer .footer-links{
+    display:none!important;
+  }
+  .account-info-links{
+    margin-top:16px;
+    padding-top:14px;
+  }
+}
+
+
+/* ===== ABRACADEAL — MAQUETTE DESKTOP PC / MAC ===== */
+.desktop-brand,.desktop-category-nav,.desktop-featured-all,.desktop-favorites-btn,
+.desktop-trust-strip,.desktop-footer-brand{display:none}
+#searchCity.desktop-search-city{display:none!important}
+
+@media (min-width:761px){
+  :root{
+    --d-bg:#0b0714;
+    --d-bg2:#12081d;
+    --d-panel:#1a0d27;
+    --d-panel2:#241033;
+    --d-border:rgba(255,255,255,.10);
+    --d-text:#fff;
+    --d-soft:#bfaec9;
+    --d-pink:#f13aad;
+    --d-purple:#8b2eb7;
+  }
+
+  html{background:var(--d-bg)!important}
+  body{
+    background:
+      radial-gradient(75% 30% at 50% 0%,rgba(115,35,150,.20),transparent 72%),
+      linear-gradient(180deg,var(--d-bg) 0%,#10081b 58%,#0a0612 100%)!important;
+    color:var(--d-text)!important;
+    overflow-x:hidden!important;
+  }
+  .container{width:min(1460px,calc(100% - 60px))!important;max-width:1460px!important}
+
+  /* HEADER — comme la maquette */
+  header{
+    position:sticky!important;
+    top:0!important;
+    z-index:10050!important;
+    min-height:70px!important;
+    background:rgba(9,5,16,.96)!important;
+    border-bottom:1px solid rgba(255,255,255,.075)!important;
+    box-shadow:0 8px 28px rgba(0,0,0,.20)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+  }
+  header .nav{
+    min-height:70px!important;
+    display:grid!important;
+    grid-template-columns:245px minmax(0,1fr) auto!important;
+    align-items:center!important;
+    gap:15px!important;
+    padding:7px 0!important;
+  }
+  .desktop-brand{
+    display:flex!important;
+    align-items:center!important;
+    gap:10px!important;
+    min-width:0!important;
+  }
+  .desktop-brand-lamp{
+    width:58px!important;height:50px!important;flex:0 0 58px!important;
+    display:block!important;overflow:hidden!important;border-radius:12px!important;
+    background:#210d32!important;box-shadow:0 6px 18px rgba(0,0,0,.24)!important;
+  }
+  .desktop-brand-lamp img{
+    width:58px!important;height:50px!important;object-fit:cover!important;display:block!important;
+  }
+  .desktop-brand-copy{display:flex!important;flex-direction:column!important;line-height:1!important}
+  .desktop-brand-copy strong{
+    font:700 25px/1 Fraunces,serif!important;letter-spacing:-.025em!important;color:#fff!important;
+  }
+  .desktop-brand-copy small{
+    margin-top:4px!important;font-size:9px!important;font-weight:700!important;color:#bdadc7!important;
+    white-space:nowrap!important;
+  }
+
+  .desktop-category-nav{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    min-width:0!important;gap:3px!important;overflow:hidden!important;
+  }
+  .desktop-category-link{
+    min-height:40px!important;padding:0 8px!important;display:inline-flex!important;align-items:center!important;
+    gap:5px!important;border-radius:10px!important;color:#f1eaf5!important;
+    font-size:13px!important;font-weight:800!important;white-space:nowrap!important;
+    transition:.16s ease!important;
+  }
+  .desktop-category-link:hover{background:rgba(255,255,255,.075)!important;transform:translateY(-1px)!important}
+
+  header .nav-actions{
+    display:flex!important;align-items:center!important;justify-content:flex-end!important;
+    flex-wrap:nowrap!important;gap:6px!important;min-width:0!important;
+  }
+  header #signupBtn{display:none!important}
+  .desktop-favorites-btn{
+    display:flex!important;align-items:center!important;justify-content:center!important;
+    width:40px!important;height:40px!important;flex:0 0 40px!important;border-radius:12px!important;
+    color:#fff!important;font-size:30px!important;line-height:1!important;background:transparent!important;
+    border:0!important;box-shadow:none!important;
+  }
+  .desktop-favorites-btn:hover{background:rgba(255,255,255,.07)!important;transform:none!important}
+  header #accountBtn{
+    min-width:102px!important;max-width:150px!important;height:40px!important;min-height:40px!important;
+    padding:0 15px!important;border-radius:13px!important;background:#1c1029!important;
+    border:1px solid rgba(255,255,255,.09)!important;color:#fff!important;
+    box-shadow:none!important;font-size:12px!important;font-weight:800!important;
+  }
+  header .publish-trigger{
+    min-width:158px!important;height:40px!important;min-height:40px!important;padding:0 17px!important;
+    border-radius:12px!important;background:linear-gradient(135deg,#9a29c7,#e32dac 58%,#ff49b7)!important;
+    color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;
+    box-shadow:0 8px 20px rgba(223,45,172,.29)!important;font-size:12px!important;
+  }
+  header #b2bNavBtn,header #headerStockBtn,header #moderationBtn,header #flowErrorsBtn,
+  header #headerMessagesBtn,header #headerLogoutBtn{
+    min-height:32px!important;height:32px!important;min-width:0!important;padding:0 8px!important;
+    border-radius:9px!important;font-size:10px!important;box-shadow:none!important;
+  }
+
+  /* ORDRE DES BLOCS */
+  main#top{display:flex!important;flex-direction:column!important;width:100%!important;background:transparent!important}
+  main#top>.hero-shell{order:1}
+  main#top>#homeFeaturedSection{order:2}
+  main#top>#b2bDiscovery{order:3}
+  main#top>#desktopTrustStrip{order:4}
+  main#top>#resultats{order:5}
+  main#top>#recentSearchSection{order:6}
+  main#top>#recentViewedSection{order:7}
+  main#top>#nearbySection{order:8}
+  main#top>#pros,main#top>#vacancesDiscovery,main#top>#annonces,main#top>.trust{display:none!important}
+
+  /* HERO — visuel directement issu de la maquette validée */
+  .hero-shell{
+    position:relative!important;background:#11091b!important;overflow:visible!important;
+    border:0!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero.container{
+    width:100%!important;max-width:none!important;height:326px!important;
+    padding:0 0 68px!important;position:relative!important;
+  }
+  .banner-frame{
+    position:relative!important;width:100%!important;height:326px!important;max-height:326px!important;
+    margin:0!important;border-radius:0!important;overflow:hidden!important;
+    background-image:none!important;
+    background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;
+    box-shadow:none!important;
+  }
+  .banner-frame::before{
+    content:""!important;position:absolute!important;inset:0!important;z-index:2!important;pointer-events:none!important;
+    background:linear-gradient(180deg,rgba(6,2,12,.02) 0%,rgba(8,4,14,.05) 67%,rgba(10,5,18,.16) 100%)!important;
+  }
+  .banner-frame::after{display:none!important}
+  #homeBrandLink{position:absolute!important;inset:0!important;z-index:1!important}
+  .banner-desktop,.mobile-banner-img,.banner-hotspots{display:none!important}
+
+  .search-wrap{
+    position:absolute!important;left:50%!important;bottom:20px!important;right:auto!important;
+    width:min(1080px,calc(100% - 120px))!important;transform:translateX(-50%)!important;z-index:12!important;
+  }
+  .search-card{
+    display:grid!important;grid-template-columns:minmax(0,1.45fr) minmax(280px,.8fr) 160px!important;
+    gap:0!important;align-items:center!important;padding:0!important;overflow:hidden!important;
+    background:#fff!important;border:1px solid rgba(255,255,255,.96)!important;border-radius:16px!important;
+    box-shadow:0 14px 38px rgba(0,0,0,.28)!important;
+  }
+  .search-card .field{
+    display:block!important;height:54px!important;min-height:54px!important;border-radius:0!important;
+    border:0!important;border-right:1px solid #ece5f0!important;background:#fff!important;
+    color:#25172d!important;font-size:14px!important;padding:0 18px!important;box-shadow:none!important;
+  }
+  #searchCity.desktop-search-city{
+    display:block!important;
+    padding-left:42px!important;
+    background-image:radial-gradient(circle at 21px 27px,#6c2d88 0 4px,transparent 5px)!important;
+    background-repeat:no-repeat!important;
+  }
+  #searchBtn{
+    width:160px!important;min-width:160px!important;height:54px!important;min-height:54px!important;
+    border-radius:0!important;border:0!important;padding:0 18px!important;color:#fff!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    box-shadow:none!important;font-size:14px!important;font-weight:900!important;
+  }
+
+  /* À LA UNE */
+  .home-featured-section{padding:26px 0 12px!important;background:transparent!important}
+  .home-featured-head{display:flex!important;align-items:flex-end!important;justify-content:space-between!important;margin-bottom:12px!important}
+  .home-featured-head h2{
+    margin:0!important;font-size:0!important;color:#fff!important;font-family:Fraunces,serif!important;
+  }
+  .home-featured-head h2::before{
+    content:"Annonces à la une";font:700 27px/1 Fraunces,serif;color:#fff;
+  }
+  .home-featured-head h2::after{
+    content:"";display:block;width:48px;height:4px;border-radius:99px;margin-top:7px;
+    background:linear-gradient(90deg,#ea3eb1,#a63ad2);
+  }
+  .home-featured-head p{display:none!important}
+  .desktop-featured-all{
+    display:inline-flex!important;color:#e5d8ec!important;font-size:12px!important;font-weight:750!important;padding-bottom:2px!important;
+  }
+  .desktop-featured-all:hover{color:#ff5fbd!important}
+
+  .home-featured-grid,.personalized-grid{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;
+    overflow:visible!important;padding:0!important;
+  }
+  .home-featured-card,.personalized-card{
+    width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;
+    border-radius:14px!important;overflow:hidden!important;background:linear-gradient(180deg,#1f102d,#160b22)!important;
+    border:1px solid rgba(255,255,255,.10)!important;box-shadow:0 8px 20px rgba(0,0,0,.19)!important;color:#fff!important;
+  }
+  .home-featured-card:hover,.personalized-card:hover{transform:translateY(-3px)!important;border-color:rgba(241,58,173,.34)!important}
+  .home-featured-photo,.personalized-photo{
+    height:128px!important;min-height:128px!important;max-height:128px!important;background:#251337!important;
+  }
+  .home-featured-body,.personalized-body{padding:9px 10px 11px!important}
+  .home-featured-meta,.personalized-meta{font-size:9.5px!important;color:#b8a8c2!important;margin-bottom:4px!important}
+  .home-featured-title,.personalized-title{
+    margin:0 0 4px!important;font-size:13px!important;line-height:1.18!important;color:#fff!important;min-height:0!important;
+  }
+  .home-featured-price,.personalized-price{
+    color:#ff54b7!important;font-size:17px!important;line-height:1.1!important;font-weight:950!important;margin-bottom:5px!important;
+  }
+  .home-featured-city,.personalized-city{font-size:10px!important;color:#c7b8d0!important}
+  .home-featured-card .favorite-btn,.personalized-card .favorite-btn{
+    width:29px!important;height:29px!important;top:7px!important;right:7px!important;background:rgba(22,9,34,.72)!important;
+    color:#fff!important;border:1px solid rgba(255,255,255,.18)!important;
+  }
+
+  /* PRO/PRO — bannière maquette (image complète, bords nets) */
+  #b2bDiscovery{
+    position:relative!important;width:min(1460px,calc(100% - 60px))!important;max-width:1460px!important;
+    aspect-ratio:1900/323!important;min-height:0!important;height:auto!important;margin:14px auto 0!important;padding:0!important;overflow:hidden!important;
+    display:block!important;
+    border:1px solid rgba(235,56,183,.42)!important;border-radius:19px!important;color:#fff!important;
+    background:url('assets/b2b-discovery-banner.webp') center/cover no-repeat!important;
+    box-shadow:0 12px 28px rgba(0,0,0,.20)!important;
+  }
+  #b2bDiscovery::after{content:none!important}
+  #b2bDiscovery>.b2b-discovery-badges{display:none!important}
+  #b2bDiscovery>div{
+    position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;
+    overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+  }
+  #b2bDiscoveryLink{
+    position:absolute!important;z-index:3!important;inset:0!important;left:0!important;top:0!important;
+    width:100%!important;height:100%!important;transform:none!important;
+    min-height:0!important;margin:0!important;padding:0!important;border-radius:19px!important;
+    background:transparent!important;border:none!important;box-shadow:none!important;
+    color:transparent!important;font-size:0!important;line-height:0!important;
+  }
+  #b2bDiscoveryLink:hover{transform:none!important;background:rgba(255,255,255,.05)!important}
+
+  /* Ligne de confiance */
+  .desktop-trust-strip{display:none!important}
+  .desktop-trust-grid{
+    display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:70px!important;
+  }
+  .desktop-trust-item{display:flex!important;align-items:center!important;gap:14px!important;min-width:0!important}
+  .desktop-trust-icon{
+    width:48px!important;height:48px!important;flex:0 0 48px!important;border-radius:50%!important;
+    display:grid!important;place-items:center!important;font-size:22px!important;color:#ff5dba!important;
+    background:radial-gradient(circle at 40% 35%,#5e176d,#250d35 72%)!important;border:1px solid rgba(255,255,255,.06)!important;
+  }
+  .desktop-trust-item strong{display:block!important;color:#fff!important;font-size:13px!important;margin-bottom:4px!important}
+  .desktop-trust-item small{display:block!important;color:#b7a8c0!important;font-size:11px!important;line-height:1.35!important}
+
+  /* Résultats : même langage visuel, mais en dessous de la maquette d'accueil */
+  .listing-section{padding:26px 0 40px!important;background:transparent!important}
+  .listing-head h2{color:#fff!important;font:700 27px/1 Fraunces,serif!important}
+  .listing-head p{color:#b6a7c0!important;font-size:12px!important}
+  #resultats .ads-grid{
+    display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:12px!important;overflow:visible!important;
+  }
+  #resultats .ad-card{
+    width:auto!important;min-width:0!important;max-width:none!important;height:auto!important;align-self:start!important;
+    background:linear-gradient(180deg,#1f102d,#160b22)!important;border:1px solid rgba(255,255,255,.10)!important;
+    border-radius:14px!important;color:#fff!important;box-shadow:0 8px 20px rgba(0,0,0,.18)!important;
+  }
+  #resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{height:128px!important;min-height:128px!important;max-height:128px!important;background:#251337!important}
+  #resultats .ad-body{padding:9px 10px 11px!important}
+  #resultats .ad-meta{font-size:9.5px!important;color:#b8a8c2!important;margin-bottom:4px!important}
+  #resultats .ad-title{font-size:13px!important;line-height:1.18!important;color:#fff!important;min-height:0!important;margin-bottom:4px!important}
+  #resultats .ad-price{font-size:17px!important;line-height:1.1!important;color:#ff54b7!important;margin-bottom:5px!important}
+  #resultats .ad-city,#resultats .ad-specs{color:#c7b8d0!important;font-size:10px!important}
+  #resultats .immo-card-location-extra,#resultats .immo-card-unit-price,#resultats .immo-card-charges{color:#9f90a9!important;font-size:9.5px!important}
+  .results-tools{display:grid!important;grid-template-columns:170px 215px!important;gap:9px!important;margin-bottom:13px!important}
+  .filters-toggle,.sort-select,.filter-chip{
+    min-height:40px!important;border-radius:11px!important;background:#1d0f2b!important;color:#f4edf8!important;
+    border:1px solid rgba(255,255,255,.10)!important;box-shadow:none!important;
+  }
+  .filters-panel{background:#fbf7fd!important;color:#2d1738!important;border-radius:16px!important}
+
+  .personalized-section{padding:18px 0 6px!important;background:transparent!important}
+  .personalized-head h2{color:#fff!important;font:700 25px/1 Fraunces,serif!important}
+  .personalized-head p{color:#b5a6bf!important}
+
+  /* FOOTER */
+  footer{
+    margin-top:18px!important;padding:22px 0 24px!important;background:#0a0611!important;
+    color:#bbaac5!important;border-top:1px solid rgba(255,255,255,.08)!important;
+  }
+  footer .footer-row{
+    display:grid!important;grid-template-columns:1fr auto 1fr!important;
+    align-items:center!important;gap:22px!important;
+  }
+  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande Anthony) ; grille
+     repassee en 1fr/auto/1fr (colonne 1 vide en miroir) pour que les liens restent
+     parfaitement centres sur la largeur du footer plutot que decales par l'ancienne
+     colonne fixe de 280px du logo. */
+  .desktop-footer-brand{display:none!important}
+  footer .footer-links{display:flex!important;justify-content:center!important;gap:22px!important;font-size:11px!important;grid-column:2!important}
+  footer .footer-links a{color:#dfd3e5!important}
+  footer .footer-links a:hover{color:#ff58b7!important}
+  .footer-copyright{order:3!important;color:#aa9ab4!important;font-size:10px!important;white-space:nowrap!important;grid-column:3!important;justify-self:end!important}
+  #accountModal .account-info-links{display:none!important}
+}
+
+@media (min-width:1600px){
+  header .nav{grid-template-columns:260px minmax(0,1fr) auto!important;gap:20px!important}
+  .desktop-category-link{padding:0 11px!important;font-size:13.5px!important}
+  .hero.container,.banner-frame{height:346px!important;max-height:346px!important}
+  .search-wrap{bottom:20px!important}
+  .home-featured-photo,.personalized-photo,#resultats .ad-photo,#resultats .ad-card.immo-card .ad-photo{
+    height:140px!important;min-height:140px!important;max-height:140px!important;
+  }
+}
+
