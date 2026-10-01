@@ -7810,6 +7810,63 @@ header #flowErrorsBtn{
   }
 }
 </style>
+<style id="abraca-desktop-single-row-20261001">
+@media (min-width:1024px){
+  header .nav{
+    display:grid!important;
+    grid-template-columns:220px minmax(0,1fr) auto!important;
+    grid-template-areas:"brand cats actions"!important;
+    align-items:center!important;
+    column-gap:12px!important;
+    row-gap:0!important;
+    min-height:70px!important;
+    padding:6px 0!important;
+  }
+  header .desktop-brand-zone{
+    grid-area:brand!important;
+    min-width:0!important;
+  }
+  header .desktop-category-nav{
+    grid-area:cats!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:center!important;
+    gap:6px!important;
+    min-width:0!important;
+    width:100%!important;
+    min-height:0!important;
+    padding:0!important;
+    margin:0!important;
+    transform:none!important;
+    overflow:visible!important;
+    position:relative!important;
+    z-index:120!important;
+  }
+  header .desktop-nav-item{
+    min-width:0!important;
+    flex:0 1 auto!important;
+  }
+  header .desktop-category-link{
+    min-height:36px!important;
+    height:36px!important;
+    padding:0 10px!important;
+    font-size:12px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+    border-radius:999px!important;
+  }
+  header .nav-actions{
+    grid-area:actions!important;
+    display:flex!important;
+    align-items:center!important;
+    justify-content:flex-end!important;
+    gap:4px!important;
+    min-width:max-content!important;
+    position:relative!important;
+    z-index:220!important;
+  }
+}
+</style>
 
 <style id="abraca-desktop-header-click-targets-20260922">
 /* Les zones transparentes du menu categories chevauchaient les actions en haut.
