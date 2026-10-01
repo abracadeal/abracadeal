@@ -8085,10 +8085,20 @@ header #flowErrorsBtn{
 }
 </style>
 
-<style id="abraca-desktop-propro-offset-20261001">
+
+<style id="abraca-propro-in-category-row-20261001">
 @media (min-width:1024px){
-  header #desktopProProBtn.desktop-propro-btn{
-    margin-left:18px!important;
+  header .desktop-propro-nav-item{
+    display:flex!important;
+    align-items:center!important;
+    min-height:40px!important;
+  }
+  header .desktop-propro-nav-item #desktopProProBtn.desktop-propro-btn{
+    margin:0!important;
+    min-height:40px!important;
+    height:40px!important;
+    padding:0 16px!important;
+    border-radius:999px!important;
   }
 }
 </style>
@@ -8110,11 +8120,13 @@ header #flowErrorsBtn{
         <span class="desktop-brand-lamp" aria-hidden="true"><img src="assets/abracadeal-lamp-icon.webp" alt=""></span>
         <span class="desktop-brand-copy"><strong>Abracadeal</strong><small>Achetez - Vendez</small></span>
       </a>
-      <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
-        <span class="desktop-propro-label">Pro/Pro</span>
-      </a>
     </div>
     <nav class="desktop-category-nav" aria-label="Catégories principales">
+      <div class="desktop-nav-item desktop-propro-nav-item">
+        <a class="btn desktop-propro-btn hidden" id="desktopProProBtn" href="pro-pro.html" aria-label="Accéder à Pro/Pro">
+          <span class="desktop-propro-label">Pro/Pro</span>
+        </a>
+      </div>
       <div class="desktop-nav-item">
         <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="voitures">Auto</a>
         <div class="desktop-submenu" aria-label="Sous-catégories Auto">
