@@ -1760,13 +1760,45 @@
 }
 
 
-/* Alignement vertical Vacances desktop — 2026-10-01 */
+
+
+/* Alignement structurel navigation rapide desktop — 2026-10-01 */
 @media (min-width:1024px) and (pointer:fine){
-  header .abraca-desktop-actions-v2 .abraca-dnav-vacances{
-    top:auto!important;
-    transform:translateY(-1px)!important;
+  header .abraca-desktop-actions-v2{
+    align-items:center!important;
   }
-  header .abraca-desktop-actions-v2 .abraca-dnav-vacances:hover{
-    transform:translateY(-2px)!important;
+  header .abraca-desktop-actions-v2 .abraca-dnav-item{
+    height:58px!important;
+    min-height:58px!important;
+    padding:5px 10px!important;
+    display:grid!important;
+    grid-template-rows:28px 16px!important;
+    align-content:center!important;
+    justify-items:center!important;
+    row-gap:2px!important;
+    transform:none!important;
+    top:auto!important;
+  }
+  header .abraca-desktop-actions-v2 .abraca-dnav-item:hover{
+    transform:none!important;
+  }
+  header .abraca-desktop-actions-v2 .abraca-dnav-item svg{
+    width:26px!important;
+    height:26px!important;
+    align-self:center!important;
+    justify-self:center!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  header .abraca-desktop-actions-v2 .abraca-dnav-item > span{
+    display:block!important;
+    height:16px!important;
+    line-height:16px!important;
+    margin:0!important;
+    padding:0!important;
+    align-self:center!important;
+  }
+  header .abraca-desktop-actions-v2 .abraca-dnav-vacances::after{
+    bottom:1px!important;
   }
 }
