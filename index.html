@@ -8061,6 +8061,29 @@ header #flowErrorsBtn{
   .hero .hero-publish-button{min-height:45px!important;font-size:.96rem!important;padding:10px 22px!important;margin:12px auto 4px!important}
 }
 </style>
+
+<style id="abraca-desktop-category-true-center-20261001">
+/* Centre visuellement la barre catégories sur le desktop, sans toucher au mobile. */
+@media (min-width:1250px){
+  header .nav{
+    position:relative!important;
+  }
+  header .desktop-category-nav{
+    position:absolute!important;
+    left:50%!important;
+    top:50%!important;
+    transform:translate(-50%,-50%)!important;
+    width:max-content!important;
+    max-width:calc(100% - 610px)!important;
+    margin:0!important;
+    padding:0!important;
+    justify-content:center!important;
+    gap:6px!important;
+    overflow:visible!important;
+    z-index:120!important;
+  }
+}
+</style>
 </head>
 <body>
 
