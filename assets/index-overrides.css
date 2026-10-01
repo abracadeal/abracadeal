@@ -1764,9 +1764,9 @@
 @media (min-width:1024px) and (pointer:fine){
   header .abraca-desktop-actions-v2 .abraca-dnav-vacances{
     top:auto!important;
-    transform:translateY(-7px)!important;
+    transform:translateY(-3px)!important;
   }
   header .abraca-desktop-actions-v2 .abraca-dnav-vacances:hover{
-    transform:translateY(-8px)!important;
+    transform:translateY(-4px)!important;
   }
 }
