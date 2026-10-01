@@ -1,0 +1,1258 @@
+
+/* Bloc fusionne le 20/09/2026 (nettoyage) - regroupe 8 blocs precedemment separes, ordre et contenu inchanges : abraca-gold-featured-uniform-cards-20260919, abraca-featured-strong-shine-fix-20260919, abraca-featured-safari-shine-20260919, abraca-desktop-publish-compact-20260919, abraca-header-brand-gold-shine-20260919, abraca-responsive-current-design-20260919, abraca-mobile-banner-and-cards-final-20260919, abraca-mobile-search-and-equal-cards-20260919 */
+
+/* À LA UNE premium or brillant */
+.featured-badge{
+  position:absolute!important;
+  overflow:hidden!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  gap:5px!important;
+  color:#4a3100!important;
+  background:linear-gradient(135deg,#fff8ce 0%,#f8dc79 20%,#d7ae31 43%,#fff0a3 62%,#b77c08 100%)!important;
+  border:1px solid rgba(255,228,135,.88)!important;
+  box-shadow:
+    0 4px 14px rgba(206,153,21,.34),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -2px 4px rgba(119,75,0,.18)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.55)!important;
+  letter-spacing:.045em!important;
+}
+.featured-badge::after{
+  content:""!important;
+  position:absolute!important;
+  top:-35%!important;
+  left:-65%!important;
+  width:42%!important;
+  height:170%!important;
+  background:linear-gradient(105deg,transparent 0%,rgba(255,255,255,.06) 28%,rgba(255,255,255,.95) 50%,rgba(255,255,255,.08) 72%,transparent 100%)!important;
+  transform:skewX(-20deg)!important;
+  animation:abracaGoldShine 3.4s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+@keyframes abracaGoldShine{
+  0%,18%{left:-65%}
+  55%,100%{left:135%}
+}
+
+/* Cartes catalogue : dimensions et alignements réguliers */
+#resultats .ads-grid{
+  align-items:stretch!important;
+}
+#resultats .ad-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:420px!important;
+  min-height:420px!important;
+  max-height:420px!important;
+}
+/* Fix 20/09/2026 : hauteur fixe des cartes remontee de 400 a 420px (desktop) car en vue Admin la 3e action (Modifier + Booster + Supprimer) faisait deborder le bloc .ad-body en overflow:hidden, ce qui rongeait le bas du bouton "Supprimer" */
+#resultats .ad-photo,
+#resultats .ad-card.immo-card .ad-photo{
+  flex:0 0 158px!important;
+  height:158px!important;
+  min-height:158px!important;
+  max-height:158px!important;
+}
+#resultats .ad-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+#resultats .ad-title{
+  min-height:2.4em!important;
+  max-height:2.4em!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+#resultats .ad-city{
+  margin-top:auto!important;
+}
+#resultats .ad-actions{
+  flex:0 0 auto!important;
+}
+
+/* Les autres rangées d'annonces gardent également des cartes régulières */
+.home-featured-grid,
+.personalized-grid{
+  align-items:stretch!important;
+}
+/* Fix 21/09/2026 : les cartes "A LA UNE" (home-featured-card) avaient une hauteur/photo plus
+   petites que les cartes normales des resultats (300px vs 420px, photo 150px vs 158px), ce qui
+   les faisait paraitre plus petites au milieu des autres annonces (signale par Anthony :
+   "mets les annonces a la une de la meme taille que les annonces normales"). Separee de
+   .personalized-card (qui garde sa taille propre, utilisee ailleurs : recherches recentes,
+   consultees, a proximite) et alignee sur #resultats .ad-card. */
+.personalized-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:300px!important;
+  min-height:300px!important;
+  max-height:300px!important;
+}
+.home-featured-card{
+  display:flex!important;
+  flex-direction:column!important;
+  height:420px!important;
+  min-height:420px!important;
+  max-height:420px!important;
+}
+.home-featured-photo{
+  height:158px!important;
+  min-height:158px!important;
+  max-height:158px!important;
+}
+/* Fix 21/09/2026 (v2) : la carte "A LA UNE" affiche desormais les memes infos completes que
+   les annonces normales (specs, DPE, prix au m2/loyer+charges, quartier) - certains de ces
+   textes secondaires sont trop sombres sur le fond fonce de la carte a la une (prevus a
+   l'origine pour un fond blanc), on les eclaircit ici pour rester lisibles. */
+.home-featured-card .immo-card-unit-price,
+.home-featured-card .immo-card-charges,
+.home-featured-card .immo-card-price-suffix,
+.home-featured-card .immo-card-location-extra,
+.home-featured-card .ad-specs,
+.home-featured-card .ad-spec:not(.immo-card-dpe){
+  color:#c5b5cf!important;
+}
+/* Fix 21/09/2026 : le prix au m2/les charges (margin-top:-4px d'origine, pensee pour un texte
+   plus petit sur fond blanc) chevauchait presque le prix principal au-dessus, plus grand ici
+   (1.12rem contre les cartes normales) - signale par Anthony ("le prix au m2 est trop pres du
+   prix presque l'un sur l'autre"). Meme correctif que #resultats .ad-card.immo-card deja plus
+   bas dans le fichier, applique ici a .home-featured-card qui ne l'avait pas. */
+.home-featured-card .immo-card-unit-price,
+.home-featured-card .immo-card-charges{
+  margin-top:3px!important;
+  display:block!important;
+}
+.home-featured-body,
+.personalized-body{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+}
+.home-featured-title,
+.personalized-title{
+  min-height:2.45em!important;
+  max-height:2.45em!important;
+  display:-webkit-box!important;
+  -webkit-line-clamp:2!important;
+  -webkit-box-orient:vertical!important;
+  overflow:hidden!important;
+}
+.home-featured-city{
+  margin-top:auto!important;
+}
+
+/* Tablette */
+/* Mobile : mêmes dimensions dans le carrousel horizontal */
+@media (max-width:760px){
+  #resultats .ads-grid{
+    align-items:stretch!important;
+  }
+  #resultats .ad-card{
+    height:295px!important;
+    min-height:295px!important;
+    max-height:295px!important;
+    align-self:stretch!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    flex:0 0 112px!important;
+    height:112px!important;
+    min-height:112px!important;
+    max-height:112px!important;
+  }
+  #resultats .ad-body{
+    height:auto!important;
+  }
+  #resultats .ad-title{
+    min-height:29px!important;
+    max-height:29px!important;
+  }
+
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:260px!important;
+    min-height:260px!important;
+    max-height:260px!important;
+    align-self:stretch!important;
+  }
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    min-height:32px!important;
+    max-height:32px!important;
+  }
+}
+
+/* Très petits téléphones */
+@media (max-width:390px){
+  #resultats .ad-card{
+    height:282px!important;
+    min-height:282px!important;
+    max-height:282px!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    flex-basis:104px!important;
+    height:104px!important;
+    min-height:104px!important;
+    max-height:104px!important;
+  }
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:246px!important;
+    min-height:246px!important;
+    max-height:246px!important;
+  }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .featured-badge::after{animation:none!important}
+}
+
+/* Badge À LA UNE : reflet nettement plus visible */
+.featured-badge{
+  position:absolute!important;
+  z-index:3!important;
+  overflow:hidden!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:#4a3100!important;
+  background:linear-gradient(135deg,#fff9d7 0%,#ffe16e 18%,#d6a91f 40%,#fff2a4 58%,#b97b05 100%)!important;
+  border:1px solid rgba(255,235,165,.98)!important;
+  box-shadow:
+    0 0 0 1px rgba(255,219,94,.32),
+    0 0 16px rgba(255,197,45,.30),
+    0 6px 20px rgba(214,157,24,.48),
+    inset 0 1px 0 rgba(255,255,255,.98),
+    inset 0 -2px 5px rgba(125,82,0,.24)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.68)!important;
+  letter-spacing:.05em!important;
+  text-transform:uppercase!important;
+}
+
+.featured-badge::after{
+  content:""!important;
+  position:absolute!important;
+  top:-65%!important;
+  left:-105%!important;
+  width:62%!important;
+  height:230%!important;
+  background:linear-gradient(
+    105deg,
+    transparent 0%,
+    rgba(255,255,255,.10) 20%,
+    rgba(255,255,255,.98) 46%,
+    rgba(255,255,255,1) 54%,
+    rgba(255,255,255,.14) 80%,
+    transparent 100%
+  )!important;
+  transform:skewX(-22deg)!important;
+  filter:blur(.1px)!important;
+  animation:abracaFeaturedStrongShine 2.05s ease-in-out infinite!important;
+  pointer-events:none!important;
+}
+
+@keyframes abracaFeaturedStrongShine{
+  0%,12%{left:-105%}
+  68%,100%{left:165%}
+}
+
+/* Immobilier : sépare clairement le prix principal du prix au m² */
+#resultats .ad-card.immo-card .ad-price{
+  margin-bottom:10px!important;
+  line-height:1.08!important;
+}
+
+#resultats .ad-card.immo-card .immo-card-unit-price{
+  display:block!important;
+  margin-top:2px!important;
+  margin-bottom:9px!important;
+  line-height:1.3!important;
+  font-size:.78rem!important;
+  color:#bdaec7!important;
+}
+
+#resultats .ad-card.immo-card .immo-card-charges{
+  margin-top:2px!important;
+  margin-bottom:8px!important;
+  line-height:1.25!important;
+}
+
+@media(max-width:760px){
+  #resultats .ad-card.immo-card .ad-price{
+    margin-bottom:7px!important;
+  }
+
+  #resultats .ad-card.immo-card .immo-card-unit-price{
+    margin-top:1px!important;
+    margin-bottom:6px!important;
+    line-height:1.25!important;
+  }
+
+  #resultats .featured-badge{
+    box-shadow:
+      0 0 0 1px rgba(255,219,94,.28),
+      0 0 13px rgba(255,197,45,.26),
+      0 5px 15px rgba(214,157,24,.40),
+      inset 0 1px 0 rgba(255,255,255,.96),
+      inset 0 -2px 4px rgba(125,82,0,.20)!important;
+  }
+}
+
+
+/* Effet À LA UNE renforcé et fiable sur Safari */
+.featured-badge{
+  background:
+    linear-gradient(110deg,
+      #a96f00 0%,
+      #d6a21b 15%,
+      #fff3a8 30%,
+      #ffd85b 42%,
+      #fffbe0 50%,
+      #ffd85b 58%,
+      #d6a21b 72%,
+      #a96f00 100%
+    )!important;
+  background-size:320% 100%!important;
+  animation:abracaGoldBadgeMove 1.65s linear infinite!important;
+  -webkit-animation:abracaGoldBadgeMove 1.65s linear infinite!important;
+  box-shadow:
+    0 0 0 1px rgba(255,218,82,.58),
+    0 0 18px rgba(255,196,42,.55),
+    0 5px 18px rgba(198,135,0,.48),
+    inset 0 1px 1px rgba(255,255,255,.95),
+    inset 0 -2px 4px rgba(108,67,0,.28)!important;
+}
+
+@keyframes abracaGoldBadgeMove{
+  0%{
+    background-position:100% 50%;
+    filter:brightness(.95);
+  }
+  45%{
+    filter:brightness(1.25);
+  }
+  100%{
+    background-position:-120% 50%;
+    filter:brightness(.98);
+  }
+}
+@-webkit-keyframes abracaGoldBadgeMove{
+  0%{
+    background-position:100% 50%;
+    -webkit-filter:brightness(.95);
+  }
+  45%{
+    -webkit-filter:brightness(1.25);
+  }
+  100%{
+    background-position:-120% 50%;
+    -webkit-filter:brightness(.98);
+  }
+}
+
+/* Le cadre de toute l'annonce confirme visuellement la mise en avant */
+#resultats .ad-card.featured-card{
+  border-color:#e8b92f!important;
+  animation:abracaFeaturedCardGlow 1.9s ease-in-out infinite!important;
+  -webkit-animation:abracaFeaturedCardGlow 1.9s ease-in-out infinite!important;
+}
+
+@keyframes abracaFeaturedCardGlow{
+  0%,100%{
+    box-shadow:0 0 0 1px rgba(217,168,35,.32),0 8px 24px rgba(0,0,0,.18)!important;
+  }
+  50%{
+    box-shadow:0 0 0 2px rgba(255,219,87,.78),0 0 24px rgba(255,188,33,.32),0 10px 28px rgba(0,0,0,.22)!important;
+  }
+}
+@-webkit-keyframes abracaFeaturedCardGlow{
+  0%,100%{
+    box-shadow:0 0 0 1px rgba(217,168,35,.32),0 8px 24px rgba(0,0,0,.18)!important;
+  }
+  50%{
+    box-shadow:0 0 0 2px rgba(255,219,87,.78),0 0 24px rgba(255,188,33,.32),0 10px 28px rgba(0,0,0,.22)!important;
+  }
+}
+
+@media (min-width:761px){
+  header .publish-trigger,
+  header .abraca-publish-top{
+    min-width:136px!important;
+    width:auto!important;
+    height:38px!important;
+    min-height:38px!important;
+    padding:0 13px!important;
+    border-radius:11px!important;
+    font-size:11px!important;
+    line-height:1!important;
+    white-space:nowrap!important;
+  }
+}
+
+/* Nom Abracadeal du header : reflet doré façon À LA UNE */
+@media (min-width:761px){
+  .desktop-brand-copy strong{
+    display:inline-block!important;
+    color:#e8bb43!important;
+    background:
+      linear-gradient(
+        110deg,
+        #9f6800 0%,
+        #d7a51e 16%,
+        #ffe47b 29%,
+        #fff8cf 43%,
+        #ffffff 50%,
+        #fff0a0 57%,
+        #d9a722 72%,
+        #a66c00 100%
+      )!important;
+    background-size:320% 100%!important;
+    background-position:100% 50%;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    -webkit-animation:abracaHeaderGoldShine 2.2s linear infinite!important;
+    filter:drop-shadow(0 0 5px rgba(255,196,55,.24));
+  }
+}
+
+@keyframes abracaHeaderGoldShine{
+  0%{background-position:100% 50%;filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+  45%{filter:drop-shadow(0 0 8px rgba(255,211,91,.52))}
+  100%{background-position:-120% 50%;filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+}
+@-webkit-keyframes abracaHeaderGoldShine{
+  0%{background-position:100% 50%;-webkit-filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+  45%{-webkit-filter:drop-shadow(0 0 8px rgba(255,211,91,.52))}
+  100%{background-position:-120% 50%;-webkit-filter:drop-shadow(0 0 4px rgba(255,196,55,.18))}
+}
+
+@media (prefers-reduced-motion:reduce){
+  .desktop-brand-copy strong{
+    animation:none!important;
+    -webkit-animation:none!important;
+    background-position:50% 50%!important;
+  }
+}
+
+/* =========================================================
+   ABRACADEAL — déclinaison TABLETTE + MOBILE
+   Desktop >=1367px conservé tel quel
+   ========================================================= */
+
+/* ---------- TABLETTE / iPad : 761px → 1366px ---------- */
+/* ---------- MOBILE : <=760px ---------- */
+@media (max-width:760px){
+  html{background:#0b0714!important}
+  body{
+    background:
+      radial-gradient(90% 24% at 50% 0%,rgba(117,36,151,.21),transparent 72%),
+      linear-gradient(180deg,#0b0714 0%,#11081c 60%,#090510 100%)!important;
+    color:#fff!important;
+    padding-bottom:82px!important;
+    overflow-x:hidden!important;
+  }
+
+  /* On remplace complètement l'ancien header flottant */
+  header{
+    display:none!important;
+  }
+  .mobile-topbar{
+    display:flex!important;
+    position:sticky!important;
+    top:0!important;
+    z-index:10050!important;
+    min-height:58px!important;
+    padding:8px 12px!important;
+    align-items:center!important;
+    justify-content:space-between!important;
+    gap:10px!important;
+    background:rgba(9,5,16,.97)!important;
+    border-bottom:1px solid rgba(255,255,255,.08)!important;
+    box-shadow:0 7px 22px rgba(0,0,0,.22)!important;
+    -webkit-backdrop-filter:blur(16px)!important;
+    backdrop-filter:blur(16px)!important;
+  }
+  .mobile-brand{
+    display:flex!important;
+    min-width:0!important;
+    line-height:1!important;
+  }
+  .mobile-brand-name{
+    display:inline-block!important;
+    font:700 25px/1 Fraunces,serif!important;
+    letter-spacing:-.035em!important;
+    background:linear-gradient(110deg,#9e6700 0%,#d7a51f 16%,#ffe477 31%,#fffbe0 48%,#ffd85b 60%,#d6a31f 76%,#a66d00 100%)!important;
+    background-size:320% 100%!important;
+    -webkit-background-clip:text!important;
+    background-clip:text!important;
+    -webkit-text-fill-color:transparent!important;
+    animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    -webkit-animation:abracaMobileBrandShine 2.2s linear infinite!important;
+    white-space:nowrap!important;
+  }
+  .mobile-brand-name .deal{
+    background:none!important;
+    color:inherit!important;
+    -webkit-text-fill-color:inherit!important;
+  }
+  .mobile-top-actions{
+    display:flex!important;
+    align-items:center!important;
+    gap:7px!important;
+  }
+  .mobile-icon-btn{
+    width:38px!important;
+    height:38px!important;
+    border-radius:12px!important;
+    background:#1d102a!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    color:#fff!important;
+    box-shadow:none!important;
+  }
+  .mobile-icon-btn svg{width:19px!important;height:19px!important}
+
+  main#top>.hero-shell{margin-top:0!important}
+  .hero-shell{
+    background:#11091b!important;
+    overflow:visible!important;
+  }
+  .hero-shell::after{display:none!important}
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 10px 14px!important;
+    display:block!important;
+  }
+
+  /* Bannière mobile */
+  .banner-frame{
+    position:relative!important;
+    width:100%!important;
+    height:176px!important;
+    max-height:176px!important;
+    margin:0 0 10px!important;
+    border-radius:0 0 20px 20px!important;
+    overflow:hidden!important;
+    background:#1a0b28!important;
+    box-shadow:none!important;
+  }
+  .banner-frame #homeBrandLink{
+    position:absolute!important;
+    inset:0!important;
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+  }
+  .banner-frame .banner-desktop{
+    display:block!important;
+    width:100%!important;
+    height:100%!important;
+    max-height:none!important;
+    object-fit:cover!important;
+    object-position:center center!important;
+    border-radius:0!important;
+    box-shadow:none!important;
+  }
+  .banner-frame .mobile-banner-img,
+  .banner-hotspots{display:none!important}
+  .banner-frame::before{
+    content:""!important;
+    position:absolute!important;
+    inset:0!important;
+    z-index:2!important;
+    pointer-events:none!important;
+    background:linear-gradient(180deg,rgba(8,3,14,0),rgba(12,5,20,.11))!important;
+  }
+  .banner-frame::after{display:none!important}
+
+  /* Recherche mobile : aucun zoom, aucun débordement */
+  .search-wrap{
+    position:static!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    transform:none!important;
+  }
+  .search-card{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:8px!important;
+    padding:9px!important;
+    overflow:visible!important;
+    border-radius:16px!important;
+    background:#fff!important;
+    border:1px solid rgba(255,255,255,.94)!important;
+    box-shadow:0 10px 26px rgba(0,0,0,.24)!important;
+  }
+  .search-card .field{
+    display:block!important;
+    width:100%!important;
+    min-width:0!important;
+    height:45px!important;
+    min-height:45px!important;
+    padding:0 13px!important;
+    border:1px solid #ece5f0!important;
+    border-radius:11px!important;
+    background:#fff!important;
+    color:#25172d!important;
+    font-size:16px!important;
+    line-height:1!important;
+    box-shadow:none!important;
+  }
+  #searchCity.desktop-search-city{
+    display:block!important;
+    padding-left:34px!important;
+    background-image:radial-gradient(circle at 18px 22px,#6c2d88 0 3.5px,transparent 4.5px)!important;
+    background-repeat:no-repeat!important;
+  }
+  #searchBtn{
+    width:100%!important;
+    min-width:0!important;
+    height:45px!important;
+    min-height:45px!important;
+    padding:0 14px!important;
+    border:0!important;
+    border-radius:11px!important;
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    color:#fff!important;
+    font-size:14px!important;
+    font-weight:900!important;
+    box-shadow:0 6px 15px rgba(223,45,172,.24)!important;
+  }
+
+  /* Titres */
+  .home-featured-section,
+  .personalized-section,
+  .listing-section{
+    background:transparent!important;
+  }
+  .home-featured-head,
+  .personalized-head,
+  .listing-head{
+    align-items:flex-end!important;
+    flex-direction:row!important;
+    gap:10px!important;
+  }
+  .home-featured-head h2,
+  .personalized-head h2,
+  .listing-head h2{
+    color:#fff!important;
+    font-family:Fraunces,serif!important;
+  }
+  .home-featured-head p,
+  .personalized-head p,
+  .listing-head p{color:#b9a8c4!important}
+
+  /* Carrousels : deux cartes visibles + début de la suivante */
+  .home-featured-grid,
+  .personalized-grid,
+  #resultats .ads-grid{
+    display:flex!important;
+    flex-wrap:nowrap!important;
+    align-items:stretch!important;
+    gap:10px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 1px 11px!important;
+    scroll-snap-type:x proximity!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .home-featured-grid::-webkit-scrollbar,
+  .personalized-grid::-webkit-scrollbar,
+  #resultats .ads-grid::-webkit-scrollbar{display:none!important}
+
+  .home-featured-card,
+  .personalized-card{
+    flex:0 0 43vw!important;
+    width:43vw!important;
+    min-width:43vw!important;
+    max-width:43vw!important;
+    height:252px!important;
+    min-height:252px!important;
+    max-height:252px!important;
+    align-self:stretch!important;
+    scroll-snap-align:start!important;
+    border-radius:15px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+  }
+  .home-featured-photo,
+  .personalized-photo{
+    height:118px!important;
+    min-height:118px!important;
+    max-height:118px!important;
+    background:#261437!important;
+  }
+  .home-featured-body,
+  .personalized-body{padding:9px 10px 10px!important}
+  .home-featured-title,
+  .personalized-title{
+    color:#fff!important;
+    min-height:31px!important;
+    max-height:31px!important;
+    font-size:12.5px!important;
+  }
+  .home-featured-price,
+  .personalized-price{
+    color:#ff64bd!important;
+    font-size:15px!important;
+  }
+  .home-featured-city,
+  .personalized-meta,
+  .personalized-city{
+    color:#c5b5cf!important;
+    font-size:10px!important;
+  }
+
+  #resultats .ad-card{
+    flex:0 0 43vw!important;
+    width:43vw!important;
+    min-width:43vw!important;
+    max-width:43vw!important;
+    height:292px!important;
+    min-height:292px!important;
+    max-height:292px!important;
+    align-self:stretch!important;
+    scroll-snap-align:start!important;
+    border-radius:15px!important;
+    background:linear-gradient(180deg,#29133c,#21102f)!important;
+    border:1px solid rgba(217,162,237,.16)!important;
+    color:#fff!important;
+    overflow:hidden!important;
+  }
+  #resultats .ad-photo,
+  #resultats .ad-card.immo-card .ad-photo{
+    height:108px!important;
+    min-height:108px!important;
+    max-height:108px!important;
+    flex-basis:108px!important;
+    background:#261437!important;
+  }
+  #resultats .ad-body{
+    padding:8px 9px 9px!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
+  }
+  #resultats .ad-meta{
+    font-size:9px!important;
+    color:#b9a9c3!important;
+    margin-bottom:3px!important;
+  }
+  #resultats .ad-title{
+    min-height:29px!important;
+    max-height:29px!important;
+    font-size:12px!important;
+    line-height:1.2!important;
+    color:#fff!important;
+  }
+  #resultats .ad-price{
+    color:#ff64bd!important;
+    font-size:15px!important;
+    margin-bottom:5px!important;
+  }
+  #resultats .ad-specs,
+  #resultats .ad-city{
+    color:#c5b5cf!important;
+    font-size:9px!important;
+  }
+
+  /* Barre d'outils résultats */
+  .results-tools{
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:8px!important;
+    width:100%!important;
+  }
+  .filters-toggle,.sort-select,.filter-chip{
+    width:100%!important;
+    min-width:0!important;
+    min-height:38px!important;
+    border-radius:10px!important;
+    background:#1d0f2b!important;
+    color:#f5edf8!important;
+    border:1px solid rgba(255,255,255,.11)!important;
+    box-shadow:none!important;
+    font-size:11px!important;
+  }
+
+  /* Navigation inférieure */
+  .mobile-bottom-nav{
+    /* Fix 22/09/2026 : meme precaution que sur la barre de recherche flottante ci-dessus - ce bandeau combine lui aussi position:fixed et backdrop-filter, cible potentielle du meme bug de scintillement/disparition Safari iOS pendant le scroll. */
+    transform:translateZ(0)!important;
+    -webkit-transform:translateZ(0)!important;
+    display:grid!important;
+    position:fixed!important;
+    left:8px!important;
+    right:8px!important;
+    bottom:calc(7px + env(safe-area-inset-bottom))!important;
+    z-index:10040!important;
+    grid-template-columns:repeat(5,minmax(0,1fr))!important;
+    min-height:64px!important;
+    padding:6px 5px!important;
+    border-radius:20px!important;
+    background:rgba(15,7,23,.96)!important;
+    border:1px solid rgba(255,255,255,.10)!important;
+    box-shadow:0 12px 34px rgba(0,0,0,.36)!important;
+    -webkit-backdrop-filter:blur(18px)!important;
+    backdrop-filter:blur(18px)!important;
+  }
+  .mobile-nav-item{
+    min-width:0!important;
+    color:#c8b8d2!important;
+  }
+  .mobile-nav-item.is-active{color:#ff61bd!important}
+  .mobile-nav-publish .mobile-publish-orb{
+    background:linear-gradient(135deg,#9b27c6,#e531ad 58%,#ff49b6)!important;
+    box-shadow:0 6px 16px rgba(229,49,173,.34)!important;
+  }
+}
+
+@media (max-width:390px){
+  .mobile-brand-name{font-size:23px!important}
+  .mobile-icon-btn{width:36px!important;height:36px!important}
+  .banner-frame{height:160px!important;max-height:160px!important}
+  .home-featured-card,
+  .personalized-card,
+  #resultats .ad-card{
+    flex-basis:42.5vw!important;
+    width:42.5vw!important;
+    min-width:42.5vw!important;
+    max-width:42.5vw!important;
+  }
+}
+
+@keyframes abracaTabletBrandShine{
+  0%{background-position:100% 50%}
+  100%{background-position:-120% 50%}
+}
+@-webkit-keyframes abracaTabletBrandShine{
+  0%{background-position:100% 50%}
+  100%{background-position:-120% 50%}
+}
+@keyframes abracaMobileBrandShine{
+  0%{background-position:100% 50%}
+  100%{background-position:-120% 50%}
+}
+@-webkit-keyframes abracaMobileBrandShine{
+  0%{background-position:100% 50%}
+  100%{background-position:-120% 50%}
+}
+
+@media (max-width:760px){
+  /* Bannière mobile : image complète, pas de fond forcé, pas de hauteur fantôme */
+  .hero.container{
+    width:100%!important;
+    max-width:none!important;
+    padding:0 10px 14px!important;
+  }
+  .banner-frame{
+    position:relative!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:auto!important;
+    margin:0 0 12px!important;
+    padding:0!important;
+    overflow:hidden!important;
+    border-radius:20px!important;
+    background:none!important;
+    background-image:none!important;
+    box-shadow:none!important;
+  }
+  .banner-frame #homeBrandLink{
+    position:static!important;
+    inset:auto!important;
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    z-index:auto!important;
+  }
+  .banner-frame .banner-desktop{
+    display:none!important;
+  }
+  .banner-frame .mobile-banner-img{
+    display:block!important;
+    visibility:visible!important;
+    opacity:1!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    object-fit:contain!important;
+    object-position:center center!important;
+    border-radius:20px!important;
+    box-shadow:none!important;
+  }
+  .banner-frame::before,
+  .banner-frame::after,
+  .banner-hotspots{
+    display:none!important;
+    content:none!important;
+  }
+  .search-wrap{
+    position:static!important;
+    left:auto!important;
+    right:auto!important;
+    bottom:auto!important;
+    width:100%!important;
+    max-width:none!important;
+    margin:0!important;
+    transform:none!important;
+  }
+
+  /* Annonces mobile : aucune écriture rognée */
+  #resultats .ad-card,
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    align-self:flex-start!important;
+  }
+
+  #resultats .ad-body,
+  #homeFeaturedSection .home-featured-body,
+  #recentSearchSection .personalized-body,
+  #recentViewedSection .personalized-body,
+  #nearbySection .personalized-body{
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  #resultats .ad-title,
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    display:block!important;
+    min-height:0!important;
+    max-height:none!important;
+    height:auto!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:normal!important;
+    -webkit-line-clamp:unset!important;
+    -webkit-box-orient:initial!important;
+    line-height:1.22!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  #resultats .ad-meta,
+  #resultats .ad-city,
+  #resultats .ad-spec,
+  #homeFeaturedSection .home-featured-meta,
+  #homeFeaturedSection .home-featured-city,
+  #recentSearchSection .personalized-meta,
+  #recentViewedSection .personalized-meta,
+  #nearbySection .personalized-meta{
+    min-height:0!important;
+    max-height:none!important;
+    overflow:visible!important;
+    text-overflow:clip!important;
+    white-space:normal!important;
+    line-height:1.25!important;
+    overflow-wrap:anywhere!important;
+  }
+
+  #resultats .ad-specs{
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+  }
+
+  #resultats .ad-actions{
+    display:flex!important;
+    flex-wrap:wrap!important;
+    height:auto!important;
+    max-height:none!important;
+    overflow:visible!important;
+    gap:6px!important;
+  }
+  #resultats .ad-actions .mini-btn{
+    flex:1 1 auto!important;
+    width:auto!important;
+    min-width:max-content!important;
+    height:auto!important;
+    min-height:32px!important;
+    padding:7px 8px!important;
+    font-size:10px!important;
+    line-height:1.1!important;
+  }
+
+  /* Si une photo distante est réellement indisponible, on évite l'icône d'image cassée */
+  .ad-photo.image-fallback,
+  .home-featured-photo.image-fallback,
+  .personalized-photo.image-fallback{
+    position:relative!important;
+    background:
+      radial-gradient(circle at 50% 38%,rgba(209,80,229,.18),transparent 42%),
+      linear-gradient(145deg,#2a123d,#180b25)!important;
+  }
+  .ad-photo.image-fallback::after,
+  .home-featured-photo.image-fallback::after,
+  .personalized-photo.image-fallback::after{
+    content:"✦"!important;
+    display:grid!important;
+    place-items:center!important;
+    position:absolute!important;
+    inset:0!important;
+    color:#fff!important;
+    font-size:26px!important;
+    opacity:.95!important;
+    pointer-events:none!important;
+  }
+}
+
+@media (max-width:390px){
+  .hero.container{
+    padding-left:8px!important;
+    padding-right:8px!important;
+  }
+  .banner-frame,
+  .banner-frame .mobile-banner-img{
+    border-radius:18px!important;
+  }
+}
+
+/* Résultats mobile : toutes les cartes prennent exactement la hauteur de la plus grande. */
+@media(max-width:760px){
+  #resultats .ads-grid{
+    align-items:stretch!important;
+  }
+  #resultats .ad-card{
+    align-self:stretch!important;
+    display:flex!important;
+    flex-direction:column!important;
+    height:auto!important;
+  }
+  #resultats .ad-body{
+    flex:1 1 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+  }
+  #resultats .ad-actions{
+    margin-top:auto!important;
+  }
+}
+
+/* Fix 20/09/2026 : "Les annonces" doit defiler verticalement sur mobile (liste normale), pas en carrousel horizontal */
+@media (max-width:760px){
+  #resultats .ads-grid{
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    overflow-x:visible!important;
+    overflow-y:visible!important;
+    scroll-snap-type:none!important;
+    -webkit-overflow-scrolling:auto!important;
+  }
+  #resultats .ad-card{
+    flex:none!important;
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+@media (max-width:390px){
+  #resultats .ad-card{
+    width:100%!important;
+    min-width:0!important;
+    max-width:none!important;
+  }
+}
+
+/* Fix 20/09/2026 : bouton "Se deconnecter" remonte en haut du panneau Compte, juste sous les raccourcis, pour etre visible sans avoir a tout faire defiler */
+.account-logout-row{
+  margin:2px 0 16px;
+  display:flex;
+  justify-content:flex-end;
+}
+.account-logout-row #logoutBtn{
+  font-size:.82rem;
+  padding:0 14px;
+  min-height:36px;
+}
+
+/* Fix 20/09/2026 : l'offre Fondateurs (#pros) existait deja juste sous le hero sur desktop, mais restait
+   discrete (necessitait de scroller sous la banniere). Ajout d'un bandeau compact et visible en haut de
+   page, desktop uniquement, avec le compteur de places existant et un lien qui scrolle vers #pros. */
+.founder-topbar{
+  background:linear-gradient(135deg,#24123b,#3c1d61);
+  color:#fff;
+}
+.founder-topbar-inner{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:14px;
+  flex-wrap:wrap;
+  padding:9px 16px;
+  font-size:.82rem;
+}
+.founder-topbar-text{font-weight:700}
+.founder-topbar-text strong{color:#f2d9ff}
+.founder-topbar-cta{
+  color:#fff;
+  font-weight:850;
+  text-decoration:underline;
+  text-underline-offset:2px;
+  white-space:nowrap;
+  background:transparent;
+  border:0;
+  font:inherit;
+  font-weight:850;
+  cursor:pointer;
+  padding:0;
+}
+.founder-topbar-cta:hover{color:#f2d9ff}
+@media(max-width:760px){
+  .founder-topbar{display:none!important}
+}
+
+/* Fix 20/09/2026 : le champ Ville et le bouton Filtres ajoutes a la recherche de l'accueil sont
+   reserves au desktop (demande initiale d'Anthony) ; sur mobile la barre redevient compacte
+   (mot-cle + bouton Rechercher uniquement), comme avant leur ajout. */
+@media(max-width:760px){
+  #searchCity.desktop-search-city{
+    display:block!important;
+    min-width:0!important;
+    padding-left:36px!important;
+    background-image:radial-gradient(circle at 18px 24px,#6c2d88 0 3.5px,transparent 4.5px)!important;
+    background-repeat:no-repeat!important;
+  }
+  .search-filters-link{display:none!important}
+}
+
+/* Fix 20/09/2026 : textes plus grands sur la pastille des annonces (titre/prix/infos),
+   demande par Anthony ("texte prix info en plus gros, une belle pastille"). Verifie en
+   direct sur les 92 annonces reelles du site avant application (clone hors-ecran de
+   .ad-body avec overflow:visible pour mesurer la hauteur naturelle du contenu) : aucun
+   depassement du budget de hauteur fixe des cartes en desktop
+   (#resultats .ad-card{height:420px}), marge restante d'au moins +34px sur le pire cas
+   parmi les 92. Sur mobile les cartes sont en height:auto (aucun risque de troncature). */
+@media(min-width:761px){
+  #resultats .ad-title{font-size:14.5px!important;line-height:1.25!important;margin-bottom:5px!important}
+  #resultats .ad-price{font-size:19px!important;line-height:1.15!important}
+  #resultats .ad-meta{font-size:10.5px!important}
+  #resultats .ad-city,#resultats .ad-specs{font-size:11px!important}
+  #resultats .immo-card-location-extra,#resultats .immo-card-unit-price,#resultats .immo-card-charges{font-size:10.5px!important}
+}
+@media(max-width:760px){
+  #resultats .ad-title{font-size:13px!important}
+  #resultats .ad-price{font-size:16.5px!important}
+  #resultats .ad-meta{font-size:10px!important}
+  #resultats .ad-city{font-size:10px!important}
+  #resultats .ad-specs{font-size:9.5px!important}
+}
+
+/* Fix 20/09/2026 : boutons Modifier/Booster/Supprimer plus compacts sur la pastille
+   en desktop (vue admin/gestion des annonces), demande par Anthony. Verifie en direct
+   sur abracadeal.fr avant application : la taille de base (.ad-actions .mini-btn,
+   sans !important, ligne ~2534) passe de 36px de hauteur / 12px de padding / 12px de
+   police a 29px / 9px / 11px sur desktop uniquement (>=761px) ; le mobile (regles
+   !important dans les @media max-width:760px) n'est pas touche. */
+@media(min-width:761px){
+  #resultats .ad-actions{gap:6px}
+  #resultats .ad-actions .mini-btn{min-height:29px!important;padding:0 9px!important;font-size:11px!important;border-radius:8px!important}
+}
+
+/* Fix 21/09/2026 : les pastilles des carrousels "Selection du moment" / "D'apres vos
+   recherches recentes" / "Recemment consultees" avaient des tailles differentes sur mobile
+   (signale par Anthony) - une regle plus tardive dans la cascade, destinee a la grille de
+   resultats #resultats .ad-card, avait ete etendue par erreur a ces 3 carrousels et annulait
+   leur hauteur fixe d'origine (260px/246px) + le line-clamp a 2 lignes du titre. Restaure ici
+   uniquement pour ces carrousels (jamais pour #resultats .ad-card, qui garde son height:auto
+   deja verifie). Verifie que le contenu reel (photo+meta+titre 2 lignes+prix) tient largement
+   dans 246-260px avant application (marge d'au moins 25px sur les annonces reelles du 21/09). */
+@media(max-width:760px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:260px!important;min-height:260px!important;max-height:260px!important;align-self:auto!important;
+  }
+  #homeFeaturedSection .home-featured-body,
+  #recentSearchSection .personalized-body,
+  #recentViewedSection .personalized-body,
+  #nearbySection .personalized-body{
+    height:auto!important;min-height:0!important;max-height:none!important;overflow:hidden!important;
+  }
+  #homeFeaturedSection .home-featured-title,
+  #recentSearchSection .personalized-title,
+  #recentViewedSection .personalized-title,
+  #nearbySection .personalized-title{
+    display:-webkit-box!important;
+    -webkit-line-clamp:2!important;
+    -webkit-box-orient:vertical!important;
+    overflow:hidden!important;
+    text-overflow:ellipsis!important;
+    white-space:normal!important;
+    min-height:31px!important;
+    max-height:31px!important;
+  }
+}
+@media(max-width:390px){
+  #homeFeaturedSection .home-featured-card,
+  #recentSearchSection .personalized-card,
+  #recentViewedSection .personalized-card,
+  #nearbySection .personalized-card{
+    height:246px!important;min-height:246px!important;max-height:246px!important;
+  }
+}
+
+/* Fix 22/09/2026 : la disposition mobile en 2 lignes (recherche pleine largeur, puis
+   ville+bouton en dessous - fix du 21/09) rendait la barre de recherche trop haute sur
+   mobile, surtout une fois flottante au scroll (signale par Anthony : "trop grande pour
+   mobile"). Repassee sur une seule ligne : les 3 elements (recherche, ville, bouton) sont
+   maintenant cote a cote. Le bouton est reduit a une icone loupe (le texte "Rechercher"
+   reste dans le DOM pour l'accessibilite/lecteurs d'ecran, seulement masque visuellement via
+   font-size:0) pour laisser assez de place aux deux champs de texte sur un ecran etroit.
+   Remplace le fix du 21/09 ci-dessus (barre sur 2 lignes). Voir aussi le fix JS dans
+   abraca-sticky-search-script-20260919 pour le bug de blocage au scroll signale en meme
+   temps. */
+@media(max-width:760px){
+  #searchCity.desktop-search-city{display:block!important}
+  .search-card{grid-template-columns:1.25fr 1fr 50px!important;gap:6px!important}
+  #searchQuery{grid-column:auto!important}
+  .search-card .field{padding:0 10px!important}
+  #searchCity.desktop-search-city{padding-left:10px!important;background-image:none!important;text-align:center!important}
+  #searchBtn{padding:0!important;min-width:0!important;font-size:0!important}
+  #searchBtn::before{content:"\1F50D";font-size:19px!important;line-height:1!important}
+}
+
+/* Fix 21/09/2026 : sur mobile, ouvrir le popover d'un filtre rapide ("Ville"/"Prix" sous
+   "Les annonces") pouvait laisser une pastille "A LA UNE" (bordure doree) visible juste a
+   cote du popover, si pres du bord de l'ecran que ca donnait l'impression que le popover
+   s'affichait derriere/mele aux pastilles d'annonces (signale par Anthony). Ajoute un fond
+   assombri plein ecran derriere le popover, sur le meme principe que .modal-backdrop deja
+   utilise par les autres fenetres du site : plus aucune pastille visible autour du popover
+   pendant qu'il est ouvert, et un tap en dehors le referme (deja gere par le js existant,
+   closeAllQuickFilterPopovers). z-index:999, juste sous le popover (1000). */
+.quick-filter-popover-backdrop{position:fixed;inset:0;background:rgba(20,8,30,.45);z-index:999}
