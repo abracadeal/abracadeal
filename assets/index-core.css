@@ -4355,3 +4355,20 @@ header #flowErrorsBtn{
   color:#9a8d9f!important;
   opacity:1!important;
 }
+
+/* Legal & help information — compact, detailed accordion layout */
+.legal-modal{max-width:900px}
+.legal-modal .modal-body,.legal-accordion{font-size:13px;line-height:1.5}
+.legal-modal .modal-body h3{font-size:15px;margin:18px 0 7px}
+.legal-accordion details{border-bottom:1px solid rgba(127,127,127,.22);padding:0}
+.legal-accordion summary{cursor:pointer;font-weight:700;font-size:14px;padding:13px 28px 13px 0;position:relative;list-style:none}
+.legal-accordion summary::-webkit-details-marker{display:none}
+.legal-accordion summary::after{content:"+";position:absolute;right:4px;top:10px;font-size:20px;font-weight:400}
+.legal-accordion details[open] summary::after{content:"−"}
+.legal-accordion details>div{padding:0 20px 12px 0}
+.legal-accordion p{margin:0 0 9px}
+@media(max-width:700px){
+  .legal-modal .modal-body,.legal-accordion{font-size:12px;line-height:1.45}
+  .legal-accordion summary{font-size:13px;padding:12px 26px 12px 0}
+  .footer-links{gap:10px 14px}
+}
