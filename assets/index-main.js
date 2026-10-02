@@ -452,8 +452,10 @@ function syncB2bEntryVisibility(){
 }
 function syncHomeMarketingVisibility(){
   const proExperience=!!currentUser && (currentProfile?.account_type==='professionnel'||currentProfile?.is_admin===true||b2bServerAdminUserId===currentUser.id);
-  // Un compte déjà opérationnel n'a plus besoin des gros blocs d'acquisition.
-  $('#b2bDiscovery')?.classList.toggle('hidden',proExperience);
+  const particularExperience=!!currentUser && currentProfile?.account_type==='particulier';
+  // Les comptes connectés n'ont pas besoin des gros blocs d'acquisition.
+  // En particulier, on masque entièrement Pro/Pro pour supprimer aussi son encadrement vide.
+  $('#b2bDiscovery')?.classList.toggle('hidden',proExperience||particularExperience);
   $('#vacancesDiscovery')?.classList.toggle('hidden',proExperience);
   $('#pros')?.classList.toggle('hidden',!!currentUser);
 }
