@@ -1660,13 +1660,17 @@ const SUBCATEGORIES = {
     ['autre-emploi','Autre emploi']
   ],
   services: [
-    ['transport','Transport / Livraison'],
+    ['artisans-travaux','Artisans / Travaux'],
     ['menage','Ménage'],
-    ['bricolage-service','Bricolage'],
+    ['jardinage','Jardinage'],
+    ['demenagement','Déménagement'],
+    ['depannage','Dépannage'],
+    ['transport','Transport / Livraison'],
     ['informatique','Informatique'],
     ['cours','Cours / Formation'],
     ['beaute-bienetre','Beauté / Bien-être'],
     ['evenementiel','Événementiel'],
+    ['services-entreprises','Services aux entreprises'],
     ['autre-service','Autre service']
   ],
   autres: [
@@ -2389,6 +2393,20 @@ $('#publishForm').addEventListener('submit',async e=>{
   if(btn.disabled) return;
 
   const wasEditing=!!editingId;
+
+  // Services : un compte professionnel classique dispose d'une seule annonce gratuite.
+  // Cette règle est indépendante de l'offre Fondateurs. Les comptes Fondateurs / abonnés
+  // conservent leurs quotas propres ; l'admin n'est jamais bloqué par ce contrôle UI.
+  if(!wasEditing && currentProfile?.is_admin!==true && currentProfile?.account_type==='professionnel' && $('#adCategory').value==='services'){
+    const {data:subscription,error:subscriptionError}=await sb.from('pro_subscriptions').select('status,billing_starts_at,current_period_end').eq('user_id',currentUser.id).maybeSingle();
+    if(subscriptionError){toast('Impossible de vérifier votre offre professionnelle. Réessayez.');return;}
+    const hasProOffer=!!subscription && ['active','trialing'].includes(String(subscription.status||'').toLowerCase());
+    if(!hasProOffer){
+      const {count,error:countError}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',currentUser.id).eq('category','services');
+      if(countError){toast('Impossible de vérifier votre annonce gratuite. Réessayez.');return;}
+      if(Number(count||0)>=1){toast('Votre annonce Services gratuite a déjà été utilisée. Choisissez une offre Pro pour publier une nouvelle annonce.');return;}
+    }
+  }
 
   // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony).
   // Ne bloque jamais la publication : si l'utilisateur choisit "Publier quand meme",
