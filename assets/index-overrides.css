@@ -1802,3 +1802,7 @@
     bottom:1px!important;
   }
 }
+
+
+/* Compte particulier : masquer totalement l’emplacement Pro/Pro, y compris son cadre forcé par les styles desktop/tablette. */
+#b2bDiscovery.hidden{display:none!important}
