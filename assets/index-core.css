@@ -4372,3 +4372,18 @@ header #flowErrorsBtn{
   .legal-accordion summary{font-size:13px;padding:12px 26px 12px 0}
   .footer-links{gap:10px 14px}
 }
+
+/* Legal information sizing/fallback */
+#legalModal .modal-body,#rulesModal .modal-body,#cookiesModal .modal-body,#rankingModal .modal-body,
+#cguModal .modal-body,#privacyModal .modal-body,#helpModal .modal-body,#safetyModal .modal-body,#contactModal .modal-body{font-size:13px!important;line-height:1.42!important}
+#legalModal .modal-body p,#rulesModal .modal-body p,#cookiesModal .modal-body p,#rankingModal .modal-body p,
+#cguModal .modal-body p,#privacyModal .modal-body p,#helpModal .modal-body p,#safetyModal .modal-body p,#contactModal .modal-body p{font-size:13px!important}
+#legalModal summary,#rulesModal summary,#cookiesModal summary,#rankingModal summary{font-size:13px!important}
+#cguModal .modal-body h3,#privacyModal .modal-body h3,#helpModal .modal-body h3,#safetyModal .modal-body h3,#contactModal .modal-body h3{font-size:15px!important}
+@media(max-width:700px){
+ #legalModal .modal-body,#rulesModal .modal-body,#cookiesModal .modal-body,#rankingModal .modal-body,
+ #cguModal .modal-body,#privacyModal .modal-body,#helpModal .modal-body,#safetyModal .modal-body,#contactModal .modal-body,
+ #legalModal .modal-body p,#rulesModal .modal-body p,#cookiesModal .modal-body p,#rankingModal .modal-body p,
+ #cguModal .modal-body p,#privacyModal .modal-body p,#helpModal .modal-body p,#safetyModal .modal-body p,#contactModal .modal-body p{font-size:12px!important}
+ #legalModal summary,#rulesModal summary,#cookiesModal summary,#rankingModal summary{font-size:12px!important}
+}
