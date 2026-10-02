@@ -1617,7 +1617,32 @@ window.addEventListener('load', abracadealForceTopOnReload);
 
 <div class="toast" id="toast"></div>
 
-<script src="assets/index-main.js?v=20261002-3"></script>
+<script src="assets/index-main.js?v=20261002-legal5"></script>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('a[data-info-modal]').forEach(function(link){
+    link.addEventListener('click',function(e){
+      var id=link.getAttribute('data-info-modal');
+      var modal=document.getElementById(id);
+      if(!modal)return;
+      e.preventDefault();
+      modal.classList.add('open');
+      modal.setAttribute('aria-hidden','false');
+      var body=modal.querySelector('.modal-body');
+      if(body){body.style.display='block';body.style.visibility='visible';body.style.opacity='1';body.scrollTop=0;}
+      document.body.style.overflow='hidden';
+    },true);
+  });
+  document.querySelectorAll('[data-close]').forEach(function(btn){
+    btn.addEventListener('click',function(e){
+      var modal=document.getElementById(btn.getAttribute('data-close'));
+      if(!modal)return;
+      e.preventDefault();modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow='';
+    },true);
+  });
+});
+</script>
+
 
 
 <div class="photo-lightbox" id="photoLightbox" aria-hidden="true">
