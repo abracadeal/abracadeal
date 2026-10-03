@@ -45,8 +45,14 @@ let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={
   photo_12:{code:'photo_12',audience:'particulier',title:'Pack Photos · jusqu’à 12',price:'2,99 €',days:0,max:1,photos:12},
   photo_30_pro:{code:'photo_30_pro',audience:'professionnel',title:'Pack Photos Pro · jusqu’à 30',price:'2,99 €',days:0,max:1,photos:30},
-  private_7d:{code:'private_7d',audience:'particulier',title:'Boost 7 jours',price:'9,99 €',days:7,max:1,photos:null},
-  private_30d:{code:'private_30d',audience:'particulier',title:'Boost 30 jours',price:'19,99 €',days:30,max:1,photos:null},
+  equipment_7d:{code:'equipment_7d',audience:'particulier',scope:'equipment',title:'À la une · 7 jours',price:'4,99 €',days:7,max:1,photos:null,stripePriceId:'price_1UMcSy1DkwXb4U3J74VBPtdz',stripeLookupKey:'amt_featured_7d'},
+  equipment_30d:{code:'equipment_30d',audience:'particulier',scope:'equipment',title:'À la une · 30 jours',price:'9,99 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcT01DkwXb4U3JTbtQ6r3y',stripeLookupKey:'amt_featured_30d'},
+  equipment_urgent_30d:{code:'equipment_urgent_30d',audience:'particulier',scope:'equipment',title:'Urgent · 30 jours',price:'1,99 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcT21DkwXb4U3JWFGJOC9T',stripeLookupKey:'amt_urgent_30d'},
+  auto_7d:{code:'auto_7d',audience:'particulier',scope:'auto',title:'À la une · 7 jours',price:'19,90 €',days:7,max:1,photos:null,stripePriceId:'price_1UMcaD1DkwXb4U3JNSNTKR22',stripeLookupKey:'auto_featured_7d'},
+  auto_30d:{code:'auto_30d',audience:'particulier',scope:'auto',title:'À la une · 30 jours',price:'49,90 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcaF1DkwXb4U3J9VSRz3TD',stripeLookupKey:'auto_featured_30d'},
+  auto_urgent_30d:{code:'auto_urgent_30d',audience:'particulier',scope:'auto',title:'Urgent · 30 jours',price:'4,99 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcaH1DkwXb4U3JAS3cFyVJ',stripeLookupKey:'auto_urgent_30d'},
+  immo_30d:{code:'immo_30d',audience:'particulier',scope:'immo',title:'À la une · 30 jours',price:'49,90 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcT41DkwXb4U3JrwKzrCn3',stripeLookupKey:'immo_featured_30d'},
+  immo_urgent_30d:{code:'immo_urgent_30d',audience:'particulier',scope:'immo',title:'Urgent · 30 jours',price:'9,90 €',days:30,max:1,photos:null,stripePriceId:'price_1UMcT71DkwXb4U3JT5J88IPM',stripeLookupKey:'immo_urgent_30d'},
   pro_5_7d:{code:'pro_5_7d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 7 jours',price:'39,90 € HT',days:7,max:5,photos:null},
   pro_10_7d:{code:'pro_10_7d',audience:'professionnel',title:'★ Jusqu’à 10 annonces / 7 jours',price:'69,90 € HT',days:7,max:10,photos:null},
   pro_5_30d:{code:'pro_5_30d',audience:'professionnel',title:'★ Jusqu’à 5 annonces / 30 jours',price:'79,90 € HT',days:30,max:5,photos:null},
@@ -1975,7 +1981,10 @@ function renderPublishPackPicker(){
     if(help)help.textContent=proPaidPhotoAllowance?'15 photos incluses avec un forfait payant. Le Pack Photos Pro débloque jusqu’à 30 photos pour 2,99 €.':'Offre Fondateurs : 15 photos par annonce. Les forfaits payants incluent aussi 15 photos.';
   }else{
     const freeLimit=basePhotoLimitForAudience();
-    const items=[{code:'free',title:'Gratuit',price:'0 €',desc:`Jusqu’à ${freeLimit} photos · annonce classique`},PROMOTION_PACKS.photo_12,PROMOTION_PACKS.private_7d,PROMOTION_PACKS.private_30d];
+    const category=$('#adCategory')?.value||''; const sub=$('#vehicleSubcategory')?.value||'';
+    const draftScope=category==='immobilier'?'immo':(category==='vehicules'&&sub==='voitures'?'auto':'equipment');
+    const visibility=Object.values(PROMOTION_PACKS).filter(p=>p.audience==='particulier'&&p.scope===draftScope);
+    const items=[{code:'free',title:'Gratuit',price:'0 €',desc:`Jusqu’à ${freeLimit} photos · annonce classique`},PROMOTION_PACKS.photo_12,...visibility];
     picker.innerHTML=items.map((p,i)=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title||'Gratuit'}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:(p.code==='photo_12'?'Jusqu’à 12 photos · sans mise en avant':`Mise en avant pendant ${p.days} jours · quota photo inchangé`)}</div></button>`).join('');
     picker.querySelectorAll('[data-publish-pack]').forEach(b=>b.addEventListener('click',()=>{selectedPublishPack=b.dataset.publishPack;renderPublishPackPicker();setPublishPhotoLimit();}));
     if(help)help.textContent='Le Pack Photos débloque jusqu’à 12 photos sans mise en avant. Les boosts améliorent uniquement la visibilité et ne changent pas le quota photo. Le paiement est sécurisé et s’effectue après la création de l’annonce.';
@@ -1992,7 +2001,7 @@ async function createPromotionOrder(packCode,listingIds=[]){
   }else if(!unique.length||unique.length>pack.max){
     throw new Error('Sélectionnez entre 1 et '+pack.max+' annonce(s)');
   }
-  const {data,error}=await sb.functions.invoke('create-promotion-order',{body:{pack_code:packCode,listing_ids:unique}});
+  const {data,error}=await sb.functions.invoke('create-promotion-order',{body:{pack_code:packCode,listing_ids:unique,stripe_price_id:pack.stripePriceId||null,stripe_lookup_key:pack.stripeLookupKey||null}});
   if(error){
     let detail=null;
     try{detail=await error.context?.json();}catch(_){}
@@ -2009,7 +2018,21 @@ async function goToPromotionCheckout(packCode,listingIds){
   }catch(_){}
   location.href=url;
 }
-function promoPackList(){return Object.values(PROMOTION_PACKS).filter(p=>p.audience===accountAudience()&&!['photo_12','photo_30_pro'].includes(p.code))}
+function promotionScopeForListing(a){
+  const category=String(a?.category||'').toLowerCase();
+  const sub=String(a?.subcategory||a?.vehicle_subcategory||'').toLowerCase();
+  if(category==='immobilier')return 'immo';
+  if(category==='vehicules'&&sub==='voitures')return 'auto';
+  if(category==='hightech'||(category==='vehicules'&&['equipement-auto','equipement-moto','equipement-caravaning','equipement-nautisme','equipement-velo','pieces-detachees'].includes(sub)))return 'equipment';
+  return 'equipment';
+}
+function promoPackList(){
+  const audience=accountAudience();
+  if(audience==='professionnel')return Object.values(PROMOTION_PACKS).filter(p=>p.audience==='professionnel'&&!['photo_30_pro'].includes(p.code));
+  const target=allAds.find(a=>a.id===promoPreselectedListingId);
+  const scope=promotionScopeForListing(target);
+  return Object.values(PROMOTION_PACKS).filter(p=>p.audience==='particulier'&&p.scope===scope);
+}
 function renderPromotionModal(){
   const packs=promoPackList(),grid=$('#promotionPackGrid'),box=$('#promotionListings'),intro=$('#promotionIntro'),photoNote=$('#promotionPhotoNote');
   const proStore=accountAudience()==='professionnel';
