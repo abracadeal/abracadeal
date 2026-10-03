@@ -1939,14 +1939,15 @@ function syncPublishVisibility(){
   if(!canChoose)select.value='public';
 }
 function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_until).getTime()>Date.now()}
-function basePhotoLimitForAudience(audience=accountAudience()){return audience==='professionnel'?15:3}
-function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:3;return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
+function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){return audience==='professionnel'?15:(category==='immobilier'||category==='vacances'?10:3)}
+function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:((a?.category==='immobilier'||a?.category==='vacances')?10:3);return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
 function listingHasPhotoPack(a){return a?.seller_type==='professionnel'?listingPhotoLimit(a)>=30:listingPhotoLimit(a)>=12}
 function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return photos.slice(0,listingPhotoLimit(a))}
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
 function setPublishPhotoLimit(){
   const pro=accountAudience()==='professionnel';
-  publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:15):(selectedPublishPack==='photo_12'?12:3);
+  const freeLimit=basePhotoLimitForAudience();
+  publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:15):(selectedPublishPack==='photo_12'?12:freeLimit);
   if(selectedPhotos.length>publishPhotoLimit) selectedPhotos=selectedPhotos.slice(0,publishPhotoLimit);
   if(selectedPhotos.length<=6)showAllPhotoSlots=false;
   const l=$('#photoLimitLabel');if(l)l.innerHTML=`Photos <span class="note">(${publishPhotoLimit} maximum)</span>`;
@@ -1973,7 +1974,8 @@ function renderPublishPackPicker(){
     picker.querySelectorAll('[data-publish-pack]').forEach(b=>b.addEventListener('click',()=>{selectedPublishPack=b.dataset.publishPack;renderPublishPackPicker();setPublishPhotoLimit();}));
     if(help)help.textContent=proPaidPhotoAllowance?'15 photos incluses avec un forfait payant. Le Pack Photos Pro débloque jusqu’à 30 photos pour 2,99 €.':'Offre Fondateurs : 15 photos par annonce. Les forfaits payants incluent aussi 15 photos.';
   }else{
-    const items=[{code:'free',title:'Gratuit',price:'0 €',desc:'Jusqu’à 3 photos · annonce classique'},PROMOTION_PACKS.photo_12,PROMOTION_PACKS.private_7d,PROMOTION_PACKS.private_30d];
+    const freeLimit=basePhotoLimitForAudience();
+    const items=[{code:'free',title:'Gratuit',price:'0 €',desc:`Jusqu’à ${freeLimit} photos · annonce classique`},PROMOTION_PACKS.photo_12,PROMOTION_PACKS.private_7d,PROMOTION_PACKS.private_30d];
     picker.innerHTML=items.map((p,i)=>`<button type="button" class="pack-card ${selectedPublishPack===p.code?'selected':''}" data-publish-pack="${p.code}"><div class="pack-card-title">${p.title||'Gratuit'}</div><div class="pack-card-price">${p.price}</div><div class="pack-card-desc">${p.code==='free'?p.desc:(p.code==='photo_12'?'Jusqu’à 12 photos · sans mise en avant':`Mise en avant pendant ${p.days} jours · quota photo inchangé`)}</div></button>`).join('');
     picker.querySelectorAll('[data-publish-pack]').forEach(b=>b.addEventListener('click',()=>{selectedPublishPack=b.dataset.publishPack;renderPublishPackPicker();setPublishPhotoLimit();}));
     if(help)help.textContent='Le Pack Photos débloque jusqu’à 12 photos sans mise en avant. Les boosts améliorent uniquement la visibilité et ne changent pas le quota photo. Le paiement est sécurisé et s’effectue après la création de l’annonce.';
@@ -2448,7 +2450,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     fuel:$('#vehicleFuel').value||null,
     transmission:$('#vehicleTransmission').value||null,
     crit_air:$('#vehicleCritAir').value||null,
-    photo_limit:wasEditing?(editingOriginalPhotoLimit||3):(accountAudience()==='professionnel'?15:3)
+    photo_limit:wasEditing?(editingOriginalPhotoLimit||basePhotoLimitForAudience(editingOriginalSellerType==='professionnel'?'professionnel':'particulier',$('#adCategory').value)):basePhotoLimitForAudience(accountAudience(),$('#adCategory').value)
   };
 
   try{
