@@ -5245,6 +5245,17 @@ async function loadProShowroomData(populateForm=false){
     const count=document.getElementById('accountCompanyDescriptionCount');if(count)count.textContent=String((proShowroomRecord.description||'').length);
   }
   const link=document.getElementById('proPublicPageLink');if(link)link.href='pro.html?id='+encodeURIComponent(currentUser.id);
+  const saveBtn=document.getElementById('saveCompanyShowroomBtn');
+  if(saveBtn){
+    saveBtn.hidden=false;
+    if(data){
+      saveBtn.dataset.mode='saved';
+      saveBtn.textContent='Modifier';
+    }else{
+      saveBtn.dataset.mode='editing';
+      saveBtn.textContent='Enregistrer les modifications';
+    }
+  }
   paintProShowroomMedia();
   refreshProShowroomPreview();
 }
