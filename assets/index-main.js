@@ -413,9 +413,9 @@ function renderCompanyAccount(){
 
 }
 $('#signupType').addEventListener('change',syncSignupCompany);
-for(const prefix of ['signup','account']){
-  $('#'+prefix+'Siret').addEventListener('input',()=>syncCompanyFields(prefix));
-  $('#'+prefix+'VatStatus').addEventListener('change',()=>syncCompanyFields(prefix));
+for(const prefix of ['signup']){
+  $('#'+prefix+'Siret')?.addEventListener('input',()=>syncCompanyFields(prefix));
+  $('#'+prefix+'VatStatus')?.addEventListener('change',()=>syncCompanyFields(prefix));
 }
 $('#editCompanyBtn').addEventListener('click',()=>{$('#companyForm').classList.remove('hidden');$('#editCompanyBtn').classList.add('hidden');$('#companySaveStatus').textContent='';const d=currentUser?.user_metadata?.company_showroom?.description||'';$('#accountCompanyDescription').value=d;$('#accountCompanyDescriptionCount').textContent=String(d.length);$('#accountCompanyDescription').focus()});
 $('#cancelCompanyBtn').addEventListener('click',()=>{renderCompanyAccount();$('#editCompanyBtn').focus()});
