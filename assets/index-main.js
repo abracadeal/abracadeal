@@ -5333,10 +5333,16 @@ function validateProCrop(){
   canvas.width=isLogo?400:1500;canvas.height=isLogo?400:500;
   const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
   ctx.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
-  canvas.toBlob(blob=>{
+  canvas.toBlob(async blob=>{
     if(!blob){toast('Impossible de préparer cette image.');return}
     if(isLogo)proShowroomPendingLogo=blob;else proShowroomPendingBanner=blob;
     markShowroomMediaDirty();paintProShowroomMedia();closeProCrop();
+    const saveBtn=document.getElementById('saveCompanyShowroomBtn');
+    if(saveBtn){
+      saveBtn.hidden=false;
+      saveBtn.textContent='Enregistrement…';
+      saveBtn.click();
+    }
   },'image/webp',0.86);
 }
 function refreshProShowroomPreview(){
