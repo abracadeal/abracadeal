@@ -370,8 +370,8 @@ async function requestCompanyCheck(action,siret){
   if(!data?.ok||data.company?.siret!==siret||(action==='verify'&&!data.verified)) throw new Error(data?.error||'La vérification du SIRET n’a pas été confirmée.');
   return data.company;
 }
-for(const prefix of ['signup','account']){
-  $('#'+prefix+'LookupBtn').addEventListener('click',async()=>{
+for(const prefix of ['signup']){
+  $('#'+prefix+'LookupBtn')?.addEventListener('click',async()=>{
     const btn=$('#'+prefix+'LookupBtn'),status=$('#'+prefix+'LookupStatus');
     const siret=$('#'+prefix+'Siret').value.replace(/\s/g,'');
     btn.disabled=true;status.textContent='Recherche dans le registre…';
@@ -384,7 +384,7 @@ for(const prefix of ['signup','account']){
       if(prefix==='signup') saveSignupDraft();
     }catch(error){status.textContent=error.message;}finally{btn.disabled=false;}
   });
-  $('#'+prefix+'Siret').addEventListener('input',()=>{$('#'+prefix+'LookupStatus').textContent='';});
+  $('#'+prefix+'Siret')?.addEventListener('input',()=>{const el=$('#'+prefix+'LookupStatus');if(el)el.textContent='';});
 }
 
 function readCompanyFields(prefix){
