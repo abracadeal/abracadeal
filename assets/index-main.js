@@ -5200,12 +5200,12 @@ document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{
  const file=e.target.files?.[0],cover=document.getElementById('proShowroomCoverLive');if(!file||!cover)return;
  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Bannière : utilisez PNG, JPG ou WebP.');e.target.value='';return}
  if(file.size>5*1024*1024){toast('La bannière doit faire moins de 5 Mo.');e.target.value='';return}
- cover.style.backgroundImage='url("'+URL.createObjectURL(file)+'")';markShowroomMediaDirty();
+ const bannerUrl=URL.createObjectURL(file);if(cover)cover.style.backgroundImage='url("'+bannerUrl+'")';if(crop){crop.style.backgroundImage='url("'+bannerUrl+'")';crop.querySelector('span')?.remove();}markShowroomMediaDirty();
 });
 function updateProBannerFrame(){
- const c=document.getElementById('proShowroomCoverLive');if(!c)return;
+ const c=document.getElementById('proShowroomCoverLive'),p=document.getElementById('proBannerCropPreview');if(!c&&!p)return;
  const z=document.getElementById('proBannerZoom')?.value||100,x=document.getElementById('proBannerX')?.value||50,y=document.getElementById('proBannerY')?.value||50,h=document.getElementById('proBannerHeight')?.value||300;
- c.style.setProperty('--pro-banner-zoom',z+'%');c.style.setProperty('--pro-banner-x',x+'%');c.style.setProperty('--pro-banner-y',y+'%');c.style.setProperty('--pro-banner-height',h+'px');
+ [c,p].filter(Boolean).forEach(el=>{el.style.backgroundSize=z+'% auto';el.style.backgroundPosition=x+'% '+y+'%';});if(c)c.style.setProperty('--pro-banner-height',h+'px');if(p)p.style.height=Math.max(160,Math.min(320,Number(h)*.72))+'px';
 }
 ['proBannerZoom','proBannerX','proBannerY','proBannerHeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{updateProBannerFrame();markShowroomMediaDirty();}));
 document.getElementById('proBannerReset')?.addEventListener('click',()=>{[['proBannerZoom',100],['proBannerX',50],['proBannerY',50],['proBannerHeight',300]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});updateProBannerFrame();markShowroomMediaDirty();});
