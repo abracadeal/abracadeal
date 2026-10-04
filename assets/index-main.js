@@ -5167,8 +5167,8 @@ function refreshProDashboard(){
   set('proDashActiveValue',active); set('proDashPendingValue',pending);
   set('proDashQuotaValue',active+' / …');
   sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle().then(({data})=>{
-    if(!data||!['active','trialing'].includes(String(data.status||'').toLowerCase()))return set('proDashQuotaValue',active+' / 20');
-    const quota=(String(data.plan_code||'').match(/250|100|50|20/)||['20'])[0];
+    const code=String(data?.plan_code||currentProfile?.pro_plan||currentProfile?.plan||'').toLowerCase();
+    const quota=(code.match(/250|100|50|20/)||[])[0] || (currentProfile?.account_type==='professionnel'?'250':'20');
     set('proDashQuotaValue',active+' / '+quota);
   });
   const unread=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesUnread');
