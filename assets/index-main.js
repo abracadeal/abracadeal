@@ -5193,11 +5193,13 @@ document.addEventListener('click',e=>{
  }
 });
 
+let proShowroomMediaDirty=false;
+function markShowroomMediaDirty(){proShowroomMediaDirty=true;const b=document.getElementById('saveCompanyShowroomBtn');if(b){b.hidden=false;b.textContent='Enregistrer les modifications';}}
 document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{
  const file=e.target.files?.[0],cover=document.getElementById('proShowroomCoverLive');if(!file||!cover)return;
  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Bannière : utilisez PNG, JPG ou WebP.');e.target.value='';return}
  if(file.size>5*1024*1024){toast('La bannière doit faire moins de 5 Mo.');e.target.value='';return}
- cover.style.backgroundImage='url("'+URL.createObjectURL(file)+'")';
+ cover.style.backgroundImage='url("'+URL.createObjectURL(file)+'")';markShowroomMediaDirty();
 });
 document.getElementById('viewProShowroomFullBtn')?.addEventListener('click',()=>{
  const box=document.querySelector('.pro-showroom-live');if(!box)return;refreshProShowroomPreview();
@@ -5211,12 +5213,12 @@ document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
  if(!file){img.hidden=true;img.removeAttribute('src');return}
  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Logo : utilisez PNG, JPG ou WebP.');e.target.value='';return}
  if(file.size>3*1024*1024){toast('Le logo doit faire moins de 3 Mo.');e.target.value='';return}
- const url=URL.createObjectURL(file);img.src=url;img.hidden=false;if(live){live.textContent='';live.style.backgroundImage=`url("${url}")`;}
+ const url=URL.createObjectURL(file);img.src=url;img.hidden=false;if(live){live.textContent='';live.style.backgroundImage=`url("${url}")`;}markShowroomMediaDirty();
 });
 
 document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{
  const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);
- const live=document.getElementById('proShowroomDescriptionLive');if(live)live.textContent=e.target.value.trim()||'Votre présentation apparaîtra ici.';
+ const live=document.getElementById('proShowroomDescriptionLive');if(live)live.textContent=e.target.value.trim()||'Votre présentation apparaîtra ici.';markShowroomMediaDirty();
 });
 function refreshProShowroomPreview(){
  const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive'),city=document.getElementById('proShowroomCityLive');
