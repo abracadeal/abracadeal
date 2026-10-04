@@ -5180,12 +5180,12 @@ document.addEventListener('click',e=>{
 window.addEventListener('abracadeal:auth',()=>setTimeout(refreshProDashboard,0));
 
 function syncProDashboardEntry(){
- const b=document.getElementById('desktopProDashboardBtn');
+ const b=document.getElementById('heroProDashboardBtn');
  if(b)b.classList.toggle('hidden',!(currentUser&&currentProfile?.account_type==='professionnel'));
 }
 window.addEventListener('abracadeal:auth',syncProDashboardEntry);
 document.addEventListener('click',e=>{
- if(e.target.closest('#desktopProDashboardBtn')){
+ if(e.target.closest('#heroProDashboardBtn')){
    openModal('accountModal');
    setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
  }
