@@ -3823,7 +3823,7 @@ window.openAd=id=>{
             ${canDelete?`
               <div class="detail-owner-actions">
                 ${currentProfile?.is_admin?`<button class="mini-btn" onclick="closeModal('detailModal');openAdminEditAd('${a.id}')">Modifier</button>`:''}
-                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à ${a.seller_type==='professionnel'?'30':'12'} photos · 2,99 €</button>`:''}
+                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Option photos en cours de refonte</button>`:''}
                 <button class="mini-btn danger" onclick="closeModal('detailModal');${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>
               </div>`:''}
 
