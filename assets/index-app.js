@@ -542,112 +542,23 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(document.getElementById('adminDbQuery')?.value?.trim())searchAdminDatabase();
   });
 
-  const PRO_PLAN_EXPECTED={
-    pro_20:{listing_limit:20,amount_cents:2990},
-    pro_50:{listing_limit:50,amount_cents:5990},
-    pro_100:{listing_limit:100,amount_cents:9990},
-    pro_250:{listing_limit:250,amount_cents:19990}
-  };
-  function validateProPlans(plans){
-    const seen=new Set();
-    for(const plan of plans){
-      const expected=PRO_PLAN_EXPECTED[plan?.code];
-      if(!expected)throw new Error('Formule Pro inconnue : '+String(plan?.code||'—'));
-      if(Number(plan.listing_limit)!==expected.listing_limit||Number(plan.amount_cents)!==expected.amount_cents){
-        throw new Error('Configuration tarifaire Pro incohérente pour '+plan.code+'. Paiement bloqué par sécurité.');
-      }
-      seen.add(plan.code);
-    }
-    for(const code of Object.keys(PRO_PLAN_EXPECTED)){
-      if(!seen.has(code))throw new Error('Formule Pro manquante : '+code);
-    }
-    return true;
-  }
-
+  const PRO_PLAN_EXPECTED={};
+  function validateProPlans(){return true;}
   async function loadProPlans(){
     const grid=document.getElementById('proPlanGrid');
-    if(!grid)return [];
-    const {data,error}=await sb.rpc('get_pro_subscription_plans');
-    if(error){grid.innerHTML='<div class="note">Impossible de charger les formules pour le moment.</div>';throw error}
-    const plans=Array.isArray(data)?data:[];
-    validateProPlans(plans);
-    grid.innerHTML=plans.map(p=>`
-      <button type="button" class="pro-plan-card" data-pro-plan="${p.code}">
-        <h3>${Number(p.listing_limit).toLocaleString('fr-FR')} annonces</h3>
-        <div class="pro-plan-price">${moneyFromCents(p.amount_cents)} <small>HT / mois</small></div>
-        <div class="pro-plan-desc">Jusqu’à ${Number(p.listing_limit).toLocaleString('fr-FR')} annonces actives · import et gestion du stock Pro.</div>
-        <span class="pro-plan-choose">Choisir cette formule</span>
-      </button>`).join('');
-    grid.querySelectorAll('[data-pro-plan]').forEach(btn=>btn.addEventListener('click',()=>startProPlanCheckout(btn.dataset.proPlan,btn)));
-    return plans;
-  }
-
-  async function startProPlanCheckout(planCode,button){
-    if(proPlanCheckoutBusy)return;
-    if(!PRO_PLAN_EXPECTED[planCode]){
-      toast('Formule Pro invalide');
-      return;
-    }
-    proPlanCheckoutBusy=true;
+    if(grid)grid.innerHTML='<div class="note">Tarification Pro en cours de refonte. Aucune formule payante n’est proposée pour le moment.</div>';
     const status=document.getElementById('proPlanStatus');
-    const old=button?.querySelector('.pro-plan-choose')?.textContent;
-    try{
-      if(status)status.textContent='Préparation de votre abonnement sécurisé…';
-      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent='Préparation…';
-
-      const siret=currentUser?.user_metadata?.company_registration?.siret;
-      if(siret){
-        try{await requestCompanyCheck('verify',String(siret).replace(/\s/g,''));}
-        catch(e){console.warn('Vérification Pro à finaliser',e)}
-      }
-
-      const {data,error}=await sb.functions.invoke('create-pro-subscription-order',{body:{plan_code:planCode}});
-      if(error){
-        let detail=null;
-        try{detail=await error.context?.json()}catch{}
-        throw new Error(detail?.error||detail?.message||error.message||'Impossible de préparer l’abonnement');
-      }
-      if(!data?.checkout_url)throw new Error(data?.error||'Lien Stripe indisponible');
-      if(status)status.textContent=data.message||'Redirection vers la validation sécurisée…';
-      try{
-        sessionStorage.setItem('abraca_pro_plan_pending','1');
-        if(!history.state?.abracaProPlanReturn){
-          history.pushState({...history.state,abracaProPlanReturn:true},document.title,location.href);
-        }
-      }catch(_){}
-      location.href=data.checkout_url;
-    }catch(err){
-      console.error(err);
-      if(status)status.textContent=err.message||'Impossible de préparer l’abonnement.';
-      toast(err.message||'Impossible de préparer l’abonnement');
-      if(button?.querySelector('.pro-plan-choose'))button.querySelector('.pro-plan-choose').textContent=old||'Choisir cette formule';
-      proPlanCheckoutBusy=false;
-    }
+    if(status)status.textContent='Les nouveaux tarifs seront ajoutés après validation.';
+    return [];
   }
-
-  async function ensureProPlanSelection({force=false}={}){
-    if(proPlanCheckBusy||!sb||!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return false;
-    proPlanCheckBusy=true;
-    try{
-      const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status,current_period_end,free_until').eq('user_id',currentUser.id).maybeSingle();
-      if(error && !/0 rows/i.test(error.message||''))console.warn('Abonnement Pro indisponible',error);
-      const accessUntilRaw=data?.free_until||data?.current_period_end||null;
-      const accessUntil=accessUntilRaw?new Date(accessUntilRaw).getTime():0;
-      const canceledButStillEntitled=data?.status==='canceled'&&Number.isFinite(accessUntil)&&accessUntil>Date.now();
-      const complete=!!data && (['trialing','active'].includes(data.status)||canceledButStillEntitled);
-      if(complete){
-        try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
-        if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
-        return false;
-      }
-      try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
-      await loadProPlans();
-      closeModal('accountModal');
-      openModal('proPlanModal');
-      return true;
-    }finally{
-      proPlanCheckBusy=false;
-    }
+  async function startProPlanCheckout(){
+    toast('Tarification Pro en cours de refonte.');
+    await loadProPlans();
+  }
+  async function ensureProPlanSelection(){
+    try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+    if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
+    return false;
   }
   window.ensureProPlanSelection=ensureProPlanSelection;
 
@@ -658,15 +569,8 @@ document.addEventListener('DOMContentLoaded',()=>{
   },true);
 
   function restoreMandatoryProPlanGate(){
-    if(!currentUser||currentProfile?.is_admin||currentProfile?.account_type!=='professionnel')return;
-    let pending=false;
-    try{pending=sessionStorage.getItem('abraca_pro_plan_pending')==='1'}catch(_){}
-    if(pending){
-      closeModal('accountModal');
-      openModal('proPlanModal');
-      loadProPlans().catch(error=>console.error('Formules Pro indisponibles',error));
-    }
-    ensureProPlanSelection();
+    if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
+    try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
   }
 
   window.addEventListener('abracadeal:auth',()=>{
