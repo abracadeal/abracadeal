@@ -34,7 +34,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1'){
         </button>
         <div id="accountMenuDropdown" class="hostaccountdropdown hidden">
           <a href="vacances.html">Mode voyageur</a>
-          <a href="espace-hote.html?billing=manage">Gérer l’abonnement</a>
+          <a href="vacances.html#devenir-hote">Tarification hôte</a>
           <button id="logoutTop" class="hidden" type="button">Déconnexion</button>
         </div>
       </div>
@@ -170,7 +170,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1'){
         <input id="oLegalCheck" type="checkbox">
         <span>Je certifie être autorisé à proposer ce logement à la location de courte durée et que les informations et numéros renseignés sont exacts. <span class="req">*</span></span>
       </label>
-      <div class="onboarding-note">Abracadeal conserve l’adresse exacte dans l’espace privé. Les informations nécessaires à l’annonce pourront ensuite être affichées conformément à la réglementation applicable.</div><div class="onboarding-note"><strong>Carte bancaire obligatoire pour tous les hôtes.</strong> Pour les 500 premiers logements, aucun débit pendant 12 mois : Stripe enregistre simplement le moyen de paiement pour l’abonnement futur. L’inscription hôte n’est finalisée qu’après cette étape.</div>
+      <div class="onboarding-note">Abracadeal conserve l’adresse exacte dans l’espace privé. Les informations nécessaires à l’annonce pourront ensuite être affichées conformément à la réglementation applicable.</div><div class="onboarding-note"><strong>Tarification hôte en cours de refonte.</strong> Aucun ancien abonnement ni moyen de paiement n’est demandé pour le moment. Les nouvelles conditions seront affichées avant toute activation payante.</div>
     </section>
 
     <div class="onboarding-actions">
@@ -321,7 +321,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1'){
   </main>
 </div>
 
-<script src="assets/espace-hote.js?v=20261002-1"></script>
+<script src="assets/espace-hote.js?v=20261004-pricing-reset1"></script>
 <script id="abraca-host-embedded-bridge">
 (()=>{
   if(new URLSearchParams(location.search).get('embedded')!=='1')return;
