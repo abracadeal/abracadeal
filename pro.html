@@ -11,9 +11,9 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-*{box-sizing:border-box}body{margin:0;background:#f6f2f7;color:#28172f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit}.top{background:#1b0d2d;color:#fff}.topin{max-width:1180px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:900;font-size:22px;text-decoration:none}.back{color:#fff;text-decoration:none;font-weight:750}.wrap{max-width:1180px;margin:26px auto;padding:0 18px}.card{background:#fff;border:1px solid #eadfed;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px #2d123b14}.banner{width:100%;aspect-ratio:3/1;background:linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43) center/cover no-repeat}.identity{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:22px 28px 16px}.logo{width:96px;height:96px;border-radius:20px;background:#fff center/cover no-repeat;border:4px solid #fff;box-shadow:0 6px 20px #0002;display:grid;place-items:center;color:#6d2b88;font-weight:900;font-size:26px}.name{font-size:28px;font-weight:900;line-height:1.1}.meta{margin-top:7px;color:#716775;display:flex;gap:9px;flex-wrap:wrap;align-items:center}.badge{background:#f0e6f5;color:#5d2371;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}.share{border:1px solid #6d2b88;background:#fff;color:#6d2b88;border-radius:12px;padding:10px 15px;font-weight:850;cursor:pointer}.tabs{display:flex;gap:4px;border-bottom:1px solid #ece4ee;padding:0 22px;overflow:auto}.tabs button{border:0;background:none;padding:14px 15px;font-weight:850;white-space:nowrap;cursor:pointer}.tabs button.active{color:#6d2b88;border-bottom:3px solid #6d2b88}.pane{padding:22px}.tools{display:grid;grid-template-columns:1fr 190px 190px;gap:10px;margin-bottom:18px}.tools input,.tools select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 12px;background:#fff}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.ad{display:block;text-decoration:none;border:1px solid #e9e1eb;border-radius:16px;overflow:hidden;background:#fff;transition:.15s transform,.15s box-shadow}.ad:hover{transform:translateY(-2px);box-shadow:0 10px 26px #32154116}.photo{aspect-ratio:4/3;background:#eee6f0 center/cover no-repeat}.adbody{padding:11px}.adtitle{font-weight:850;line-height:1.25;min-height:2.5em}.price{font-weight:900;color:#5b2170;margin-top:6px}.city{color:#746a77;font-size:13px;margin-top:4px}.more{display:block;margin:20px auto 0;border:0;border-radius:12px;background:#6d2b88;color:#fff;padding:11px 18px;font-weight:850;cursor:pointer}.about{display:grid;grid-template-columns:1.4fr .6fr;gap:22px}.box{border:1px solid #e9e1eb;border-radius:16px;padding:18px}.box h3{margin-top:0}.facts{display:grid;gap:12px}.fact{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eee7ef;padding-bottom:10px}.review{border:1px solid #e9e1eb;border-radius:16px;padding:16px;margin-bottom:12px}.stars{color:#a46b1b;font-weight:900}.muted{color:#776c7b}.empty{padding:30px;text-align:center;color:#776c7b}.error{max-width:620px;margin:80px auto;background:#fff;border-radius:20px;padding:30px;text-align:center;border:1px solid #eadfed}.error a{display:inline-block;margin-top:12px;color:#6d2b88;font-weight:850}
+*{box-sizing:border-box}body{margin:0;background:#f6f2f7;color:#28172f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit}.top{background:#1b0d2d;color:#fff}.topin{max-width:1180px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:900;font-size:22px;text-decoration:none}.back{color:#fff;text-decoration:none;font-weight:750}.wrap{max-width:1180px;margin:26px auto;padding:0 18px}.card{background:#fff;border:1px solid #eadfed;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px #2d123b14}.banner{width:100%;aspect-ratio:3/1;background:linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43) center/cover no-repeat}.identity{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:22px 28px 16px}.logo{width:96px;height:96px;border-radius:20px;background:#fff center/cover no-repeat;border:4px solid #fff;box-shadow:0 6px 20px #0002;display:grid;place-items:center;color:#6d2b88;font-weight:900;font-size:26px}.name{font-size:28px;font-weight:900;line-height:1.1}.meta{margin-top:7px;color:#716775;display:flex;gap:9px;flex-wrap:wrap;align-items:center}.badge{background:#f0e6f5;color:#5d2371;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}.identity-actions{display:flex;gap:10px;align-items:center}.share,.follow{border:1px solid #6d2b88;background:#fff;color:#6d2b88;border-radius:12px;padding:10px 15px;font-weight:850;cursor:pointer}.follow{background:#6d2b88;color:#fff}.follow.following{background:#f1e7f5;color:#5d2371}.follow:disabled{opacity:.65;cursor:default}.tabs{display:flex;gap:4px;border-bottom:1px solid #ece4ee;padding:0 22px;overflow:auto}.tabs button{border:0;background:none;padding:14px 15px;font-weight:850;white-space:nowrap;cursor:pointer}.tabs button.active{color:#6d2b88;border-bottom:3px solid #6d2b88}.pane{padding:22px}.tools{display:grid;grid-template-columns:1fr 190px 190px;gap:10px;margin-bottom:18px}.tools input,.tools select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 12px;background:#fff}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.ad{display:block;text-decoration:none;border:1px solid #e9e1eb;border-radius:16px;overflow:hidden;background:#fff;transition:.15s transform,.15s box-shadow}.ad:hover{transform:translateY(-2px);box-shadow:0 10px 26px #32154116}.photo{aspect-ratio:4/3;background:#eee6f0 center/cover no-repeat}.adbody{padding:11px}.adtitle{font-weight:850;line-height:1.25;min-height:2.5em}.price{font-weight:900;color:#5b2170;margin-top:6px}.city{color:#746a77;font-size:13px;margin-top:4px}.more{display:block;margin:20px auto 0;border:0;border-radius:12px;background:#6d2b88;color:#fff;padding:11px 18px;font-weight:850;cursor:pointer}.about{display:grid;grid-template-columns:1.4fr .6fr;gap:22px}.box{border:1px solid #e9e1eb;border-radius:16px;padding:18px}.box h3{margin-top:0}.facts{display:grid;gap:12px}.fact{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eee7ef;padding-bottom:10px}.review{border:1px solid #e9e1eb;border-radius:16px;padding:16px;margin-bottom:12px}.stars{color:#a46b1b;font-weight:900}.muted{color:#776c7b}.empty{padding:30px;text-align:center;color:#776c7b}.error{max-width:620px;margin:80px auto;background:#fff;border-radius:20px;padding:30px;text-align:center;border:1px solid #eadfed}.error a{display:inline-block;margin-top:12px;color:#6d2b88;font-weight:850}
 @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tools{grid-template-columns:1fr 1fr}.tools input{grid-column:1/-1}.about{grid-template-columns:1fr}}
-@media(max-width:620px){.wrap{margin:14px auto;padding:0 10px}.card{border-radius:18px}.identity{grid-template-columns:72px 1fr;padding:16px 14px 12px;gap:12px}.logo{width:72px;height:72px;border-radius:16px;font-size:20px}.name{font-size:21px}.identity .share{grid-column:1/-1;width:100%}.tabs{padding:0 8px}.pane{padding:14px 10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tools{grid-template-columns:1fr}.tools input{grid-column:auto}.adbody{padding:9px}.adtitle{font-size:14px}.price{font-size:15px}.topin{padding:12px}.brand{font-size:19px}}
+@media(max-width:620px){.wrap{margin:14px auto;padding:0 10px}.card{border-radius:18px}.identity{grid-template-columns:72px 1fr;padding:16px 14px 12px;gap:12px}.logo{width:72px;height:72px;border-radius:16px;font-size:20px}.name{font-size:21px}.identity .identity-actions{grid-column:1/-1;width:100%;display:grid;grid-template-columns:1fr 1fr}.identity .share,.identity .follow{width:100%}.tabs{padding:0 8px}.pane{padding:14px 10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tools{grid-template-columns:1fr}.tools input{grid-column:auto}.adbody{padding:9px}.adtitle{font-size:14px}.price{font-size:15px}.topin{padding:12px}.brand{font-size:19px}}
 </style>
 </head>
 <body>
@@ -25,7 +25,7 @@ const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const id=new URLSearchParams(location.search).get('id');
 const app=document.getElementById('app');
-let profile=null,showroom=null,listings=[],reviews=[],filtered=[],shown=24;
+let profile=null,showroom=null,listings=[],reviews=[],filtered=[],shown=24,currentUser=null,isFollowing=false,followerCount=0;
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const money=v=>v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €';
 const showroomUrl=path=>path?sb.storage.from('pro-showroom').getPublicUrl(path).data?.publicUrl||'':'';
@@ -52,17 +52,47 @@ function renderShell(){
   app.innerHTML='<div class="card">'+
     '<div class="banner"'+(banner?' style="background-image:url(&quot;'+esc(banner)+'&quot;)"':'')+'></div>'+
     '<div class="identity"><div class="logo"'+(logo?' style="background-image:url(&quot;'+esc(logo)+'&quot;)"':'')+'>'+(logo?'':esc(initials(profile.display_name)))+'</div>'+
-    '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+'<span>★ '+esc(r.label)+'</span></div></div>'+
-    '<button class="share" id="shareBtn" type="button">Partager</button></div>'+
+    '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+'<span>★ '+esc(r.label)+'</span><span id="followersCount">'+followerCount+' abonné'+(followerCount>1?'s':'')+'</span></div></div>'+
+    '<div class="identity-actions"><button class="follow'+(isFollowing?' following':'')+'" id="followBtn" type="button">'+(isFollowing?'✓ Abonné':'♡ S’abonner')+'</button><button class="share" id="shareBtn" type="button">Partager</button></div></div>'+
     '<nav class="tabs"><button class="active" data-tab="ads">Annonces ('+listings.length+')</button><button data-tab="about">À propos</button><button data-tab="reviews">Avis ('+reviews.length+')</button></nav>'+
     '<section class="pane" id="pane"></section></div>';
   document.getElementById('shareBtn').onclick=sharePage;
+  document.getElementById('followBtn').onclick=toggleFollow;
   document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
   setTab('ads');
 }
 async function sharePage(){
   const data={title:document.title,text:'Découvrez ce showroom professionnel sur Abracadeal',url:location.href};
   try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert('Lien copié.');}}catch(e){if(e?.name!=='AbortError')prompt('Copiez ce lien :',location.href);}
+}
+
+async function toggleFollow(){
+  const btn=document.getElementById('followBtn');
+  if(!currentUser){
+    alert('Connectez-vous à Abracadeal pour vous abonner à ce professionnel.');
+    location.href='index.html';
+    return;
+  }
+  if(!btn)return;
+  btn.disabled=true;
+  try{
+    if(isFollowing){
+      const {error}=await sb.from('pro_followers').delete().eq('pro_id',id).eq('follower_id',currentUser.id);
+      if(error)throw error;
+      isFollowing=false;followerCount=Math.max(0,followerCount-1);
+    }else{
+      const {error}=await sb.from('pro_followers').insert({pro_id:id,follower_id:currentUser.id});
+      if(error)throw error;
+      isFollowing=true;followerCount+=1;
+    }
+    btn.classList.toggle('following',isFollowing);
+    btn.textContent=isFollowing?'✓ Abonné':'♡ S’abonner';
+    const count=document.getElementById('followersCount');
+    if(count)count.textContent=followerCount+' abonné'+(followerCount>1?'s':'');
+  }catch(error){
+    console.error(error);
+    alert('Impossible de modifier votre abonnement pour le moment.');
+  }finally{btn.disabled=false}
 }
 function setTab(tab){
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
@@ -108,6 +138,16 @@ async function init(){
   ]);
   if(p.error||!p.data||p.data.account_type!=='professionnel'){fail();return}
   profile=p.data;showroom=s.data||{};listings=l.data||[];reviews=r.data||[];
+  const [{data:sessionData},{count:followersTotal}]=await Promise.all([
+    sb.auth.getSession(),
+    sb.from('pro_followers').select('*',{count:'exact',head:true}).eq('pro_id',id)
+  ]);
+  currentUser=sessionData?.session?.user||null;
+  followerCount=Number(followersTotal||0);
+  if(currentUser){
+    const {data:followRow}=await sb.from('pro_followers').select('pro_id').eq('pro_id',id).eq('follower_id',currentUser.id).maybeSingle();
+    isFollowing=!!followRow;
+  }
   renderShell();
 }
 init().catch(err=>{console.error(err);fail()});
