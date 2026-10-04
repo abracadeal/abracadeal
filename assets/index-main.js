@@ -5153,3 +5153,28 @@ window.addEventListener('pageshow',()=>{
     }
   },0);
 });
+
+
+function refreshProDashboard(){
+  const panel=document.getElementById('proDashboardPanel');
+  const isPro=!!currentUser&&currentProfile?.account_type==='professionnel';
+  panel?.classList.toggle('hidden',!isPro);
+  if(!isPro)return;
+  const mine=(allAds||[]).filter(a=>a.owner_id===currentUser.id);
+  const active=mine.filter(a=>['active','published','approved'].includes(String(a.status||'').toLowerCase())).length;
+  const pending=mine.filter(a=>String(a.status||'').toLowerCase()==='pending').length;
+  const planRaw=String(currentProfile?.pro_plan||currentProfile?.plan||'20');
+  const quota=(planRaw.match(/250|100|50|20/)||['20'])[0];
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
+  set('proDashActiveValue',active); set('proDashPendingValue',pending); set('proDashQuotaValue',active+' / '+quota);
+  const unread=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesUnread');
+  set('proDashMessagesValue',(unread?.textContent||'0').trim()||'0');
+}
+document.addEventListener('click',e=>{
+  if(e.target.closest('#proDashActive,#proDashStockBtn')){closeModal('accountModal');openMyAds();}
+  if(e.target.closest('#proDashPending')){closeModal('accountModal');openMyAds();}
+  if(e.target.closest('#proDashMessages')) document.getElementById('accountMessagesBtn')?.click();
+  if(e.target.closest('#proDashImportBtn')) document.getElementById('proImportBtn')?.click();
+  if(e.target.closest('#proDashProfileBtn')) document.getElementById('editCompanyBtn')?.click();
+});
+window.addEventListener('abracadeal:auth',()=>setTimeout(refreshProDashboard,0));
