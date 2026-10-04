@@ -1368,7 +1368,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
  </div>
 </div>
 <div class="form-grid">
- <div class="form-row full"><label for="accountCompanyBanner">Bannière du showroom</label><div class="pro-banner-upload"><input class="input" id="accountCompanyBanner" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · puis ajustez vous-même le cadrage.</small></div>
+ <div class="form-row full"><label for="accountCompanyBanner">Bannière du showroom</label><div class="pro-banner-upload" id="proBannerUploadBox"><input class="input" id="accountCompanyBanner" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · puis ajustez vous-même le cadrage.</small></div>
  <div class="pro-banner-editor" id="proBannerEditor">
   <label>Zoom <input id="proBannerZoom" type="range" min="50" max="180" value="100"></label>
   <label>Horizontal <input id="proBannerX" type="range" min="0" max="100" value="50"></label>
@@ -1376,7 +1376,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
   <label>Hauteur <input id="proBannerHeight" type="range" min="180" max="480" value="300"></label>
   <button class="btn ghost" id="proBannerReset" type="button">Réinitialiser le cadrage</button>
  </div></div>
- <div class="form-row full"><label for="accountCompanyLogo">Logo de l’entreprise</label><div class="pro-logo-upload"><img id="accountCompanyLogoPreview" alt="Aperçu du logo" hidden><div><input class="input" id="accountCompanyLogo" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · carré recommandé. Il apparaîtra sur votre page Pro.</small></div></div></div>
+ <div class="form-row full" id="proLogoUploadRow"><label for="accountCompanyLogo">Logo de l’entreprise</label><div class="pro-logo-upload"><img id="accountCompanyLogoPreview" alt="Aperçu du logo" hidden><div><input class="input" id="accountCompanyLogo" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · carré recommandé. Il apparaîtra sur votre page Pro.</small></div></div></div>
  <div class="form-row full"><label for="accountCompanyDescription">Présentation de l’entreprise</label><textarea class="input" id="accountCompanyDescription" rows="5" maxlength="1200" placeholder="Présentez votre entreprise, vos spécialités et vos services. Ce texte apparaîtra sur votre showroom Abracadeal."></textarea><small><span id="accountCompanyDescriptionCount">0</span>/1200 caractères</small></div>
  </div><p id="companySaveStatus" class="note" role="status"></p>
  <div class="form-actions"><button class="btn primary" type="button" id="viewProShowroomFullBtn">Voir ma page en grand</button><button class="btn primary" type="submit" id="saveCompanyShowroomBtn" hidden>Enregistrer les modifications</button><button class="btn ghost" type="button" id="cancelCompanyBtn">Annuler</button></div>
