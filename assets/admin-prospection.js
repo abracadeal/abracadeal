@@ -14,9 +14,9 @@ Pour les petits garages qui souhaitent tester avec une dizaine ou une vingtaine 
 
 Vos annonces peuvent être importées directement par flux, CSV ou XML, sans ressaisie.
 
-Une carte bancaire est demandée lors de l’inscription uniquement pour assurer la continuité de l’abonnement après la période offerte. Aucun prélèvement n’est effectué tant que vous restez dans les 20 annonces offertes. Le forfait 50 annonces coûte 59,90 € HT/mois et est facturé immédiatement si vous dépassez 20 annonces actives.
+La tarification Abracadeal Pro est actuellement en cours de refonte. Aucun ancien forfait n’est proposé pour le moment.
 
-Après les 12 mois offerts, l’abonnement démarre à partir de 29,90 € HT/mois selon le nombre d’annonces actives de votre formule.
+Les nouveaux tarifs et quotas seront communiqués avant toute activation payante.
 
 Découvrir l’offre Fondateurs :
 https://abracadeal.fr/pro-fondateur.html
