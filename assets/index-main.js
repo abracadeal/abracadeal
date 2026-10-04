@@ -5194,13 +5194,21 @@ document.addEventListener('click',e=>{
 });
 
 document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
- const file=e.target.files?.[0], img=document.getElementById('accountCompanyLogoPreview'); if(!img)return;
+ const file=e.target.files?.[0], img=document.getElementById('accountCompanyLogoPreview'), live=document.getElementById('proShowroomLogoLive'); if(!img)return;
  if(!file){img.hidden=true;img.removeAttribute('src');return}
  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Logo : utilisez PNG, JPG ou WebP.');e.target.value='';return}
  if(file.size>3*1024*1024){toast('Le logo doit faire moins de 3 Mo.');e.target.value='';return}
- img.src=URL.createObjectURL(file);img.hidden=false;
+ const url=URL.createObjectURL(file);img.src=url;img.hidden=false;if(live){live.textContent='';live.style.backgroundImage=`url("${url}")`;}
 });
 
 document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{
  const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);
+ const live=document.getElementById('proShowroomDescriptionLive');if(live)live.textContent=e.target.value.trim()||'Votre présentation apparaîtra ici.';
 });
+function refreshProShowroomPreview(){
+ const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive');
+ if(n)n.textContent=currentProfile?.display_name||currentUser?.user_metadata?.display_name||'Ma page Pro';
+ if(p)p.textContent=currentProfile?.phone||'Téléphone de contact';
+ const desc=currentUser?.user_metadata?.company_showroom?.description||'';if(d)d.textContent=desc||'Votre présentation apparaîtra ici.';
+}
+document.getElementById('editCompanyBtn')?.addEventListener('click',()=>setTimeout(refreshProShowroomPreview,0));
