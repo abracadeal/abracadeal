@@ -5190,3 +5190,11 @@ document.addEventListener('click',e=>{
    setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
  }
 });
+
+document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
+ const file=e.target.files?.[0], img=document.getElementById('accountCompanyLogoPreview'); if(!img)return;
+ if(!file){img.hidden=true;img.removeAttribute('src');return}
+ if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Logo : utilisez PNG, JPG ou WebP.');e.target.value='';return}
+ if(file.size>3*1024*1024){toast('Le logo doit faire moins de 3 Mo.');e.target.value='';return}
+ img.src=URL.createObjectURL(file);img.hidden=false;
+});
