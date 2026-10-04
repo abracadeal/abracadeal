@@ -113,7 +113,9 @@ window.addEventListener('load', abracadealForceTopOnReload);
 #legalModal summary,#rulesModal summary,#cookiesModal summary,#rankingModal summary{font-size:13px!important}
 #cguModal h3,#privacyModal h3,#helpModal h3,#safetyModal h3,#contactModal h3{font-size:15px!important}
 </style>
-</head>
+<style id="pro-dashboard-style">
+.pro-dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pro-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}.pro-dashboard-card{appearance:none;text-align:left;border:1px solid #eaddef;background:#fff;border-radius:14px;padding:15px;color:#35173f}.pro-dashboard-card strong{display:block;font-size:25px;color:#6f2388}.pro-dashboard-card span{font-size:12px;font-weight:700}.pro-dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}.pro-dashboard-actions a{text-decoration:none}@media(max-width:700px){.pro-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pro-dashboard-actions>*{flex:1 1 46%}}
+</style></head>
 <body>
 
 <div class="portrait-only-overlay" aria-live="polite" aria-label="Mode portrait requis">
@@ -1289,7 +1291,22 @@ window.addEventListener('load', abracadealForceTopOnReload);
   <div id="adminDbResults" class="admin-db-results"></div>
 </section>
 
-        <section id="companyAccountSection" class="profile-edit-box hidden">
+        <section id="proDashboardPanel" class="profile-edit-box hidden" aria-live="polite">
+  <div class="pro-dashboard-head"><div><h3>Tableau de bord Pro</h3><p class="note">Pilotez votre stock et votre activité Abracadeal.</p></div><button class="btn primary publish-trigger" type="button">+ Publier une annonce</button></div>
+  <div class="pro-dashboard-grid">
+    <button class="pro-dashboard-card" type="button" id="proDashActive"><strong id="proDashActiveValue">—</strong><span>Annonces actives</span></button>
+    <button class="pro-dashboard-card" type="button" id="proDashPending"><strong id="proDashPendingValue">—</strong><span>En attente</span></button>
+    <button class="pro-dashboard-card" type="button" id="proDashMessages"><strong id="proDashMessagesValue">—</strong><span>Messages</span></button>
+    <div class="pro-dashboard-card"><strong id="proDashQuotaValue">—</strong><span>Quota utilisé</span></div>
+  </div>
+  <div class="pro-dashboard-actions">
+    <button class="btn ghost" type="button" id="proDashStockBtn">Gérer mon stock</button>
+    <button class="btn ghost" type="button" id="proDashImportBtn">Importer mon stock</button>
+    <button class="btn ghost" type="button" id="proDashProfileBtn">Ma vitrine Pro</button>
+    <a class="btn ghost" href="vendeur-tendances.html">Tendances acheteurs</a>
+  </div>
+</section>
+<section id="companyAccountSection" class="profile-edit-box hidden">
           <h3>Mon espace professionnel</h3>
           <div style="margin:12px 0 18px;padding:15px;border:1px solid #e8d8ee;border-radius:14px;background:#faf5fc"><strong style="display:block;color:#451657;margin-bottom:6px">Tendances du marché</strong><p class="note">Découvrez les recherches enregistrées par les acheteurs, regroupées anonymement.</p><a class="btn primary" href="vendeur-tendances.html" style="display:inline-block;text-decoration:none">Voir les tendances →</a></div>
           <dl id="companySummary" class="profile-summary"></dl>
