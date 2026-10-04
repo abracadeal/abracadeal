@@ -5198,3 +5198,7 @@ document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
  if(file.size>3*1024*1024){toast('Le logo doit faire moins de 3 Mo.');e.target.value='';return}
  img.src=URL.createObjectURL(file);img.hidden=false;
 });
+
+document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{
+ const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);
+});
