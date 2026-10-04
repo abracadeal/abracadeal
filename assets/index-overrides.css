@@ -1806,3 +1806,6 @@
 
 /* Compte particulier : masquer totalement l’emplacement Pro/Pro, y compris son cadre forcé par les styles desktop/tablette. */
 #b2bDiscovery.hidden{display:none!important}
+
+/* 2026-10-04: retrait définitif du raccourci Vacances du header desktop */
+header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
