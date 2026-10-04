@@ -5201,6 +5201,13 @@ document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{
  if(file.size>5*1024*1024){toast('La bannière doit faire moins de 5 Mo.');e.target.value='';return}
  cover.style.backgroundImage='url("'+URL.createObjectURL(file)+'")';markShowroomMediaDirty();
 });
+function updateProBannerFrame(){
+ const c=document.getElementById('proShowroomCoverLive');if(!c)return;
+ const z=document.getElementById('proBannerZoom')?.value||100,x=document.getElementById('proBannerX')?.value||50,y=document.getElementById('proBannerY')?.value||50,h=document.getElementById('proBannerHeight')?.value||300;
+ c.style.setProperty('--pro-banner-zoom',z+'%');c.style.setProperty('--pro-banner-x',x+'%');c.style.setProperty('--pro-banner-y',y+'%');c.style.setProperty('--pro-banner-height',h+'px');
+}
+['proBannerZoom','proBannerX','proBannerY','proBannerHeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{updateProBannerFrame();markShowroomMediaDirty();}));
+document.getElementById('proBannerReset')?.addEventListener('click',()=>{[['proBannerZoom',100],['proBannerX',50],['proBannerY',50],['proBannerHeight',300]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});updateProBannerFrame();markShowroomMediaDirty();});
 document.getElementById('viewProShowroomFullBtn')?.addEventListener('click',()=>{
  const box=document.querySelector('.pro-showroom-live');if(!box)return;refreshProShowroomPreview();
  const back=document.createElement('div');back.className='pro-showroom-fullscreen-backdrop';
