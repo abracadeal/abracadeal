@@ -5163,10 +5163,14 @@ function refreshProDashboard(){
   const mine=(allAds||[]).filter(a=>a.owner_id===currentUser.id);
   const active=mine.filter(a=>['active','published','approved'].includes(String(a.status||'').toLowerCase())).length;
   const pending=mine.filter(a=>String(a.status||'').toLowerCase()==='pending').length;
-  const planRaw=String(currentProfile?.pro_plan||currentProfile?.plan||'20');
-  const quota=(planRaw.match(/250|100|50|20/)||['20'])[0];
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
-  set('proDashActiveValue',active); set('proDashPendingValue',pending); set('proDashQuotaValue',active+' / '+quota);
+  set('proDashActiveValue',active); set('proDashPendingValue',pending);
+  set('proDashQuotaValue',active+' / …');
+  sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle().then(({data})=>{
+    if(!data||!['active','trialing'].includes(String(data.status||'').toLowerCase()))return set('proDashQuotaValue',active+' / 20');
+    const quota=(String(data.plan_code||'').match(/250|100|50|20/)||['20'])[0];
+    set('proDashQuotaValue',active+' / '+quota);
+  });
   const unread=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesUnread');
   set('proDashMessagesValue',(unread?.textContent||'0').trim()||'0');
 }
