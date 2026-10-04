@@ -114,7 +114,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 #cguModal h3,#privacyModal h3,#helpModal h3,#safetyModal h3,#contactModal h3{font-size:15px!important}
 </style>
 <style id="pro-dashboard-style">
-.pro-dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pro-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}.pro-dashboard-card{appearance:none;text-align:left;border:1px solid #eaddef;background:#fff;border-radius:14px;padding:15px;color:#35173f}.pro-dashboard-card strong{display:block;font-size:25px;color:#6f2388}.pro-dashboard-card span{font-size:12px;font-weight:700}.pro-dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}.pro-dashboard-actions a{text-decoration:none}@media(max-width:700px){.pro-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pro-dashboard-actions>*{flex:1 1 46%}}
+.pro-dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pro-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}.pro-dashboard-card{appearance:none;text-align:left;border:1px solid #eaddef;background:#fff;border-radius:14px;padding:15px;color:#35173f}.pro-dashboard-card strong{display:block;font-size:25px;color:#6f2388}.pro-dashboard-card span{font-size:12px;font-weight:700}.pro-dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}.pro-dashboard-actions a{text-decoration:none}@media(max-width:700px){.pro-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pro-dashboard-actions>*{flex:1 1 46%;min-height:48px}.pro-dashboard-card{min-height:86px}.pro-dashboard-card strong{font-size:29px}}
 </style></head>
 <body>
 
@@ -1292,18 +1292,18 @@ window.addEventListener('load', abracadealForceTopOnReload);
 </section>
 
         <section id="proDashboardPanel" class="profile-edit-box hidden" aria-live="polite">
-  <div class="pro-dashboard-head"><div><h3>Tableau de bord Pro</h3><p class="note">Pilotez votre stock et votre activité Abracadeal.</p></div><button class="btn primary publish-trigger" type="button">+ Publier une annonce</button></div>
+  <div class="pro-dashboard-head"><div><h3>Mon activité Pro</h3><p class="note">Vos annonces et vos clients, accessibles en un coup d’œil.</p></div><button class="btn primary publish-trigger" type="button">+ Publier une annonce</button></div>
   <div class="pro-dashboard-grid">
-    <button class="pro-dashboard-card" type="button" id="proDashActive"><strong id="proDashActiveValue">—</strong><span>Annonces actives</span></button>
-    <button class="pro-dashboard-card" type="button" id="proDashPending"><strong id="proDashPendingValue">—</strong><span>En attente</span></button>
+    <button class="pro-dashboard-card" type="button" id="proDashActive"><strong id="proDashActiveValue">—</strong><span>En ligne</span></button>
+    <button class="pro-dashboard-card" type="button" id="proDashPending"><strong id="proDashPendingValue">—</strong><span>À valider</span></button>
     <button class="pro-dashboard-card" type="button" id="proDashMessages"><strong id="proDashMessagesValue">—</strong><span>Messages</span></button>
-    <div class="pro-dashboard-card"><strong id="proDashQuotaValue">—</strong><span>Quota utilisé</span></div>
+    <div class="pro-dashboard-card"><strong id="proDashQuotaValue">—</strong><span>Places utilisées</span></div>
   </div>
   <div class="pro-dashboard-actions">
-    <button class="btn ghost" type="button" id="proDashStockBtn">Gérer mon stock</button>
-    <button class="btn ghost" type="button" id="proDashImportBtn">Importer mon stock</button>
-    <button class="btn ghost" type="button" id="proDashProfileBtn">Ma vitrine Pro</button>
-    <a class="btn ghost" href="vendeur-tendances.html">Tendances acheteurs</a>
+    <button class="btn ghost" type="button" id="proDashStockBtn">📦 Mes annonces</button>
+    <button class="btn ghost" type="button" id="proDashImportBtn">⬆️ Importer</button>
+    <button class="btn ghost" type="button" id="proDashProfileBtn">🏪 Ma page Pro</button>
+    <a class="btn ghost" href="vendeur-tendances.html">📈 Tendances</a>
   </div>
 </section>
 <section id="companyAccountSection" class="profile-edit-box hidden">
