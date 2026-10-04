@@ -5178,3 +5178,15 @@ document.addEventListener('click',e=>{
   if(e.target.closest('#proDashProfileBtn')) document.getElementById('editCompanyBtn')?.click();
 });
 window.addEventListener('abracadeal:auth',()=>setTimeout(refreshProDashboard,0));
+
+function syncProDashboardEntry(){
+ const b=document.getElementById('desktopProDashboardBtn');
+ if(b)b.classList.toggle('hidden',!(currentUser&&currentProfile?.account_type==='professionnel'));
+}
+window.addEventListener('abracadeal:auth',syncProDashboardEntry);
+document.addEventListener('click',e=>{
+ if(e.target.closest('#desktopProDashboardBtn')){
+   openModal('accountModal');
+   setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
+ }
+});
