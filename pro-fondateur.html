@@ -1,85 +1,34 @@
 <!doctype html>
 <html lang="fr"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Offre Fondateurs Abracadeal : jusqu’à 20 annonces actives gratuites pendant 12 mois pour les 500 premiers professionnels, puis forfaits Pro selon le volume.">
+<meta name="description" content="Offre Fondateurs Abracadeal Pro. Tarification en cours de refonte.">
 <link rel="canonical" href="https://abracadeal.fr/pro-fondateur.html">
 <meta name="robots" content="index,follow">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="fr_FR">
 <meta property="og:title" content="Offre Fondateurs Pro — Abracadeal">
-<meta property="og:description" content="500 premiers professionnels : jusqu’à 20 annonces actives gratuites pendant 12 mois.">
+<meta property="og:description" content="Abracadeal prépare une nouvelle grille tarifaire Pro.">
 <meta property="og:url" content="https://abracadeal.fr/pro-fondateur.html">
 <meta property="og:image" content="https://abracadeal.fr/assets/abracadeal-banner-main.webp">
 <title>Offre Fondateurs Pro — Abracadeal</title>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#f8f4fa;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#6f218c;--pink:#e746a3;--shadow:0 18px 45px rgba(47,17,63,.09)}
-*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}.top{background:#1c0b2b;color:#fff}.topin{width:min(1050px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900}.wrap{width:min(1050px,calc(100% - 28px));margin:38px auto 60px}.hero{text-align:center}.hero h1{font-size:clamp(2.3rem,5vw,4.5rem);margin:8px 0;letter-spacing:-.04em}.hero p{max-width:720px;margin:0 auto;color:var(--muted);line-height:1.6}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#f1e7f5;color:var(--p);font-weight:850;font-size:.78rem}.plans{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:30px}.plan{background:#fff;border:1px solid var(--line);border-radius:20px;padding:20px;box-shadow:var(--shadow)}.plan h2{margin:0 0 8px}.price{font-size:1.6rem;font-weight:900;margin:12px 0}.muted{color:var(--muted);line-height:1.5}.btn{display:inline-flex;width:100%;min-height:46px;align-items:center;justify-content:center;border-radius:13px;background:linear-gradient(135deg,#842aaa,var(--pink));color:#fff;font-weight:900;margin-top:14px}.note{margin-top:24px;background:#fff;border:1px solid var(--line);border-radius:18px;padding:18px;text-align:center}.note strong{display:block;margin-bottom:5px}.small{font-size:.82rem;color:var(--muted);line-height:1.5}.statusmsg{margin:18px auto 0;max-width:760px;padding:12px 14px;border-radius:12px;background:#f1e7f5;color:#6f218c;font-weight:800;display:none}.statusmsg.show{display:block}.statusmsg.err{background:#fff0f3;color:#b4234f}.btn.loading{opacity:.65;pointer-events:none}
-@media(max-width:900px){.plans{grid-template-columns:1fr 1fr}}@media(max-width:560px){.plans{grid-template-columns:1fr}.topin{align-items:flex-start;padding:10px 0}}
-</style><link rel="icon" href="/favicon.ico?v=2" sizes="any">
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink)}a{text-decoration:none;color:inherit}.top{background:#1c0b2b;color:#fff}.topin{width:min(900px,calc(100% - 28px));margin:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px}.brand{font-weight:900}.wrap{width:min(900px,calc(100% - 28px));margin:46px auto 70px}.hero{text-align:center}.hero h1{font-size:clamp(2.2rem,5vw,4.2rem);margin:10px 0;letter-spacing:-.04em}.hero p{max-width:720px;margin:0 auto;color:var(--muted);line-height:1.65}.pill{display:inline-flex;padding:7px 10px;border-radius:999px;background:#f1e7f5;color:var(--p);font-weight:850;font-size:.78rem}.card{margin:30px auto 0;background:#fff;border:1px solid var(--line);border-radius:22px;padding:26px;box-shadow:var(--shadow);text-align:center}.card h2{margin:0 0 10px}.card p{color:var(--muted);line-height:1.6}.btn{display:inline-flex;min-height:48px;align-items:center;justify-content:center;padding:0 22px;border-radius:13px;background:linear-gradient(135deg,#842aaa,var(--pink));color:#fff;font-weight:900;margin-top:12px}
+</style>
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
-</head>
-<body>
+</head><body>
 <header class="top"><div class="topin"><a class="brand" href="index.html">Abracadeal</a><a href="index.html">← Retour</a></div></header>
 <main class="wrap">
 <section class="hero">
-<span class="pill">Offre Fondateurs · 500 premiers pros</span>
-<h1>12 mois offerts.</h1>
-<p>Les 500 premiers professionnels bénéficient de jusqu’à 20 annonces actives simultanément gratuites pendant 12 mois, avec 15 photos maximum par annonce. Une annonce vendue, louée ou retirée libère une place dans le quota. Au-delà de 20 annonces actives, le forfait correspondant au volume choisi est facturé immédiatement. Après la période offerte, l’abonnement continue selon le forfait sélectionné, avec résiliation possible à tout moment.</p><div id="statusMsg" class="statusmsg"></div>
+<span class="pill">Offre Fondateurs Pro</span>
+<h1>Nouvelle tarification en préparation.</h1>
+<p>Nous reprenons entièrement les forfaits Abracadeal Pro, les quotas et les options pour repartir sur une grille claire et cohérente. Aucun ancien tarif n’est proposé actuellement.</p>
 </section>
-<section class="plans">
-<div class="plan"><h2>20 annonces actives</h2><div class="price">29,90 € HT/mois</div><div class="muted">Facturation après les 12 mois offerts pour les Fondateurs éligibles.</div><button class="btn" type="button" data-plan="pro_20">Choisir</button></div>
-<div class="plan"><h2>50 annonces actives</h2><div class="price">59,90 € HT/mois</div><div class="muted">Facturation immédiate si vous dépassez 20 annonces actives.</div><button class="btn" type="button" data-plan="pro_50">Choisir</button></div>
-<div class="plan"><h2>100 annonces actives</h2><div class="price">99,90 € HT/mois</div><div class="muted">Pour les stocks plus importants, facturé dès la souscription.</div><button class="btn" type="button" data-plan="pro_100">Choisir</button></div>
-<div class="plan"><h2>250 annonces actives</h2><div class="price">199,90 € HT/mois</div><div class="muted">Pour les grands catalogues, facturé dès la souscription.</div><button class="btn" type="button" data-plan="pro_250">Choisir</button></div>
+<section class="card">
+<h2>Tarification en cours de refonte</h2>
+<p>Les nouveaux forfaits seront publiés ici après validation. Ils seront affichés clairement avant toute souscription ou paiement.</p>
+<a class="btn" href="index.html">Retour à Abracadeal</a>
 </section>
-<div class="note"><strong>Gratuit jusqu’à 20 annonces actives simultanément pendant 12 mois pour les 500 premiers professionnels.</strong><div class="small">Une carte bancaire peut être enregistrée pour assurer la continuité de l’abonnement. Aucun prélèvement n’est effectué pendant la période offerte tant que vous restez dans la limite de 20 annonces actives. Les forfaits supérieurs sont facturés immédiatement. Les tarifs et la date de première facturation sont affichés avant validation.</div></div>
-</main>
-<script>
-const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
-const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
-const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const statusMsg=document.getElementById('statusMsg');
-const PRO_PLAN_EXPECTED={
-  pro_20:{listing_limit:20,amount_cents:2990},
-  pro_50:{listing_limit:50,amount_cents:5990},
-  pro_100:{listing_limit:100,amount_cents:9990},
-  pro_250:{listing_limit:250,amount_cents:19990}
-};
-function msg(t,err=false){statusMsg.textContent=t;statusMsg.className='statusmsg show'+(err?' err':'')}
-async function verifyPlanPrice(planCode){
-  const expected=PRO_PLAN_EXPECTED[planCode];
-  if(!expected)throw new Error('Formule Pro invalide.');
-  const {data,error}=await sb.rpc('get_pro_subscription_plans');
-  if(error)throw new Error('Impossible de vérifier le tarif de la formule.');
-  const plans=Array.isArray(data)?data:[];
-  const plan=plans.find(p=>p.code===planCode);
-  if(!plan||Number(plan.listing_limit)!==expected.listing_limit||Number(plan.amount_cents)!==expected.amount_cents){
-    throw new Error('Configuration tarifaire incohérente. Paiement bloqué par sécurité.');
-  }
-}
-document.querySelectorAll('[data-plan]').forEach(btn=>{
-  btn.addEventListener('click',async()=>{
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session){msg('Connectez-vous avec votre compte professionnel pour choisir votre formule.',true);setTimeout(()=>location.href='index.html#accountModal',900);return}
-    btn.classList.add('loading');btn.textContent='Préparation…';
-    try{
-      await verifyPlanPrice(btn.dataset.plan);
-      const {data,error}=await sb.functions.invoke('create-pro-subscription-order',{body:{plan_code:btn.dataset.plan}});
-      if(error||!data?.checkout_url){
-        let detail=data?.error||'';
-        if(!detail&&error?.context&&typeof error.context.json==='function'){
-          try{const responseBody=await error.context.json();detail=typeof responseBody?.error==='string'?responseBody.error:''}catch(_){}
-        }
-        msg(detail||error?.message||'Impossible de préparer l’abonnement.',true);return;
-      }
-      const start=data.billing_starts_at?new Date(data.billing_starts_at).toLocaleDateString('fr-FR'):'';
-      msg(data.founder?('Aucun débit aujourd’hui. Première facturation prévue le '+start+'.'):'Redirection vers Stripe…');
-      location.href=data.checkout_url;
-    }finally{
-      btn.classList.remove('loading');btn.textContent='Choisir';
-    }
-  });
-});
-</script></body></html>
+</main></body></html>
