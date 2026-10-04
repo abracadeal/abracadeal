@@ -1814,3 +1814,16 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 @media (min-width:761px){header .abraca-dnav-vacances,header a[href="vacances.html"].header-vacances-btn,header .abraca-vacances-top{display:none!important;visibility:hidden!important;width:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}}
 
 @media(min-width:761px){.desktop-propro-nav-item{display:flex!important;align-items:center!important;gap:8px!important}.desktop-pro-dashboard-btn{white-space:nowrap!important;border-radius:999px!important;font-weight:800!important}}
+
+/* Tableau de bord Pro — bouton premium champagne, aligné avec Pro/Pro */
+@media(min-width:761px){
+ .desktop-propro-nav-item{gap:10px!important}
+ #desktopProDashboardBtn{
+  order:2!important;height:42px!important;min-height:42px!important;padding:0 20px!important;
+  border-radius:999px!important;border:1px solid rgba(255,226,155,.78)!important;
+  background:linear-gradient(135deg,#f7e4ae 0%,#d8b76d 48%,#f1d896 100%)!important;
+  color:#2a1730!important;font-weight:900!important;letter-spacing:-.01em!important;
+  box-shadow:0 5px 18px rgba(211,174,94,.20),inset 0 1px 0 rgba(255,255,255,.7)!important;
+ }
+ #desktopProDashboardBtn:hover{transform:translateY(-1px)!important;filter:brightness(1.035)!important;box-shadow:0 7px 22px rgba(211,174,94,.28)!important}
+}
