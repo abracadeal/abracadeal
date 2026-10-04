@@ -1558,9 +1558,6 @@ document.addEventListener('DOMContentLoaded',()=>{
     bar.className='abraca-desktop-actions-v2';
     bar.setAttribute('aria-label','Navigation rapide');
 
-    const vac=make('a','abraca-dnav-vacances','Vacances',icon.vacations);
-    vac.href='vacances.html';
-
     const fav=make('button','abraca-dnav-favorites','Favoris',icon.heart);
     fav.addEventListener('click',()=>{
       if(!clickOriginal(['.desktop-favorites-btn','#favoritesBtn','#headerFavoritesBtn'])){
@@ -1583,7 +1580,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(!clickOriginal(['#accountBtn','.abraca-account-trigger','#loginBtn','#signupBtn'])) openModal('accountModal');
     });
 
-    bar.append(vac,fav,msg,acct);
+    bar.append(fav,msg,acct);
     actions.appendChild(bar);
     syncBadge();
     syncAccountLabel();
