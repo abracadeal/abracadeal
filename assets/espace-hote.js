@@ -354,19 +354,13 @@ $('completeHostBtn').onclick=async()=>{
     if(privateErr){await sb.from('listings').delete().eq('id',listingId);onboardingMsg(privateErr.message,true);return}
 
     const {error:hostPendingErr}=await sb.from('vacation_hosts').update({
-      status:'pending',onboarding_completed:false,onboarding_listing_id:listingId,updated_at:now
+      status:'pending',onboarding_completed:true,onboarding_listing_id:listingId,updated_at:now
     }).eq('user_id',currentUser.id);
     if(hostPendingErr){onboardingMsg(hostPendingErr.message,true);return}
 
-    const {data:checkoutData,error:checkoutErr}=await sb.functions.invoke('create-vacation-subscription-order',{body:{listing_id:listingId}});
-    if(checkoutErr||!checkoutData?.checkout_url){
-      onboardingMsg(checkoutErr?.message||checkoutData?.error||'Impossible d’ouvrir le paiement sécurisé Stripe.',true);
-      return;
-    }
-
-    saveHostDraft();
-    onboardingMsg(checkoutData.offer+' — redirection vers le paiement sécurisé Stripe…');
-    location.href=checkoutData.checkout_url;
+    clearHostDraft();
+    onboardingMsg('Inscription hôte enregistrée. La tarification est en cours de refonte.');
+    location.href='photos-vacances.html?listing='+encodeURIComponent(listingId);
   }finally{btn.disabled=false}
 };
 
@@ -471,21 +465,10 @@ let vacationBillingOpening=false;
 async function handleVacationBillingQuery(){
   const action=new URLSearchParams(location.search).get('billing');
   if(!['manage','cancel'].includes(action)||vacationBillingOpening)return;
-  const {data:{session}}=await sb.auth.getSession();
-  if(!session?.user)return;
   vacationBillingOpening=true;
-  try{
-    const {data,error}=await sb.functions.invoke('create-vacation-billing-portal',{body:{action}});
-    if(error||!data?.portal_url){
-      vacationBillingOpening=false;
-      alert(error?.message||data?.error||'Impossible d’ouvrir la gestion de l’abonnement.');
-      return;
-    }
-    location.href=data.portal_url;
-  }catch(e){
-    vacationBillingOpening=false;
-    alert(e?.message||'Impossible d’ouvrir la gestion de l’abonnement.');
-  }
+  alert('La tarification Hôte est en cours de refonte. Aucun abonnement payant n’est actuellement proposé.');
+  try{history.replaceState({},document.title,location.pathname)}catch(_){}
+  vacationBillingOpening=false;
 }
 sb.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>handleVacationBillingQuery(),0)});
 handleVacationBillingQuery();
