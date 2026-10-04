@@ -1827,3 +1827,10 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
  }
  #desktopProDashboardBtn:hover{transform:translateY(-1px)!important;filter:brightness(1.035)!important;box-shadow:0 7px 22px rgba(211,174,94,.28)!important}
 }
+
+/* Réserve la largeur du Tableau de bord : il ne doit jamais chevaucher Auto */
+@media(min-width:761px){
+ .desktop-propro-nav-item{flex:0 0 auto!important;min-width:max-content!important;width:auto!important;overflow:visible!important}
+ #desktopProDashboardBtn{flex:0 0 auto!important;margin-right:4px!important}
+ .desktop-category-nav{column-gap:8px!important}
+}
