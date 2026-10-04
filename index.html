@@ -115,7 +115,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 </style>
 <style id="pro-dashboard-style">
 .pro-dashboard-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.pro-dashboard-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:16px 0}.pro-dashboard-card{appearance:none;text-align:left;border:1px solid #eaddef;background:#fff;border-radius:14px;padding:15px;color:#35173f}.pro-dashboard-card strong{display:block;font-size:25px;color:#6f2388}.pro-dashboard-card span{font-size:12px;font-weight:700}.pro-dashboard-actions{display:flex;gap:8px;flex-wrap:wrap}.pro-dashboard-actions a{text-decoration:none}@media(max-width:700px){.pro-dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.pro-dashboard-actions>*{flex:1 1 46%;min-height:48px}.pro-dashboard-card{min-height:86px}.pro-dashboard-card strong{font-size:29px}}
-</style></head>
+</style><style>.pro-logo-upload{display:flex;align-items:center;gap:14px}.pro-logo-upload img{width:76px;height:76px;object-fit:contain;border:1px solid #eaddef;border-radius:16px;background:#fff;padding:6px}.pro-logo-upload>div{flex:1}@media(max-width:600px){.pro-logo-upload{align-items:flex-start;flex-direction:column}}</style></head>
 <body>
 
 <div class="portrait-only-overlay" aria-live="polite" aria-label="Mode portrait requis">
@@ -1340,6 +1340,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
           <p class="note">Le SIRET est contrôlé dans le registre des entreprises lors de l’enregistrement. Ce contrôle ne vérifie pas le numéro de TVA ni l’identité du représentant.</p>
           <button type="button" class="btn ghost" id="editCompanyBtn">Compléter mes informations d’entreprise</button>
           <form id="companyForm" class="hidden"><div class="form-grid">
+ <div class="form-row full"><label for="accountCompanyLogo">Logo de l’entreprise</label><div class="pro-logo-upload"><img id="accountCompanyLogoPreview" alt="Aperçu du logo" hidden><div><input class="input" id="accountCompanyLogo" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · carré recommandé. Il apparaîtra sur votre page Pro.</small></div></div></div>
  <div class="form-row full"><label for="accountCompany">Raison sociale</label><input class="input" id="accountCompany" required maxlength="160" autocomplete="organization"></div>
  <div class="form-row full"><label for="accountSiret">SIRET (14 chiffres)</label><input class="input" id="accountSiret" required inputmode="numeric" maxlength="20" placeholder="123 456 789 00012"><small>Le SIREN est renseigné automatiquement à partir du SIRET.</small></div>
  <div class="form-row full"><button class="btn ghost" type="button" id="accountLookupBtn">Rechercher mon entreprise</button><p class="note" role="status" aria-live="polite" id="accountLookupStatus"></p></div><div class="form-row full"><label for="accountSiren">SIREN (9 chiffres)</label><input class="input" id="accountSiren" readonly inputmode="numeric"></div>
