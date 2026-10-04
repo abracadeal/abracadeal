@@ -5206,9 +5206,14 @@ document.getElementById('accountCompanyDescription')?.addEventListener('input',e
  const live=document.getElementById('proShowroomDescriptionLive');if(live)live.textContent=e.target.value.trim()||'Votre présentation apparaîtra ici.';
 });
 function refreshProShowroomPreview(){
- const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive');
+ const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive'),city=document.getElementById('proShowroomCityLive');
  if(n)n.textContent=currentProfile?.display_name||currentUser?.user_metadata?.display_name||'Ma page Pro';
  if(p)p.textContent=currentProfile?.phone||'Téléphone de contact';
+ if(city)city.textContent=currentProfile?.city||'Ville';
  const desc=currentUser?.user_metadata?.company_showroom?.description||'';if(d)d.textContent=desc||'Votre présentation apparaîtra ici.';
+ const mine=(allAds||[]).filter(a=>a.owner_id===currentUser?.id&&a.status==='active');
+ const ac=document.getElementById('proShowroomAdsCount'),at=document.getElementById('proShowroomAdsTitle'),box=document.getElementById('proShowroomAdsPreview');
+ if(ac)ac.textContent='('+mine.length+')';if(at)at.textContent=mine.length+' annonce'+(mine.length>1?'s':'')+' en ligne';
+ if(box)box.innerHTML=mine.length?mine.slice(0,6).map(a=>'<div class="pro-showroom-mini-ad"><b>'+esc(a.title||'Annonce')+'</b><span>'+esc(a.city||'')+(a.price?' · '+formatPrice(a.price):'')+'</span></div>').join(''):'<div class="note">Aucune annonce active pour le moment.</div>';
 }
 document.getElementById('editCompanyBtn')?.addEventListener('click',()=>setTimeout(refreshProShowroomPreview,0));
