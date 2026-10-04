@@ -1834,3 +1834,8 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
  #desktopProDashboardBtn{flex:0 0 auto!important;margin-right:4px!important}
  .desktop-category-nav{column-gap:8px!important}
 }
+
+/* Tableau de bord Pro sur la bannière, sous le bouton Déposer */
+.hero-pro-dashboard-button{position:absolute!important;right:24px!important;top:92px!important;z-index:8!important;height:48px!important;padding:0 28px!important;border-radius:15px!important;border:1px solid rgba(255,226,155,.82)!important;background:linear-gradient(135deg,#f7e4ae,#d5b268 50%,#f1d896)!important;color:#29162f!important;font-weight:900!important;font-size:15px!important;box-shadow:0 8px 24px rgba(211,174,94,.24)!important;cursor:pointer!important}
+.hero-pro-dashboard-button:hover{transform:translateY(-1px)!important;filter:brightness(1.04)!important}
+@media(max-width:760px){.hero-pro-dashboard-button{position:static!important;width:calc(100% - 24px)!important;margin:8px 12px 0!important}}
