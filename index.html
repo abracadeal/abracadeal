@@ -1337,20 +1337,13 @@ window.addEventListener('load', abracadealForceTopOnReload);
   </div>
   <div class="pro-boost-wallet-note">Les crédits achetés n’expirent pas tant qu’ils ne sont pas utilisés. Un crédit est retiré uniquement lorsque vous boostez une annonce.</div>
 </div>
-          <p class="note">Le SIRET est contrôlé dans le registre des entreprises lors de l’enregistrement. Ce contrôle ne vérifie pas le numéro de TVA ni l’identité du représentant.</p>
-          <button type="button" class="btn ghost" id="editCompanyBtn">Compléter mes informations d’entreprise</button>
+          <button type="button" class="btn ghost" id="editCompanyBtn">Modifier ma page Pro</button>
           <form id="companyForm" class="hidden"><div class="form-grid">
- <div class="form-row full"><label for="accountCompanyLogo">Logo de l’entreprise</label><div class="pro-logo-upload"><img id="accountCompanyLogoPreview" alt="Aperçu du logo" hidden><div><input class="input" id="accountCompanyLogo" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · carré recommandé. Il apparaîtra sur votre page Pro.</small></div></div><div class="form-row full"><label for="accountCompanyDescription">Présentation de l’entreprise</label><textarea class="input" id="accountCompanyDescription" rows="5" maxlength="1200" placeholder="Présentez votre entreprise, vos spécialités et vos services. Ce texte apparaîtra sur votre showroom Abracadeal."></textarea><small><span id="accountCompanyDescriptionCount">0</span>/1200 caractères</small></div></div>
- <div class="form-row full"><label for="accountCompany">Raison sociale</label><input class="input" id="accountCompany" required maxlength="160" autocomplete="organization"></div>
- <div class="form-row full"><label for="accountSiret">SIRET (14 chiffres)</label><input class="input" id="accountSiret" required inputmode="numeric" maxlength="20" placeholder="123 456 789 00012"><small>Le SIREN est renseigné automatiquement à partir du SIRET.</small></div>
- <div class="form-row full"><button class="btn ghost" type="button" id="accountLookupBtn">Rechercher mon entreprise</button><p class="note" role="status" aria-live="polite" id="accountLookupStatus"></p></div><div class="form-row full"><label for="accountSiren">SIREN (9 chiffres)</label><input class="input" id="accountSiren" readonly inputmode="numeric"></div>
- <div class="form-row full"><label for="accountVatStatus">Situation TVA</label><select class="select" id="accountVatStatus" required><option value="">Choisir une situation</option><option value="yes">Je dispose d’un numéro de TVA intracommunautaire</option><option value="no">Je n’ai pas de numéro de TVA / franchise en base</option><option value="pending">Numéro de TVA en cours d’attribution</option></select></div>
- <div class="form-row full hidden" id="accountVatRow"><label for="accountVat">Numéro de TVA intracommunautaire</label><input class="input" id="accountVat" maxlength="24" placeholder="FR…" autocapitalize="characters"></div>
- </div>
-            <p class="note">Une modification de ces informations ne confère pas le statut d’entreprise vérifiée.</p>
-            <p id="companySaveStatus" class="note" role="status"></p>
-            <div class="form-actions"><button class="btn primary" type="submit">Vérifier et enregistrer l’entreprise</button><button class="btn ghost" type="button" id="cancelCompanyBtn">Annuler</button></div>
-          </form>
+ <div class="form-row full"><label for="accountCompanyLogo">Logo de l’entreprise</label><div class="pro-logo-upload"><img id="accountCompanyLogoPreview" alt="Aperçu du logo" hidden><div><input class="input" id="accountCompanyLogo" type="file" accept="image/png,image/jpeg,image/webp"><small>PNG, JPG ou WebP · carré recommandé. Il apparaîtra sur votre page Pro.</small></div></div></div>
+ <div class="form-row full"><label for="accountCompanyDescription">Présentation de l’entreprise</label><textarea class="input" id="accountCompanyDescription" rows="5" maxlength="1200" placeholder="Présentez votre entreprise, vos spécialités et vos services. Ce texte apparaîtra sur votre showroom Abracadeal."></textarea><small><span id="accountCompanyDescriptionCount">0</span>/1200 caractères</small></div>
+ </div><p id="companySaveStatus" class="note" role="status"></p>
+ <div class="form-actions"><button class="btn primary" type="submit">Enregistrer ma page Pro</button><button class="btn ghost" type="button" id="cancelCompanyBtn">Annuler</button></div>
+</form>
         </section>
         <form id="profileForm" class="profile-edit-box hidden">
           <h3>Modifier mes informations</h3>
