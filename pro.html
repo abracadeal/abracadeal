@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Showroom Abracadeal</title>
+<meta name="robots" content="index,follow">
+<meta name="theme-color" content="#1b0d2d">
+<link rel="icon" href="/favicon.ico?v=2" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=2">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f6f2f7;color:#28172f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit}.top{background:#1b0d2d;color:#fff}.topin{max-width:1180px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:900;font-size:22px;text-decoration:none}.back{color:#fff;text-decoration:none;font-weight:750}.wrap{max-width:1180px;margin:26px auto;padding:0 18px}.card{background:#fff;border:1px solid #eadfed;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px #2d123b14}.banner{width:100%;aspect-ratio:3/1;background:linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43) center/cover no-repeat}.identity{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:22px 28px 16px}.logo{width:96px;height:96px;border-radius:20px;background:#fff center/cover no-repeat;border:4px solid #fff;box-shadow:0 6px 20px #0002;display:grid;place-items:center;color:#6d2b88;font-weight:900;font-size:26px}.name{font-size:28px;font-weight:900;line-height:1.1}.meta{margin-top:7px;color:#716775;display:flex;gap:9px;flex-wrap:wrap;align-items:center}.badge{background:#f0e6f5;color:#5d2371;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}.share{border:1px solid #6d2b88;background:#fff;color:#6d2b88;border-radius:12px;padding:10px 15px;font-weight:850;cursor:pointer}.tabs{display:flex;gap:4px;border-bottom:1px solid #ece4ee;padding:0 22px;overflow:auto}.tabs button{border:0;background:none;padding:14px 15px;font-weight:850;white-space:nowrap;cursor:pointer}.tabs button.active{color:#6d2b88;border-bottom:3px solid #6d2b88}.pane{padding:22px}.tools{display:grid;grid-template-columns:1fr 190px 190px;gap:10px;margin-bottom:18px}.tools input,.tools select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 12px;background:#fff}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.ad{display:block;text-decoration:none;border:1px solid #e9e1eb;border-radius:16px;overflow:hidden;background:#fff;transition:.15s transform,.15s box-shadow}.ad:hover{transform:translateY(-2px);box-shadow:0 10px 26px #32154116}.photo{aspect-ratio:4/3;background:#eee6f0 center/cover no-repeat}.adbody{padding:11px}.adtitle{font-weight:850;line-height:1.25;min-height:2.5em}.price{font-weight:900;color:#5b2170;margin-top:6px}.city{color:#746a77;font-size:13px;margin-top:4px}.more{display:block;margin:20px auto 0;border:0;border-radius:12px;background:#6d2b88;color:#fff;padding:11px 18px;font-weight:850;cursor:pointer}.about{display:grid;grid-template-columns:1.4fr .6fr;gap:22px}.box{border:1px solid #e9e1eb;border-radius:16px;padding:18px}.box h3{margin-top:0}.facts{display:grid;gap:12px}.fact{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eee7ef;padding-bottom:10px}.review{border:1px solid #e9e1eb;border-radius:16px;padding:16px;margin-bottom:12px}.stars{color:#a46b1b;font-weight:900}.muted{color:#776c7b}.empty{padding:30px;text-align:center;color:#776c7b}.error{max-width:620px;margin:80px auto;background:#fff;border-radius:20px;padding:30px;text-align:center;border:1px solid #eadfed}.error a{display:inline-block;margin-top:12px;color:#6d2b88;font-weight:850}
+@media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tools{grid-template-columns:1fr 1fr}.tools input{grid-column:1/-1}.about{grid-template-columns:1fr}}
+@media(max-width:620px){.wrap{margin:14px auto;padding:0 10px}.card{border-radius:18px}.identity{grid-template-columns:72px 1fr;padding:16px 14px 12px;gap:12px}.logo{width:72px;height:72px;border-radius:16px;font-size:20px}.name{font-size:21px}.identity .share{grid-column:1/-1;width:100%}.tabs{padding:0 8px}.pane{padding:14px 10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tools{grid-template-columns:1fr}.tools input{grid-column:auto}.adbody{padding:9px}.adtitle{font-size:14px}.price{font-size:15px}.topin{padding:12px}.brand{font-size:19px}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><a class="brand" href="index.html">Abracadeal</a><a class="back" href="index.html#resultats">← Retour aux annonces</a></div></header>
+<main class="wrap"><div id="app"><div class="card"><div class="empty">Chargement du showroom…</div></div></div></main>
+<script>
+const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
+const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
+const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const id=new URLSearchParams(location.search).get('id');
+const app=document.getElementById('app');
+let profile=null,showroom=null,listings=[],reviews=[],filtered=[],shown=24;
+const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const money=v=>v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €';
+const showroomUrl=path=>path?sb.storage.from('pro-showroom').getPublicUrl(path).data?.publicUrl||'':'';
+const photoUrl=path=>path?sb.storage.from('listing-images').getPublicUrl(path).data?.publicUrl||'':'';
+const initials=name=>String(name||'PRO').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'PRO';
+const catLabel=v=>({vehicules:'Auto / Moto',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Autres';
+
+function fail(){
+  document.title='Showroom introuvable · Abracadeal';
+  app.innerHTML='<div class="error"><h1>Showroom introuvable</h1><p>Ce profil professionnel n’existe pas ou n’est plus disponible.</p><a href="index.html">Retour à l’accueil Abracadeal</a></div>';
+}
+function rating(){
+  if(!reviews.length)return {avg:0,label:'Aucun avis'};
+  const avg=reviews.reduce((s,r)=>s+Number(r.rating||0),0)/reviews.length;
+  return {avg,label:avg.toFixed(1).replace('.',',')+' / 5 · '+reviews.length+' avis'};
+}
+function firstPhoto(l){
+  const photos=[...(l.listing_photos||[])].sort((a,b)=>Number(a.position)-Number(b.position));
+  return photos[0]?.storage_path||'';
+}
+function renderShell(){
+  const r=rating(),banner=showroomUrl(showroom?.banner_path),logo=showroomUrl(showroom?.logo_path);
+  document.title=(profile.display_name||'Professionnel')+' · Showroom Abracadeal';
+  app.innerHTML='<div class="card">'+
+    '<div class="banner"'+(banner?' style="background-image:url(&quot;'+esc(banner)+'&quot;)"':'')+'></div>'+
+    '<div class="identity"><div class="logo"'+(logo?' style="background-image:url(&quot;'+esc(logo)+'&quot;)"':'')+'>'+(logo?'':esc(initials(profile.display_name)))+'</div>'+
+    '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+'<span>★ '+esc(r.label)+'</span></div></div>'+
+    '<button class="share" id="shareBtn" type="button">Partager</button></div>'+
+    '<nav class="tabs"><button class="active" data-tab="ads">Annonces ('+listings.length+')</button><button data-tab="about">À propos</button><button data-tab="reviews">Avis ('+reviews.length+')</button></nav>'+
+    '<section class="pane" id="pane"></section></div>';
+  document.getElementById('shareBtn').onclick=sharePage;
+  document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>setTab(b.dataset.tab));
+  setTab('ads');
+}
+async function sharePage(){
+  const data={title:document.title,text:'Découvrez ce showroom professionnel sur Abracadeal',url:location.href};
+  try{if(navigator.share)await navigator.share(data);else{await navigator.clipboard.writeText(location.href);alert('Lien copié.');}}catch(e){if(e?.name!=='AbortError')prompt('Copiez ce lien :',location.href);}
+}
+function setTab(tab){
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+  if(tab==='ads')renderAds();else if(tab==='about')renderAbout();else renderReviews();
+}
+function applyFilters(){
+  const q=(document.getElementById('stockSearch')?.value||'').trim().toLowerCase(),cat=document.getElementById('stockCategory')?.value||'',sort=document.getElementById('stockSort')?.value||'recent';
+  filtered=listings.filter(l=>(!q||(l.title||'').toLowerCase().includes(q)||(l.city||'').toLowerCase().includes(q))&&(!cat||l.category===cat));
+  filtered.sort((a,b)=>sort==='price-asc'?Number(a.price??Infinity)-Number(b.price??Infinity):sort==='price-desc'?Number(b.price??-Infinity)-Number(a.price??-Infinity):new Date(b.created_at)-new Date(a.created_at));
+  shown=24;renderCards();
+}
+function renderAds(){
+  const pane=document.getElementById('pane'),cats=[...new Set(listings.map(l=>l.category).filter(Boolean))];
+  pane.innerHTML=(listings.length>6?'<div class="tools"><input id="stockSearch" placeholder="Rechercher dans ce stock"><select id="stockCategory"><option value="">Toutes les catégories</option>'+cats.map(c=>'<option value="'+esc(c)+'">'+esc(catLabel(c))+'</option>').join('')+'</select><select id="stockSort"><option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
+  if(listings.length>6){['stockSearch','stockCategory','stockSort'].forEach(x=>document.getElementById(x).addEventListener(x==='stockSearch'?'input':'change',applyFilters));}
+  filtered=[...listings];shown=24;renderCards();
+}
+function renderCards(){
+  const host=document.getElementById('stockResults');if(!host)return;
+  if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
+  const cards=filtered.slice(0,shown).map(l=>{
+    const photo=photoUrl(firstPhoto(l)),url='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/share-listing?id='+encodeURIComponent(l.id);
+    return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div><div class="city">'+esc(l.city||'')+'</div></div></a>';
+  }).join('');
+  host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
+  document.getElementById('moreBtn')?.addEventListener('click',()=>{shown+=24;renderCards()});
+}
+function renderAbout(){
+  const pane=document.getElementById('pane'),cats=[...new Set(listings.map(l=>catLabel(l.category)).filter(Boolean))];
+  pane.innerHTML='<div class="about"><div class="box"><h3>À propos</h3><p>'+(showroom?.description?esc(showroom.description).replace(/\n/g,'<br>'):'Ce professionnel n’a pas encore ajouté de présentation.')+'</p></div><div class="box"><h3>Informations</h3><div class="facts"><div class="fact"><span>Ville</span><strong>'+esc(profile.city||'—')+'</strong></div><div class="fact"><span>Membre depuis</span><strong>'+esc(profile.joined_at?new Date(profile.joined_at).toLocaleDateString('fr-FR',{month:'long',year:'numeric'}):'—')+'</strong></div><div class="fact"><span>Annonces</span><strong>'+listings.length+'</strong></div><div><span class="muted">Catégories</span><p>'+esc(cats.join(', ')||'—')+'</p></div></div></div></div>';
+}
+function renderReviews(){
+  const pane=document.getElementById('pane');if(!reviews.length){pane.innerHTML='<div class="empty">Aucun avis pour le moment.</div>';return}
+  pane.innerHTML=reviews.map(r=>'<article class="review"><div><span class="stars">'+'★'.repeat(Number(r.rating||0))+'☆'.repeat(5-Number(r.rating||0))+'</span> <strong>'+Number(r.rating||0)+'/5</strong></div><p>'+esc(r.comment||'')+'</p><div class="muted">'+new Date(r.created_at).toLocaleDateString('fr-FR')+'</div></article>').join('');
+}
+async function init(){
+  if(!id||!/^[0-9a-f-]{36}$/i.test(id)){fail();return}
+  const [p,s,l,r]=await Promise.all([
+    sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',id).maybeSingle(),
+    sb.from('pro_showrooms').select('description,banner_path,logo_path,updated_at').eq('user_id',id).maybeSingle(),
+    sb.from('listings').select('id,title,price,city,category,created_at,listing_photos(storage_path,position)').eq('owner_id',id).eq('status','active').eq('visibility_scope','public').order('created_at',{ascending:false}),
+    sb.from('reviews').select('rating,comment,created_at').eq('seller_id',id).eq('status','active').order('created_at',{ascending:false})
+  ]);
+  if(p.error||!p.data||p.data.account_type!=='professionnel'){fail();return}
+  profile=p.data;showroom=s.data||{};listings=l.data||[];reviews=r.data||[];
+  renderShell();
+}
+init().catch(err=>{console.error(err);fail()});
+</script>
+</body>
+</html>

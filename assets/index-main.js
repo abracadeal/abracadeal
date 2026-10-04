@@ -410,6 +410,7 @@ function renderCompanyAccount(){
   const rows=[['Raison sociale',data.company_name],['SIRET',data.siret],['SIREN',data.siren],['Situation TVA',labels[data.vat_status]],...(data.vat_number?[['Numéro de TVA',data.vat_number]]:[])];
   $('#companySummary').innerHTML=rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value||'À compléter')}</dd></div>`).join('');
   setTimeout(()=>window.loadProBillingPanel?.(),0);
+  if(pro)setTimeout(()=>loadProShowroomData(false),0);
 
 }
 $('#signupType').addEventListener('change',syncSignupCompany);
@@ -417,25 +418,16 @@ for(const prefix of ['signup']){
   $('#'+prefix+'Siret')?.addEventListener('input',()=>syncCompanyFields(prefix));
   $('#'+prefix+'VatStatus')?.addEventListener('change',()=>syncCompanyFields(prefix));
 }
-$('#editCompanyBtn').addEventListener('click',()=>{$('#companyForm').classList.remove('hidden');$('#editCompanyBtn').classList.add('hidden');$('#companySaveStatus').textContent='';const d=currentUser?.user_metadata?.company_showroom?.description||'';$('#accountCompanyDescription').value=d;$('#accountCompanyDescriptionCount').textContent=String(d.length);$('#accountCompanyDescription').focus()});
-$('#cancelCompanyBtn').addEventListener('click',()=>{renderCompanyAccount();$('#editCompanyBtn').focus()});
-$('#companyForm').addEventListener('submit',async e=>{
-  e.preventDefault();
-  if(!sb||!currentUser||currentProfile?.account_type!=='professionnel') return;
-  const btn=e.submitter;
-  try{
-    btn.disabled=true;
-    const description=(document.getElementById('accountCompanyDescription')?.value||'').trim();
-    const existing=currentUser?.user_metadata?.company_showroom||{};
-    const {data,error}=await sb.auth.updateUser({data:{company_showroom:{...existing,description}}});
-    if(error)throw error;
-    currentUser=data.user;
-    $('#companySaveStatus').textContent='Page Pro enregistrée.';
-    proShowroomMediaDirty=false;const save=document.getElementById('saveCompanyShowroomBtn'),bu=document.getElementById('proBannerUploadBox'),lu=document.getElementById('proLogoUploadRow');if(save)save.hidden=true;if(bu)bu.hidden=true;if(lu)lu.hidden=true;
-    toast('Page Pro enregistrée');
-  }catch(error){$('#companySaveStatus').textContent=error.message||'Impossible d’enregistrer. Réessayez.'}
-  finally{btn.disabled=false}
+document.getElementById('editCompanyBtn')?.addEventListener('click',async()=>{
+  document.getElementById('companyForm')?.classList.remove('hidden');
+  document.getElementById('editCompanyBtn')?.classList.add('hidden');
+  const status=document.getElementById('companySaveStatus');if(status)status.textContent='Chargement de votre showroom…';
+  await loadProShowroomData(true);
+  if(status)status.textContent='';
+  document.getElementById('accountCompanyDescription')?.focus();
 });
+document.getElementById('cancelCompanyBtn')?.addEventListener('click',()=>{renderCompanyAccount();document.getElementById('editCompanyBtn')?.focus()});
+document.getElementById('companyForm')?.addEventListener('submit',saveProShowroom);
 syncSignupCompany();
 
 function setProfileEditing(editing){
@@ -4444,10 +4436,11 @@ window.openSellerProfile=async sellerId=>{
   openModal('sellerProfileModal');
 
   const adminViewing=!!currentProfile?.is_admin;
-  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},boostSummaryResult,proAccountSummaryResult]=await Promise.all([
+  const [{data:profile,error:pErr},{data:reviews,error:rErr},{data:listings},{data:showroom},boostSummaryResult,proAccountSummaryResult]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('*').eq('seller_id',sellerId).eq('status','active').order('created_at',{ascending:false}),
     sb.from('listings').select('id,title,price,city').eq('owner_id',sellerId).eq('status','active').eq('visibility_scope','public').order('created_at',{ascending:false}).limit(8),
+    sb.from('pro_showrooms').select('banner_path').eq('user_id',sellerId).maybeSingle(),
     adminViewing?sb.rpc('get_admin_pro_boost_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null}),
     adminViewing?sb.rpc('get_admin_pro_account_summary',{p_user_id:sellerId}):Promise.resolve({data:null,error:null})
   ]);
@@ -4465,6 +4458,7 @@ window.openSellerProfile=async sellerId=>{
   const list=reviews||[];
   const avg=list.length?list.reduce((s,r)=>s+Number(r.rating),0)/list.length:0;
   const joined=profile.joined_at?formatReviewDate(profile.joined_at):'';
+  const showroomBanner=profile.account_type==='professionnel'&&showroom?.banner_path?showroomAssetUrl(showroom.banner_path):'';
   const isSelf=!!currentUser&&currentUser.id===sellerId;
   const myReview=currentUser?list.find(r=>r.reviewer_id===currentUser.id):null;
   const profileComplete=!!(currentProfile?.display_name?.trim()&&currentProfile?.city?.trim()&&currentProfile?.phone?.trim());
@@ -4527,6 +4521,7 @@ window.openSellerProfile=async sellerId=>{
     </article>`).join(''):`<div class="note">Aucun avis pour le moment.</div>`;
 
   body.innerHTML=`
+    ${profile.account_type==='professionnel'?`<div style="aspect-ratio:3/1;border-radius:16px;margin:0 0 14px;background:${showroomBanner?'url(&quot;'+esc(showroomBanner)+'&quot;) center/cover no-repeat':'linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43)'}"></div><a class="btn primary" style="display:inline-flex;text-decoration:none;margin:0 0 18px" href="pro.html?id=${encodeURIComponent(sellerId)}" target="_blank" rel="noopener">Voir le showroom du professionnel</a>`:''}
     <div class="seller-profile-head">
       <div>
         <h3 class="seller-profile-name">${esc(profile.display_name)}</h3>
@@ -5195,48 +5190,194 @@ document.addEventListener('click',e=>{
 });
 
 let proShowroomMediaDirty=false;
-function markShowroomMediaDirty(){proShowroomMediaDirty=true;const b=document.getElementById('saveCompanyShowroomBtn');if(b){b.hidden=false;b.textContent='Enregistrer les modifications';}}
-document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{
- const file=e.target.files?.[0],cover=document.getElementById('proShowroomCoverLive');if(!file||!cover)return;
- if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Bannière : utilisez PNG, JPG ou WebP.');e.target.value='';return}
- if(file.size>5*1024*1024){toast('La bannière doit faire moins de 5 Mo.');e.target.value='';return}
- const bannerUrl=URL.createObjectURL(file);if(cover)cover.style.backgroundImage='url("'+bannerUrl+'")';if(crop){crop.style.backgroundImage='url("'+bannerUrl+'")';crop.querySelector('span')?.remove();}markShowroomMediaDirty();
-});
-function updateProBannerFrame(){
- const c=document.getElementById('proShowroomCoverLive'),p=document.getElementById('proBannerCropPreview');if(!c&&!p)return;
- const z=document.getElementById('proBannerZoom')?.value||100,x=document.getElementById('proBannerX')?.value||50,y=document.getElementById('proBannerY')?.value||50,h=document.getElementById('proBannerHeight')?.value||380;
- [c,p].filter(Boolean).forEach(el=>{el.style.backgroundSize=z+'% auto';el.style.backgroundPosition=x+'% '+y+'%';});if(c)c.style.setProperty('--pro-banner-height',h+'px');if(p)p.style.height=Math.max(160,Math.min(320,Number(h)*.72))+'px';
-}
-['proBannerZoom','proBannerX','proBannerY','proBannerHeight'].forEach(id=>document.getElementById(id)?.addEventListener('input',()=>{updateProBannerFrame();markShowroomMediaDirty();}));
-document.getElementById('proBannerReset')?.addEventListener('click',()=>{[['proBannerZoom',100],['proBannerX',50],['proBannerY',50],['proBannerHeight',380]].forEach(([id,v])=>{const e=document.getElementById(id);if(e)e.value=v});updateProBannerFrame();markShowroomMediaDirty();});
-document.getElementById('viewProShowroomFullBtn')?.addEventListener('click',()=>{
- const box=document.querySelector('.pro-showroom-live');if(!box)return;refreshProShowroomPreview();
- const back=document.createElement('div');back.className='pro-showroom-fullscreen-backdrop';
- const close=document.createElement('button');close.className='pro-showroom-full-close';close.type='button';close.textContent='×';
- const exit=()=>{box.classList.remove('pro-showroom-fullscreen');back.remove();close.remove();};
- back.onclick=exit;close.onclick=exit;document.body.append(back,close);box.classList.add('pro-showroom-fullscreen');
-});
-document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
- const file=e.target.files?.[0], img=document.getElementById('accountCompanyLogoPreview'), live=document.getElementById('proShowroomLogoLive'); if(!img)return;
- if(!file){img.hidden=true;img.removeAttribute('src');return}
- if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Logo : utilisez PNG, JPG ou WebP.');e.target.value='';return}
- if(file.size>3*1024*1024){toast('Le logo doit faire moins de 3 Mo.');e.target.value='';return}
- const url=URL.createObjectURL(file);img.src=url;img.hidden=false;if(live){live.textContent='';live.style.backgroundImage=`url("${url}")`;}markShowroomMediaDirty();
-});
+let proShowroomRecord={description:'',banner_path:null,logo_path:null,updated_at:null};
+let proShowroomPendingBanner=null,proShowroomPendingLogo=null;
+let proCropState={kind:'banner',img:null,objectUrl:'',scale:1,minScale:1,x:0,y:0,pointers:new Map(),drag:null,pinch:null};
+let proPreviewBannerUrl='',proPreviewLogoUrl='';
 
-document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{
- const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);
- const live=document.getElementById('proShowroomDescriptionLive');if(live)live.textContent=e.target.value.trim()||'Votre présentation apparaîtra ici.';markShowroomMediaDirty();
-});
-function refreshProShowroomPreview(){
- const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive'),city=document.getElementById('proShowroomCityLive');
- if(n)n.textContent=currentProfile?.display_name||currentUser?.user_metadata?.display_name||'Ma page Pro';
- if(p)p.textContent=currentProfile?.phone||'Téléphone de contact';
- if(city)city.textContent=currentProfile?.city||'Ville';
- const desc=currentUser?.user_metadata?.company_showroom?.description||'';if(d)d.textContent=desc||'Votre présentation apparaîtra ici.';
- const mine=(allAds||[]).filter(a=>a.owner_id===currentUser?.id&&a.status==='active');
- const ac=document.getElementById('proShowroomAdsCount'),at=document.getElementById('proShowroomAdsTitle'),box=document.getElementById('proShowroomAdsPreview');
- if(ac)ac.textContent='('+mine.length+')';if(at)at.textContent=mine.length+' annonce'+(mine.length>1?'s':'')+' en ligne';
- if(box)box.innerHTML=mine.length?mine.slice(0,6).map(a=>'<div class="pro-showroom-mini-ad"><b>'+esc(a.title||'Annonce')+'</b><span>'+esc(a.city||'')+(a.price?' · '+formatPrice(a.price):'')+'</span></div>').join(''):'<div class="note">Aucune annonce active pour le moment.</div>';
+function showroomAssetUrl(path){
+  if(!path||!sb)return '';
+  const {data}=sb.storage.from('pro-showroom').getPublicUrl(path);
+  return data?.publicUrl||'';
 }
-document.getElementById('editCompanyBtn')?.addEventListener('click',()=>setTimeout(refreshProShowroomPreview,0));
+function showroomInitials(){
+  const name=(currentProfile?.display_name||currentUser?.user_metadata?.display_name||'PRO').trim();
+  return name.split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'PRO';
+}
+function markShowroomMediaDirty(){
+  proShowroomMediaDirty=true;
+  const b=document.getElementById('saveCompanyShowroomBtn');
+  if(b){b.hidden=false;b.textContent='Enregistrer les modifications';}
+}
+function paintProShowroomMedia(){
+  const cover=document.getElementById('proShowroomCoverLive');
+  const logo=document.getElementById('proShowroomLogoLive');
+  if(proPreviewBannerUrl){URL.revokeObjectURL(proPreviewBannerUrl);proPreviewBannerUrl='';}
+  if(proPreviewLogoUrl){URL.revokeObjectURL(proPreviewLogoUrl);proPreviewLogoUrl='';}
+  if(cover){
+    const url=proShowroomPendingBanner?(proPreviewBannerUrl=URL.createObjectURL(proShowroomPendingBanner)):showroomAssetUrl(proShowroomRecord.banner_path);
+    cover.style.backgroundImage=url?'url("'+url+'")':'linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43)';
+  }
+  if(logo){
+    const url=proShowroomPendingLogo?(proPreviewLogoUrl=URL.createObjectURL(proShowroomPendingLogo)):showroomAssetUrl(proShowroomRecord.logo_path);
+    logo.style.backgroundImage=url?'url("'+url+'")':'none';
+    logo.textContent=url?'':showroomInitials();
+  }
+}
+async function loadProShowroomData(populateForm=false){
+  if(!sb||!currentUser||currentProfile?.account_type!=='professionnel')return;
+  const {data,error}=await sb.from('pro_showrooms').select('description,banner_path,logo_path,updated_at').eq('user_id',currentUser.id).maybeSingle();
+  if(error){console.error('Showroom Pro indisponible',error);return;}
+  const legacy=currentUser?.user_metadata?.company_showroom?.description||'';
+  proShowroomRecord=data||{description:legacy,banner_path:null,logo_path:null,updated_at:null};
+  if(populateForm){
+    const field=document.getElementById('accountCompanyDescription');if(field)field.value=proShowroomRecord.description||'';
+    const count=document.getElementById('accountCompanyDescriptionCount');if(count)count.textContent=String((proShowroomRecord.description||'').length);
+  }
+  const link=document.getElementById('proPublicPageLink');if(link)link.href='pro.html?id='+encodeURIComponent(currentUser.id);
+  paintProShowroomMedia();
+  refreshProShowroomPreview();
+}
+async function saveProShowroom(e){
+  e.preventDefault();
+  if(!sb||!currentUser||currentProfile?.account_type!=='professionnel')return;
+  const btn=e.submitter||document.getElementById('saveCompanyShowroomBtn'),status=document.getElementById('companySaveStatus');
+  if(btn)btn.disabled=true;if(status)status.textContent='Enregistrement…';
+  const uploaded=[];
+  try{
+    const description=(document.getElementById('accountCompanyDescription')?.value||'').trim();
+    let bannerPath=proShowroomRecord.banner_path||null,logoPath=proShowroomRecord.logo_path||null;
+    const stamp=Date.now();
+    if(proShowroomPendingBanner){
+      bannerPath=currentUser.id+'/banner-'+stamp+'.webp';
+      const {error}=await sb.storage.from('pro-showroom').upload(bannerPath,proShowroomPendingBanner,{contentType:'image/webp',upsert:false,cacheControl:'3600'});
+      if(error)throw error;uploaded.push(bannerPath);
+    }
+    if(proShowroomPendingLogo){
+      logoPath=currentUser.id+'/logo-'+stamp+'.webp';
+      const {error}=await sb.storage.from('pro-showroom').upload(logoPath,proShowroomPendingLogo,{contentType:'image/webp',upsert:false,cacheControl:'3600'});
+      if(error)throw error;uploaded.push(logoPath);
+    }
+    const payload={user_id:currentUser.id,description:description||null,banner_path:bannerPath,logo_path:logoPath,updated_at:new Date().toISOString()};
+    const {error}=await sb.from('pro_showrooms').upsert(payload,{onConflict:'user_id'});
+    if(error)throw error;
+    const obsolete=[];
+    if(proShowroomPendingBanner&&proShowroomRecord.banner_path&&proShowroomRecord.banner_path!==bannerPath)obsolete.push(proShowroomRecord.banner_path);
+    if(proShowroomPendingLogo&&proShowroomRecord.logo_path&&proShowroomRecord.logo_path!==logoPath)obsolete.push(proShowroomRecord.logo_path);
+    if(obsolete.length){const {error:removeError}=await sb.storage.from('pro-showroom').remove(obsolete);if(removeError)console.warn('Ancien média showroom non supprimé',removeError);}
+    proShowroomRecord={...payload};proShowroomPendingBanner=null;proShowroomPendingLogo=null;proShowroomMediaDirty=false;
+    if(btn)btn.hidden=true;
+    paintProShowroomMedia();refreshProShowroomPreview();
+    if(status)status.textContent='Page Pro enregistrée.';
+    toast('Page Pro enregistrée');
+  }catch(error){
+    if(uploaded.length)await sb.storage.from('pro-showroom').remove(uploaded);
+    console.error(error);
+    if(status)status.textContent=error?.message||'Impossible d’enregistrer. Réessayez.';
+  }finally{if(btn)btn.disabled=false}
+}
+function clampProCrop(){
+  const frame=document.getElementById('proCropFrame'),img=proCropState.img;if(!frame||!img)return;
+  const r=frame.getBoundingClientRect(),w=img.naturalWidth*proCropState.scale,h=img.naturalHeight*proCropState.scale;
+  proCropState.x=Math.min(0,Math.max(r.width-w,proCropState.x));
+  proCropState.y=Math.min(0,Math.max(r.height-h,proCropState.y));
+}
+function renderProCrop(){
+  const el=document.getElementById('proCropImage');if(!el||!proCropState.img)return;
+  clampProCrop();
+  el.style.width=(proCropState.img.naturalWidth*proCropState.scale)+'px';
+  el.style.height=(proCropState.img.naturalHeight*proCropState.scale)+'px';
+  el.style.left=proCropState.x+'px';el.style.top=proCropState.y+'px';
+}
+function setProCropScale(next,focusX=null,focusY=null){
+  const frame=document.getElementById('proCropFrame');if(!frame||!proCropState.img)return;
+  const old=proCropState.scale,max=proCropState.minScale*3;
+  next=Math.max(proCropState.minScale,Math.min(max,next));
+  const r=frame.getBoundingClientRect(),fx=focusX??r.width/2,fy=focusY??r.height/2;
+  const imageX=(fx-proCropState.x)/old,imageY=(fy-proCropState.y)/old;
+  proCropState.scale=next;proCropState.x=fx-imageX*next;proCropState.y=fy-imageY*next;
+  const slider=document.getElementById('proCropZoom');if(slider)slider.value=String(Math.round((next/proCropState.minScale)*100));
+  renderProCrop();
+}
+function openProCrop(file,kind){
+  if(!file)return;
+  if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Utilisez une image PNG, JPG ou WebP.');return}
+  if(file.size>15*1024*1024){toast('Cette image est trop lourde. Choisissez un fichier de moins de 15 Mo.');return}
+  const modal=document.getElementById('proCropModal'),dialog=document.getElementById('proCropDialog'),imgEl=document.getElementById('proCropImage');if(!modal||!dialog||!imgEl)return;
+  if(proCropState.objectUrl)URL.revokeObjectURL(proCropState.objectUrl);
+  proCropState={kind,img:null,objectUrl:URL.createObjectURL(file),scale:1,minScale:1,x:0,y:0,pointers:new Map(),drag:null,pinch:null};
+  dialog.classList.toggle('logo-mode',kind==='logo');
+  document.getElementById('proCropTitle').textContent=kind==='logo'?'Cadrer le logo':'Cadrer la bannière';
+  modal.classList.remove('hidden');
+  const image=new Image();
+  image.onload=()=>{
+    proCropState.img=image;imgEl.src=proCropState.objectUrl;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      const r=document.getElementById('proCropFrame').getBoundingClientRect();
+      proCropState.minScale=Math.max(r.width/image.naturalWidth,r.height/image.naturalHeight);
+      proCropState.scale=proCropState.minScale;
+      proCropState.x=(r.width-image.naturalWidth*proCropState.scale)/2;
+      proCropState.y=(r.height-image.naturalHeight*proCropState.scale)/2;
+      const slider=document.getElementById('proCropZoom');if(slider)slider.value='100';
+      renderProCrop();
+    }));
+  };
+  image.onerror=()=>{closeProCrop();toast('Impossible de lire cette image.');};
+  image.src=proCropState.objectUrl;
+}
+function closeProCrop(){document.getElementById('proCropModal')?.classList.add('hidden');proCropState.pointers?.clear();}
+function validateProCrop(){
+  const frame=document.getElementById('proCropFrame'),img=proCropState.img;if(!frame||!img)return;
+  const r=frame.getBoundingClientRect(),sx=-proCropState.x/proCropState.scale,sy=-proCropState.y/proCropState.scale,sw=r.width/proCropState.scale,sh=r.height/proCropState.scale;
+  const isLogo=proCropState.kind==='logo',canvas=document.createElement('canvas');
+  canvas.width=isLogo?400:1500;canvas.height=isLogo?400:500;
+  const ctx=canvas.getContext('2d');ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality='high';
+  ctx.drawImage(img,sx,sy,sw,sh,0,0,canvas.width,canvas.height);
+  canvas.toBlob(blob=>{
+    if(!blob){toast('Impossible de préparer cette image.');return}
+    if(isLogo)proShowroomPendingLogo=blob;else proShowroomPendingBanner=blob;
+    markShowroomMediaDirty();paintProShowroomMedia();closeProCrop();
+  },'image/webp',0.86);
+}
+function refreshProShowroomPreview(){
+  const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive'),city=document.getElementById('proShowroomCityLive');
+  if(n)n.textContent=currentProfile?.display_name||currentUser?.user_metadata?.display_name||'Ma page Pro';
+  if(p)p.textContent=currentProfile?.phone||'Téléphone de contact';
+  if(city)city.textContent=currentProfile?.city||'Ville';
+  const field=document.getElementById('accountCompanyDescription');
+  const desc=field&&!document.getElementById('companyForm')?.classList.contains('hidden')?field.value.trim():(proShowroomRecord.description||'');
+  if(d)d.textContent=desc||'Votre présentation apparaîtra ici.';
+  const mine=(allAds||[]).filter(a=>a.owner_id===currentUser?.id&&a.status==='active'&&a.visibility_scope!=='pro');
+  const ac=document.getElementById('proShowroomAdsCount'),at=document.getElementById('proShowroomAdsTitle'),box=document.getElementById('proShowroomAdsPreview');
+  if(ac)ac.textContent='('+mine.length+')';if(at)at.textContent=mine.length+' annonce'+(mine.length>1?'s':'')+' en ligne';
+  if(box)box.innerHTML=mine.length?mine.slice(0,6).map(a=>'<div class="pro-showroom-mini-ad"><b>'+esc(a.title||'Annonce')+'</b><span>'+esc(a.city||'')+(a.price?' · '+formatPrice(a.price):'')+'</span></div>').join(''):'<div class="note">Aucune annonce active pour le moment.</div>';
+}
+document.getElementById('proBannerChangeBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('accountCompanyBanner')?.click()});
+document.getElementById('proShowroomCoverLive')?.addEventListener('click',()=>document.getElementById('accountCompanyBanner')?.click());
+document.getElementById('proShowroomCoverLive')?.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();document.getElementById('accountCompanyBanner')?.click()}});
+document.getElementById('proLogoChangeBtn')?.addEventListener('click',()=>document.getElementById('accountCompanyLogo')?.click());
+document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{const file=e.target.files?.[0];e.target.value='';openProCrop(file,'banner')});
+document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{const file=e.target.files?.[0];e.target.value='';openProCrop(file,'logo')});
+document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);refreshProShowroomPreview();markShowroomMediaDirty()});
+document.getElementById('proCropCancel')?.addEventListener('click',closeProCrop);
+document.getElementById('proCropValidate')?.addEventListener('click',validateProCrop);
+document.getElementById('proCropZoom')?.addEventListener('input',e=>setProCropScale(proCropState.minScale*(Number(e.target.value)/100)));
+document.getElementById('proCropFrame')?.addEventListener('wheel',e=>{e.preventDefault();const r=e.currentTarget.getBoundingClientRect();setProCropScale(proCropState.scale*(e.deltaY<0?1.08:.92),e.clientX-r.left,e.clientY-r.top)},{passive:false});
+const cropFrame=document.getElementById('proCropFrame');
+cropFrame?.addEventListener('pointerdown',e=>{
+  cropFrame.setPointerCapture(e.pointerId);proCropState.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(proCropState.pointers.size===1)proCropState.drag={px:e.clientX,py:e.clientY,x:proCropState.x,y:proCropState.y};
+  if(proCropState.pointers.size===2){const pts=[...proCropState.pointers.values()];proCropState.pinch={dist:Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),scale:proCropState.scale};}
+});
+cropFrame?.addEventListener('pointermove',e=>{
+  if(!proCropState.pointers.has(e.pointerId))return;proCropState.pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(proCropState.pointers.size>=2&&proCropState.pinch){
+    const pts=[...proCropState.pointers.values()],d=Math.hypot(pts[0].x-pts[1].x,pts[0].y-pts[1].y),r=cropFrame.getBoundingClientRect(),cx=(pts[0].x+pts[1].x)/2-r.left,cy=(pts[0].y+pts[1].y)/2-r.top;
+    setProCropScale(proCropState.pinch.scale*(d/proCropState.pinch.dist),cx,cy);
+  }else if(proCropState.drag){
+    proCropState.x=proCropState.drag.x+(e.clientX-proCropState.drag.px);proCropState.y=proCropState.drag.y+(e.clientY-proCropState.drag.py);renderProCrop();
+  }
+});
+function endCropPointer(e){proCropState.pointers.delete(e.pointerId);proCropState.pinch=null;const remain=[...proCropState.pointers.values()][0];proCropState.drag=remain?{px:remain.x,py:remain.y,x:proCropState.x,y:proCropState.y}:null;}
+cropFrame?.addEventListener('pointerup',endCropPointer);cropFrame?.addEventListener('pointercancel',endCropPointer);
+window.addEventListener('resize',()=>{if(!document.getElementById('proCropModal')?.classList.contains('hidden')&&proCropState.img){const r=cropFrame.getBoundingClientRect();proCropState.minScale=Math.max(r.width/proCropState.img.naturalWidth,r.height/proCropState.img.naturalHeight);setProCropScale(Math.max(proCropState.scale,proCropState.minScale));}});
