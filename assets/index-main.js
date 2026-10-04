@@ -428,6 +428,16 @@ document.getElementById('editCompanyBtn')?.addEventListener('click',async()=>{
 });
 document.getElementById('cancelCompanyBtn')?.addEventListener('click',()=>{renderCompanyAccount();document.getElementById('editCompanyBtn')?.focus()});
 document.getElementById('companyForm')?.addEventListener('submit',saveProShowroom);
+document.getElementById('saveCompanyShowroomBtn')?.addEventListener('click',e=>{
+  const btn=e.currentTarget;
+  if(btn.dataset.mode==='saved'){
+    e.preventDefault();
+    btn.dataset.mode='editing';
+    btn.textContent='Enregistrer les modifications';
+    const status=document.getElementById('companySaveStatus');if(status)status.textContent='';
+    document.getElementById('accountCompanyDescription')?.focus();
+  }
+});
 syncSignupCompany();
 
 function setProfileEditing(editing){
@@ -5207,7 +5217,7 @@ function showroomInitials(){
 function markShowroomMediaDirty(){
   proShowroomMediaDirty=true;
   const b=document.getElementById('saveCompanyShowroomBtn');
-  if(b){b.hidden=false;b.textContent='Enregistrer les modifications';}
+  if(b){b.hidden=false;b.dataset.mode='editing';b.textContent='Enregistrer les modifications';}
 }
 function paintProShowroomMedia(){
   const cover=document.getElementById('proShowroomCoverLive');
@@ -5266,13 +5276,14 @@ async function saveProShowroom(e){
     if(proShowroomPendingLogo&&proShowroomRecord.logo_path&&proShowroomRecord.logo_path!==logoPath)obsolete.push(proShowroomRecord.logo_path);
     if(obsolete.length){const {error:removeError}=await sb.storage.from('pro-showroom').remove(obsolete);if(removeError)console.warn('Ancien média showroom non supprimé',removeError);}
     proShowroomRecord={...payload};proShowroomPendingBanner=null;proShowroomPendingLogo=null;proShowroomMediaDirty=false;
-    if(btn)btn.hidden=true;
+    if(btn){btn.hidden=false;btn.dataset.mode='saved';btn.textContent='Modifier';}
     paintProShowroomMedia();refreshProShowroomPreview();
     if(status)status.textContent='Page Pro enregistrée.';
     toast('Page Pro enregistrée');
   }catch(error){
     if(uploaded.length)await sb.storage.from('pro-showroom').remove(uploaded);
     console.error(error);
+    if(btn){btn.hidden=false;btn.dataset.mode='editing';btn.textContent='Réessayer l’enregistrement';}
     if(status)status.textContent=error?.message||'Impossible d’enregistrer. Réessayez.';
   }finally{if(btn)btn.disabled=false}
 }
