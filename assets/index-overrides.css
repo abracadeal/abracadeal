@@ -1809,3 +1809,6 @@
 
 /* 2026-10-04: retrait définitif du raccourci Vacances du header desktop */
 header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
+
+/* retrait Vacances de toute barre rapide desktop, y compris bundle mis en cache */
+@media (min-width:761px){header .abraca-dnav-vacances,header a[href="vacances.html"].header-vacances-btn,header .abraca-vacances-top{display:none!important;visibility:hidden!important;width:0!important;min-width:0!important;padding:0!important;margin:0!important;border:0!important;overflow:hidden!important}}
