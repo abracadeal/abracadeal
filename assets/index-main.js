@@ -431,6 +431,7 @@ $('#companyForm').addEventListener('submit',async e=>{
     if(error)throw error;
     currentUser=data.user;
     $('#companySaveStatus').textContent='Page Pro enregistrée.';
+    proShowroomMediaDirty=false;const save=document.getElementById('saveCompanyShowroomBtn'),bu=document.getElementById('proBannerUploadBox'),lu=document.getElementById('proLogoUploadRow');if(save)save.hidden=true;if(bu)bu.hidden=true;if(lu)lu.hidden=true;
     toast('Page Pro enregistrée');
   }catch(error){$('#companySaveStatus').textContent=error.message||'Impossible d’enregistrer. Réessayez.'}
   finally{btn.disabled=false}
