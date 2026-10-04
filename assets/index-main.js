@@ -5193,6 +5193,19 @@ document.addEventListener('click',e=>{
  }
 });
 
+document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{
+ const file=e.target.files?.[0],cover=document.getElementById('proShowroomCoverLive');if(!file||!cover)return;
+ if(!/^image\/(png|jpeg|webp)$/.test(file.type)){toast('Bannière : utilisez PNG, JPG ou WebP.');e.target.value='';return}
+ if(file.size>5*1024*1024){toast('La bannière doit faire moins de 5 Mo.');e.target.value='';return}
+ cover.style.backgroundImage='url("'+URL.createObjectURL(file)+'")';
+});
+document.getElementById('viewProShowroomFullBtn')?.addEventListener('click',()=>{
+ const box=document.querySelector('.pro-showroom-live');if(!box)return;refreshProShowroomPreview();
+ const back=document.createElement('div');back.className='pro-showroom-fullscreen-backdrop';
+ const close=document.createElement('button');close.className='pro-showroom-full-close';close.type='button';close.textContent='×';
+ const exit=()=>{box.classList.remove('pro-showroom-fullscreen');back.remove();close.remove();};
+ back.onclick=exit;close.onclick=exit;document.body.append(back,close);box.classList.add('pro-showroom-fullscreen');
+});
 document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{
  const file=e.target.files?.[0], img=document.getElementById('accountCompanyLogoPreview'), live=document.getElementById('proShowroomLogoLive'); if(!img)return;
  if(!file){img.hidden=true;img.removeAttribute('src');return}
