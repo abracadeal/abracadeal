@@ -410,30 +410,28 @@ function renderCompanyAccount(){
   const rows=[['Raison sociale',data.company_name],['SIRET',data.siret],['SIREN',data.siren],['Situation TVA',labels[data.vat_status]],...(data.vat_number?[['Numéro de TVA',data.vat_number]]:[])];
   $('#companySummary').innerHTML=rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value||'À compléter')}</dd></div>`).join('');
   setTimeout(()=>window.loadProBillingPanel?.(),0);
-  for(const [suffix,key] of [['Company','company_name'],['Siret','siret'],['VatStatus','vat_status'],['Vat','vat_number']]) $('#account'+suffix).value=data[key]||'';
-  syncCompanyFields('account');
+
 }
 $('#signupType').addEventListener('change',syncSignupCompany);
 for(const prefix of ['signup','account']){
   $('#'+prefix+'Siret').addEventListener('input',()=>syncCompanyFields(prefix));
   $('#'+prefix+'VatStatus').addEventListener('change',()=>syncCompanyFields(prefix));
 }
-$('#editCompanyBtn').addEventListener('click',()=>{$('#companyForm').classList.remove('hidden');$('#editCompanyBtn').classList.add('hidden');$('#companySaveStatus').textContent='';$('#accountCompany').focus()});
+$('#editCompanyBtn').addEventListener('click',()=>{$('#companyForm').classList.remove('hidden');$('#editCompanyBtn').classList.add('hidden');$('#companySaveStatus').textContent='';const d=currentUser?.user_metadata?.company_showroom?.description||'';$('#accountCompanyDescription').value=d;$('#accountCompanyDescriptionCount').textContent=String(d.length);$('#accountCompanyDescription').focus()});
 $('#cancelCompanyBtn').addEventListener('click',()=>{renderCompanyAccount();$('#editCompanyBtn').focus()});
 $('#companyForm').addEventListener('submit',async e=>{
   e.preventDefault();
   if(!sb||!currentUser||currentProfile?.account_type!=='professionnel') return;
   const btn=e.submitter;
   try{
-    const company_registration=readCompanyFields('account');
     btn.disabled=true;
-    $('#companySaveStatus').textContent='Vérification du SIRET…';
-    const company=await requestCompanyCheck('verify',company_registration.siret);
-    Object.assign(company_registration,company);
-    const {data,error}=await sb.auth.updateUser({data:{company_registration}});
-    if(error) throw new Error('SIRET enregistré, mais les informations complémentaires n’ont pas été sauvegardées : '+error.message);
+    const description=(document.getElementById('accountCompanyDescription')?.value||'').trim();
+    const existing=currentUser?.user_metadata?.company_showroom||{};
+    const {data,error}=await sb.auth.updateUser({data:{company_showroom:{...existing,description}}});
+    if(error)throw error;
     currentUser=data.user;
-    renderCompanyAccount();toast('SIRET contrôlé et informations d’entreprise enregistrées');
+    $('#companySaveStatus').textContent='Page Pro enregistrée.';
+    toast('Page Pro enregistrée');
   }catch(error){$('#companySaveStatus').textContent=error.message||'Impossible d’enregistrer. Réessayez.'}
   finally{btn.disabled=false}
 });
