@@ -107,3 +107,12 @@
     grid-template-columns:repeat(2,minmax(0,1fr))!important;
   }
 }
+
+/* Le mot « Abracadeal » est dessiné un peu à gauche dans l'image (≈2,2 %) :
+   léger décalage à droite pour le centrer sur la page. Le bord gauche est fondu
+   pour se raccorder au fond du cadre. */
+.banner-frame.banner-main-live .banner-main-image{
+  transform:translateX(2.2%);
+  -webkit-mask-image:linear-gradient(to right,transparent 0,#000 4%);
+  mask-image:linear-gradient(to right,transparent 0,#000 4%);
+}
