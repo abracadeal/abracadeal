@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - '.github/workflows/final-pricing-runtime.yml'
+      - '.github/final_pricing_runtime_patch.py'
 permissions:
   contents: write
 jobs:
@@ -10,91 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Patch runtime pricing
-        shell: python
-        run: |
-          from pathlib import Path
-          import re
-
-          # Public Vacances: consumer price may be public, Pro details stay gated.
-          p=Path('vacances.html'); s=p.read_text(); before=s
-          repl={
-            'Abracadeal Vacances : locations saisonnières en direct. Tarification hôte en cours de refonte.':'Abracadeal Vacances : locations saisonnières en direct. Publication Particulier à 4,99 € TTC pour 30 jours. Tarifs Pro réservés aux comptes professionnels.',
-            'Abracadeal Vacances met <strong>directement en relation voyageurs et hôtes</strong>. La tarification destinée aux hôtes est actuellement en cours de refonte.':'Abracadeal Vacances met <strong>directement en relation voyageurs et hôtes</strong>. Pour un particulier, la publication d’un logement coûte <strong>4,99 € TTC pour 30 jours</strong>, avec jusqu’à 15 photos. Les tarifs professionnels sont accessibles uniquement après connexion à un compte Pro.',
-            '<span class="hero-badge"><strong>Hôtes</strong> : nouvelle tarification en préparation</span>':'<span class="hero-badge"><strong>Particulier</strong> : 4,99 € TTC / logement / 30 jours</span>',
-            '<span><strong>Devenir hôte</strong><small>Tarification en cours de refonte.</small></span>':'<span><strong>Devenir hôte</strong><small>Particulier : 4,99 € TTC / 30 jours · Pro : tarifs après connexion</small></span>',
-            '<div class="value-card"><div class="icon">🏷️</div><h3>Tarification en refonte</h3><p>Les nouvelles conditions commerciales pour les hôtes seront publiées avant toute activation payante.</p></div>':'<div class="value-card"><div class="icon">🏷️</div><h3>Publication simple</h3><p>Particulier : 4,99 € TTC par logement pour 30 jours, jusqu’à 15 photos. Les formules Pro sont affichées uniquement après connexion professionnelle.</p></div>',
-            '<h3>Tarification en cours de refonte</h3>\n      <p class="legal">Les anciens tarifs Abracadeal Vacances ont été retirés. La nouvelle grille sera affichée clairement avant toute souscription ou paiement.</p>':'<h3>Particulier : 4,99 € TTC / 30 jours</h3>\n      <p class="legal">Jusqu’à 15 photos par logement. Pour les conciergeries et hébergeurs professionnels, les formules mensuelles et leurs tarifs HT sont visibles uniquement après connexion à un compte Pro.</p>'
-          }
-          for a,b in repl.items(): s=s.replace(a,b)
-          if s==before: raise SystemExit('vacances.html: aucun remplacement appliqué')
-          p.write_text(s)
-
-          # Host page note + cache bust.
-          p=Path('espace-hote.html'); s=p.read_text(); before=s
-          s=s.replace('<div class="onboarding-note"><strong>Tarification hôte en cours de refonte.</strong> Aucun ancien abonnement ni moyen de paiement n’est demandé pour le moment. Les nouvelles conditions seront affichées avant toute activation payante.</div>', '<div class="onboarding-note"><strong>Tarification :</strong> Particulier : 4,99 € TTC par logement pour 30 jours, jusqu’à 15 photos. Professionnel : formules Vacances Pro accessibles après création et connexion à un compte professionnel.</div>')
-          s=s.replace('assets/espace-hote.js?v=20261004-pricing-reset1','assets/espace-hote.js?v=20261005-pricing-final1')
-          if s==before: raise SystemExit('espace-hote.html: aucun remplacement appliqué')
-          p.write_text(s)
-
-          # Host runtime: onboarding copy + real Stripe Vacances Pro portal.
-          p=Path('assets/espace-hote.js'); s=p.read_text(); before=s
-          s=s.replace("onboardingMsg('Inscription hôte enregistrée. La tarification est en cours de refonte.');", "onboardingMsg(profile?.account_type==='professionnel'?'Inscription hôte enregistrée. Ajoutez vos photos puis choisissez votre formule Vacances Pro.':'Inscription hôte enregistrée. Ajoutez vos photos ; la publication Particulier est à 4,99 € TTC pour 30 jours.');")
-          old="""let vacationBillingOpening=false;
-async function handleVacationBillingQuery(){
-  const action=new URLSearchParams(location.search).get('billing');
-  if(!['manage','cancel'].includes(action)||vacationBillingOpening)return;
-  vacationBillingOpening=true;
-  alert('La tarification Hôte est en cours de refonte. Aucun abonnement payant n’est actuellement proposé.');
-  try{history.replaceState({},document.title,location.pathname)}catch(_){}
-  vacationBillingOpening=false;
-}
-"""
-          new="""let vacationBillingOpening=false;
-async function handleVacationBillingQuery(){
-  const action=new URLSearchParams(location.search).get('billing');
-  if(!['manage','cancel'].includes(action)||vacationBillingOpening)return;
-  vacationBillingOpening=true;
-  try{
-    const {data:{session}}=await sb.auth.getSession();
-    if(!session){alert('Connectez-vous pour gérer votre abonnement.');return}
-    const {data:p}=await sb.from('profiles').select('account_type').eq('id',session.user.id).maybeSingle();
-    if(p?.account_type!=='professionnel'){
-      alert('Les publications Vacances Particulier sont des achats ponctuels à 4,99 € TTC pour 30 jours : aucun abonnement n’est à résilier.');
-      return;
-    }
-    const {data,error}=await sb.functions.invoke('create-vacation-billing-portal',{body:{action}});
-    if(error||!data?.portal_url)throw new Error(data?.error||error?.message||'Portail abonnement indisponible');
-    location.href=data.portal_url;
-  }catch(error){alert(error?.message||'Impossible d’ouvrir la gestion de l’abonnement.');}
-  finally{
-    try{history.replaceState({},document.title,location.pathname)}catch(_){}
-    vacationBillingOpening=false;
-  }
-}
-"""
-          if old not in s: raise SystemExit('espace-hote.js: bloc billing attendu introuvable')
-          s=s.replace(old,new,1)
-          if s==before: raise SystemExit('espace-hote.js: aucune modification appliquée')
-          p.write_text(s)
-
-          # Main listing photo quotas aligned with final public/private pricing.
-          p=Path('assets/index-main.js'); s=p.read_text(); before=s
-          s=s.replace("let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null;", "let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;")
-          old="function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){return audience==='professionnel'?15:(category==='immobilier'||category==='vacances'?10:3)}\nfunction listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:((a?.category==='immobilier'||a?.category==='vacances')?10:3);return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}"
-          new="function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){if(audience==='professionnel'){if(proPlanPhotoLimit)return proPlanPhotoLimit;if(category==='hightech'||category==='maison'||category==='mode')return 8;if(category==='emploi'||category==='services')return 5;return 15}if(category==='immobilier'||category==='hightech'||category==='maison'||category==='mode')return 5;if(category==='vacances')return 15;return 3}\nfunction listingPhotoLimit(a){let base;if(a?.seller_type==='professionnel'){base=(a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?8:((a?.category==='emploi'||a?.category==='services')?5:15)}else{base=(a?.category==='immobilier'||a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?5:(a?.category==='vacances'?15:3)}return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}"
-          if old not in s: raise SystemExit('index-main.js: fonctions photo attendues introuvables')
-          s=s.replace(old,new,1)
-          s=s.replace("publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:15):(selectedPublishPack==='photo_12'?12:freeLimit);", "publishPhotoLimit=pro?freeLimit:freeLimit;")
-          s=s.replace("if(help)help.textContent='La tarification des options Abracadeal est en cours de refonte. Aucune option payante n’est proposée pour le moment.';", "if(help)help.innerHTML='Les options photos supplémentaires, Urgent, À la une et Boost sont disponibles depuis <a href=\"options-annonce.html\">Options de mes annonces</a>.';")
-          # Existing Pro subscription resolver: read plan_code and derive 30-photo allowance for 100/250 plans.
-          s=s.replace(".select('status,billing_starts_at,current_period_end')", ".select('status,plan_code,billing_starts_at,current_period_end')",1)
-          s=s.replace("proPaidPhotoAllowance=!!data&&data.status==='active'&&(!data.billing_starts_at||new Date(data.billing_starts_at)<=new Date())&&(!data.current_period_end||new Date(data.current_period_end)>new Date());", "const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;")
-          if s==before: raise SystemExit('index-main.js: aucune modification appliquée')
-          p.write_text(s)
-
-      - name: Verify runtime pricing guardrails
-        shell: bash
+      - name: Apply patch
+        run: python .github/final_pricing_runtime_patch.py
+      - name: Verify
         run: |
           ! grep -q 'Tarification hôte en cours de refonte' vacances.html espace-hote.html
           ! grep -q 'tarification Hôte est en cours de refonte' assets/espace-hote.js
@@ -102,12 +21,11 @@ async function handleVacationBillingQuery(){
           grep -q 'create-vacation-billing-portal' assets/espace-hote.js
           grep -q 'proPlanPhotoLimit' assets/index-main.js
           grep -q 'options-annonce.html' assets/index-main.js
-          # Exact Pro Vacances tariffs must not be exposed on the public Vacances page.
           ! grep -Eq '49 € HT|99 € HT' vacances.html
       - name: Commit
         run: |
-          git config user.name "abracadeal-bot"
-          git config user.email "abracadeal@gmail.com"
+          git config user.name abracadeal-bot
+          git config user.email abracadeal@gmail.com
           git add vacances.html espace-hote.html assets/espace-hote.js assets/index-main.js
-          git commit -m "Finalise les tarifs Vacances et les quotas photos"
+          git commit -m 'Finalise les tarifs Vacances et les quotas photos'
           git push
