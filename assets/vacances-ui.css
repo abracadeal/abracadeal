@@ -5342,3 +5342,13 @@ html.abraca-vacances-tablet-mobile .vac-mobile-banner-exact{
 .vac-legal-head{display:flex;align-items:center;justify-content:space-between;padding:17px 20px;border-bottom:1px solid #eee5f1}.vac-legal-head h2{margin:0;font-size:1.25rem}.vac-legal-close{border:0;background:transparent;font-size:1.55rem;cursor:pointer}
 .vac-legal-body{padding:20px;overflow:auto;line-height:1.62}.vac-legal-body h3{margin:22px 0 7px;font-size:1.02rem}.vac-legal-body p{margin:8px 0}.vac-legal-body ul{padding-left:21px}.vac-legal-body a{color:#7b2a96;text-decoration:underline}
 @media(max-width:760px){.vac-legal-links{gap:10px;font-size:.8rem}.vac-legal-overlay{padding:8px}.vac-legal-card{max-height:calc(100dvh - 16px);border-radius:17px}.vac-legal-body{padding:16px}}
+
+
+/* VACANCES_BG_MATCH_MAIN_20261005 */
+:root{--paper:#faf7fd}
+body,#vacTravelerMain{background:#faf7fd!important}
+#vacTravelerMain .section,#vacTravelerMain .section.alt,#vacTravelerMain .owner{background:#faf7fd!important}
+@media(max-width:760px){
+  body,#vacTravelerMain{background:#faf7fd!important}
+  #vacTravelerMain .hero{background:transparent!important}
+}
