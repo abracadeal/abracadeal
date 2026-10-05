@@ -16,3 +16,31 @@
 #vacTravelerMain .value-card .mini-link{
   color:#e47bdc!important;
 }
+
+/* Lisibilite du simulateur : jamais de texte clair sur fond clair */
+#vacTravelerMain .calc-result{
+  background:#f8eef8!important;
+  border-color:#e1c9e8!important;
+}
+#vacTravelerMain .metric{
+  background:#fff8fd!important;
+  border:1px solid #dfc8e5!important;
+  box-shadow:none!important;
+}
+#vacTravelerMain .metric span{
+  color:#6f4b76!important;
+  opacity:1!important;
+}
+#vacTravelerMain .metric strong{
+  color:#7b247f!important;
+  opacity:1!important;
+  text-shadow:none!important;
+}
+#vacTravelerMain .direct-price,
+#vacTravelerMain .direct-price span,
+#vacTravelerMain .direct-price strong{
+  color:#fff!important;
+}
+#vacTravelerMain .direct-price{
+  background:linear-gradient(90deg,#5d2077,#8a3798)!important;
+}
