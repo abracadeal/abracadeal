@@ -1,0 +1,73 @@
+name: Apply Abracadeal pricing site integration
+on:
+  push:
+    paths:
+      - '.github/workflows/apply-pricing-site-integration.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Patch homepage and categories
+        shell: python
+        run: |
+          from pathlib import Path
+          import re
+
+          p=Path('index.html')
+          s=p.read_text()
+          original=s
+
+          replacements={
+            '🎉 <strong>Offre Fondateurs</strong> · 12 mois gratuits pour les professionnels':'🎉 <strong>Offre Fondateurs</strong> · Auto, Moto & Immobilier · 12 mois gratuits',
+            '<h2>Professionnels : démarrez avec 12 mois gratuits.</h2>':'<h2>Pros Auto, Moto & Immobilier : démarrez avec 12 mois gratuits.</h2>',
+            'Garages, marchands, agences et boutiques peuvent publier et gérer leur stock sur Abracadeal. Profitez de l’offre de lancement dès la création de votre compte professionnel.':'Garages, marchands Auto/Moto et agences immobilières peuvent publier et gérer leur stock sur Abracadeal. L’offre Fondateurs est réservée aux 500 premiers comptes professionnels éligibles, sous réserve de places disponibles.',
+            'Les conditions commerciales et les futurs forfaits Abracadeal Pro sont actuellement en cours de refonte.':'12 mois gratuits sur les formules 20 ou 50 annonces pour les Pros Auto, Moto et Immobilier, puis -50 % la 2e année. Tarif public normal à partir de la 3e année.',
+            'Tarification Abracadeal en cours de refonte. Aucun ancien forfait, boost ou service payant n’est proposé actuellement. Les nouveaux tarifs seront affichés clairement avant toute activation.':'Les tarifs détaillés, quotas, packs et options Pro sont visibles uniquement après création ou connexion à un compte professionnel.'
+          }
+          for old,new in replacements.items():
+            if old in s:
+              s=s.replace(old,new)
+
+          # Place a safe link to the gated Pro pricing page next to the existing signup CTA, without exposing prices publicly.
+          marker='Reutilise openProfessionalSignup()'
+          if marker in s and 'href="pro-fondateur.html"' not in s:
+            # Add the link after the first signup button following this founder block.
+            pos=s.find(marker)
+            tail=s[pos:]
+            m=re.search(r'(</button>)',tail)
+            if m:
+              at=pos+m.end()
+              s=s[:at]+'\n      <a class="btn ghost" href="pro-fondateur.html">Voir l’offre et les tarifs Pro</a>'+s[at:]
+
+          if s==original:
+            raise SystemExit('index.html: aucune modification appliquée')
+          p.write_text(s)
+
+          j=Path('assets/index-main.js')
+          t=j.read_text()
+          before=t
+          t=t.replace("['bricolage','Bricolage']","['bricolage','Bricolage & Matériel']")
+          # Instruments de musique belongs in High-tech; inject before the high-tech catch-all if absent.
+          if "['instruments-musique','Instruments de musique']" not in t:
+            t=t.replace("['autre-hightech','Autre high-tech']","['instruments-musique','Instruments de musique'],\n    ['autre-hightech','Autre high-tech']")
+          if t==before:
+            raise SystemExit('assets/index-main.js: aucune modification appliquée')
+          j.write_text(t)
+
+      - name: Verify no public Pro euro tariffs were introduced
+        shell: bash
+        run: |
+          ! grep -E '299 € HT|499 € HT|799 € HT|1 399 € HT|29,90 € HT/mois|89 € HT/mois' index.html
+          grep -q 'pro-fondateur.html' index.html
+          grep -q 'Bricolage & Matériel' assets/index-main.js
+          grep -q 'Instruments de musique' assets/index-main.js
+      - name: Commit patch
+        run: |
+          git config user.name "abracadeal-bot"
+          git config user.email "abracadeal@gmail.com"
+          git add index.html assets/index-main.js
+          git commit -m "Relie la tarification Pro privée et clarifie les catégories"
+          git push
