@@ -5595,7 +5595,8 @@ html,body,#vacTravelerMain{
   object-fit:contain!important;
 }
 
-/* Bannière Vacances sur ordinateur/tablette : plus large, bords fondus dans le fond de la page. */
+/* Bannière Vacances sur ordinateur/tablette : plus large, bords fondus dans le fond de la page.
+   Le logo est dessiné un peu à gauche dans l'image : léger décalage à droite pour le centrer. */
 @media (min-width:768px){
   #vacMobileTop.vac-mobile-banner-shell{
     width:min(1400px,100%)!important;
@@ -5605,9 +5606,10 @@ html,body,#vacTravelerMain{
     border:0!important;
     border-radius:0!important;
     box-shadow:none!important;
-    overflow:visible!important;
+    overflow:hidden!important;
   }
   #vacMobileTop img.vac-mobile-banner-exact{
+    transform:translateX(2.9%);
     border:0!important;
     border-radius:0!important;
     box-shadow:none!important;
