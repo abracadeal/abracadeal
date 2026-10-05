@@ -546,13 +546,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   function validateProPlans(){return true;}
   async function loadProPlans(){
     const grid=document.getElementById('proPlanGrid');
-    if(grid)grid.innerHTML='<div class="note">Tarification Pro en cours de refonte. Aucune formule payante n’est proposée pour le moment.</div>';
+    if(grid)grid.innerHTML='<div class="note">Les tarifs détaillés sont réservés aux comptes professionnels. <a href="pro-fondateur.html">Voir les formules Pro</a>.</div>';
     const status=document.getElementById('proPlanStatus');
-    if(status)status.textContent='Les nouveaux tarifs seront ajoutés après validation.';
+    if(status)status.textContent='Formules Pro disponibles après connexion.';
     return [];
   }
   async function startProPlanCheckout(){
-    toast('Tarification Pro en cours de refonte.');
+    location.href='pro-fondateur.html';
     await loadProPlans();
   }
   async function ensureProPlanSelection(){
