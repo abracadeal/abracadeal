@@ -1,0 +1,24 @@
+name: Vacances full dark run
+
+on:
+  push:
+    paths:
+      - '.github/workflows/vacances-full-dark-run.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply patch
+        run: python .github/patch_vac_full_dark.py
+      - name: Commit
+        run: |
+          git config user.name 'abracadeal'
+          git config user.email 'abracadeal@gmail.com'
+          git add assets/vacances-ui.css vacances.html
+          git diff --cached --quiet || git commit -m 'Passe toute la page Vacances en sombre'
+          git push
