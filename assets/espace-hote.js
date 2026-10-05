@@ -359,7 +359,7 @@ $('completeHostBtn').onclick=async()=>{
     if(hostPendingErr){onboardingMsg(hostPendingErr.message,true);return}
 
     clearHostDraft();
-    onboardingMsg('Inscription hôte enregistrée. La tarification est en cours de refonte.');
+    onboardingMsg(profile?.account_type==='professionnel'?'Inscription hôte enregistrée. Ajoutez vos photos puis choisissez votre formule Vacances Pro.':'Inscription hôte enregistrée. Ajoutez vos photos ; la publication Particulier est à 4,99 € TTC pour 30 jours.');
     location.href='photos-vacances.html?listing='+encodeURIComponent(listingId);
   }finally{btn.disabled=false}
 };
@@ -466,9 +466,22 @@ async function handleVacationBillingQuery(){
   const action=new URLSearchParams(location.search).get('billing');
   if(!['manage','cancel'].includes(action)||vacationBillingOpening)return;
   vacationBillingOpening=true;
-  alert('La tarification Hôte est en cours de refonte. Aucun abonnement payant n’est actuellement proposé.');
-  try{history.replaceState({},document.title,location.pathname)}catch(_){}
-  vacationBillingOpening=false;
+  try{
+    const {data:{session}}=await sb.auth.getSession();
+    if(!session){alert('Connectez-vous pour gérer votre abonnement.');return}
+    const {data:p}=await sb.from('profiles').select('account_type').eq('id',session.user.id).maybeSingle();
+    if(p?.account_type!=='professionnel'){
+      alert('Les publications Vacances Particulier sont des achats ponctuels à 4,99 € TTC pour 30 jours : aucun abonnement n’est à résilier.');
+      return;
+    }
+    const {data,error}=await sb.functions.invoke('create-vacation-billing-portal',{body:{action}});
+    if(error||!data?.portal_url)throw new Error(data?.error||error?.message||'Portail abonnement indisponible');
+    location.href=data.portal_url;
+  }catch(error){alert(error?.message||'Impossible d’ouvrir la gestion de l’abonnement.');}
+  finally{
+    try{history.replaceState({},document.title,location.pathname)}catch(_){}
+    vacationBillingOpening=false;
+  }
 }
 sb.auth.onAuthStateChange((_event,session)=>{if(session?.user)setTimeout(()=>handleVacationBillingQuery(),0)});
 handleVacationBillingQuery();

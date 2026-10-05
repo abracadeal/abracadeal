@@ -39,7 +39,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 let professionalSignupViewerId=null;
 let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false;
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
-let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null;
+let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;
 let promoSelectedPack=null, promoPreselectedListingId=null;
 let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={};
@@ -1932,15 +1932,15 @@ function syncPublishVisibility(){
   if(!canChoose)select.value='public';
 }
 function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_until).getTime()>Date.now()}
-function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){return audience==='professionnel'?15:(category==='immobilier'||category==='vacances'?10:3)}
-function listingPhotoLimit(a){const base=a?.seller_type==='professionnel'?15:((a?.category==='immobilier'||a?.category==='vacances')?10:3);return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
+function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){if(audience==='professionnel'){if(proPlanPhotoLimit)return proPlanPhotoLimit;if(category==='hightech'||category==='maison'||category==='mode')return 8;if(category==='emploi'||category==='services')return 5;return 15}if(category==='immobilier'||category==='hightech'||category==='maison'||category==='mode')return 5;if(category==='vacances')return 15;return 3}
+function listingPhotoLimit(a){let base;if(a?.seller_type==='professionnel'){base=(a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?8:((a?.category==='emploi'||a?.category==='services')?5:15)}else{base=(a?.category==='immobilier'||a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?5:(a?.category==='vacances'?15:3)}return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
 function listingHasPhotoPack(a){return a?.seller_type==='professionnel'?listingPhotoLimit(a)>=30:listingPhotoLimit(a)>=12}
 function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return photos.slice(0,listingPhotoLimit(a))}
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
 function setPublishPhotoLimit(){
   const pro=accountAudience()==='professionnel';
   const freeLimit=basePhotoLimitForAudience();
-  publishPhotoLimit=pro?(selectedPublishPack==='photo_30_pro'&&proPaidPhotoAllowance?30:15):(selectedPublishPack==='photo_12'?12:freeLimit);
+  publishPhotoLimit=freeLimit;
   if(selectedPhotos.length>publishPhotoLimit) selectedPhotos=selectedPhotos.slice(0,publishPhotoLimit);
   if(selectedPhotos.length<=6)showAllPhotoSlots=false;
   const l=$('#photoLimitLabel');if(l)l.innerHTML=`Photos <span class="note">(${publishPhotoLimit} maximum)</span>`;
@@ -1952,9 +1952,9 @@ async function refreshProPhotoAllowance(){
   const uid=currentUser.id;
   if(proPhotoAllowanceUser===uid)return;
   proPhotoAllowanceUser=uid;
-  const {data,error}=await sb.from('pro_subscriptions').select('status,billing_starts_at,current_period_end').eq('user_id',uid).maybeSingle();
+  const {data,error}=await sb.from('pro_subscriptions').select('status,plan_code,billing_starts_at,current_period_end').eq('user_id',uid).maybeSingle();
   if(error){proPhotoAllowanceUser=null;return;}
-  proPaidPhotoAllowance=!!data&&data.status==='active'&&(!data.billing_starts_at||new Date(data.billing_starts_at)<=new Date())&&(!data.current_period_end||new Date(data.current_period_end)>new Date());
+  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
 function renderPublishPackPicker(){
@@ -1962,7 +1962,7 @@ function renderPublishPackPicker(){
   selectedPublishPack='free';
   const freeLimit=basePhotoLimitForAudience();
   picker.innerHTML=`<button type="button" class="pack-card selected" data-publish-pack="free"><div class="pack-card-title">Publication standard</div><div class="pack-card-price">Incluse</div><div class="pack-card-desc">Jusqu’à ${freeLimit} photo${freeLimit>1?'s':''} · sans option payante</div></button>`;
-  if(help)help.textContent='La tarification des options Abracadeal est en cours de refonte. Aucune option payante n’est proposée pour le moment.';
+  if(help)help.innerHTML='Les options photos supplémentaires, Urgent, À la une et Boost sont disponibles depuis <a href="options-annonce.html">Options de mes annonces</a>.';
   setPublishPhotoLimit();
 }
 function isProBoostCreditPack(code){return ['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d'].includes(code)}
