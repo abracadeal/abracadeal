@@ -1,0 +1,154 @@
+name: Vacances full dark
+
+on:
+  push:
+    paths:
+      - '.github/workflows/vacances-full-dark.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply full dark Vacances theme
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          css = Path('assets/vacances-ui.css')
+          s = css.read_text()
+          marker = '/* VACANCES_FULL_DARK_20261005 */'
+          block = r'''
+
+/* VACANCES_FULL_DARK_20261005 */
+:root{
+  --vac-bg-1:#0b0412;
+  --vac-bg-2:#10061a;
+  --vac-bg-3:#150822;
+  --vac-bg-4:#1b0d2d;
+  --vac-card:#160b21;
+  --vac-card-2:#1d102a;
+  --vac-border:rgba(255,255,255,.09);
+  --vac-text:#f7f1fa;
+  --vac-soft:#cdbed7;
+}
+html,body,#vacTravelerMain{
+  background:
+    radial-gradient(65% 90% at 50% 7%,rgba(113,34,160,.16),transparent 58%),
+    linear-gradient(180deg,#0b0412 0%,#10061a 34%,#150822 70%,#1b0d2d 100%)!important;
+  color:var(--vac-text)!important;
+}
+.topbar{
+  background:rgba(9,3,15,.98)!important;
+  border-bottom:1px solid rgba(255,255,255,.06)!important;
+  box-shadow:0 10px 30px rgba(0,0,0,.32)!important;
+}
+#vacTravelerMain .hero,
+#vacTravelerMain .section,
+#vacTravelerMain .section.alt,
+#vacTravelerMain .owner,
+#vacTravelerMain .cta,
+#vacTravelerMain .footer{
+  background:transparent!important;
+  border-color:var(--vac-border)!important;
+}
+#vacTravelerMain .section-head h2,
+#vacTravelerMain .section-head p,
+#vacTravelerMain .owner h2,
+#vacTravelerMain .cta h2,
+#vacTravelerMain .cta p,
+#vacHomeListingsSection h2,
+#vacHomeListingsSection p{
+  color:var(--vac-text)!important;
+}
+.search-box,
+#vacationSearch .vac-search-tile,
+.value-card,.step,.contact-card,.price-card,.calc,
+.vac-listing-card,.vac-listing-empty,.vac-mobile-offer,
+.vac-date-panel,.vac-date-box,.vac-legal-card{
+  background:linear-gradient(180deg,var(--vac-card) 0%,var(--vac-card-2) 100%)!important;
+  color:var(--vac-text)!important;
+  border-color:var(--vac-border)!important;
+  box-shadow:0 12px 32px rgba(0,0,0,.28)!important;
+}
+.search-title,.search-subtitle,
+#vacationSearch .vac-search-tile label,
+#vacationSearch .vac-search-tile .field,
+#vacationSearch .vac-date-trigger,
+.vac-listing-title,.vac-listing-price,.vac-listing-meta,.vac-listing-host,
+.value-card h3,.value-card p,.step h3,.step p,.contact-card h3,.contact-card p,
+.price-line span,.calc-intro,.calc small,
+.vac-date-head strong,.vac-date-head span,.vac-date-box span,
+.vac-legal-card,.vac-legal-body{
+  color:var(--vac-text)!important;
+}
+#vacationSearch .vac-search-tile .field::placeholder,
+#vacationSearch input::placeholder,
+#vacationSearch textarea::placeholder{
+  color:#a997b5!important;
+  opacity:1!important;
+}
+#vacationSearch .vac-search-tile .field,
+#vacationSearch .vac-date-trigger,
+.vac-date-box input{
+  background:transparent!important;
+  color:var(--vac-text)!important;
+}
+.vac-date-box input{
+  border-color:var(--vac-border)!important;
+}
+.vac-listing-photo,.vac-listing-photo-empty{
+  background:#12081c!important;
+}
+.vac-listing-empty strong,.vac-listing-empty p{color:var(--vac-text)!important}
+.vac-listing-card:hover{box-shadow:0 18px 40px rgba(0,0,0,.36)!important}
+.vac-france-launch-note{
+  background:#180c23!important;
+  color:var(--vac-soft)!important;
+  border-color:var(--vac-border)!important;
+}
+.vac-mobile-main-return a,
+.vac-mobile-top-account{
+  background:#160b21!important;
+  color:var(--vac-text)!important;
+  border-color:var(--vac-border)!important;
+}
+.vac-mobile-offer small,.vac-listing-meta,.vac-listing-host,.section-head p{color:var(--vac-soft)!important}
+@media (min-width:1024px) and (pointer:fine){
+  .vac-desktop-actions-v2 .vac-dnav-item,
+  .vac-desktop-actions-v2 .vac-dnav-vacances{color:var(--vac-text)!important}
+  .vac-desktop-actions-v2 .vac-dnav-item:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}
+}
+@media(max-width:760px){
+  html,body,#vacTravelerMain{
+    background:linear-gradient(180deg,#0b0412 0%,#10061a 36%,#150822 72%,#1b0d2d 100%)!important;
+  }
+  .hero{background:transparent!important}
+  .vac-mobile-popular h2,.vac-mobile-popular p,.vac-popular-seeall,.vac-mobile-main-return span{color:var(--vac-text)!important}
+  .vac-mobile-offer,.search-box,#vacationSearch .vac-search-tile{background:linear-gradient(180deg,#160b21,#1d102a)!important}
+}
+'''
+          if marker in s:
+              s = s.split(marker)[0].rstrip() + block
+          else:
+              s += block
+          css.write_text(s)
+
+          html = Path('vacances.html')
+          h = html.read_text()
+          import re
+          h = re.sub(r'assets/vacances-ui\.css\?v=[^"\']+', 'assets/vacances-ui.css?v=20261005-dark4', h, count=1)
+          html.write_text(h)
+          PY
+      - name: Commit
+        shell: bash
+        run: |
+          git config user.name 'abracadeal'
+          git config user.email 'abracadeal@gmail.com'
+          git add assets/vacances-ui.css vacances.html
+          git diff --cached --quiet || git commit -m 'Passe toute la page Vacances en thème sombre'
+          git push
