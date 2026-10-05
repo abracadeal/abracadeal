@@ -5397,3 +5397,74 @@ html,body,#vacTravelerMain{
 .vac-mobile-offer small,.vac-listing-meta,.vac-listing-host,.section-head p{color:var(--vac-soft)!important}
 @media (min-width:1024px) and (pointer:fine){.vac-desktop-actions-v2 .vac-dnav-item,.vac-desktop-actions-v2 .vac-dnav-vacances{color:var(--vac-text)!important}.vac-desktop-actions-v2 .vac-dnav-item:hover{background:rgba(255,255,255,.07)!important;color:#fff!important}}
 @media(max-width:760px){html,body,#vacTravelerMain{background:linear-gradient(180deg,#0b0412 0%,#10061a 36%,#150822 72%,#1b0d2d 100%)!important}.hero{background:transparent!important}.vac-mobile-popular h2,.vac-mobile-popular p,.vac-popular-seeall,.vac-mobile-main-return span{color:var(--vac-text)!important}.vac-mobile-offer,.search-box,#vacationSearch .vac-search-tile{background:linear-gradient(180deg,#160b21,#1d102a)!important}}
+
+
+/* VACANCES_TEXT_CONTRAST_20261005 */
+:root{
+  --vac-text:#fff9ff;
+  --vac-soft:#e8dcef;
+  --vac-muted:#cdbed7;
+}
+#vacTravelerMain,
+#vacTravelerMain p,
+#vacTravelerMain li,
+#vacTravelerMain span,
+#vacTravelerMain label,
+#vacTravelerMain small,
+#vacTravelerMain strong,
+#vacTravelerMain h1,
+#vacTravelerMain h2,
+#vacTravelerMain h3,
+#vacTravelerMain h4{
+  color:var(--vac-text)!important;
+}
+#vacTravelerMain .hero p,
+#vacTravelerMain .section-head p,
+#vacTravelerMain .search-subtitle,
+#vacTravelerMain .search-note,
+#vacTravelerMain .vac-listing-meta,
+#vacTravelerMain .vac-listing-host,
+#vacTravelerMain .vac-mobile-offer small,
+#vacTravelerMain .calc small,
+#vacTravelerMain .vac-date-head span{
+  color:var(--vac-soft)!important;
+}
+#vacTravelerMain .eyebrow,
+#vacTravelerMain .accent,
+#vacTravelerMain .highlight,
+#vacTravelerMain .hero strong,
+#vacTravelerMain .hero b{
+  color:#f05ab1!important;
+}
+#vacTravelerMain .search-title,
+#vacTravelerMain .section-head h2,
+#vacTravelerMain .owner h2,
+#vacTravelerMain .cta h2,
+#vacHomeListingsSection h2{
+  color:#fff!important;
+  text-shadow:0 2px 12px rgba(0,0,0,.32)!important;
+}
+#vacationSearch .vac-search-tile label,
+#vacationSearch .vac-search-icon{
+  color:#f2dff6!important;
+}
+#vacationSearch .vac-search-tile .field,
+#vacationSearch .vac-date-trigger,
+#vacationSearch select,
+#vacationSearch input{
+  color:#fff!important;
+}
+#vacationSearch .vac-search-tile .field::placeholder,
+#vacationSearch input::placeholder,
+#vacationSearch textarea::placeholder{
+  color:#cdbed7!important;
+  opacity:1!important;
+}
+.vac-listing-title,.vac-listing-price{color:#fff!important}
+.vac-listing-meta,.vac-listing-host{color:#d9cae2!important}
+.vac-france-launch-note{color:#eadff0!important}
+.vac-mobile-main-return span,.vac-popular-seeall{color:#f0e4f5!important}
+@media(max-width:760px){
+  .vac-mobile-popular h2{color:#fff!important}
+  .vac-mobile-popular p{color:#e3d6e9!important}
+}
