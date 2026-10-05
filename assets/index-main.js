@@ -1595,8 +1595,7 @@ const SUBCATEGORIES = {
     ['equipement-caravaning','Équipement caravaning'],
     ['equipement-nautisme','Équipement nautisme'],
     ['equipement-velo','Équipement vélo'],
-    ['pieces-detachees','Pièces détachées'],
-    ['services-reparation','Services / réparation']
+    ['pieces-detachees','Pièces détachées']
   ],
   immobilier: [
     ['vente-appartement','Appartement à vendre'],
@@ -1658,6 +1657,7 @@ const SUBCATEGORIES = {
     ['jardinage','Jardinage'],
     ['demenagement','Déménagement'],
     ['depannage','Dépannage'],
+    ['reparation-vehicules','Réparation véhicules'],
     ['transport','Transport / Livraison'],
     ['informatique','Informatique'],
     ['cours','Cours / Formation'],
