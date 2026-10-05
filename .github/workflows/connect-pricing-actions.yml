@@ -1,0 +1,43 @@
+name: Connect Abracadeal pricing actions
+on:
+  push:
+    paths:
+      - '.github/workflows/connect-pricing-actions.yml'
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Connect pricing entry points
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p=Path('index.html'); s=p.read_text(); before=s
+          marker='<button class="btn ghost admin-account-shortcut hidden" id="accountFlowBtn" type="button">Flux</button>'
+          if marker in s and 'href="options-annonce.html"' not in s:
+            s=s.replace(marker, marker+'\n            <a class="btn ghost" href="options-annonce.html">Options de mes annonces</a>',1)
+          p.write_text(s)
+          if s==before: print('index.html déjà à jour ou marqueur absent')
+
+          j=Path('assets/index-app.js'); t=j.read_text(); old=t
+          t=t.replace("if(grid)grid.innerHTML='<div class=\"note\">Tarification Pro en cours de refonte. Aucune formule payante n’est proposée pour le moment.</div>';", "if(grid)grid.innerHTML='<div class=\"note\">Les tarifs détaillés sont réservés aux comptes professionnels. <a href=\"pro-fondateur.html\">Voir les formules Pro</a>.</div>';" )
+          t=t.replace("if(status)status.textContent='Les nouveaux tarifs seront ajoutés après validation.';", "if(status)status.textContent='Formules Pro disponibles après connexion.';")
+          t=t.replace("toast('Tarification Pro en cours de refonte.');", "location.href='pro-fondateur.html';")
+          j.write_text(t)
+          if t==old: print('index-app.js déjà à jour ou anciennes chaînes absentes')
+      - name: Verify
+        shell: bash
+        run: |
+          grep -q 'options-annonce.html' index.html
+          grep -q 'pro-fondateur.html' assets/index-app.js
+          ! grep -q 'Tarification Pro en cours de refonte' assets/index-app.js
+      - name: Commit
+        run: |
+          git config user.name "abracadeal-bot"
+          git config user.email "abracadeal@gmail.com"
+          git add index.html assets/index-app.js
+          git commit -m "Connecte les tarifs privés et les options aux comptes"
+          git push
