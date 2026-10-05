@@ -1618,13 +1618,14 @@ const SUBCATEGORIES = {
     ['gaming','Jeux vidéo / Consoles'],
     ['accessoires-hightech','Accessoires'],
     ['objets-connectes','Objets connectés'],
+    ['instruments-musique','Instruments de musique'],
     ['autre-hightech','Autre high-tech']
   ],
   maison: [
     ['meubles','Meubles'],
     ['decoration','Décoration'],
     ['electromenager','Électroménager'],
-    ['bricolage','Bricolage'],
+    ['bricolage','Bricolage & Matériel'],
     ['jardin','Jardin'],
     ['cuisine','Cuisine'],
     ['linge-maison','Linge de maison'],

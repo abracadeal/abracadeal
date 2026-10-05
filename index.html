@@ -300,7 +300,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 <main id="top">
   <div class="founder-topbar" id="founderTopbar">
     <div class="container founder-topbar-inner">
-      <span class="founder-topbar-text">🎉 <strong>Offre Fondateurs</strong> · 12 mois gratuits pour les professionnels</span>
+      <span class="founder-topbar-text">🎉 <strong>Offre Fondateurs</strong> · Auto, Moto & Immobilier · 12 mois gratuits</span>
       <span class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></span>
       <button type="button" class="founder-topbar-cta" onclick="openModal('founderOfferModal')">Voir l'offre →</button>
     </div>
@@ -329,8 +329,8 @@ window.addEventListener('load', abracadealForceTopOnReload);
       <div class="pro-block">
         <div>
           <div class="founder-inline"><strong>Offre Fondateurs</strong> · réservée aux 500 premiers comptes professionnels éligibles</div>
-          <h2>Professionnels : démarrez avec 12 mois gratuits.</h2>
-          <p>Garages, marchands, agences et boutiques peuvent publier et gérer leur stock sur Abracadeal. Profitez de l’offre de lancement dès la création de votre compte professionnel.</p>
+          <h2>Pros Auto, Moto & Immobilier : démarrez avec 12 mois gratuits.</h2>
+          <p>Garages, marchands Auto/Moto et agences immobilières peuvent publier et gérer leur stock sur Abracadeal. L’offre Fondateurs est réservée aux 500 premiers comptes professionnels éligibles, sous réserve de places disponibles.</p>
           <div class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></div>
           <div class="pro-main-actions" style="margin-top:14px">
             <a class="btn primary" id="proAccountBtn" href="#accountModal">Profiter des 12 mois gratuits</a>
@@ -1007,15 +1007,16 @@ window.addEventListener('load', abracadealForceTopOnReload);
       <div class="founder-progress" aria-hidden="true"><span data-founder-progress></span></div>
       <div class="founder-progress-note" data-founder-progress-note>Le compteur se base sur les professionnels vérifiés.</div>
       <div class="founder-steps">
-        <div><b>Offre Fondateurs</b><span>Les conditions commerciales et les futurs forfaits Abracadeal Pro sont actuellement en cours de refonte.</span></div>
+        <div><b>Offre Fondateurs</b><span>12 mois gratuits sur les formules 20 ou 50 annonces pour les Pros Auto, Moto et Immobilier, puis -50 % la 2e année. Tarif public normal à partir de la 3e année.</span></div>
       </div>
-      <p class="note">Tarification Abracadeal en cours de refonte. Aucun ancien forfait, boost ou service payant n’est proposé actuellement. Les nouveaux tarifs seront affichés clairement avant toute activation.</p>
+      <p class="note">Les tarifs détaillés, quotas, packs et options Pro sont visibles uniquement après création ou connexion à un compte professionnel.</p>
       <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par Anthony, pour convertir directement
            depuis la modale au lieu de forcer un aller-retour manuel vers l'inscription.
            Reutilise openProfessionalSignup() (deja utilisee par #proAccountBtn) qui bascule
            sur l'onglet inscription, preselectionne "Professionnel" et ouvre accountModal. -->
       <div class="form-actions" style="margin-top:18px">
         <button type="button" class="btn primary" onclick="closeModal('founderOfferModal');openProfessionalSignup();">S’inscrire</button>
+      <a class="btn ghost" href="pro-fondateur.html">Voir l’offre et les tarifs Pro</a>
       </div>
     </div>
   </div>
