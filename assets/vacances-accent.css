@@ -1,0 +1,18 @@
+/* Accents rose/violet clair pour les cartes Vacances */
+#vacTravelerMain .value-card p,
+#vacTravelerMain .value-card small,
+#vacTravelerMain .value-card .muted{
+  color:#efb6ea!important;
+}
+#vacTravelerMain .value-card .icon{
+  background:linear-gradient(135deg,rgba(217,106,208,.20),rgba(179,79,196,.16))!important;
+  color:#e47bdc!important;
+  border:1px solid rgba(217,106,208,.34)!important;
+  box-shadow:0 6px 16px rgba(188,71,178,.10)!important;
+}
+#vacTravelerMain .value-card{
+  border-color:rgba(217,106,208,.26)!important;
+}
+#vacTravelerMain .value-card .mini-link{
+  color:#e47bdc!important;
+}
