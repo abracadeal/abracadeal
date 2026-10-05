@@ -47,5 +47,5 @@ css.write_text(s)
 
 html = Path('vacances.html')
 h = html.read_text()
-h = re.sub(r'assets/vacances-ui\.css\?v=[^"\']+', 'assets/vacances-ui.css?v=20261005-dark4', h, count=1)
+h = re.sub(r"assets/vacances-ui\.css\?v=[^\"']+", 'assets/vacances-ui.css?v=20261005-dark4', h, count=1)
 html.write_text(h)
