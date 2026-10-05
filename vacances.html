@@ -24,7 +24,7 @@
 
 <link rel="stylesheet" href="assets/mobile-safety-20260919.css?v=20260919-1">
 
-<link rel="stylesheet" href="assets/vacances-ui.css?v=20261005-dark6">
+<link rel="stylesheet" href="assets/vacances-ui.css?v=20261005-dark7">
 
 
 
@@ -128,14 +128,19 @@
 
 
 <div class="vac-mobile-banner-shell" id="vacMobileTop">
-  <img
-    class="vac-mobile-banner-exact"
-    src="assets/abracadeal-vacances-mobile.webp?v=20260920-1"
-    alt="Abracadeal Vacances — De bonnes affaires près de chez vous et partout ailleurs !"
-    width="1290"
-    height="563"
-    decoding="async"
-    fetchpriority="high">
+  <picture>
+    <source media="(max-width: 767px)" type="image/webp" srcset="assets/banniere-vacances-mobile.webp" width="800" height="570">
+    <source media="(max-width: 767px)" type="image/jpeg" srcset="assets/banniere-vacances-mobile.jpg" width="800" height="570">
+    <source type="image/webp" srcset="assets/banniere-vacances-desktop.webp" width="1920" height="823">
+    <img
+      class="vac-mobile-banner-exact"
+      src="assets/banniere-vacances-desktop.jpg"
+      alt="Abracadeal Vacances, lampe magique dorée"
+      width="1920"
+      height="823"
+      decoding="async"
+      fetchpriority="high">
+  </picture>
 </div>
 
 <div class="auth-modal" id="vacAuthModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="vacAuthTitle">
