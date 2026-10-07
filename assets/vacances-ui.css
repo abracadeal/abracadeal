@@ -5620,26 +5620,6 @@ html,body,#vacTravelerMain{
   }
 }
 
-/* 07/10/2026 : banniere Vacances mobile recentree. Dans banniere-vacances-mobile.webp,
-   le dessin (lampe + logo) est decale d'environ 4,5 % vers la gauche : on le recale
-   dans le cadre arrondi. S'applique aussi a l'iPad/tablette, qui affiche la version mobile
-   (assets/tablet-as-mobile-20261007.js). */
-@media (max-width:767px){
-  html body .vac-mobile-banner-shell{
-    overflow:hidden!important;
-    border-radius:24px!important;
-    border:1px solid rgba(145,72,154,.13)!important;
-    box-sizing:border-box!important;
-  }
-  html body .vac-mobile-banner-shell picture{display:block!important}
-  html body .vac-mobile-banner-shell picture .vac-mobile-banner-exact{
-    border:0!important;
-    border-radius:0!important;
-    transform:translateX(4.5%) scale(1.1)!important;
-    transform-origin:center center!important;
-  }
-}
-
 /* iPad/tablette en paysage (version mobile) : contenu centre, banniere moins haute. */
 @media (orientation:landscape){
   html.abraca-tablet-as-mobile body .vac-mobile-main-return,
@@ -5650,17 +5630,40 @@ html,body,#vacTravelerMain{
     margin-right:auto!important;
     box-sizing:border-box!important;
   }
-  html.abraca-tablet-as-mobile body .vac-mobile-banner-shell{
-    width:calc(100% - 20px)!important;
-    max-width:680px!important;
-    margin-left:auto!important;
-    margin-right:auto!important;
-  }
   html.abraca-tablet-as-mobile body .vac-mobile-bottom-nav{
     max-width:720px!important;
     left:50%!important;
     right:auto!important;
     width:calc(100% - 20px)!important;
     transform:translateX(-50%)!important;
+  }
+}
+
+/* Mobile + iPad/tablette : banniere large (banniere-vacances-mobile-tablette.jpg, 2000x667)
+   etiree sur toute la largeur, peu haute. La tablette passe aussi par (max-width:767px)
+   grace a assets/tablet-as-mobile-20261007.js. */
+@media (max-width:767px){
+  html body #vacMobileTop.vac-mobile-banner-shell{
+    width:calc(100% - 20px)!important;
+    max-width:none!important;
+    height:auto!important;
+    aspect-ratio:auto!important;
+    margin:8px auto 12px!important;
+    overflow:hidden!important;
+    border-radius:20px!important;
+  }
+  html body #vacMobileTop picture{display:block!important}
+  html body #vacMobileTop.vac-mobile-banner-shell picture img.vac-mobile-banner-exact{
+    display:block!important;
+    width:100%!important;
+    height:auto!important;
+    min-height:0!important;
+    max-height:none!important;
+    aspect-ratio:2000 / 667!important;
+    object-fit:cover!important;
+    object-position:center!important;
+    transform:none!important;
+    border:0!important;
+    border-radius:0!important;
   }
 }

@@ -59,7 +59,8 @@
   /* <picture><source media="..."> : choisir les images mobiles. */
   function applyToSource(el){
     var m = el.getAttribute('media');
-    if (m && !el.hasAttribute('data-tablet-media')){
+    /* data-tablet-keep-media : la tablette garde le choix d'image d'origine (ex. banniere large). */
+    if (m && !el.hasAttribute('data-tablet-media') && !el.hasAttribute('data-tablet-keep-media')){
       el.setAttribute('data-tablet-media', m);
       el.setAttribute('media', rewrite(m));
     }
