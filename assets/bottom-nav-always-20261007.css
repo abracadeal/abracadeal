@@ -1,0 +1,36 @@
+/* Mobile + tablette (la tablette passe par (max-width:760px) via tablet-as-mobile) :
+   la barre de navigation du bas reste toujours visible, y compris quand une fenetre
+   est ouverte (Compte / "Bonjour ...", Messages, Publier, annonce, Admin...).
+   Les fenetres s'arretent juste au-dessus de la barre.
+   :not(#abraca-x) = specificite d'un id, pour passer devant les regles #xxxModal existantes. */
+@media (max-width:760px){
+  :root{--abraca-bottom-nav-space:calc(96px + env(safe-area-inset-bottom))}
+
+  /* Accueil */
+  html body .mobile-bottom-nav:not(#abraca-x){z-index:70000!important}
+  html body .modal-backdrop:not(#abraca-x){
+    padding-bottom:var(--abraca-bottom-nav-space)!important;
+    box-sizing:border-box!important;
+  }
+  html body .modal-backdrop:not(#abraca-x)>.modal:not(#abraca-x){
+    height:100%!important;
+    max-height:100%!important;
+  }
+
+  /* Messages courts (toast) : au-dessus de la barre, pas par-dessus. */
+  html body #toast:not(#abraca-x){
+    top:auto!important;
+    bottom:calc(var(--abraca-bottom-nav-space) + 8px)!important;
+  }
+
+  /* Vacances */
+  html body .vac-mobile-bottom-nav:not(#abraca-x){z-index:70000!important}
+  html body #vacAuthModal:not(#abraca-x),
+  html body #vacDateSheet:not(#abraca-x),
+  html body .vac-legal-overlay:not(#abraca-x){
+    bottom:var(--abraca-bottom-nav-space)!important;
+  }
+  html body .vac-legal-overlay:not(#abraca-x)>.vac-legal-card{
+    max-height:100%!important;
+  }
+}

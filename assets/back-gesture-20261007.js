@@ -90,6 +90,18 @@
     if (layer && el.classList.contains(layer.cls)) layer.close(el);
   });
 
+  /* Barre du bas toujours visible (bottom-nav-always-20261007.css) : toucher un de ses
+     boutons ferme d'abord la fenetre ouverte, puis le bouton fait son action habituelle. */
+  document.addEventListener('click', function(e){
+    if (!e.target.closest || !e.target.closest('.mobile-bottom-nav, .vac-mobile-bottom-nav')) return;
+    for (var i = 0; i < LAYERS.length; i++){
+      var open = document.querySelectorAll(LAYERS[i].sel);
+      for (var j = 0; j < open.length; j++){
+        if (open[j].classList.contains(LAYERS[i].cls)) LAYERS[i].close(open[j]);
+      }
+    }
+  }, true);
+
   function start(){
     new MutationObserver(function(muts){
       for (var i = 0; i < muts.length; i++){
