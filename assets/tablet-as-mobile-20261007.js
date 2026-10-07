@@ -1,7 +1,8 @@
 /* Tablette tactile (iPad...) = version mobile.
-   Sur tablette, toutes les media queries de largeur (CSS et window.matchMedia) sont
-   evaluees comme si l'ecran faisait EFFECTIVE_WIDTH px de large : le site applique donc
-   exactement ses regles mobiles, en occupant toute la largeur reelle de la tablette.
+   Sur tablette, toutes les media queries de largeur (CSS, window.matchMedia et
+   <source media> des <picture>) sont evaluees comme si l'ecran faisait EFFECTIVE_WIDTH px
+   de large : le site applique donc exactement ses regles mobiles, en occupant toute la
+   largeur reelle de la tablette.
    Telephone et desktop : aucun changement (le script ne fait rien).
    A charger en <script> synchrone tout en haut du <head>, puis appeler
    window.abracaTabletAsMobile.applyToStyles() en fin de <head>. */
@@ -44,38 +45,49 @@
       if (r.cssRules) walk(r.cssRules);
     }
   }
-  var done = typeof WeakSet === 'function' ? new WeakSet() : null;
+  /* Idempotent (les requetes reecrites restent identiques) : on peut repasser sans risque. */
   function applyToSheet(sheet){
-    if (!sheet || (done && done.has(sheet))) return;
+    if (!sheet) return;
     var rules;
     try { rules = sheet.cssRules; } catch(e){ return; } /* feuille externe (Leaflet, Google Fonts) */
-    if (!rules) return;
-    if (done) done.add(sheet);
     walk(rules);
   }
   function applyToStyles(){
     for (var i = 0; i < document.styleSheets.length; i++) applyToSheet(document.styleSheets[i]);
   }
 
-  /* Styles ajoutes plus tard (feuilles chargees dynamiquement, <style> injectes par JS). */
-  function watch(){
-    applyToStyles();
-    new MutationObserver(function(muts){
-      for (var i = 0; i < muts.length; i++){
-        var nodes = muts[i].addedNodes;
-        for (var j = 0; j < nodes.length; j++){
-          var n = nodes[j];
-          if (n.tagName === 'STYLE') applyToSheet(n.sheet);
-          else if (n.tagName === 'LINK'){
-            applyToSheet(n.sheet);
-            n.addEventListener('load', function(){ applyToSheet(this.sheet); });
-          }
-        }
-      }
-    }).observe(document.documentElement, {childList:true, subtree:true});
+  /* <picture><source media="..."> : choisir les images mobiles. */
+  function applyToSource(el){
+    var m = el.getAttribute('media');
+    if (m && !el.hasAttribute('data-tablet-media')){
+      el.setAttribute('data-tablet-media', m);
+      el.setAttribute('media', rewrite(m));
+    }
   }
-  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', watch);
-  else watch();
+  function applyToSources(root){
+    var list = root.querySelectorAll ? root.querySelectorAll('source[media]') : [];
+    for (var i = 0; i < list.length; i++) applyToSource(list[i]);
+  }
+
+  /* Elements ajoutes pendant le chargement ou plus tard : <style>/<link> injectes par JS,
+     <source media> des <picture> (traites des leur insertion par le parseur). */
+  new MutationObserver(function(muts){
+    for (var i = 0; i < muts.length; i++){
+      var nodes = muts[i].addedNodes;
+      for (var j = 0; j < nodes.length; j++){
+        var n = nodes[j];
+        if (n.nodeType !== 1) continue;
+        if (n.tagName === 'STYLE') applyToSheet(n.sheet);
+        else if (n.tagName === 'LINK'){
+          applyToSheet(n.sheet);
+          n.addEventListener('load', function(){ applyToSheet(this.sheet); });
+        }
+        else if (n.tagName === 'SOURCE') applyToSource(n);
+        else if (n.querySelectorAll) applyToSources(n);
+      }
+    }
+  }).observe(document.documentElement, {childList:true, subtree:true});
+  document.addEventListener('DOMContentLoaded', function(){ applyToStyles(); applyToSources(document); });
   window.addEventListener('load', applyToStyles);
 
   window.abracaTabletAsMobile = { effectiveWidth: EFFECTIVE_WIDTH, applyToStyles: applyToStyles };

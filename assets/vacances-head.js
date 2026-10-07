@@ -7,7 +7,8 @@
   var notPhone=!/iPhone|iPod/i.test(ua);
   var tabletByTouch=touch && notPhone && minSide>=600;
   var explicitTablet=/iPad|Tablet/i.test(ua) || (/Android/i.test(ua)&&!/Mobile/i.test(ua));
-  if(tabletByTouch||explicitTablet){
+  /* Si la tablette affiche deja la version mobile (tablet-as-mobile), pas d'ancien mode tablette. */
+  if(!window.abracaTabletAsMobile && (tabletByTouch||explicitTablet)){
     document.documentElement.classList.add('abraca-vacances-tablet-mobile');
   }
 
