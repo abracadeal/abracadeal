@@ -304,7 +304,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     publish.classList.add('abraca-publish-top');
     publish.dataset.desktopLabel=(publish.textContent||'').trim();
     const syncPublishLabel=()=>{
-      publish.textContent=window.innerWidth<=760?'Publier':(publish.dataset.desktopLabel||'Publier une annonce');
+      publish.textContent=window.matchMedia('(max-width:760px)').matches?'Publier':(publish.dataset.desktopLabel||'Publier une annonce');
     };
     syncPublishLabel();
     window.addEventListener('resize',syncPublishLabel,{passive:true});
@@ -1144,7 +1144,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   function floatSearch(){
     if (!ensureRefs() || floating || isTabletMobileUi()) return;
     const rect = wrap.getBoundingClientRect();
-    const isWide = window.innerWidth > 760;
+    const isWide = !window.matchMedia('(max-width:760px)').matches;
     placeholder.style.height = Math.ceil(rect.height) + 'px';
     wrap.parentNode.insertBefore(placeholder, wrap);
     document.body.appendChild(wrap);
