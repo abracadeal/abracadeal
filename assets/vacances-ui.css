@@ -5667,3 +5667,42 @@ html,body,#vacTravelerMain{
     border-radius:0!important;
   }
 }
+
+/* Mobile + tablette : logo "Abracadeal / Louez - Voyagez" comme sur desktop,
+   a la place du bouton "← Abracadeal". */
+html body .vac-mobile-main-return a.vac-mobile-brand{
+  display:inline-flex!important;
+  flex-direction:column!important;
+  align-items:center!important;
+  gap:0!important;
+  min-height:0!important;
+  padding:2px 0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:none!important;
+  box-shadow:none!important;
+  text-decoration:none!important;
+  line-height:1!important;
+}
+html body .vac-mobile-main-return a.vac-mobile-brand b{
+  display:inline-block!important;
+  font:900 28px/1 Fraunces,serif!important;
+  letter-spacing:-.02em!important;
+  color:#e8bb43!important;
+  background:linear-gradient(110deg,#9f6800 0%,#d7a51e 16%,#ffe47b 29%,#fff8cf 43%,#fff 50%,#fff0a0 57%,#d9a722 72%,#a66c00 100%)!important;
+  background-size:320% 100%!important;
+  -webkit-background-clip:text!important;
+  background-clip:text!important;
+  -webkit-text-fill-color:transparent!important;
+  animation:abracaVacHeaderGoldShine 2.2s linear infinite!important;
+  white-space:nowrap!important;
+}
+html body .vac-mobile-main-return a.vac-mobile-brand small{
+  display:block!important;
+  margin-top:3px!important;
+  font:700 9px/1 Inter,sans-serif!important;
+  letter-spacing:.08em!important;
+  text-transform:uppercase!important;
+  color:#fff!important;
+  white-space:nowrap!important;
+}
