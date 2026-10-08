@@ -6,7 +6,7 @@ function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currenc
 async function boot(){
  const id=new URLSearchParams(location.search).get('id');if(!id){$('loading').textContent='Logement introuvable.';return}
  const [{data:l,error},{data:d},{data:photos}]=await Promise.all([
-  sb.from('listings').select('id,owner_id,title,description,price,city,postal_code,status,featured_until').eq('id',id).eq('category','vacances').maybeSingle(),
+  sb.from('listings').select('id,listing_reference,owner_id,title,description,price,city,postal_code,status,featured_until').eq('id',id).eq('category','vacances').maybeSingle(),
   sb.from('vacation_listing_details').select('*').eq('listing_id',id).maybeSingle(),
   sb.from('listing_photos').select('*').eq('listing_id',id).order('position')
  ]);
@@ -20,6 +20,8 @@ async function boot(){
    }
  }
  $('title').textContent=l.title;$('location').textContent=l.city+(l.postal_code?' · '+l.postal_code:'');$('price').textContent=money(l.price);$('desc').innerHTML='<h2>Description</h2><p>'+esc(l.description).replace(/\n/g,'<br>')+'</p>';
+ $('listingReference').textContent=l.listing_reference?'Référence de l’annonce : '+l.listing_reference:'';
+ $('listingReference').hidden=!l.listing_reference;
  $('chips').innerHTML=['👥 '+(detail.max_guests||2)+' voyageurs','🛏 '+(detail.beds??1)+' lit(s)','🚪 '+(detail.bedrooms??1)+' chambre(s)','🛁 '+(detail.bathrooms??1)+' salle(s) de bain','🌙 min. '+(detail.min_nights||1)+' nuit(s)'].map(x=>'<span class="chip">'+x+'</span>').join('');
  $('amenities').innerHTML=(detail.amenities||[]).length?(detail.amenities||[]).map(x=>'<span class="chip">'+esc(x)+'</span>').join(''):'<span class="muted">Aucun équipement renseigné.</span>';
  $('rules').innerHTML='<p><b>Arrivée :</b> à partir de '+String(detail.checkin_from||'15:00').slice(0,5)+' · <b>Départ :</b> avant '+String(detail.checkout_until||'11:00').slice(0,5)+'</p>'+(detail.house_rules?'<p>'+esc(detail.house_rules).replace(/\n/g,'<br>')+'</p>':'');

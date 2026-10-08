@@ -3754,6 +3754,7 @@ window.openAd=id=>{
               <div class="detail-price-main">${money(a.price)}</div>
               <div class="detail-location">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
               <div class="detail-meta-line">${esc(categoryLabel)}${created?' · Publiée le '+esc(created):''}</div>
+              ${a.listing_reference?`<div class="detail-meta-line">Référence de l’annonce : <b>${esc(a.listing_reference)}</b></div>`:''}
             </div>
           </div>
 
