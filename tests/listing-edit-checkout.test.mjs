@@ -4,13 +4,13 @@ import fs from 'node:fs';
 import vm from 'node:vm';
 
 const source=fs.readFileSync('options-annonce.html','utf8').match(/<script>([\s\S]*?)<\/script>/)[1];
-async function render(rows,offers){
+async function render(rows,offers,search='?revision=candidate'){
  const calls=[],cards=[],nodes=new Map();
  const node=()=>({textContent:'',innerHTML:'',classList:{add(){},remove(){}},prepend(c){cards.push(c)},querySelector(){return {}}});
  const document={body:node(),querySelector:()=>nodes.get('heading'),getElementById(id){if(!nodes.has(id))nodes.set(id,node());return nodes.get(id)},createElement:node};
  nodes.set('heading',node());
- const sb={auth:{getSession:async()=>({data:{session:{user:{id:'owner'}}}})},from(table){calls.push(['table',table]);const q={select(){return q},eq(k,v){calls.push([k,v]);return q},not(){return q},then(resolve){return Promise.resolve({data:rows}).then(resolve)}};return q},rpc:async(name)=>{calls.push(['rpc',name]);return {data:offers}}};
- const context=vm.createContext({document,location:{search:'?revision=candidate'},supabase:{createClient:()=>sb},URLSearchParams,Error,confirm(){},alert(){}});
+ const sb={auth:{getSession:async()=>({data:{session:{user:{id:'owner'}}}})},from(table){calls.push(['table',table]);const q={select(){return q},eq(k,v){calls.push([k,v]);return q},not(){return q},in(){return q},order(){return q},limit(){return q},then(resolve){return Promise.resolve({data:rows}).then(resolve)}};return q},rpc:async(name)=>{calls.push(['rpc',name]);return {data:name==='get_my_listing_revisions'?[{candidate_id:'candidate',paid:false,included:false,applied_at:null}]:offers}}};
+ const context=vm.createContext({document,location:{search},supabase:{createClient:()=>sb},URLSearchParams,Error,confirm(){},alert(){}});
  vm.runInContext(source,context);
  await new Promise(resolve=>setImmediate(resolve));
  return {calls,cards,nodes,document};
@@ -37,4 +37,12 @@ test('tarif absent : bloque la modification sans inventer de prix',async()=>{
  const result=await render([{id:'candidate',revision_of:'original',title:'Annonce modifiée'}],[]);
  assert.equal(result.cards.length,0);
  assert.match(result.nodes.get('status').textContent,/tarif de modification est indisponible/);
+});
+
+test('ancien lien sans paramètre : affiche seulement le tarif de la modification non payée',async()=>{
+ const result=await render([{id:'candidate',revision_of:'original',title:'Annonce modifiée'}],[{code:'private_listing_edit',amount_cents:290},{code:'photo_lifestyle_10',offer_type:'photo_option',amount_cents:99}], '');
+ assert.equal(result.cards.length,1);
+ assert.match(result.cards[0].innerHTML,/2,90 € TTC/);
+ assert.doesNotMatch(result.cards[0].innerHTML,/0,99|10 photos|<select/);
+ assert.equal(result.nodes.get('heading').textContent,'Modifier et remonter mon annonce');
 });

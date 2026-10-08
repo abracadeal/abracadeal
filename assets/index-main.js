@@ -1971,7 +1971,7 @@ function renderPublishPackPicker(){
   selectedPublishPack='free';
   const freeLimit=basePhotoLimitForAudience();
   picker.innerHTML=`<button type="button" class="pack-card selected" data-publish-pack="free"><div class="pack-card-title">Publication standard</div><div class="pack-card-price">Incluse</div><div class="pack-card-desc">Jusqu’à ${freeLimit} photo${freeLimit>1?'s':''} · sans option payante</div></button>`;
-  if(help)help.innerHTML='Les options photos supplémentaires, Urgent, À la une et Boost sont disponibles depuis <a href="options-annonce.html">Options de mes annonces</a>.';
+  if(help)help.innerHTML='Les options photos supplémentaires, Urgent, À la une et Boost sont disponibles depuis <a href="options-annonce.html?options=1">Options de mes annonces</a>.';
   setPublishPhotoLimit();
 }
 function isProBoostCreditPack(code){return ['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d'].includes(code)}
