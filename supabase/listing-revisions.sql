@@ -113,15 +113,16 @@ begin
  select * into strict c from public.listings where id=p_candidate_id for update;
  select * into strict l from public.listings where id=r.original_id for update;
  select * into m from public.listing_moderation where listing_id=c.id;
+ if p_order_id is not null then
+  if not exists(select 1 from public.commerce_orders o where o.id=p_order_id and o.revision_id=c.id and o.user_id=r.owner_id and o.offer_code='private_listing_edit' and o.status='paid' and o.withdrawal_accepted_at is not null) then raise exception 'Paiement confirmé requis'; end if;
+  update private.listing_revisions set paid=true,order_id=p_order_id where candidate_id=c.id;r.paid:=true;
+ end if;
+ if c.status='rejected' then return jsonb_build_object('revision',true,'applied',false,'refused',true); end if;
  select coalesce(jsonb_agg(jsonb_build_object('id',id,'path',storage_path) order by id),'[]'::jsonb) into snap from public.listing_photos where listing_id=c.id;
  if m.safety_snapshot is distinct from jsonb_build_object('text',c.title||E'\n'||coalesce(c.description,''),'photos',snap) then raise exception 'Version modifiée après analyse'; end if;
  if p_approve then
   if c.status<>'pending' or not coalesce(m.ai_checked,false) or coalesce(m.safety_blocked,false) then raise exception 'Analyse complète requise'; end if;
   update private.listing_revisions set approved=true where candidate_id=c.id;r.approved:=true;
- end if;
- if p_order_id is not null then
-  if not exists(select 1 from public.commerce_orders o where o.id=p_order_id and o.revision_id=c.id and o.user_id=r.owner_id and o.offer_code='private_listing_edit' and o.status='paid' and o.withdrawal_accepted_at is not null) then raise exception 'Paiement confirmé requis'; end if;
-  update private.listing_revisions set paid=true,order_id=p_order_id where candidate_id=c.id;r.paid:=true;
  end if;
  if not r.approved or not (r.paid or r.included) then return jsonb_build_object('revision',true,'applied',false); end if;
  if l.status<>'active' or private.edit_content(l) is distinct from r.base_content then raise exception 'La version en ligne a changé : vérification requise'; end if;

@@ -9,6 +9,24 @@ Deno.serve(async req=>{
   const admin=createClient(url,key,{auth:{persistSession:false}});
   const {data:a,error:authError}=await admin.auth.getUser(authorization.replace(/^Bearer\s+/i,''));if(authError||!a.user)return json({error:'Connexion requise'},401);
   const body=await req.json();
+  if(body.action==='cancel'){
+   const {data:proposal}=await admin.from('listings').select('id,owner_id,revision_of,status').eq('id',String(body.listing_id||'')).single();
+   if(!proposal||proposal.owner_id!==a.user.id||!proposal.revision_of||proposal.status!=='pending')return json({error:'Proposition non annulable'},409);
+   const {data:order}=await admin.from('commerce_orders').select('id,status,stripe_checkout_session_id').eq('revision_id',proposal.id).in('status',['pending','paid']).maybeSingle();
+   if(order?.status==='paid')return json({error:'Cette modification est payée : elle doit être traitée par la modération.'},409);
+   if(order?.stripe_checkout_session_id){
+    const stripeKey=Deno.env.get('STRIPE_SECRET_KEY')||Deno.env.get('STRIPE_RESTRICTED_KEY')||'';
+    const headers={Authorization:'Bearer '+stripeKey};
+    const r=await fetch('https://api.stripe.com/v1/checkout/sessions/'+encodeURIComponent(order.stripe_checkout_session_id),{headers,signal:AbortSignal.timeout(15000)});const session=await r.json();
+    if(!r.ok||session.status==='complete')return json({error:'Paiement en cours de confirmation : annulation impossible.'},409);
+    if(session.status==='open'){const expired=await fetch('https://api.stripe.com/v1/checkout/sessions/'+encodeURIComponent(order.stripe_checkout_session_id)+'/expire',{method:'POST',headers,signal:AbortSignal.timeout(15000)});if(!expired.ok)return json({error:'Paiement en cours : annulation impossible.'},409);}
+   }
+   if(order){const cancelled=await admin.from('commerce_orders').update({status:'cancelled'}).eq('id',order.id).eq('status','pending');if(cancelled.error)throw cancelled.error;}
+   const {data:photos}=await admin.from('listing_photos').select('storage_path').eq('listing_id',proposal.id);
+   const removed=await admin.from('listings').delete().eq('id',proposal.id);if(removed.error)throw removed.error;
+   for(const bucket of ['listing-images','listing-images-pending']){const paths=(photos||[]).map(p=>p.storage_path);if(paths.length){const result=await admin.storage.from(bucket).remove(paths);if(result.error)throw result.error;}}
+   return json({ok:true,cancelled:true});
+  }
   const caller=createClient(url,Deno.env.get('SUPABASE_ANON_KEY')!,{global:{headers:{Authorization:authorization}},auth:{persistSession:false}});
   const {data:r,error}=await caller.rpc('prepare_listing_change',{p_listing_id:body.listing_id,p_changes:body.changes,p_replace_photos:body.replace_photos===true,p_phone:body.phone||null});if(error)throw error;
   if(!r.price_only&&r.copy_photos){

@@ -29,6 +29,9 @@ begin
  proposal:=public.prepare_listing_change(v_id,'{"title":"Accompagnement interdit"}',false,null);candidate:=(proposal->>'listing_id')::uuid;
  perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','service_role')::text,true);
  update public.listings set status='rejected' where listings.id=candidate;
+ insert into public.commerce_orders(user_id,offer_code,amount_cents,status,listing_id,revision_id,withdrawal_accepted_at,withdrawal_text) values(owner,'private_listing_edit',290,'paid',v_id,candidate,now(),'Consentement de test') returning commerce_orders.id into orderid;
+ proposal:=public.complete_listing_revision(candidate,false,orderid);
+ if proposal->>'refused'<>'true' then raise exception 'FAIL paiement après refus';end if;
  if (select status from public.listings where listings.id=v_id)<>'active' or (select title from public.listings where listings.id=v_id)<>'Fauteuil de salon retapissé' or (select featured_until from public.listings where listings.id=v_id)<>old_feature then raise exception 'FAIL refus conserve ancienne annonce/options';end if;
  -- raise notice 'PASS modification refusée : ancienne version et options conservées';
  perform set_config('abraca.revision_write','',true);
