@@ -2458,7 +2458,7 @@ $('#publishForm').addEventListener('submit',async e=>{
       if(!result.price_only){await uploadPhotos(result.listing_id);await requestAutomaticModeration(result.listing_id);}
       if(status)status.textContent=result.price_only?'Baisse de prix enregistrée gratuitement, sans remontée.':'Version proposée enregistrée. L’ancienne annonce reste en ligne.';
       await loadAds();closeModal('publishModal');resetPublishForm();
-      if(!result.free)location.href='options-annonce.html?revision='+encodeURIComponent(result.listing_id);
+      if(!result.free){window.showPaymentLoading?.('Préparation du paiement…','Votre modification est enregistrée. Ouverture de la page de paiement, merci de patienter.');location.href='options-annonce.html?revision='+encodeURIComponent(result.listing_id);}
       else toast(result.price_only?'Prix mis à jour sans remontée.':'Modification envoyée pour vérification, sans remontée.');
       return;
     }else if(wasEditing){

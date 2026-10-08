@@ -7,3 +7,21 @@ window.confirmOptionPurchase=()=>new Promise(resolve=>{
  dialog.querySelector('form').onsubmit=e=>{e.preventDefault();if(dialog.querySelector('input').checked)finish(true);};
  dialog.querySelector('[data-cancel]').onclick=()=>finish(false);dialog.oncancel=e=>{e.preventDefault();finish(false);};document.body.append(dialog);dialog.showModal();
 });
+
+// Fix 08/10/2026 : apres "Continuer vers le paiement", la creation de la session Stripe puis le
+// chargement de Stripe prennent plusieurs secondes sans aucun retour visuel : on pouvait croire
+// que rien ne se passait (signale par Anthony). Ecran d'attente plein ecran jusqu'a l'arrivee
+// sur Stripe ; masque en cas d'erreur ou de retour arriere depuis Stripe.
+window.showPaymentLoading=(title='Redirection vers le paiement sécurisé…',text='Connexion à Stripe en cours, cela peut prendre quelques secondes. Ne fermez pas la page.')=>{
+ let o=document.getElementById('abracaPaymentLoading');
+ if(!o){
+  if(!document.getElementById('abracaPaymentLoadingStyle')){const st=document.createElement('style');st.id='abracaPaymentLoadingStyle';st.textContent='@keyframes abracaPaySpin{to{transform:rotate(360deg)}}';document.head.append(st);}
+  o=document.createElement('div');o.id='abracaPaymentLoading';o.setAttribute('role','status');o.setAttribute('aria-live','polite');
+  o.style.cssText='position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(24,10,32,.72);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);font-family:Inter,system-ui,sans-serif';
+  o.innerHTML='<div style="max-width:380px;width:100%;background:#fff;border-radius:20px;padding:28px 24px;text-align:center;color:#24152d;box-shadow:0 24px 80px rgba(0,0,0,.35)"><div style="width:44px;height:44px;margin:0 auto 16px;border-radius:50%;border:4px solid #eadfee;border-top-color:#842aaa;animation:abracaPaySpin .8s linear infinite"></div><strong data-title style="display:block;font-size:1.1rem;margin-bottom:8px"></strong><p data-text style="margin:0;color:#74697a;line-height:1.5;font-size:.92rem"></p></div>';
+  document.body.append(o);
+ }
+ o.querySelector('[data-title]').textContent=title;o.querySelector('[data-text]').textContent=text;o.style.display='flex';
+};
+window.hidePaymentLoading=()=>{const o=document.getElementById('abracaPaymentLoading');if(o)o.style.display='none';};
+window.addEventListener('pageshow',()=>window.hidePaymentLoading());
