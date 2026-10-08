@@ -50,7 +50,8 @@ test('recherche dans les questions et réponses, accents et majuscules ignorés'
   assert.equal(ui.search('MOT DE PASSE OUBLIE')[0].question, 'Mot de passe oublié');
   assert.ok(ui.search('RÉTRACTATION').some(e => e.question === 'Les options sont-elles remboursables ?'));
   assert.equal(ui.search('iCal')[0].question, 'Puis-je synchroniser mon calendrier Airbnb ou Booking ?');
-  assert.equal(ui.search('60 jours')[0].question, 'Combien de temps restent en ligne les annonces pros ?');
+  assert.ok(ui.search('60 jours').some(x => x.question === 'Combien de temps mon annonce reste-t-elle en ligne ?'));
+  assert.ok(ui.search('60 jours').some(x => x.question === 'Combien de temps restent en ligne les annonces pros ?'));
 });
 test('synonymes, pluriels et recherche de plusieurs mots', () => {
   const ui = setup();

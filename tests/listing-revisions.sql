@@ -1,7 +1,7 @@
 -- Transactional integration tests: no real listing, order or queued call survives.
 begin;
 do $$
-declare owner uuid; v_id uuid; candidate uuid; orderid uuid; proposal jsonb; old_date timestamptz:=now()-interval '1 day'; old_feature timestamptz:=now()+interval '7 days'; photo_id uuid; hash_value text:=repeat('a',64); original_title text:='Fauteuil de salon test révisions';
+declare v_expiry timestamptz; owner uuid; v_id uuid; candidate uuid; orderid uuid; proposal jsonb; old_date timestamptz:=now()-interval '1 day'; old_feature timestamptz:=now()+interval '7 days'; photo_id uuid; hash_value text:=repeat('a',64); original_title text:='Fauteuil de salon test révisions';
 begin
  select p.id into strict owner from public.profiles p where not coalesce(is_admin,false) and private.moderation_user_allowed(p.id) limit 1;
  perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','service_role')::text,true);
@@ -10,12 +10,20 @@ begin
  insert into public.listing_moderation(listing_id,ai_checked,risk_level,risk_score,safety_snapshot) values(v_id,true,'green',0,jsonb_build_object('text',original_title||E'\n'||'Fauteuil de salon disponible en bon état.','photos','[]'::jsonb));
  update public.listings set status='active' where listings.id=v_id;
  if (select status from public.listings where listings.id=v_id)<>'active' then raise exception 'Fixture non active'; end if;
+ if (select expires_at from public.listings where id=v_id) is distinct from now()+interval '60 days' then raise exception 'FAIL first publication sixty days'; end if;
+ perform set_config('abraca.expiry_backfill',txid_current()::text,true);
+ update public.listings set expires_at=now()+interval '20 days' where id=v_id;
+ perform set_config('abraca.expiry_backfill','',true);
+ select expires_at into v_expiry from public.listings where id=v_id;
  perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','authenticated')::text,true);
  proposal:=public.prepare_listing_change(v_id,'{"price":90}',false,null);
  if proposal->>'price_only'<>'true' or (select price from public.listings where listings.id=v_id)<>90 or (select created_at from public.listings where listings.id=v_id)<>old_date or (select status from public.listings where listings.id=v_id)<>'active' then raise exception 'FAIL prix gratuit sans remontée';end if;
- -- raise notice 'PASS baisse de prix gratuite sans remontée';
+ if (select expires_at from public.listings where id=v_id) is distinct from v_expiry then raise exception 'FAIL price decrease extended expiry'; end if;
+ update public.listings set expires_at=now()+interval '1 year' where id=v_id;
+ if (select expires_at from public.listings where id=v_id) is distinct from v_expiry then raise exception 'FAIL owner bypassed expiry'; end if;
  proposal:=public.prepare_listing_change(v_id,'{"title":"Fauteuil de salon retapissé"}',false,null);candidate:=(proposal->>'listing_id')::uuid;
  if (select title from public.listings where listings.id=v_id)<>original_title then raise exception 'Ancienne version remplacée trop tôt';end if;
+ if (select expires_at from public.listings where id=candidate) is not null then raise exception 'FAIL candidate expires during review'; end if;
  perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','service_role')::text,true);
  insert into public.listing_moderation(listing_id,ai_checked,risk_level,risk_score,safety_snapshot) select candidate,true,'green',0,jsonb_build_object('text',title||E'\n'||description,'photos','[]'::jsonb) from public.listings where listings.id=candidate;
  perform public.complete_listing_revision(candidate,true,null);
@@ -27,6 +35,8 @@ begin
  perform public.complete_listing_revision(candidate,false,orderid);
  if (select title from public.listings where listings.id=v_id)<>'Fauteuil de salon retapissé' or (select created_at from public.listings where listings.id=v_id)<=old_date or (select featured_until from public.listings where listings.id=v_id)<>old_feature or (select urgent_until from public.listings where listings.id=v_id)<>old_feature then raise exception 'FAIL modification payée remontée/options';end if;
  perform public.complete_listing_revision(candidate,false,orderid);
+ if (select expires_at from public.listings where id=v_id) is distinct from now()+interval '60 days' then raise exception 'FAIL paid approved edit did not renew sixty days'; end if;
+ select expires_at into v_expiry from public.listings where id=v_id;
  -- raise notice 'PASS modification payée validée avec remontée, options préservées, webhook idempotent';
  perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','authenticated')::text,true);
  proposal:=public.prepare_listing_change(v_id,'{"title":"Accompagnement interdit"}',false,null);candidate:=(proposal->>'listing_id')::uuid;
@@ -36,7 +46,7 @@ begin
  proposal:=public.complete_listing_revision(candidate,false,orderid);
  if proposal->>'refused'<>'true' then raise exception 'FAIL paiement après refus';end if;
  if (select status from public.listings where listings.id=v_id)<>'active' or (select title from public.listings where listings.id=v_id)<>'Fauteuil de salon retapissé' or (select featured_until from public.listings where listings.id=v_id)<>old_feature then raise exception 'FAIL refus conserve ancienne annonce/options';end if;
- -- raise notice 'PASS modification refusée : ancienne version et options conservées';
+ if (select expires_at from public.listings where id=v_id) is distinct from v_expiry then raise exception 'FAIL rejected edit changed expiry'; end if;
  perform set_config('abraca.revision_write','',true);
  delete from public.listings where listings.id=v_id;
  begin
