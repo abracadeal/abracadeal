@@ -2,8 +2,13 @@
    Le lien de partage passe par une page Open Graph publique puis redirige vers la fiche.
    Sur iOS/SMS, on partage uniquement ce lien afin d'éviter l'envoi texte + lien en double. */
 (function(){
-  const SHARE_BASE='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/share-listing';
-  const shareUrl=id=>SHARE_BASE+'?id='+encodeURIComponent(id);
+  /* Fix 08/10/2026 : le lien supabase.co/functions/v1/share-listing tombait sur une page blanche
+     (Supabase force text/plain + CSP sandbox sur les pages HTML des fonctions : pas de redirection).
+     On partage desormais le lien direct de la fiche sur abracadeal.fr. Sans apercu photo propre a
+     l'annonce, on ajoute le titre + prix devant le lien sur WhatsApp / SMS. */
+  const shareUrl=id=>'https://abracadeal.fr/?annonce='+encodeURIComponent(id);
+  const shareText=id=>{try{return typeof listingShareText==='function'?listingShareText(id):''}catch(_){return ''}};
+  const withText=id=>{const t=shareText(id),u=shareUrl(id);return t?t+'\n'+u:u};
 
   window.copyListingLink=async id=>{
     const url=shareUrl(id);
@@ -12,8 +17,7 @@
   };
 
   window.shareListingWhatsApp=id=>{
-    const url=shareUrl(id);
-    window.open('https://wa.me/?text='+encodeURIComponent(url),'_blank','noopener');
+    window.open('https://wa.me/?text='+encodeURIComponent(withText(id)),'_blank','noopener');
   };
 
   window.shareListingFacebook=id=>{
@@ -22,7 +26,7 @@
   };
 
   window.shareListingSms=id=>{
-    location.href='sms:?&body='+encodeURIComponent(shareUrl(id));
+    location.href='sms:?&body='+encodeURIComponent(withText(id));
   };
 
   window.shareListingNative=async id=>{

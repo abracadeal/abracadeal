@@ -116,7 +116,7 @@ function renderCards(){
   const host=document.getElementById('stockResults');if(!host)return;
   if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
   const cards=filtered.slice(0,shown).map(l=>{
-    const photo=photoUrl(firstPhoto(l)),url='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/share-listing?id='+encodeURIComponent(l.id);
+    const photo=photoUrl(firstPhoto(l)),url='https://abracadeal.fr/?annonce='+encodeURIComponent(l.id);
     return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div><div class="city">'+esc(l.city||'')+'</div></div></a>';
   }).join('');
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
