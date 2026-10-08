@@ -151,3 +151,5 @@ a{color:inherit;text-decoration:none}
 .sensitive-photo{filter:blur(22px);cursor:pointer}.photo:has(.sensitive-photo)::after{content:"Photo sensible · cliquez pour afficher";position:absolute;bottom:8px;left:5px;right:5px;color:white;background:#241326;padding:5px;font-size:11px;pointer-events:none}.preview-gallery img[data-reveal-photo]{cursor:pointer}
 
 @media(max-width:600px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.phone-admin-panel{margin:16px 0;padding:16px;border:1px solid #87579d;border-radius:12px;background:#1a0e28}.phone-admin-panel summary{cursor:pointer;font-weight:700}.phone-admin-panel p{font-size:13px;line-height:1.5}.phone-admin-panel label{display:grid;gap:6px;margin:10px 0}.phone-admin-panel input,.phone-admin-panel textarea{width:100%;padding:10px;border-radius:8px;box-sizing:border-box}.phone-admin-panel button{padding:10px;border-radius:8px;cursor:pointer}.phone-reservation{padding:12px 0;border-top:1px solid #87579d}.photo-reuse-alert{color:#ffcf70;font-weight:bold;margin:8px 0}

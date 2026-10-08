@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import {prohibitedTerms,hashPhotos} from './policy.ts';
 import {stageImportedImages} from './import-images.ts';
 import {MODEL,getPhotos,quarantine,scanSafety,recordSafety,enforce,publishPhotos,snapshot} from './safety.ts';
 
@@ -79,8 +80,19 @@ Deno.serve(async(req)=>{
       return json({ok:true,status:'rejected',safety_blocked:true});
     }
     if(!['pending','active'].includes(listing.status))return json({error:'Annonce non éligible à la publication'},409);
+    const banned=prohibitedTerms(listing);
+    if(banned.length){
+      const reason='Offre interdite par les règles de diffusion : '+banned.join(', ');
+      const {data:rows,error}=await admin.from('listings').update({status:'rejected'}).eq('id',listing.id).eq('updated_at',listing.updated_at).select('id');
+      if(error||!rows?.length)throw error||new Error('Annonce modifiée : recommencer');
+      await quarantine(admin,await getPhotos(admin,listing.id));
+      const saved=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:100,risk_level:'red',reasons:[reason],engine:'abracadeal-prohibited-services-v1',ai_checked:false,auto_published:false,admin_reviewed:false,checked_at:new Date().toISOString()},{onConflict:'listing_id'});
+      if(saved.error)throw saved.error;
+      return json({ok:true,status:'rejected',risk_level:'red',reasons:[reason],ai_checked:false});
+    }
     const photos=await getPhotos(admin,listing.id);
     let safety:any;
+    let reusedPhotos=0;
     try{
       await stageImportedImages(admin,listing,photos);
       const {data:stagedListing,error:stagedError}=await admin.from('listings').select('status,updated_at,title,description').eq('id',listing.id).single();
@@ -88,8 +100,11 @@ Deno.serve(async(req)=>{
       if(stagedListing.title!==listing.title||stagedListing.description!==listing.description)throw new Error('Texte modifié pendant l’import des photos');
       listing.status=stagedListing.status;listing.updated_at=stagedListing.updated_at;
       if(listing.status!=='active')await quarantine(admin,photos);
+      reusedPhotos=await hashPhotos(admin,photos);
       safety=await scanSafety(admin,listing,photos);
       await recordSafety(admin,listing.id,safety);
+      const reuseSaved=await admin.from('listing_moderation').update({reused_photo_count:reusedPhotos}).eq('listing_id',listing.id);
+      if(reuseSaved.error)throw reuseSaved.error;
     }catch(error){
       if(listing.status!=='active')await quarantine(admin,await getPhotos(admin,listing.id)).catch(()=>{});
       const message=error instanceof Error?error.message:'Analyse indisponible';
@@ -223,6 +238,7 @@ Deno.serve(async(req)=>{
     const manualReviewRequired=!!moderationState?.requires_manual_review;
     if(manualReviewRequired)reasons.push('Photos modifiées : validation manuelle requise');
 
+    if(reusedPhotos)add(30,'Photo(s) identique(s) utilisée(s) par un autre compte : +30 points');
     score=clamp(score);
     let riskLevel:'green'|'orange'|'red'=score<=20?'green':score<=60?'orange':'red';
     if(hardHold&&riskLevel!=='red')riskLevel='red';
@@ -257,7 +273,7 @@ Deno.serve(async(req)=>{
     }
 
     const engine=MODEL+'+'+(extraErrorMessage?'abracadeal-rules-only':'abracadeal-rules-only+sql_heuristic_v1');
-    const{error:moderationError}=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,checked_at:new Date().toISOString(),engine,ai_checked:true,auto_published:autoPublished},{onConflict:'listing_id'});
+    const{error:moderationError}=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,checked_at:new Date().toISOString(),engine,ai_checked:true,reused_photo_count:reusedPhotos,auto_published:autoPublished},{onConflict:'listing_id'});
     if(moderationError)throw moderationError;
 
     return json({ok:true,listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,ai_configured:true,ai_checked:true,ai_error:null,sql_heuristic_tier:extraTier,sql_heuristic_error:extraErrorMessage,auto_published:autoPublished,quality_check:qualityCheck,manual_review_required:manualReviewRequired,status:finalStatus,engine});

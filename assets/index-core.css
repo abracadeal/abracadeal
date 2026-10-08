@@ -4387,3 +4387,5 @@ header #flowErrorsBtn{
  #cguModal .modal-body p,#privacyModal .modal-body p,#helpModal .modal-body p,#safetyModal .modal-body p,#contactModal .modal-body p{font-size:12px!important}
  #legalModal summary,#rulesModal summary,#cookiesModal summary,#rankingModal summary{font-size:12px!important}
 }
+
+.buyer-safety-note{padding:12px 14px;margin:0 0 12px;border:1px solid #dfb768;border-left:4px solid #b57c1c;border-radius:10px;background:#fff6df;color:#4c3513;font-size:13px;line-height:1.5;font-weight:600}

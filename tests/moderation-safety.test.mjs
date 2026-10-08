@@ -4,11 +4,27 @@ import {test} from 'node:test';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {stageImportedImages} from '../supabase/functions/moderate-listing/import-images.ts';
+import {prohibitedTerms,hashPhotos} from '../supabase/functions/moderate-listing/policy.ts';
 const listing={id:'listing',owner_id:'owner',title:'Mercedes Classe V',description:'Véhicule à vendre'};
 const photos=[{id:'b',storage_path:'b.webp',storage_bucket:'listing-images-pending'},{id:'a',storage_path:'a.webp',storage_bucket:'listing-images-pending'}];
 const admin={storage:{from:()=>({createSignedUrl:async p=>({data:{signedUrl:'https://example.test/'+p}})})}};
 const cats={sexual:false,'sexual/minors':false,violence:false,'violence/graphic':false};
 const response=(categories=cats)=>Response.json({results:[{flagged:Object.values(categories).some(Boolean),categories}]});
+test('termes interdits dans toutes les catégories, massage professionnel autorisé',()=>{
+ for(const word of ['Rencontre','escort','Accompagnement','Moment de détente','moments de detente']){
+  assert.ok(prohibitedTerms({title:word,category:'vehicules',seller_type:'professionnel'}).length);
+ }
+ assert.deepEqual(prohibitedTerms({title:'Massage professionnel',seller_type:'professionnel'}),[]);
+ assert.deepEqual(prohibitedTerms({title:'Massage',seller_type:'particulier'}),['massage non professionnel']);
+ assert.deepEqual(prohibitedTerms({title:'Massage amateur',seller_type:'professionnel'}),['massage non professionnel']);
+});
+test('SHA-256 identique pour les mêmes octets, détection entre comptes',async()=>{
+ const hashes=[];
+ const service={storage:{from:()=>({download:async()=>({data:new Blob(['photo identique'])})})},
+  rpc:async(n,p)=>{hashes.push(p.p_sha256);return{data:hashes.length>1?1:0}}};
+ assert.equal(await hashPhotos(service,photos),1);
+ assert.equal(hashes[0],hashes[1]);assert.match(hashes[0],/^[0-9a-f]{64}$/);
+});
 test('photos externes importées dans le bucket privé ; adresses privées refusées',async()=>{
  const originalFetch=globalThis.fetch,originalDeno=globalThis.Deno;
  const calls=[];

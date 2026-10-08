@@ -73,7 +73,7 @@ function card(a){
       '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
     '</div>'+
     '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
-    reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
+    (Number(state.mods.get(a.id)?.reused_photo_count)>0?'<div class="photo-reuse-alert">⚠ '+Number(state.mods.get(a.id).reused_photo_count)+' photo(s) réutilisée(s) par un autre compte · +30 points</div>':'')+reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
   '</article>';
 }
 
@@ -161,7 +161,7 @@ async function loadProfiles(rows){
 async function loadMods(ids){
   state.mods.clear();
   if(!ids.length)return;
-  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,edit_review_pending,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
+  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,edit_review_pending,reused_photo_count,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
   if(error)console.warn(error);
   (data||[]).forEach(m=>state.mods.set(m.listing_id,m));
 }
@@ -310,6 +310,8 @@ $('#bulkDelete').addEventListener('click',async()=>{
   }
 });
 document.addEventListener('click',async e=>{
+  const release=e.target.closest('[data-release-phone]');
+  if(release){await releasePhoneReservation(Number(release.dataset.releasePhone));return;}
   const sensitive=e.target.closest('[data-reveal-photo]');
   if(sensitive){sensitive.classList.toggle('sensitive-photo');return;}
   const closePreviewBtn=e.target.closest('[data-close-preview]');
@@ -376,3 +378,27 @@ async function boot(){
 boot();
 
 document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-reveal-photo]')){e.preventDefault();e.target.click();}});
+
+let phoneReservations=[],phoneReleaseBusy=false;
+$('#phoneReleaseForm').addEventListener('submit',async e=>{
+ e.preventDefault();if(phoneReleaseBusy)return;
+ phoneReleaseBusy=true;$('#phoneReleaseSearch').disabled=true;phoneReservations=[];
+ try{
+  const {data,error}=await sb.rpc('admin_phone_reservation_lookup',{p_phone:$('#phoneReleaseNumber').value});
+  if(error)throw error;phoneReservations=data||[];
+  $('#phoneReleaseResults').innerHTML=phoneReservations.length?phoneReservations.map((r,i)=>'<div class="phone-reservation"><strong>'+esc(r.display_name||'Compte sans nom')+'</strong><br>'+esc(r.account_type)+' · '+esc(r.phone_normalized)+'<br><small>Compte : '+esc(r.user_id)+'</small><br><button type="button" data-release-phone="'+i+'">Libérer ce numéro pour ce compte</button></div>').join(''):'<p>Aucune réservation trouvée. Vérifiez le format du numéro.</p>';
+ }catch(error){$('#phoneReleaseResults').textContent=error.message||'Recherche impossible';}
+ finally{phoneReleaseBusy=false;$('#phoneReleaseSearch').disabled=false;}
+});
+async function releasePhoneReservation(index){
+ if(phoneReleaseBusy)return;const row=phoneReservations[index];if(!row)return;
+ const reason=$('#phoneReleaseReason').value.trim();
+ if(reason.length<10){toast('Saisissez un motif de 10 caractères minimum');return;}
+ if(!confirm('Retirer '+row.phone_normalized+' du compte '+(row.display_name||row.user_id)+' ('+row.account_type+') et de ses contacts d’annonces ? Cette action sera journalisée.'))return;
+ phoneReleaseBusy=true;
+ try{
+  const {error}=await sb.rpc('admin_release_phone',{p_phone:row.phone_normalized,p_user_id:row.user_id,p_account_type:row.account_type,p_reason:reason});
+  if(error)throw error;phoneReservations=[];$('#phoneReleaseResults').textContent='Numéro libéré. Action enregistrée avec votre compte administrateur, le motif et la date.';toast('Numéro libéré et action journalisée');
+ }catch(error){toast(error.message||'Libération impossible');}
+ finally{phoneReleaseBusy=false;}
+}
