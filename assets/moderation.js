@@ -58,11 +58,11 @@ function isSecondCheck(a){const m=state.mods.get(a.id);return a.status==='active
 function needsEditReview(a){const m=state.mods.get(a.id);return m?.edit_review_pending===true&&m?.admin_reviewed!==true}
 
 function card(a){
-  const pending=state.tab==='pending';
+  const pending=state.tab==='pending'||(state.tab==='reference'&&(a.status==='pending'||isSecondCheck(a)||needsEditReview(a)));
   const red=state.mods.get(a.id)?.risk_level==='red';
   const validated=state.tab==='validated';
   const p=photoUrl(firstPhoto(a));
-  const statusChip=(a.revision_of?'<span class="chip orange">Modification proposée · ancienne version conservée</span>':'')+(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
+  const statusChip=(state.tab==='reference'?'<span class="chip gray">'+esc(({pending:'À modérer',active:'En ligne',hidden:'Masquée',rejected:'Refusée',archived:'Archivée',sold:'Vendue'})[a.status]||a.status)+'</span>':'')+(a.revision_of?'<span class="chip orange">Modification proposée · ancienne version conservée</span>':'')+(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
   const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
@@ -70,11 +70,12 @@ function card(a){
       ? '<div class="history-actions"><button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button></div>'
       : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
   return '<article class="card">'+
-    (!pending?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
+    (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
       '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
       '<div class="info"><div class="rowtop"><h2 class="title">'+esc(a.title||'Annonce')+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
       '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
+      (a.listing_reference?'<div class="meta">Référence : '+esc(a.listing_reference)+'</div>':'')+
       '<div class="price">'+esc(money(a.price))+'</div>'+
       '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
     '</div>'+
@@ -138,7 +139,8 @@ function openPreview(id){
       '<section class="preview-section"><h3>Vendeur</h3><div class="preview-seller"><strong>'+esc(profile?.display_name||sellerName(a))+'</strong><br>'+esc(profile?.city||a.city||'')+(a.contact_email?'<br>'+esc(a.contact_email):'')+(a.phone?'<br>'+esc(a.phone):'')+'</div></section>'+
       '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+retryErrorMarkup(a)+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
     '</div>';
-  if(state.tab==='pending'){
+  const pending=state.tab==='pending'||(state.tab==='reference'&&(a.status==='pending'||isSecondCheck(a)||needsEditReview(a)));
+  if(pending){
     $('#previewActions').innerHTML=
       '<button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button>'+
       '<button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button>'+
@@ -151,7 +153,7 @@ function openPreview(id){
     $('#previewActions').style.gridTemplateColumns='1fr';
   }
   $('#previewActions').innerHTML+='<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>';
-  if(state.tab==='pending')$('#previewActions').style.gridTemplateColumns='repeat(3,minmax(0,1fr))';
+  if(pending)$('#previewActions').style.gridTemplateColumns='repeat(3,minmax(0,1fr))';
   modal.hidden=false;
   modal.setAttribute('aria-hidden','false');
   document.body.style.overflow='hidden';
@@ -248,18 +250,38 @@ async function refreshCounts(){
   $('#countRejected').textContent=rejected>99?'99+':rejected;
 }
 
+function listingReferenceQuery(value){
+  const compact=String(value||'').trim().toUpperCase().replace(/[\s–—]/g,'').replace(/-/g,'');
+  const match=compact.match(/^ABR(\d{4})(\d{8,})$/);
+  return match?'ABR-'+match[1]+'-'+match[2]:'';
+}
+async function referenceRows(){
+  const reference=listingReferenceQuery($('#referenceSearch').value);
+  if(!reference)return [];
+  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').eq('listing_reference',reference);
+  if(error)throw error;return data||[];
+}
+$('#referenceSearchForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  if(state.busy)return;
+  if(!listingReferenceQuery($('#referenceSearch').value)){toast('Saisissez une référence complète, par exemple ABR-2026-00000001.');return;}
+  state.tab='reference';
+  document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+  await load();
+});
+
 async function load(){
   if(state.busy)return;
   setStatus('Chargement…');
   $('#list').innerHTML='';
   try{
     await loadReports();
-    let rows=state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():state.tab==='reported'?await reportedRows():await rejectedRows();
+    let rows=state.tab==='reference'?await referenceRows():state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():state.tab==='reported'?await reportedRows():await rejectedRows();
     state.rows=rows;
     state.selected.clear();
     updateBulkUI();
     await Promise.all([loadProfiles(rows),loadMods(rows.map(x=>x.id)),loadPhotoUrls(rows)]);
-    $('#list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Aucune annonce dans cette section.</div>';
+    $('#list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">'+(state.tab==='reference'?'Aucune annonce avec cette référence.':'Aucune annonce dans cette section.')+'</div>';
     setStatus(rows.length+' annonce'+(rows.length>1?'s':'')+(state.tab==='pending'?' à traiter':''));
     updateBulkUI();
     refreshCounts().catch(console.warn);
@@ -331,6 +353,7 @@ document.addEventListener('click',async e=>{
   const tab=e.target.closest('[data-tab]');
   if(tab){
     state.tab=tab.dataset.tab;
+    $('#referenceSearch').value='';
     state.selected.clear();
     document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===tab));
     await load();return;

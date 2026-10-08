@@ -3009,6 +3009,12 @@ function hasActiveCatalogueFilters(){
     || !!activeVehicleSubcategory;
 }
 
+function listingReferenceQuery(value){
+  const compact=String(value||'').trim().toUpperCase().replace(/[\s–—]/g,'').replace(/-/g,'');
+  const match=compact.match(/^ABR(\d{4})(\d{8,})$/);
+  return match?'ABR-'+match[1]+'-'+match[2]:'';
+}
+
 async function loadAds(){
   const sequence=++adsLoadSequence;
   const viewerId=currentUser?.id;
@@ -3060,6 +3066,8 @@ async function loadAds(){
   }else{
     let q=sb.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
     q=q.is('revision_of',null);
+    const reference=listingReferenceQuery($('#searchQuery')?.value);
+    if(reference)q=q.eq('listing_reference',reference);
     if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
     else q=q.eq('status','active').eq('visibility_scope','public');
     const {data,error}=await q.order('created_at',{ascending:false});
@@ -3070,7 +3078,7 @@ async function loadAds(){
   await hydratePrivatePhotos(loadedAds);
   if(!isCurrent()) return;
 
-  if(!moderationMode && !onlyMine){
+  if(!moderationMode && !onlyMine && !listingReferenceQuery($('#searchQuery')?.value)){
     const existingIds=new Set((loadedAds||[]).map(a=>a.id));
     loadedAds=[...SHOWROOM_LOA_ADS.filter(a=>!existingIds.has(a.id)),...(loadedAds||[])];
 
@@ -3148,6 +3156,7 @@ function resetSearchFilters({keepMode=false}={}){
 }
 function filteredAds(){
   const q=$('#searchQuery').value.trim().toLowerCase();
+  const reference=listingReferenceQuery(q);
   const city=$('#searchCity').value.trim().toLowerCase();
   const minPrice=Number($('#filterPriceMin')?.value||0);
   const maxPriceRaw=$('#filterPriceMax')?.value||'';
@@ -3183,6 +3192,7 @@ function filteredAds(){
   const effectiveSub=effectiveCategory==='immobilier'?'':($('#filterSubcategory')?.value||activeVehicleSubcategory||'');
 
   let ads=allAds.filter(a=>{
+    if(reference)return a.listing_reference===reference;
     const hay=`${a.title||''} ${cleanDescription(a)} ${a.item_condition||''} ${equipmentTypeOf(a)} ${subcategoryLabel(a.category,vehicleSubcategoryOf(a))} ${a.city||''} ${a.postal_code||''} ${a.vehicle_make||''} ${a.vehicle_model||''} ${a.crit_air||''} ${vehicleMetaSearchText(a)} ${realEstateMetaSearchText(a)}`.toLowerCase();
     const locationHay=`${a.city||''} ${a.postal_code||''}`.toLowerCase();
     const price=(a.price===null||a.price==='')?null:Number(a.price);
