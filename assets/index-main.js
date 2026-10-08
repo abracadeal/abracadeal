@@ -3452,6 +3452,7 @@ function renderAds(){
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
     const canUseProBoost=!!(
+      a.status==='active' &&
       currentUser &&
       (
         currentProfile?.is_admin===true ||
@@ -3493,7 +3494,7 @@ function renderAds(){
         <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
-          ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}
+          ${(!moderationMode&&canDelete&&a.status==='active'&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
           ${(!moderationMode&&canDelete&&a.owner_id===currentUser?.id&&canRenewPrivateListing(a))?`<button class="mini-btn" onclick="event.stopPropagation();renewPrivateListing('${a.id}',this)">Prolonger gratuitement · 60 jours</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&a.status==='active'&&!a.revision_of)?`<button class="mini-btn" onclick="event.stopPropagation();editAd('${a.id}')">Modifier</button>`:''}
