@@ -112,7 +112,11 @@ html{scrollbar-gutter:stable}
 /* Fix 21/09/2026 : Anthony souhaite garder uniquement l'ecriture "Abracadeal" en filigrane sur
    les photos, sans le fond assombri derriere. On retire le fond/padding/arrondi/flou et on
    renforce l'ombre portee du texte pour qu'il reste lisible sur n'importe quelle photo. */
+/* Fix 08/10/2026 : filigrane en double sur les photos. Le texte "Abracadeal" est deja incruste
+   dans chaque photo a l'envoi (compressImage), le span HTML ajoutait un 2e filigrane decale
+   par-dessus. On masque le span pour ne garder que celui incruste dans l'image. */
 .photo-watermark{
+  display:none!important;
   color:#fff!important;
   background:none!important;
   padding:0!important;
