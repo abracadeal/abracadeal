@@ -3300,6 +3300,7 @@ header #signupBtn{display:none!important}
 }
 
 .modal-backdrop .modal-head h2{
+  color:#2d1638!important;
   margin:0!important;
   line-height:1.2!important;
 }
