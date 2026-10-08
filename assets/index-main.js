@@ -2124,7 +2124,7 @@ function openPromotionForListing(id){
   }
   toast('Tarification des mises en avant en cours de refonte.');
 }
-async function buyPhotoPackForListing(){toast('Tarification des packs photos en cours de refonte.');}
+async function buyPhotoPackForListing(id){location.href='options-annonce.html?options=1&option=photos&listing='+encodeURIComponent(id);}
 
 function resetPublishForm(){
   $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
@@ -3494,7 +3494,7 @@ function renderAds(){
         <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
-          ${(!moderationMode&&canDelete&&a.status==='active'&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}
+          ${(!moderationMode&&canDelete&&a.status==='active'&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Ajouter des photos</button>`:''}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
           ${(!moderationMode&&canDelete&&a.owner_id===currentUser?.id&&canRenewPrivateListing(a))?`<button class="mini-btn" onclick="event.stopPropagation();renewPrivateListing('${a.id}',this)">Prolonger gratuitement · 60 jours</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&a.status==='active'&&!a.revision_of)?`<button class="mini-btn" onclick="event.stopPropagation();editAd('${a.id}')">Modifier</button>`:''}
@@ -3887,7 +3887,7 @@ window.openAd=id=>{
             ${canDelete?`
               <div class="detail-owner-actions">
                 ${currentProfile?.is_admin?`<button class="mini-btn" onclick="closeModal('detailModal');openAdminEditAd('${a.id}')">Modifier</button>`:''}
-                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Option photos en cours de refonte</button>`:''}
+                ${(!currentProfile?.is_admin&&!listingHasPhotoPack(a))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Ajouter des photos</button>`:''}
                 <button class="mini-btn danger" onclick="closeModal('detailModal');${currentProfile?.is_admin?`adminDeleteAd('${a.id}')`:`deleteAd('${a.id}')`}">Supprimer</button>
               </div>`:''}
 
