@@ -143,11 +143,17 @@ window.dismissGiftNotice=async function(id){
 }
 
 function getHostDraft(){
-  try{return JSON.parse(localStorage.getItem('abraca_host_signup_draft')||'null')}catch{return null}
+  try{
+    const draft=JSON.parse(localStorage.getItem('abraca_host_signup_draft')||'null');
+    if(!draft)return null;
+    if(!draft._savedAt){draft._savedAt=Date.now();localStorage.setItem('abraca_host_signup_draft',JSON.stringify(draft));}
+    if(Date.now()-Number(draft._savedAt)>30*24*60*60*1000){localStorage.removeItem('abraca_host_signup_draft');return null;}
+    return draft;
+  }catch{return null}
 }
 function saveHostDraft(){
   const ids=['oFirstName','oLastName','oPhone','oBirthDate','oHostCity','oCountry','oRentalStatus','oSiret','oAddress1','oPostal','oCity','oPropertyType','oPrimaryResidence','oGuests','oBedrooms','oBeds','oBathrooms','oRegistrationNumber','oClassifiedStars','oTitle','oPrice','oCleaning','oDescription'];
-  const d={};ids.forEach(id=>{const el=$(id);if(el)d[id]=el.value});
+  const d={_savedAt:Date.now()};ids.forEach(id=>{const el=$(id);if(el)d[id]=el.value});
   localStorage.setItem('abraca_host_signup_draft',JSON.stringify(d));
 }
 function restoreHostDraft(overwrite=true){
@@ -246,12 +252,15 @@ $('completeHostBtn').onclick=async()=>{
       const accountEmail=$('oAccountEmail').value.trim();
       const accountPassword=$('oAccountPassword').value;
 
+      const legalAcceptance=await window.confirmLegalRegistration();
+      if(!legalAcceptance)return;
       const {data:signupData,error:signupError}=await sb.auth.signUp({
         email:accountEmail,
         password:accountPassword,
         options:{
           emailRedirectTo:location.origin+'/vacances.html?mode=hote&host_signup=1',
           data:{
+            ...legalAcceptance,
             display_name:(first+' '+last).trim(),
             account_type:requestedType,
             phone:normalizedPhone

@@ -229,10 +229,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
         const phoneCheck=await abracaVacPhoneAvailable(phone);
         if(!phoneCheck.ok){setAuthMessage(phoneCheck.message,'error');return}
         const normalizedPhone=phoneCheck.normalized;
+        const legalAcceptance=await window.confirmLegalRegistration();
+        if(!legalAcceptance)return;
         const {data,error}=await sbVac.auth.signUp({
           email,
           password,
           options:{data:{
+            ...legalAcceptance,
             display_name:displayName,
             phone:normalizedPhone,
             account_type:'particulier'

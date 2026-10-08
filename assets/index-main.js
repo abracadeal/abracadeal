@@ -631,10 +631,12 @@ $('#signupForm').addEventListener('submit',async e=>{
       Object.assign(company_registration,company);
       $('#signupCompany').value=company.company_name;
     }
+    const legalAcceptance=await window.confirmLegalRegistration();
+    if(!legalAcceptance)return;
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.fr/',data:{display_name:name,account_type:type,phone,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,...(company_registration?{company_registration}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();

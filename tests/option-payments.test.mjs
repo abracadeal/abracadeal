@@ -37,5 +37,5 @@ test('edge checkout : consentement absent refusé avant modération, commande et
  const context=vm.createContext({createClient:()=>admin,Deno:{env:{get:()=> 'test'},serve:h=>handler=h},requireConsent,checkOptionListing,checkoutLegalText,WITHDRAWAL_TEXT,Response,URLSearchParams,Error,console:{error(){}},fetch:async()=>{fetched=true;throw Error('must not fetch')}});
  const code=stripTypeScriptTypes(fs.readFileSync('supabase/functions/create-commerce-order/index.ts','utf8')).replace(/^import .*;\s*$/gm,'');vm.runInContext(code,context);
  const response=await handler(new Request('https://test',{method:'POST',headers:{Authorization:'Bearer token'},body:JSON.stringify({offer_code:'private_featured',listing_id:'listing'})}));
- assert.notEqual(response.status,200);assert.match((await response.json()).error,/renonciation/);assert.equal(inserted,false);assert.equal(fetched,false);
+ assert.notEqual(response.status,200);assert.match((await response.json()).error,/activation immédiate/);assert.equal(inserted,false);assert.equal(fetched,false);
 });
