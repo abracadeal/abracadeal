@@ -62,7 +62,7 @@ Deno.serve(async(req)=>{
     const listingId=String(body?.listing_id||'').trim();
     if(!listingId)return json({error:'listing_id manquant'},400);
 
-    const{data:listing,error:listingError}=await admin.from('listings').select('id,owner_id,category,title,description,price,city,postal_code,item_condition,seller_type,status,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,updated_at,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value').eq('id',listingId).single();
+    const{data:listing,error:listingError}=await admin.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,postal_code,item_condition,seller_type,status,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,updated_at,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value').eq('id',listingId).single();
     if(listingError||!listing)return json({error:'Annonce introuvable'},404);
     if(!trustedInternal&&listing.owner_id!==caller.id&&!isAdmin)return json({error:'Accès refusé'},403);
 
@@ -101,6 +101,14 @@ Deno.serve(async(req)=>{
       listing.status=stagedListing.status;listing.updated_at=stagedListing.updated_at;
       if(listing.status!=='active')await quarantine(admin,photos);
       reusedPhotos=await hashPhotos(admin,photos);
+      const republish=await admin.rpc('check_listing_republication',{p_listing_id:listing.id});
+      if(republish.error)throw republish.error;
+      if(republish.data){
+       const reason='Cette annonce ressemble à une annonce supprimée récemment. Modifiez-la depuis Mes annonces.';
+       await admin.from('listings').update({status:'rejected'}).eq('id',listing.id);
+       await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:100,risk_level:'red',reasons:[reason],engine:'anti-republication-30d',ai_checked:false,auto_published:false});
+       return json({ok:false,error:reason,status:'rejected',risk_level:'red'});
+      }
       safety=await scanSafety(admin,listing,photos);
       await recordSafety(admin,listing.id,safety);
       const reuseSaved=await admin.from('listing_moderation').update({reused_photo_count:reusedPhotos}).eq('listing_id',listing.id);
@@ -123,6 +131,7 @@ Deno.serve(async(req)=>{
       return json({ok:true,status:'rejected',ai_checked:true,risk_level:'red',reasons:[reason],engine:MODEL});
     }
     if(action==='validate'){
+      if(listing.revision_of){await publishPhotos(admin,listing,photos);const r=await admin.rpc('complete_listing_revision',{p_candidate_id:listing.id,p_approve:true});if(r.error)throw r.error;return json({ok:true,revision:true,...r.data,status:'pending',ai_checked:true,engine:MODEL});}
       await publishPhotos(admin,listing,photos);
       const authHeader=req.headers.get('Authorization')||'';
       const reviewer=createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{global:{headers:{Authorization:authHeader}},auth:{persistSession:false}});
@@ -245,7 +254,7 @@ Deno.serve(async(req)=>{
     if(extraTier===2)riskLevel='red';
     else if(extraTier===1&&riskLevel==='green')riskLevel='orange';
     if(manualReviewRequired&&riskLevel==='green')riskLevel='orange';
-    const qualityCheck=riskLevel==='green'&&Math.random()<0.03;
+    const qualityCheck=riskLevel==='green'&&action!=='payment_check'&&Math.random()<0.03;
     if(qualityCheck)reasons.push('Contrôle qualité aléatoire (3 %)');
 
     let autoPublished=false;
@@ -263,7 +272,7 @@ Deno.serve(async(req)=>{
         finalStatus='pending';
       }
     }else if(listing.status==='pending'){
-      if(riskLevel==='green'&&!qualityCheck){
+      if(riskLevel==='green'&&!qualityCheck&&!listing.revision_of){
         await publishPhotos(admin,listing,photos);
         const{data:updatedRows,error:statusError}=await admin.from('listings').update({status:'active'}).eq('id',listing.id).eq('status','pending').eq('updated_at',listing.updated_at).select('id');
         if(statusError||!updatedRows?.length){await quarantine(admin,await getPhotos(admin,listing.id));throw statusError||new Error('Annonce modifiée pendant la modération : recommencer');}
@@ -276,6 +285,10 @@ Deno.serve(async(req)=>{
     const{error:moderationError}=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,checked_at:new Date().toISOString(),engine,ai_checked:true,reused_photo_count:reusedPhotos,auto_published:autoPublished},{onConflict:'listing_id'});
     if(moderationError)throw moderationError;
 
+    if(listing.revision_of&&riskLevel==='green'&&!qualityCheck){
+      await publishPhotos(admin,listing,photos);
+      const r=await admin.rpc('complete_listing_revision',{p_candidate_id:listing.id,p_approve:true});if(r.error)throw r.error;
+    }
     return json({ok:true,listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,ai_configured:true,ai_checked:true,ai_error:null,sql_heuristic_tier:extraTier,sql_heuristic_error:extraErrorMessage,auto_published:autoPublished,quality_check:qualityCheck,manual_review_required:manualReviewRequired,status:finalStatus,engine});
   }catch(error){
     console.error(error);

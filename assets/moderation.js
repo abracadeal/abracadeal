@@ -62,7 +62,7 @@ function card(a){
   const red=state.mods.get(a.id)?.risk_level==='red';
   const validated=state.tab==='validated';
   const p=photoUrl(firstPhoto(a));
-  const statusChip=(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
+  const statusChip=(a.revision_of?'<span class="chip orange">Modification proposée · ancienne version conservée</span>':'')+(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
   const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
@@ -348,8 +348,8 @@ document.addEventListener('click',async e=>{
   try{
     if(action==='validate'){
       const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
-      if(!error&&data?.status!=='active')throw Error(data?.ai_error||'Annonce non validée');
-      if(error)throw error;toast('Annonce validée');
+      if(!error&&data?.status!=='active'&&data?.revision!==true)throw Error(data?.ai_error||'Annonce non validée');
+      if(error)throw error;toast(data?.revision?'Modification validée. Application après paiement.':'Annonce validée');
     }else if(action==='pharos'){
       const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'pharos'}});
       if(error||!data?.ok)throw error||Error('Action Pharos impossible');

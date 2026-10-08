@@ -2166,10 +2166,13 @@ document.getElementById('noPhotoAddPhotoBtn')?.addEventListener('click',()=>{
 });
 
 
-window.openAdminEditAd=function(id){
-  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+let editFormBaseline=null;
+function editFormState(){return JSON.stringify([...$('#publishForm').querySelectorAll('input,select,textarea')].filter(x=>x.id!=='adPrice'&&x.type!=='file').map(x=>[x.id,x.name,(x.type==='checkbox'||x.type==='radio')?x.checked:x.value]));}
+window.openAdminEditAd=function(id,ownerEdit=false){
+  if(!currentProfile?.is_admin&&!ownerEdit){toast('Accès administrateur requis');return;}
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
   if(!a){toast('Annonce introuvable');return;}
+  if(ownerEdit&&(a.owner_id!==currentUser?.id||a.status!=='active'||a.revision_of)){toast('Annonce en ligne requise');return;}
   resetPublishForm();
   editingId=a.id;
   editingOriginalOwnerId=a.owner_id;
@@ -2228,10 +2231,14 @@ window.openAdminEditAd=function(id){
   $$('input[name="immoFeature"]').forEach(x=>x.checked=(im.features||[]).includes(x.value));
 
   $('#publishPackArea')?.classList.add('hidden');
-  $('#publishModal .modal-head h2').textContent='Modifier l’annonce · Admin';
-  $('#publishSubmitBtn').textContent='Enregistrer';
+  $('#publishModal .modal-head h2').textContent=ownerEdit?'Modifier mon annonce':'Modifier l’annonce · Admin';
+  $('#publishSubmitBtn').textContent=ownerEdit?'Enregistrer la baisse de prix ou proposer une modification':'Enregistrer';
   if($('#photoGalleryMeta')) $('#photoGalleryMeta').textContent='Les photos actuelles sont conservées. Ajoutez de nouvelles photos uniquement si vous souhaitez les remplacer.';
   if($('#photoQuotaTitle')) $('#photoQuotaTitle').textContent=`Photos actuelles conservées · limite ${editingOriginalPhotoLimit}`;
+  if(ownerEdit){sb.from('listing_contacts').select('phone').eq('listing_id',id).maybeSingle().then(({data})=>{if(editingId===id){$('#adPhone').value=data?.phone||'';editFormBaseline=editFormState();}});}
+  $('#listingEditNotice')?.remove();
+  if(ownerEdit){const notice=document.createElement('p');notice.id='listingEditNotice';notice.style.cssText='background:#f5eaf9;padding:14px;border-radius:10px;line-height:1.5';notice.textContent='Baisse de prix seule : gratuite et illimitée, sans remontée. Toute autre modification : « Modifier et remonter mon annonce ». L’ancienne version et ses options restent en ligne pendant la vérification.';$('#publishForm').prepend(notice);sb.rpc('get_my_commerce_pricing').then(({data})=>{const offer=(data||[]).find(o=>o.code==='private_listing_edit');if(offer&&editingId===id)notice.textContent+=' Tarif : '+(Number(offer.amount_cents)/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' € TTC.';});}
+  editFormBaseline=editFormState();
   openModal('publishModal');
 };
 
@@ -2442,7 +2449,17 @@ $('#publishForm').addEventListener('submit',async e=>{
   try{
     let listingId=null;
 
-    if(wasEditing){
+    if(wasEditing&&currentProfile?.is_admin!==true){
+      const {data:{session}}=await sb.auth.getSession();
+      const response=await fetch(SUPABASE_URL+'/functions/v1/prepare-listing-edit',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({listing_id:editingId,changes:(!selectedPhotos.length&&editFormBaseline===editFormState())?{price:payload.price}:payload,replace_photos:selectedPhotos.length>0,phone:$('#adPhone').value.trim()||null})});
+      const result=await response.json();if(!response.ok)throw Error(result.error||'Modification impossible');
+      if(!result.price_only){await uploadPhotos(result.listing_id);await requestAutomaticModeration(result.listing_id);}
+      if(status)status.textContent=result.price_only?'Baisse de prix enregistrée gratuitement, sans remontée.':'Version proposée enregistrée. L’ancienne annonce reste en ligne.';
+      await loadAds();closeModal('publishModal');resetPublishForm();
+      if(!result.free)location.href='options-annonce.html?revision='+encodeURIComponent(result.listing_id);
+      else toast(result.price_only?'Prix mis à jour sans remontée.':'Modification envoyée pour vérification, sans remontée.');
+      return;
+    }else if(wasEditing){
       if(status) status.textContent='Enregistrement des modifications…';
       let editQuery=sb.from('listings').update(payload).eq('id',editingId);
       if(currentProfile?.is_admin!==true) editQuery=editQuery.eq('owner_id',currentUser.id);
@@ -2777,7 +2794,7 @@ async function openSharedListingFromUrl(){
   if(!ad && sb){
     try{
       let query=sb.from('listings')
-        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
+        .select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
         .eq('id',id);
       if(!adminPreviewId){
         query=query.eq('status','active').eq('visibility_scope','public');
@@ -3039,7 +3056,8 @@ async function loadAds(){
       (mods||[]).forEach(m=>risks.set(m.listing_id,m));
     }
   }else{
-    let q=sb.from('listings').select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
+    let q=sb.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
+    q=q.is('revision_of',null);
     if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
     else q=q.eq('status','active').eq('visibility_scope','public');
     const {data,error}=await q.order('created_at',{ascending:false});
@@ -3445,6 +3463,7 @@ function renderAds(){
           ${moderationActions}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&(a.seller_type!=='professionnel'&&!listingHasPhotoPack(a)&&!listingIsFeatured(a)))?`<button class="mini-btn" onclick="event.stopPropagation();buyPhotoPackForListing('${a.id}')">📷 Jusqu’à 12 photos</button>`:''}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
+          ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&a.status==='active'&&!a.revision_of)?`<button class="mini-btn" onclick="event.stopPropagation();editAd('${a.id}')">Modifier</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
@@ -3923,7 +3942,7 @@ async function renderDetailRecommendations(a){
     const sellerReq=a.is_showroom
       ?Promise.resolve({data:[],error:null})
       :sb.from('listings')
-        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
+        .select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
         .eq('status','active')
         .eq('visibility_scope','public')
         .eq('owner_id',a.owner_id)
@@ -3932,7 +3951,7 @@ async function renderDetailRecommendations(a){
         .limit(6);
 
     const relatedReq=sb.from('listings')
-      .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
+      .select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
       .eq('status','active')
       .eq('visibility_scope','public')
       .eq('category',a.category)
@@ -4647,11 +4666,11 @@ window.reportAd=async id=>{
   const {error}=await sb.from('reports').insert({listing_id:id,reporter_id:currentUser.id,reason:reason.trim()});
   if(error)toast(error.message);else toast('Signalement envoyé');
 };
-window.editAd=()=>{ toast('Une annonce déposée ne peut pas être modifiée. Supprime-la et recrée-la.'); };
+window.editAd=id=>window.openAdminEditAd(id,true);
 window.approveAd=async id=>{
   if(!currentProfile?.is_admin) return;
   const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
-  if(!error&&data?.status!=='active'){toast(data?.ai_error||'Annonce non validée');return;}
+  if(!error&&data?.status!=='active'&&data?.revision!==true){toast(data?.ai_error||'Annonce non validée');return;}
   if(error){toast(error.message);return}
   toast('Annonce acceptée et mise en ligne');
   await loadAds();

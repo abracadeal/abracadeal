@@ -57,6 +57,15 @@ export async function recordSafety(admin:any,id:string,result:any,error:string|n
  },{onConflict:'listing_id'}));
 }
 export async function enforce(admin:any,listing:any,reason:string,pharos=false,actor:string|null=null){
+ if(listing.revision_of&&!pharos){
+  // Refused proposed changes must leave the already approved version and options intact.
+  const photos=await getPhotos(admin,listing.id);
+  for(const bucket of ['listing-images','listing-images-pending']){const paths=photos.map((p:any)=>p.storage_path);if(paths.length)must(await admin.storage.from(bucket).remove(paths));}
+  must(await admin.from('listing_photos').delete().eq('listing_id',listing.id));
+  must(await admin.from('listings').update({status:'rejected'}).eq('id',listing.id));
+  must(await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_level:'red',risk_score:100,reasons:[reason],safety_blocked:true,auto_published:false,ai_checked:true,engine:MODEL}));
+  return;
+ }
  must(await admin.rpc('moderation_suspend_owner',{p_listing_id:listing.id,p_reason:reason,p_pharos:pharos,p_actor:actor}));
  // Database suspension applies to existing JWTs immediately through restrictive RLS.
  const listings=must(await admin.from('listings').select('id').eq('owner_id',listing.owner_id))||[];
