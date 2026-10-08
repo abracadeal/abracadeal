@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#0b0714">
 <title>Abracadeal — Modération</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link rel="stylesheet" href="assets/moderation.css?v=20261002-1">
+<link rel="stylesheet" href="assets/moderation.css?v=20261008-safety1">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
@@ -30,6 +30,7 @@
     <nav class="tabs" aria-label="Filtres de modération">
       <button class="tab active" type="button" data-tab="pending">À modérer <span class="count" id="countPending">0</span></button>
       <button class="tab" type="button" data-tab="validated">Validées <span class="count" id="countValidated">0</span></button>
+      <button class="tab" type="button" data-tab="reported">Signalées <span class="count" id="countReported">0</span></button>
       <button class="tab" type="button" data-tab="rejected">Refusées <span class="count" id="countRejected">0</span></button>
     </nav>
     <div class="bulkbar" id="bulkbar" hidden>
@@ -78,6 +79,6 @@
   </a>
 </nav>
 
-<script src="assets/moderation.js?v=20261002-1"></script>
+<script src="assets/moderation.js?v=20261008-safety1"></script>
 </body>
 </html>

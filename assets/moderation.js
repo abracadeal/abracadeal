@@ -9,13 +9,13 @@ const storage={
 };
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:SUPABASE_AUTH_STORAGE_KEY}});
 const $=s=>document.querySelector(s);
-const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set()};
+const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set(),photoUrls:new Map(),reports:new Map()};
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
 function cat(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Annonce'}
 function ago(v){if(!v)return'';const d=Date.now()-new Date(v).getTime(),h=Math.floor(d/3600000);if(h<1)return"À l'instant";if(h<24)return'Il y a '+h+' h';const j=Math.floor(h/24);return'Il y a '+j+' j'}
-function photoUrl(path){if(!path)return'assets/default-listing-photo-20260921.jpg';if(/^https?:\/\//i.test(path))return path;return sb.storage.from('listing-images').getPublicUrl(path).data.publicUrl||'assets/default-listing-photo-20260921.jpg'}
+function photoUrl(path){return state.photoUrls.get(path)||'assets/default-listing-photo-20260921.jpg'}
 function firstPhoto(a){return [...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0))[0]?.storage_path||''}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
 function setStatus(t){$('#status').textContent=t}
@@ -53,6 +53,7 @@ function needsEditReview(a){const m=state.mods.get(a.id);return m?.edit_review_p
 
 function card(a){
   const pending=state.tab==='pending';
+  const red=state.mods.get(a.id)?.risk_level==='red';
   const validated=state.tab==='validated';
   const p=photoUrl(firstPhoto(a));
   const statusChip=(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
@@ -65,14 +66,14 @@ function card(a){
   return '<article class="card">'+
     (!pending?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
-      '<div class="photo"><img src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
+      '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
       '<div class="info"><div class="rowtop"><h2 class="title">'+esc(a.title||'Annonce')+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
       '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
       '<div class="price">'+esc(money(a.price))+'</div>'+
       '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
     '</div>'+
     '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
-    reasonsMarkup(a)+preview+actions+
+    reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
   '</article>';
 }
 
@@ -113,7 +114,7 @@ function openPreview(id){
   const modal=$('#previewModal');
   const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));
   const gallery=photos.length
-    ? '<div class="preview-gallery">'+photos.map(p=>'<img src="'+esc(photoUrl(p.storage_path))+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">').join('')+'</div>'
+    ? '<div class="preview-gallery">'+photos.map(p=>'<img '+(state.mods.get(a.id)?.risk_level==='red'?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(photoUrl(p.storage_path))+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">').join('')+'</div>'
     : '<div class="preview-gallery"><img src="assets/default-listing-photo-20260921.jpg" alt="Abracadeal"></div>';
   const specs=previewSpecs(a);
   const m=state.mods.get(a.id);
@@ -143,6 +144,7 @@ function openPreview(id){
     $('#previewActions').innerHTML='<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
     $('#previewActions').style.gridTemplateColumns='1fr';
   }
+  $('#previewActions').innerHTML+='<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>';
   if(state.tab==='pending')$('#previewActions').style.gridTemplateColumns='repeat(3,minmax(0,1fr))';
   modal.hidden=false;
   modal.setAttribute('aria-hidden','false');
@@ -165,14 +167,14 @@ async function loadMods(ids){
 }
 
 async function pendingRows(){
-  const {data:pending,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','pending').order('created_at',{ascending:false});
+  const {data:pending,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').eq('status','pending').order('created_at',{ascending:false});
   if(error)throw error;
   const {data:autoMods,error:autoErr}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
   if(autoErr)throw autoErr;
   const ids=(autoMods||[]).map(x=>x.listing_id).filter(Boolean);
   let active=[];
   if(ids.length){
-    const r=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').in('id',ids).eq('status','active').order('created_at',{ascending:false});
+    const r=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').in('id',ids).eq('status','active').order('created_at',{ascending:false});
     if(r.error)throw r.error; active=r.data||[];
   }
   const seen=new Set((pending||[]).map(x=>x.id));
@@ -183,13 +185,41 @@ async function validatedRows(){
   if(error)throw error;
   const ids=(mods||[]).map(x=>x.listing_id).filter(Boolean);
   if(!ids.length)return[];
-  const {data,error:e}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').in('id',ids).eq('status','active');
+  const {data,error:e}=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').in('id',ids).eq('status','active');
   if(e)throw e;
   const order=new Map((mods||[]).map((m,i)=>[m.listing_id,i]));
   return (data||[]).sort((a,b)=>(order.get(a.id)??999)-(order.get(b.id)??999));
 }
 async function rejectedRows(){
-  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,position)').eq('status','rejected').order('updated_at',{ascending:false}).limit(150);
+  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').eq('status','rejected').order('updated_at',{ascending:false}).limit(150);
+  if(error)throw error;return data||[];
+}
+
+async function loadPhotoUrls(rows){
+  state.photoUrls.clear();
+  await Promise.all(rows.flatMap(a=>a.listing_photos||[]).map(async p=>{
+    if(/^https?:\/\//i.test(p.storage_path)){state.photoUrls.set(p.storage_path,p.storage_path);return;}
+    const {data,error}=await sb.storage.from(p.storage_bucket||'listing-images').createSignedUrl(p.storage_path,600);
+    if(!error&&data?.signedUrl)state.photoUrls.set(p.storage_path,data.signedUrl);
+  }));
+}
+async function loadReports(){
+  const {data,error}=await sb.from('reports').select('listing_id,reporter_id,status');
+  if(error)throw error;
+  state.reports.clear();
+  const reporters=new Map();
+  for(const r of data||[]){
+    if(r.status==='dismissed'||!r.listing_id)continue;
+    if(!reporters.has(r.listing_id))reporters.set(r.listing_id,new Set());
+    if(r.reporter_id)reporters.get(r.listing_id).add(r.reporter_id);
+  }
+  for(const [id,set] of reporters)state.reports.set(id,set.size);
+  $('#countReported').textContent=state.reports.size;
+}
+async function reportedRows(){
+  const ids=[...state.reports.keys()];
+  if(!ids.length)return [];
+  const {data,error}=await sb.from('listings').select('*,listing_photos(id,storage_path,storage_bucket,position)').in('id',ids).order('updated_at',{ascending:false});
   if(error)throw error;return data||[];
 }
 
@@ -214,11 +244,12 @@ async function load(){
   setStatus('Chargement…');
   $('#list').innerHTML='';
   try{
-    let rows=state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():await rejectedRows();
+    await loadReports();
+    let rows=state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():state.tab==='reported'?await reportedRows():await rejectedRows();
     state.rows=rows;
     state.selected.clear();
     updateBulkUI();
-    await Promise.all([loadProfiles(rows),loadMods(rows.map(x=>x.id))]);
+    await Promise.all([loadProfiles(rows),loadMods(rows.map(x=>x.id)),loadPhotoUrls(rows)]);
     $('#list').innerHTML=rows.length?rows.map(card).join(''):'<div class="empty">Aucune annonce dans cette section.</div>';
     setStatus(rows.length+' annonce'+(rows.length>1?'s':'')+(state.tab==='pending'?' à traiter':''));
     updateBulkUI();
@@ -229,9 +260,9 @@ async function load(){
 }
 
 async function removeListing(id){
-  const {data:photos}=await sb.from('listing_photos').select('storage_path').eq('listing_id',id);
+  const {data:photos}=await sb.from('listing_photos').select('storage_path,storage_bucket').eq('listing_id',id);
   const paths=(photos||[]).map(x=>x.storage_path).filter(Boolean);
-  if(paths.length){const r=await sb.storage.from('listing-images').remove(paths);if(r.error)console.warn(r.error)}
+  for(const bucket of ['listing-images','listing-images-pending']){const paths=(photos||[]).filter(p=>(p.storage_bucket||'listing-images')===bucket&&!/^https?:\/\//i.test(p.storage_path)).map(p=>p.storage_path);if(paths.length){const r=await sb.storage.from(bucket).remove(paths);if(r.error)throw r.error}}
   const {error}=await sb.rpc('admin_delete_listing',{p_listing_id:id});
   if(error)throw error;
 }
@@ -279,6 +310,8 @@ $('#bulkDelete').addEventListener('click',async()=>{
   }
 });
 document.addEventListener('click',async e=>{
+  const sensitive=e.target.closest('[data-reveal-photo]');
+  if(sensitive){sensitive.classList.toggle('sensitive-photo');return;}
   const closePreviewBtn=e.target.closest('[data-close-preview]');
   if(closePreviewBtn){closePreview();return;}
   if(e.target.id==='previewModal'){closePreview();return;}
@@ -295,16 +328,22 @@ document.addEventListener('click',async e=>{
   if(!btn||state.busy)return;
   const id=btn.dataset.id,action=btn.dataset.action,a=state.rows.find(x=>x.id===id);
   if(!a)return;
+  let pharosWindow=null;
+  if(action==='pharos'){if(!confirm('Supprimer toutes les photos du compte, bannir le compte et ouvrir Pharos ? Le signalement devra être envoyé sur le portail officiel.'))return;pharosWindow=window.open('about:blank','_blank');}
   if(action==='reject'&&!confirm('Refuser cette annonce ?'))return;
   if(action==='delete'&&!confirm('Supprimer cette annonce du site ?'))return;
   if(action==='dismiss'&&!confirm('Retirer cette annonce de la liste Validées ? Elle restera publiée sur le site.'))return;
   setBusy(true);
   try{
     if(action==='validate'){
-      const {error}=isSecondCheck(a)
-        ? await sb.rpc('validate_auto_published_listing',{p_listing_id:id})
-        : await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'active'});
+      const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
+      if(!error&&data?.status!=='active')throw Error(data?.ai_error||'Annonce non validée');
       if(error)throw error;toast('Annonce validée');
+    }else if(action==='pharos'){
+      const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'pharos'}});
+      if(error||!data?.ok)throw error||Error('Action Pharos impossible');
+      if(pharosWindow){pharosWindow.opener=null;pharosWindow.location='https://www.internet-signalement.gouv.fr/';}
+      toast('Photos supprimées, compte banni. Envoyez le signalement sur Pharos.');
     }else if(action==='reject'){
       const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'rejected'});
       if(error)throw error;toast('Annonce refusée');
@@ -318,7 +357,7 @@ document.addEventListener('click',async e=>{
     closePreview();
     setBusy(false);
     await load();
-  }catch(err){console.error(err);toast(err.message||'Action impossible');}
+  }catch(err){if(pharosWindow)pharosWindow.close();console.error(err);toast(err.message||'Action impossible');}
   finally{setBusy(false)}
 });
 
@@ -335,3 +374,5 @@ async function boot(){
   await load();
 }
 boot();
+
+document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target.matches('[data-reveal-photo]')){e.preventDefault();e.target.click();}});

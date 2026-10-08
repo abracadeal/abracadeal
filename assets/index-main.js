@@ -145,9 +145,17 @@ function cataloguePrice(a){const base=money(a?.price);return a?.category==='vaca
 function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
 // Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande Anthony).
 // Purement visuel cote frontend : ne touche jamais listing_photos, ni les limites/packs de photos.
+const privatePhotoUrls=new Map();
+async function hydratePrivatePhotos(rows){
+ await Promise.all(rows.flatMap(a=>a.listing_photos||[]).filter(p=>p.storage_bucket==='listing-images-pending').map(async p=>{
+ const {data}=await sb.storage.from('listing-images-pending').createSignedUrl(p.storage_path,600);
+ privatePhotoUrls.set(p.storage_path,data?.signedUrl||'');
+ }));
+}
 const ABRACA_DEFAULT_LISTING_PHOTO = 'assets/default-listing-photo-20260921.jpg';
 function photoUrl(path){
   if(!path) return '';
+  if(privatePhotoUrls.has(path))return privatePhotoUrls.get(path);
   if(/^https?:\/\//i.test(String(path))) return String(path);
   if(!sb) return '';
   const {data}=sb.storage.from('listing-images').getPublicUrl(path);
@@ -2344,20 +2352,20 @@ async function uploadPhotos(listingId){
 
   const rows=await Promise.all(selectedPhotos.map(async(blob,i)=>{
     const path=`${currentUser.id}/${listingId}/${crypto.randomUUID()}.webp`;
-    const {error}=await sb.storage.from('listing-images').upload(
+    const {error}=await sb.storage.from('listing-images-pending').upload(
       path,
       blob,
       {contentType:'image/webp',upsert:false,cacheControl:'3600'}
     );
     if(error) throw error;
-    return {listing_id:listingId,storage_path:path,position:i+1};
+    return {listing_id:listingId,storage_path:path,storage_bucket:'listing-images-pending',position:i+1};
   }));
 
   const {error}=await sb.from('listing_photos').insert(rows);
   if(error) throw error;
 }
 async function removePhotoPaths(paths){
-  if(paths?.length) await sb.storage.from('listing-images').remove(paths);
+  if(paths?.length)for(const bucket of ['listing-images','listing-images-pending']){const {error}=await sb.storage.from(bucket).remove(paths);if(error)console.warn(error);}
 }
 
 $('#publishForm').addEventListener('submit',async e=>{
@@ -2770,7 +2778,7 @@ async function openSharedListingFromUrl(){
   if(!ad && sb){
     try{
       let query=sb.from('listings')
-        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
+        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
         .eq('id',id);
       if(!adminPreviewId){
         query=query.eq('status','active').eq('visibility_scope','public');
@@ -2992,7 +3000,7 @@ async function loadAds(){
 
   if(moderationMode && currentProfile?.is_admin){
     const {data:pending,error:pendingError}=await sb.from('listings')
-      .select('*,listing_photos(id,storage_path,position)')
+      .select('*,listing_photos(id,storage_path,storage_bucket,position)')
       .eq('status','pending')
       .order('created_at',{ascending:false});
     if(!isCurrent()) return;
@@ -3013,7 +3021,7 @@ async function loadAds(){
     const autoIds=(autoRows||[]).map(r=>r.listing_id).filter(id=>id&&!pendingIds.has(id));
     if(autoIds.length){
       const {data:autoAds,error:autoAdsError}=await sb.from('listings')
-        .select('*,listing_photos(id,storage_path,position)')
+        .select('*,listing_photos(id,storage_path,storage_bucket,position)')
         .in('id',autoIds)
         .eq('status','active')
         .order('created_at',{ascending:false});
@@ -3032,7 +3040,7 @@ async function loadAds(){
       (mods||[]).forEach(m=>risks.set(m.listing_id,m));
     }
   }else{
-    let q=sb.from('listings').select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)');
+    let q=sb.from('listings').select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
     if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
     else q=q.eq('status','active').eq('visibility_scope','public');
     const {data,error}=await q.order('created_at',{ascending:false});
@@ -3040,6 +3048,7 @@ async function loadAds(){
     loadedAds=data||[];
   }
 
+  await hydratePrivatePhotos(loadedAds);
   if(!isCurrent()) return;
 
   if(!moderationMode && !onlyMine){
@@ -3914,7 +3923,7 @@ async function renderDetailRecommendations(a){
     const sellerReq=a.is_showroom
       ?Promise.resolve({data:[],error:null})
       :sb.from('listings')
-        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
+        .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
         .eq('status','active')
         .eq('visibility_scope','public')
         .eq('owner_id',a.owner_id)
@@ -3923,7 +3932,7 @@ async function renderDetailRecommendations(a){
         .limit(6);
 
     const relatedReq=sb.from('listings')
-      .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,position)')
+      .select('id,owner_id,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
       .eq('status','active')
       .eq('visibility_scope','public')
       .eq('category',a.category)
@@ -4641,7 +4650,8 @@ window.reportAd=async id=>{
 window.editAd=()=>{ toast('Une annonce déposée ne peut pas être modifiée. Supprime-la et recrée-la.'); };
 window.approveAd=async id=>{
   if(!currentProfile?.is_admin) return;
-  const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'active'});
+  const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
+  if(!error&&data?.status!=='active'){toast(data?.ai_error||'Annonce non validée');return;}
   if(error){toast(error.message);return}
   toast('Annonce acceptée et mise en ligne');
   await loadAds();

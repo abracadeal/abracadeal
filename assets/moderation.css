@@ -14,7 +14,7 @@ a{color:inherit;text-decoration:none}
 .hero{padding:26px 0 16px}
 .hero h1{font:700 clamp(2.1rem,9vw,3.6rem)/1 Fraunces,Georgia,serif;margin:0}
 .hero p{margin:9px 0 0;color:var(--muted);line-height:1.45}
-.tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:10px 0 18px}
+.tabs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:10px 0 18px}
 .tab{min-height:48px;border:1px solid rgba(154,67,192,.35);border-radius:14px;background:#1a0e28;color:#f1e8f6;font-weight:850;display:flex;align-items:center;justify-content:center;gap:7px;padding:7px 5px}
 .tab.active{background:linear-gradient(135deg,#edbd55,#f2cf74);color:#24150a;border-color:#f2cf74}
 .count{display:inline-flex;min-width:23px;height:23px;padding:0 6px;border-radius:999px;align-items:center;justify-content:center;background:rgba(255,255,255,.12);font-size:11px;font-weight:950}
@@ -147,3 +147,7 @@ a{color:inherit;text-decoration:none}
     will-change:transform!important;
   }
 }
+
+.sensitive-photo{filter:blur(22px);cursor:pointer}.photo:has(.sensitive-photo)::after{content:"Photo sensible · cliquez pour afficher";position:absolute;bottom:8px;left:5px;right:5px;color:white;background:#241326;padding:5px;font-size:11px;pointer-events:none}.preview-gallery img[data-reveal-photo]{cursor:pointer}
+
+@media(max-width:600px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
