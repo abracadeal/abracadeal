@@ -21,6 +21,9 @@ begin
  perform public.complete_listing_revision(candidate,true,null);
  if (select title from public.listings where listings.id=v_id)<>original_title then raise exception 'Remplacement avant paiement';end if;
  insert into public.commerce_orders(user_id,offer_code,amount_cents,status,listing_id,revision_id,withdrawal_accepted_at,withdrawal_text) values(owner,'private_listing_edit',290,'paid',v_id,candidate,now(),'Consentement de test') returning commerce_orders.id into orderid;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','authenticated')::text,true);
+ begin delete from public.listings where listings.id=candidate;raise exception 'FAIL suppression directe d’une proposition payée';exception when others then if sqlerrm<>'Annulez cette proposition depuis Options de mes annonces.' then raise;end if;end;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',owner,'role','service_role')::text,true);
  perform public.complete_listing_revision(candidate,false,orderid);
  if (select title from public.listings where listings.id=v_id)<>'Fauteuil de salon retapissé' or (select created_at from public.listings where listings.id=v_id)<=old_date or (select featured_until from public.listings where listings.id=v_id)<>old_feature or (select urgent_until from public.listings where listings.id=v_id)<>old_feature then raise exception 'FAIL modification payée remontée/options';end if;
  perform public.complete_listing_revision(candidate,false,orderid);

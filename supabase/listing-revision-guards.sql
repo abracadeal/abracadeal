@@ -25,3 +25,6 @@ create or replace function public.get_my_listing_revisions() returns table(candi
 language sql security definer set search_path='' as $$select candidate_id,original_id,approved,paid,included,applied_at from private.listing_revisions where owner_id=auth.uid()$$;
 revoke all on function public.get_my_listing_revisions() from public,anon;
 grant execute on function public.get_my_listing_revisions() to authenticated;
+
+-- The owner must expire a pending Checkout Session through the authenticated edge handler.
+create or replace function private.guard_listing_revision_delete() returns trigger language plpgsql security definer set search_path='' as $$ begin if old.revision_of is not null and coalesce(auth.role(),'')<>'service_role' and not public.is_admin() and exists(select 1 from public.listings where id=old.revision_of) and exists(select 1 from public.commerce_orders where revision_id=old.id and status in ('pending','paid')) then raise exception 'Annulez cette proposition depuis Options de mes annonces.';end if;return old;end $$;create trigger aa_guard_listing_revision_delete before delete on public.listings for each row execute function private.guard_listing_revision_delete();
