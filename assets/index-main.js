@@ -1494,8 +1494,8 @@ function updateImportSectorCopy(){
   const display=$('#proImportSectorDisplay');if(display)display.textContent=immo?'Immobilier / agence':'Auto / Moto';
   const help=$('#proImportSectorHelp');if(help)help.textContent=(proImportLockedSector?'Secteur déterminé automatiquement à partir de l’activité du compte professionnel.':(currentProfile?.is_admin?'Mode administrateur : secteur libre pour les tests.':'Secteur du compte professionnel.'));
   const checks=$('#proImportChecksText');if(checks)checks.textContent=immo
-    ?'Référence mandat unique · type de bien et transaction reconnus · contrôle prix / surfaces / DPE-GES · annonce existante = mise à jour · statut et mise en avant conservés · contrôle des photos · modération uniquement des nouvelles annonces.'
-    :'Référence stock unique · Auto / Moto reconnu · contrôle prix / année / kilométrage · annonce existante = mise à jour · statut et mise en avant conservés · contrôle des photos · modération uniquement des nouvelles annonces.';
+    ?'Référence mandat unique · type de bien et transaction reconnus · contrôle prix / surfaces / DPE-GES · annonce existante = mise à jour · mise en avant conservée · analyse OpenAI du texte et de chaque photo avant publication, y compris lors des mises à jour.'
+    :'Référence stock unique · Auto / Moto reconnu · contrôle prix / année / kilométrage · annonce existante = mise à jour · mise en avant conservée · analyse OpenAI du texte et de chaque photo avant publication, y compris lors des mises à jour.';
   const url=$('#proImportFeedUrl');if(url)url.placeholder=immo?'https://agence.fr/biens.xml':'https://garage.fr/stock.xml';
   const name=$('#proAutoFeedName');if(name)name.value=immo?'Portefeuille immobilier':'Stock Auto / Moto';
 }
