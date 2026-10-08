@@ -1,0 +1,35 @@
+begin;
+do $$declare u uuid;l uuid;v uuid;old_created timestamptz;old_reference text;result jsonb;denied boolean;begin
+ select id into strict u from public.profiles where not is_admin and private.moderation_user_allowed(id) limit 1;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',u,'role','service_role')::text,true);
+ insert into public.listings(owner_id,category,title,description,city,status) values(u,'autres','Prolongation gratuite test','Annonce temporaire de vérification','Cannes','pending') returning id into l;
+ insert into public.listing_moderation(listing_id,ai_checked,risk_level,risk_score,safety_snapshot)
+ select l,true,'green',0,jsonb_build_object('text',title||E'\n'||description,'photos','[]'::jsonb) from public.listings where id=l;
+ update public.listings set status='active' where id=l;
+ select created_at,listing_reference into old_created,old_reference from public.listings where id=l;
+ perform set_config('abraca.expiry_backfill',txid_current()::text,true);
+ update public.listings set expires_at=now()+interval '4 days',expiry_reminder_sent_at=now() where id=l;
+ perform set_config('abraca.expiry_backfill','',true);
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',u,'role','authenticated')::text,true);
+ result:=public.renew_private_listing(l);
+ if result->>'status'<>'active' or (result->>'moderation_required')::boolean then raise exception 'Active renewal should remain live'; end if;
+ if (select expires_at from public.listings where id=l) is distinct from now()+interval '64 days' then raise exception 'Remaining days lost'; end if;
+ if (select created_at from public.listings where id=l) is distinct from old_created or (select listing_reference from public.listings where id=l) is distinct from old_reference then raise exception 'Renewal moved or renamed listing'; end if;
+ if (select expiry_reminder_sent_at from public.listings where id=l) is not null then raise exception 'Renewal reminder not reset'; end if;
+ denied:=false;begin perform public.renew_private_listing(l);exception when others then denied:=true;end;if not denied then raise exception 'Repeated extension allowed';end if;
+ perform set_config('abraca.expiry_backfill',txid_current()::text,true);update public.listings set expires_at=now()-interval '1 minute' where id=l;perform set_config('abraca.expiry_backfill','',true);
+ perform private.expire_private_listings();
+ result:=public.renew_private_listing(l);
+ if result->>'status'<>'pending' or not (result->>'moderation_required')::boolean or (select expires_at from public.listings where id=l) is not null then raise exception 'Expired renewal bypassed moderation'; end if;
+ if (select ai_checked from public.listing_moderation where listing_id=l) then raise exception 'Old approval reused';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',u,'role','service_role')::text,true);
+ update public.listing_moderation set ai_checked=true,risk_level='green',risk_score=0 where listing_id=l;
+ update public.listings set status='active' where id=l;
+ if (select expires_at from public.listings where id=l) is distinct from now()+interval '60 days' then raise exception 'Sixty days not started on approval';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',u,'role','authenticated')::text,true);
+ perform public.archive_listing(l,'user_deleted');
+ denied:=false;begin perform public.renew_private_listing(l);exception when others then denied:=true;end;if not denied then raise exception 'User-deleted listing revived';end if;
+ perform set_config('request.jwt.claims','{}',true);denied:=false;begin perform public.renew_private_listing(l);exception when others then denied:=true;end;if not denied then raise exception 'Anonymous renewal allowed';end if;
+end $$;
+set constraints all immediate;
+rollback;
