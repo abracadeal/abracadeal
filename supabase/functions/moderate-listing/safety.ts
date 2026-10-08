@@ -59,7 +59,6 @@ export async function recordSafety(admin:any,id:string,result:any,error:string|n
 export async function enforce(admin:any,listing:any,reason:string,pharos=false,actor:string|null=null){
  must(await admin.rpc('moderation_suspend_owner',{p_listing_id:listing.id,p_reason:reason,p_pharos:pharos,p_actor:actor}));
  // Database suspension applies to existing JWTs immediately through restrictive RLS.
- must(await admin.auth.admin.updateUserById(listing.owner_id,{ban_duration:'876000h'}));
  const listings=must(await admin.from('listings').select('id').eq('owner_id',listing.owner_id))||[];
  for(const l of listings){
   const photos=await getPhotos(admin,l.id);
@@ -71,9 +70,10 @@ export async function enforce(admin:any,listing:any,reason:string,pharos=false,a
  }
  // Related-edit triggers can requeue rejected listings after photo deletion.
  must(await admin.from('listings').update({status:'rejected'}).eq('owner_id',listing.owner_id).neq('status','archived'));
+ must(await admin.auth.admin.updateUserById(listing.owner_id,{ban_duration:'876000h'}));
  must(await admin.from('listing_moderation').update({
   risk_level:'red',risk_score:100,reasons:[reason],safety_blocked:true,auto_published:false,
-  ai_checked:!pharos,engine:MODEL,
+  ai_checked:!pharos,engine:pharos?'admin-pharos':MODEL,
   enforcement_completed_at:new Date().toISOString()
  }).eq('listing_id',listing.id));
 }
