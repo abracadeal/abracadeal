@@ -23,6 +23,7 @@
 <p class="results" id="search-status" role="status" aria-live="polite" aria-atomic="true"></p>
 </div>
 <div id="no-results" class="empty" hidden><p>Vous ne trouvez pas votre réponse ? Écrivez-nous à <a href="mailto:contact@abracadeal.fr">contact@abracadeal.fr</a></p></div>
+<div id="search-results" hidden aria-labelledby="results-title"><h2 id="results-title">Résultats de recherche</h2></div>
 <div id="faq">
 <section aria-labelledby="theme-1"><h2 id="theme-1">Compte</h2>
 <details><summary>Comment créer un compte ?</summary><div class="answer"><p>Cliquez sur « Compte », puis inscrivez-vous avec votre e-mail. Un lien de confirmation vous est envoyé : ouvrez-le pour activer votre compte.</p></div></details>
@@ -84,45 +85,75 @@
 <script>
 (() => {
   const normalize = value => value.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  const words = value => normalize(value).match(/[a-z0-9]+/g) || [];
+  // Treat the expression as one synonym, without matching unrelated uses of "mot".
+  const words = value => normalize(value).replace(/\bmot\s+de\s+passe\b/g, 'mdp').match(/[a-z0-9]+/g) || [];
+  const root = word => word.slice(0, 5);
+  const ignored = new Set(words('le la les de des du un une mon ma mes je comment pourquoi est ce que quoi pour sur et ou'));
   const groups = [
     ['arnaque', 'arnaques', 'escroquerie', 'escroqueries', 'fraude', 'fraudes', 'frauduleux', 'frauduleuse', 'frauduleuses'],
     ['supprimer', 'suppression', 'supprime', 'supprimee', 'supprimees', 'supprimes', 'supprimiez', 'retirer', 'retire', 'retiree', 'retirees', 'retrait'],
     ['payer', 'paye', 'payee', 'payant', 'payante', 'payantes', 'payants', 'paiement', 'paiements', 'prix', 'tarif', 'tarifs', 'cout', 'coute'],
-    ['pro', 'pros', 'professionnel', 'professionnelle', 'professionnels', 'professionnelles', 'garage', 'garages', 'agence', 'agences']
+    ['pro', 'pros', 'professionnel', 'professionnelle', 'professionnels', 'professionnelles', 'garage', 'garages', 'agence', 'agences'],
+    ['rembourser', 'remboursement', 'rembourse', 'remboursable', 'rétractation', 'annuler', 'annulation'],
+    ['modifier', 'modification', 'changer', 'corriger', 'correction', 'éditer'],
+    ['photo', 'photos', 'image', 'images'],
+    ['vendre', 'vente', 'vendu', 'vendeur'],
+    ['acheter', 'achat', 'acheteur'],
+    ['connexion', 'connecter', 'identifiant', 'mot de passe', 'mdp'],
+    ['annonce', 'annonces', 'publication', 'publier', 'déposer', 'dépôt'],
+    ['location', 'vacances', 'logement', 'airbnb', 'gîte'],
+    ['signaler', 'signalement', 'dénoncer', 'abus'],
+    ['contact', 'contacter', 'joindre', 'aide', 'support']
   ];
   const aliases = new Map();
-  groups.forEach((group, index) => group.forEach(word => aliases.set(word, `synonym-${index}`)));
-  const canonical = word => aliases.get(word) || word;
+  groups.forEach((group, index) => group.forEach(value => words(value).forEach(word => {
+    const key = root(word);
+    if (!aliases.has(key)) aliases.set(key, new Set());
+    aliases.get(key).add(`synonym-${index}`);
+  })));
+  const keys = word => [root(word), ...(aliases.get(root(word)) || [])];
   const input = document.getElementById('help-search');
   const clear = document.getElementById('clear-search');
   const status = document.getElementById('search-status');
   const empty = document.getElementById('no-results');
+  const faq = document.getElementById('faq');
+  const results = document.getElementById('search-results');
   const sections = Array.from(document.querySelectorAll('#faq section'));
-  const entries = Array.from(document.querySelectorAll('#faq details')).map(detail => ({
+  const entries = Array.from(document.querySelectorAll('#faq details')).map((detail, index) => ({
     detail,
-    tokens: new Set(words(detail.textContent).map(canonical)),
+    section: detail.parentNode,
+    index,
+    tokens: new Set(words(detail.textContent).flatMap(keys)),
     previousOpen: detail.open
   }));
   let searching = false;
   const filter = () => {
-    const query = words(input.value).map(canonical);
+    const query = [...new Set(words(input.value).filter(word => !ignored.has(word)).map(root))];
     const active = query.length > 0;
     if (active && !searching) entries.forEach(entry => { entry.previousOpen = entry.detail.open; });
-    let count = 0;
+    const matches = [];
     entries.forEach(entry => {
-      const match = query.every(term => entry.tokens.has(term));
+      // Each important word contributes once, even if it appears several times in the answer.
+      const score = query.filter(term => keys(term).some(key => entry.tokens.has(key))).length;
+      const match = !active || score > 0;
       entry.detail.hidden = !match;
       if (active) entry.detail.open = match;
       else if (searching) entry.detail.open = entry.previousOpen;
-      if (match) count++;
+      if (match) matches.push({ entry, score });
     });
-    sections.forEach(section => {
-      section.hidden = !Array.from(section.querySelectorAll('details')).some(detail => !detail.hidden);
-    });
-    empty.hidden = count !== 0;
+    if (active) {
+      matches.sort((a, b) => b.score - a.score || a.entry.index - b.entry.index);
+      matches.forEach(({ entry }) => results.appendChild(entry.detail));
+    } else if (searching) {
+      // Restore both the themes and their original order when the search is cleared.
+      entries.forEach(entry => entry.section.appendChild(entry.detail));
+    }
+    faq.hidden = active;
+    sections.forEach(section => { section.hidden = active; });
+    results.hidden = !active || matches.length === 0;
+    empty.hidden = matches.length !== 0;
     clear.hidden = input.value.length === 0;
-    status.textContent = active ? `${count} réponse${count === 1 ? '' : 's'} trouvée${count === 1 ? '' : 's'}` : `${entries.length} questions, classées par thème`;
+    status.textContent = active ? `${matches.length} réponse${matches.length === 1 ? '' : 's'} trouvée${matches.length === 1 ? '' : 's'}` : `${entries.length} questions, classées par thème`;
     searching = active;
   };
   input.addEventListener('input', filter);
