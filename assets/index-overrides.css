@@ -1840,30 +1840,32 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 .hero-pro-dashboard-button:hover{transform:translateY(-1px)!important;filter:brightness(1.04)!important}
 @media(max-width:760px){.hero-pro-dashboard-button{position:static!important;width:calc(100% - 24px)!important;margin:8px 12px 0!important}}
 
-/* Fix 08/10/2026 : cartes d'annonces de meme taille partout (resultats, a la une, recemment
-   consultees...) et photo qui remplit l'espace libre au lieu de laisser un grand vide sous le
-   prix (signale par Anthony). Hauteur de carte commune 420px ; le bloc texte prend sa hauteur
-   naturelle et la photo occupe tout le reste (minimum 158px). Desktop/tablette uniquement,
-   le mobile garde ses cartes propres (index-mobile.css). */
+/* Fix 08/10/2026 (v2) : cartes d'annonces homogenes partout (resultats, a la une, recemment
+   consultees...). La v1 (photo qui remplit tout l'espace libre) donnait des photos de hauteurs
+   differentes et trop etirees en hauteur, avec le filigrane coupe - "c'est nul" (Anthony).
+   Ici : meme photo paysage de 200px pour toutes les cartes, cadree a droite pour ne jamais
+   couper le filigrane incruste en bas a droite ; la carte prend la hauteur de son contenu
+   (plus de vide sous le prix) et les cartes d'une meme rangee s'alignent sur la plus haute.
+   Desktop/tablette uniquement, le mobile garde ses cartes (index-mobile.css). */
 @media(min-width:761px){
   main#top #resultats .ad-card,
   main#top .personalized-card,
   main#top .home-featured-card{
-    height:420px!important;min-height:420px!important;max-height:420px!important;
+    height:auto!important;min-height:0!important;max-height:none!important;
   }
   main#top #resultats .ad-card .ad-photo,
   main#top .personalized-card .personalized-photo,
   main#top .home-featured-card .home-featured-photo{
-    flex:1 1 auto!important;height:auto!important;min-height:158px!important;max-height:none!important;
+    flex:0 0 200px!important;height:200px!important;min-height:200px!important;max-height:200px!important;
   }
   main#top #resultats .ad-card .ad-photo img,
   main#top .personalized-card .personalized-photo img,
   main#top .home-featured-card .home-featured-photo img{
-    width:100%!important;height:100%!important;object-fit:cover!important;
+    width:100%!important;height:100%!important;object-fit:cover!important;object-position:right center!important;
   }
   main#top #resultats .ad-card .ad-body,
   main#top .personalized-card .personalized-body,
   main#top .home-featured-card .home-featured-body{
-    flex:0 0 auto!important;
+    flex:1 1 auto!important;
   }
 }
