@@ -12,7 +12,7 @@ window.confirmOptionPurchase=()=>new Promise(resolve=>{
 // chargement de Stripe prennent plusieurs secondes sans aucun retour visuel : on pouvait croire
 // que rien ne se passait (signale par Anthony). Ecran d'attente plein ecran jusqu'a l'arrivee
 // sur Stripe ; masque en cas d'erreur ou de retour arriere depuis Stripe.
-window.showPaymentLoading=(title='Redirection vers le paiement sécurisé…',text='Connexion à Stripe en cours, cela peut prendre quelques secondes. Ne fermez pas la page.')=>{
+window.showPaymentLoading=(title='Redirection vers le paiement sécurisé…',text='Cela peut prendre quelques secondes. Ne fermez pas la page.')=>{
  let o=document.getElementById('abracaPaymentLoading');
  if(!o){
   if(!document.getElementById('abracaPaymentLoadingStyle')){const st=document.createElement('style');st.id='abracaPaymentLoadingStyle';st.textContent='@keyframes abracaPaySpin{to{transform:rotate(360deg)}}';document.head.append(st);}
