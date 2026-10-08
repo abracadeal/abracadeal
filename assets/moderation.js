@@ -36,6 +36,7 @@ function updateBulkUI(){
 
 function riskMarkup(a){
   const m=state.mods.get(a.id);
+  if(a.status==='pending'&&m?.retry_exhausted&&!m?.ai_checked)return '<span class="chip gray">⚠ Analyse impossible</span>';
   if(!m)return '<span class="chip gray">⚪ Analyse en attente</span>';
   const level=['green','orange','red'].includes(m.risk_level)?m.risk_level:'gray';
   const icon=level==='green'?'🟢':level==='orange'?'🟠':level==='red'?'🔴':'⚪';
@@ -46,6 +47,11 @@ function reasonsMarkup(a){
   const m=state.mods.get(a.id),reasons=Array.isArray(m?.reasons)?m.reasons.filter(Boolean).slice(0,3):[];
   if(!reasons.length)return'';
   return '<div class="reasons">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>';
+}
+function retryErrorMarkup(a){
+ const m=state.mods.get(a.id);
+ if(a.status!=='pending'||!m?.retry_exhausted||m?.ai_checked)return '';
+ return '<div class="analysis-impossible" role="status"><strong>Analyse impossible</strong><div>Limite de 10 relances automatiques atteinte.</div><div>Dernière erreur : '+esc(m.retry_last_error||m.ai_error||'Réponse indisponible')+'</div></div>';
 }
 function sellerName(a){const p=state.profiles.get(a.owner_id);return p?.display_name|| (a.seller_type==='professionnel'?'Professionnel':'Particulier')}
 function isSecondCheck(a){const m=state.mods.get(a.id);return a.status==='active'&&m?.auto_published===true&&m?.admin_reviewed!==true}
@@ -73,7 +79,7 @@ function card(a){
       '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
     '</div>'+
     '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
-    (Number(state.mods.get(a.id)?.reused_photo_count)>0?'<div class="photo-reuse-alert">⚠ '+Number(state.mods.get(a.id).reused_photo_count)+' photo(s) réutilisée(s) par un autre compte · +30 points</div>':'')+reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
+    (Number(state.mods.get(a.id)?.reused_photo_count)>0?'<div class="photo-reuse-alert">⚠ '+Number(state.mods.get(a.id).reused_photo_count)+' photo(s) réutilisée(s) par un autre compte · +30 points</div>':'')+retryErrorMarkup(a)+reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
   '</article>';
 }
 
@@ -130,7 +136,7 @@ function openPreview(id){
       (specs.length?'<section class="preview-section"><h3>Informations de l’annonce</h3><div class="preview-spec-grid">'+specs.map(x=>'<div class="preview-spec"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('')+'</div></section>':'')+
       '<section class="preview-section"><h3>Description</h3><div class="preview-description">'+esc(cleanDescription(a)||'Aucune description.')+'</div></section>'+
       '<section class="preview-section"><h3>Vendeur</h3><div class="preview-seller"><strong>'+esc(profile?.display_name||sellerName(a))+'</strong><br>'+esc(profile?.city||a.city||'')+(a.contact_email?'<br>'+esc(a.contact_email):'')+(a.phone?'<br>'+esc(a.phone):'')+'</div></section>'+
-      '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
+      '<section class="preview-section"><h3>Contrôle</h3><div class="review-state" style="margin:0">'+riskMarkup(a)+(needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':'')+'</div>'+retryErrorMarkup(a)+(reasons.length?'<div class="reasons" style="margin:10px 0 0">'+reasons.map(x=>'<div>• '+esc(x)+'</div>').join('')+'</div>':'')+'</section>'+
     '</div>';
   if(state.tab==='pending'){
     $('#previewActions').innerHTML=
@@ -161,9 +167,12 @@ async function loadProfiles(rows){
 async function loadMods(ids){
   state.mods.clear();
   if(!ids.length)return;
-  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,auto_published,admin_reviewed,edit_review_pending,reused_photo_count,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
+  const {data,error}=await sb.from('listing_moderation').select('listing_id,risk_score,risk_level,reasons,checked_at,engine,ai_checked,ai_error,auto_published,admin_reviewed,edit_review_pending,reused_photo_count,hidden_from_admin_history,reviewed_at,reviewed_by').in('listing_id',ids);
   if(error)console.warn(error);
   (data||[]).forEach(m=>state.mods.set(m.listing_id,m));
+  const retries=await sb.rpc('admin_moderation_retry_status',{p_listing_ids:ids});
+  if(retries.error)throw retries.error;
+  (retries.data||[]).forEach(r=>state.mods.set(r.listing_id,{...(state.mods.get(r.listing_id)||{}),...r}));
 }
 
 async function pendingRows(){

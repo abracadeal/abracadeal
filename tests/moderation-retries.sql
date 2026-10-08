@@ -29,7 +29,7 @@ begin
  where q.listing_id=any(v_failed) and h.url like '%/moderate-listing' and h.headers ? 'x-internal-moderation-key'
  and convert_from(h.body,'UTF8')::jsonb->>'listing_id'=q.listing_id::text;
  if v_queued<>3 then raise exception 'Trois appels authentifiés du circuit normal sont requis';end if;
- -- A repeated API failure stays eligible on the next interval, with no attempt ceiling.
+ -- A repeated API failure stays eligible on the next interval, until the retry ceiling.
  v_id:=v_failed[1];
  update private.moderation_retry_state set next_attempt_at=now()-interval '1 minute' where listing_id=v_id;
  if private.dispatch_moderation_retries(20)<>1 then raise exception 'Un échec répété doit être relancé';end if;
@@ -38,6 +38,29 @@ begin
  update public.listing_moderation set ai_checked=true where listing_id=v_id;
  update private.moderation_retry_state set next_attempt_at=now()-interval '1 minute' where listing_id=v_id;
  if private.dispatch_moderation_retries(20)<>0 then raise exception 'Une analyse terminée ne doit pas être relancée';end if;
+ -- The tenth retry is allowed; an eleventh automatic retry must never be queued.
+ update public.listing_moderation set ai_checked=false,ai_error='OpenAI Moderation HTTP 429' where listing_id=v_id;
+ update private.moderation_retry_state set attempts=9,next_attempt_at=now()-interval '1 minute' where listing_id=v_id;
+ if private.dispatch_moderation_retries(20)<>1 then raise exception 'La dixième relance doit être autorisée';end if;
+ update private.moderation_retry_state set next_attempt_at=now()-interval '1 minute',last_attempt_at=now()-interval '10 minutes' where listing_id=v_id;
+ if private.dispatch_moderation_retries(20)<>0 then raise exception 'La onzième relance doit être interdite';end if;
+ if (select attempts from private.moderation_retry_state where listing_id=v_id)<>10 then raise exception 'Le compteur doit rester à 10';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',v_owner,'role','authenticated')::text,true);
+ if not exists(select 1 from public.admin_moderation_retry_status(array[v_id]) where retry_exhausted and retry_attempts=10 and retry_last_error='OpenAI Moderation HTTP 429') then raise exception 'Analyse impossible et dernière erreur doivent être exposées à l’administrateur';end if;
+ -- Transport failures are parsed defensively and durable history wins over an older API error.
+ if private.moderation_retry_response_error(500,'{"error":"WORKER_ERROR"}',null)<>'WORKER_ERROR' then raise exception 'Erreur réseau invalide';end if;
+ if private.moderation_retry_response_error(503,'not JSON',null)<>'HTTP 503 : not JSON' then raise exception 'Réponse non JSON invalide';end if;
+ update private.moderation_retry_state set last_error='WORKER_ERROR',last_error_at=now() where listing_id=v_id;
+ if not exists(select 1 from public.admin_moderation_retry_status(array[v_id]) where retry_last_error='WORKER_ERROR') then raise exception 'La dernière erreur doit rester conservée';end if;
+ update public.listing_moderation set ai_checked=true where listing_id=v_id;
+ if exists(select 1 from public.admin_moderation_retry_status(array[v_id]) where retry_exhausted) then raise exception 'Une analyse réussie doit retirer la mention Analyse impossible';end if;
+ perform set_config('request.jwt.claims','{}',true);
+ begin
+  perform * from public.admin_moderation_retry_status(array[v_id]);
+  raise exception 'Un visiteur ne doit pas voir le statut de reprise';
+ exception when others then
+  if sqlerrm<>'Accès administrateur requis' then raise;end if;
+ end;
  if has_function_privilege('anon','private.dispatch_moderation_retries(integer)','execute')
   or has_function_privilege('authenticated','private.dispatch_moderation_retries(integer)','execute') then raise exception 'La relance doit rester inaccessible aux clients';end if;
 end $$;

@@ -87,3 +87,15 @@ test('UI : photos rouges floutées, vertes visibles, onglet signalements et Phar
  assert.doesNotMatch(vm.runInContext("card(state.rows[0])",context),/sensitive-photo/);
  assert.match(fs.readFileSync(new URL('../moderation.html',import.meta.url),'utf8'),/data-tab="reported"/);
 });
+test('UI : Analyse impossible et dernière erreur après dix relances, texte échappé',()=>{
+ const element={addEventListener(){},classList:{add(){},remove(){}},style:{}};
+ const document={querySelector:()=>element,addEventListener(){},querySelectorAll:()=>[],body:{style:{}}};
+ const sb={auth:{getSession:()=>new Promise(()=>{})}};
+ const context=vm.createContext({document,supabase:{createClient:()=>sb},console,Map,Set,Date,setTimeout,clearTimeout});
+ vm.runInContext(fs.readFileSync(new URL('../assets/moderation.js',import.meta.url),'utf8'),context);
+ vm.runInContext("state.mods.set('listing',{retry_attempts:10,retry_exhausted:true,ai_checked:false,retry_last_error:'OpenAI 429 <script>bad</script>'});state.rows=[{id:'listing',status:'pending'}]",context);
+ const html=vm.runInContext('card(state.rows[0])',context);
+ assert.match(html,/Analyse impossible/);assert.match(html,/10 relances/);assert.match(html,/Dernière erreur : OpenAI 429 &lt;script&gt;/);assert.doesNotMatch(html,/<script>/);
+ vm.runInContext("state.mods.get('listing').ai_checked=true",context);
+ assert.doesNotMatch(vm.runInContext('card(state.rows[0])',context),/Analyse impossible/);
+});

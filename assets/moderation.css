@@ -153,3 +153,5 @@ a{color:inherit;text-decoration:none}
 @media(max-width:600px){.tabs{grid-template-columns:repeat(2,minmax(0,1fr))}}
 
 .phone-admin-panel{margin:16px 0;padding:16px;border:1px solid #87579d;border-radius:12px;background:#1a0e28}.phone-admin-panel summary{cursor:pointer;font-weight:700}.phone-admin-panel p{font-size:13px;line-height:1.5}.phone-admin-panel label{display:grid;gap:6px;margin:10px 0}.phone-admin-panel input,.phone-admin-panel textarea{width:100%;padding:10px;border-radius:8px;box-sizing:border-box}.phone-admin-panel button{padding:10px;border-radius:8px;cursor:pointer}.phone-reservation{padding:12px 0;border-top:1px solid #87579d}.photo-reuse-alert{color:#ffcf70;font-weight:bold;margin:8px 0}
+
+.analysis-impossible{margin:12px 0;padding:12px;border:1px solid #d7a742;border-radius:10px;background:rgba(215,167,66,.1);color:#ffda87;overflow-wrap:anywhere}.analysis-impossible strong{display:block;margin-bottom:6px}.analysis-impossible div{font-size:13px;line-height:1.5}
