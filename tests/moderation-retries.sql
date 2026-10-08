@@ -21,7 +21,7 @@ begin
  if v_n<>1 then raise exception 'La reprise ne doit traiter que le reste du lot (% reçus)',v_n;end if;
  v_n:=private.dispatch_moderation_retries(20);
  if v_n<>0 then raise exception 'Une annonce déjà relancée ne doit pas être envoyée deux fois';end if;
- if (select count(*) from private.moderation_retry_state where listing_id=any(v_failed) and attempts=1 and next_attempt_at>=now()+interval '15 minutes')<>3 then
+ if (select count(*) from private.moderation_retry_state where listing_id=any(v_failed) and attempts=1 and next_attempt_at>=date_trunc('minute',now())+interval '15 minutes')<>3 then
   raise exception 'Échecs et interruption doivent être relancés avec délai de 15 minutes';
  end if;
  if exists(select 1 from private.moderation_retry_state where listing_id=any(v_skip)) then raise exception 'La reprise ne doit pas toucher les décisions de modération';end if;

@@ -45,7 +45,7 @@ begin
    timeout_milliseconds:=120000
   );
   insert into private.moderation_retry_state(listing_id,attempts,last_attempt_at,next_attempt_at,request_id)
-  values(v_row.id,1,now(),now()+interval '15 minutes',v_request)
+  values(v_row.id,1,now(),date_trunc('minute',now())+interval '15 minutes',v_request)
   on conflict(listing_id) do update set attempts=private.moderation_retry_state.attempts+1,
    last_attempt_at=excluded.last_attempt_at,next_attempt_at=excluded.next_attempt_at,request_id=excluded.request_id;
   v_count:=v_count+1;
