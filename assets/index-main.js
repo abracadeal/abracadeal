@@ -3862,7 +3862,7 @@ window.openAd=id=>{
               <button type="button" class="seller-profile-link" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">Voir le profil et les avis</button>
 
               <div class="seller-contact">
-                <aside class="buyer-safety-note" aria-label="Conseil de sécurité">Abracadeal ne gère aucun paiement entre acheteurs et vendeurs. Méfiez-vous de toute demande de paiement par mandat, coupon PCS ou via un &quot;transporteur&quot;, et de tout lien de paiement envoyé au nom d’Abracadeal. Privilégiez la remise en main propre.</aside>
+                <aside class="buyer-safety-note" aria-label="Conseil de sécurité">Abracadeal ne gère aucun paiement. Méfiez-vous des mandats, coupons PCS ou liens de paiement : privilégiez la remise en main propre.</aside>
                 ${!isOwner?`<button class="btn primary" type="button" onclick="startMessageForListing('${a.id}')">Envoyer un message</button>`:''}
                 <div class="phone-share-row">
                   ${a.show_phone

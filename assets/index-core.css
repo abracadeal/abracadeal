@@ -4389,4 +4389,5 @@ header #flowErrorsBtn{
  #legalModal summary,#rulesModal summary,#cookiesModal summary,#rankingModal summary{font-size:12px!important}
 }
 
-.buyer-safety-note{padding:12px 14px;margin:0 0 12px;border:1px solid #dfb768;border-left:4px solid #b57c1c;border-radius:10px;background:#fff6df;color:#4c3513;font-size:13px;line-height:1.5;font-weight:600}
+/* Fix 08/10/2026 : message de securite paiement rendu plus discret (Anthony : prenait trop de place) */
+.buyer-safety-note{padding:0;margin:0 0 12px;border:0;background:none;color:#7a6a86;font-size:11.5px;line-height:1.4;font-weight:500}
