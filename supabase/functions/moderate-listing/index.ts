@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+import {stageImportedImages} from './import-images.ts';
 import {MODEL,getPhotos,quarantine,scanSafety,recordSafety,enforce,publishPhotos,snapshot} from './safety.ts';
 
 const corsHeaders={"Access-Control-Allow-Origin":"*","Access-Control-Allow-Headers":"authorization, x-client-info, apikey, content-type, x-internal-moderation-key"};
@@ -81,6 +82,11 @@ Deno.serve(async(req)=>{
     const photos=await getPhotos(admin,listing.id);
     let safety:any;
     try{
+      await stageImportedImages(admin,listing,photos);
+      const {data:stagedListing,error:stagedError}=await admin.from('listings').select('status,updated_at,title,description').eq('id',listing.id).single();
+      if(stagedError)throw stagedError;
+      if(stagedListing.title!==listing.title||stagedListing.description!==listing.description)throw new Error('Texte modifié pendant l’import des photos');
+      listing.status=stagedListing.status;listing.updated_at=stagedListing.updated_at;
       if(listing.status!=='active')await quarantine(admin,photos);
       safety=await scanSafety(admin,listing,photos);
       await recordSafety(admin,listing.id,safety);

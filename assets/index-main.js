@@ -1291,9 +1291,8 @@ async function importOneProfessionalRow(r){
   try{
     const {error:contactError}=await sb.rpc('save_listing_contact',{p_listing_id:listingId,p_phone:currentProfile?.phone||null,p_contact_email:currentUser.email||null}); if(contactError)throw contactError;
     await replaceImportedPhotos(listingId,r.photos,Math.max(15,Math.min(30,Number(r.existingPhotoLimit||15))));
-    // La modération ne s'applique qu'à une NOUVELLE annonce. Une annonce existante
-    // ne doit jamais repasser en pending parce qu'un garage met son stock à jour.
-    const moderation=isUpdate?null:await requestAutomaticModeration(listingId);
+    // Chaque création et mise à jour importée repasse par le contrôle texte + photos.
+    const moderation=await requestAutomaticModeration(listingId);
     return {listingId,moderation,updated:isUpdate};
   }catch(err){
     if(!isUpdate)await sb.from('listings').delete().eq('id',listingId); throw err;

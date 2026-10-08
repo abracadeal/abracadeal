@@ -3,11 +3,28 @@ import assert from 'node:assert/strict';
 import {test} from 'node:test';
 import fs from 'node:fs';
 import vm from 'node:vm';
+import {stageImportedImages} from '../supabase/functions/moderate-listing/import-images.ts';
 const listing={id:'listing',owner_id:'owner',title:'Mercedes Classe V',description:'Véhicule à vendre'};
 const photos=[{id:'b',storage_path:'b.webp',storage_bucket:'listing-images-pending'},{id:'a',storage_path:'a.webp',storage_bucket:'listing-images-pending'}];
 const admin={storage:{from:()=>({createSignedUrl:async p=>({data:{signedUrl:'https://example.test/'+p}})})}};
 const cats={sexual:false,'sexual/minors':false,violence:false,'violence/graphic':false};
 const response=(categories=cats)=>Response.json({results:[{flagged:Object.values(categories).some(Boolean),categories}]});
+test('photos externes importées dans le bucket privé ; adresses privées refusées',async()=>{
+ const originalFetch=globalThis.fetch,originalDeno=globalThis.Deno;
+ const calls=[];
+ globalThis.Deno={resolveDns:async()=>['198.51.100.10']};
+ globalThis.fetch=async()=>new Response(new Uint8Array([137,80,78,71,0,0,0,0]),{status:200});
+ const query={eq(){return query},select:async()=>({data:[{id:'photo'}]})};
+ const service={storage:{from:bucket=>({upload:async(path,bytes)=>{calls.push({bucket,path});return{}},remove:async()=>({})})},from:()=>({update:()=>query})};
+ try{
+  const rows=[{id:'photo',storage_path:'https://stock.example/photo.png'}];
+  await stageImportedImages(service,listing,rows);
+  assert.equal(calls[0].bucket,'listing-images-pending');
+  assert.match(rows[0].storage_path,/^owner\/listing\//);
+  assert.equal(rows[0].storage_bucket,'listing-images-pending');
+  await assert.rejects(stageImportedImages(service,listing,[{id:'other',storage_path:'http://127.0.0.1/private.png'}]),/privée interdite/);
+ }finally{globalThis.fetch=originalFetch;globalThis.Deno=originalDeno;}
+});
 test('texte et chaque photo privée sont analysés, snapshot déterministe',async()=>{
  const calls=[];
  const result=await scanSafety(admin,listing,photos,async(u,o)=>{calls.push(JSON.parse(o.body));return response()},'test');
