@@ -6,7 +6,7 @@ import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 const source=readFileSync(new URL('../supabase/functions/pro-stock-sync/index.ts',import.meta.url),'utf8');
 function harness({existing=null,apiFailure=false}={}){
- const writes=[],calls=[];let handler;
+ const writes=[],calls=[];let handler;let photoState=existing?.listing_photos||[];
  const admin={auth:{admin:{getUserById:async()=>({data:{user:{email:'test@example.test'}}})}},from(table){
   let op='select',payload,filters=[];
   const q={select(){return q},insert(v){op='insert';payload=v;return q},update(v){op='update';payload=v;return q},delete(){op='delete';return q},upsert(v){op='upsert';payload=v;return q},eq(k,v){filters.push([k,v]);return q},not(){return q},maybeSingle(){return resolve()},single(){return resolve()},then(a,b){return resolve().then(a,b)}};
@@ -15,6 +15,7 @@ function harness({existing=null,apiFailure=false}={}){
    let data=null;
    if(table==='pro_stock_sync_runs')data={id:'run'};
    if(table==='listings')data=op==='select'?existing:{id:existing?.id||'new-listing',photo_limit:3};
+   if(table==='listing_photos'){if(op==='insert')photoState=payload.map((p,i)=>({...p,id:'photo-'+i}));if(op==='delete')photoState=[];data=photoState;}
    if(table==='profiles')data={phone:null};
    if(table==='integration_secrets')data={secret_value:'fake-secret'};
    return {data,error:null};
@@ -64,4 +65,18 @@ test('XML : photos répétées et attributs src sont toutes conservées',async()
  const h=harness();h.context.xml='<stock><vehicle><reference>A1</reference><titre>Voiture</titre><ville>Cannes</ville><photos><photo>https://example.test/a.jpg</photo><photo src="https://example.test/b.jpg?a=1&amp;b=2" /></photos></vehicle></stock>';
  const rows=await vm.runInContext("normalizeRows(parseXml(xml),'vehicules')",h.context);
  assert.equal(rows[0].photos.length,2);assert.equal(rows[0].photos[1],'https://example.test/b.jpg?a=1&b=2');
+});
+
+test('flux inchangé : pas de réécriture ni de remise en attente à chaque poll',async()=>{
+ const first=harness();first.context.feed=feed;first.context.rows=[raw];await vm.runInContext('sync(feed,rows)',first.context);
+ const listing=first.writes.find(w=>w.table==='listings').payload;
+ const state=first.writes.find(w=>w.table==='listing_moderation').payload;
+ const photos=first.writes.find(w=>w.table==='listing_photos'&&w.op==='insert').payload.map((p,i)=>({...p,id:'photo-'+i}));
+ // The mock database lowered the photo allowance to 3; the next poll must honor it.
+ const existing={...listing,id:'new-listing',photo_limit:3,status:'active',listing_moderation:state,listing_photos:photos};
+ const next=harness({existing});next.context.feed=feed;next.context.rows=[raw];
+ const result=await vm.runInContext('sync(feed,rows)',next.context);
+ assert.equal(result.unchanged,1);assert.equal(next.calls.length,0);assert.ok(next.writes.every(w=>!['listings','listing_photos'].includes(w.table)));
+ const changed=harness({existing:{...existing,title:'Titre changé'}});changed.context.feed=feed;changed.context.rows=[raw];
+ const result2=await vm.runInContext('sync(feed,rows)',changed.context);assert.equal(result2.unchanged,0);assert.equal(changed.calls.length,1);
 });

@@ -89,7 +89,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
  const runResult=await admin.from('pro_stock_sync_runs').insert({feed_id:feed.id}).select('id').single();
  if(runResult.error)throw runResult.error;
  const run=runResult.data;
- let created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0;
+ let created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0,unchanged=0;
  const failures:string[]=[];
  const seen=new Set<string>();const source=`feed:${feed.id}`;
  const must=(r:any)=>{if(r.error)throw r.error;return r.data;};
@@ -100,7 +100,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     // Invalid rows still count as present: a malformed update must not archive the old listing.
     if(r.ref)seen.add(r.ref);
     if(r.errors?.length)throw Error(r.errors.join(', '));
-    const existing=must(await admin.from('listings').select('id,status,photo_limit').eq('owner_id',feed.owner_id).eq('source',source).eq('external_id',r.ref).maybeSingle());
+    const existing=must(await admin.from('listings').select('*,listing_moderation(stock_import_signature,stock_import_photo_ids),listing_photos(id)').eq('owner_id',feed.owner_id).eq('source',source).eq('external_id',r.ref).maybeSingle());
     // Reports and safety decisions must not be undone by a scheduled reimport.
     if(existing?.status==='hidden'||existing?.status==='rejected')continue;
     const meta=r.category==='immobilier'?immoMeta(r):vehicleMeta(r);
@@ -116,6 +116,18 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     }else{
      payload.item_condition=null;payload.vehicle_make=null;payload.vehicle_model=null;payload.vehicle_year=null;
      payload.mileage=null;payload.fuel=null;payload.transmission=null;payload.crit_air=null;
+    }
+    const {last_synced_at:ignoredTimestamp,...contentPayload}=payload;
+    const includedPhotos=r.photos.slice(0,Math.max(1,Math.min(30,Number(existing?.photo_limit||15))));
+    const signature=await sha256(JSON.stringify({content:contentPayload,photos:includedPhotos}));
+    const prior=Array.isArray(existing?.listing_moderation)?existing.listing_moderation[0]:existing?.listing_moderation;
+    const photoIds=(existing?.listing_photos||[]).map((p:any)=>p.id).sort();
+    if(existing && prior?.stock_import_signature===signature
+      && Object.entries(contentPayload).every(([k,v])=>JSON.stringify(existing[k]??null)===JSON.stringify(v??null))
+      && JSON.stringify(photoIds)===JSON.stringify([...(prior.stock_import_photo_ids||[])].sort())){
+     // Do not reset a successful check or rewrite photos on each scheduled poll.
+     // Failed/incomplete checks are resumed independently by the moderation retry cron.
+     unchanged++;continue;
     }
     // Both creations and updates enter the same pending -> moderate-listing -> active circuit.
     payload.status='pending';
@@ -139,6 +151,12 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      const photoRows=r.photos.slice(0,allowedLimit).map((u:string,i:number)=>({listing_id:listingId,storage_path:u,position:i+1}));
      must(await admin.from('listing_photos').insert(photoRows));
     }
+    const importedPhotos=must(await admin.from('listing_photos').select('id').eq('listing_id',listingId))||[];
+    // Reuse the signature computed before the update; database-enforced photo caps may be smaller.
+    const persistedSignature=includedPhotos.length===Math.min(r.photos.length,Number(listing.photo_limit||15))
+      ?signature:await sha256(JSON.stringify({content:contentPayload,photos:r.photos.slice(0,Number(listing.photo_limit||15))}));
+    must(await admin.from('listing_moderation').upsert({listing_id:listingId,stock_import_signature:persistedSignature,
+     stock_import_photo_ids:importedPhotos.map((p:any)=>p.id).sort()},{onConflict:'listing_id'}));
     // The shared function downloads external photos into private storage, hashes them,
     // scans text + every photo with OpenAI, and alone publishes approved content.
     await moderateListingInternal(listingId);
@@ -157,7 +175,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:null;
   must(await admin.from('pro_stock_feeds').update({last_run_at:new Date().toISOString(),...(errors?{}:{last_success_at:new Date().toISOString()}),last_error:errorMessage,updated_at:new Date().toISOString()}).eq('id',feed.id));
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
-  return{ok:true,feed_id:feed.id,sector:feed.sector||'vehicules',received:rawRows.length,created,updated,archived,errors,moderated,photo_truncated_count:photoTruncated,photo_policy:'Limite photos du compte et de chaque annonce conservée'};
+  return{ok:true,feed_id:feed.id,sector:feed.sector||'vehicules',received:rawRows.length,created,updated,archived,errors,moderated,unchanged,photo_truncated_count:photoTruncated,photo_policy:'Limite photos du compte et de chaque annonce conservée'};
  }catch(e){
   const msg=e instanceof Error?e.message:String(e);
   await admin.from('pro_stock_feeds').update({last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);
