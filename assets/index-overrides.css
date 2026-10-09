@@ -1869,3 +1869,17 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
     flex:1 1 auto!important;
   }
 }
+
+/* Fix 09/10/2026 : tablette en portrait (481-760px) - les annonces passent en 2 colonnes qui
+   s'elargissent (jusqu'a 360px) mais la photo gardait une hauteur fixe de 108px : photo ecrasee,
+   mal cadree (signale par Anthony), alors que "Recemment consultees" (178x128) est bien.
+   On garde les memes proportions que ces cartes. Telephones (<=480px) inchanges. */
+@media(min-width:481px) and (max-width:760px){
+  main#top #resultats .ad-card .ad-photo,
+  main#top #resultats .ad-card.immo-card .ad-photo{
+    flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:178/128!important;
+  }
+  main#top #resultats .ad-card .ad-photo img{
+    width:100%!important;height:100%!important;object-fit:cover!important;
+  }
+}
