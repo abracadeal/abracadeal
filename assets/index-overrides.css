@@ -1852,6 +1852,9 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
   main#top .personalized-card,
   main#top .home-featured-card{
     height:auto!important;min-height:0!important;max-height:none!important;
+    /* Fix 09/10/2026 : index-mobile.css (>=761px) forcait align-self:start, donc les cartes d'une
+       meme rangee n'avaient pas la meme hauteur (ex. voiture avec km/annee vs equipement). */
+    align-self:stretch!important;
   }
   main#top #resultats .ad-card .ad-photo,
   main#top .personalized-card .personalized-photo,
