@@ -21,3 +21,4 @@
 -- Prospection (aucune donnée dans ce dépôt) : tables privées private.sirene_etab / sirene_queue (registre officiel),
 --   private.prospect_leads / osm_queue (OpenStreetMap, toute la France), fonction prospect-email-crawler
 --   (relève l'e-mail publié sur le site du pro), tâches cron abracadeal-osm-france et abracadeal-prospect-crawler.
+-- Limite des formules Pro : total des annonces de toutes les catégories couvertes par la formule (Auto/Moto + Immo confondus), migration pro_limit_counts_all_categories_of_plan.
