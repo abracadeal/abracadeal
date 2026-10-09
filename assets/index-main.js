@@ -37,7 +37,7 @@ const sb = (window.supabase && window.supabase.createClient)
 const $=s=>document.querySelector(s);
 const $$=s=>[...document.querySelectorAll(s)];
 let professionalSignupViewerId=null;
-let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false;
+let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false, editOriginalPhotos=[], editPhotosLoading=false;
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
 let selectedPublishPack='free', selectedPublishOffers=new Set(), publishStep=1, publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;
 let publishCommerceOffers=[], publishOffersUser=null, publishOffersLoading=false;
@@ -1951,7 +1951,7 @@ function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION
 function setPublishPhotoLimit(){
   const pro=accountAudience()==='professionnel';
   const freeLimit=basePhotoLimitForAudience();
-  publishPhotoLimit=freeLimit;
+  publishPhotoLimit=editingId&&editingOriginalPhotoLimit?Math.max(freeLimit,editingOriginalPhotoLimit):freeLimit;
   if(selectedPhotos.length>publishPhotoLimit) selectedPhotos=selectedPhotos.slice(0,publishPhotoLimit);
   if(selectedPhotos.length<=6)showAllPhotoSlots=false;
   const l=$('#photoLimitLabel');if(l)l.innerHTML=`Photos <span class="note">(${publishPhotoLimit} maximum)</span>`;
@@ -2190,7 +2190,7 @@ function openPromotionForListing(id){
 }
 
 function resetPublishForm(){
-  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; selectedPublishOffers.clear(); publishStep=1; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
+  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; editOriginalPhotos=[]; editPhotosLoading=false; selectedPublishPack='free'; selectedPublishOffers.clear(); publishStep=1; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
   editingOriginalOwnerId=null; editingOriginalStatus=null; editingOriginalSellerType=null; editingOriginalPhotoLimit=null;
   hideLocationSuggestions();
   $('#photoPreview').innerHTML=''; renderPublishPackPicker(); renderSelectedPhotos();
@@ -2246,6 +2246,7 @@ window.openAdminEditAd=function(id,ownerEdit=false){
   editingOriginalSellerType=a.seller_type||'particulier';
   editingOriginalPhotoLimit=Number(a.photo_limit||((a.seller_type==='professionnel')?15:3));
   existingPhotoPaths=(a.listing_photos||[]).map(p=>p.storage_path);
+  loadExistingPhotosForEdit(a);
 
   $('#adCategory').value=a.category||'';
   const sub=vehicleSubcategoryOf(a)||'';
@@ -2299,8 +2300,7 @@ window.openAdminEditAd=function(id,ownerEdit=false){
   $('#publishPackArea')?.classList.add('hidden');
   $('#publishModal .modal-head h2').textContent=ownerEdit?'Modifier mon annonce':'Modifier l’annonce · Admin';
   $('#publishSubmitBtn').textContent=ownerEdit?'Enregistrer la baisse de prix ou proposer une modification':'Enregistrer';
-  if($('#photoGalleryMeta')) $('#photoGalleryMeta').textContent='Les photos actuelles sont conservées. Ajoutez de nouvelles photos uniquement si vous souhaitez les remplacer.';
-  if($('#photoQuotaTitle')) $('#photoQuotaTitle').textContent=`Photos actuelles conservées · limite ${editingOriginalPhotoLimit}`;
+  setPublishPhotoLimit();
   if(ownerEdit){sb.from('listing_contacts').select('phone').eq('listing_id',id).maybeSingle().then(({data})=>{if(editingId===id){$('#adPhone').value=data?.phone||'';editFormBaseline=editFormState();}});}
   $('#listingEditNotice')?.remove();
   if(ownerEdit){const notice=document.createElement('p');notice.id='listingEditNotice';notice.style.cssText='background:#f5eaf9;color:#3b1d4a;font-weight:600;font-size:12.5px;padding:10px 12px;border-radius:10px;line-height:1.45';notice.textContent='Baisse de prix seule : gratuite et illimitée, sans remontée. Toute autre modification : « Modifier et remonter mon annonce ». L’ancienne version et ses options restent en ligne pendant la vérification.';$('#publishForm').prepend(notice);sb.rpc('get_my_commerce_pricing').then(({data})=>{const offer=(data||[]).find(o=>o.code==='private_listing_edit');if(offer&&editingId===id)notice.textContent='Baisse de prix seule : gratuite et illimitée, sans remontée. Toute autre modification vous sera facturée '+(Number(offer.amount_cents)/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' € TTC. Après paiement et validation, votre annonce remontera en tête des résultats. L’ancienne version et ses options restent en ligne pendant la vérification.';});}
@@ -2308,6 +2308,26 @@ window.openAdminEditAd=function(id,ownerEdit=false){
   openModal('publishModal');
 };
 
+// Fix 09/10/2026 : en modification, les photos deja enregistrees sont chargees dans la galerie et
+// comptent dans la limite (avant : "3 photos restantes" alors qu'une photo existait deja). L'image
+// par defaut Abracadeal n'est jamais une photo de l'annonce : une annonce sans photo reste a 0.
+// Les photos ne sont renvoyees au serveur que si elles ont change (sinon il les recopie).
+function editPhotosChanged(){return selectedPhotos.length!==editOriginalPhotos.length||selectedPhotos.some((b,i)=>b!==editOriginalPhotos[i])}
+async function loadExistingPhotosForEdit(a){
+  const id=a.id,photos=[...(a.listing_photos||[])].filter(p=>p?.storage_path).sort((x,y)=>(x.position||0)-(y.position||0));
+  if(!photos.length)return;
+  editPhotosLoading=true;
+  const meta=$('#photoGalleryMeta');if(meta)meta.textContent='Chargement des photos actuelles…';
+  try{
+    const blobs=await Promise.all(photos.map(async p=>{const r=await fetch(photoUrl(p.storage_path));if(!r.ok)throw Error('photo');return r.blob()}));
+    if(editingId!==id)return;
+    selectedPhotos=blobs;editOriginalPhotos=[...blobs];
+  }catch(_){
+    if(editingId===id)toast('Photos actuelles non chargées : elles seront conservées si vous n’en ajoutez pas.');
+  }finally{
+    if(editingId===id){editPhotosLoading=false;setPublishPhotoLimit();}
+  }
+}
 async function compressImage(file){
   // Adaptive WebP: keep detail while avoiding oversized uploads.
   return new Promise((resolve,reject)=>{
@@ -2455,6 +2475,7 @@ $('#publishForm').addEventListener('submit',async e=>{
   if(btn.disabled) return;
 
   const wasEditing=!!editingId;
+  if(wasEditing&&editPhotosLoading){toast('Chargement des photos actuelles en cours, réessayez dans un instant.');return;}
 
   // Services : un compte professionnel classique dispose d'une seule annonce gratuite.
   // Cette règle est indépendante de l'offre Fondateurs. Les comptes Fondateurs / abonnés
@@ -2473,7 +2494,7 @@ $('#publishForm').addEventListener('submit',async e=>{
   // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony).
   // Ne bloque jamais la publication : si l'utilisateur choisit "Publier quand meme",
   // pendingNoPhotoConfirm passe a true et on laisse continuer normalement.
-  const hasAnyPhoto = selectedPhotos.length>0 || existingPhotoPaths.length>0;
+  const hasAnyPhoto = selectedPhotos.length>0 || (existingPhotoPaths.length>0 && !editPhotosChanged());
   if(!hasAnyPhoto && !pendingNoPhotoConfirm){
     openModal('noPhotoConfirmModal');
     return;
@@ -2518,9 +2539,9 @@ $('#publishForm').addEventListener('submit',async e=>{
 
     if(wasEditing&&currentProfile?.is_admin!==true){
       const {data:{session}}=await sb.auth.getSession();
-      const response=await fetch(SUPABASE_URL+'/functions/v1/prepare-listing-edit',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({listing_id:editingId,changes:(!selectedPhotos.length&&editFormBaseline===editFormState())?{price:payload.price}:payload,replace_photos:selectedPhotos.length>0,phone:$('#adPhone').value.trim()||null})});
+      const response=await fetch(SUPABASE_URL+'/functions/v1/prepare-listing-edit',{method:'POST',headers:{Authorization:'Bearer '+session.access_token,apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({listing_id:editingId,changes:(!editPhotosChanged()&&editFormBaseline===editFormState())?{price:payload.price}:payload,replace_photos:editPhotosChanged(),phone:$('#adPhone').value.trim()||null})});
       const result=await response.json();if(!response.ok)throw Error(result.error||'Modification impossible');
-      if(!result.price_only){await uploadPhotos(result.listing_id);await requestAutomaticModeration(result.listing_id);}
+      if(!result.price_only){if(editPhotosChanged())await uploadPhotos(result.listing_id);await requestAutomaticModeration(result.listing_id);}
       if(status)status.textContent=result.price_only?'Baisse de prix enregistrée gratuitement, sans remontée.':'Version proposée enregistrée. L’ancienne annonce reste en ligne.';
       await loadAds();closeModal('publishModal');resetPublishForm();
       if(!result.free){window.showPaymentLoading?.('Préparation du paiement…','Votre modification est enregistrée. Ouverture de la page de paiement, merci de patienter.');location.href='options-annonce.html?revision='+encodeURIComponent(result.listing_id);}
@@ -2533,7 +2554,7 @@ $('#publishForm').addEventListener('submit',async e=>{
       const {error}=await editQuery;
       if(error) throw error;
 
-      if(selectedPhotos.length){
+      if(editPhotosChanged()){
         if(status) status.textContent='Envoi des photos…';
         const {data:oldRows}=await sb.from('listing_photos').select('storage_path').eq('listing_id',editingId);
         const oldPaths=(oldRows||[]).map(x=>x.storage_path);
