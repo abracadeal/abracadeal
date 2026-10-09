@@ -2575,6 +2575,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     if(!wasEditing && paidOfferCodes.length && listingId){
       if(status) status.textContent='Ouverture du paiement sécurisé…';
       window.showPaymentLoading?.('Préparation du paiement…','Votre annonce est enregistrée. Ouverture de la page de paiement, merci de patienter.');
+      closeModal('publishModal');resetPublishForm();
       location.href='options-annonce.html?options=1&listing='+encodeURIComponent(listingId)+'&offers='+encodeURIComponent(paidOfferCodes.join(','));
       return;
     }
@@ -5485,3 +5486,15 @@ cropFrame?.addEventListener('pointerup',endCropPointer);cropFrame?.addEventListe
 window.addEventListener('resize',()=>{if(!document.getElementById('proCropModal')?.classList.contains('hidden')&&proCropState.img){const r=cropFrame.getBoundingClientRect();proCropState.minScale=Math.max(r.width/proCropState.img.naturalWidth,r.height/proCropState.img.naturalHeight);setProCropScale(Math.max(proCropState.scale,proCropState.minScale));}});
 
 document.getElementById('publishBackBtn')?.addEventListener('click',()=>{publishStep=1;renderPublishPackPicker();$('#publishModal .modal-body')?.scrollTo({top:0,behavior:'smooth'});});
+
+// Fix 09/10/2026 : retour de Stripe apres paiement valide -> message sur l'accueil. Et si la page
+// est restauree depuis le cache (bouton retour), la fenetre de publication est fermee et videe
+// pour ne jamais republier la meme annonce.
+(function(){
+  const qs=new URLSearchParams(location.search);
+  if(qs.get('commerce')==='success'){
+    qs.delete('commerce');history.replaceState(null,'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash);
+    setTimeout(()=>toast('Paiement validé ✓ Vos options sont en cours d’activation.'),600);
+  }
+  window.addEventListener('pageshow',e=>{if(e.persisted&&document.getElementById('publishModal')?.classList.contains('open')){closeModal('publishModal');resetPublishForm();}});
+})();
