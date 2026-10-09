@@ -15,3 +15,6 @@
 -- pro_urgent_30 1,49→1,99 HT (price_1UOdwC1DkwXb4U3J49RKiuVK), ancien prix archivé.
 -- pro_urgent_30 finalement : 9,99 € HT pour 60 jours (duration_days=60, label 'Urgent — 60 jours', price_1UOdy71DkwXb4U3JVKXv4xg4) ; prix 1,49 et 1,99 archivés.
 -- Urgent (pro 9,99 HT, particulier 9,99 TTC) : jusqu'à la fin de l'annonce (expires_at), sinon 60 jours ; webhook stripe-pricing-v2-webhook v9.
+-- À la une Pro aligné sur particulier (HT) : 24 h 6,99 (nouvelle offre pro_featured_1), 7 j 19,99, 14 j 29,99, 30 j 39,99 ; anciens prix/produits archivés.
+-- Rareté À la une : migration featured_slots_per_category_department (5 places par catégorie et département,
+--   réservation 30 min pendant paiement) ; contrôle dans create-commerce-order v14 ; affichage « Plus que X places » sur options-annonce.html.
