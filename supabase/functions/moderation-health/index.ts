@@ -1,0 +1,1 @@
+Deno.serve(()=>new Response(JSON.stringify({ok:false,disabled:true,message:'OpenAI moderation is disabled. Abracadeal internal moderation is active.'}),{status:404,headers:{'content-type':'application/json','cache-control':'no-store'}}));

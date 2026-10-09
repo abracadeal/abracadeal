@@ -1,0 +1,1 @@
+Deno.serve(()=>new Response(JSON.stringify({message:"One-time test complete; this endpoint is disabled"}),{status:410,headers:{"content-type":"application/json"}}));

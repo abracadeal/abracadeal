@@ -1,0 +1,1 @@
+Deno.serve(()=>new Response(JSON.stringify({error:"Self-test disabled"}),{status:410,headers:{"Content-Type":"application/json"}}));

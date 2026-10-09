@@ -1,0 +1,1 @@
+Deno.serve(() => new Response(JSON.stringify({error:'disabled'}), {status:410, headers:{'content-type':'application/json'}}));

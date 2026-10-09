@@ -1,0 +1,1 @@
+Deno.serve(()=>new Response(JSON.stringify({message:"One-time Stripe test setup completed; provisioning endpoint disabled"}),{status:410,headers:{"content-type":"application/json"}}));
