@@ -1,0 +1,12 @@
+-- Migrations appliquées le 09/10/2026 (projet jplzvxmpbpjssyinozap) — trace pour l'historique du dépôt.
+-- 1. conversation_leads_purchase_potential : table conversation_leads (réponses acheteur + statut vendeur),
+--    fonctions set_conversation_lead, set_contact_status, compute_lead_score (interne), get_my_contacts.
+-- 2. lock_grant_pro_listing_credits : grant_pro_listing_credits réservé à service_role (appelé par le webhook Stripe).
+-- 3. private_bump_and_daily_bump_offers : offer_type 'bump' et 'daily_bump', colonne listings.daily_bump_until,
+--    offres private_featured_1 (6,99), private_bump_now (5,99), private_daily_bump_7 (24,99), private_daily_bump_30 (59,99),
+--    fonction apply_daily_bumps() + cron 'abracadeal-daily-bumps' (5 6 * * * UTC).
+-- 4. daily_bump_service_write_and_guard : apply_daily_bumps écrit en mode serveur ; private.guard_listing_change
+--    protège aussi daily_bump_until.
+-- 5. fix_boost_consumption_guard : consume_commerce_boost et consume_pro_boost écrivent en mode serveur
+--    (les boosts achetés étaient bloqués par private.guard_listing_change).
+-- Le détail SQL exact est consultable dans Supabase > Database > Migrations.
