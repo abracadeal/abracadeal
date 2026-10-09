@@ -1,0 +1,5 @@
+-- 2026-10-09 : migration "founder_20_plus_unit_listings_and_pro_contact_auth" (appliquée sur Supabase)
+-- 1. get_public_pro_contact : réservé aux membres connectés (auth.uid() non nul, execute retiré à anon/public).
+-- 2. enforce_founder_50_listing_limit : au-delà de la limite de la formule, consomme 1 crédit
+--    de pro_listing_credit_wallet (annonce achetée à l'unité) ; sans crédit, message invitant à en acheter une.
+-- 3. pro_subscription_plans : pro_50.founder_eligible = false (seule la formule 20 est gratuite 12 mois).
