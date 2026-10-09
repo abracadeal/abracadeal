@@ -1900,3 +1900,15 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 #publishForm.publish-step-2 .form-grid > :not(#publishPackArea){display:none!important}
 .publish-photo-option{margin-top:14px}
 .publish-photo-option-title{font-weight:800;margin-bottom:8px}
+
+/* Fix 09/10/2026 : <=760px (telephone, tablette portrait), la regle "garder uniquement le Boost"
+   masquait aussi Modifier / Supprimer sur les vignettes du proprietaire, et la fiche detaillee ne
+   propose pas Modifier aux particuliers : impossible de modifier son annonce (signale par Anthony).
+   On reaffiche ces deux boutons, cote a cote, sous la vignette. */
+@media(max-width:760px){
+  #resultats .ad-actions{flex-wrap:wrap!important;gap:5px!important}
+  #resultats .ad-actions .mini-btn[onclick*="editAd("],
+  #resultats .ad-actions .mini-btn[onclick*="deleteAd("]{
+    display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:1 1 0!important;min-width:0!important;
+  }
+}
