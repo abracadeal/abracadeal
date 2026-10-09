@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://abracadeal.fr/</loc><lastmod>2026-10-08</lastmod><changefreq>daily</changefreq><priority>1.0</priority></url>
-  <url><loc>https://abracadeal.fr/vacances.html</loc><lastmod>2026-10-08</lastmod><changefreq>weekly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://abracadeal.fr/pro-fondateur.html</loc><lastmod>2026-10-08</lastmod><changefreq>weekly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://abracadeal.fr/partager-particuliers.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://abracadeal.fr/aide.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://abracadeal.fr/securite.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://abracadeal.fr/regles-diffusion.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://abracadeal.fr/classement-annonces.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://abracadeal.fr/contact.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.4</priority></url>
-  <url><loc>https://abracadeal.fr/cgu.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://abracadeal.fr/mentions-legales.html</loc><lastmod>2026-10-08</lastmod><changefreq>yearly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://abracadeal.fr/confidentialite.html</loc><lastmod>2026-10-08</lastmod><changefreq>monthly</changefreq><priority>0.3</priority></url>
-  <url><loc>https://abracadeal.fr/cookies.html</loc><lastmod>2026-10-08</lastmod><changefreq>yearly</changefreq><priority>0.2</priority></url>
-</urlset>
+<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <sitemap><loc>https://abracadeal.fr/sitemap-pages.xml</loc></sitemap>
+  <sitemap><loc>https://abracadeal.fr/sitemap-annonces.xml</loc></sitemap>
+</sitemapindex>

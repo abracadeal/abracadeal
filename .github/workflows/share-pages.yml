@@ -1,4 +1,4 @@
-# Pages de partage des annonces (apercu WhatsApp/Facebook avec la photo de l'annonce).
+# Pages publiques des annonces (referencement Google + apercu WhatsApp/Facebook) et sitemap-annonces.xml.
 # Regenere annonce/<id>/ toutes les 10 minutes environ (scripts/build_share_pages.py).
 name: Pages de partage des annonces
 
@@ -30,7 +30,7 @@ jobs:
       - run: python scripts/build_share_pages.py
       - name: Publier les changements
         run: |
-          git add -A annonce
+          git add -A annonce sitemap-annonces.xml
           if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
           git config user.name "abracadeal-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
