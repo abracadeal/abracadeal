@@ -20,6 +20,30 @@
   if (!isTablet) return;
 
   document.documentElement.classList.add('abraca-tablet-as-mobile');
+  /* Taille tablette (vertical ET horizontal) : la page recoit une largeur de mise en page
+     reduite via la balise viewport, le navigateur agrandit tout proportionnellement.
+     Recalcule a chaque rotation. Telephone et desktop : non concernes. */
+  var PORTRAIT_SCALE = 1.35, LANDSCAPE_SCALE = 1.2;
+  function fitViewport(){
+    var meta = document.querySelector('meta[name="viewport"]');
+    if (!meta){
+      meta = document.createElement('meta');
+      meta.name = 'viewport';
+      (document.head || document.documentElement).appendChild(meta);
+    }
+    var landscape = nativeMatchMedia('(orientation:landscape)').matches;
+    var screenW = landscape ? lw : sw;
+    var w = landscape
+      ? Math.max(760, Math.min(1140, Math.round(screenW / LANDSCAPE_SCALE)))
+      : Math.max(560, Math.min(760, Math.round(screenW / PORTRAIT_SCALE)));
+    var content = 'width=' + w + ', viewport-fit=cover';
+    if (meta.getAttribute('content') !== content) meta.setAttribute('content', content);
+  }
+  if (document.head) fitViewport();
+  else document.addEventListener('readystatechange', fitViewport, {once:true});
+  document.addEventListener('DOMContentLoaded', fitViewport);
+  window.addEventListener('orientationchange', function(){ setTimeout(fitViewport, 60); });
+  window.addEventListener('resize', fitViewport);
 
   var TRUE_Q = '(min-width:0px)', FALSE_Q = '(max-width:0px)';
   var WIDTH_RE = /\(\s*(min|max)-width\s*:\s*([\d.]+)px\s*\)/gi;
