@@ -75,7 +75,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20261005-1">
 
-<link rel="stylesheet" href="assets/index-overrides.css?v=20261009-thumb-fit">
+<link rel="stylesheet" href="assets/index-overrides.css?v=20261009-publish-steps">
 
 
 
@@ -973,7 +973,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
             <label class="phone-choice"><input id="adShowPhone" type="checkbox" checked><span><strong>Afficher mon numéro aux membres connectés</strong><br><span class="note">Vous pouvez décocher cette option : les acheteurs devront alors utiliser uniquement la messagerie Abracadeal.</span></span></label>
           </div>
           <div class="form-row full" id="publishPackArea">
-            <label>Publication et options facultatives</label>
+            <label>Options de visibilité <span class="note">(facultatives, cumulables)</span></label>
             <div id="publishPackPicker" class="pack-picker"></div>
             <div class="note" id="publishPackHelp"></div>
           </div>
@@ -995,11 +995,16 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
                 <div class="note photo-help abraca-default-photo-note">Pour de meilleurs résultats, ajoutez au moins une photo à votre annonce. Sans photo, Abracadeal affichera automatiquement une image par défaut.</div>
               </div>
             </div>
+            <div class="publish-photo-option hidden">
+              <div class="publish-photo-option-title">Besoin de plus de photos ? <span class="note">(facultatif)</span></div>
+              <div id="publishPhotoOptionPicker" class="pack-picker"></div>
+            </div>
           </div>
           </div>
         </div>
         <div class="form-actions">
           <a class="btn ghost" data-close="publishModal" href="#">Annuler</a>
+          <button class="btn ghost hidden" id="publishBackBtn" type="button">← Retour</button>
           <button class="btn primary" id="publishSubmitBtn" type="submit">Mettre en ligne</button>
           <div id="publishStatus" class="publish-status" aria-live="polite"></div>
         </div>
@@ -1748,7 +1753,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <div class="toast" id="toast"></div>
 
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
-<script src="assets/index-main.js?v=20261009-publish-options"></script>
+<script src="assets/index-main.js?v=20261009-publish-steps"></script>
 <script>
 document.addEventListener('DOMContentLoaded',function(){
   document.querySelectorAll('a[data-info-modal]').forEach(function(link){

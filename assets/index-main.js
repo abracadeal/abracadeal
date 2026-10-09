@@ -39,7 +39,7 @@ const $$=s=>[...document.querySelectorAll(s)];
 let professionalSignupViewerId=null;
 let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false;
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
-let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;
+let selectedPublishPack='free', selectedPublishOffers=new Set(), publishStep=1, publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;
 let publishCommerceOffers=[], publishOffersUser=null, publishOffersLoading=false;
 let promoSelectedPack=null, promoPreselectedListingId=null;
 let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
@@ -1928,7 +1928,7 @@ function toggleVehicleFields(){ updatePublishFields(); }
 
 $('#adCategory').addEventListener('change', ()=>{
   populateSubcategories('');
-  selectedPublishPack='free';renderPublishPackPicker();
+  selectedPublishPack='free';selectedPublishOffers.clear();renderPublishPackPicker();
   updatePublishFields();
 });
 $('#vehicleSubcategory').addEventListener('change', updatePublishFields);
@@ -1989,20 +1989,52 @@ async function loadPublishCommerceOffers(){
     publishOffersLoading=false;renderPublishPackPicker();
   }
 }
+// Fix 09/10/2026 (demande Anthony) : publication en 2 etapes. Etape 1 = formulaire, avec l'option
+// "Photos supplementaires" pres des photos ; "Continuer" ouvre l'etape 2 = options de visibilite
+// (A la une, Urgent, Boosts). Plusieurs options cumulables, une seule par type (une seule duree
+// "A la une"), total calcule et paye en une fois (create-commerce-order, offer_codes).
+function publishMoney(c){return (Number(c)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' € '+(accountAudience()==='professionnel'?'HT':'TTC')}
+function publishChosenOffers(){return publishCommerceOffers.filter(o=>selectedPublishOffers.has(o.code)&&publishOfferMatches(o))}
+function publishStepsActive(){return !editingId&&!!currentUser&&publishCommerceOffers.some(o=>publishOfferMatches(o)&&o.offer_type!=='photo_option')}
+function togglePublishOffer(code){
+  if(code==='free'){publishCommerceOffers.forEach(o=>{if(o.offer_type!=='photo_option')selectedPublishOffers.delete(o.code)});renderPublishPackPicker();return}
+  const offer=publishCommerceOffers.find(o=>o.code===code);if(!offer)return;
+  if(selectedPublishOffers.has(code))selectedPublishOffers.delete(code);
+  else{publishCommerceOffers.forEach(o=>{if(o.offer_type===offer.offer_type)selectedPublishOffers.delete(o.code)});selectedPublishOffers.add(code)}
+  renderPublishPackPicker();
+}
+function updatePublishStepUi(){
+  const form=$('#publishForm');if(!form)return;
+  const steps=publishStepsActive();if(!steps)publishStep=1;
+  const step2=steps&&publishStep===2;
+  form.classList.toggle('publish-step-2',step2);
+  if(!editingId)$('#publishPackArea')?.classList.toggle('hidden',!step2);
+  $('#publishBackBtn')?.classList.toggle('hidden',!step2);
+  const btn=$('#publishSubmitBtn');
+  if(btn&&!editingId&&!btn.disabled){
+    const chosen=publishChosenOffers(),total=chosen.reduce((t,o)=>t+Number(o.amount_cents),0);
+    btn.textContent=steps&&publishStep===1?'Continuer':(chosen.length?'Mettre en ligne et payer '+publishMoney(total):'Mettre en ligne');
+  }
+}
 function renderPublishPackPicker(){
   const picker=$('#publishPackPicker'),help=$('#publishPackHelp');if(!picker)return;
   const offers=publishCommerceOffers.filter(o=>publishOfferMatches(o));
-  if(selectedPublishPack!=='free'&&!offers.some(o=>o.code===selectedPublishPack))selectedPublishPack='free';
-  const freeLimit=basePhotoLimitForAudience();
-  const money=c=>(Number(c)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' € '+(accountAudience()==='professionnel'?'HT':'TTC');
+  [...selectedPublishOffers].forEach(c=>{if(!offers.some(o=>o.code===c))selectedPublishOffers.delete(c)});
   const optionDescription=o=>o.offer_type==='photo_option'?'Limite augmentée après paiement. Ajoutez ensuite les photos dans Modifier.':o.offer_type==='boost_pack'?'5 remontées ponctuelles · crédits sans expiration':o.offer_type==='featured'?'Mise en avant pendant '+o.duration_days+' jours':'Badge Urgent pendant '+o.duration_days+' jours';
-  const card=(code,title,price,description)=>'<button type="button" class="pack-card'+(selectedPublishPack===code?' selected':'')+'" data-publish-pack="'+esc(code)+'" aria-pressed="'+(selectedPublishPack===code)+'"><div class="pack-card-title">'+esc(title)+'</div><div class="pack-card-price">'+price+'</div><div class="pack-card-desc">'+esc(description)+'</div></button>';
-  picker.innerHTML=card('free','Sans option payante','Incluse','Jusqu’à '+freeLimit+' photos incluses')+offers.map(o=>card(o.code,o.label,money(o.amount_cents),optionDescription(o))).join('');
-  picker.querySelectorAll('[data-publish-pack]').forEach(button=>button.addEventListener('click',()=>{
-    selectedPublishPack=button.dataset.publishPack;renderPublishPackPicker();
-  }));
-  const chosen=offers.find(o=>o.code===selectedPublishPack);
-  if(help)help.textContent=chosen?'Option choisie : '+chosen.label+' — '+money(chosen.amount_cents)+'. Après vérification de l’annonce, vous confirmerez le paiement sur la page suivante.':publishOffersUser===currentUser?.id?'Options facultatives : choisissez une option ou publiez sans option payante.':'Chargement des options et de leurs tarifs…';
+  const card=(code,title,price,description,selected)=>'<button type="button" class="pack-card'+(selected?' selected':'')+'" data-publish-pack="'+esc(code)+'" aria-pressed="'+selected+'"><div class="pack-card-title">'+esc(title)+'</div><div class="pack-card-price">'+price+'</div><div class="pack-card-desc">'+esc(description)+'</div></button>';
+  const photoOffers=offers.filter(o=>o.offer_type==='photo_option'),packOffers=offers.filter(o=>o.offer_type!=='photo_option');
+  const photoPicker=$('#publishPhotoOptionPicker');
+  if(photoPicker){
+    photoPicker.closest('.publish-photo-option')?.classList.toggle('hidden',!photoOffers.length||!!editingId);
+    photoPicker.innerHTML=photoOffers.map(o=>card(o.code,o.label,publishMoney(o.amount_cents),optionDescription(o),selectedPublishOffers.has(o.code))).join('');
+  }
+  picker.innerHTML=card('free','Sans option payante','Incluse','Publication standard',!packOffers.some(o=>selectedPublishOffers.has(o.code)))+packOffers.map(o=>card(o.code,o.label,publishMoney(o.amount_cents),optionDescription(o),selectedPublishOffers.has(o.code))).join('');
+  document.querySelectorAll('#publishPackPicker [data-publish-pack],#publishPhotoOptionPicker [data-publish-pack]').forEach(button=>button.addEventListener('click',()=>togglePublishOffer(button.dataset.publishPack)));
+  const chosen=publishChosenOffers(),total=chosen.reduce((t,o)=>t+Number(o.amount_cents),0);
+  if(help)help.innerHTML=chosen.length
+    ?'<strong>Votre sélection :</strong> '+chosen.map(o=>esc(o.label)+' ('+publishMoney(o.amount_cents)+')').join(' + ')+'<br><strong>Total : '+publishMoney(total)+'</strong> · un seul paiement. Après vérification de l’annonce, vous confirmerez le paiement sur la page suivante.'
+    :publishOffersUser===currentUser?.id?'Options cumulables (une seule durée « À la une »). Vous pouvez aussi publier sans option payante.':'Chargement des options et de leurs tarifs…';
+  updatePublishStepUi();
   setPublishPhotoLimit();
   if(currentUser&&!publishOffersLoading&&publishOffersUser!==currentUser.id)loadPublishCommerceOffers();
 }
@@ -2158,7 +2190,7 @@ function openPromotionForListing(id){
 }
 
 function resetPublishForm(){
-  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
+  $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; selectedPublishPack='free'; selectedPublishOffers.clear(); publishStep=1; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
   editingOriginalOwnerId=null; editingOriginalStatus=null; editingOriginalSellerType=null; editingOriginalPhotoLimit=null;
   hideLocationSuggestions();
   $('#photoPreview').innerHTML=''; renderPublishPackPicker(); renderSelectedPhotos();
@@ -2166,6 +2198,7 @@ function resetPublishForm(){
   $('#publishModal .modal-head h2').textContent='Publier une annonce';
   if($('#publishSubmitBtn')) $('#publishSubmitBtn').textContent='Mettre en ligne';
   if($('#publishStatus')) $('#publishStatus').textContent=''; populateSubcategories(''); updatePublishFields(); syncPublishVisibility();
+  updatePublishStepUi();
 }
 $$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
   e.preventDefault();
@@ -2410,6 +2443,7 @@ async function removePhotoPaths(paths){
 $('#publishForm').addEventListener('submit',async e=>{
   e.preventDefault();
   if(!currentUser){toast('Connexion requise');return}
+  if(!editingId&&publishStepsActive()&&publishStep===1){publishStep=2;renderPublishPackPicker();$('#publishModal .modal-body')?.scrollTo({top:0,behavior:'smooth'});return}
 
   const requestedVisibility=$('#listingVisibility')?.value==='pro'?'pro':'public';
   if(requestedVisibility==='pro'&&currentProfile?.is_admin!==true){
@@ -2537,9 +2571,11 @@ $('#publishForm').addEventListener('submit',async e=>{
     const autoPublished=moderationResult?.status==='active' || moderationResult?.auto_published===true;
     if(status) status.textContent=wasEditing?'Modifications enregistrées ✓':(autoPublished?'Annonce vérifiée et mise en ligne ✓':'Annonce envoyée pour vérification ✓');
     await loadAds();
-    if(!wasEditing && selectedPublishPack!=='free' && listingId){
+    const paidOfferCodes=publishChosenOffers().map(o=>o.code);
+    if(!wasEditing && paidOfferCodes.length && listingId){
       if(status) status.textContent='Ouverture du paiement sécurisé…';
-      location.href='options-annonce.html?options=1&listing='+encodeURIComponent(listingId)+'&offer='+encodeURIComponent(selectedPublishPack);
+      window.showPaymentLoading?.('Préparation du paiement…','Votre annonce est enregistrée. Ouverture de la page de paiement, merci de patienter.');
+      location.href='options-annonce.html?options=1&listing='+encodeURIComponent(listingId)+'&offers='+encodeURIComponent(paidOfferCodes.join(','));
       return;
     }
     closeModal('publishModal');
@@ -5447,3 +5483,5 @@ cropFrame?.addEventListener('pointermove',e=>{
 function endCropPointer(e){proCropState.pointers.delete(e.pointerId);proCropState.pinch=null;const remain=[...proCropState.pointers.values()][0];proCropState.drag=remain?{px:remain.x,py:remain.y,x:proCropState.x,y:proCropState.y}:null;}
 cropFrame?.addEventListener('pointerup',endCropPointer);cropFrame?.addEventListener('pointercancel',endCropPointer);
 window.addEventListener('resize',()=>{if(!document.getElementById('proCropModal')?.classList.contains('hidden')&&proCropState.img){const r=cropFrame.getBoundingClientRect();proCropState.minScale=Math.max(r.width/proCropState.img.naturalWidth,r.height/proCropState.img.naturalHeight);setProCropScale(Math.max(proCropState.scale,proCropState.minScale));}});
+
+document.getElementById('publishBackBtn')?.addEventListener('click',()=>{publishStep=1;renderPublishPackPicker();$('#publishModal .modal-body')?.scrollTo({top:0,behavior:'smooth'});});
