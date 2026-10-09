@@ -3,3 +3,8 @@
 -- 2. enforce_founder_50_listing_limit : au-delà de la limite de la formule, consomme 1 crédit
 --    de pro_listing_credit_wallet (annonce achetée à l'unité) ; sans crédit, message invitant à en acheter une.
 -- 3. pro_subscription_plans : pro_50.founder_eligible = false (seule la formule 20 est gratuite 12 mois).
+-- Correction même jour (règle confirmée par Anthony) :
+-- Offre Fondateurs = formules 20 ET 50 gratuites 12 mois (pro_50.founder_eligible remis à true).
+-- Fondateur 20 qui dépasse : passer en 50 Fondateurs (fonction change-pro-subscription-plan, garde gratuité et -50 %)
+--   ou acheter l'annonce supplémentaire à l'unité. Fondateur 50 qui dépasse : annonce à l'unité (pas de 100 Fondateurs).
+-- Migrations : founder_50_restored_and_limit_message, founder_limit_message_by_plan.
