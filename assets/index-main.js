@@ -40,6 +40,7 @@ let professionalSignupViewerId=null;
 let currentUser=null, currentProfile=null, allAds=[], selectedPhotos=[], editingId=null, existingPhotoPaths=[], pendingNoPhotoConfirm=false;
 let editingOriginalOwnerId=null, editingOriginalStatus=null, editingOriginalSellerType=null, editingOriginalPhotoLimit=null;
 let selectedPublishPack='free', publishPhotoLimit=3, proPaidPhotoAllowance=false, proPhotoAllowanceUser=null, proPlanPhotoLimit=null;
+let publishCommerceOffers=[], publishOffersUser=null, publishOffersLoading=false;
 let promoSelectedPack=null, promoPreselectedListingId=null;
 let proBoostWalletState={7:0,30:0}, boostCreditListingId=null;
 const PROMOTION_PACKS={};
@@ -1927,6 +1928,7 @@ function toggleVehicleFields(){ updatePublishFields(); }
 
 $('#adCategory').addEventListener('change', ()=>{
   populateSubcategories('');
+  selectedPublishPack='free';renderPublishPackPicker();
   updatePublishFields();
 });
 $('#vehicleSubcategory').addEventListener('change', updatePublishFields);
@@ -1966,13 +1968,43 @@ async function refreshProPhotoAllowance(){
   const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
+function publishOfferMatches(o,audience=accountAudience(),category=$('#adCategory')?.value){
+  if(o.audience!==audience||!['featured','urgent','boost_pack','photo_option'].includes(o.offer_type))return false;
+  if(o.offer_type!=='photo_option')return true;
+  const categories={photo_auto_moto_15:['vehicules'],photo_immo_15:['immobilier'],photo_lifestyle_10:['hightech','maison','mode'],photo_services_emploi_10:['services','emploi']};
+  return (categories[o.code]||[]).includes(category);
+}
+async function loadPublishCommerceOffers(){
+  if(!currentUser||publishOffersLoading||publishOffersUser===currentUser.id)return;
+  const uid=currentUser.id;publishOffersLoading=true;
+  try{
+    const {data,error}=await sb.rpc('get_my_commerce_pricing');
+    if(error)throw error;
+    if(currentUser?.id!==uid)return;
+    publishCommerceOffers=data||[];publishOffersUser=uid;
+  }catch(error){
+    console.warn('Options de publication indisponibles',error);
+    publishOffersUser=uid;
+  }finally{
+    publishOffersLoading=false;renderPublishPackPicker();
+  }
+}
 function renderPublishPackPicker(){
   const picker=$('#publishPackPicker'),help=$('#publishPackHelp');if(!picker)return;
-  selectedPublishPack='free';
+  const offers=publishCommerceOffers.filter(o=>publishOfferMatches(o));
+  if(selectedPublishPack!=='free'&&!offers.some(o=>o.code===selectedPublishPack))selectedPublishPack='free';
   const freeLimit=basePhotoLimitForAudience();
-  picker.innerHTML=`<button type="button" class="pack-card selected" data-publish-pack="free"><div class="pack-card-title">Publication standard</div><div class="pack-card-price">Incluse</div><div class="pack-card-desc">Jusqu’à ${freeLimit} photo${freeLimit>1?'s':''} · sans option payante</div></button>`;
-  if(help)help.innerHTML='Les options photos supplémentaires, Urgent, À la une et Boost sont disponibles depuis <a href="options-annonce.html?options=1">Options de mes annonces</a>.';
+  const money=c=>(Number(c)/100).toLocaleString('fr-FR',{minimumFractionDigits:2,maximumFractionDigits:2})+' € '+(accountAudience()==='professionnel'?'HT':'TTC');
+  const optionDescription=o=>o.offer_type==='photo_option'?'Limite augmentée après paiement. Ajoutez ensuite les photos dans Modifier.':o.offer_type==='boost_pack'?'5 remontées ponctuelles · crédits sans expiration':o.offer_type==='featured'?'Mise en avant pendant '+o.duration_days+' jours':'Badge Urgent pendant '+o.duration_days+' jours';
+  const card=(code,title,price,description)=>'<button type="button" class="pack-card'+(selectedPublishPack===code?' selected':'')+'" data-publish-pack="'+esc(code)+'" aria-pressed="'+(selectedPublishPack===code)+'"><div class="pack-card-title">'+esc(title)+'</div><div class="pack-card-price">'+price+'</div><div class="pack-card-desc">'+esc(description)+'</div></button>';
+  picker.innerHTML=card('free','Sans option payante','Incluse','Jusqu’à '+freeLimit+' photos incluses')+offers.map(o=>card(o.code,o.label,money(o.amount_cents),optionDescription(o))).join('');
+  picker.querySelectorAll('[data-publish-pack]').forEach(button=>button.addEventListener('click',()=>{
+    selectedPublishPack=button.dataset.publishPack;renderPublishPackPicker();
+  }));
+  const chosen=offers.find(o=>o.code===selectedPublishPack);
+  if(help)help.textContent=chosen?'Option choisie : '+chosen.label+' — '+money(chosen.amount_cents)+'. Après vérification de l’annonce, vous confirmerez le paiement sur la page suivante.':publishOffersUser===currentUser?.id?'Options facultatives : choisissez une option ou publiez sans option payante.':'Chargement des options et de leurs tarifs…';
   setPublishPhotoLimit();
+  if(currentUser&&!publishOffersLoading&&publishOffersUser!==currentUser.id)loadPublishCommerceOffers();
 }
 function isProBoostCreditPack(code){return ['pro_5_7d','pro_10_7d','pro_5_30d','pro_10_30d'].includes(code)}
 async function createPromotionOrder(){throw new Error('Tarification Abracadeal en cours de refonte.');}
@@ -2507,8 +2539,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     await loadAds();
     if(!wasEditing && selectedPublishPack!=='free' && listingId){
       if(status) status.textContent='Ouverture du paiement sécurisé…';
-      const checkoutUrl=await createPromotionOrder(selectedPublishPack,[listingId]);
-      location.href=checkoutUrl;
+      location.href='options-annonce.html?options=1&listing='+encodeURIComponent(listingId)+'&offer='+encodeURIComponent(selectedPublishPack);
       return;
     }
     closeModal('publishModal');
