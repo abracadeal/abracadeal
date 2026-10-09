@@ -16,9 +16,7 @@ Vos annonces peuvent être importées directement par flux, CSV ou XML, sans res
 
 Sans engagement de durée : pas de contrat de 12 mois. Vous restez parce que ça marche, pas parce que vous êtes engagé, et vous résiliez en un clic depuis votre espace.
 
-La tarification Abracadeal Pro est actuellement en cours de refonte. Aucun ancien forfait n’est proposé pour le moment.
-
-Les nouveaux tarifs et quotas seront communiqués avant toute activation payante.
+Les tarifs détaillés sont visibles dès la création de votre compte Pro.
 
 Découvrir l’offre Fondateurs :
 https://abracadeal.fr/pro-fondateur.html
