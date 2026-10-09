@@ -1969,7 +1969,7 @@ async function refreshProPhotoAllowance(){
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
 function publishOfferMatches(o,audience=accountAudience(),category=$('#adCategory')?.value){
-  if(o.audience!==audience||!['featured','urgent','boost_pack','photo_option'].includes(o.offer_type))return false;
+  if(o.audience!==audience||!['featured','urgent','boost_pack','photo_option','daily_bump'].includes(o.offer_type))return false;
   if(o.offer_type!=='photo_option')return true;
   const categories={photo_auto_moto_15:['vehicules'],photo_immo_15:['immobilier'],photo_lifestyle_10:['hightech','maison','mode'],photo_services_emploi_10:['services','emploi']};
   return (categories[o.code]||[]).includes(category);
@@ -2020,7 +2020,7 @@ function renderPublishPackPicker(){
   const picker=$('#publishPackPicker'),help=$('#publishPackHelp');if(!picker)return;
   const offers=publishCommerceOffers.filter(o=>publishOfferMatches(o));
   [...selectedPublishOffers].forEach(c=>{if(!offers.some(o=>o.code===c))selectedPublishOffers.delete(c)});
-  const optionDescription=o=>o.offer_type==='photo_option'?'Limite augmentée après paiement. Ajoutez ensuite les photos dans Modifier.':o.offer_type==='boost_pack'?'5 remontées ponctuelles · crédits sans expiration':o.offer_type==='featured'?'Mise en avant pendant '+o.duration_days+' jours':'Badge Urgent pendant '+o.duration_days+' jours';
+  const optionDescription=o=>o.offer_type==='photo_option'?'Limite augmentée après paiement. Ajoutez ensuite les photos dans Modifier.':o.offer_type==='boost_pack'?'5 remontées ponctuelles · crédits sans expiration':o.offer_type==='featured'?'Mise en avant pendant '+(Number(o.duration_days)===1?'24 h':o.duration_days+' jours'):o.offer_type==='daily_bump'?'Remonte en tête des résultats chaque matin pendant '+o.duration_days+' jours':'Badge Urgent pendant '+o.duration_days+' jours';
   const card=(code,title,price,description,selected)=>'<button type="button" class="pack-card'+(selected?' selected':'')+'" data-publish-pack="'+esc(code)+'" aria-pressed="'+selected+'"><div class="pack-card-title">'+esc(title)+'</div><div class="pack-card-price">'+price+'</div><div class="pack-card-desc">'+esc(description)+'</div></button>';
   const photoOffers=offers.filter(o=>o.offer_type==='photo_option'),packOffers=offers.filter(o=>o.offer_type!=='photo_option');
   const photoPicker=$('#publishPhotoOptionPicker');
