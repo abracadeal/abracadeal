@@ -18,3 +18,6 @@
 -- À la une Pro aligné sur particulier (HT) : 24 h 6,99 (nouvelle offre pro_featured_1), 7 j 19,99, 14 j 29,99, 30 j 39,99 ; anciens prix/produits archivés.
 -- Rareté À la une : migration featured_slots_per_category_department (5 places par catégorie et département,
 --   réservation 30 min pendant paiement) ; contrôle dans create-commerce-order v14 ; affichage « Plus que X places » sur options-annonce.html.
+-- Prospection (aucune donnée dans ce dépôt) : tables privées private.sirene_etab / sirene_queue (registre officiel),
+--   private.prospect_leads / osm_queue (OpenStreetMap, toute la France), fonction prospect-email-crawler
+--   (relève l'e-mail publié sur le site du pro), tâches cron abracadeal-osm-france et abracadeal-prospect-crawler.
