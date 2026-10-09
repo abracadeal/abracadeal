@@ -4,10 +4,11 @@ const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
 
-const DEFAULT_SUBJECT='Abracadeal — offre Fondateurs';
+const DEFAULT_SUBJECT='Marre de payer trop cher vos annonces, {{societe}} ?';
 const DEFAULT_BODY=`Bonjour,
 
 Je me permets de vous contacter au sujet de {{societe}}.
+Marre de payer trop cher ? Abracadeal, l’associé qui fait du bien à vos comptes.
 Abracadeal est une nouvelle plateforme de petites annonces ouverte aux particuliers comme aux professionnels.
 
 Pour les petits garages qui souhaitent tester avec une dizaine ou une vingtaine de véhicules, les 500 premiers professionnels inscrits bénéficient de jusqu’à 20 annonces actives gratuites pendant 12 mois, avec 15 photos par annonce.
@@ -255,10 +256,10 @@ async function boot(){
   $('app').style.display='block';$('lock').style.display='none';
 
   $('googleClientId').value=localStorage.getItem('abr_google_client_id')||'';
-  if(localStorage.getItem('abr_prospect_template_version')!=='5'){
+  if(localStorage.getItem('abr_prospect_template_version')!=='6'){
     localStorage.setItem('abr_prospect_subject',DEFAULT_SUBJECT);
     localStorage.setItem('abr_prospect_body',DEFAULT_BODY);
-    localStorage.setItem('abr_prospect_template_version','5');
+    localStorage.setItem('abr_prospect_template_version','6');
   }
   $('subjectTpl').value=localStorage.getItem('abr_prospect_subject')||DEFAULT_SUBJECT;
   $('bodyTpl').value=localStorage.getItem('abr_prospect_body')||DEFAULT_BODY;
