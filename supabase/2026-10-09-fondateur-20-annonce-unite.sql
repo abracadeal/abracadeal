@@ -12,3 +12,4 @@
 -- hightech_10 29,90→29,99 (price_1UOdrZ1DkwXb4U3JYYgqxalq) ; hightech_30 abonnement 29,90→29,99/mois (price_1UOdrb1DkwXb4U3JuIHOjNKO)
 -- hightech_pack30 69,90→69,99 (price_1UOdrd1DkwXb4U3JAFxpzAJI) ; maison_10 39,90→39,99 (price_1UOdre1DkwXb4U3Jb2NUzFhV)
 -- maison_pack30 89,90→89,99 (price_1UOdrg1DkwXb4U3JdEjIvkv5). commerce_offers + pro_subscription_plans mis à jour.
+-- pro_urgent_30 1,49→1,99 HT (price_1UOdwC1DkwXb4U3J49RKiuVK), ancien prix archivé.
