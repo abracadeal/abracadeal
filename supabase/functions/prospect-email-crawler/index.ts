@@ -72,7 +72,10 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const { data: key } = await admin.from("integration_secrets").select("secret_value").eq("name", "prospect_crawler_internal").single();
   if (!key?.secret_value || req.headers.get("x-internal-key") !== key.secret_value) return json({ error: "Non autorisé" }, 401);
-  const { data: rows, error } = await admin.rpc("prospect_crawler_next", { p_limit: 12 });
+  const body = await req.json().catch(() => ({}));
+  // project "eps" : prospection Elite Prestige Services, données séparées (private.eps_leads).
+  const pre = body?.project === "eps" ? "eps_crawler" : "prospect_crawler";
+  const { data: rows, error } = await admin.rpc(pre + "_next", { p_limit: 12 });
   if (error) return json({ error: error.message }, 500);
   const results: Record<string, number> = {};
   const queue = [...(rows || [])];
@@ -82,7 +85,7 @@ Deno.serve(async (req) => {
       let res = { status: "error", email: null as string | null, phone: null as string | null };
       try { res = await crawl(String(r.site || "")); } catch { /* garde error */ }
       results[res.status] = (results[res.status] || 0) + 1;
-      await admin.rpc("prospect_crawler_save", { p_id: r.id, p_email: res.email, p_status: res.status === "error" ? "todo" : res.status, p_phone: res.phone });
+      await admin.rpc(pre + "_save", { p_id: r.id, p_email: res.email, p_status: res.status === "error" ? "todo" : res.status, p_phone: res.phone });
     }
   };
   await Promise.all([worker(), worker(), worker(), worker()]);
