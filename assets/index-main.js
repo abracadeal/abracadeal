@@ -4455,6 +4455,7 @@ async function loadConversationMessages(scrollToBottom=true){
   const msgs=data||[];
   thread.innerHTML=msgs.length?msgs.map(m=>`<div class="message-bubble ${m.sender_id===currentUser.id?'mine':''}">${esc(m.body)}<span class="message-time">${esc(formatMessageTime(m.created_at))}</span></div>`).join(''):'<div class="message-placeholder">Aucun message pour le moment. Écris le premier message.</div>';
   if(scrollToBottom) thread.scrollTop=thread.scrollHeight;
+  if(typeof window.abracaLeadPanelUpdate==='function') window.abracaLeadPanelUpdate(msgs);
   await refreshUnreadMessages();
 }
 window.startMessageForListing=async(listingId)=>{
@@ -4499,6 +4500,7 @@ $('#messageForm')?.addEventListener('submit',async e=>{
   const {error}=await sb.rpc('send_message',{p_conversation_id:currentConversationId,p_body:body});
   if(btn){btn.disabled=false;btn.textContent='Envoyer'}
   if(error){toast(error.message||'Message non envoyé');return;}
+  if(typeof window.abracaLeadSave==='function') await window.abracaLeadSave(currentConversationId);
   input.value='';
   input.style.height='';
   await loadConversationMessages(true);
