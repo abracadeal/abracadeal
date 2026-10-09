@@ -14,6 +14,8 @@ Pour les petits garages qui souhaitent tester avec une dizaine ou une vingtaine 
 
 Vos annonces peuvent être importées directement par flux, CSV ou XML, sans ressaisie.
 
+Sans engagement de durée : pas de contrat de 12 mois. Vous restez parce que ça marche, pas parce que vous êtes engagé, et vous résiliez en un clic depuis votre espace.
+
 La tarification Abracadeal Pro est actuellement en cours de refonte. Aucun ancien forfait n’est proposé pour le moment.
 
 Les nouveaux tarifs et quotas seront communiqués avant toute activation payante.
