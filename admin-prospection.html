@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="assets/admin-prospection.css?v=20261002-1">
+<link rel="stylesheet" href="assets/admin-prospection.css?v=20261010-mailer">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3">
@@ -28,11 +28,11 @@
 
 <main class="wrap" id="app" style="display:none">
   <h1>Prospection Pros</h1>
-  <p class="sub">Outil interne Abracadeal : import du fichier prospects, personnalisation automatique, envoi manuel par petits lots via Gmail et liste d’opposition. Aucun envoi ne démarre sans action de ta part.</p>
+  <p class="sub">Outil interne Abracadeal : import du fichier prospects, personnalisation automatique, envoi automatique depuis tes adresses Abracadeal (verrouillé jusqu’à ton feu vert) et liste d’opposition. Aucun envoi ne démarre sans action de ta part.</p>
 
   <section class="grid4">
     <div class="metric"><span>Prospects</span><strong id="mTotal">0</strong></div>
-    <div class="metric"><span>Prêts</span><strong id="mReady">0</strong></div>
+    <div class="metric"><span>En attente (pause + prêts)</span><strong id="mReady">0</strong></div>
     <div class="metric"><span>Envoyés aujourd’hui</span><strong id="mToday">0</strong></div>
     <div class="metric"><span>STOP / opposition</span><strong id="mStop">0</strong></div>
   </section>
@@ -50,8 +50,21 @@
     <div id="importMsg" class="notice" style="display:none"></div>
   </section>
 
+  <section class="card" id="mailerCard">
+    <h2>2. Envoi automatique depuis tes adresses Abracadeal</h2>
+    <div class="small">Les mots de passe sont rangés dans le coffre-fort chiffré de la base : ils ne s’affichent jamais, même ici. « Vérifier » teste seulement la connexion à OVH, sans rien envoyer.</div>
+    <div id="mailboxes"></div>
+    <div class="sep"></div>
+    <div id="goBox" class="notice">Chargement…</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn green" id="goBtn" style="display:none">Donner le feu vert</button>
+      <button class="btn red" id="stopAllBtn" style="display:none">Tout arrêter</button>
+    </div>
+    <div id="mailerMsg" class="notice" style="display:none"></div>
+  </section>
+
   <section class="card">
-    <h2>2. Connecter le Gmail d’envoi</h2>
+    <h2>Option : envoi manuel via Gmail</h2>
     <div class="row">
       <div class="field grow">
         <label>Google OAuth Client ID</label>
@@ -77,7 +90,7 @@
       </div>
     </div>
     <div class="field" style="margin-top:10px">
-      <label>Message texte — variable disponible : {{societe}}</label>
+      <label>Message texte — variables : {{societe}} (nom du pro), {{expediteur}} (adresse qui envoie). Le lien de désinscription est ajouté automatiquement en bas.</label>
       <textarea id="bodyTpl"></textarea>
     </div>
     <div class="row" style="margin-top:10px">
@@ -88,16 +101,15 @@
   </section>
 
   <section class="card">
-    <h2>4. Envoi du lot</h2>
+    <h2>Envoi manuel d’un lot via Gmail</h2>
     <div class="toolbar">
       <button class="btn primary" id="sendBatchBtn">Envoyer le prochain lot</button>
       <button class="btn red" id="stopBatchBtn" disabled>Arrêter le lot</button>
       <select id="categoryFilter" style="width:auto;min-width:170px">
         <option value="">Toutes catégories</option>
-        <option>Auto</option>
-        <option>Moto</option>
-        <option>Immobilier</option>
-        <option>High-Tech</option>
+        <option>Garage / concession auto</option>
+        <option>Concession moto</option>
+        <option>Agence immobilière</option>
       </select>
       <span class="small" id="batchInfo">Maximum 100 e-mails/jour depuis cet outil.</span>
     </div>
@@ -135,6 +147,6 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261002-1"></script>
+<script src="assets/admin-prospection.js?v=20261010-mailer"></script>
 </body>
 </html>

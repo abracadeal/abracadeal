@@ -26,7 +26,7 @@ Les places Fondateurs restantes sont affichées directement sur le site. Si vous
 
 Bien cordialement,
 Service Pros Abracadeal
-contact@abracadeal.fr`;
+{{expediteur}}`;
 
 let gmailToken=null,gmailEmail=null,tokenClient=null,stopRequested=false,sending=false,allRows=[];
 
@@ -35,7 +35,7 @@ function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
 function cleanEmail(v){return String(v||'').trim().toLowerCase()}
 function normKey(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'')}
 function isEmail(v){return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)}
-function tpl(v,row){return String(v||'').replaceAll('{{societe}}',row?.company||'votre entreprise')}
+function tpl(v,row,from){return String(v||'').replaceAll('{{societe}}',row?.company||'votre entreprise').replaceAll('{{expediteur}}',from||gmailEmail||'contact@abracadeal.fr')}
 function show(id,msg,type=''){const el=$(id);el.style.display='block';el.className='notice '+type;el.textContent=msg}
 function localMidnightIso(){const d=new Date();d.setHours(0,0,0,0);return d.toISOString()}
 function safeHeader(v){return String(v||'').replace(/[\r\n]/g,' ').trim()}
@@ -58,7 +58,7 @@ async function logAction(prospectId,action,detail=''){
 async function loadMetrics(){
   const [{count:total},{count:ready},{count:stop},{count:today}]=await Promise.all([
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}),
-    sb.from('prospection_prospects').select('*',{count:'exact',head:true}).eq('status','ready'),
+    sb.from('prospection_prospects').select('*',{count:'exact',head:true}).in('status',['ready','paused']),
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}).eq('status','opted_out'),
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}).eq('status','sent').gte('sent_at',localMidnightIso())
   ]);
@@ -87,7 +87,7 @@ async function loadProspects(){
   </tr>`).join(''):'<tr><td colspan="7" class="muted">Aucun prospect.</td></tr>';
 }
 
-async function refresh(){await Promise.all([loadMetrics(),loadProspects()])}
+async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer()])}
 
 async function markStop(id){
   if(!confirm('Ajouter ce prospect à la liste d’opposition ? Il ne sera plus envoyé.'))return;
@@ -248,6 +248,80 @@ async function sendBatch(){
   await refresh();
 }
 
+
+// ---------- Envoi automatique depuis les boîtes OVH (Zimbra) ----------
+let mailerState=null;
+function fmtDate(v){return v?new Date(v).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):''}
+async function loadMailer(){
+  const {data,error}=await sb.rpc('admin_prospect_mailer_state');
+  if(error){$('goBox').className='notice err';$('goBox').textContent='Erreur : '+error.message;return}
+  mailerState=data;
+  const st=data.settings||{};
+  $('mailboxes').innerHTML=(data.mailboxes||[]).map((m,i)=>{
+    const state=!m.has_password?'<span class="wait">● Mot de passe à enregistrer</span>'
+      :m.verified_at?'<span class="ok">● Connexion vérifiée le '+esc(fmtDate(m.verified_at))+'</span>'
+      :m.last_error?'<span class="ko">● Connexion refusée : '+esc(m.last_error)+'</span>'
+      :'<span class="wait">● Mot de passe enregistré, connexion à vérifier</span>';
+    return `<div class="mbox" data-i="${i}">
+      <div><div class="addr">${esc(m.email)}</div><div class="state">${state}<br><span class="muted">${m.sent_today} envoyé(s) aujourd’hui · ${m.enabled?'active':'désactivée'}</span></div></div>
+      <div class="field"><label>Nom affiché</label><input class="mbName" value="${esc(m.display_name)}"></div>
+      <div class="field" style="min-width:0"><label>Limite / jour</label><input class="mbLimit" type="number" min="1" max="300" value="${m.daily_limit}"></div>
+      <div class="field"><label>${m.has_password?'Changer le mot de passe':'Mot de passe de la boîte'}</label><input class="mbPass" type="password" autocomplete="new-password" placeholder="${m.has_password?'•••••••• (enregistré)':'Mot de passe OVH'}"></div>
+      <div class="acts">
+        <button class="btn primary mbSave">Enregistrer</button>
+        <button class="btn green mbVerify" ${m.has_password?'':'disabled'}>Vérifier la connexion</button>
+        <button class="btn mbTest" ${m.verified_at?'':'disabled'}>M’envoyer un test</button>
+        <button class="btn mbToggle">${m.enabled?'Désactiver cette adresse':'Réactiver cette adresse'}</button>
+      </div></div>`}).join('');
+  document.querySelectorAll('.mbox').forEach(el=>{
+    const m=data.mailboxes[+el.dataset.i];
+    el.querySelector('.mbSave').onclick=()=>saveMailbox(m,el,m.enabled);
+    el.querySelector('.mbToggle').onclick=()=>saveMailbox(m,el,!m.enabled);
+    el.querySelector('.mbVerify').onclick=()=>mailerCall('verify',m.email,'Vérification de la connexion à OVH…');
+    el.querySelector('.mbTest').onclick=()=>{if(confirm('Envoyer UN message de test à ton adresse admin depuis '+m.email+' ?'))mailerCall('test',m.email,'Envoi du message de test…')};
+  });
+  const c=data.counts||{};const waiting=(c.paused||0)+(c.ready||0);
+  const verified=(data.mailboxes||[]).filter(m=>m.enabled&&m.verified_at);
+  const perDay=verified.reduce((a,m)=>a+m.daily_limit,0);
+  if(st.sending_enabled){
+    $('goBox').className='notice ok';
+    $('goBox').innerHTML='🟢 <b>Envoi automatique ACTIF</b> depuis le '+esc(fmtDate(st.enabled_at))+'. Envois étalés de '+st.window_start+' h à '+st.window_end+' h'+(st.weekdays_only?', du lundi au vendredi':'')+', jusqu’à '+perDay+' par jour au total. Il reste '+waiting+' prospects à contacter.';
+    $('goBtn').style.display='none';$('stopAllBtn').style.display='';
+  }else{
+    $('goBox').className='notice';
+    $('goBox').innerHTML='🔒 <b>Envoi automatique verrouillé.</b> '+waiting+' prospects attendent. Rien ne partira tant que tu n’as pas cliqué sur « Donner le feu vert ».'+(verified.length?' Adresses prêtes : '+verified.map(m=>esc(m.email)).join(', ')+' ('+perDay+' e-mails/jour au total).':' Commence par enregistrer et vérifier au moins une adresse.');
+    $('goBtn').style.display='';$('goBtn').disabled=!verified.length;$('stopAllBtn').style.display='none';
+  }
+}
+async function saveMailbox(m,el,enabled){
+  const pass=el.querySelector('.mbPass').value;
+  const {error}=await sb.rpc('admin_prospect_mailbox_save',{p_email:m.email,p_display_name:el.querySelector('.mbName').value,p_daily_limit:Number(el.querySelector('.mbLimit').value)||m.daily_limit,p_enabled:enabled,p_password:pass||null});
+  if(error){show('mailerMsg','Erreur : '+error.message,'err');return}
+  show('mailerMsg',pass?'Enregistré. Mot de passe rangé dans le coffre-fort : clique maintenant sur « Vérifier la connexion ».':'Enregistré.','ok');
+  await loadMailer();
+}
+async function mailerCall(action,mailbox,wait){
+  show('mailerMsg',wait,'');
+  const {data,error}=await sb.functions.invoke('prospect-mailer',{body:{action,mailbox}});
+  if(error){show('mailerMsg','Erreur : '+error.message,'err');return}
+  show('mailerMsg',data?.ok?data.message:'Échec : '+(data?.error||'erreur inconnue'),data?.ok?'ok':'err');
+  await loadMailer();
+}
+async function giveGo(){
+  const v=prompt('Le robot va contacter les prospects en attente, petit à petit, depuis tes adresses vérifiées.\n\nPour confirmer, tape : FEU VERT');
+  if(v===null)return;
+  const {data,error}=await sb.rpc('admin_prospect_go',{p_enable:true,p_confirm:v});
+  if(error){show('mailerMsg','Erreur : '+error.message,'err');return}
+  show('mailerMsg','Feu vert donné. '+(data?.released||0)+' prospect(s) passés de « En pause » à « Prêts ». Les envois démarrent pendant la plage horaire.','ok');
+  await refresh();
+}
+async function stopAll(){
+  if(!confirm('Arrêter immédiatement tous les envois automatiques ?'))return;
+  const {error}=await sb.rpc('admin_prospect_go',{p_enable:false});
+  if(error){show('mailerMsg','Erreur : '+error.message,'err');return}
+  show('mailerMsg','Envois automatiques arrêtés.','ok');await refresh();
+}
+
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.user){$('lock').style.display='block';$('lockText').textContent='Connecte-toi avec ton compte administrateur.';return}
@@ -265,12 +339,20 @@ async function boot(){
   $('bodyTpl').value=localStorage.getItem('abr_prospect_body')||DEFAULT_BODY;
   $('dailyLimit').value=localStorage.getItem('abr_prospect_daily_limit')||'50';
   await refresh();
+  // Le modèle enregistré sur le serveur (utilisé par l'envoi automatique) fait foi
+  if(mailerState?.settings?.subject){$('subjectTpl').value=mailerState.settings.subject;$('bodyTpl').value=mailerState.settings.body}
 }
 
 $('importBtn').addEventListener('click',importFile);
 $('saveClientBtn').addEventListener('click',()=>{saveLocal();show('gmailState','Client ID enregistré sur cet appareil.','ok')});
 $('gmailBtn').addEventListener('click',()=>{saveLocal();initGmail()});
-$('saveTplBtn').addEventListener('click',()=>{saveLocal();show('sendMsg','Modèle enregistré sur cet appareil.','ok')});
+$('saveTplBtn').addEventListener('click',async()=>{
+  saveLocal();
+  const {error}=await sb.rpc('admin_prospect_template_save',{p_subject:$('subjectTpl').value,p_body:$('bodyTpl').value});
+  show('sendMsg',error?'Erreur : '+error.message:'Modèle enregistré (utilisé aussi par l’envoi automatique).',error?'err':'ok');
+});
+$('goBtn').addEventListener('click',giveGo);
+$('stopAllBtn').addEventListener('click',stopAll);
 $('previewBtn').addEventListener('click',()=>{
   const sample=allRows.find(x=>x.status==='ready')||allRows[0]||{company:'Riviera Auto Cannes'};
   $('previewBox').style.display='block';$('previewBox').textContent='OBJET : '+tpl($('subjectTpl').value,sample)+'\n\n'+tpl($('bodyTpl').value,sample);
