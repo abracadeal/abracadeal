@@ -280,6 +280,16 @@ async function loadMailer(){
     el.querySelector('.mbVerify').onclick=()=>mailerCall('verify',m.email,'Vérification de la connexion à OVH…');
     el.querySelector('.mbTest').onclick=()=>{if(confirm('Envoyer UN message de test à ton adresse admin depuis '+m.email+' ?'))mailerCall('test',m.email,'Envoi du message de test…')};
   });
+  const mix=st.category_mix||{},wbc=data.waiting_by_category||{};
+  const tot=Object.values(mix).reduce((x,y)=>x+Number(y||0),0)||1;
+  $('mixBox').innerHTML=Object.keys(mix).map(k=>`<div class="field" style="min-width:150px;max-width:220px"><label>${esc(k)} — ${wbc[k]||0} en attente</label><input type="number" min="0" max="100" class="mixIn" data-k="${esc(k)}" value="${mix[k]}"></div>`).join('')+'<button class="btn" id="mixSave">Enregistrer la répartition</button>';
+  const perDayAll=(data.mailboxes||[]).filter(m=>m.enabled).reduce((a,m)=>a+m.daily_limit,0);
+  $('mixInfo').textContent='Parts en % des envois du jour. Avec '+perDayAll+' e-mails/jour : '+Object.keys(mix).map(k=>k+' ≈ '+Math.round(perDayAll*Number(mix[k]||0)/tot)).join(' · ')+'. Une catégorie terminée laisse sa place aux autres.';
+  $('mixSave').onclick=async()=>{
+    const m={};document.querySelectorAll('.mixIn').forEach(i=>m[i.dataset.k]=Math.max(0,Number(i.value)||0));
+    const {error}=await sb.rpc('admin_prospect_mix_save',{p_mix:m});
+    show('mailerMsg',error?'Erreur : '+error.message:'Répartition enregistrée.',error?'err':'ok');if(!error)loadMailer();
+  };
   const c=data.counts||{};const waiting=(c.paused||0)+(c.ready||0);
   const verified=(data.mailboxes||[]).filter(m=>m.enabled&&m.verified_at);
   const perDay=verified.reduce((a,m)=>a+m.daily_limit,0);
