@@ -243,3 +243,11 @@ grant execute on function public.prospect_unsubscribe(uuid) to service_role;
 -- private.prospect_mailer_settings.category_mix jsonb (défaut auto 50 / immo 35 / moto 15),
 -- public.admin_prospect_mix_save(jsonb), admin_prospect_mailer_state() renvoie category_mix + waiting_by_category,
 -- prospect_mailer_claim() choisit la catégorie la plus en retard sur sa part du jour.
+
+-- Migrations complémentaires appliquées le 10/10/2026 :
+-- * founder_quotas_category_region : 500 places = auto 250 / immo 175 / moto 75, réparties par région au prorata
+--   des pros recensés (min. 1), private.founder_quota_settings.release_at = 15/01/2027 (places libres rouvertes à tous),
+--   claim_founder_slot / enroll_verified_founder vérifient private.founder_quota_block(), founder_enrollments.founder_category/region,
+--   public.get_my_founder_availability() (page Pro), public.admin_founder_quota_overview().
+-- * prospect_mailer_templates_by_category : private.prospect_mailer_settings.templates (versions auto / immo / moto),
+--   public.prospect_mailer_template_for(text), public.admin_prospect_template_save_cat(text,text,text).

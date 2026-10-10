@@ -278,7 +278,7 @@ async function loadMailer(){
     el.querySelector('.mbSave').onclick=()=>saveMailbox(m,el,m.enabled);
     el.querySelector('.mbToggle').onclick=()=>saveMailbox(m,el,!m.enabled);
     el.querySelector('.mbVerify').onclick=()=>mailerCall('verify',m.email,'Vérification de la connexion à OVH…');
-    el.querySelector('.mbTest').onclick=()=>{if(confirm('Envoyer UN message de test à ton adresse admin depuis '+m.email+' ?'))mailerCall('test',m.email,'Envoi du message de test…')};
+    el.querySelector('.mbTest').onclick=()=>{const cat=$('tplCategory').value;if(confirm('Envoyer UN message de test (version « '+cat+' ») à ton adresse admin depuis '+m.email+' ?'))mailerCall('test',m.email,'Envoi du message de test…',cat)};
   });
   const mix=st.category_mix||{},wbc=data.waiting_by_category||{};
   const tot=Object.values(mix).reduce((x,y)=>x+Number(y||0),0)||1;
@@ -310,9 +310,9 @@ async function saveMailbox(m,el,enabled){
   show('mailerMsg',pass?'Enregistré. Mot de passe rangé dans le coffre-fort : clique maintenant sur « Vérifier la connexion ».':'Enregistré.','ok');
   await loadMailer();
 }
-async function mailerCall(action,mailbox,wait){
+async function mailerCall(action,mailbox,wait,category){
   show('mailerMsg',wait,'');
-  const {data,error}=await sb.functions.invoke('prospect-mailer',{body:{action,mailbox}});
+  const {data,error}=await sb.functions.invoke('prospect-mailer',{body:{action,mailbox,category}});
   if(error){show('mailerMsg','Erreur : '+error.message,'err');return}
   show('mailerMsg',data?.ok?data.message:'Échec : '+(data?.error||'erreur inconnue'),data?.ok?'ok':'err');
   await loadMailer();
@@ -332,6 +332,11 @@ async function stopAll(){
   show('mailerMsg','Envois automatiques arrêtés.','ok');await refresh();
 }
 
+function loadTplForCategory(){
+  const t=mailerState?.settings?.templates?.[$('tplCategory').value];
+  if(t){$('subjectTpl').value=t.subject;$('bodyTpl').value=t.body}
+  else if(mailerState?.settings?.subject){$('subjectTpl').value=mailerState.settings.subject;$('bodyTpl').value=mailerState.settings.body}
+}
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();
   if(!session?.user){$('lock').style.display='block';$('lockText').textContent='Connecte-toi avec ton compte administrateur.';return}
@@ -350,7 +355,7 @@ async function boot(){
   $('dailyLimit').value=localStorage.getItem('abr_prospect_daily_limit')||'50';
   await refresh();
   // Le modèle enregistré sur le serveur (utilisé par l'envoi automatique) fait foi
-  if(mailerState?.settings?.subject){$('subjectTpl').value=mailerState.settings.subject;$('bodyTpl').value=mailerState.settings.body}
+  loadTplForCategory();
 }
 
 $('importBtn').addEventListener('click',importFile);
@@ -358,13 +363,16 @@ $('saveClientBtn').addEventListener('click',()=>{saveLocal();show('gmailState','
 $('gmailBtn').addEventListener('click',()=>{saveLocal();initGmail()});
 $('saveTplBtn').addEventListener('click',async()=>{
   saveLocal();
-  const {error}=await sb.rpc('admin_prospect_template_save',{p_subject:$('subjectTpl').value,p_body:$('bodyTpl').value});
-  show('sendMsg',error?'Erreur : '+error.message:'Modèle enregistré (utilisé aussi par l’envoi automatique).',error?'err':'ok');
+  const cat=$('tplCategory').value;
+  const {error}=await sb.rpc('admin_prospect_template_save_cat',{p_category:cat,p_subject:$('subjectTpl').value,p_body:$('bodyTpl').value});
+  show('sendMsg',error?'Erreur : '+error.message:'Version « '+cat+' » enregistrée (utilisée par l’envoi automatique).',error?'err':'ok');
+  if(!error)await loadMailer();
 });
 $('goBtn').addEventListener('click',giveGo);
+$('tplCategory').addEventListener('change',loadTplForCategory);
 $('stopAllBtn').addEventListener('click',stopAll);
 $('previewBtn').addEventListener('click',()=>{
-  const sample=allRows.find(x=>x.status==='ready')||allRows[0]||{company:'Riviera Auto Cannes'};
+  const sample=allRows.find(x=>x.category===$('tplCategory').value)||{company:'Riviera Auto Cannes'};
   $('previewBox').style.display='block';$('previewBox').textContent='OBJET : '+tpl($('subjectTpl').value,sample)+'\n\n'+tpl($('bodyTpl').value,sample);
 });
 $('sendBatchBtn').addEventListener('click',()=>{saveLocal();sendBatch()});

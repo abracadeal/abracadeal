@@ -2,7 +2,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026.
 // Actions :
 //   POST {action:"verify", mailbox}         admin connecté : teste l'identifiant SMTP sans rien envoyer
-//   POST {action:"test", mailbox}           admin connecté : envoie UN message de test à l'adresse de l'admin
+//   POST {action:"test", mailbox, category} admin connecté : envoie UN message de test (version du métier) à l'adresse de l'admin
 //   POST {action:"run"}                     cron (clé interne) : envoie seulement si le « feu vert » est donné
 //   POST {action:"unsubscribe", u, t}       page abracadeal.fr/desinscription.html
 //   POST ?u=..&t=.. (List-Unsubscribe-Post) désinscription en un clic depuis la messagerie
@@ -146,7 +146,7 @@ Deno.serve(async (req) => {
         await admin.rpc("prospect_mailer_verified", { p_email: c.email, p_ok: true, p_error: null });
         return json({ ok: true, message: "Connexion réussie : identifiant et mot de passe acceptés par OVH. Aucun e-mail envoyé." });
       }
-      const { data: tpl } = await admin.rpc("prospect_mailer_template");
+      const { data: tpl } = await admin.rpc("prospect_mailer_template_for", { p_category: String(body.category || "Garage / concession auto") });
       const to = String(user.email || "");
       const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl as { subject: string; body: string });
       await smtp(c, { to, data });
@@ -162,13 +162,13 @@ Deno.serve(async (req) => {
     if (!req.headers.get("x-internal-key") || req.headers.get("x-internal-key") !== await secret("prospect_crawler_internal")) return json({ error: "Non autorisé" }, 401);
     const { data: jobs, error } = await admin.rpc("prospect_mailer_claim");
     if (error) return json({ error: error.message }, 500);
-    const list = (jobs || []) as { id: string; email: string; company: string; mailbox: string }[];
+    const list = (jobs || []) as { id: string; email: string; company: string; mailbox: string; category: string | null }[];
     if (!list.length) return json({ ok: true, sent: 0 });
-    const { data: tpl } = await admin.rpc("prospect_mailer_template");
     const res: Record<string, string> = {};
     for (const j of list) {
       try {
         const c = await creds(j.mailbox);
+        const { data: tpl } = await admin.rpc("prospect_mailer_template_for", { p_category: j.category || "" });
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl as { subject: string; body: string });
         await smtp(c, { to: j.email, data });
         await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: true, p_error: null, p_message_id: msgId });
