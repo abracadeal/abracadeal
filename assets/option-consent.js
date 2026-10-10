@@ -10,7 +10,7 @@ window.confirmOptionPurchase=()=>new Promise(resolve=>{
 
 // Fix 08/10/2026 : apres "Continuer vers le paiement", la creation de la session Stripe puis le
 // chargement de Stripe prennent plusieurs secondes sans aucun retour visuel : on pouvait croire
-// que rien ne se passait (signale par Anthony). Ecran d'attente plein ecran jusqu'a l'arrivee
+// que rien ne se passait (retour utilisateur). Ecran d'attente plein ecran jusqu'a l'arrivee
 // sur Stripe ; masque en cas d'erreur ou de retour arriere depuis Stripe.
 window.showPaymentLoading=(title='Redirection vers le paiement sécurisé…',text='Cela peut prendre quelques secondes. Ne fermez pas la page.')=>{
  let o=document.getElementById('abracaPaymentLoading');

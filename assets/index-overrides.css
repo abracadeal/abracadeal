@@ -93,7 +93,7 @@
 /* Fix 22/09/2026 : desktop/tablette - meme principe de decongestion des pastilles que sur mobile
    (abraca-mobile-card-info-cleanup-20260921, ci-dessus) : vehicules -> plus de LOA en pastille,
    immobilier -> uniquement surface + DPE comme infos secondaires (prix/m2, charges, quartier,
-   pieces/chambres/etage restent dans la fiche complete). Demande explicite d'Anthony : "conserver
+   pieces/chambres/etage restent dans la fiche complete). Demande explicite de l'admin : "conserver
    le meme principe de lisibilite : cartes propres, peu chargees" pour desktop/tablette aussi. */
 @media(min-width:761px){
   #resultats .ad-card .loa-detail,
@@ -1842,7 +1842,7 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 
 /* Fix 08/10/2026 (v2) : cartes d'annonces homogenes partout (resultats, a la une, recemment
    consultees...). La v1 (photo qui remplit tout l'espace libre) donnait des photos de hauteurs
-   differentes et trop etirees en hauteur, avec le filigrane coupe - "c'est nul" (Anthony).
+   differentes et trop etirees en hauteur, avec le filigrane coupe - "c'est nul" (l'admin).
    Ici : meme photo paysage de 200px pour toutes les cartes, cadree a droite pour ne jamais
    couper le filigrane incruste en bas a droite ; la carte prend la hauteur de son contenu
    (plus de vide sous le prix) et les cartes d'une meme rangee s'alignent sur la plus haute.
@@ -1875,7 +1875,7 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 
 /* Fix 09/10/2026 : tablette en portrait (481-760px) - les annonces passent en 2 colonnes qui
    s'elargissent (jusqu'a 360px) mais la photo gardait une hauteur fixe de 108px : photo ecrasee,
-   mal cadree (signale par Anthony), alors que "Recemment consultees" (178x128) est bien.
+   mal cadree (signale par l'admin), alors que "Recemment consultees" (178x128) est bien.
    On garde les memes proportions que ces cartes. Telephones (<=480px) inchanges. */
 @media(min-width:481px) and (max-width:760px){
   main#top #resultats .ad-card .ad-photo,
@@ -1903,7 +1903,7 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
 
 /* Fix 09/10/2026 : <=760px (telephone, tablette portrait), la regle "garder uniquement le Boost"
    masquait aussi Modifier / Supprimer sur les vignettes du proprietaire, et la fiche detaillee ne
-   propose pas Modifier aux particuliers : impossible de modifier son annonce (signale par Anthony).
+   propose pas Modifier aux particuliers : impossible de modifier son annonce (signale par l'admin).
    On reaffiche ces deux boutons, cote a cote, sous la vignette. */
 @media(max-width:760px){
   #resultats .ad-actions{flex-wrap:wrap!important;gap:5px!important}

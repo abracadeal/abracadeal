@@ -591,7 +591,7 @@ footer{
 .ad-photo{position:relative}.favorite-btn{position:absolute;top:9px;right:9px;width:34px;height:34px;border-radius:50%;border:1px solid rgba(60,30,80,.12);background:rgba(255,255,255,.94);display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;cursor:pointer;z-index:3;box-shadow:0 3px 12px rgba(35,17,48,.12);color:#5d4868}.favorite-btn.active{color:#e8328a}.favorite-btn:hover{transform:scale(1.04)}
 .ad-body{padding:12px 13px 13px}
 .ad-meta{font-size:.7rem;color:#8a7b93;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-/* Fix 21/09/2026 : le nom du pro (ajoute apres coup en JS) etait concatene sur la meme ligne que la categorie et se faisait couper au milieu du mot (ex. "...Elite Prest..."), ce qui donnait l'impression que le libelle categorie 'rongeait' l'espace (signale par Anthony). Le nom du pro passe desormais sur sa propre ligne, avec sa propre troncature. */
+/* Fix 21/09/2026 : le nom du pro (ajoute apres coup en JS) etait concatene sur la meme ligne que la categorie et se faisait couper au milieu du mot (ex. "...Elite Prest..."), ce qui donnait l'impression que le libelle categorie 'rongeait' l'espace (signale par l'admin). Le nom du pro passe desormais sur sa propre ligne, avec sa propre troncature. */
 .ad-pro-name{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#a08bad;font-weight:700;margin-top:1px}
 .ad-title{font-size:.96rem;font-weight:800;margin:0 0 6px;color:#24162d;line-height:1.25;min-height:2.4em}
 .ad-price{font-size:1.08rem;font-weight:900;color:#7c259e;margin-bottom:7px}
@@ -1333,7 +1333,7 @@ a.btn{cursor:pointer}
   color:#8a7795;
   font-size:3rem;
 }
-/* Fix 21/09/2026 : image de fallback Abracadeal (annonces sans photo, demande Anthony).
+/* Fix 21/09/2026 : image de fallback Abracadeal (annonces sans photo, demande l'admin).
    Purement visuelle, pas de zoom/lightbox puisqu'il n'y a pas de vraie photo derriere. */
 .abraca-default-photo{
   cursor:default!important;
@@ -1676,7 +1676,7 @@ a.btn{cursor:pointer}
 }
 /* Fix 20/09/2026 : la pastille "Agrandir" (affichee au survol de la photo principale de la
    fiche annonce) chevauchait visuellement le badge "Abracadeal" en bas a droite de la photo,
-   signale par Anthony sur mobile. Verifie en direct sur abracadeal.fr (fiche "Bureaux 120 m2
+   signale par l'admin sur mobile. Verifie en direct sur abracadeal.fr (fiche "Bureaux 120 m2
    - Cannes centre", 375px) : les deux badges se recouvrent bien sur ~20x25px des que le survol
    est actif. Sur mobile/tablette tactile, appuyer sur la photo ouvre directement le zoom
    (voir openPhotoLightbox), donc l'infobulle "Agrandir" n'apporte rien et peut en plus rester
@@ -1959,7 +1959,7 @@ a.btn{cursor:pointer}
 .filters-toggle{display:inline-flex;align-items:center;gap:8px;border:1px solid #d9cce0;background:#fff;border-radius:12px;padding:10px 14px;font-weight:850;color:#4e2c62;cursor:pointer}
 
 /* Fix 20/09/2026 : barre de "quick filters" (Ville / Prix / champ selon categorie / Filtres),
-   inspiree du retour d'Anthony (recherche pas assez fluide, comparee a leboncoin). Chaque puce
+   inspiree du retour de l'admin (recherche pas assez fluide, comparee a leboncoin). Chaque puce
    ouvre un petit popover avec un champ "miroir" synchronise en direct avec le vrai champ du
    panneau de filtres complet (aucune duplication de logique de filtrage : filteredAds() continue
    de lire uniquement les champs d'origine #searchCity/#filterPriceMin.../#filterVehicleMake/
@@ -2072,7 +2072,7 @@ a.btn{cursor:pointer}
 #accountModal .btn:disabled{opacity:.5;cursor:not-allowed}
 .banner-hotspot.selected{box-shadow:none;background:transparent}
 /* Fix 21/09/2026 : sur desktop/tablette/mobile, body{color:...!important} (theme sombre du
-   site) rendait ce texte blanc sur son propre fond clair, donc illisible (signale par Anthony :
+   site) rendait ce texte blanc sur son propre fond clair, donc illisible (signale par l'admin :
    "message du moderateur illisible"). On fixe une couleur sombre explicite, comme pour
    .message-safety juste au-dessus dans la meme modale. */
 .moderation-notice{padding:16px;margin:0 0 12px;border:1px solid #eadff0;border-radius:14px;background:#faf5fc;color:#3d2254}
@@ -2247,7 +2247,7 @@ a.btn{cursor:pointer}
 .detail-photo-tool:hover{transform:translateY(-1px);box-shadow:0 9px 24px rgba(68,27,86,.23);filter:brightness(1.02)}
 .detail-photo-tool.heart{background:#fff;color:#563860}.detail-photo-tool.heart.active{color:#e8328a;background:#fff7fb;border-color:#efb0ce}
 
-/* Fix 20/09/2026 : carousel photos sur la pastille (plusieurs photos par annonce), demande par Anthony */
+/* Fix 20/09/2026 : carousel photos sur la pastille (plusieurs photos par annonce), demande par l'admin */
 .carousel-arrow{position:absolute;top:50%;transform:translateY(-50%);z-index:5;width:26px;height:26px;border-radius:50%;border:none;background:rgba(20,8,28,.42);color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;cursor:pointer;padding:0;transition:background .14s ease,transform .14s ease}
 .carousel-arrow:hover{background:rgba(20,8,28,.62)}
 .carousel-arrow:active{transform:translateY(-50%) scale(.92)}
@@ -4280,7 +4280,7 @@ header #flowErrorsBtn{
 .admin-mobile-action-badge.show{display:flex}
 /* Fix 21/09/2026 : right:12px placait ce badge par-dessus l'icone du bouton (au lieu du coin
    exterieur du bouton comme .mobile-nav-badge juste au-dessus, deja correct) - il "rongeait"
-   visuellement l'icone Admin (signale par Anthony : "le compteur sur le nom d'utilisateur pour
+   visuellement l'icone Admin (signale par l'admin : "le compteur sur le nom d'utilisateur pour
    les notifications est ronger"). Meme position que .mobile-nav-badge (coin haut-droit du
    bouton entier, hors de l'icone/texte). */
 .mobile-admin-nav-badge{
@@ -4554,7 +4554,7 @@ header #flowErrorsBtn{
     width:auto!important;
     max-width:none!important;
     margin:0!important;
-    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par Anthony : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
+    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par l'admin : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
     transform:translateZ(0)!important;
     z-index:10080!important;
   }
@@ -4569,7 +4569,7 @@ header #flowErrorsBtn{
        .search-wrap (le parent position:fixed) mais backdrop-filter est ici, sur .search-card
        (l'enfant). Sur Safari iOS, c'est l'element qui porte backdrop-filter lui-meme qui doit
        avoir son propre calque GPU dedie pour ne pas le perdre pendant un scroll (signale par
-       Anthony : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
+       l'admin : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
        temps la barre disparait"). Meme traitement que .mobile-bottom-nav, ou transform et
        backdrop-filter sont deja sur le meme element. */
     transform:translateZ(0)!important;
@@ -4596,7 +4596,7 @@ header #flowErrorsBtn{
 }
 
 /* Fix 20/09/2026 : meme barre de recherche flottante, mais pour desktop/tablette (>760px) -
-   demande d'Anthony ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
+   demande de l'admin ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
    top/left/width sont calcules et poses en inline par le script abraca-sticky-search-script
    (pas de valeurs figees ici) pour rester juste sous le header sticky et parfaitement centree,
    quelle que soit la largeur d'ecran. */
@@ -5156,7 +5156,7 @@ header #flowErrorsBtn{
     display:grid!important;grid-template-columns:1fr auto 1fr!important;
     align-items:center!important;gap:22px!important;
   }
-  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande Anthony) ; grille
+  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande l'admin) ; grille
      repassee en 1fr/auto/1fr (colonne 1 vide en miroir) pour que les liens restent
      parfaitement centres sur la largeur du footer plutot que decales par l'ancienne
      colonne fixe de 280px du logo. */
@@ -5266,7 +5266,7 @@ header #flowErrorsBtn{
 }
 /* Fix 21/09/2026 : les cartes "A LA UNE" (home-featured-card) avaient une hauteur/photo plus
    petites que les cartes normales des resultats (300px vs 420px, photo 150px vs 158px), ce qui
-   les faisait paraitre plus petites au milieu des autres annonces (signale par Anthony :
+   les faisait paraitre plus petites au milieu des autres annonces (signale par l'admin :
    "mets les annonces a la une de la meme taille que les annonces normales"). Separee de
    .personalized-card (qui garde sa taille propre, utilisee ailleurs : recherches recentes,
    consultees, a proximite) et alignee sur #resultats .ad-card. */
@@ -5303,7 +5303,7 @@ header #flowErrorsBtn{
 }
 /* Fix 21/09/2026 : le prix au m2/les charges (margin-top:-4px d'origine, pensee pour un texte
    plus petit sur fond blanc) chevauchait presque le prix principal au-dessus, plus grand ici
-   (1.12rem contre les cartes normales) - signale par Anthony ("le prix au m2 est trop pres du
+   (1.12rem contre les cartes normales) - signale par l'admin ("le prix au m2 est trop pres du
    prix presque l'un sur l'autre"). Meme correctif que #resultats .ad-card.immo-card deja plus
    bas dans le fichier, applique ici a .home-featured-card qui ne l'avait pas. */
 .home-featured-card .immo-card-unit-price,
@@ -6319,7 +6319,7 @@ header #flowErrorsBtn{
 }
 
 /* Fix 20/09/2026 : le champ Ville et le bouton Filtres ajoutes a la recherche de l'accueil sont
-   reserves au desktop (demande initiale d'Anthony) ; sur mobile la barre redevient compacte
+   reserves au desktop (demande initiale de l'admin) ; sur mobile la barre redevient compacte
    (mot-cle + bouton Rechercher uniquement), comme avant leur ajout. */
 @media(max-width:760px){
   #searchCity.desktop-search-city{
@@ -6333,7 +6333,7 @@ header #flowErrorsBtn{
 }
 
 /* Fix 20/09/2026 : textes plus grands sur la pastille des annonces (titre/prix/infos),
-   demande par Anthony ("texte prix info en plus gros, une belle pastille"). Verifie en
+   demande par l'admin ("texte prix info en plus gros, une belle pastille"). Verifie en
    direct sur les 92 annonces reelles du site avant application (clone hors-ecran de
    .ad-body avec overflow:visible pour mesurer la hauteur naturelle du contenu) : aucun
    depassement du budget de hauteur fixe des cartes en desktop
@@ -6355,7 +6355,7 @@ header #flowErrorsBtn{
 }
 
 /* Fix 20/09/2026 : boutons Modifier/Booster/Supprimer plus compacts sur la pastille
-   en desktop (vue admin/gestion des annonces), demande par Anthony. Verifie en direct
+   en desktop (vue admin/gestion des annonces), demande par l'admin. Verifie en direct
    sur abracadeal.fr avant application : la taille de base (.ad-actions .mini-btn,
    sans !important, ligne ~2534) passe de 36px de hauteur / 12px de padding / 12px de
    police a 29px / 9px / 11px sur desktop uniquement (>=761px) ; le mobile (regles
@@ -6367,7 +6367,7 @@ header #flowErrorsBtn{
 
 /* Fix 21/09/2026 : les pastilles des carrousels "Selection du moment" / "D'apres vos
    recherches recentes" / "Recemment consultees" avaient des tailles differentes sur mobile
-   (signale par Anthony) - une regle plus tardive dans la cascade, destinee a la grille de
+   (signale par l'admin) - une regle plus tardive dans la cascade, destinee a la grille de
    resultats #resultats .ad-card, avait ete etendue par erreur a ces 3 carrousels et annulait
    leur hauteur fixe d'origine (260px/246px) + le line-clamp a 2 lignes du titre. Restaure ici
    uniquement pour ces carrousels (jamais pour #resultats .ad-card, qui garde son height:auto
@@ -6411,7 +6411,7 @@ header #flowErrorsBtn{
 
 /* Fix 22/09/2026 : la disposition mobile en 2 lignes (recherche pleine largeur, puis
    ville+bouton en dessous - fix du 21/09) rendait la barre de recherche trop haute sur
-   mobile, surtout une fois flottante au scroll (signale par Anthony : "trop grande pour
+   mobile, surtout une fois flottante au scroll (signale par l'admin : "trop grande pour
    mobile"). Repassee sur une seule ligne : les 3 elements (recherche, ville, bouton) sont
    maintenant cote a cote. Le bouton est reduit a une icone loupe (le texte "Rechercher"
    reste dans le DOM pour l'accessibilite/lecteurs d'ecran, seulement masque visuellement via
@@ -6432,7 +6432,7 @@ header #flowErrorsBtn{
 /* Fix 21/09/2026 : sur mobile, ouvrir le popover d'un filtre rapide ("Ville"/"Prix" sous
    "Les annonces") pouvait laisser une pastille "A LA UNE" (bordure doree) visible juste a
    cote du popover, si pres du bord de l'ecran que ca donnait l'impression que le popover
-   s'affichait derriere/mele aux pastilles d'annonces (signale par Anthony). Ajoute un fond
+   s'affichait derriere/mele aux pastilles d'annonces (signale par l'admin). Ajoute un fond
    assombri plein ecran derriere le popover, sur le meme principe que .modal-backdrop deja
    utilise par les autres fenetres du site : plus aucune pastille visible autour du popover
    pendant qu'il est ouvert, et un tap en dehors le referme (deja gere par le js existant,
@@ -6535,7 +6535,7 @@ header #flowErrorsBtn{
 /* Fix 22/09/2026 : desktop/tablette - meme principe de decongestion des pastilles que sur mobile
    (abraca-mobile-card-info-cleanup-20260921, ci-dessus) : vehicules -> plus de LOA en pastille,
    immobilier -> uniquement surface + DPE comme infos secondaires (prix/m2, charges, quartier,
-   pieces/chambres/etage restent dans la fiche complete). Demande explicite d'Anthony : "conserver
+   pieces/chambres/etage restent dans la fiche complete). Demande explicite de l'admin : "conserver
    le meme principe de lisibilite : cartes propres, peu chargees" pour desktop/tablette aussi. */
 @media(min-width:761px){
   #resultats .ad-card .loa-detail,
@@ -8647,7 +8647,7 @@ header #flowErrorsBtn{
         <div><b>12 mois gratuits</b><span>Diffusion et synchronisation du stock gratuites pendant les 12 premiers mois pour les comptes éligibles.</span></div>
       </div>
       <p class="note">Une carte bancaire sera demandée pour activer l’offre. Aucun débit pendant les 12 mois gratuits. À l’issue de cette période, la formule choisie devient payante au tarif affiché lors de l’activation ; elle peut être résiliée avant la fin de la période gratuite. Les options de visibilité, boosts et autres services payants restent distincts.</p>
-      <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par Anthony, pour convertir directement
+      <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par l'admin, pour convertir directement
            depuis la modale au lieu de forcer un aller-retour manuel vers l'inscription.
            Reutilise openProfessionalSignup() (deja utilisee par #proAccountBtn) qui bascule
            sur l'onglet inscription, preselectionne "Professionnel" et ouvre accountModal. -->
@@ -8658,7 +8658,7 @@ header #flowErrorsBtn{
   </div>
 </div>
 
-<!-- Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony). -->
+<!-- Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande l'admin). -->
 <div class="modal-backdrop" id="noPhotoConfirmModal" aria-hidden="true">
   <div class="modal" role="dialog" aria-modal="true" aria-labelledby="noPhotoConfirmTitle">
     <div class="modal-head"><h2 id="noPhotoConfirmTitle">Aucune photo ajoutée</h2><a class="close-btn" data-close="noPhotoConfirmModal" href="#" aria-label="Fermer">×</a></div>
@@ -9386,7 +9386,7 @@ function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
 function cataloguePrice(a){const base=money(a?.price);return a?.category==='vacances'&&a?.price!==null&&a?.price!==''?base+' / nuit':base}
 function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
-// Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande Anthony).
+// Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande l'admin).
 // Purement visuel cote frontend : ne touche jamais listing_photos, ni les limites/packs de photos.
 const ABRACA_DEFAULT_LISTING_PHOTO = 'assets/default-listing-photo-20260921.jpg';
 function photoUrl(path){
@@ -9408,7 +9408,7 @@ async function refreshModerationCount(){
   const btn=$('#moderationBtn');
   // Fix 22/09/2026 : #moderationBtn est masque en desktop (voir commentaire CSS plus haut),
   // donc alimente aussi #accountModerationBtn (raccourci "Moderer" de la modale Mon compte),
-  // seul acces reel a la moderation sur cette largeur - signale par Anthony
+  // seul acces reel a la moderation sur cette largeur - signale par l'admin
   // ("ya pas de compteurs disponible sur desktop").
   const accountBtn=$('#accountModerationBtn');
   if(!btn && !accountBtn) return 0;
@@ -9423,7 +9423,7 @@ async function refreshModerationCount(){
   // Fix 21/09/2026 : le compteur (bouton "Modérer" + badge "Admin" du menu mobile, cf.
   // syncAdminBadges()) ne comptait que les pending, alors que la file de modération inclut
   // aussi, depuis ce même jour, les annonces auto-publiées en attente d'une deuxième
-  // vérification manuelle (voir loadAds()) - demande d'Anthony : "mettre un compteur pour le
+  // vérification manuelle (voir loadAds()) - demande de l'admin : "mettre un compteur pour le
   // nombre a moderer" doit refléter le vrai total affiché dans la file.
   let autoActiveCount=0;
   const {data:autoRows,error:autoError}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
@@ -11371,7 +11371,7 @@ $$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
   openModal('publishModal');
 }));
 
-// Fix 21/09/2026 : boutons de la confirmation "annonce sans photo" (demande Anthony).
+// Fix 21/09/2026 : boutons de la confirmation "annonce sans photo" (demande l'admin).
 document.getElementById('noPhotoPublishAnywayBtn')?.addEventListener('click',()=>{
   pendingNoPhotoConfirm=true;
   closeModal('noPhotoConfirmModal');
@@ -11604,7 +11604,7 @@ $('#publishForm').addEventListener('submit',async e=>{
 
   const wasEditing=!!editingId;
 
-  // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony).
+  // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande l'admin).
   // Ne bloque jamais la publication : si l'utilisateur choisit "Publier quand meme",
   // pendingNoPhotoConfirm passe a true et on laisse continuer normalement.
   const hasAnyPhoto = selectedPhotos.length>0 || existingPhotoPaths.length>0;
@@ -12104,7 +12104,7 @@ window.carouselStep=function(el,dir){
     // Fix 22/09/2026 : meme correctif que selectDetailPhoto (fiche annonce) plus bas dans le
     // fichier - reinitialise l'etat de secours a chaque navigation carousel sur la pastille,
     // sinon une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher
-    // sur une autre photo cassee ensuite (signale par Anthony : "une photo par defaut et une
+    // sur une autre photo cassee ensuite (signale par l'admin : "une photo par defaut et une
     // autre invisible, celle par defaut ne revient jamais").
     img.dataset.abracaFallback='';
     img.classList.remove('abraca-default-photo');
@@ -12221,7 +12221,7 @@ async function loadAds(){
 
     // Fix 21/09/2026 : deuxieme verification manuelle des annonces deja publiees
     // automatiquement. Elles restent en ligne (status active) pendant qu'elles
-    // apparaissent ici pour un controle a posteriori (Anthony : "laisse les
+    // apparaissent ici pour un controle a posteriori (l'admin : "laisse les
     // annonces moderer automatiquement pour une deuxieme verification manuelle").
     const {data:autoRows,error:autoRowsError}=await sb.from('listing_moderation')
       .select('listing_id')
@@ -12908,7 +12908,7 @@ window.openAd=id=>{
   const created=listingDateLabel(a);
   // Fix 21/09/2026 : la barre de recherche flottante (position:fixed, z-index superieur au
   // contenu de la grille) peut recouvrir les boutons de moderation d'une pastille pendant le
-  // scroll, les rendant inaccessibles (signale par Anthony : "ya des annonces impossible a
+  // scroll, les rendant inaccessibles (signale par l'admin : "ya des annonces impossible a
   // moderer les touches sont inaccessible"). On duplique donc l'action de moderation ici, dans
   // la fiche annonce complete (z-index du #detailModal deja au-dessus de tout le reste du site),
   // qui reste toujours accessible quel que soit le defilement de la grille.
@@ -13983,7 +13983,7 @@ updateFilterSubcategories('');
 refreshFilterCount();
 
 /* Fix 20/09/2026 : barre de "filtres rapides" (Ville / Prix / Marque ou Type de bien / Filtres),
-   demandee par Anthony pour une recherche plus fluide (reference : leboncoin). Chaque puce ouvre
+   demandee par l'admin pour une recherche plus fluide (reference : leboncoin). Chaque puce ouvre
    un petit popover avec un champ "miroir" : filteredAds() continue de lire uniquement les champs
    d'origine (#searchCity, #filterPriceMin/Max, #filterVehicleMake, #filterImmoPropertyType), les
    miroirs se contentent de pousser leur valeur dedans et de redeclencher les evenements existants -
@@ -14730,7 +14730,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Fix 21/09/2026 : compteur "Annonces à modérer" dans le tableau de bord admin.
   // Compte les annonces pending (premiere decision) + les annonces deja publiees
   // automatiquement mais pas encore relues par un admin (deuxieme verification
-  // manuelle demandee par Anthony), sans jamais les depublier en attendant.
+  // manuelle demandee par l'admin), sans jamais les depublier en attendant.
   async function refreshPendingModerationStat(){
     const card=document.getElementById('statPendingModerationCard');
     const el=document.getElementById('statPendingModeration');
@@ -15632,7 +15632,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     requestAnimationFrame(measure);
   }
 
-  // Fix 20/09/2026 : barre de recherche "un peu buguee au scroll" (signale par Anthony).
+  // Fix 20/09/2026 : barre de recherche "un peu buguee au scroll" (signale par l'admin).
   // Cause trouvee : les deux tests d'entree/sortie utilisaient exactement le meme seuil
   // (triggerY+6), donc aucune vraie zone morte n'existait entre les deux etats - au moindre
   // micro-mouvement de la molette/trackpad pile a ce pixel-la (scroll inertiel, valeurs
@@ -15644,7 +15644,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // frame) pour alleger le travail pendant un scroll rapide.
   let ticking = false;
 
-  // Fix 22/09/2026 : bug signale par Anthony ("quand on est dans le scroll et qu'on veut
+  // Fix 22/09/2026 : bug signale par l'admin ("quand on est dans le scroll et qu'on veut
   // faire une recherche ca bloque"). Cause probable : sur mobile, l'ouverture du clavier
   // virtuel apres un tap dans un champ de la barre de recherche peut a elle seule faire
   // varier window.scrollY (le navigateur ajuste la page pour garder le champ visible), ce
@@ -15691,7 +15691,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('pageshow', () => { requestAnimationFrame(() => { measure(); update(); }); });
   window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', () => {
-    // Fix 22/09/2026 (v2) : bug signale par Anthony ("quand on se positionne sur la barre
+    // Fix 22/09/2026 (v2) : bug signale par l'admin ("quand on se positionne sur la barre
     // de recherche et qu'on scroll en meme temps la barre disparait"). Cause trouvee : sur
     // mobile, taper dans un champ ouvre le clavier virtuel, ce qui declenche un evenement
     // 'resize' - or ce handler appelait restoreSearch() sans verifier searchFieldFocused
@@ -15797,7 +15797,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   /* Fix 21/09/2026 : certaines annonces (notamment immobilier) avaient une photo enregistree
      mais dont l'URL est cassee/inaccessible (ex. domaine de test invalide) - l'ancienne version
      masquait juste la photo (display:none) et n'affichait l'etoile de secours que sur mobile,
-     donc sur desktop la pastille restait vide (signale par Anthony : "les photos par defaut
+     donc sur desktop la pastille restait vide (signale par l'admin : "les photos par defaut
      n'apparaissent pas dans les pastilles immobilier"). Desormais on bascule vers la vraie
      photo de secours Abracadeal (meme visuel que quand il n'y a aucune photo), sur toutes les
      tailles d'ecran et sur toutes les zones photo du site. */

@@ -144,7 +144,7 @@ function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
 function cataloguePrice(a){const base=money(a?.price);return a?.category==='vacances'&&a?.price!==null&&a?.price!==''?base+' / nuit':base}
 function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v}
-// Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande Anthony).
+// Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande interne).
 // Purement visuel cote frontend : ne touche jamais listing_photos, ni les limites/packs de photos.
 const privatePhotoUrls=new Map();
 async function hydratePrivatePhotos(rows){
@@ -174,7 +174,7 @@ async function refreshModerationCount(){
   const btn=$('#moderationBtn');
   // Fix 22/09/2026 : #moderationBtn est masque en desktop (voir commentaire CSS plus haut),
   // donc alimente aussi #accountModerationBtn (raccourci "Moderer" de la modale Mon compte),
-  // seul acces reel a la moderation sur cette largeur - signale par Anthony
+  // seul acces reel a la moderation sur cette largeur - retour utilisateur
   // ("ya pas de compteurs disponible sur desktop").
   const accountBtn=$('#accountModerationBtn');
   if(!btn && !accountBtn) return 0;
@@ -189,7 +189,7 @@ async function refreshModerationCount(){
   // Fix 21/09/2026 : le compteur (bouton "Modérer" + badge "Admin" du menu mobile, cf.
   // syncAdminBadges()) ne comptait que les pending, alors que la file de modération inclut
   // aussi, depuis ce même jour, les annonces auto-publiées en attente d'une deuxième
-  // vérification manuelle (voir loadAds()) - demande d'Anthony : "mettre un compteur pour le
+  // vérification manuelle (voir loadAds()) - demande interne : "mettre un compteur pour le
   // nombre a moderer" doit refléter le vrai total affiché dans la file.
   let autoActiveCount=0;
   const {data:autoRows,error:autoError}=await sb.from('listing_moderation').select('listing_id').eq('auto_published',true).or('admin_reviewed.is.null,admin_reviewed.eq.false');
@@ -1989,7 +1989,7 @@ async function loadPublishCommerceOffers(){
     publishOffersLoading=false;renderPublishPackPicker();
   }
 }
-// Fix 09/10/2026 (demande Anthony) : publication en 2 etapes. Etape 1 = formulaire, avec l'option
+// Fix 09/10/2026 (demande interne) : publication en 2 etapes. Etape 1 = formulaire, avec l'option
 // "Photos supplementaires" pres des photos ; "Continuer" ouvre l'etape 2 = options de visibilite
 // (A la une, Urgent, Boosts). Plusieurs options cumulables, une seule par type (une seule duree
 // "A la une"), total calcule et paye en une fois (create-commerce-order, offer_codes).
@@ -2220,7 +2220,7 @@ if(new URLSearchParams(window.location.search).get('deposer')==='1'){
   window.history.replaceState(null,'',window.location.pathname+window.location.hash);
 }
 
-// Fix 21/09/2026 : boutons de la confirmation "annonce sans photo" (demande Anthony).
+// Fix 21/09/2026 : boutons de la confirmation "annonce sans photo" (demande interne).
 document.getElementById('noPhotoPublishAnywayBtn')?.addEventListener('click',()=>{
   pendingNoPhotoConfirm=true;
   closeModal('noPhotoConfirmModal');
@@ -2491,7 +2491,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     }
   }
 
-  // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande Anthony).
+  // Fix 21/09/2026 : confirmation avant publication d'une annonce sans photo (demande interne).
   // Ne bloque jamais la publication : si l'utilisateur choisit "Publier quand meme",
   // pendingNoPhotoConfirm passe a true et on laisse continuer normalement.
   const hasAnyPhoto = selectedPhotos.length>0 || (existingPhotoPaths.length>0 && !editPhotosChanged());
@@ -3005,7 +3005,7 @@ window.carouselStep=function(el,dir){
     // Fix 22/09/2026 : meme correctif que selectDetailPhoto (fiche annonce) plus bas dans le
     // fichier - reinitialise l'etat de secours a chaque navigation carousel sur la pastille,
     // sinon une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher
-    // sur une autre photo cassee ensuite (signale par Anthony : "une photo par defaut et une
+    // sur une autre photo cassee ensuite (retour utilisateur : "une photo par defaut et une
     // autre invisible, celle par defaut ne revient jamais").
     img.dataset.abracaFallback='';
     img.classList.remove('abraca-default-photo');
@@ -3121,7 +3121,7 @@ async function loadAds(){
 
     // Fix 21/09/2026 : deuxieme verification manuelle des annonces deja publiees
     // automatiquement. Elles restent en ligne (status active) pendant qu'elles
-    // apparaissent ici pour un controle a posteriori (Anthony : "laisse les
+    // apparaissent ici pour un controle a posteriori (l'admin : "laisse les
     // annonces moderer automatiquement pour une deuxieme verification manuelle").
     const {data:autoRows,error:autoRowsError}=await sb.from('listing_moderation')
       .select('listing_id')
@@ -3830,7 +3830,7 @@ window.openAd=id=>{
   const created=listingDateLabel(a);
   // Fix 21/09/2026 : la barre de recherche flottante (position:fixed, z-index superieur au
   // contenu de la grille) peut recouvrir les boutons de moderation d'une pastille pendant le
-  // scroll, les rendant inaccessibles (signale par Anthony : "ya des annonces impossible a
+  // scroll, les rendant inaccessibles (retour utilisateur : "ya des annonces impossible a
   // moderer les touches sont inaccessible"). On duplique donc l'action de moderation ici, dans
   // la fiche annonce complete (z-index du #detailModal deja au-dessus de tout le reste du site),
   // qui reste toujours accessible quel que soit le defilement de la grille.
@@ -4924,7 +4924,7 @@ updateFilterSubcategories('');
 refreshFilterCount();
 
 /* Fix 20/09/2026 : barre de "filtres rapides" (Ville / Prix / Marque ou Type de bien / Filtres),
-   demandee par Anthony pour une recherche plus fluide (reference : leboncoin). Chaque puce ouvre
+   demandee pour une recherche plus fluide (reference : leboncoin). Chaque puce ouvre
    un petit popover avec un champ "miroir" : filteredAds() continue de lire uniquement les champs
    d'origine (#searchCity, #filterPriceMin/Max, #filterVehicleMake, #filterImmoPropertyType), les
    miroirs se contentent de pousser leur valeur dedans et de redeclencher les evenements existants -

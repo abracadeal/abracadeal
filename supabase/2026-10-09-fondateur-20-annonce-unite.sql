@@ -3,12 +3,12 @@
 -- 2. enforce_founder_50_listing_limit : au-delà de la limite de la formule, consomme 1 crédit
 --    de pro_listing_credit_wallet (annonce achetée à l'unité) ; sans crédit, message invitant à en acheter une.
 -- 3. pro_subscription_plans : pro_50.founder_eligible = false (seule la formule 20 est gratuite 12 mois).
--- Correction même jour (règle confirmée par Anthony) :
+-- Correction même jour (règle confirmée par l'admin) :
 -- Offre Fondateurs = formules 20 ET 50 gratuites 12 mois (pro_50.founder_eligible remis à true).
 -- Fondateur 20 qui dépasse : passer en 50 Fondateurs (fonction change-pro-subscription-plan, garde gratuité et -50 %)
 --   ou acheter l'annonce supplémentaire à l'unité. Fondateur 50 qui dépasse : annonce à l'unité (pas de 100 Fondateurs).
 -- Migrations : founder_50_restored_and_limit_message, founder_limit_message_by_plan.
--- Harmonisation des prix en ,99 (demande d'Anthony) — nouveaux prix Stripe, anciens archivés :
+-- Harmonisation des prix en ,99 (demande de l'admin) — nouveaux prix Stripe, anciens archivés :
 -- hightech_10 29,90→29,99 (price_1UOdrZ1DkwXb4U3JYYgqxalq) ; hightech_30 abonnement 29,90→29,99/mois (price_1UOdrb1DkwXb4U3JuIHOjNKO)
 -- hightech_pack30 69,90→69,99 (price_1UOdrd1DkwXb4U3JAFxpzAJI) ; maison_10 39,90→39,99 (price_1UOdre1DkwXb4U3Jb2NUzFhV)
 -- maison_pack30 89,90→89,99 (price_1UOdrg1DkwXb4U3JdEjIvkv5). commerce_offers + pro_subscription_plans mis à jour.

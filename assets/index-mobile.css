@@ -177,7 +177,7 @@
     width:auto!important;
     max-width:none!important;
     margin:0!important;
-    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par Anthony : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
+    /* Fix 22/09/2026 : transform:translateZ(0) au lieu de transform:none - force la creation d'un calque GPU dedie pour eviter le bug Safari iOS ou un element position:fixed combine a backdrop-filter peut disparaitre/scintiller un instant pendant le scroll (signale par l'admin : "la barre de tache bug disparait pendant le scroll"). Meme effet de remise a zero du transform que l'ancienne valeur none. */
     transform:translateZ(0)!important;
     z-index:10080!important;
   }
@@ -192,7 +192,7 @@
        .search-wrap (le parent position:fixed) mais backdrop-filter est ici, sur .search-card
        (l'enfant). Sur Safari iOS, c'est l'element qui porte backdrop-filter lui-meme qui doit
        avoir son propre calque GPU dedie pour ne pas le perdre pendant un scroll (signale par
-       Anthony : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
+       l'admin : "quand on se positionne sur la barre de recherche et qu'on scroll en meme
        temps la barre disparait"). Meme traitement que .mobile-bottom-nav, ou transform et
        backdrop-filter sont deja sur le meme element. */
     transform:translateZ(0)!important;
@@ -219,7 +219,7 @@
 }
 
 /* Fix 20/09/2026 : meme barre de recherche flottante, mais pour desktop/tablette (>760px) -
-   demande d'Anthony ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
+   demande de l'admin ("est-ce que la barre de recherche peut rester en haut pendant le scroll").
    top/left/width sont calcules et poses en inline par le script abraca-sticky-search-script
    (pas de valeurs figees ici) pour rester juste sous le header sticky et parfaitement centree,
    quelle que soit la largeur d'ecran. */
@@ -779,7 +779,7 @@
     display:grid!important;grid-template-columns:1fr auto 1fr!important;
     align-items:center!important;gap:22px!important;
   }
-  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande Anthony) ; grille
+  /* Fix 20/09/2026 : logo Abracadeal retire du footer desktop (demande l'admin) ; grille
      repassee en 1fr/auto/1fr (colonne 1 vide en miroir) pour que les liens restent
      parfaitement centres sur la largeur du footer plutot que decales par l'ancienne
      colonne fixe de 280px du logo. */

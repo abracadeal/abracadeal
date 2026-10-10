@@ -84,7 +84,7 @@
 }
 /* Fix 21/09/2026 : les cartes "A LA UNE" (home-featured-card) avaient une hauteur/photo plus
    petites que les cartes normales des resultats (300px vs 420px, photo 150px vs 158px), ce qui
-   les faisait paraitre plus petites au milieu des autres annonces (signale par Anthony :
+   les faisait paraitre plus petites au milieu des autres annonces (signale par l'admin :
    "mets les annonces a la une de la meme taille que les annonces normales"). Separee de
    .personalized-card (qui garde sa taille propre, utilisee ailleurs : recherches recentes,
    consultees, a proximite) et alignee sur #resultats .ad-card. */
@@ -121,7 +121,7 @@
 }
 /* Fix 21/09/2026 : le prix au m2/les charges (margin-top:-4px d'origine, pensee pour un texte
    plus petit sur fond blanc) chevauchait presque le prix principal au-dessus, plus grand ici
-   (1.12rem contre les cartes normales) - signale par Anthony ("le prix au m2 est trop pres du
+   (1.12rem contre les cartes normales) - signale par l'admin ("le prix au m2 est trop pres du
    prix presque l'un sur l'autre"). Meme correctif que #resultats .ad-card.immo-card deja plus
    bas dans le fichier, applique ici a .home-featured-card qui ne l'avait pas. */
 .home-featured-card .immo-card-unit-price,
@@ -1137,7 +1137,7 @@
 }
 
 /* Fix 20/09/2026 : le champ Ville et le bouton Filtres ajoutes a la recherche de l'accueil sont
-   reserves au desktop (demande initiale d'Anthony) ; sur mobile la barre redevient compacte
+   reserves au desktop (demande initiale de l'admin) ; sur mobile la barre redevient compacte
    (mot-cle + bouton Rechercher uniquement), comme avant leur ajout. */
 @media(max-width:760px){
   #searchCity.desktop-search-city{
@@ -1151,7 +1151,7 @@
 }
 
 /* Fix 20/09/2026 : textes plus grands sur la pastille des annonces (titre/prix/infos),
-   demande par Anthony ("texte prix info en plus gros, une belle pastille"). Verifie en
+   demande par l'admin ("texte prix info en plus gros, une belle pastille"). Verifie en
    direct sur les 92 annonces reelles du site avant application (clone hors-ecran de
    .ad-body avec overflow:visible pour mesurer la hauteur naturelle du contenu) : aucun
    depassement du budget de hauteur fixe des cartes en desktop
@@ -1173,7 +1173,7 @@
 }
 
 /* Fix 20/09/2026 : boutons Modifier/Booster/Supprimer plus compacts sur la pastille
-   en desktop (vue admin/gestion des annonces), demande par Anthony. Verifie en direct
+   en desktop (vue admin/gestion des annonces), demande par l'admin. Verifie en direct
    sur abracadeal.fr avant application : la taille de base (.ad-actions .mini-btn,
    sans !important, ligne ~2534) passe de 36px de hauteur / 12px de padding / 12px de
    police a 29px / 9px / 11px sur desktop uniquement (>=761px) ; le mobile (regles
@@ -1185,7 +1185,7 @@
 
 /* Fix 21/09/2026 : les pastilles des carrousels "Selection du moment" / "D'apres vos
    recherches recentes" / "Recemment consultees" avaient des tailles differentes sur mobile
-   (signale par Anthony) - une regle plus tardive dans la cascade, destinee a la grille de
+   (signale par l'admin) - une regle plus tardive dans la cascade, destinee a la grille de
    resultats #resultats .ad-card, avait ete etendue par erreur a ces 3 carrousels et annulait
    leur hauteur fixe d'origine (260px/246px) + le line-clamp a 2 lignes du titre. Restaure ici
    uniquement pour ces carrousels (jamais pour #resultats .ad-card, qui garde son height:auto
@@ -1229,7 +1229,7 @@
 
 /* Fix 22/09/2026 : la disposition mobile en 2 lignes (recherche pleine largeur, puis
    ville+bouton en dessous - fix du 21/09) rendait la barre de recherche trop haute sur
-   mobile, surtout une fois flottante au scroll (signale par Anthony : "trop grande pour
+   mobile, surtout une fois flottante au scroll (signale par l'admin : "trop grande pour
    mobile"). Repassee sur une seule ligne : les 3 elements (recherche, ville, bouton) sont
    maintenant cote a cote. Le bouton est reduit a une icone loupe (le texte "Rechercher"
    reste dans le DOM pour l'accessibilite/lecteurs d'ecran, seulement masque visuellement via
@@ -1250,7 +1250,7 @@
 /* Fix 21/09/2026 : sur mobile, ouvrir le popover d'un filtre rapide ("Ville"/"Prix" sous
    "Les annonces") pouvait laisser une pastille "A LA UNE" (bordure doree) visible juste a
    cote du popover, si pres du bord de l'ecran que ca donnait l'impression que le popover
-   s'affichait derriere/mele aux pastilles d'annonces (signale par Anthony). Ajoute un fond
+   s'affichait derriere/mele aux pastilles d'annonces (signale par l'admin). Ajoute un fond
    assombri plein ecran derriere le popover, sur le meme principe que .modal-backdrop deja
    utilise par les autres fenetres du site : plus aucune pastille visible autour du popover
    pendant qu'il est ouvert, et un tap en dehors le referme (deja gere par le js existant,

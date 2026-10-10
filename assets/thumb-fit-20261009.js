@@ -1,5 +1,5 @@
 /* Abracadeal — cadrage automatique des photos dans les vignettes (09/10/2026).
-   Demande d'Anthony : toutes les photos postees doivent etre bien cadrees dans les vignettes,
+   Demande interne : toutes les photos postees doivent etre bien cadrees dans les vignettes,
    sur mobile, tablette et desktop, quel que soit leur format (portrait, paysage, carre).
    - Format proche de la vignette (recadrage <= 20 %) : la photo remplit la vignette, ancree en
      bas a droite pour ne jamais couper le filigrane "Abracadeal" incruste dans l'image.

@@ -404,7 +404,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Fix 21/09/2026 : compteur "Annonces à modérer" dans le tableau de bord admin.
   // Compte les annonces pending (premiere decision) + les annonces deja publiees
   // automatiquement mais pas encore relues par un admin (deuxieme verification
-  // manuelle demandee par Anthony), sans jamais les depublier en attendant.
+  // manuelle demandee), sans jamais les depublier en attendant.
   async function refreshPendingModerationStat(){
     const card=document.getElementById('statPendingModerationCard');
     const el=document.getElementById('statPendingModeration');
@@ -1178,7 +1178,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     requestAnimationFrame(measure);
   }
 
-  // Fix 20/09/2026 : barre de recherche "un peu buguee au scroll" (signale par Anthony).
+  // Fix 20/09/2026 : barre de recherche "un peu buguee au scroll" (retour utilisateur).
   // Cause trouvee : les deux tests d'entree/sortie utilisaient exactement le meme seuil
   // (triggerY+6), donc aucune vraie zone morte n'existait entre les deux etats - au moindre
   // micro-mouvement de la molette/trackpad pile a ce pixel-la (scroll inertiel, valeurs
@@ -1190,7 +1190,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // frame) pour alleger le travail pendant un scroll rapide.
   let ticking = false;
 
-  // Fix 22/09/2026 : bug signale par Anthony ("quand on est dans le scroll et qu'on veut
+  // Fix 22/09/2026 : bug retour utilisateur ("quand on est dans le scroll et qu'on veut
   // faire une recherche ca bloque"). Cause probable : sur mobile, l'ouverture du clavier
   // virtuel apres un tap dans un champ de la barre de recherche peut a elle seule faire
   // varier window.scrollY (le navigateur ajuste la page pour garder le champ visible), ce
@@ -1237,7 +1237,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   window.addEventListener('pageshow', () => { requestAnimationFrame(() => { measure(); update(); }); });
   window.addEventListener('scroll', onScroll, {passive:true});
   window.addEventListener('resize', () => {
-    // Fix 22/09/2026 (v2) : bug signale par Anthony ("quand on se positionne sur la barre
+    // Fix 22/09/2026 (v2) : bug retour utilisateur ("quand on se positionne sur la barre
     // de recherche et qu'on scroll en meme temps la barre disparait"). Cause trouvee : sur
     // mobile, taper dans un champ ouvre le clavier virtuel, ce qui declenche un evenement
     // 'resize' - or ce handler appelait restoreSearch() sans verifier searchFieldFocused
@@ -1346,7 +1346,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   /* Fix 21/09/2026 : certaines annonces (notamment immobilier) avaient une photo enregistree
      mais dont l'URL est cassee/inaccessible (ex. domaine de test invalide) - l'ancienne version
      masquait juste la photo (display:none) et n'affichait l'etoile de secours que sur mobile,
-     donc sur desktop la pastille restait vide (signale par Anthony : "les photos par defaut
+     donc sur desktop la pastille restait vide (retour utilisateur : "les photos par defaut
      n'apparaissent pas dans les pastilles immobilier"). Desormais on bascule vers la vraie
      photo de secours Abracadeal (meme visuel que quand il n'y a aucune photo), sur toutes les
      tailles d'ecran et sur toutes les zones photo du site. */

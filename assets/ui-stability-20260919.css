@@ -109,7 +109,7 @@ html{scrollbar-gutter:stable}
 }
 
 /* Noms / filigranes visibles sur les annonces et fiches vendeur */
-/* Fix 21/09/2026 : Anthony souhaite garder uniquement l'ecriture "Abracadeal" en filigrane sur
+/* Fix 21/09/2026 : l'admin souhaite garder uniquement l'ecriture "Abracadeal" en filigrane sur
    les photos, sans le fond assombri derriere. On retire le fond/padding/arrondi/flou et on
    renforce l'ombre portee du texte pour qu'il reste lisible sur n'importe quelle photo. */
 /* Fix 08/10/2026 : filigrane en double sur les photos. Le texte "Abracadeal" est deja incruste

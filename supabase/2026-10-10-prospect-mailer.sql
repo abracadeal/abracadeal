@@ -1,5 +1,5 @@
 -- Envoi automatique de la prospection Abracadeal depuis les boîtes OVH (Zimbra) — 10/10/2026
--- Verrouillé par défaut : rien ne part tant qu'Anthony n'a pas donné le « feu vert » depuis le CRM.
+-- Verrouillé par défaut : rien ne part tant qu'l'admin n'a pas donné le « feu vert » depuis le CRM.
 
 create table if not exists private.prospect_mailboxes (
   email text primary key,
