@@ -442,6 +442,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     put('statPlan20',stats.plan_counts?.pro_20);
     put('statPlan50',stats.plan_counts?.pro_50);
     put('statPlan100',stats.plan_counts?.pro_100);
+    put('statPlan200',stats.plan_counts?.pro_200);
     put('statPlan250',stats.plan_counts?.pro_250);
     const mrr=document.getElementById('statMrr');
     if(mrr)mrr.textContent=moneyFromCents(stats.theoretical_mrr_cents||0);
@@ -626,7 +627,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     pro_20:'Jusqu’à 20 annonces',
     pro_50:'Jusqu’à 50 annonces',
     pro_100:'Jusqu’à 100 annonces',
-    pro_250:'Jusqu’à 250 annonces'
+    pro_200:'Jusqu’à 200 annonces',
+    pro_250:'Plus de 200 annonces (sur devis)'
   };
   const statusLabels={
     trialing:'Période gratuite',

@@ -1965,7 +1965,7 @@ async function refreshProPhotoAllowance(){
   proPhotoAllowanceUser=uid;
   const {data,error}=await sb.from('pro_subscriptions').select('status,plan_code,billing_starts_at,current_period_end').eq('user_id',uid).maybeSingle();
   if(error){proPhotoAllowanceUser=null;return;}
-  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
+  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_200','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
 function publishOfferMatches(o,audience=accountAudience(),category=$('#adCategory')?.value){
