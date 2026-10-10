@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow">
+<title>Abracadeal — Espace modérateur</title>
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--bg:#f7f3fa;--card:#fff;--ink:#21132d;--muted:#77677f;--line:#e8dced;--p:#6f218c;--pink:#e746a3;--ok:#14855b;--no:#c0263d;--orange:#c97a12}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink)}
+.top{background:#1c0b2b;color:#fff;position:sticky;top:0;z-index:5}
+.topin{width:min(980px,calc(100% - 32px));margin:auto;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.brand{font-weight:900;font-size:1.1rem}.brand span{color:#f354b5}
+.wrap{width:min(980px,calc(100% - 32px));margin:24px auto 60px}
+.btn{border:0;cursor:pointer;border-radius:12px;padding:12px 16px;font-weight:800;font-size:.95rem;color:#fff;background:linear-gradient(135deg,#842aaa,var(--pink))}
+.btn.ghost{background:rgba(255,255,255,.12)}
+.btn.ok{background:var(--ok)}.btn.no{background:var(--no)}
+.btn:disabled{opacity:.5;cursor:wait}
+.login{max-width:400px;margin:60px auto;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 16px 40px rgba(47,17,63,.09)}
+.login h1{margin:0 0 6px;font-size:1.5rem}.login p{color:var(--muted);margin:0 0 20px;line-height:1.5}
+label{display:block;font-size:.85rem;font-weight:800;color:var(--muted);margin:14px 0 6px}
+input{width:100%;border:1px solid var(--line);border-radius:12px;padding:12px;font-size:1rem}
+input:focus{outline:2px solid #b34bd6;border-color:transparent}
+.login .btn{width:100%;margin-top:20px}
+.err{color:var(--no);font-weight:700;margin-top:12px;min-height:1.2em}
+.bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.bar h1{margin:0;font-size:1.4rem}.count{color:var(--muted)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin-bottom:16px;box-shadow:0 8px 22px rgba(47,17,63,.06)}
+.photos{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scroll-snap-type:x mandatory}
+.photos img{height:200px;width:auto;max-width:300px;object-fit:cover;border-radius:12px;flex:0 0 auto;cursor:zoom-in;scroll-snap-align:start;background:#eee}
+.nophoto{color:var(--muted);font-size:.9rem;padding:12px;border:1px dashed var(--line);border-radius:12px}
+h2{margin:12px 0 4px;font-size:1.15rem}
+.meta{color:var(--muted);font-size:.9rem;line-height:1.5}
+.price{font-weight:900;font-size:1.2rem;margin:4px 0}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:.78rem;font-weight:800;background:#f1e7f5;color:var(--p)}
+.chip.green{background:#e3f6ec;color:var(--ok)}.chip.orange{background:#fdf0dc;color:var(--orange)}.chip.red{background:#fde4e8;color:var(--no)}
+.reasons{font-size:.85rem;color:#7a4a00;background:#fff8ea;border-radius:10px;padding:8px 10px;margin:6px 0}
+.desc{white-space:pre-wrap;line-height:1.5;font-size:.95rem;max-height:9.5em;overflow:hidden;position:relative}
+.desc.open{max-height:none}
+.more{background:none;border:0;color:var(--p);font-weight:800;cursor:pointer;padding:4px 0}
+.actions{display:flex;gap:10px;margin-top:12px}.actions .btn{flex:1;padding:14px}
+.empty{text-align:center;padding:50px 20px;color:var(--muted);background:var(--card);border-radius:18px;border:1px solid var(--line)}
+.zoom{position:fixed;inset:0;background:rgba(0,0,0,.88);display:none;align-items:center;justify-content:center;z-index:20;cursor:zoom-out}
+.zoom img{max-width:94vw;max-height:92vh;border-radius:10px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:#21132d;color:#fff;padding:12px 18px;border-radius:12px;font-weight:700;opacity:0;transition:.2s;pointer-events:none;z-index:30}
+.toast.show{opacity:1}
+.help{font-size:.85rem;color:var(--muted);line-height:1.5;margin:-6px 0 16px}
+@media(max-width:560px){.photos img{height:160px}.actions{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><div class="brand">Abracadeal <span>Modération</span></div><button class="btn ghost" id="logout" hidden>Déconnexion</button></div></header>
+
+<section class="login" id="loginBox">
+  <h1>Espace modérateur</h1>
+  <p>Connectez-vous avec le pseudo et le mot de passe qui vous ont été donnés.</p>
+  <form id="loginForm">
+    <label for="pseudo">Pseudo modérateur</label>
+    <input id="pseudo" autocomplete="username" autocapitalize="none" spellcheck="false" required>
+    <label for="password">Mot de passe</label>
+    <input id="password" type="password" autocomplete="current-password" required>
+    <button class="btn" id="loginBtn" type="submit">Se connecter</button>
+    <div class="err" id="loginErr"></div>
+  </form>
+</section>
+
+<main class="wrap" id="app" hidden>
+  <div class="bar"><div><h1>Annonces à vérifier</h1><div class="count" id="count">Chargement…</div></div><button class="btn" id="refresh">Actualiser</button></div>
+  <p class="help">Vérifiez les photos, le titre, le prix et la description. <strong>Valider</strong> met l’annonce en ligne. <strong>Supprimer</strong> la refuse définitivement (arnaque, contenu interdit, photos inappropriées, annonce absurde…). En cas de doute, laissez-la : l’administrateur la verra.</p>
+  <div id="list"></div>
+</main>
+
+<div class="zoom" id="zoom"><img alt=""></div>
+<div class="toast" id="toast"></div>
+
+<script>
+const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF',{auth:{persistSession:true,autoRefreshToken:true,storageKey:'abracadeal-moderateur'}});
+const $=id=>document.getElementById(id);
+const CAT={vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'};
+let rows=[],busy=false,timer=null;
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+function toast(t){const el=$('toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2800)}
+function money(v){return v===null||v===undefined||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
+function ago(v){const h=Math.floor((Date.now()-new Date(v))/3600000);if(h<1)return'il y a moins d’une heure';if(h<24)return'il y a '+h+' h';return'il y a '+Math.floor(h/24)+' j'}
+function risk(r){if(!r.risk_level)return'<span class="chip">Analyse automatique en attente</span>';const l={green:['green','Risque faible'],orange:['orange','À vérifier'],red:['red','Risque élevé']}[r.risk_level]||['','Analyse'];return'<span class="chip '+l[0]+'">'+l[1]+(r.risk_score!=null?' · '+r.risk_score+'/100':'')+'</span>'}
+
+async function api(body){
+  const {data,error}=await sb.functions.invoke('moderator-api',{body});
+  if(error){let m=error.message;try{m=(await error.context.json()).error||m}catch(_){}throw new Error(m)}
+  if(data?.error)throw new Error(data.error);return data;
+}
+function render(){
+  $('count').textContent=rows.length?rows.length+' annonce'+(rows.length>1?'s':'')+' en attente':'';
+  if(!rows.length){$('list').innerHTML='<div class="empty">🎉 Aucune annonce à vérifier pour le moment.<br>La liste se met à jour toute seule.</div>';return}
+  $('list').innerHTML=rows.map(r=>{
+    const veh=r.category==='vehicules'?[r.vehicle_make,r.vehicle_model,r.vehicle_year,r.mileage!=null?Number(r.mileage).toLocaleString('fr-FR')+' km':null].filter(Boolean).join(' · '):'';
+    return '<article class="item" data-id="'+r.id+'">'+
+      (r.photos.length?'<div class="photos">'+r.photos.map(u=>'<img loading="lazy" src="'+esc(u)+'" alt="">').join('')+'</div>':'<div class="nophoto">Aucune photo</div>')+
+      '<h2>'+esc(r.title||'Sans titre')+'</h2><div class="price">'+money(r.price)+'</div>'+
+      '<div class="meta">'+esc(CAT[r.category]||r.category||'')+' · '+esc([r.city,r.postal_code].filter(Boolean).join(' '))+' · '+(r.seller_type==='professionnel'?'Professionnel':'Particulier')+' · déposée '+ago(r.created_at)+(veh?'<br>'+esc(veh):'')+'</div>'+
+      '<div class="chips">'+risk(r)+(r.revision_of?'<span class="chip orange">Modification d’une annonce déjà en ligne</span>':'')+'</div>'+
+      (r.reasons?.length?'<div class="reasons">'+r.reasons.map(x=>'• '+esc(x)).join('<br>')+'</div>':'')+
+      '<div class="desc">'+esc(r.description||'(pas de description)')+'</div><button class="more" type="button">Lire tout</button>'+
+      '<div class="actions"><button class="btn ok" data-act="ok">✓ Valider</button><button class="btn no" data-act="no">✕ Supprimer</button></div></article>'}).join('');
+}
+async function load(){
+  try{const d=await api({action:'queue'});rows=d.rows||[];render()}
+  catch(e){$('count').textContent='Erreur : '+e.message;if(/reconnect|session|réservé/i.test(e.message))showLogin(e.message)}
+}
+async function act(id,ok){
+  if(busy)return;const r=rows.find(x=>x.id===id);if(!r)return;
+  if(!ok&&!confirm('Supprimer définitivement l’annonce « '+(r.title||'')+' » ?'))return;
+  busy=true;document.querySelectorAll('.item[data-id="'+id+'"] .btn').forEach(b=>b.disabled=true);
+  try{
+    if(ok){
+      const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
+      if(error){let m=error.message;try{m=(await error.context.json()).error||m}catch(_){}throw new Error(m)}
+      if(data?.status==='rejected')toast('Le contrôle de sécurité a bloqué cette annonce : elle est refusée.');
+      else if(data?.status!=='active'&&data?.revision!==true)throw new Error(data?.ai_error||data?.error||'Validation impossible, réessayez');
+      else toast('✓ Annonce validée et mise en ligne');
+    }else{
+      const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'rejected'});
+      if(error)throw error;toast('Annonce supprimée');
+    }
+    rows=rows.filter(x=>x.id!==id);render();
+  }catch(e){toast(e.message||'Action impossible');document.querySelectorAll('.item[data-id="'+id+'"] .btn').forEach(b=>b.disabled=false)}
+  finally{busy=false}
+}
+$('list').addEventListener('click',e=>{
+  const item=e.target.closest('.item');if(!item)return;
+  if(e.target.matches('img')){$('zoom').querySelector('img').src=e.target.src;$('zoom').style.display='flex';return}
+  if(e.target.matches('.more')){const d=item.querySelector('.desc');d.classList.toggle('open');e.target.textContent=d.classList.contains('open')?'Réduire':'Lire tout';return}
+  const b=e.target.closest('[data-act]');if(b)act(item.dataset.id,b.dataset.act==='ok');
+});
+$('zoom').addEventListener('click',()=>$('zoom').style.display='none');
+$('refresh').addEventListener('click',load);
+
+function showLogin(msg){clearInterval(timer);$('app').hidden=true;$('logout').hidden=true;$('loginBox').hidden=false;$('loginErr').textContent=msg||''}
+async function enter(){
+  const {data:ok}=await sb.rpc('is_moderator');
+  if(ok!==true){await sb.auth.signOut();showLogin('Ce compte n’a pas accès à la modération.');return}
+  $('loginBox').hidden=true;$('app').hidden=false;$('logout').hidden=false;
+  await load();clearInterval(timer);timer=setInterval(load,60000);
+}
+$('loginForm').addEventListener('submit',async e=>{
+  e.preventDefault();$('loginErr').textContent='';$('loginBtn').disabled=true;
+  const pseudo=$('pseudo').value.trim().toLowerCase();
+  const email=pseudo.includes('@')?pseudo:pseudo+'@moderation.abracadeal.fr';
+  const {error}=await sb.auth.signInWithPassword({email,password:$('password').value});
+  $('loginBtn').disabled=false;
+  if(error){$('loginErr').textContent=/banned/i.test(error.message)?'Accès désactivé. Contactez l’administrateur.':'Pseudo ou mot de passe incorrect.';return}
+  $('password').value='';enter();
+});
+$('logout').addEventListener('click',async()=>{await sb.auth.signOut();showLogin('Vous êtes déconnecté.')});
+(async()=>{const {data:{session}}=await sb.auth.getSession();if(session)enter()})();
+</script>
+</body>
+</html>

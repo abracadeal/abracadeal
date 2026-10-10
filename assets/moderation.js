@@ -434,3 +434,37 @@ async function releasePhoneReservation(index){
  }catch(error){toast(error.message||'Libération impossible');}
  finally{phoneReleaseBusy=false;}
 }
+
+
+// ---------- Comptes modérateurs (admin) ----------
+async function modApi(body){
+  const {data,error}=await sb.functions.invoke('moderator-api',{body});
+  if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch{}throw new Error(msg)}
+  if(data?.error)throw new Error(data.error);
+  return data;
+}
+async function loadModerators(){
+  const host=$('#modList');if(!host)return;
+  const {data,error}=await sb.rpc('admin_moderators');
+  if(error){host.textContent='Erreur : '+error.message;return}
+  if(!data?.length){host.innerHTML='<p>Aucun modérateur pour le moment.</p>';return}
+  host.innerHTML=data.map(m=>'<div class="phone-reservation"><strong>'+esc(m.pseudo)+'</strong> · '+(m.active?'✅ actif':'⛔ accès coupé')+'<br><small>'+m.validated+' validée(s) · '+m.rejected+' supprimée(s)'+(m.last_action?' · dernière action '+new Date(m.last_action).toLocaleString('fr-FR'):'')+'</small><br>'+
+    '<button type="button" data-mod-toggle="'+m.user_id+'" data-active="'+(m.active?'0':'1')+'">'+(m.active?'Couper l’accès':'Réactiver')+'</button> '+
+    '<button type="button" data-mod-reset="'+m.user_id+'" data-pseudo="'+esc(m.pseudo)+'">Changer le mot de passe</button></div>').join('');
+}
+$('#modCreateForm')?.addEventListener('submit',async e=>{
+  e.preventDefault();const btn=$('#modCreateBtn');btn.disabled=true;
+  try{const d=await modApi({action:'create',pseudo:$('#modPseudo').value,password:$('#modPassword').value});toast(d.message);$('#modPseudo').value='';$('#modPassword').value='';await loadModerators()}
+  catch(err){toast(err.message||'Création impossible')}
+  finally{btn.disabled=false}
+});
+$('#modList')?.addEventListener('click',async e=>{
+  const t=e.target.closest('[data-mod-toggle]'),r=e.target.closest('[data-mod-reset]');
+  try{
+    if(t){const active=t.dataset.active==='1';if(!confirm(active?'Réactiver ce modérateur ?':'Couper l’accès de ce modérateur ? Il sera déconnecté et ne pourra plus se connecter.'))return;
+      const d=await modApi({action:'set_active',user_id:t.dataset.modToggle,active});toast(d.message);await loadModerators()}
+    if(r){const pw=prompt('Nouveau mot de passe pour « '+r.dataset.pseudo+' » (8 caractères minimum) :');if(!pw)return;
+      const d=await modApi({action:'reset',user_id:r.dataset.modReset,password:pw});toast(d.message)}
+  }catch(err){toast(err.message||'Action impossible')}
+});
+$('#modAdminPanel')?.addEventListener('toggle',e=>{if(e.target.open)loadModerators()});

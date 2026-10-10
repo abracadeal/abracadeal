@@ -251,3 +251,10 @@ grant execute on function public.prospect_unsubscribe(uuid) to service_role;
 --   public.get_my_founder_availability() (page Pro), public.admin_founder_quota_overview().
 -- * prospect_mailer_templates_by_category : private.prospect_mailer_settings.templates (versions auto / immo / moto),
 --   public.prospect_mailer_template_for(text), public.admin_prospect_template_save_cat(text,text,text).
+
+-- Modération déléguée (10/10/2026, migrations moderator_role + moderator_scope_pending_only) :
+-- private.moderators(user_id, pseudo, active), public.is_moderator(), moderate_listing() ouvert aux modérateurs
+-- (annonces 'pending' uniquement, analyse de sécurité requise avant mise en ligne), public.moderator_register(),
+-- public.admin_moderators(), public.moderator_set_active(). Fonctions serveur : moderator-api (file + gestion des comptes),
+-- moderate-listing (action validate autorisée aux modérateurs). Pages : moderateur.html (pseudo + mot de passe),
+-- gestion des comptes dans moderation.html (admin).

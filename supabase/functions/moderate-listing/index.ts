@@ -27,6 +27,7 @@ Deno.serve(async(req)=>{
 
     let caller:any=null;
     let isAdmin=false;
+    let isModerator=false;
     if(!trustedInternal){
       const authHeader=req.headers.get('Authorization')||'';
       if(!authHeader)return json({error:'Non authentifié'},401);
@@ -36,6 +37,7 @@ Deno.serve(async(req)=>{
       if(authError||!caller)return json({error:'Session invalide'},401);
       const{data:callerProfile}=await admin.from('profiles').select('is_admin').eq('id',caller.id).maybeSingle();
       isAdmin=!!callerProfile?.is_admin;
+      if(!isAdmin){const{data:mod}=await callerClient.rpc('is_moderator');isModerator=mod===true;}
     }
 
     const body=await req.json().catch(()=>({}));
@@ -64,7 +66,7 @@ Deno.serve(async(req)=>{
 
     const{data:listing,error:listingError}=await admin.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,postal_code,item_condition,seller_type,status,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,updated_at,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value').eq('id',listingId).single();
     if(listingError||!listing)return json({error:'Annonce introuvable'},404);
-    if(!trustedInternal&&listing.owner_id!==caller.id&&!isAdmin)return json({error:'Accès refusé'},403);
+    if(!trustedInternal&&listing.owner_id!==caller.id&&!isAdmin&&!isModerator)return json({error:'Accès refusé'},403);
 
     const action=String(body?.action||'moderate');
     if(action==='pharos'){
@@ -72,7 +74,8 @@ Deno.serve(async(req)=>{
       await enforce(admin,listing,'Action Pharos préparée par un administrateur : photos supprimées, compte banni (envoi à confirmer)',true,caller.id);
       return json({ok:true,pharos_submitted:false,portal:'https://www.internet-signalement.gouv.fr/'});
     }
-    if(action==='validate'&&!isAdmin)return json({error:'Administrateur requis'},403);
+    if(action==='validate'&&!isAdmin&&!isModerator)return json({error:'Administrateur ou modérateur requis'},403);
+    if(isModerator&&!isAdmin&&action!=='validate')return json({error:'Action réservée à l’administrateur'},403);
     const {data:blocked,error:blockedError}=await admin.from('listing_moderation').select('safety_blocked').eq('listing_id',listing.id).maybeSingle();
     if(blockedError)throw blockedError;
     if(blocked?.safety_blocked){
