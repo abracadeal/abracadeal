@@ -238,3 +238,8 @@ grant execute on function public.prospect_mailer_template() to service_role;
 grant execute on function public.prospect_mailer_claim() to service_role;
 grant execute on function public.prospect_mailer_done(uuid, boolean, text, text) to service_role;
 grant execute on function public.prospect_unsubscribe(uuid) to service_role;
+
+-- Migration complémentaire « prospect_mailer_category_mix » (appliquée) :
+-- private.prospect_mailer_settings.category_mix jsonb (défaut auto 50 / immo 35 / moto 15),
+-- public.admin_prospect_mix_save(jsonb), admin_prospect_mailer_state() renvoie category_mix + waiting_by_category,
+-- prospect_mailer_claim() choisit la catégorie la plus en retard sur sa part du jour.
