@@ -12,3 +12,33 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
  dialog.oncancel=e=>{e.preventDefault();finish(null);};
  document.body.append(dialog);dialog.showModal();
 });
+
+// Vacances utilise les memes pages d'information et legales que le site principal.
+// On evite ainsi le melange entre fenetres modales et pages completes.
+(function(){
+ const destinations={
+  vacHelpModal:'aide.html',
+  vacSafetyModal:'securite.html',
+  vacCguModal:'cgu.html',
+  vacPrivacyModal:'confidentialite.html',
+  vacContactModal:'contact.html'
+ };
+ function harmonizeVacancesLegal(){
+  document.querySelectorAll('[data-vac-legal]').forEach(link=>{
+   const target=destinations[link.getAttribute('data-vac-legal')];
+   if(!target)return;
+   link.setAttribute('href',target);
+   link.removeAttribute('data-vac-legal');
+  });
+  document.querySelectorAll('.vac-legal-overlay').forEach(modal=>modal.remove());
+  const links=document.querySelector('.vac-legal-links');
+  if(links){
+   links.style.fontSize='12px';
+   links.style.lineHeight='1.45';
+   links.style.gap='8px 14px';
+   links.style.opacity='.82';
+  }
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',harmonizeVacancesLegal);
+ else harmonizeVacancesLegal();
+})();
