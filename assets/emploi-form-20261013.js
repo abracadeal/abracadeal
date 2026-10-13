@@ -1,6 +1,6 @@
 /* Abracadeal — formulaire structure Emploi (13/10/2026)
-   Ajoute des champs metier uniquement quand la publication concerne Emploi/Offres d'emploi.
-   Les valeurs sont injectees dans la description existante afin de rester compatibles avec le schema listings actuel. */
+   Le type de contrat est deja gere par la sous-categorie Emploi existante (CDI, CDD, etc.).
+   Ce bloc ajoute uniquement les informations complementaires afin d'eviter tout doublon. */
 (function(){
   'use strict';
   const EMP=/emploi|offre d['’ ]?emploi|recrut/i;
@@ -19,7 +19,6 @@
     if(!desc) return;
     const box=document.createElement('section'); box.id='abracaJobFields'; box.className='abraca-job-fields';
     box.innerHTML=`<h3>Informations sur le poste</h3><p class="abraca-job-help">Ajoutez les informations essentielles pour aider les candidats à trouver votre offre.</p>
-      ${field('Type de contrat','job_contract',`<select name="__NAME__" required><option value="">Choisir</option>${options(['CDI','CDD','Intérim','Alternance','Stage','Freelance / Indépendant','Saisonnier','Autre'])}</select>`,true)}
       ${field("Secteur d’activité",'job_sector','<input name="__NAME__" type="text" placeholder="Ex. Transport, Hôtellerie, Commerce">',false)}
       ${field('Métier','job_trade','<input name="__NAME__" type="text" placeholder="Ex. Chauffeur privé">',false)}
       ${field('Expérience','job_experience',`<select name="__NAME__"><option value="">Non précisé</option>${options(['Débutant accepté','0 à 2 ans','2 à 5 ans','5 à 10 ans','10 ans et +'])}</select>`,false)}
@@ -36,7 +35,7 @@
     const form=desc.closest('form');
     form?.addEventListener('submit',()=>{
       const rows=[]; const val=n=>txt($(`[name="${n}"]`,box));
-      [['Type de contrat','job_contract'],["Secteur d’activité",'job_sector'],['Métier','job_trade'],['Expérience','job_experience'],["Niveau d’études",'job_education'],['Temps de travail','job_schedule'],['Référence','job_reference']].forEach(([l,n])=>{if(val(n))rows.push(`${l} : ${val(n)}`)});
+      [["Secteur d’activité",'job_sector'],['Métier','job_trade'],['Expérience','job_experience'],["Niveau d’études",'job_education'],['Temps de travail','job_schedule'],['Référence','job_reference']].forEach(([l,n])=>{if(val(n))rows.push(`${l} : ${val(n)}`)});
       if(val('job_salary')) rows.push(`Salaire brut : ${val('job_salary')} € ${val('job_salary_period')||''}`.trim());
       if(val('job_apply_method')==='website'&&val('job_apply_url')) rows.push(`Candidature : ${val('job_apply_url')}`);
       if(rows.length){
