@@ -1,15 +1,22 @@
 """Pages publiques des annonces : référencement Google + aperçu de partage (WhatsApp / Facebook / SMS).
 
 Exécuté par GitHub Actions (.github/workflows/share-pages.yml) toutes les 10 minutes environ.
-Pour chaque annonce active et publique :
-  - annonce/<id>/index.html : vraie page lisible par Google (titre, prix, ville, photos, description,
-    caractéristiques, données structurées schema.org), indexable, avec un bouton vers la fiche complète
-    https://abracadeal.fr/?annonce=<id> (contact, favoris, messagerie) ;
+Pour chaque annonce active, publique, non expirée (et qui n'est pas une révision en attente) :
+  - annonce/<id>/index.html : vraie page lisible par Google sans JavaScript (titre, prix, ville, photos,
+    description, caractéristiques, données structurées schema.org), indexable, avec un bouton vers la
+    fiche complète https://abracadeal.fr/?annonce=<id> (contact, favoris, messagerie) ;
   - annonce/<id>/apercu.jpg : photo principale en JPEG (format lu par WhatsApp pour l'aperçu).
-Génère aussi sitemap-annonces.xml (liste des annonces en ligne, soumise à Google via sitemap.xml).
-Les dossiers des annonces qui ne sont plus en ligne sont supprimés (la page renvoie alors 404).
+Génère aussi :
+  - annonces/... : pages catégories / villes / catégorie + ville avec de vrais liens <a href> vers les annonces ;
+  - sitemap-annonces.xml (annonces en ligne) et sitemap-categories.xml (pages catégories / villes non vides),
+    tous deux référencés par sitemap.xml.
+Les dossiers des annonces qui ne sont plus en ligne (vendues, retirées, expirées, refusées, masquées,
+supprimées...) sont supprimés : GitHub Pages renvoie alors une vraie erreur 404 et l'URL sort du sitemap.
 
 Aucune donnée de contact (téléphone, e-mail) n'est publiée : elles restent réservées aux membres connectés.
+
+Test hors ligne : ABRACA_FIXTURE=chemin/vers/annonces.json python scripts/build_share_pages.py
+(le fichier contient la liste des annonces telle que renvoyée par Supabase ; aucune photo n'est téléchargée).
 """
 import datetime
 import hashlib
@@ -20,6 +27,7 @@ import os
 import re
 import shutil
 import sys
+import unicodedata
 import urllib.parse
 import urllib.request
 
@@ -28,20 +36,75 @@ from PIL import Image
 SUPABASE_URL = "https://jplzvxmpbpjssyinozap.supabase.co"
 SUPABASE_KEY = "sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF"  # clé publique du site
 SITE = "https://abracadeal.fr"
-BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
+BASE = os.environ.get("ABRACA_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 ROOT = os.path.join(BASE, "annonce")
+HUBS = os.path.join(BASE, "annonces")
 SITEMAP = os.path.join(BASE, "sitemap-annonces.xml")
+SITEMAP_HUBS = os.path.join(BASE, "sitemap-categories.xml")
+FIXTURE = os.environ.get("ABRACA_FIXTURE")
 DEFAULT_PHOTO = SITE + "/assets/default-listing-photo-20260921.jpg"
 CATEGORIES = {"vehicules": "Véhicules", "immobilier": "Immobilier", "vacances": "Locations de vacances",
               "hightech": "High-tech", "maison": "Maison", "mode": "Mode", "emploi": "Emploi",
               "services": "Services", "autres": "Autres"}
 MAX_IMAGE_BYTES = 280 * 1024  # WhatsApp n'affiche plus l'aperçu au-delà d'environ 300 Ko
 MAX_PHOTOS = 8
-VERSION = "2"  # à incrémenter pour forcer la régénération de toutes les pages
+MAX_HUB_LISTINGS = 120
+VERSION = "3"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
-          "created_at,updated_at,listing_photos(storage_path,position)")
+          "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
 MARKER = re.compile(r"^\[ABRACA_([A-Z_]+):([^\]]*)\]\s*", re.M)
+
+# Pages catégories : (slug d'URL, nom, nom au pluriel pour les phrases, filtre, texte d'introduction)
+HUB_CATEGORIES = [
+    ("voitures-occasion", "Voitures d’occasion", "voitures d’occasion",
+     lambda l, m: l.get("category") == "vehicules" and (m["sub"] == "voitures" or (not m["sub"] and bool(l.get("vehicle_make")))),
+     "Citadines, berlines, SUV, breaks ou monospaces : retrouvez les voitures d’occasion vendues par des particuliers "
+     "et des professionnels, avec marque, modèle, année, kilométrage, énergie et boîte de vitesses affichés sur chaque annonce."),
+    ("motos", "Motos et scooters d’occasion", "motos et scooters d’occasion",
+     lambda l, m: l.get("category") == "vehicules" and m["sub"] == "motos",
+     "Roadsters, sportives, trails, customs et scooters : parcourez les deux-roues d’occasion à vendre, "
+     "du 50 cm³ pour la ville à la grosse cylindrée pour la route."),
+    ("utilitaires", "Utilitaires d’occasion", "utilitaires d’occasion",
+     lambda l, m: l.get("category") == "vehicules" and m["sub"] == "utilitaires",
+     "Fourgons, fourgonnettes, plateaux et camions benne : les véhicules utilitaires d’occasion pour les artisans, "
+     "les entreprises et les particuliers."),
+    ("vehicules", "Véhicules d’occasion", "véhicules d’occasion",
+     lambda l, m: l.get("category") == "vehicules",
+     "Toutes les annonces de véhicules : voitures, motos, utilitaires, camping-cars et caravanes, "
+     "vendus par des particuliers et des professionnels."),
+    ("immobilier", "Immobilier", "annonces immobilières",
+     lambda l, m: l.get("category") == "immobilier",
+     "Appartements, maisons, terrains et locaux : annonces immobilières à la vente et à la location, "
+     "avec surface, nombre de pièces, DPE et photos."),
+    ("locations-vacances", "Locations de vacances", "locations de vacances",
+     lambda l, m: l.get("category") == "vacances",
+     "Appartements, villas et studios à louer pour les vacances, au tarif à la nuit, directement auprès des hôtes."),
+    ("high-tech", "High-tech d’occasion", "produits high-tech d’occasion",
+     lambda l, m: l.get("category") == "hightech",
+     "Smartphones, ordinateurs, consoles, TV et photo : le high-tech d’occasion à petit prix."),
+    ("maison", "Maison et jardin", "articles pour la maison",
+     lambda l, m: l.get("category") == "maison",
+     "Meubles, électroménager, décoration, bricolage et jardin : équipez votre maison avec des articles d’occasion."),
+    ("mode", "Mode", "articles de mode",
+     lambda l, m: l.get("category") == "mode",
+     "Vêtements, chaussures, sacs, montres et accessoires de mode d’occasion."),
+    ("emploi", "Emploi", "offres d’emploi",
+     lambda l, m: l.get("category") == "emploi",
+     "Offres d’emploi, missions et recrutements publiés par les entreprises et les particuliers."),
+    ("services", "Services", "annonces de services",
+     lambda l, m: l.get("category") == "services",
+     "Artisans, cours, aide à domicile, déménagement et prestations : trouvez un service près de chez vous."),
+]
+CORE_CATEGORIES = ("voitures-occasion", "motos", "immobilier")  # toujours publiées, même vides (en noindex)
+CORE_CITIES = {"cannes": "Cannes", "nice": "Nice", "marseille": "Marseille"}
+CITY_TEXT = {
+    "cannes": "Cannes et ses environs (Le Cannet, Mandelieu-la-Napoule, Mougins, Vallauris), sur la Côte d’Azur, dans les Alpes-Maritimes.",
+    "nice": "Nice et la métropole Nice Côte d’Azur (Saint-Laurent-du-Var, Cagnes-sur-Mer, Villefranche-sur-Mer).",
+    "marseille": "Marseille et ses arrondissements, ainsi que les communes voisines des Bouches-du-Rhône.",
+}
+MIN_LISTINGS_FOR_CITY = 3  # une ville hors liste ci-dessus obtient sa page dès 3 annonces en ligne
+RESERVED_SLUGS = {h[0] for h in HUB_CATEGORIES}
 
 
 def fetch(url, headers=None):
@@ -51,16 +114,33 @@ def fetch(url, headers=None):
 
 
 def active_listings():
+    if FIXTURE:
+        with open(FIXTURE, encoding="utf-8") as f:
+            return json.load(f)
+    now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     rows, start, page = [], 0, 1000
     while True:
         q = urllib.parse.urlencode({"select": FIELDS, "status": "eq.active", "visibility_scope": "eq.public",
-                                    "revision_of": "is.null", "order": "created_at.desc"})
+                                    "revision_of": "is.null", "or": f"(expires_at.is.null,expires_at.gt.{now})",
+                                    "order": "created_at.desc"})
         data = json.loads(fetch(f"{SUPABASE_URL}/rest/v1/listings?{q}", {
             "apikey": SUPABASE_KEY, "Range-Unit": "items", "Range": f"{start}-{start + page - 1}"}))
         rows += data
         if len(data) < page:
             return rows
         start += page
+
+
+def slugify(s):
+    s = unicodedata.normalize("NFKD", str(s or "")).encode("ascii", "ignore").decode().lower()
+    return re.sub(r"[^a-z0-9]+", "-", s).strip("-")
+
+
+def city_key(city):
+    """« Marseille 8e », « MARSEILLE » et « Marseille 13008 » -> « marseille »."""
+    c = re.sub(r"\b(cedex|arrondissement)\b.*$", "", str(city or ""), flags=re.I)
+    c = re.sub(r"\s+\d+\s*(e|er|eme|ème)?\s*$", "", c.strip(), flags=re.I)
+    return slugify(c)
 
 
 def money(v):
@@ -116,6 +196,13 @@ def to_jpeg(raw):
         img.save(out, "JPEG", quality=quality, optimize=True, progressive=True)
         if out.tell() <= MAX_IMAGE_BYTES:
             break
+    return out.getvalue(), img.size
+
+
+def placeholder_jpeg():
+    img = Image.new("RGB", (1200, 900), (111, 33, 140))
+    out = io.BytesIO()
+    img.save(out, "JPEG", quality=80)
     return out.getvalue(), img.size
 
 
@@ -201,7 +288,7 @@ def seo_title(listing, meta):
     return " – ".join(parts)
 
 
-def json_ld(listing, meta, photos, page_url, desc):
+def json_ld(listing, meta, photos, page_url, desc, crumbs):
     price = listing.get("price")
     offer = {"@type": "Offer", "url": page_url, "priceCurrency": "EUR",
              "availability": "https://schema.org/InStock",
@@ -231,13 +318,23 @@ def json_ld(listing, meta, photos, page_url, desc):
             data["fuelType"] = listing["fuel"]
         if listing.get("transmission"):
             data["vehicleTransmission"] = listing["transmission"]
-    crumbs = [("Accueil", SITE + "/"),
-              (CATEGORIES.get(listing.get("category"), "Annonces"), None),
-              ((listing.get("title") or "Annonce").strip(), page_url)]
-    crumb = {"@context": "https://schema.org", "@type": "BreadcrumbList",
-             "itemListElement": [dict({"@type": "ListItem", "position": i + 1, "name": n}, **({"item": u} if u else {})) for i, (n, u) in enumerate(crumbs)]}
-    dump = lambda d: json.dumps(d, ensure_ascii=False).replace("</", "<\\/")
-    return f'<script type="application/ld+json">{dump(data)}</script>\n<script type="application/ld+json">{dump(crumb)}</script>'
+    return ld_script(data) + "\n" + ld_script(breadcrumb_ld(crumbs))
+
+
+def ld_script(d):
+    return '<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False).replace("<", "\\u003c") + "</script>"
+
+
+def breadcrumb_ld(crumbs):
+    return {"@context": "https://schema.org", "@type": "BreadcrumbList",
+            "itemListElement": [dict({"@type": "ListItem", "position": i + 1, "name": n}, **({"item": u} if u else {}))
+                                for i, (n, u) in enumerate(crumbs)]}
+
+
+def crumbs_html(crumbs):
+    e = lambda s: html.escape(str(s), quote=True)
+    parts = [f'<a href="{e(u)}">{e(n)}</a>' for n, u in crumbs[:-1]]
+    return '<nav class="crumbs" aria-label="Fil d’Ariane">' + " › ".join(parts + [e(crumbs[-1][0])]) + "</nav>"
 
 
 CSS = """*{box-sizing:border-box}body{margin:0;background:#f7f3fa;color:#21132d;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
@@ -252,10 +349,46 @@ h1{font-size:1.5rem;line-height:1.25;margin:0 0 6px}.price{font-size:1.6rem;font
 .cta{display:block;text-align:center;background:#6f218c;color:#fff;font-weight:800;padding:14px;border-radius:12px;text-decoration:none;margin:14px 0}
 table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid #efe6f4;vertical-align:top}th{color:#6b5a78;font-weight:600;width:45%}
 .desc{white-space:pre-line;overflow-wrap:anywhere}h2{font-size:1.1rem;margin:0 0 8px}footer{text-align:center;font-size:.8rem;color:#6b5a78;padding:24px 16px}
-.badge{display:inline-block;background:#f1e7f5;color:#6f218c;font-weight:700;font-size:.78rem;padding:3px 9px;border-radius:999px;margin-bottom:8px}"""
+.badge{display:inline-block;background:#f1e7f5;color:#6f218c;font-weight:700;font-size:.78rem;padding:3px 9px;border-radius:999px;margin-bottom:8px}
+.intro{color:#4a3a57;margin:0 0 14px}.list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
+.list a{display:flex;flex-direction:column;background:#fff;border-radius:14px;overflow:hidden;text-decoration:none;color:#21132d;box-shadow:0 2px 10px rgba(36,16,47,.06);height:100%}
+.list img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#e9dff0}.list .t{font-weight:700;padding:10px 12px 2px}.list .p{color:#6f218c;font-weight:800;padding:0 12px}.list .c{color:#6b5a78;font-size:.85rem;padding:2px 12px 12px}
+.links{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none;margin:0}.links a{display:inline-block;background:#fff;border:1px solid #e4d6ec;border-radius:999px;padding:6px 12px;text-decoration:none;font-size:.9rem}"""
 
 
-def page_html(listing, size):
+def page_head(title, desc, url, robots="index,follow,max-image-preview:large", og_image=None, extra=""):
+    e = lambda s: html.escape(str(s), quote=True)
+    og = (f'<meta property="og:image" content="{e(og_image)}">\n'
+          f'<meta name="twitter:card" content="summary_large_image">\n') if og_image else ""
+    return f"""<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="{robots}">
+<title>{e(title)}</title>
+<meta name="description" content="{e(desc)}">
+<link rel="canonical" href="{e(url)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Abracadeal">
+<meta property="og:locale" content="fr_FR">
+<meta property="og:title" content="{e(title)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{e(url)}">
+{og}<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<style>{CSS}</style>
+{extra}
+</head><body>
+<header><a href="{SITE}/"><img src="/icon-192.png" alt="" width="30" height="30">Abracadeal</a></header>
+<main>
+"""
+
+
+PAGE_FOOT = """</main>
+<footer>Abracadeal — petites annonces partout en France · <a href="/annonces/">Toutes les catégories et villes</a> · <a href="/">Accueil</a></footer>
+</body></html>
+"""
+
+
+def page_html(listing, size, crumbs, ref_suffix=""):
     lid = listing["id"]
     e = lambda s: html.escape(str(s), quote=True)
     text, meta = parse_description(listing.get("description"))
@@ -269,13 +402,15 @@ def page_html(listing, size):
     cat = CATEGORIES.get(listing.get("category"), "Annonces")
     page_url = f"{SITE}/annonce/{lid}/"
     app_url = f"{SITE}/?annonce={urllib.parse.quote(lid)}"
-    head_title = seo_title(listing, meta)
+    head_title = seo_title(listing, meta) + ref_suffix
     specs = specs_of(listing, meta)
     key = {"Année", "Kilométrage", "Énergie", "Boîte de vitesses", "Surface", "Pièces", "Type de bien", "Transaction", "État"}
     spec_txt = ", ".join(v for k, v in specs if k in key)
     desc_src = " ".join(text.split())
     meta_desc = " · ".join(x for x in (title, price, place, spec_txt, desc_src) if x)
     meta_desc = (meta_desc[:155].rsplit(" ", 1)[0] + "…") if len(meta_desc) > 158 else meta_desc
+    if ref_suffix:
+        meta_desc = (meta_desc[:140].rsplit(" ", 1)[0] if len(meta_desc) > 140 else meta_desc) + ref_suffix
     photos = photo_urls(listing)
     og_title = f"{title} - {price}" if price else title
     og_desc = " · ".join(x for x in (place, cat, "Abracadeal") if x)
@@ -310,24 +445,191 @@ def page_html(listing, size):
 <meta name="twitter:image" content="{e(image)}">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <style>{CSS}</style>
-{json_ld(listing, meta, photos, page_url, desc_src or head_title)}
+{json_ld(listing, meta, photos, page_url, desc_src or head_title, crumbs)}
 </head><body>
 <header><a href="{SITE}/"><img src="/icon-192.png" alt="" width="30" height="30">Abracadeal</a></header>
 <main>
-<nav class="crumbs"><a href="{SITE}/">Accueil</a> › {e(cat)}{f' › {e(listing.get("city"))}' if listing.get("city") else ''}</nav>
+{crumbs_html(crumbs)}
 {f'<div class="gallery">{gallery}</div>' if gallery else ''}
 <span class="badge">{e(seller)} · {e(cat)}</span>
 <h1>{e(title)}</h1>
 {f'<p class="price">{e(price)}</p>' if price else ''}
 {f'<p class="where">📍 {e(place)}</p>' if place else ''}
-<a class="cta" href="{e(app_url)}">Contacter le vendeur sur Abracadeal</a>
+<a class="cta" href="{e(app_url)}" rel="nofollow">Contacter le vendeur sur Abracadeal</a>
 {f'<section class="card"><h2>Caractéristiques</h2><table>{rows}</table></section>' if rows else ''}
 {f'<section class="card"><h2>Description</h2><div class="desc">{e(text)}</div></section>' if text else ''}
-<a class="cta" href="{e(app_url)}">Voir l’annonce complète et contacter le vendeur</a>
+<a class="cta" href="{e(app_url)}" rel="nofollow">Voir l’annonce complète et contacter le vendeur</a>
 </main>
-<footer>Annonce publiée sur <a href="{SITE}/">Abracadeal</a> — petites annonces partout en France. Les coordonnées du vendeur sont réservées aux membres connectés.</footer>
+<footer>Annonce publiée sur <a href="{SITE}/">Abracadeal</a> — petites annonces partout en France · <a href="{SITE}/annonces/">Toutes les catégories et villes</a>. Les coordonnées du vendeur sont réservées aux membres connectés.</footer>
 </body></html>
 """
+
+
+# ---------- Pages catégories / villes ----------
+
+def hub_url(cat_slug=None, city_slug=None):
+    return SITE + "/annonces/" + "".join(f"{s}/" for s in (cat_slug, city_slug) if s)
+
+
+def listing_card(item):
+    e = lambda s: html.escape(str(s), quote=True)
+    l, photos = item["listing"], item["photos"]
+    price = money(l.get("price"))
+    if price and l.get("category") == "vacances":
+        price += " / nuit"
+    img = photos[0] if photos else DEFAULT_PHOTO
+    title = (l.get("title") or "Annonce").strip()
+    return (f'<li><a href="/annonce/{e(l["id"])}/"><img src="{e(img)}" alt="{e(title)}" loading="lazy" width="400" height="300">'
+            f'<span class="t">{e(title)}</span>{f"<span class=p>{e(price)}</span>" if price else ""}'
+            f'<span class="c">{e(l.get("city") or "")}</span></a></li>')
+
+
+def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links):
+    e = lambda s: html.escape(str(s), quote=True)
+    robots = "index,follow" if items else "noindex,follow"
+    shown = items[:MAX_HUB_LISTINGS]
+    item_list = {"@context": "https://schema.org", "@type": "ItemList", "numberOfItems": len(shown),
+                 "itemListElement": [{"@type": "ListItem", "position": i + 1, "url": f'{SITE}/annonce/{it["listing"]["id"]}/'}
+                                     for i, it in enumerate(shown)]}
+    extra = ld_script(breadcrumb_ld(crumbs)) + ("\n" + ld_script(item_list) if shown else "")
+    body = [crumbs_html(crumbs), f"<h1>{e(h1)}</h1>", f'<p class="intro">{e(intro)}</p>']
+    if shown:
+        n = len(items)
+        body.append(f'<p class="intro"><strong>{n} annonce{"s" if n > 1 else ""} en ligne.</strong></p>')
+        body.append('<ul class="list">' + "".join(listing_card(it) for it in shown) + "</ul>")
+    else:
+        body.append('<p class="card">Aucune annonce en ligne pour le moment dans cette rubrique. '
+                    '<a href="/">Découvrir toutes les annonces sur Abracadeal</a> ou <a href="/">déposer une annonce</a>.</p>')
+    if links:
+        body.append(f'<section class="card"><h2>{e(links_title)}</h2><ul class="links">'
+                    + "".join(f'<li><a href="{e(u)}">{e(n)}</a></li>' for n, u in links) + "</ul></section>")
+    return page_head(title, desc, url, robots=robots, extra=extra) + "\n".join(body) + "\n" + PAGE_FOOT
+
+
+def build_hubs(items):
+    """Retourne {chemin relatif: (html, indexable)} et, pour chaque annonce, ses liens de fil d'Ariane."""
+    for it in items:
+        it["city_key"] = city_key(it["listing"].get("city"))
+        it["cats"] = [h[0] for h in HUB_CATEGORIES if h[3](it["listing"], it["meta"])]
+
+    # Villes : noms d'affichage les plus fréquents, villes « cœur » toujours présentes
+    counts, names = {}, {}
+    for it in items:
+        k = it["city_key"]
+        if not k or k in RESERVED_SLUGS:
+            continue
+        counts[k] = counts.get(k, 0) + 1
+        names.setdefault(k, {})
+        c = re.sub(r"\s+\d+\s*(e|er|eme|ème)?\s*$", "", (it["listing"].get("city") or "").strip(), flags=re.I)
+        names[k][c] = names[k].get(c, 0) + 1
+    cities = dict(CORE_CITIES)
+    for k, n in counts.items():
+        if n >= MIN_LISTINGS_FOR_CITY and k not in cities:
+            cities[k] = max(names[k].items(), key=lambda kv: (kv[1], kv[0]))[0].title()
+
+    cat_info = {h[0]: h for h in HUB_CATEGORIES}
+    by_cat = {h[0]: [it for it in items if h[0] in it["cats"]] for h in HUB_CATEGORIES}
+    by_city = {k: [it for it in items if it["city_key"] == k] for k in cities}
+    cats = [h[0] for h in HUB_CATEGORIES if h[0] in CORE_CATEGORIES or by_cat[h[0]]]
+
+    pages = {}
+    home = ("Accueil", SITE + "/")
+    root = ("Toutes les annonces", hub_url())
+    city_links = lambda cat=None: [(f"{cat_info[cat][1]} à {cities[k]}" if cat else f"Annonces à {cities[k]}",
+                                    hub_url(cat, k)) for k in sorted(cities, key=lambda k: cities[k])
+                                   if (not cat and (k in CORE_CITIES or by_city[k])) or
+                                   (cat and (cat in CORE_CATEGORIES and k in CORE_CITIES or any(cat in it["cats"] for it in by_city[k])))]
+
+    # Page racine /annonces/
+    links = [(cat_info[c][1], hub_url(c)) for c in cats] + city_links()
+    pages[""] = (hub_page("Petites annonces par catégorie et par ville | Abracadeal",
+                          "Petites annonces par catégorie et par ville",
+                          "Toutes les annonces en ligne sur Abracadeal, classées par catégorie et par ville : voitures d’occasion, "
+                          "motos, immobilier, locations de vacances, high-tech et bien plus, publiées par des particuliers et des professionnels.",
+                          "Parcourez les petites annonces Abracadeal par catégorie (voitures d’occasion, motos, immobilier...) et par ville (Cannes, Nice, Marseille...).",
+                          hub_url(), [home, root], items, "Catégories et villes", links), bool(items))
+
+    # Catégories
+    for c in cats:
+        slug, name, plural, _, intro = cat_info[c]
+        its = by_cat[c]
+        pages[c] = (hub_page(f"{name} : annonces entre particuliers et pros | Abracadeal", f"{name}",
+                             intro, f"{name} : {len(its)} annonce{'s' if len(its) > 1 else ''} en ligne sur Abracadeal. {intro[:110].rsplit(' ', 1)[0]}…",
+                             hub_url(c), [home, root, (name, hub_url(c))], its, f"{name} par ville", city_links(c)), bool(its))
+
+    # Villes et catégorie + ville
+    for k, cname in cities.items():
+        its = by_city[k]
+        if not its and k not in CORE_CITIES:
+            continue
+        ctext = CITY_TEXT.get(k, f"{cname} et ses environs.")
+        cat_links = [(f"{cat_info[c][1]} à {cname}", hub_url(c, k)) for c in cats
+                     if (c in CORE_CATEGORIES and k in CORE_CITIES) or any(c in it["cats"] for it in its)]
+        pages[k] = (hub_page(f"Petites annonces à {cname} : auto, moto, immobilier | Abracadeal",
+                             f"Petites annonces à {cname}",
+                             f"Achetez et vendez près de chez vous : toutes les petites annonces publiées à {ctext}",
+                             f"Petites annonces à {cname} : {len(its)} annonce{'s' if len(its) > 1 else ''} de particuliers et de professionnels "
+                             f"(voitures, motos, immobilier, high-tech...) sur Abracadeal.",
+                             hub_url(None, k), [home, root, (f"Annonces à {cname}", hub_url(None, k))], its,
+                             f"Rubriques à {cname}", cat_links), bool(its))
+        for c in cats:
+            sub = [it for it in its if c in it["cats"]]
+            if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
+                continue
+            slug, name, plural, _, intro = cat_info[c]
+            pages[f"{c}/{k}"] = (hub_page(
+                f"{name} à {cname} | Abracadeal", f"{name} à {cname}",
+                f"Les {plural} à {ctext} {intro}",
+                f"{name} à {cname} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural} publiée{'s' if len(sub) > 1 else ''} "
+                f"par des particuliers et des professionnels sur Abracadeal.",
+                hub_url(c, k), [home, root, (name, hub_url(c)), (cname, hub_url(c, k))], sub,
+                f"Autres rubriques à {cname}", [(n, u) for n, u in cat_links if u != hub_url(c, k)]), bool(sub))
+
+    # Fil d'Ariane de chaque annonce : catégorie la plus précise, puis ville si elle a sa page
+    for it in items:
+        l = it["listing"]
+        crumbs = [home]
+        main_cat = it["cats"][0] if it["cats"] else None
+        if main_cat:
+            crumbs.append((cat_info[main_cat][1], hub_url(main_cat)))
+            if f"{main_cat}/{it['city_key']}" in pages:
+                crumbs.append((cities[it["city_key"]], hub_url(main_cat, it["city_key"])))
+        elif it["city_key"] in pages and it["city_key"] in cities:
+            crumbs.append((f"Annonces à {cities[it['city_key']]}", hub_url(None, it["city_key"])))
+        crumbs.append(((l.get("title") or "Annonce").strip(), f"{SITE}/annonce/{l['id']}/"))
+        it["crumbs"] = crumbs
+    return pages
+
+
+def write_if_changed(path, content):
+    old = open(path, encoding="utf-8").read() if os.path.exists(path) else None
+    if old != content:
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        with open(path, "w", encoding="utf-8") as f:
+            f.write(content)
+        return True
+    return False
+
+
+def write_hubs(pages):
+    keep = set()
+    for rel, (content, _) in pages.items():
+        folder = os.path.join(HUBS, *rel.split("/")) if rel else HUBS
+        keep.add(os.path.normpath(folder))
+        write_if_changed(os.path.join(folder, "index.html"), content)
+    # Supprime les pages catégories / villes qui n'ont plus lieu d'être (-> 404)
+    for dirpath, dirnames, filenames in os.walk(HUBS, topdown=False):
+        norm = os.path.normpath(dirpath)
+        if norm not in keep and "index.html" in filenames:
+            os.remove(os.path.join(dirpath, "index.html"))
+        if norm != os.path.normpath(HUBS) and not os.listdir(dirpath):
+            os.rmdir(dirpath)
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
+    for rel in sorted(pages):
+        if pages[rel][1]:
+            lines.append(f"  <url><loc>{SITE}/annonces/{rel + '/' if rel else ''}</loc></url>")
+    lines.append("</urlset>")
+    write_if_changed(SITEMAP_HUBS, "\n".join(lines) + "\n")
 
 
 def write_sitemap(entries):
@@ -337,55 +639,85 @@ def write_sitemap(entries):
         img = "".join(f"<image:image><image:loc>{html.escape(u)}</image:loc></image:image>" for u in photos[:5])
         lines.append(f"  <url><loc>{SITE}/annonce/{lid}/</loc><lastmod>{lastmod}</lastmod>{img}</url>")
     lines.append("</urlset>")
-    content = "\n".join(lines) + "\n"
-    old = open(SITEMAP, encoding="utf-8").read() if os.path.exists(SITEMAP) else ""
-    if old != content:
-        with open(SITEMAP, "w", encoding="utf-8") as f:
-            f.write(content)
+    write_if_changed(SITEMAP, "\n".join(lines) + "\n")
+
+
+def jpeg_for(lid, src, folder, img_sig):
+    """Réutilise l'aperçu existant si la photo principale n'a pas changé (évite de le retélécharger)."""
+    index, jpg = os.path.join(folder, "index.html"), os.path.join(folder, "apercu.jpg")
+    if os.path.exists(index) and os.path.exists(jpg) and f"<!-- img:{img_sig} -->" in open(index, encoding="utf-8").read():
+        with Image.open(jpg) as im:
+            return None, im.size
+    if FIXTURE:
+        return placeholder_jpeg()
+    try:
+        return to_jpeg(fetch(src))
+    except Exception as exc:  # photo illisible : on retombe sur la photo par défaut
+        print(f"photo {lid}: {exc}", file=sys.stderr)
+        return to_jpeg(fetch(DEFAULT_PHOTO))
 
 
 def main():
     listings = active_listings()
     os.makedirs(ROOT, exist_ok=True)
-    keep, made, failed, entries = set(), 0, 0, []
+    existing = [n for n in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, n))]
+    # Garde-fou : si Supabase renvoie soudain beaucoup moins d'annonces (panne, règle d'accès modifiée),
+    # on ne supprime pas tout le site d'un coup. Forcer avec ABRACA_ALLOW_MASS_REMOVAL=1.
+    if len(existing) >= 20 and len(listings) < len(existing) * 0.5 and not os.environ.get("ABRACA_ALLOW_MASS_REMOVAL"):
+        sys.exit(f"Arrêt de sécurité : {len(listings)} annonces en ligne contre {len(existing)} pages existantes.")
+
+    items = []
     for listing in listings:
         lid = str(listing["id"])
         if not re.fullmatch(r"[0-9a-fA-F-]{36}", lid):
             continue
+        text, meta = parse_description(listing.get("description"))
+        items.append({"listing": listing, "meta": meta, "photos": photo_urls(listing)})
+
+    pages = build_hubs(items)
+    titles = {}
+    for it in items:
+        t = seo_title(it["listing"], it["meta"])
+        titles[t] = titles.get(t, 0) + 1
+
+    keep, made, failed, entries = set(), 0, 0, []
+    for it in items:
+        listing, photos = it["listing"], it["photos"]
+        lid = str(listing["id"])
         keep.add(lid)
         folder = os.path.join(ROOT, lid)
-        photos = photo_urls(listing)
         src = photos[0] if photos else DEFAULT_PHOTO
         lastmod = (listing.get("updated_at") or listing.get("created_at") or datetime.date.today().isoformat())[:10]
         entries.append((lid, lastmod, photos))
-        payload = {k: v for k, v in listing.items() if k not in ("listing_photos", "updated_at")}
-        sig = hashlib.sha256(json.dumps([VERSION, photos, payload], sort_keys=True, default=str).encode()).hexdigest()[:16]
+        ref = f" · réf. {lid[:8]}" if titles[seo_title(listing, it["meta"])] > 1 else ""
+        payload = {k: v for k, v in listing.items() if k not in ("listing_photos", "updated_at", "expires_at")}
+        sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref], sort_keys=True, default=str).encode()).hexdigest()[:16]
+        img_sig = hashlib.sha256(src.encode()).hexdigest()[:16]
         index = os.path.join(folder, "index.html")
         if os.path.exists(index) and f"<!-- sig:{sig} -->" in open(index, encoding="utf-8").read():
             continue
         try:
-            jpeg, size = to_jpeg(fetch(src))
-        except Exception as exc:  # photo illisible : on retombe sur la photo par défaut
-            print(f"photo {lid}: {exc}", file=sys.stderr)
-            try:
-                jpeg, size = to_jpeg(fetch(DEFAULT_PHOTO))
-            except Exception as exc2:
-                print(f"defaut {lid}: {exc2}", file=sys.stderr)
-                failed += 1
-                continue
+            jpeg, size = jpeg_for(lid, src, folder, img_sig)
+        except Exception as exc:
+            print(f"defaut {lid}: {exc}", file=sys.stderr)
+            failed += 1
+            continue
         os.makedirs(folder, exist_ok=True)
-        with open(os.path.join(folder, "apercu.jpg"), "wb") as f:
-            f.write(jpeg)
+        if jpeg is not None:
+            with open(os.path.join(folder, "apercu.jpg"), "wb") as f:
+                f.write(jpeg)
         with open(index, "w", encoding="utf-8") as f:
-            f.write(page_html(listing, size) + f"<!-- sig:{sig} -->\n")
+            f.write(page_html(listing, size, it["crumbs"], ref) + f"<!-- sig:{sig} -->\n<!-- img:{img_sig} -->\n")
         made += 1
     removed = 0
     for name in os.listdir(ROOT):
         if os.path.isdir(os.path.join(ROOT, name)) and name not in keep:
             shutil.rmtree(os.path.join(ROOT, name))
             removed += 1
-    write_sitemap(entries)
-    print(f"{len(listings)} annonces en ligne · {made} pages (re)générées · {removed} supprimées · {failed} échecs")
+    write_sitemap([e for e in entries if e[0] in keep and os.path.exists(os.path.join(ROOT, e[0], "index.html"))])
+    write_hubs(pages)
+    print(f"{len(listings)} annonces en ligne · {made} pages (re)générées · {removed} supprimées · {failed} échecs · "
+          f"{len(pages)} pages catégories/villes ({sum(1 for p in pages.values() if p[1])} indexables)")
 
 
 if __name__ == "__main__":

@@ -1,10 +1,31 @@
 User-agent: *
+# Pages publiques : accueil, annonces, catégories / villes, vacances, pages d'information
 Allow: /
-Disallow: /backups/
+Allow: /annonce/
+Allow: /annonces/
+
+# Doublon de la page publique : la fiche in-app /?annonce=<id> a pour URL canonique /annonce/<id>/
+Disallow: /*?annonce=
+Disallow: /*&annonce=
+
+# Administration et modération
+Disallow: /admin-commerce.html
+Disallow: /admin-pilotage.html
 Disallow: /admin-prospection.html
 Disallow: /admin-recherche.html
+Disallow: /admin-retention.html
 Disallow: /admin-vacances.html
 Disallow: /moderation.html
+Disallow: /moderateur.html
+
+# Compte, options payantes et paiement, espace pro privé, statistiques vendeur
+Disallow: /options-annonce.html
+Disallow: /pro-pro.html
+Disallow: /tendances-vendeurs.html
+Disallow: /vendeur-tendances.html
+Disallow: /desinscription.html
+
+# Espaces hôte / voyageur privés et messagerie
 Disallow: /espace-hote.html
 Disallow: /espace-voyageur.html
 Disallow: /messages-vacances.html
@@ -12,6 +33,16 @@ Disallow: /demandes-hote.html
 Disallow: /gestion-sejour.html
 Disallow: /profil-vacances.html
 Disallow: /photos-vacances.html
-Disallow: /pro-pro.html
+Disallow: /avis-vacances.html
+Disallow: /export-ical-vacances.html
+Disallow: /ical.html
+
+# Fichiers techniques
+Disallow: /backups/
+Disallow: /docs/
+Disallow: /emails/
+Disallow: /scripts/
+Disallow: /supabase/
+Disallow: /tests/
 
 Sitemap: https://abracadeal.fr/sitemap.xml
