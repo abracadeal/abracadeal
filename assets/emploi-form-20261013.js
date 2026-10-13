@@ -1,32 +1,33 @@
-/* Abracadeal — formulaire Emploi : strictement conditionne a #adCategory=emploi */
+/* Abracadeal — champs Emploi intégrés dans la grille native du formulaire */
 (function(){
 'use strict';
 const $=(s,r=document)=>r.querySelector(s), text=e=>(e&&((e.value||e.textContent)||'').trim())||'';
 const opts=a=>a.map(v=>`<option value="${v}">${v}</option>`).join('');
-function categorySelect(){return $('#adCategory')}
-function isEmployment(){const c=categorySelect();if(!c)return false;const v=(c.value||'').toLowerCase().trim();const t=(c.options&&c.selectedIndex>=0?c.options[c.selectedIndex].text:'').toLowerCase().trim();return v==='emploi'||t==='emploi'||t==="offres d'emploi"}
-function removeJobForm(){const b=$('#abracaJobFields');if(b)b.remove()}
-function field(label,name,control){return `<label class="job-field"><span class="job-label">${label}</span>${control.replaceAll('__NAME__',name)}</label>`}
-function sync(){if(!isEmployment()){removeJobForm();return}mount()}
+function isEmployment(){const c=$('#adCategory');if(!c)return false;const v=(c.value||'').toLowerCase().trim(),t=(c.options?.[c.selectedIndex]?.text||'').toLowerCase().trim();return v==='emploi'||t==='emploi'||t==="offres d'emploi"}
+function remove(){document.querySelectorAll('.abraca-job-native').forEach(e=>e.remove())}
+function row(label,html,full=false){const d=document.createElement('div');d.className='form-row abraca-job-native'+(full?' full':'');d.innerHTML=`<label>${label}</label>${html}`;return d}
 function mount(){
- if($('#abracaJobFields'))return;
- const desc=$('textarea[name="description"],textarea#description,textarea[id*="description" i]');if(!desc)return;
- const box=document.createElement('section');box.id='abracaJobFields';box.className='abraca-job-fields';
- box.innerHTML=`<div class="job-head"><div><h3>Détails de l’offre d’emploi</h3><p>Complétez les informations utiles aux candidats.</p></div><span class="job-badge">Emploi</span></div>
- <div class="job-section"><h4>Poste recherché</h4><div class="job-grid job-grid-2">
- ${field("Secteur d’activité",'job_sector','<input name="__NAME__" type="text" placeholder="Ex. Transport, Hôtellerie, Commerce">')}
- ${field('Métier / fonction','job_trade','<input name="__NAME__" type="text" placeholder="Ex. Chauffeur privé">')}
- ${field('Expérience','job_experience',`<select name="__NAME__"><option value="">Non précisé</option>${opts(['Débutant accepté','0 à 2 ans','2 à 5 ans','5 à 10 ans','10 ans et +'])}</select>`)}
- ${field("Niveau d’études",'job_education',`<select name="__NAME__"><option value="">Non précisé</option>${opts(['Sans diplôme','CAP / BEP','Bac','Bac +2','Bac +3','Bac +5 et +'])}</select>`)}</div></div>
- <div class="job-section"><h4>Conditions</h4><div class="job-grid job-grid-2">${field('Temps de travail *','job_schedule',`<select name="__NAME__" required><option value="">Choisir</option>${opts(['Temps plein','Temps partiel','Temps plein ou temps partiel'])}</select>`)}${field('Référence','job_reference','<input name="__NAME__" type="text" maxlength="80" placeholder="Facultatif">')}</div>
- <div class="job-salary"><div class="job-salary-title">Rémunération <span>facultatif</span></div><div class="job-grid job-grid-salary">${field('Salaire brut','job_salary','<div class="job-money"><input name="__NAME__" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex. 2200"><b>€</b></div>')}${field('Période','job_salary_period',`<select name="__NAME__">${opts(['Par mois','Par an','Par heure'])}</select>`)}</div></div></div>
- <div class="job-section job-section-last"><h4>Candidatures</h4>${field('Recevoir les candidatures via','job_apply_method',`<select name="__NAME__"><option value="email">Email / messagerie Abracadeal</option><option value="website">Site recruteur</option></select>`)}<div class="abraca-job-site" hidden>${field('Lien du site recruteur','job_apply_url','<input name="__NAME__" type="url" placeholder="https://…">')}</div></div>`;
- const anchor=desc.closest('.field,.form-group,.input-group,label,div')||desc;anchor.parentNode.insertBefore(box,anchor);
- const method=$('[name="job_apply_method"]',box),site=$('.abraca-job-site',box);method?.addEventListener('change',()=>site.hidden=method.value!=='website');
- const form=desc.closest('form');if(form&&!form.dataset.jobSubmitBound){form.dataset.jobSubmitBound='1';form.addEventListener('submit',()=>{if(!isEmployment())return;const b=$('#abracaJobFields');if(!b)return;const rows=[],val=n=>text($(`[name="${n}"]`,b));[["Secteur d’activité",'job_sector'],['Métier','job_trade'],['Expérience','job_experience'],["Niveau d’études",'job_education'],['Temps de travail','job_schedule'],['Référence','job_reference']].forEach(([l,n])=>{if(val(n))rows.push(`${l} : ${val(n)}`)});if(val('job_salary'))rows.push(`Salaire brut : ${val('job_salary')} € ${val('job_salary_period')||''}`.trim());if(val('job_apply_method')==='website'&&val('job_apply_url'))rows.push(`Candidature : ${val('job_apply_url')}`);if(rows.length){const marker='\n\n--- Informations emploi ---\n';desc.value=desc.value.split(marker)[0]+marker+rows.join('\n');desc.dispatchEvent(new Event('input',{bubbles:true}))}},true)}
+ if(!isEmployment()){remove();return}if($('.abraca-job-native'))return;
+ const desc=$('#adDescription');if(!desc)return;const descRow=desc.closest('.form-row');if(!descRow)return;const parent=descRow.parentNode;
+ const nodes=[
+  row("Secteur d’activité",'<input class="input" name="job_sector" maxlength="100" placeholder="Ex. Transport, Hôtellerie, Commerce">'),
+  row('Métier / fonction','<input class="input" name="job_trade" maxlength="100" placeholder="Ex. Chauffeur privé">'),
+  row('Expérience',`<select class="select" name="job_experience"><option value="">Non précisé</option>${opts(['Débutant accepté','0 à 2 ans','2 à 5 ans','5 à 10 ans','10 ans et +'])}</select>`),
+  row("Niveau d’études",`<select class="select" name="job_education"><option value="">Non précisé</option>${opts(['Sans diplôme','CAP / BEP','Bac','Bac +2','Bac +3','Bac +5 et +'])}</select>`),
+  row('Temps de travail',`<select class="select" name="job_schedule"><option value="">Choisir</option>${opts(['Temps plein','Temps partiel','Temps plein ou temps partiel'])}</select>`),
+  row('Référence <span class="note">(facultatif)</span>','<input class="input" name="job_reference" maxlength="80" placeholder="Ex. EMP-2026-001">'),
+  row('Salaire brut <span class="note">(facultatif)</span>','<input class="input" name="job_salary" type="number" min="0" step="1" inputmode="numeric" placeholder="Ex. 2200">'),
+  row('Période du salaire',`<select class="select" name="job_salary_period">${opts(['Par mois','Par an','Par heure'])}</select>`),
+  row('Réception des candidatures',`<select class="select" name="job_apply_method"><option value="email">Messagerie Abracadeal</option><option value="website">Site recruteur</option></select>`,true),
+  row('Lien du site recruteur <span class="note">(si sélectionné)</span>','<input class="input" name="job_apply_url" type="url" placeholder="https://…">',true)
+ ];
+ nodes.forEach(n=>parent.insertBefore(n,descRow));
+ const urlRow=$('[name="job_apply_url"]')?.closest('.abraca-job-native'),method=$('[name="job_apply_method"]');
+ function applyMode(){if(urlRow)urlRow.classList.toggle('hidden',method?.value!=='website')}method?.addEventListener('change',applyMode);applyMode();
 }
-const style=document.createElement('style');style.textContent=`.abraca-job-fields{margin:20px 0;border:1px solid #eadff0;border-radius:18px;background:#fff;overflow:hidden;color:#2d1538}.job-head{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;background:#fbf7fd}.job-head h3{font-size:18px;margin:0 0 3px}.job-head p{margin:0;color:#776b7c;font-size:13px}.job-badge{background:#f8e8f3;color:#9d286f;border-radius:999px;padding:6px 11px;font-size:12px;font-weight:800}.job-section{padding:17px 20px;border-top:1px solid #f0e9f3}.job-section h4{margin:0 0 13px;font-size:14px}.job-grid{display:grid;gap:13px 16px}.job-grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}.job-grid-salary{grid-template-columns:minmax(0,1.2fr) minmax(150px,.8fr)}.job-field{display:block;margin:0}.job-label{display:block;margin:0 0 6px;font-size:12px;font-weight:750}.job-field input,.job-field select{width:100%;height:44px;box-sizing:border-box;border:1px solid #d9cfdd;border-radius:10px;background:#fff;padding:0 12px;font:inherit}.job-salary{margin-top:15px;padding:14px;border-radius:13px;background:#faf7fb;border:1px solid #eee5f0}.job-salary-title{font-size:13px;font-weight:800;margin-bottom:10px}.job-salary-title span{font-size:11px;font-weight:600;color:#95899a}.job-money{position:relative}.job-money input{padding-right:38px}.job-money b{position:absolute;right:13px;top:50%;transform:translateY(-50%)}.abraca-job-site{margin-top:13px}@media(max-width:700px){.job-grid-2,.job-grid-salary{grid-template-columns:1fr}.job-head,.job-section{padding:15px}}`;document.head.appendChild(style);
-document.addEventListener('change',e=>{if(e.target&&e.target.id==='adCategory')sync()},true);
-new MutationObserver(()=>{const c=categorySelect();if(c&&!c.dataset.jobWatch){c.dataset.jobWatch='1';c.addEventListener('change',sync)}if(!isEmployment())removeJobForm();else if(!$('#abracaJobFields'))mount()}).observe(document.documentElement,{childList:true,subtree:true});
-document.readyState==='loading'?document.addEventListener('DOMContentLoaded',sync):sync();
+function sync(){if(isEmployment())mount();else remove()}
+function bindSubmit(){const form=$('#adDescription')?.closest('form');if(!form||form.dataset.jobNativeSubmit)return;form.dataset.jobNativeSubmit='1';form.addEventListener('submit',()=>{if(!isEmployment())return;const desc=$('#adDescription');if(!desc)return;const val=n=>text($(`[name="${n}"]`)),rows=[];[["Secteur d’activité",'job_sector'],['Métier','job_trade'],['Expérience','job_experience'],["Niveau d’études",'job_education'],['Temps de travail','job_schedule'],['Référence','job_reference']].forEach(([l,n])=>{if(val(n))rows.push(`${l} : ${val(n)}`)});if(val('job_salary'))rows.push(`Salaire brut : ${val('job_salary')} € ${val('job_salary_period')||''}`.trim());if(val('job_apply_method')==='website'&&val('job_apply_url'))rows.push(`Candidature : ${val('job_apply_url')}`);if(rows.length){const marker='\n\n--- Informations emploi ---\n';desc.value=desc.value.split(marker)[0]+marker+rows.join('\n');desc.dispatchEvent(new Event('input',{bubbles:true}))}},true)}
+document.addEventListener('change',e=>{if(e.target?.id==='adCategory')sync()},true);
+new MutationObserver(()=>{bindSubmit();if(!isEmployment())remove();else if(!$('.abraca-job-native'))mount()}).observe(document.documentElement,{childList:true,subtree:true});
+function init(){bindSubmit();sync()}document.readyState==='loading'?document.addEventListener('DOMContentLoaded',init):init();
 })();
