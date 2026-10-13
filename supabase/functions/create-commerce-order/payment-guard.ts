@@ -18,3 +18,15 @@ export function checkoutLegalText(params:URLSearchParams){
  params.set('consent_collection[terms_of_service]','required');
  params.set('custom_text[terms_of_service_acceptance][message]',WITHDRAWAL_TEXT+' [Conditions de vente](https://abracadeal.fr/cgv.html#retractation).');
 }
+
+// Facture automatique (13/10/2026) : Stripe génère une facture PDF numérotée pour chaque paiement
+// unique et l'envoie au client avec le reçu. Les abonnements produisent déjà leurs factures.
+// Mentions légales du pied de facture modifiables sans redéploiement via le secret STRIPE_INVOICE_FOOTER.
+export function invoiceOnPayment(params:URLSearchParams,orderRef:string,description:string){
+ params.set('invoice_creation[enabled]','true');
+ params.set('invoice_creation[invoice_data][description]',description.slice(0,1500));
+ params.set('invoice_creation[invoice_data][metadata][abraca_order]',orderRef);
+ const footer=(Deno.env.get('STRIPE_INVOICE_FOOTER')||'').trim();
+ if(footer)params.set('invoice_creation[invoice_data][footer]',footer.slice(0,5000));
+ params.set('billing_address_collection','required');
+}

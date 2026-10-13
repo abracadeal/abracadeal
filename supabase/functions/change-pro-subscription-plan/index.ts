@@ -40,7 +40,7 @@ Deno.serve(async req=>{
   if(isFounder&&target.founder_eligible!==true)return json({error:"Cette formule n’est pas couverte par l’offre Fondateurs : contactez-nous pour en changer sans perdre vos avantages."},409);
   if(!stripeKey)return json({error:"Paiement Stripe indisponible"},503);
   const price=await stripe("prices/"+encodeURIComponent(target.stripe_price_id));
-  if(price?.active!==true||price?.livemode!==false||price?.type!=="recurring"||Number(price?.unit_amount)!==Number(target.amount_cents))return json({error:"Tarif Stripe incohérent avec le catalogue Abracadeal"},503);
+  if(price?.active!==true||price?.livemode!==/^(sk|rk)_live_/.test(stripeKey)||price?.type!=="recurring"||Number(price?.unit_amount)!==Number(target.amount_cents))return json({error:"Tarif Stripe incohérent avec le catalogue Abracadeal"},503);
   const s=await stripe("subscriptions/"+encodeURIComponent(sub.stripe_subscription_id));
   if(!["active","trialing"].includes(String(s.status)))return json({error:"Abonnement Stripe inactif"},409);
   const now=Math.floor(Date.now()/1000);const trialing=String(s.status)==="trialing";

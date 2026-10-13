@@ -1,4 +1,4 @@
-import {requireConsent,checkOptionListing,checkoutLegalText,WITHDRAWAL_TEXT} from './payment-guard.ts';
+import {requireConsent,checkOptionListing,checkoutLegalText,invoiceOnPayment,WITHDRAWAL_TEXT} from './payment-guard.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 const SUPABASE_URL=Deno.env.get("SUPABASE_URL")!;
 const SERVICE_ROLE=Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -103,7 +103,7 @@ Deno.serve(async req=>{
     }
     const stripeKey=Deno.env.get("STRIPE_SECRET_KEY")||Deno.env.get("STRIPE_RESTRICTED_KEY")||"";
     if(!stripeKey)throw new Error("Paiement Stripe indisponible");
-    const params=new URLSearchParams();checkoutLegalText(params);
+    const params=new URLSearchParams();checkoutLegalText(params);invoiceOnPayment(params,order.id,pack.creditPack?`Pack de boost: ${pack.max} crédits`:`${pack.max} emplacements de promotion`);
     params.set("mode","payment");
     params.set("client_reference_id",order.id);
     params.set("line_items[0][price]",pack.stripePriceId);
