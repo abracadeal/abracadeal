@@ -10,14 +10,19 @@ Génère aussi :
   - annonces/... : pages catégories / villes / catégorie + ville avec de vrais liens <a href> vers les annonces ;
   - sitemap-annonces.xml (annonces en ligne) et sitemap-categories.xml (pages catégories / villes non vides),
     tous deux référencés par sitemap.xml.
-Les dossiers des annonces qui ne sont plus en ligne (vendues, retirées, expirées, refusées, masquées,
-supprimées...) sont supprimés : GitHub Pages renvoie alors une vraie erreur 404 et l'URL sort du sitemap.
+Annonce qui n'est plus en ligne :
+  - vendue ou expirée : la page reste 30 jours en version « Annonce vendue / expirée » (noindex, hors sitemap,
+    annonces similaires + bouton de dépôt), puis son dossier est supprimé (vraie 404) ;
+  - supprimée par le vendeur, retirée par l'admin, refusée ou masquée : dossier supprimé immédiatement (404).
+Chaque page annonce affiche aussi des « annonces similaires » (liens internes pour Google et les visiteurs).
 
 Aucune donnée de contact (téléphone, e-mail) n'est publiée : elles restent réservées aux membres connectés.
 
 Test hors ligne : ABRACA_FIXTURE=chemin/vers/annonces.json python scripts/build_share_pages.py
-(le fichier contient la liste des annonces telle que renvoyée par Supabase ; aucune photo n'est téléchargée).
+(liste des annonces telle que renvoyée par Supabase, ou {"listings": [...], "unavailable": [{"id", "reason",
+"unavailable_at"}]} ; aucune photo n'est téléchargée).
 """
+import base64
 import datetime
 import hashlib
 import html
@@ -49,7 +54,10 @@ CATEGORIES = {"vehicules": "Véhicules", "immobilier": "Immobilier", "vacances":
 MAX_IMAGE_BYTES = 280 * 1024  # WhatsApp n'affiche plus l'aperçu au-delà d'environ 300 Ko
 MAX_PHOTOS = 8
 MAX_HUB_LISTINGS = 120
-VERSION = "3"  # à incrémenter pour forcer la régénération de toutes les pages
+MAX_SIMILAR = 6
+UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
+DEPOSIT_URL = SITE + "/?deposer=1"
+VERSION = "4"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -113,10 +121,15 @@ def fetch(url, headers=None):
         return r.read()
 
 
+def load_fixture():
+    with open(FIXTURE, encoding="utf-8") as f:
+        data = json.load(f)
+    return data if isinstance(data, dict) else {"listings": data, "unavailable": []}
+
+
 def active_listings():
     if FIXTURE:
-        with open(FIXTURE, encoding="utf-8") as f:
-            return json.load(f)
+        return load_fixture()["listings"]
     now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     rows, start, page = [], 0, 1000
     while True:
@@ -129,6 +142,20 @@ def active_listings():
         if len(data) < page:
             return rows
         start += page
+
+
+def unavailable_listings():
+    """Annonces publiques vendues ou expirées depuis moins de UNAVAILABLE_DAYS jours : {id: (motif, date)}."""
+    if FIXTURE:
+        rows = load_fixture().get("unavailable", [])
+    else:
+        req = urllib.request.Request(f"{SUPABASE_URL}/rest/v1/rpc/seo_recently_unavailable_listings",
+                                     data=json.dumps({"p_days": UNAVAILABLE_DAYS}).encode(), method="POST",
+                                     headers={"User-Agent": "abracadeal-share-pages", "apikey": SUPABASE_KEY,
+                                              "Content-Type": "application/json"})
+        with urllib.request.urlopen(req, timeout=60) as r:
+            rows = json.loads(r.read())
+    return {str(r["id"]): (r.get("reason") or "sold", str(r.get("unavailable_at") or "")[:10]) for r in rows}
 
 
 def slugify(s):
@@ -388,7 +415,26 @@ PAGE_FOOT = """</main>
 """
 
 
-def page_html(listing, size, crumbs, ref_suffix=""):
+def similar_section(similar, title="Annonces similaires"):
+    if not similar:
+        return ""
+    return f'<section class="card"><h2>{html.escape(title)}</h2><ul class="list">' + "".join(listing_card(it) for it in similar) + "</ul></section>"
+
+
+def snapshot(it):
+    """Résumé de l'annonce gardé dans la page, pour produire la version « vendue » sans relire la base."""
+    l = it["listing"]
+    d = {k: l.get(k) for k in ("id", "title", "price", "city", "postal_code", "category", "seller_type")}
+    d.update(cats=it["cats"], city_key=it["city_key"], crumbs=it["crumbs"][:-1])
+    return base64.b64encode(json.dumps(d, ensure_ascii=False).encode()).decode()
+
+
+def read_snapshot(index):
+    m = re.search(r"<!-- snap:([A-Za-z0-9+/=]+) -->", open(index, encoding="utf-8").read())
+    return json.loads(base64.b64decode(m.group(1))) if m else None
+
+
+def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     lid = listing["id"]
     e = lambda s: html.escape(str(s), quote=True)
     text, meta = parse_description(listing.get("description"))
@@ -459,6 +505,7 @@ def page_html(listing, size, crumbs, ref_suffix=""):
 {f'<section class="card"><h2>Caractéristiques</h2><table>{rows}</table></section>' if rows else ''}
 {f'<section class="card"><h2>Description</h2><div class="desc">{e(text)}</div></section>' if text else ''}
 <a class="cta" href="{e(app_url)}" rel="nofollow">Voir l’annonce complète et contacter le vendeur</a>
+{similar_section(similar)}
 </main>
 <footer>Annonce publiée sur <a href="{SITE}/">Abracadeal</a> — petites annonces partout en France · <a href="{SITE}/annonces/">Toutes les catégories et villes</a>. Les coordonnées du vendeur sont réservées aux membres connectés.</footer>
 </body></html>
@@ -657,14 +704,71 @@ def jpeg_for(lid, src, folder, img_sig):
         return to_jpeg(fetch(DEFAULT_PHOTO))
 
 
+def similar_for(cats, ckey, items, exclude=None, n=MAX_SIMILAR):
+    """Annonces en ligne proches : même catégorie + même ville, puis même catégorie, puis même ville, puis récentes."""
+    main_cat = cats[0] if cats else None
+    tiers = [lambda it: main_cat and main_cat in it["cats"] and ckey and it["city_key"] == ckey,
+             lambda it: main_cat and main_cat in it["cats"],
+             lambda it: ckey and it["city_key"] == ckey,
+             lambda it: True]
+    out, seen = [], {exclude}
+    for test in tiers:
+        for it in items:
+            lid = str(it["listing"]["id"])
+            if lid not in seen and test(it):
+                out.append(it)
+                seen.add(lid)
+                if len(out) >= n:
+                    return out
+    return out
+
+
+def sold_page_html(snap, reason, since, size, similar):
+    e = lambda s: html.escape(str(s), quote=True)
+    lid = snap["id"]
+    title = (snap.get("title") or "Annonce").strip()
+    page_url = f"{SITE}/annonce/{lid}/"
+    state = "vendue" if reason == "sold" else "expirée"
+    city = snap.get("city") or ""
+    cats = snap.get("cats") or []
+    cat_name = next((h[1] for h in HUB_CATEGORIES if cats and h[0] == cats[0]), CATEGORIES.get(snap.get("category"), "Annonces"))
+    crumbs = [tuple(c) for c in (snap.get("crumbs") or [("Accueil", SITE + "/")])] + [(title, page_url)]
+    more = [(f"Toutes les annonces : {cat_name}", hub_url(cats[0]))] if cats else []
+    if cats and snap.get("city_key"):
+        more.insert(0, (f"{cat_name} à {city}", hub_url(cats[0], snap["city_key"])))
+    more.append(("Toutes les catégories et villes", hub_url()))
+    image = f"{page_url}apercu.jpg"
+    desc = f"Cette annonce ({title}{', ' + city if city else ''}) est {state}. Découvrez des annonces similaires sur Abracadeal."
+    head = page_head(f"Annonce {state} : {title} | Abracadeal", desc, page_url, robots="noindex,follow", extra=(
+        f'<meta property="og:image" content="{e(image)}">\n<meta property="og:image:width" content="{size[0]}">\n'
+        f'<meta property="og:image:height" content="{size[1]}">\n<meta name="twitter:card" content="summary_large_image">'))
+    links = "".join(f'<li><a href="{e(u)}">{e(n)}</a></li>' for n, u in more)
+    return head + f"""{crumbs_html(crumbs)}
+<span class="badge">Annonce {e(state)}</span>
+<h1>{e(title)}</h1>
+<p class="where">{'📍 ' + e(city) + ' · ' if city else ''}{e(cat_name)}</p>
+<div class="gallery"><img src="apercu.jpg" alt="{e(title)}" width="{size[0]}" height="{size[1]}" style="filter:grayscale(.6);opacity:.8"></div>
+<section class="card"><h2>Cette annonce n’est plus disponible</h2>
+<p>{'Le vendeur a indiqué que cet article est vendu.' if reason == 'sold' else 'Cette annonce a expiré et n’est plus en ligne.'}
+Voici des annonces proches qui pourraient vous intéresser.</p></section>
+{similar_section(similar)}
+<section class="card"><h2>Continuer la recherche</h2><ul class="links">{links}</ul></section>
+<section class="card"><h2>Vous avez quelque chose à vendre ?</h2>
+<p>Publiez votre annonce gratuitement sur Abracadeal, en quelques minutes.</p>
+<a class="cta" href="{e(DEPOSIT_URL)}" rel="nofollow">Déposer une annonce gratuitement</a></section>
+""" + PAGE_FOOT
+
+
 def main():
     listings = active_listings()
+    unavailable = unavailable_listings()
     os.makedirs(ROOT, exist_ok=True)
     existing = [n for n in os.listdir(ROOT) if os.path.isdir(os.path.join(ROOT, n))]
     # Garde-fou : si Supabase renvoie soudain beaucoup moins d'annonces (panne, règle d'accès modifiée),
     # on ne supprime pas tout le site d'un coup. Forcer avec ABRACA_ALLOW_MASS_REMOVAL=1.
-    if len(existing) >= 20 and len(listings) < len(existing) * 0.5 and not os.environ.get("ABRACA_ALLOW_MASS_REMOVAL"):
-        sys.exit(f"Arrêt de sécurité : {len(listings)} annonces en ligne contre {len(existing)} pages existantes.")
+    still = len(listings) + len(set(unavailable) & set(existing))
+    if len(existing) >= 20 and still < len(existing) * 0.5 and not os.environ.get("ABRACA_ALLOW_MASS_REMOVAL"):
+        sys.exit(f"Arrêt de sécurité : {still} annonces à garder contre {len(existing)} pages existantes.")
 
     items = []
     for listing in listings:
@@ -690,8 +794,11 @@ def main():
         lastmod = (listing.get("updated_at") or listing.get("created_at") or datetime.date.today().isoformat())[:10]
         entries.append((lid, lastmod, photos))
         ref = f" · réf. {lid[:8]}" if titles[seo_title(listing, it["meta"])] > 1 else ""
+        similar = similar_for(it["cats"], it["city_key"], items, exclude=lid)
+        sim_sig = [(s["listing"]["id"], s["listing"].get("title"), s["listing"].get("price"), s["listing"].get("city"), s["photos"][:1])
+                   for s in similar]
         payload = {k: v for k, v in listing.items() if k not in ("listing_photos", "updated_at", "expires_at")}
-        sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref], sort_keys=True, default=str).encode()).hexdigest()[:16]
+        sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref, sim_sig], sort_keys=True, default=str).encode()).hexdigest()[:16]
         img_sig = hashlib.sha256(src.encode()).hexdigest()[:16]
         index = os.path.join(folder, "index.html")
         if os.path.exists(index) and f"<!-- sig:{sig} -->" in open(index, encoding="utf-8").read():
@@ -707,17 +814,47 @@ def main():
             with open(os.path.join(folder, "apercu.jpg"), "wb") as f:
                 f.write(jpeg)
         with open(index, "w", encoding="utf-8") as f:
-            f.write(page_html(listing, size, it["crumbs"], ref) + f"<!-- sig:{sig} -->\n<!-- img:{img_sig} -->\n")
+            f.write(page_html(listing, size, it["crumbs"], ref, similar)
+                    + f"<!-- sig:{sig} -->\n<!-- img:{img_sig} -->\n<!-- snap:{snapshot(it)} -->\n")
         made += 1
+
+    # Annonces vendues / expirées depuis moins de 30 jours : page « plus disponible » (noindex), hors sitemap
+    sold = 0
+    for lid, (reason, since) in unavailable.items():
+        folder = os.path.join(ROOT, lid)
+        index, jpg = os.path.join(folder, "index.html"), os.path.join(folder, "apercu.jpg")
+        if lid in keep or not re.fullmatch(r"[0-9a-fA-F-]{36}", lid) or not os.path.exists(index) or not os.path.exists(jpg):
+            continue
+        try:
+            snap = read_snapshot(index)
+        except Exception:
+            snap = None
+        if not snap:
+            continue
+        similar = similar_for(snap.get("cats") or [], snap.get("city_key"), items, exclude=lid)
+        sig = hashlib.sha256(json.dumps([VERSION, reason, [s["listing"]["id"] for s in similar], snap], sort_keys=True,
+                                        default=str).encode()).hexdigest()[:16]
+        keep.add(lid)
+        if f"<!-- unavailable:{sig} -->" in open(index, encoding="utf-8").read():
+            continue
+        with Image.open(jpg) as im:
+            size = im.size
+        with open(index, "w", encoding="utf-8") as f:
+            f.write(sold_page_html(snap, reason, since, size, similar)
+                    + f"<!-- unavailable:{sig} -->\n<!-- snap:{base64.b64encode(json.dumps(snap, ensure_ascii=False).encode()).decode()} -->\n")
+        sold += 1
+
     removed = 0
     for name in os.listdir(ROOT):
         if os.path.isdir(os.path.join(ROOT, name)) and name not in keep:
             shutil.rmtree(os.path.join(ROOT, name))
             removed += 1
-    write_sitemap([e for e in entries if e[0] in keep and os.path.exists(os.path.join(ROOT, e[0], "index.html"))])
+    active_ids = {str(it["listing"]["id"]) for it in items}
+    write_sitemap([e for e in entries if e[0] in active_ids and os.path.exists(os.path.join(ROOT, e[0], "index.html"))])
     write_hubs(pages)
-    print(f"{len(listings)} annonces en ligne · {made} pages (re)générées · {removed} supprimées · {failed} échecs · "
-          f"{len(pages)} pages catégories/villes ({sum(1 for p in pages.values() if p[1])} indexables)")
+    print(f"{len(listings)} annonces en ligne · {made} pages (re)générées · {sold} pages « vendue/expirée » mises à jour · "
+          f"{removed} supprimées · {failed} échecs · {len(pages)} pages catégories/villes "
+          f"({sum(1 for p in pages.values() if p[1])} indexables)")
 
 
 if __name__ == "__main__":
