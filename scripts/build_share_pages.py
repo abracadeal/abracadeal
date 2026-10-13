@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "4"  # à incrémenter pour forcer la régénération de toutes les pages
+VERSION = "5"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -368,9 +368,11 @@ CSS = """*{box-sizing:border-box}body{margin:0;background:#f7f3fa;color:#21132d;
 a{color:#6f218c}header{background:#24102f;padding:12px 16px}header a{color:#fff;text-decoration:none;font-weight:800;font-size:1.15rem;display:inline-flex;align-items:center;gap:8px}
 header img{width:30px;height:30px;border-radius:8px}main{max-width:900px;margin:0 auto;padding:16px}
 nav.crumbs{font-size:.85rem;color:#6b5a78;margin:4px 0 12px}nav.crumbs a{color:#6b5a78}
-.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px;margin-bottom:16px}
-.gallery img{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:12px;background:#e9dff0}
-.gallery img:first-child{grid-column:1/-1;aspect-ratio:16/10}
+.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -16px 16px;padding:0 16px;scrollbar-width:thin}
+.gallery img{flex:0 0 86%;width:86%;height:min(58vh,440px);object-fit:contain;border-radius:12px;background:#ece3f2;scroll-snap-align:center}
+.gallery img:only-child{flex-basis:100%;width:100%}
+@media(min-width:700px){.gallery{margin:0 0 16px;padding:0}.gallery img{flex-basis:62%;width:62%}}
+.gallery-hint{font-size:.8rem;color:#6b5a78;margin:-10px 0 14px}
 h1{font-size:1.5rem;line-height:1.25;margin:0 0 6px}.price{font-size:1.6rem;font-weight:850;color:#6f218c;margin:0}
 .where{color:#4a3a57;margin:4px 0 14px}.card{background:#fff;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 2px 10px rgba(36,16,47,.06)}
 .cta{display:block;text-align:center;background:#6f218c;color:#fff;font-weight:800;padding:14px;border-radius:12px;text-decoration:none;margin:14px 0}
@@ -497,6 +499,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
 <main>
 {crumbs_html(crumbs)}
 {f'<div class="gallery">{gallery}</div>' if gallery else ''}
+{f'<p class="gallery-hint">{len(photos)} photos · faites glisser pour les voir</p>' if len(photos) > 1 else ''}
 <span class="badge">{e(seller)} · {e(cat)}</span>
 <h1>{e(title)}</h1>
 {f'<p class="price">{e(price)}</p>' if price else ''}

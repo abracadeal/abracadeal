@@ -4844,11 +4844,41 @@ window.adminDeleteAd=async id=>{
   await loadAds();
 };
 
+// Retrait d'une annonce : on demande le motif. « Vendu » = annonce archivée comme vendue (page publique
+// « Annonce vendue » 30 jours avec annonces similaires) ; autres motifs = suppression définitive comme avant.
+function askRemovalReason(){
+  return new Promise(resolve=>{
+    const choices=[['sold_abracadeal','🎉 Vendu grâce à Abracadeal'],['sold_elsewhere','Vendu ailleurs'],['not_selling','Je ne souhaite plus vendre'],['other','Autre raison']];
+    const wrap=document.createElement('div');
+    wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');wrap.setAttribute('aria-labelledby','removalReasonTitle');
+    wrap.style.cssText='position:fixed;inset:0;z-index:100000;background:rgba(20,8,30,.55);display:flex;align-items:flex-end;justify-content:center;padding:16px';
+    wrap.innerHTML=`<div style="background:#fff;color:#21132d;width:min(440px,100%);border-radius:20px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.3);margin:auto 0;font-family:inherit">
+      <h3 id="removalReasonTitle" style="margin:0 0 6px;font-size:1.15rem">Pourquoi retirez-vous cette annonce ?</h3>
+      <p style="margin:0 0 14px;color:#6b5a78;font-size:.9rem">Votre réponse nous aide à améliorer Abracadeal.</p>
+      ${choices.map(([v,l])=>`<button type="button" data-reason="${v}" style="display:block;width:100%;text-align:left;padding:13px 14px;margin:0 0 8px;border:1px solid #e4d6ec;border-radius:12px;background:#faf6fc;color:#21132d;font:inherit;font-weight:700;cursor:pointer">${l}</button>`).join('')}
+      <p style="margin:6px 0 12px;color:#6b5a78;font-size:.8rem">Une annonce vendue est retirée des résultats. Sinon, elle est supprimée définitivement.</p>
+      <button type="button" data-reason="" style="display:block;width:100%;padding:12px;border:0;border-radius:12px;background:transparent;color:#6f218c;font:inherit;font-weight:700;cursor:pointer">Annuler</button></div>`;
+    const close=v=>{document.removeEventListener('keydown',onKey);wrap.remove();resolve(v||null);};
+    const onKey=e=>{if(e.key==='Escape')close(null);};
+    wrap.addEventListener('click',e=>{const b=e.target.closest('[data-reason]');if(b)close(b.dataset.reason);else if(e.target===wrap)close(null);});
+    document.addEventListener('keydown',onKey);
+    document.body.appendChild(wrap);
+    wrap.querySelector('[data-reason]').focus();
+  });
+}
 window.deleteAd=async id=>{
   if(!currentUser){toast('Connexion requise');return;}
-  if(!confirm('Supprimer définitivement cette annonce ?'))return;
-  const {data:owned,error:ownerError}=await sb.from('listings').select('id').eq('id',id).eq('owner_id',currentUser.id).maybeSingle();
+  const reason=await askRemovalReason();
+  if(!reason)return;
+  const {data:owned,error:ownerError}=await sb.from('listings').select('id,category').eq('id',id).eq('owner_id',currentUser.id).maybeSingle();
   if(ownerError||!owned){toast('Cette annonce ne vous appartient pas ou n’est plus disponible.');return;}
+  try{await sb.from('listing_removal_feedback').insert({listing_id:id,owner_id:currentUser.id,reason,category:owned.category||null});}catch(e){}
+  if(reason==='sold_abracadeal'||reason==='sold_elsewhere'){
+    const {error:soldError}=await sb.rpc('archive_listing',{p_listing_id:id,p_reason:'sold'});
+    if(soldError){toast(soldError.message);return;}
+    await loadAds();toast(reason==='sold_abracadeal'?'Félicitations pour la vente ! 🎉':'Annonce marquée comme vendue');
+    return;
+  }
   const {data:rows}=await sb.from('listing_photos').select('storage_path').eq('listing_id',id);
   const paths=(rows||[]).map(x=>x.storage_path);
   if(paths.length) await removePhotoPaths(paths);
