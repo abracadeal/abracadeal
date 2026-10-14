@@ -25,3 +25,24 @@ window.showPaymentLoading=(title='Redirection vers le paiement sécurisé…',te
 };
 window.hidePaymentLoading=()=>{const o=document.getElementById('abracaPaymentLoading');if(o)o.style.display='none';};
 window.addEventListener('pageshow',()=>window.hidePaymentLoading());
+
+// 14/10/2026 : gestion des changements de formule Pro.
+// Montees immediates ; baisses programmees a la prochaine echeance.
+setTimeout(()=>{
+ if(typeof window.planState!=='function'||typeof window.changePlan!=='function')return;
+ window.planState=o=>{
+  const cur=window.mySub&&['active','trialing'].includes(window.mySub.status)?window.mySub:null;
+  if(!cur||!o.recurring||!(o.code in window.PRO_LIMITS)||!(cur.plan_code in window.PRO_LIMITS))return {};
+  const founder=cur.founder_number!=null,curLimit=window.PRO_LIMITS[cur.plan_code],nextLimit=window.PRO_LIMITS[o.code];
+  if(o.code===cur.plan_code)return {label:'Votre formule actuelle',disabled:true,note:founder?'Fondateur':''};
+  if(founder&&o.founder_eligible!==true)return {label:'Hors offre Fondateurs',disabled:true,note:'Cette formule ne conserve pas vos avantages Fondateur'};
+  if(nextLimit>curLimit)return {label:'Passer à cette formule',upgrade:true,note:founder?'Activation immédiate · avantages Fondateur conservés':'Activation immédiate · prorata facturé'};
+  return {label:'Choisir cette formule',upgrade:true,note:'Baisse appliquée à la prochaine échéance'};
+ };
+ window.changePlan=async o=>{
+  const cur=window.mySub,founder=cur?.founder_number!=null,from=window.PRO_LIMITS[cur?.plan_code]||0,to=window.PRO_LIMITS[o.code]||0,down=to<from;
+  let msg=down?'Passer à la formule '+to+' annonces ?\n\nLa baisse prendra effet à votre prochaine échéance. Votre quota actuel reste disponible jusque-là.':'Passer à la formule '+to+' annonces ?\n\n'+(founder?'Vos avantages Fondateur sont conservés.':'La différence au prorata sera facturée immédiatement.');
+  if(!confirm(msg))return;
+  try{window.showPaymentLoading(down?'Programmation de votre nouvelle formule…':'Mise à jour de votre formule…','Cela peut prendre quelques secondes.');const d=await window.callFunction('change-pro-subscription-plan',{plan_code:o.code,confirm:true});window.hidePaymentLoading();alert(d.message||'Formule mise à jour.');location.reload();}catch(e){window.hidePaymentLoading();alert(e.message||'Changement impossible');}
+ };
+},0);
