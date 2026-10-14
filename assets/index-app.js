@@ -557,9 +557,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     await loadProPlans();
   }
   async function ensureProPlanSelection(){
-    try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+    if(!sb||!currentUser||currentProfile?.account_type!=='professionnel'||currentProfile?.is_admin===true)return false;
+    const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle();
+    if(error){console.warn('Vérification formule Pro indisponible',error);return false;}
+    const active=!!data&&['active','trialing'].includes(String(data.status||'').toLowerCase());
+    if(active){
+      try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+      if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
+      return false;
+    }
+    try{sessionStorage.setItem('abraca_pro_plan_pending','1')}catch(_){}
     if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
-    return false;
+    if(!/\/pro-fondateur\.html$/i.test(location.pathname))location.href='pro-fondateur.html';
+    return true;
   }
   window.ensureProPlanSelection=ensureProPlanSelection;
 
@@ -570,8 +580,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   },true);
 
   function restoreMandatoryProPlanGate(){
-    if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
-    try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
+    ensureProPlanSelection().catch(error=>console.warn('Contrôle formule Pro',error));
   }
 
   window.addEventListener('abracadeal:auth',()=>{
