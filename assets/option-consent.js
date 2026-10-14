@@ -46,3 +46,28 @@ setTimeout(()=>{
   try{showPaymentLoading(down?'Programmation de votre nouvelle formule…':'Mise à jour de votre formule…','Cela peut prendre quelques secondes.');const d=await callFunction('change-pro-subscription-plan',{plan_code:o.code,confirm:true});hidePaymentLoading();alert(d.message||'Formule mise à jour.');location.reload();}catch(e){hidePaymentLoading();alert(e.message||'Changement impossible');}
  };
 },0);
+
+// 14/10/2026 : le bouton Retour de la page Pro doit réellement permettre de revenir au site.
+// Le compte reste sans quota tant qu'aucun abonnement ou crédit à l'unité n'est actif.
+(()=>{
+ const isProPricing=/\/pro-fondateur\.html$/i.test(location.pathname);
+ if(isProPricing){
+   const wireReturn=()=>{const a=[...document.querySelectorAll('a')].find(x=>x.textContent.trim()==='← Retour');if(a){a.href='index.html?pro_return=1';a.addEventListener('click',()=>{try{sessionStorage.setItem('abraca_pro_plan_deferred','1')}catch(_){}})}};
+   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',wireReturn,{once:true});else wireReturn();
+   return;
+ }
+ const qs=new URLSearchParams(location.search);
+ if(qs.get('pro_return')==='1'){
+   try{sessionStorage.setItem('abraca_pro_plan_deferred','1')}catch(_){}
+   qs.delete('pro_return');
+   history.replaceState(null,'',location.pathname+(qs.toString()?'?'+qs.toString():'')+location.hash);
+ }
+ setTimeout(()=>{
+   if(sessionStorage.getItem('abraca_pro_plan_deferred')!=='1'||typeof window.ensureProPlanSelection!=='function')return;
+   const original=window.ensureProPlanSelection;
+   window.ensureProPlanSelection=async(...args)=>{
+     try{if(sessionStorage.getItem('abraca_pro_plan_deferred')==='1')return false}catch(_){}
+     return original(...args);
+   };
+ },0);
+})();
