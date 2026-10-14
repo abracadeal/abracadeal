@@ -1,0 +1,48 @@
+name: Nettoyer vignette annonce Pro a l unite
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/remove-single-ad-duration-note-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Retirer les durees de la vignette annonce simple
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('pro-fondateur.html')
+          s=p.read_text()
+          old="""function durationNote(o){if(o.code==='pro_autoimmo_single')return '<div class=\"note\">Auto / Moto : 60 jours · Immobilier : 90 jours</div><div class=\"note\">Aussi pour publier ponctuellement au-delà des annonces de votre formule.</div>';if(o.code==='pro_boost_5')return '<div class=\"note\">5 boosts · crédits sans expiration</div>';return ''}"""
+          new="""function durationNote(o){if(o.code==='pro_autoimmo_single')return '<div class=\"note\">Pour publier ponctuellement sans abonnement ou au-delà des annonces de votre formule.</div>';if(o.code==='pro_boost_5')return '<div class=\"note\">5 boosts · crédits sans expiration</div>';return ''}"""
+          if s.count(old)!=1:
+              raise SystemExit(f'Bloc attendu introuvable ou duplique: {s.count(old)}')
+          p.write_text(s.replace(old,new,1))
+          PY
+
+      - name: Verification
+        run: |
+          ! grep -F "Auto / Moto : 60 jours · Immobilier : 90 jours" pro-fondateur.html
+          grep -F "Pour publier ponctuellement sans abonnement" pro-fondateur.html
+
+      - name: Commit et nettoyage
+        run: |
+          rm .github/workflows/remove-single-ad-duration-note-once.yml
+          git config user.name "Abracadeal Bot"
+          git config user.email "abracadeal@gmail.com"
+          git add pro-fondateur.html .github/workflows/remove-single-ad-duration-note-once.yml
+          git diff --cached --quiet && exit 0
+          git commit -m "Simplifie la vignette annonce Pro a l unite"
+          git push origin main
