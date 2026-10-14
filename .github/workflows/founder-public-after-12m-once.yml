@@ -1,0 +1,113 @@
+name: Offre Fondateur 12 mois gratuits puis tarif public
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/founder-public-after-12m-once.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Corriger toute la logique Fondateur
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          # --- Page Fondateurs ---
+          p = Path('pro-fondateur.html')
+          t = p.read_text()
+          replacements = [
+            (', puis <strong>-50 % la 2e année</strong>.', ', puis <strong>tarif public normal à partir du 13e mois</strong>.'),
+            (' À partir de la 3e année, le tarif public normal s’applique.', ''),
+            ('20 ou 50 annonces gratuites pendant 12 mois, puis -50 % la 2e année, puis tarif public normal en 3e année.', '20 ou 50 annonces gratuites pendant 12 mois, puis tarif public normal à partir du 13e mois.'),
+            ("gratuit jusqu’à la fin de vos 12 mois, puis -50 % la 2e année, puis '+money(o.amount_cents)+' HT / mois.", "gratuit jusqu’à la fin de vos 12 mois, puis '+money(o.amount_cents)+' HT / mois."),
+          ]
+          for old,new in replacements:
+              if old in t:
+                  t=t.replace(old,new)
+          p.write_text(t)
+
+          # --- Accueil ---
+          p = Path('index.html')
+          t = p.read_text()
+          t = t.replace('12 mois gratuits sur les formules 20 ou 50 annonces pour les Pros Auto, Moto et Immobilier, puis -50 % la 2e année. Au-delà de votre formule, annonce supplémentaire à l’unité. Tarif public normal à partir de la 3e année.', '12 mois gratuits sur les formules 20 ou 50 annonces pour les Pros Auto, Moto et Immobilier. Puis tarif public normal à partir du 13e mois. Au-delà de votre formule, annonce supplémentaire à l’unité.')
+          p.write_text(t)
+
+          # --- Création Checkout Pro : prix public après l'essai, pas de prix année 2 ---
+          p = Path('supabase/functions/create-pro-subscription-order/index.ts')
+          lines = p.read_text().splitlines()
+          lines = [line for line in lines if not line.startswith('async function ensureFounderYear2Price(')]
+          t='\n'.join(lines)+'\n'
+          t=t.replace('const methods=await paymentMethods();const checkoutPriceId=founderFree?await ensureFounderYear2Price(plan):priceId;', 'const methods=await paymentMethods();const checkoutPriceId=priceId;')
+          t=t.replace('if(discountUntil)p.set("subscription_data[metadata][abraca_founder_discount_until]",String(Math.floor(discountUntil.getTime()/1000)))', '')
+          t=t.replace('discount_until:founderEligible&&discountUntil?discountUntil.toISOString():null', 'discount_until:null')
+          t=t.replace('12 mois gratuits, puis -50 % la 2e année, puis tarif public normal.', '12 mois gratuits, puis tarif public normal à partir du 13e mois.')
+          p.write_text(t)
+
+          # --- Webhook principal : essai 12 mois puis prix public ---
+          p = Path('supabase/functions/stripe-pricing-v2-webhook/index.ts')
+          lines = p.read_text().splitlines()
+          new_lines=[]
+          for line in lines:
+              if line.startswith('async function ensureFounderSchedule('):
+                  new_lines.append('async function ensureFounderSchedule(subscription:any,publicPriceId:string,freeUntil:string){if(subscription.schedule)return subscription.schedule;const freeEnd=Math.floor(new Date(freeUntil).getTime()/1000);const init=new URLSearchParams({from_subscription:String(subscription.id)});const schedule=await stripe("subscription_schedules",init);const phase=new URLSearchParams();phase.set("end_behavior","release");phase.set("proration_behavior","none");phase.set("phases[0][items][0][price]",publicPriceId);phase.set("phases[0][items][0][quantity]","1");phase.set("phases[0][start_date]",String(schedule.current_phase?.start_date||subscription.current_period_start||Math.floor(Date.now()/1000)));phase.set("phases[0][end_date]",String(freeEnd));phase.set("phases[0][trial_end]",String(freeEnd));phase.set("phases[0][proration_behavior]","none");phase.set("phases[1][items][0][price]",publicPriceId);phase.set("phases[1][items][0][quantity]","1");phase.set("phases[1][start_date]",String(freeEnd));phase.set("phases[1][iterations]","1");phase.set("phases[1][proration_behavior]","none");await stripe("subscription_schedules/"+encodeURIComponent(schedule.id),phase);return schedule.id}')
+              else:
+                  new_lines.append(line)
+          t='\n'.join(new_lines)+'\n'
+          old='if(isFounder){if(Number(subPrice?.unit_amount)!==Math.round(Number(plan.amount_cents)*0.5)||String(subPrice?.currency||"")!=="eur"||String(subPrice?.type||"")!=="recurring"||String(subPrice?.recurring?.interval||"")!=="month")return json({error:"Tarif Fondateur année 2 incohérent"},400)}else if(subPrice?.id!==plan.stripe_price_id)return json({error:"Tarif Pro Stripe incohérent"},400);'
+          new='if(subPrice?.id!==plan.stripe_price_id)return json({error:"Tarif Pro Stripe incohérent"},400);'
+          if old not in t:
+              raise SystemExit('Validation tarif Fondateur introuvable dans stripe-pricing-v2-webhook')
+          t=t.replace(old,new,1)
+          old='scheduleId=await ensureFounderSchedule(sub,String(subPrice.id),String(plan.stripe_price_id),String(founder.free_until),String(founder.discount_until))'
+          if old not in t:
+              raise SystemExit('Appel schedule Fondateur introuvable')
+          t=t.replace(old,'scheduleId=await ensureFounderSchedule(sub,String(plan.stripe_price_id),String(founder.free_until))',1)
+          t=t.replace('founder_discount_until:isFounder?founder.discount_until:null,founder_discount_percent:isFounder?50:null', 'founder_discount_until:isFounder?founder.free_until:null,founder_discount_percent:isFounder?0:null')
+          p.write_text(t)
+
+          # --- Ancien webhook promotion : neutraliser toute remise Fondateur ---
+          p = Path('supabase/functions/stripe-promotion-webhook/index.ts')
+          t = p.read_text()
+          t=t.replace('const founderDiscount=proOrder.founder_number!==null&&proOrder.plan_code!=="pro_20"&&founderRow?.discount_until&&new Date(founderRow.discount_until).getTime()>Date.now();', 'const founderDiscount=false;')
+          t=t.replace('founder_discount_until:founderRow?.discount_until??null,', 'founder_discount_until:founderRow?.free_until??null,')
+          t=t.replace('founder_discount_percent:founderRow?.discount_percent??null,', 'founder_discount_percent:founderRow?0:null,')
+          p.write_text(t)
+
+          # Vérifications fonctionnelles simples
+          check = Path('pro-fondateur.html').read_text()+Path('index.html').read_text()+Path('supabase/functions/create-pro-subscription-order/index.ts').read_text()+Path('supabase/functions/stripe-pricing-v2-webhook/index.ts').read_text()
+          forbidden=['-50 % la 2e année','Fondateur année 2 incohérent','ensureFounderYear2Price']
+          for s in forbidden:
+              if s in check:
+                  raise SystemExit('Ancienne logique encore présente: '+s)
+          PY
+
+      - name: Vérifier les nouveaux textes
+        run: |
+          grep -F "tarif public normal à partir du 13e mois" pro-fondateur.html
+          grep -F "Puis tarif public normal à partir du 13e mois" index.html
+          grep -F "const checkoutPriceId=priceId" supabase/functions/create-pro-subscription-order/index.ts
+          grep -F "founder_discount_percent:isFounder?0:null" supabase/functions/stripe-pricing-v2-webhook/index.ts
+
+      - name: Commit et nettoyage
+        run: |
+          rm -f .github/workflows/founder-public-after-12m-once.yml
+          rm -f .github/workflows/fix-pro-return-loop-once.yml
+          git config user.name "Abracadeal Bot"
+          git config user.email "abracadeal@gmail.com"
+          git add -A
+          git diff --cached --quiet && exit 0
+          git commit -m "Fondateurs : 12 mois gratuits puis tarif public"
+          git pull --rebase origin main
+          git push origin main
