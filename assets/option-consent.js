@@ -71,3 +71,24 @@ setTimeout(()=>{
    };
  },0);
 })();
+
+// 14/10/2026 : la page des formules doit rester centrée sur les abonnements.
+// L'annonce à l'unité et les options de visibilité restent disponibles dans leurs parcours dédiés,
+// mais ne sont plus mises en avant dans la grille Fondateurs.
+(()=>{
+ if(!/\/pro-fondateur\.html$/i.test(location.pathname))return;
+ const clean=()=>{
+   const optionsTitle=[...document.querySelectorAll('h3')].find(x=>x.textContent.trim()==='Options de visibilité');
+   if(optionsTitle?.parentElement)optionsTitle.parentElement.style.display='none';
+   document.querySelectorAll('#pricingGroups .offer').forEach(card=>{
+     const t=(card.textContent||'').replace(/\s+/g,' ').trim();
+     if((t.includes('1 annonce')&&t.includes('24,99'))||t.includes('Auto / Moto / Immobilier — 1 annonce'))card.remove();
+   });
+ };
+ const start=()=>{
+   clean();
+   const root=document.getElementById('pricingGroups');
+   if(root)new MutationObserver(clean).observe(root,{childList:true,subtree:true});
+ };
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});else start();
+})();
