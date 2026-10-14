@@ -190,7 +190,7 @@ Deno.serve(async req=>{
       const stripeSub=await stripeRequest("subscriptions/"+encodeURIComponent(subscriptionId));
       const {data:expectedPlan}=await admin.from("pro_subscription_plans").select("stripe_price_id").eq("code",proOrder.plan_code).single();
       if(stripeSub.items?.data?.length!==1||stripeSub.items.data[0]?.price?.id!==expectedPlan?.stripe_price_id||Number(stripeSub.items.data[0]?.quantity||1)!==1)return json({error:"Tarif Pro Stripe incohérent"},400);
-      const founderDiscount=proOrder.founder_number!==null&&proOrder.plan_code!=="pro_20"&&founderRow?.discount_until&&new Date(founderRow.discount_until).getTime()>Date.now();
+      const founderDiscount=false;
       if(founder){
         const expectedEnd=Math.floor(new Date(proOrder.free_until).getTime()/1000);
         if(Math.abs(Number(stripeSub.trial_end||0)-expectedEnd)>60)return json({error:"Essai Fondateur incorrect"},400);
@@ -233,8 +233,8 @@ Deno.serve(async req=>{
           stripe_checkout_session_id:session.id||null,
           founder_number:founderRow?.founder_number??proOrder.founder_number??null,
           founder_free_until:founderRow?.free_until??proOrder.free_until??null,
-          founder_discount_until:founderRow?.discount_until??null,
-          founder_discount_percent:founderRow?.discount_percent??null,
+          founder_discount_until:founderRow?.free_until??null,
+          founder_discount_percent:founderRow?0:null,
           enrolled_at:proOrder.enrolled_at,
           free_until:proOrder.free_until,
           billing_starts_at:proOrder.billing_starts_at,
