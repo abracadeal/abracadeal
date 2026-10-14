@@ -84,3 +84,5 @@ jobs:
           git diff --cached --quiet && exit 0
           git commit -m "Autorise les annonces Pro a l'unite sans abonnement"
           git push origin main
+
+# trigger 2
