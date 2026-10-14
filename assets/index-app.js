@@ -561,7 +561,13 @@ document.addEventListener('DOMContentLoaded',()=>{
     const {data,error}=await sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle();
     if(error){console.warn('Vérification formule Pro indisponible',error);return false;}
     const active=!!data&&['active','trialing'].includes(String(data.status||'').toLowerCase());
-    if(active){
+    let hasSingleCredit=false;
+    if(!active){
+      const {data:wallet,error:walletError}=await sb.from('pro_listing_credit_wallet').select('credits').eq('user_id',currentUser.id).gt('credits',0).limit(1);
+      if(walletError)console.warn('Vérification crédit annonce Pro indisponible',walletError);
+      else hasSingleCredit=Array.isArray(wallet)&&wallet.some(row=>Number(row?.credits||0)>0);
+    }
+    if(active||hasSingleCredit){
       try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
       if(document.getElementById('proPlanModal')?.classList.contains('open'))closeModal('proPlanModal');
       return false;

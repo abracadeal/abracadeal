@@ -565,7 +565,7 @@ async function abracaPhoneAvailable(phone,accountType='particulier'){
 
 // Brouillon limité à cet onglet. Aucun mot de passe enregistré.
 const signupDraftKey='abracadeal.signupDraft.v1';
-const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSiret','signupVatStatus','signupVat'];
+const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSector','signupSiret','signupVatStatus','signupVat'];
 function saveSignupDraft(){
   try{sessionStorage.setItem(signupDraftKey,JSON.stringify(Object.fromEntries(signupDraftIds.map(id=>[id,$('#'+id).value]))));}catch(_){}
 }
@@ -616,6 +616,8 @@ $('#signupForm').addEventListener('submit',async e=>{
   btn.textContent='Création...';
   btn.disabled=true;
   const name=$('#signupName').value.trim(), type=$('#signupType').value;
+  const proSector=type==='professionnel'?String($('#signupSector')?.value||'').trim():'';
+  if(type==='professionnel'&&!proSector){status.textContent='Choisis ton domaine professionnel.';return;}
   const rawPhone=$('#signupPhone').value.trim();
   try{
     const phoneCheck=await abracaPhoneAvailable(rawPhone,type);
@@ -637,7 +639,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,pro_sector:proSector||null,...(company_registration?{company_registration}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();
