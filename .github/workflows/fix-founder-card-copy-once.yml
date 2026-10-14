@@ -1,0 +1,53 @@
+name: Corriger texte vignettes Fondateurs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/fix-founder-card-copy-once.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Corriger les vignettes Fondateurs
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          p=Path('pro-fondateur.html')
+          t=p.read_text()
+          old="const founder=founderOffer?'<div class=\"saving\">🎁 <strong>12 mois offerts</strong> — valeur '+money(o.amount_cents*12)+' HT<span>✅ Sans engagement : résiliez en un clic avant la fin, vous ne payez rien.</span></div><div class=\"note\">Offre Fondateurs · puis '+money(Math.round(o.amount_cents/2))+' HT / mois la 2e année (-50 %), puis '+money(o.amount_cents)+' HT / mois</div>':'';"
+          new="const founder=founderOffer?'<div class=\"saving\">🎁 <strong>12 mois offerts</strong> — valeur '+money(o.amount_cents*12)+' HT<span>✅ Sans engagement : résiliez en un clic avant la fin, vous ne payez rien.</span></div><div class=\"note\">Offre Fondateurs · puis '+money(o.amount_cents)+' HT / mois à partir du 13e mois</div>':'';"
+          if t.count(old)!=1:
+              raise SystemExit(f'Bloc vignette Fondateur attendu introuvable ou dupliqué: {t.count(old)}')
+          t=t.replace(old,new,1)
+          # Signature de version HTML pour forcer une nouvelle version de la page côté hébergement/CDN.
+          marker='<!-- founder-card-copy-v20261014-2 -->'
+          if marker not in t:
+              t=t.replace('</head>',marker+'\n</head>',1)
+          p.write_text(t)
+          PY
+
+      - name: Verification
+        run: |
+          grep -F "à partir du 13e mois" pro-fondateur.html
+          if grep -F "Math.round(o.amount_cents/2)" pro-fondateur.html; then exit 1; fi
+          if grep -F "la 2e année (-50 %)" pro-fondateur.html; then exit 1; fi
+
+      - name: Commit et nettoyage
+        run: |
+          rm .github/workflows/fix-founder-card-copy-once.yml
+          git config user.name "Abracadeal Bot"
+          git config user.email "abracadeal@gmail.com"
+          git add pro-fondateur.html .github/workflows/fix-founder-card-copy-once.yml
+          git commit -m "Corrige texte des vignettes Fondateurs"
+          git push origin main
