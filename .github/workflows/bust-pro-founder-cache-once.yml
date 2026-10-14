@@ -1,0 +1,28 @@
+name: Cache page Pro Fondateurs
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/bust-pro-founder-cache-once.yml]
+permissions:
+  contents: write
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Forcer le nouveau script de nettoyage
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('pro-fondateur.html')
+          s=p.read_text()
+          s=s.replace('assets/option-consent.js?v=20261008-pay-loading2','assets/option-consent.js?v=20261014-pro-cleanup3')
+          p.write_text(s)
+          PY
+          git rm .github/workflows/bust-pro-founder-cache-once.yml
+          git add pro-fondateur.html
+          git config user.name "abracadeal-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Force le nettoyage visuel de la page Pro"
+          git pull --rebase origin main
+          git push origin main
