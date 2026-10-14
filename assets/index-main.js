@@ -3497,7 +3497,7 @@ function listingExpiryMarkup(a){
   return label||date?`<div class="ad-meta" style="margin-bottom:8px;font-weight:850">${esc(label||date)}</div>`:'';
 }
 function canRenewPrivateListing(a){
-  return a.seller_type==='particulier'&&a.category!=='vacances'&&!a.revision_of&&a.expires_at&&new Date(a.expires_at).getTime()<=Date.now()+7*86400000&&(a.status==='active'||(a.status==='archived'&&a.archive_reason==='expired'));
+  return ['particulier','professionnel'].includes(a.seller_type)&&a.category!=='vacances'&&!a.revision_of&&a.expires_at&&new Date(a.expires_at).getTime()<=Date.now()+7*86400000&&(a.status==='active'||(a.status==='archived'&&a.archive_reason==='expired'));
 }
 window.renewPrivateListing=async(id,button)=>{
   if(button)button.disabled=true;
