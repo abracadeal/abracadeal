@@ -13,7 +13,7 @@ Deno.serve(async req=>{
   if(!stripeKey)return json({error:"stripe_key_missing"},500);
   const h={Authorization:"Bearer "+stripeKey};
   const g=await fetch("https://api.stripe.com/v1/coupons/"+ID,{headers:h});
-  if(g.ok){const c=await g.json();return json({ok:true,existed:true,id:c.id,percent_off:c.percent_off,duration:c.duration,months:c.duration_in_months,valid:c.valid,livemode:c.livemode});}
+  if(g.ok){const c=await g.json();const conforme=c?.valid===true&&Number(c?.percent_off)===20&&c?.duration==="repeating"&&Number(c?.duration_in_months)===6;if(!conforme)return json({ok:false,existed:true,error:"coupon_existant_non_conforme",id:c.id,percent_off:c.percent_off,duration:c.duration,months:c.duration_in_months,valid:c.valid},409);return json({ok:true,existed:true,id:c.id,percent_off:c.percent_off,duration:c.duration,months:c.duration_in_months,valid:c.valid,livemode:c.livemode});}
   const p=new URLSearchParams();p.set("id",ID);p.set("name","Formule 100 : -20 % pendant 6 mois");p.set("percent_off","20");p.set("duration","repeating");p.set("duration_in_months","6");p.set("metadata[abraca_plan_code]","pro_100");
   const r=await fetch("https://api.stripe.com/v1/coupons",{method:"POST",headers:{...h,"Content-Type":"application/x-www-form-urlencoded"},body:p});
   const c=await r.json().catch(()=>({}));
