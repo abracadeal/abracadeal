@@ -2395,7 +2395,7 @@ async function compressImage(file){
         const ctx=canvas.getContext('2d');if(!ctx)throw Error('Compression indisponible');
         ctx.drawImage(img,0,0,w,h);
         const text='Abracadeal',fontSize=Math.max(24,Math.round(Math.min(w,h)*.05)),pad=Math.max(12,Math.round(fontSize*.72));
-        ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.30;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.22)';ctx.shadowBlur=3;ctx.fillText(text,w-pad,h-pad);ctx.restore();
+        ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.55;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=Math.max(3,Math.round(fontSize*.18));ctx.fillText(text,w-pad,h-pad);ctx.restore();
         // Target 120 KiB for all images; allow 200 KiB if stronger compression visibly harms detail.
         const target=120*1024;
         const qualityFloor=.60;
@@ -3473,8 +3473,11 @@ function rememberSearch(){
   const old=readLocalList(RECENT_SEARCH_KEY).filter(x=>`${x.q}|${x.city}|${x.cat}`!==`${q}|${city}|${cat}`);
   old.unshift(item);writeLocalList(RECENT_SEARCH_KEY,old.slice(0,8));
 }
+// Les photos envoyées depuis le site ont « Abracadeal » incrusté à l'envoi (compressImage). Celles des flux Pro
+// (import automatique) ne passent pas par là : on affiche alors le filigrane en surimpression.
+function abracaWmOverlay(a){return String(a?.source||'').startsWith('feed:')?' photo-watermark--overlay':'';}
 function personalizedCard(a,extra=''){
-  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${adSeoTitle(a)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
 }
 function renderRecentViewed(){
@@ -3523,7 +3526,7 @@ function renderHomeFeatured(){
   const picked=selectMixedFeatured(candidates,8);
   grid.innerHTML=picked.map(a=>{
     const photos=visiblePhotosFor(a);
-    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
@@ -3608,9 +3611,9 @@ function renderAds(){
   grid.innerHTML=ads.map(a=>{
     const photos=visiblePhotosFor(a);
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
-  window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone};
+  window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
-    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt=""><span class="photo-watermark">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
+    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
     const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button><div class="carousel-dots">${photoUrls.map((_,i)=>`<span class="carousel-dot${i===0?' active':''}"></span>`).join('')}</div>`:'';
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
@@ -3895,7 +3898,7 @@ window.openAd=id=>{
   if(!onlyMine&&!favoritesMode&&!moderationMode)renderRecentViewed();
   const photos=visiblePhotosFor(a);
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
-  window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone};
+  window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
   const specs=detailSpecsFor(a);
   const isOwner=!!(currentUser&&a.owner_id===currentUser.id);
   const canDelete=!!(isOwner||currentProfile?.is_admin);
@@ -3929,7 +3932,7 @@ window.openAd=id=>{
             <button type="button" id="detailFavoriteBtn-${a.id}" data-favorite-id="${a.id}" class="detail-photo-tool heart ${favoriteIds.has(a.id)?'active':''}" aria-label="${favoriteIds.has(a.id)?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${favoriteIds.has(a.id)?'♥':'♡'}</span><span class="fav-count" id="detailFavoriteCount-${a.id}" data-fav-count-id="${a.id}"></span></button>
           </div>
           ${photos.length>1?`<button type="button" class="detail-gallery-arrow detail-gallery-prev" aria-label="Photo précédente" onclick="event.stopPropagation();changeDetailPhoto(-1)">&#10094;</button><button type="button" class="detail-gallery-arrow detail-gallery-next" aria-label="Photo suivante" onclick="event.stopPropagation();changeDetailPhoto(1)">&#10095;</button>`:""}
-          <span class="photo-watermark" id="detailPhotoWatermark">Abracadeal</span><div class="detail-photo-count" id="detailPhotoCount">1 / ${photos.length}</div>
+          <span class="photo-watermark${abracaWmOverlay(a)}" id="detailPhotoWatermark">Abracadeal</span><div class="detail-photo-count" id="detailPhotoCount">1 / ${photos.length}</div>
         </div>
         ${photos.length>1?`<div class="detail-thumbs">
           ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})"><img src="${photoUrl(p.storage_path)}" alt="Photo ${i+1}"></button>`).join('')}
@@ -4240,6 +4243,7 @@ window.currentDetailPhotoUrls=[];
 let photoLightboxIndex=0;
 
 window.openPhotoLightboxFromCurrent=()=>{
+  document.getElementById('photoLightboxWatermark')?.classList.toggle('photo-watermark--overlay',!!window.currentDetailListing?.imported);
   const urls=window.currentDetailPhotoUrls||[];
   if(!urls.length) return;
   const main=document.getElementById('detailMainPhoto');
