@@ -2066,12 +2066,27 @@ function renderPublishPackPicker(){
     photoPicker.closest('.publish-photo-option')?.classList.toggle('hidden',!photoOffers.length||!!editingId);
     photoPicker.innerHTML=photoOffers.map(o=>card(o.code,o.label,publishMoney(o.amount_cents),optionDescription(o),selectedPublishOffers.has(o.code))).join('');
   }
-  picker.innerHTML=card('free','Sans option payante','Incluse','Publication standard',!packOffers.some(o=>selectedPublishOffers.has(o.code)))+packOffers.map(o=>card(o.code,o.label,publishMoney(o.amount_cents),optionDescription(o),selectedPublishOffers.has(o.code))).join('');
+  // 15/10/2026 : présentation sobre — publication gratuite par défaut, options repliées dans une liste discrète.
+  const anyPaid=packOffers.some(o=>selectedPublishOffers.has(o.code));
+  const shortLabel=o=>o.offer_type==='featured'?(Number(o.duration_days)===1?'24 h':o.duration_days+' jours'):o.offer_type==='daily_bump'?o.duration_days+' jours':o.label;
+  const row=o=>{const on=selectedPublishOffers.has(o.code);return '<button type="button" class="pub-row'+(on?' on':'')+'" data-publish-pack="'+esc(o.code)+'" aria-pressed="'+on+'"><span class="pub-tick" aria-hidden="true">'+(on?'✓':'')+'</span><span class="pub-row-label">'+esc(shortLabel(o))+'</span><span class="pub-row-price">'+publishMoney(o.amount_cents)+'</span></button>';};
+  const groups=[
+    ['featured','À la une','Votre annonce en tête de sa catégorie (une durée au choix)'],
+    ['daily_bump','Remontée quotidienne','Remonte en haut des résultats chaque matin'],
+    ['urgent','Badge Urgent','Badge « Urgent » jusqu’à la fin de l’annonce'],
+    ['boost_pack','Pack de remontées','Remontées ponctuelles, sans date limite']
+  ];
+  const groupsHtml=groups.map(([type,title,desc])=>{const list=packOffers.filter(o=>o.offer_type===type);if(!list.length)return '';return '<div class="pub-group"><div class="pub-group-head"><strong>'+esc(title)+'</strong><span>'+esc(desc)+'</span></div><div class="pub-rows">'+list.map(row).join('')+'</div></div>';}).join('');
+  const others=packOffers.filter(o=>!groups.some(g=>g[0]===o.offer_type));
+  const othersHtml=others.length?'<div class="pub-group"><div class="pub-rows">'+others.map(row).join('')+'</div></div>':'';
+  const wasOpen=picker.querySelector('details.pub-more')?.open;
+  picker.innerHTML='<button type="button" class="pub-free'+(anyPaid?'':' on')+'" data-publish-pack="free" aria-pressed="'+(!anyPaid)+'"><span class="pub-tick" aria-hidden="true">'+(anyPaid?'':'✓')+'</span><span><strong>Publication gratuite</strong><span class="pub-free-sub">Votre annonce est mise en ligne après vérification, sans frais.</span></span></button>'
+    +(packOffers.length?'<details class="pub-more"'+(anyPaid||wasOpen?' open':'')+'><summary>Booster la visibilité <span>(facultatif)</span></summary>'+groupsHtml+othersHtml+'</details>':'');
   document.querySelectorAll('#publishPackPicker [data-publish-pack],#publishPhotoOptionPicker [data-publish-pack]').forEach(button=>button.addEventListener('click',()=>togglePublishOffer(button.dataset.publishPack)));
   const chosen=publishChosenOffers(),total=chosen.reduce((t,o)=>t+Number(o.amount_cents),0);
   if(help)help.innerHTML=chosen.length
     ?'<strong>Votre sélection :</strong> '+chosen.map(o=>esc(o.label)+' ('+publishMoney(o.amount_cents)+')').join(' + ')+'<br><strong>Total : '+publishMoney(total)+'</strong> · un seul paiement. Après vérification de l’annonce, vous confirmerez le paiement sur la page suivante.'
-    :publishOffersUser===currentUser?.id?'Options cumulables (une seule durée « À la une »). Vous pouvez aussi publier sans option payante.':'Chargement des options et de leurs tarifs…';
+    :publishOffersUser===currentUser?.id?'':'Chargement des options…';
   updatePublishStepUi();
   setPublishPhotoLimit();
   if(currentUser&&!publishOffersLoading&&publishOffersUser!==currentUser.id)loadPublishCommerceOffers();
