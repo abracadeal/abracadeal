@@ -81,3 +81,38 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPasswordPolicy);
  else installPasswordPolicy();
 })();
+
+// Correctif fiche annonce : le propriétaire particulier doit toujours retrouver
+// son bouton Modifier. Le clic réutilise editAd(), donc le parcours de modification
+// payante existant (1,99 €) reste la seule voie de modification.
+(function(){
+ function restoreOwnerEditButton(){
+  const modal=document.getElementById('detailModal');
+  if(!modal)return;
+  const actions=modal.querySelector('.detail-owner-actions');
+  if(!actions||actions.querySelector('[data-owner-edit-restored]'))return;
+  const deleteButton=[...actions.querySelectorAll('button')].find(btn=>/\bdeleteAd\('([^']+)'\)/.test(btn.getAttribute('onclick')||'')&&!/adminDeleteAd/.test(btn.getAttribute('onclick')||''));
+  if(!deleteButton)return;
+  const match=(deleteButton.getAttribute('onclick')||'').match(/\bdeleteAd\('([^']+)'\)/);
+  const listingId=match?.[1];
+  if(!listingId)return;
+  const editButton=document.createElement('button');
+  editButton.type='button';
+  editButton.className='mini-btn';
+  editButton.dataset.ownerEditRestored='1';
+  editButton.textContent='Modifier · 1,99 €';
+  editButton.addEventListener('click',()=>{
+   closeModal('detailModal');
+   editAd(listingId);
+  });
+  actions.insertBefore(editButton,deleteButton);
+ }
+ function install(){
+  const modal=document.getElementById('detailModal');
+  if(!modal)return;
+  new MutationObserver(restoreOwnerEditButton).observe(modal,{childList:true,subtree:true});
+  restoreOwnerEditButton();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',install);
+ else install();
+})();
