@@ -42,3 +42,40 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',harmonizeVacancesLegal);
  else harmonizeVacancesLegal();
 })();
+
+// Regle mot de passe Abracadeal : 8 caracteres minimum, avec au moins
+// une majuscule, une minuscule et un chiffre. La validation native du
+// navigateur bloque l'envoi du formulaire avant la creation du compte.
+(function(){
+ const PASSWORD_MESSAGE='Le mot de passe doit contenir au moins 8 caractères, avec 1 majuscule, 1 minuscule et 1 chiffre.';
+ const PASSWORD_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+ function installPasswordPolicy(){
+  const input=document.getElementById('signupPassword');
+  if(!input)return;
+  input.minLength=8;
+  input.setAttribute('pattern','(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}');
+  input.setAttribute('title',PASSWORD_MESSAGE);
+  input.setAttribute('aria-describedby','signupPasswordRule');
+  let note=document.getElementById('signupPasswordRule');
+  if(!note){
+   note=document.createElement('div');
+   note.id='signupPasswordRule';
+   note.className='note';
+   note.textContent='8 caractères minimum · 1 majuscule · 1 minuscule · 1 chiffre';
+   input.insertAdjacentElement('afterend',note);
+  }
+  const validate=()=>{
+   const value=input.value||'';
+   input.setCustomValidity(!value||PASSWORD_RE.test(value)?'':PASSWORD_MESSAGE);
+  };
+  input.addEventListener('input',validate);
+  input.addEventListener('blur',validate);
+  input.addEventListener('invalid',()=>{
+   if(input.validity.valueMissing)input.setCustomValidity('Choisissez un mot de passe.');
+   else input.setCustomValidity(PASSWORD_MESSAGE);
+  });
+  validate();
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',installPasswordPolicy);
+ else installPasswordPolicy();
+})();
