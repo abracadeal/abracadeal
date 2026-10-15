@@ -8,6 +8,15 @@ const storage={
   removeItem(k){try{localStorage.removeItem(k)}catch{} try{sessionStorage.removeItem(k)}catch{}}
 };
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true,storage,storageKey:SUPABASE_AUTH_STORAGE_KEY}});
+// iPhone : un onglet mis en veille garde un jeton expiré ; on le rafraîchit avant l'appel et on réessaie une fois sur 401.
+async function invokeFresh(name,opts){
+  try{const{data:s}=await sb.auth.getSession();const exp=s?.session?.expires_at||0;if(s?.session&&exp*1000-Date.now()<60000)await sb.auth.refreshSession();}catch(_){}
+  let res=await sb.functions.invoke(name,opts);
+  const st=res?.error?.context?.status;
+  if(st===401){try{await sb.auth.refreshSession();}catch(_){}res=await sb.functions.invoke(name,opts);}
+  return res;
+}
+
 const $=s=>document.querySelector(s);
 const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set(),photoUrls:new Map(),reports:new Map()};
 
@@ -370,11 +379,11 @@ document.addEventListener('click',async e=>{
   setBusy(true);
   try{
     if(action==='validate'){
-      const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
+      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'validate'}});
       if(!error&&data?.status!=='active'&&data?.revision!==true)throw Error(data?.ai_error||'Annonce non validée');
       if(error)throw error;toast(data?.revision?'Modification validée. Application après paiement.':'Annonce validée');
     }else if(action==='pharos'){
-      const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'pharos'}});
+      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'pharos'}});
       if(error||!data?.ok)throw error||Error('Action Pharos impossible');
       if(pharosWindow){pharosWindow.opener=null;pharosWindow.location='https://www.internet-signalement.gouv.fr/';}
       toast('Photos supprimées, compte banni. Envoyez le signalement sur Pharos.');
@@ -438,7 +447,7 @@ async function releasePhoneReservation(index){
 
 // ---------- Comptes modérateurs (admin) ----------
 async function modApi(body){
-  const {data,error}=await sb.functions.invoke('moderator-api',{body});
+  const {data,error}=await invokeFresh('moderator-api',{body});
   if(error){let msg=error.message;try{msg=(await error.context.json()).error||msg}catch{}throw new Error(msg)}
   if(data?.error)throw new Error(data.error);
   return data;

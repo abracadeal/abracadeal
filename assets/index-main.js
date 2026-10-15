@@ -3118,9 +3118,17 @@ window.toggleFavorite=async(id,event)=>{
 
 const moderationRiskById=new Map();
 
+// iPhone : un onglet mis en veille garde un jeton expiré ; on le rafraîchit avant l'appel et on réessaie une fois sur 401.
+async function invokeFresh(name,opts){
+  try{const{data:s}=await sb.auth.getSession();const exp=s?.session?.expires_at||0;if(s?.session&&exp*1000-Date.now()<60000)await sb.auth.refreshSession();}catch(_){}
+  let res=await sb.functions.invoke(name,opts);
+  const st=res?.error?.context?.status;
+  if(st===401){try{await sb.auth.refreshSession();}catch(_){}res=await sb.functions.invoke(name,opts);}
+  return res;
+}
 async function requestAutomaticModeration(listingId){
   try{
-    const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:listingId}});
+    const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:listingId}});
     if(error) throw error;
     return data||null;
   }catch(err){
@@ -4860,7 +4868,7 @@ window.reportAd=async id=>{
 window.editAd=id=>window.openAdminEditAd(id,true);
 window.approveAd=async id=>{
   if(!currentProfile?.is_admin) return;
-  const {data,error}=await sb.functions.invoke('moderate-listing',{body:{listing_id:id,action:'validate'}});
+  const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'validate'}});
   if(!error&&data?.status!=='active'&&data?.revision!==true){toast(data?.ai_error||'Annonce non validée');return;}
   if(error){toast(error.message);return}
   toast('Annonce acceptée et mise en ligne');
