@@ -126,7 +126,7 @@ html{scrollbar-gutter:stable}
   backdrop-filter:none!important;
 }
 /* 16/10/2026 : photos importées par flux Pro = pas de filigrane incrusté, on affiche le texte en surimpression. */
-.photo-watermark.photo-watermark--overlay{display:block!important}
+.photo-watermark.photo-watermark--overlay{display:block!important;color:#fff!important;opacity:.9;-webkit-text-stroke:.6px rgba(20,8,30,.8);text-shadow:0 0 2px rgba(20,8,30,.9),0 1px 5px rgba(0,0,0,.75)!important}
 .seller-card h3,
 .seller-profile-name,
 #companySummary dd{

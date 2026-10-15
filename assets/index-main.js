@@ -2395,7 +2395,7 @@ async function compressImage(file){
         const ctx=canvas.getContext('2d');if(!ctx)throw Error('Compression indisponible');
         ctx.drawImage(img,0,0,w,h);
         const text='Abracadeal',fontSize=Math.max(24,Math.round(Math.min(w,h)*.05)),pad=Math.max(12,Math.round(fontSize*.72));
-        ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.55;ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,.6)';ctx.shadowBlur=Math.max(3,Math.round(fontSize*.18));ctx.fillText(text,w-pad,h-pad);ctx.restore();
+        ctx.save();ctx.font='700 '+fontSize+'px Georgia, serif';ctx.textAlign='right';ctx.textBaseline='bottom';ctx.globalAlpha=.8;ctx.lineJoin='round';ctx.lineWidth=Math.max(2,Math.round(fontSize*.12));ctx.strokeStyle='rgba(20,8,30,.75)';ctx.shadowColor='rgba(0,0,0,.55)';ctx.shadowBlur=Math.max(3,Math.round(fontSize*.2));ctx.strokeText(text,w-pad,h-pad);ctx.shadowBlur=0;ctx.fillStyle='#fff';ctx.fillText(text,w-pad,h-pad);ctx.restore();
         // Target 120 KiB for all images; allow 200 KiB if stronger compression visibly harms detail.
         const target=120*1024;
         const qualityFloor=.60;
