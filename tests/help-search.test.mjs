@@ -35,9 +35,9 @@ function setup() {
   return { elements, sections, entries, search(value) { elements.get('help-search').value = value; elements.get('help-search').handlers.input(); return (elements.get('faq').hidden ? results.details : sections.flatMap(section => section.details)).filter(entry => !entry.hidden); } };
 }
 
-test('37 questions, 9 thèmes, contenu accessible sans JavaScript et aucun tarif professionnel', () => {
+test('38 questions, 9 thèmes, contenu accessible sans JavaScript et aucun tarif professionnel', () => {
   const ui = setup();
-  assert.equal(ui.entries.length, 37);
+  assert.equal(ui.entries.length, 38);
   assert.equal(ui.sections.length, 9);
   assert.ok(ui.entries.every(entry => !entry.hidden && !entry.open));
   assert.equal(ui.elements.get('search-panel').hidden, false);
@@ -108,7 +108,7 @@ test('racines de cinq lettres, synonymes ajoutés et petits mots ignorés', () =
   assert.ok(ui.search('support').some(e => e.question === 'Comment contacter Abracadeal ?'));
   assert.ok(ui.search('VERIFICATION').some(e => e.question === "Pourquoi mon annonce n'est-elle pas encore visible ?"));
   assert.deepEqual(ui.search('comment vendre ma voiture').map(e => e.question), ui.search('vendre voiture').map(e => e.question));
-  assert.equal(ui.search('le la les de des du un une mon ma mes je comment pourquoi est ce que quoi pour sur et ou').length, 37);
+  assert.equal(ui.search('le la les de des du un une mon ma mes je comment pourquoi est ce que quoi pour sur et ou').length, 38);
 });
 test('tri global par mots trouvés, correspondance OU et restauration des thèmes', () => {
   const ui = setup();
