@@ -2381,6 +2381,15 @@ async function loadExistingPhotosForEdit(a){
     if(editingId===id){editPhotosLoading=false;setPublishPhotoLimit();}
   }
 }
+// Safari (iPhone/Mac) ne sait pas encoder le WebP : canvas.toBlob('image/webp') y renvoie un PNG de 1 à 2 Mo.
+// On détecte une fois et on bascule alors sur du JPEG, compressé de la même façon.
+let abracaPhotoType=null;
+function abracaEncodeType(){
+  if(abracaPhotoType)return abracaPhotoType;
+  try{const c=document.createElement('canvas');c.width=c.height=2;abracaPhotoType=c.toDataURL('image/webp').startsWith('data:image/webp')?'image/webp':'image/jpeg';}catch(_){abracaPhotoType='image/jpeg';}
+  return abracaPhotoType;
+}
+const abracaExtFor=t=>t==='image/jpeg'?'jpg':t==='image/png'?'png':'webp';
 async function compressImage(file){
   // Adaptive WebP: keep detail while avoiding oversized uploads.
   return new Promise((resolve,reject)=>{
@@ -2402,7 +2411,7 @@ async function compressImage(file){
         let best=null,bestUnderCap=null;
         for(let pass=0;pass<3;pass++){
           for(const quality of [.85,.78,.70,.60]){
-            const blob=await new Promise(ok=>canvas.toBlob(ok,'image/webp',quality));
+            const blob=await new Promise(ok=>canvas.toBlob(ok,abracaEncodeType(),quality));
             if(!blob)throw Error('Impossible de compresser cette photo');
             if(!best||blob.size<best.size)best=blob;
             if(blob.size<=target){resolve(blob);return}
@@ -2496,11 +2505,12 @@ async function uploadPhotos(listingId){
   if(!selectedPhotos.length) return;
 
   const rows=await Promise.all(selectedPhotos.map(async(blob,i)=>{
-    const path=`${currentUser.id}/${listingId}/${crypto.randomUUID()}.webp`;
+    const type=['image/webp','image/jpeg','image/png'].includes(blob?.type)?blob.type:'image/webp';
+    const path=`${currentUser.id}/${listingId}/${crypto.randomUUID()}.${abracaExtFor(type)}`;
     const {error}=await sb.storage.from('listing-images-pending').upload(
       path,
       blob,
-      {contentType:'image/webp',upsert:false,cacheControl:'3600'}
+      {contentType:type,upsert:false,cacheControl:'3600'}
     );
     if(error) throw error;
     return {listing_id:listingId,storage_path:path,storage_bucket:'listing-images-pending',position:i+1};
@@ -5479,13 +5489,13 @@ async function saveProShowroom(e){
     let bannerPath=proShowroomRecord.banner_path||null,logoPath=proShowroomRecord.logo_path||null;
     const stamp=Date.now();
     if(proShowroomPendingBanner){
-      bannerPath=currentUser.id+'/banner-'+stamp+'.webp';
-      const {error}=await sb.storage.from('pro-showroom').upload(bannerPath,proShowroomPendingBanner,{contentType:'image/webp',upsert:false,cacheControl:'3600'});
+      const bType=proShowroomPendingBanner.type||'image/webp';bannerPath=currentUser.id+'/banner-'+stamp+'.'+abracaExtFor(bType);
+      const {error}=await sb.storage.from('pro-showroom').upload(bannerPath,proShowroomPendingBanner,{contentType:bType,upsert:false,cacheControl:'3600'});
       if(error)throw error;uploaded.push(bannerPath);
     }
     if(proShowroomPendingLogo){
-      logoPath=currentUser.id+'/logo-'+stamp+'.webp';
-      const {error}=await sb.storage.from('pro-showroom').upload(logoPath,proShowroomPendingLogo,{contentType:'image/webp',upsert:false,cacheControl:'3600'});
+      const lType=proShowroomPendingLogo.type||'image/webp';logoPath=currentUser.id+'/logo-'+stamp+'.'+abracaExtFor(lType);
+      const {error}=await sb.storage.from('pro-showroom').upload(logoPath,proShowroomPendingLogo,{contentType:lType,upsert:false,cacheControl:'3600'});
       if(error)throw error;uploaded.push(logoPath);
     }
     const payload={user_id:currentUser.id,description:description||null,banner_path:bannerPath,logo_path:logoPath,updated_at:new Date().toISOString()};
@@ -5574,7 +5584,7 @@ function validateProCrop(){
       saveBtn.textContent='Enregistrement…';
       saveBtn.click();
     }
-  },'image/webp',0.86);
+  },isLogo&&abracaEncodeType()!=='image/webp'?'image/png':abracaEncodeType(),0.86);
 }
 function refreshProShowroomPreview(){
   const n=document.getElementById('proShowroomNameLive'),p=document.getElementById('proShowroomPhoneLive'),d=document.getElementById('proShowroomDescriptionLive'),city=document.getElementById('proShowroomCityLive');
