@@ -4391,3 +4391,7 @@ header #flowErrorsBtn{
 
 /* Fix 08/10/2026 : message de securite paiement rendu plus discret (l'admin : prenait trop de place) */
 .buyer-safety-note{padding:0;margin:0 0 12px;border:0;background:none;color:#7a6a86;font-size:11.5px;line-height:1.4;font-weight:500}
+
+/* 15/10/2026 : boutons du quota mensuel offert (formule 100) */
+.mini-btn.pro-month-btn{background:linear-gradient(90deg,#fff6e0,#fdebc0);border-color:#e3c27a;color:#6b4a0c;font-weight:700}
+.mini-btn.pro-month-btn:disabled{opacity:.5;cursor:not-allowed}

@@ -510,6 +510,7 @@ function updateAuthUI(preserveEditing=false){
     if($('#profileEmail')) $('#profileEmail').value=currentUser.email||'';
     setTimeout(refreshUnreadMessages,0);
     if(isProAccount)setTimeout(()=>loadProBoostWallet().catch(error=>console.warn('Boost wallet',error)),0);
+    if(isProAccount)setTimeout(()=>{refreshProPhotoAllowance().catch(e=>console.warn('Limite photos pack',e));loadProMonthlyAllowance().catch(e=>console.warn('Quota mensuel Pro',e));},0);
     else{proBoostWalletState={7:0,30:0};renderProBoostWallet();}
   }else{
     proBoostWalletState={7:0,30:0};renderProBoostWallet();
@@ -1962,6 +1963,39 @@ function setPublishPhotoLimit(){
   const q=$('#photoQuotaTitle');if(q)q.textContent=`Jusqu’à ${publishPhotoLimit} photo${publishPhotoLimit>1?'s':''} incluse${publishPhotoLimit>1?'s':''}`;
   renderSelectedPhotos();
 }
+
+// Formule 100 : 5 « À la une 7 jours » + 5 remontées offerts chaque mois (remis à zéro le 1er du mois).
+let proMonthlyAllowance=null;
+async function loadProMonthlyAllowance(){
+  if(!sb||!currentUser||currentProfile?.account_type!=='professionnel'){proMonthlyAllowance=null;return null;}
+  const {data,error}=await sb.rpc('get_my_pro_monthly_allowance');
+  if(error){console.warn('Quota mensuel Pro indisponible',error);return proMonthlyAllowance;}
+  const before=JSON.stringify(proMonthlyAllowance);
+  proMonthlyAllowance=data&&data.eligible?data:null;
+  if(before!==JSON.stringify(proMonthlyAllowance)&&typeof renderAds==='function'){try{renderAds();}catch(_){}}
+  return proMonthlyAllowance;
+}
+function proMonthlyErrorMessage(error){
+  const raw=String(error?.message||error?.details||'');
+  if(raw.includes('no_monthly_featured_left'))return 'Vous avez utilisé vos 5 « À la une » offerts ce mois-ci.';
+  if(raw.includes('no_monthly_bump_left'))return 'Vous avez utilisé vos 5 remontées offertes ce mois-ci.';
+  if(raw.includes('listing_already_featured'))return 'Cette annonce est déjà à la une.';
+  if(raw.includes('listing_not_active'))return 'Seule une annonce en ligne peut être mise en avant.';
+  if(raw.includes('plan_100_required'))return 'Réservé à la formule 100 annonces.';
+  return error?.message||'Action impossible pour le moment.';
+}
+async function useProMonthlyAllowance(id,kind,btn){
+  if(!id||!['featured','bump'].includes(kind))return;
+  if(btn)btn.disabled=true;
+  try{
+    const {data,error}=await sb.rpc('use_pro_monthly_allowance',{p_listing_id:id,p_kind:kind});
+    if(error)throw error;
+    proMonthlyAllowance={...(proMonthlyAllowance||{}),featured_left:data.featured_left,bumps_left:data.bumps_left,eligible:true};
+    toast(kind==='featured'?'Annonce à la une pendant 7 jours · '+data.featured_left+' restant'+(data.featured_left>1?'s':'')+' ce mois-ci':'Annonce remontée en tête de liste · '+data.bumps_left+' remontée'+(data.bumps_left>1?'s':'')+' restante'+(data.bumps_left>1?'s':''));
+    await loadAds();
+  }catch(err){toast(proMonthlyErrorMessage(err));if(btn)btn.disabled=false;await loadProMonthlyAllowance();}
+}
+window.useProMonthlyAllowance=useProMonthlyAllowance;
 async function refreshProPhotoAllowance(){
   if(!sb||!currentUser||accountAudience()!=='professionnel')return;
   const uid=currentUser.id;
@@ -3601,6 +3635,7 @@ function renderAds(){
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
+          ${(!moderationMode&&proMonthlyAllowance?.eligible&&a.status==='active'&&a.seller_type==='professionnel'&&a.owner_id===currentUser?.id)?`${listingIsFeatured(a)?'':`<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.featured_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','featured',this)">⭐ À la une 7 j · offert (${Number(proMonthlyAllowance.featured_left||0)}/5)</button>`}<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.bumps_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','bump',this)">⬆️ Remonter · offert (${Number(proMonthlyAllowance.bumps_left||0)}/5)</button>`:''}
           ${(!moderationMode&&canDelete&&a.owner_id===currentUser?.id&&canRenewPrivateListing(a))?`<button class="mini-btn" onclick="event.stopPropagation();renewPrivateListing('${a.id}',this)">Prolonger gratuitement · 60 jours</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&a.status==='active'&&!a.revision_of)?`<button class="mini-btn" onclick="event.stopPropagation();editAd('${a.id}')">Modifier</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
