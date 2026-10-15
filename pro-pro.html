@@ -35,13 +35,13 @@
 </section>
 
 <section class="panel hidden" data-section="offers">
-<div class="panelhead"><div><h2>Offres privées Pro/Pro</h2><div class="note">Le vendeur choisit si le prix est visible immédiatement ou après accord.</div></div><button class="btn primary" id="newOffer">Déposer une offre</button></div>
+<div class="panelhead"><div><h2>Offres privées Pro/Pro</h2><div class="note">Le vendeur choisit si le prix est visible immédiatement ou après accord. Les offres déposées directement dans Pro/Pro sont gratuites et ne sont pas décomptées de votre quota d’annonces d’abonnement.</div></div><button class="btn primary" id="newOffer">Déposer une offre</button></div>
 <div class="note" id="offersStatus"></div><div class="grid" id="offersGrid"></div>
 <div class="toolbar hidden" id="adminPager"><button class="btn" id="adminPrevious">Précédente</button><span class="note" id="adminPage"></span><button class="btn" id="adminNext">Suivante</button></div>
 </section>
 
 <section class="panel hidden" data-section="stock">
-<div class="panelhead"><div><h2>Mon stock</h2><div class="note">Gérez vos offres privées publiées, vendues ou retirées.</div></div><button class="btn primary" id="newOfferStock">Déposer une offre</button></div>
+<div class="panelhead"><div><h2>Mon stock</h2><div class="note">Gérez vos offres privées publiées, vendues ou retirées. Ces offres Pro/Pro sont hors quota et ne consomment aucune place de votre abonnement.</div></div><button class="btn primary" id="newOfferStock">Déposer une offre</button></div>
 <div class="note" id="stockStatus"></div><div class="grid" id="stockGrid"></div>
 </section>
 
@@ -63,6 +63,7 @@
 
 <form id="offerForm" class="form hidden">
 <h3 id="offerHeading">Nouvelle offre Pro/Pro</h3><input type="hidden" id="offerId">
+<div class="note">Publication Pro/Pro gratuite : cette offre ne sera pas décomptée de votre abonnement.</div>
 <div class="formgrid">
 <div class="field full"><label>Titre</label><input class="input" id="offerTitle" required minlength="3" maxlength="160"></div>
 <div class="field"><label>Prix</label><input class="input" id="offerPrice" type="number" min="0" max="9999999999" step="0.01" required></div>
