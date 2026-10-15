@@ -25,7 +25,7 @@ Deno.serve(async req=>{
       const subscriptionId=typeof sub.id==="string"?sub.id:"";
       const customerId=typeof sub.customer==="string"?sub.customer:"";
       const status=event.type==="customer.subscription.deleted"?"canceled":String(sub.status||"active");
-      const updates:any={status,cancel_at_period_end:!!sub.cancel_at_period_end,updated_at:new Date().toISOString()};
+      const updates:any={status,cancel_at_period_end:(!!sub.cancel_at_period_end||(!!sub.cancel_at&&!sub.ended_at)),updated_at:new Date().toISOString()};
       if(event.type!=="customer.subscription.deleted"){
         if(Number.isFinite(Number(sub.current_period_start)))updates.current_period_start=new Date(Number(sub.current_period_start)*1000).toISOString();
         if(Number.isFinite(Number(sub.current_period_end)))updates.current_period_end=new Date(Number(sub.current_period_end)*1000).toISOString();
@@ -70,7 +70,7 @@ Deno.serve(async req=>{
           const nowIso=new Date().toISOString();
           const currentPeriodStart=Number.isFinite(Number(sub.current_period_start))?new Date(Number(sub.current_period_start)*1000).toISOString():null;
           const currentPeriodEnd=Number.isFinite(Number(sub.current_period_end))?new Date(Number(sub.current_period_end)*1000).toISOString():null;
-          const {error:subError}=await admin.from("pro_subscriptions").upsert({user_id:order.user_id,plan_code:order.plan_code,listing_limit:Number(plan.listing_limit),status:isFounder?"trialing":String(sub.status||"active"),source:"stripe",stripe_customer_id:typeof session.customer==="string"?session.customer:null,stripe_subscription_id:subId,stripe_checkout_session_id:session.id,founder_number:isFounder?founder.founder_number:null,founder_free_until:isFounder?founder.free_until:null,founder_discount_until:isFounder?founder.free_until:null,founder_discount_percent:isFounder?0:null,enrolled_at:isFounder?founder.enrolled_at:order.enrolled_at,free_until:isFounder?founder.free_until:null,billing_starts_at:isFounder?founder.free_until:nowIso,current_period_start:currentPeriodStart,current_period_end:currentPeriodEnd,cancel_at_period_end:!!sub.cancel_at_period_end,updated_at:nowIso},{onConflict:"user_id"});
+          const {error:subError}=await admin.from("pro_subscriptions").upsert({user_id:order.user_id,plan_code:order.plan_code,listing_limit:Number(plan.listing_limit),status:isFounder?"trialing":String(sub.status||"active"),source:"stripe",stripe_customer_id:typeof session.customer==="string"?session.customer:null,stripe_subscription_id:subId,stripe_checkout_session_id:session.id,founder_number:isFounder?founder.founder_number:null,founder_free_until:isFounder?founder.free_until:null,founder_discount_until:isFounder?founder.free_until:null,founder_discount_percent:isFounder?0:null,enrolled_at:isFounder?founder.enrolled_at:order.enrolled_at,free_until:isFounder?founder.free_until:null,billing_starts_at:isFounder?founder.free_until:nowIso,current_period_start:currentPeriodStart,current_period_end:currentPeriodEnd,cancel_at_period_end:(!!sub.cancel_at_period_end||(!!sub.cancel_at&&!sub.ended_at)),updated_at:nowIso},{onConflict:"user_id"});
           if(subError)throw subError;
           const {error:completeError}=await admin.from("pro_subscription_orders").update({status:"completed",stripe_customer_id:typeof session.customer==="string"?session.customer:null,stripe_subscription_id:subId,completed_at:nowIso,updated_at:nowIso}).eq("id",order.id).eq("status","pending");
           if(completeError)throw completeError;
