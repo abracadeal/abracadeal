@@ -44,16 +44,16 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
 })();
 
 // Regle mot de passe Abracadeal : 8 caracteres minimum, avec au moins
-// une majuscule, une minuscule et un chiffre. La validation native du
-// navigateur bloque l'envoi du formulaire avant la creation du compte.
+// une majuscule, une minuscule, un chiffre et un symbole. La validation
+// native du navigateur bloque l'envoi avant la creation du compte.
 (function(){
- const PASSWORD_MESSAGE='Le mot de passe doit contenir au moins 8 caractères, avec 1 majuscule, 1 minuscule et 1 chiffre.';
- const PASSWORD_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/;
+ const PASSWORD_MESSAGE='Le mot de passe doit contenir au moins 8 caractères, avec 1 majuscule, 1 minuscule, 1 chiffre et 1 symbole.';
+ const PASSWORD_RE=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9\s]).{8,}$/;
  function installPasswordPolicy(){
   const input=document.getElementById('signupPassword');
   if(!input)return;
   input.minLength=8;
-  input.setAttribute('pattern','(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}');
+  input.setAttribute('pattern','(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9\\s]).{8,}');
   input.setAttribute('title',PASSWORD_MESSAGE);
   input.setAttribute('aria-describedby','signupPasswordRule');
   let note=document.getElementById('signupPasswordRule');
@@ -61,8 +61,10 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
    note=document.createElement('div');
    note.id='signupPasswordRule';
    note.className='note';
-   note.textContent='8 caractères minimum · 1 majuscule · 1 minuscule · 1 chiffre';
+   note.textContent='8 caractères minimum · 1 majuscule · 1 minuscule · 1 chiffre · 1 symbole';
    input.insertAdjacentElement('afterend',note);
+  }else{
+   note.textContent='8 caractères minimum · 1 majuscule · 1 minuscule · 1 chiffre · 1 symbole';
   }
   const validate=()=>{
    const value=input.value||'';
