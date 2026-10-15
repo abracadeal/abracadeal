@@ -57,7 +57,7 @@ async function loadFounderOfferCounter(){
   const counters=[...document.querySelectorAll('[data-founder-counter]')];
   if(!counters.length||!sb)return;
   try{
-    const {data,error}=await sb.rpc('get_founder_offer_status');
+    const {data,error}=await sb.rpc('get_founder_offer_counter');
     if(error)throw error;
     const row=Array.isArray(data)?data[0]:data;
     const total=Math.max(1,Number(row?.total_places||500));
