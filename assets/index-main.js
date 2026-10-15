@@ -971,8 +971,8 @@ function collectImportPhotos(r){
     });
   };
   Object.entries(r).forEach(([k,v])=>{if(/(^|_)(photo|photos|image|images|picture|pictures)(_|$)/.test(k)) add(v);});
-  for(let i=1;i<=30;i++) add(importCell(r,[`photo_${i}`,`photo${i}`,`image_${i}`,`image${i}`,`picture_${i}`,`picture${i}`]));
-  return urls.slice(0,30);
+  for(let i=1;i<=45;i++) add(importCell(r,[`photo_${i}`,`photo${i}`,`image_${i}`,`image${i}`,`picture_${i}`,`picture${i}`]));
+  return urls.slice(0,45);
 }
 function normalizeFrenchPostalCode(value){
   const digits=String(value??'').replace(/\D/g,'');
@@ -1297,7 +1297,7 @@ async function importOneProfessionalRow(r){
   }
   try{
     const {error:contactError}=await sb.rpc('save_listing_contact',{p_listing_id:listingId,p_phone:currentProfile?.phone||null,p_contact_email:currentUser.email||null}); if(contactError)throw contactError;
-    await replaceImportedPhotos(listingId,r.photos,30); // plafonné ensuite par la limite du pack lue sur l'annonce
+    await replaceImportedPhotos(listingId,r.photos,45); // plafonné ensuite par la limite du pack lue sur l'annonce
     // Chaque création et mise à jour importée repasse par le contrôle texte + photos.
     const moderation=await requestAutomaticModeration(listingId);
     return {listingId,moderation,updated:isUpdate};
@@ -1948,7 +1948,7 @@ function syncPublishVisibility(){
 }
 function listingIsFeatured(a){return !!a?.featured_until && new Date(a.featured_until).getTime()>Date.now()}
 function basePhotoLimitForAudience(audience=accountAudience(),category=$('#adCategory')?.value){if(audience==='professionnel'){if(proPlanPhotoLimit)return proPlanPhotoLimit;if(category==='hightech'||category==='maison'||category==='mode')return 8;if(category==='emploi'||category==='services')return 5;return 15}if(category==='immobilier'||category==='hightech'||category==='maison'||category==='mode')return 5;if(category==='vacances')return 15;return 3}
-function listingPhotoLimit(a){let base;if(a?.seller_type==='professionnel'){base=(a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?8:((a?.category==='emploi'||a?.category==='services')?5:15)}else{base=(a?.category==='immobilier'||a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?5:(a?.category==='vacances'?15:3)}return Math.max(base,Math.min(30,Number(a?.photo_limit||base)))}
+function listingPhotoLimit(a){let base;if(a?.seller_type==='professionnel'){base=(a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?8:((a?.category==='emploi'||a?.category==='services')?5:15)}else{base=(a?.category==='immobilier'||a?.category==='hightech'||a?.category==='maison'||a?.category==='mode')?5:(a?.category==='vacances'?15:3)}return Math.max(base,Math.min(45,Number(a?.photo_limit||base)))}
 function listingHasPhotoPack(a){return a?.seller_type==='professionnel'?listingPhotoLimit(a)>=30:listingPhotoLimit(a)>=12}
 function visiblePhotosFor(a){const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return photos.slice(0,listingPhotoLimit(a))}
 function currentPublishPack(){return selectedPublishPack==='free'?null:PROMOTION_PACKS[selectedPublishPack]||null}
@@ -1969,7 +1969,7 @@ async function refreshProPhotoAllowance(){
   proPhotoAllowanceUser=uid;
   const {data,error}=await sb.from('pro_subscriptions').select('status,plan_code,billing_starts_at,current_period_end').eq('user_id',uid).maybeSingle();
   if(error){proPhotoAllowanceUser=null;return;}
-  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive?(['pro_50','pro_100','pro_200','pro_250'].includes(data.plan_code)?30:(data.plan_code==='pro_20'?15:null)):null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
+  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive?(['pro_100','pro_200','pro_250'].includes(data.plan_code)?45:(data.plan_code==='pro_50'?30:(data.plan_code==='pro_20'?15:null))):null; proPaidPhotoAllowance=(proPlanPhotoLimit||0)>=30;
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
 function publishOfferMatches(o,audience=accountAudience(),category=$('#adCategory')?.value){
