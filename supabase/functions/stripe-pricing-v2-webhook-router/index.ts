@@ -24,7 +24,14 @@ Deno.serve(async req=>{
       const sub=event?.data?.object||{};
       const subscriptionId=typeof sub.id==="string"?sub.id:"";
       const customerId=typeof sub.customer==="string"?sub.customer:"";
-      const status=event.type==="customer.subscription.deleted"?"canceled":String(sub.status||"active");
+      let status=event.type==="customer.subscription.deleted"?"canceled":String(sub.status||"active");
+      // Résiliation pendant la période gratuite (Fondateurs) : arrêt immédiat, sans attendre la fin des 12 mois.
+      if(event.type==="customer.subscription.updated"&&String(sub.status)==="trialing"&&(sub.cancel_at_period_end||sub.cancel_at)&&!sub.ended_at&&subscriptionId&&STRIPE_KEY){
+        const r=await fetch("https://api.stripe.com/v1/subscriptions/"+encodeURIComponent(subscriptionId),{method:"DELETE",headers:{Authorization:"Bearer "+STRIPE_KEY,"Content-Type":"application/x-www-form-urlencoded"},body:new URLSearchParams({invoice_now:"false",prorate:"false"})});
+        const d=await r.json().catch(()=>({}));
+        if(!r.ok&&!String(d?.error?.message||"").toLowerCase().includes("canceled"))throw new Error("Stripe : annulation immédiate impossible — "+(d?.error?.message||r.status));
+        status="canceled";
+      }
       const updates:any={status,cancel_at_period_end:(!!sub.cancel_at_period_end||(!!sub.cancel_at&&!sub.ended_at)),updated_at:new Date().toISOString()};
       if(event.type!=="customer.subscription.deleted"){
         if(Number.isFinite(Number(sub.current_period_start)))updates.current_period_start=new Date(Number(sub.current_period_start)*1000).toISOString();
