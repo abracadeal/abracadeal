@@ -1289,13 +1289,15 @@ async function importOneProfessionalRow(r){
     // Réimport = mise à jour uniquement : on conserve le statut, la date de publication
     // et les éventuels champs de mise en avant déjà présents sur l'annonce.
     delete updatePayload.status;
+    // La limite photo est fixée par le pack côté serveur : ne pas l'écraser au réimport.
+    delete updatePayload.photo_limit;
     const {error}=await sb.from('listings').update(updatePayload).eq('id',listingId).eq('owner_id',currentUser.id); if(error)throw error;
   }else{
     const {data,error}=await sb.from('listings').insert(payload).select('id').single(); if(error)throw error; listingId=data.id;
   }
   try{
     const {error:contactError}=await sb.rpc('save_listing_contact',{p_listing_id:listingId,p_phone:currentProfile?.phone||null,p_contact_email:currentUser.email||null}); if(contactError)throw contactError;
-    await replaceImportedPhotos(listingId,r.photos,Math.max(15,Math.min(30,Number(r.existingPhotoLimit||15))));
+    await replaceImportedPhotos(listingId,r.photos,30); // plafonné ensuite par la limite du pack lue sur l'annonce
     // Chaque création et mise à jour importée repasse par le contrôle texte + photos.
     const moderation=await requestAutomaticModeration(listingId);
     return {listingId,moderation,updated:isUpdate};
@@ -1967,7 +1969,7 @@ async function refreshProPhotoAllowance(){
   proPhotoAllowanceUser=uid;
   const {data,error}=await sb.from('pro_subscriptions').select('status,plan_code,billing_starts_at,current_period_end').eq('user_id',uid).maybeSingle();
   if(error){proPhotoAllowanceUser=null;return;}
-  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive&&['pro_100','pro_200','pro_250'].includes(data.plan_code)?30:null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
+  const proActive=!!data&&['active','trialing'].includes(data.status)&&(!data.current_period_end||new Date(data.current_period_end)>new Date()); proPlanPhotoLimit=proActive?(['pro_50','pro_100','pro_200','pro_250'].includes(data.plan_code)?30:(data.plan_code==='pro_20'?15:null)):null; proPaidPhotoAllowance=proPlanPhotoLimit===30;
   if(currentUser?.id===uid){setPublishPhotoLimit();renderPublishPackPicker();}
 }
 function publishOfferMatches(o,audience=accountAudience(),category=$('#adCategory')?.value){

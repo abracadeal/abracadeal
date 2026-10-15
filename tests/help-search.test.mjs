@@ -114,8 +114,9 @@ test('tri global par mots trouvés, correspondance OU et restauration des thème
   const ui = setup();
   const original = ui.sections.map(section => section.details.map(e => e.question));
   const found = ui.search('photos 15');
-  assert.equal(found[0].question, 'Combien coûte une annonce de location de vacances ?');
-  assert.ok(found.some(e => e.question === 'Combien de photos puis-je ajouter ?'));
+  // La FAQ photos mentionne désormais « 15 photos » (formule Pro 20) : elle contient les deux mots et passe en tête.
+  assert.equal(found[0].question, 'Combien de photos puis-je ajouter ?');
+  assert.ok(found.some(e => e.question === 'Combien coûte une annonce de location de vacances ?'));
   assert.ok(ui.search('iCal xyzaucunresultat').some(e => e.question === 'Puis-je synchroniser mon calendrier Airbnb ou Booking ?'));
   ui.search('');
   assert.deepEqual(ui.sections.map(section => section.details.map(e => e.question)), original);
