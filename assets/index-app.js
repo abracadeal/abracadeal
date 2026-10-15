@@ -643,7 +643,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     pro_50:'Jusqu’à 50 annonces',
     pro_100:'Jusqu’à 100 annonces',
     pro_200:'Jusqu’à 200 annonces',
-    pro_250:'Plus de 200 annonces (sur devis)'
+    pro_250:'Plus de 100 annonces (sur devis)'
   };
   const statusLabels={
     trialing:'Période gratuite',
