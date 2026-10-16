@@ -72,8 +72,11 @@ async function loadFounderOfferCounter(){
       if(label)label.textContent=text;
     });
     const pct=Math.min(100,Math.max(0,(claimed/total)*100));
-    document.querySelectorAll('[data-founder-progress]').forEach(el=>el.style.width=pct+'%');
+    // Lancement : tant que peu de pros sont inscrits, on masque la barre et le nombre d'inscrits (évite l'effet « site vide »)
+    const fewClaimed=claimed<25;
+    document.querySelectorAll('[data-founder-progress]').forEach(el=>{el.style.width=pct+'%';if(el.parentElement)el.parentElement.style.display=fewClaimed?'none':'';});
     document.querySelectorAll('[data-founder-progress-note]').forEach(el=>{
+      if(fewClaimed){el.textContent='Places réparties par région : premiers inscrits, premiers servis.';return;}
       el.textContent=`${claimed.toLocaleString('fr-FR')} professionnel${claimed>1?'s':''} vérifié${claimed>1?'s':''} inscrit${claimed>1?'s':''} · ${remaining.toLocaleString('fr-FR')} place${remaining>1?'s':''} restante${remaining>1?'s':''}.`;
     });
   }catch(err){
@@ -3625,8 +3628,8 @@ function renderAds(){
       ?vehicleSubLabel(activeVehicleSubcategory)
       :(activeCategory?catLabel(activeCategory):'Les annonces'))));
   const waitingImmoRadius=(($('#filterCategory')?.value||activeCategory||'')==='immobilier'&&Number($('#filterImmoRadius')?.value||0)&&($('#searchCity')?.value||'').trim()&&!immoRadiusState.ready);
-  $('#resultSubtitle').textContent=waitingImmoRadius?'Calcul du rayon autour de la ville…':(moderationMode?(ads.length?`${ads.length} annonce${ads.length>1?'s':''} nécessite${ads.length>1?'nt':''} votre décision.`:'Tout est automatisé : aucune annonce ne nécessite votre intervention.'):(ads.length?`${ads.length} annonce${ads.length>1?'s':''} affichée${ads.length>1?'s':''}.`:'Aucune annonce ne correspond pour le moment.'));
-  if(!ads.length){grid.innerHTML=moderationMode?'<div class="empty-state" style="grid-column:1/-1"><b>Rien à modérer ✓</b>Les annonces propres sont publiées automatiquement. Seules les exceptions apparaissent ici.</div>':'<div class="empty-state" style="grid-column:1/-1"><b>Aucune annonce pour le moment</b>Les nouvelles annonces apparaîtront ici.</div>';return}
+  $('#resultSubtitle').textContent=waitingImmoRadius?'Calcul du rayon autour de la ville…':(moderationMode?(ads.length?`${ads.length} annonce${ads.length>1?'s':''} nécessite${ads.length>1?'nt':''} votre décision.`:'Tout est automatisé : aucune annonce ne nécessite votre intervention.'):(ads.length?(ads.length>=30?`${ads.length} annonce${ads.length>1?'s':''} affichée${ads.length>1?'s':''}.`:'Les dernières annonces publiées.'):'Aucune annonce ne correspond pour le moment.'));
+  if(!ads.length){grid.innerHTML=moderationMode?'<div class="empty-state" style="grid-column:1/-1"><b>Rien à modérer ✓</b>Les annonces propres sont publiées automatiquement. Seules les exceptions apparaissent ici.</div>':'<div class="empty-state" style="grid-column:1/-1"><b>Soyez le premier à publier ici</b>Abracadeal vient d’ouvrir : une annonce déposée maintenant sera en tête de liste.<br><button type="button" class="btn primary" style="margin-top:12px" onclick="document.querySelector(\'.publish-trigger\')?.click()">＋ Déposer une annonce gratuitement</button></div>';return}
   grid.innerHTML=ads.map(a=>{
     const photos=visiblePhotosFor(a);
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
