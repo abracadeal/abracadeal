@@ -57,5 +57,5 @@ const qs=new URLSearchParams(location.search);if(qs.get('commerce')==='success')
 })();
 </script>
 
-<script>(async function(){try{const {data}=await sb.rpc('get_founder_offer_counter');const r=Array.isArray(data)?data[0]:data;if(!r)return;const tot=Number(r.total_places||500),rem=Math.max(0,Number(r.remaining_places??tot));document.getElementById('fRemaining').textContent=rem.toLocaleString('fr-FR');document.getElementById('fBar').style.width=Math.min(100,((tot-rem)/tot)*100)+'%'}catch(_){}})();</script>
+<script>(async function(){try{const {data}=await sb.rpc('get_founder_offer_counter');const r=Array.isArray(data)?data[0]:data;if(!r)return;const tot=Number(r.total_places||500),rem=Math.max(0,Number(r.remaining_places??tot));document.getElementById('fRemaining').textContent=rem.toLocaleString('fr-FR');const bar=document.getElementById('fBar');bar.style.width=Math.min(100,((tot-rem)/tot)*100)+'%';if(tot-rem<25&&bar.parentElement)bar.parentElement.style.display='none'}catch(_){}})();</script>
 </body></html>
