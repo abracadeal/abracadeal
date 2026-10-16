@@ -5050,7 +5050,18 @@ $('#immoNearbyFilterBtn')?.addEventListener('click',activateImmoNearbyFilter);
 $('#searchCity')?.addEventListener('input',()=>{if(immoNearbyFilterState.active)clearImmoNearbyFilter();});
 $('#searchCity')?.addEventListener('change',()=>{if(Number($('#filterImmoRadius')?.value||0))refreshImmoRadiusState();refreshFilterCount();});
 $('#sortAds')?.addEventListener('change',renderAds);
-$('#resetFilters')?.addEventListener('click',()=>{resetSearchFilters({keepMode:true});renderAds();});
+$('#resetFilters')?.addEventListener('click',()=>{
+  /* Fix 16/10/2026 : sur mobile, « Réinitialiser les filtres » ferme le panneau
+     et ramène à l'accueil (même comportement que le logo). Desktop inchangé. */
+  if(window.matchMedia?.('(max-width:760px)').matches){
+    $('#filtersPanel')?.classList.add('hidden');
+    closeAllQuickFilterPopovers();
+    const home=document.querySelector('.mobile-brand[data-home-brand]')||document.querySelector('[data-home-brand]');
+    if(home){home.click();return;}
+    resetSearchFilters();loadAds();window.scrollTo({top:0,left:0,behavior:'auto'});return;
+  }
+  resetSearchFilters({keepMode:true});renderAds();
+});
 updateFilterSubcategories('');
 refreshFilterCount();
 
