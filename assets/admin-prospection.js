@@ -295,7 +295,7 @@ async function loadMailer(){
   const perDay=verified.reduce((a,m)=>a+m.daily_limit,0);
   if(st.sending_enabled){
     $('goBox').className='notice ok';
-    $('goBox').innerHTML='🟢 <b>Envoi automatique ACTIF</b> depuis le '+esc(fmtDate(st.enabled_at))+'. Envois étalés de '+st.window_start+' h à '+st.window_end+' h'+(st.weekdays_only?', du lundi au vendredi':'')+', jusqu’à '+perDay+' par jour au total. Il reste '+waiting+' prospects à contacter.';
+    $('goBox').innerHTML='🟢 <b>Envoi automatique ACTIF</b> depuis le '+esc(fmtDate(st.enabled_at))+'. Envois étalés de '+st.window_start+' h à '+st.window_end+' h'+(st.weekdays_only?', du lundi au samedi (jamais le dimanche)':'')+', jusqu’à '+perDay+' par jour au total. Il reste '+waiting+' prospects à contacter.';
     $('goBtn').style.display='none';$('stopAllBtn').style.display='';
   }else{
     $('goBox').className='notice';
