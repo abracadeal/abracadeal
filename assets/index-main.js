@@ -1183,7 +1183,15 @@ function rowsFromXml(text){
   if(repeated&&repeated[1]>=1)return children.filter(n=>n.tagName===repeated[0]).map(xmlNodeToObject);
   return root?[xmlNodeToObject(root)]:[];
 }
+// Bibliothèques lourdes chargées seulement quand on s'en sert (avant : bloquaient l'affichage de chaque page,
+// ~360 Ko compressés : lecteur Excel pour l'import Pro, Leaflet pour la carte d'une fiche).
+const abracaLazyLoads={};
+function abracaLoadScript(src){return abracaLazyLoads[src]||(abracaLazyLoads[src]=new Promise((ok,ko)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=()=>ok();s.onerror=()=>{delete abracaLazyLoads[src];ko(new Error('Chargement impossible : '+src));};document.head.appendChild(s);}));}
+function abracaLoadCss(href){if(document.querySelector('link[href="'+href+'"]'))return;const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l);}
+async function ensureXlsx(){if(!window.XLSX)await abracaLoadScript('https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js');return window.XLSX;}
+async function ensureLeaflet(){abracaLoadCss('https://unpkg.com/leaflet@1.9.4/dist/leaflet.css');if(!window.L)await abracaLoadScript('https://unpkg.com/leaflet@1.9.4/dist/leaflet.js');return window.L;}
 async function rowsFromSpreadsheetBuffer(buffer){
+  try{await ensureXlsx();}catch(_){}
   if(!window.XLSX)throw new Error('Le lecteur Excel ne s’est pas chargé. Recharge la page.');
   const wb=XLSX.read(buffer,{type:'array'}); const ws=wb.Sheets[wb.SheetNames[0]];
   return XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
@@ -1537,7 +1545,8 @@ $('#loadImportFeed')?.addEventListener('click',async()=>{
 $('#downloadImportTemplate')?.addEventListener('click',()=>{
   const sample=currentImportSample();const headers=Object.keys(sample);const values=Object.values(sample);const csv=[headers,values].map(row=>row.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(';')).join('\n');downloadTextFile((($('#proImportSector')?.value||'vehicules')==='immobilier'?'modele_biens_abracadeal.csv':'modele_stock_abracadeal.csv'),'\ufeff'+csv,'text/csv;charset=utf-8');
 });
-$('#downloadExcelTemplate')?.addEventListener('click',()=>{
+$('#downloadExcelTemplate')?.addEventListener('click',async()=>{
+  try{await ensureXlsx();}catch(_){}
   if(!window.XLSX){toast('Le lecteur Excel ne s’est pas chargé. Recharge la page.');return;}
   const sample=currentImportSample();const ws=XLSX.utils.json_to_sheet([sample]);
   const wb=XLSX.utils.book_new();
@@ -3487,7 +3496,7 @@ function rememberSearch(){
 // (import automatique) ne passent pas par là : on affiche alors le filigrane en surimpression.
 function abracaWmOverlay(a){return String(a?.source||'').startsWith('feed:')?' photo-watermark--overlay':'';}
 function personalizedCard(a,extra=''){
-  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${adSeoTitle(a)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
 }
 function renderRecentViewed(){
@@ -3536,7 +3545,7 @@ function renderHomeFeatured(){
   const picked=selectMixedFeatured(candidates,8);
   grid.innerHTML=picked.map(a=>{
     const photos=visiblePhotosFor(a);
-    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
@@ -3623,7 +3632,7 @@ function renderAds(){
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
-    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt=""><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
+    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
     const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button><div class="carousel-dots">${photoUrls.map((_,i)=>`<span class="carousel-dot${i===0?' active':''}"></span>`).join('')}</div>`:'';
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
@@ -3869,6 +3878,8 @@ async function geocodeApproxLocation(city,postalCode){
 async function renderApproxMap(a){
   const el=document.getElementById(`detailMap-${a.id}`);
   if(!el) return;
+  try{await ensureLeaflet();}catch(_){}
+  if(!document.body.contains(el)) return;
   if(!window.L){
     el.innerHTML='<div class="detail-map-loading">Carte indisponible pour le moment.</div>';
     return;
