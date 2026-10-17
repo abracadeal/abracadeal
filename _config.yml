@@ -1,0 +1,9 @@
+# GitHub Pages : fichiers internes du dépôt à ne pas publier sur abracadeal.fr (17/10/2026)
+exclude:
+  - JOURNAL.md
+  - supabase
+  - tests
+  - scripts
+  - backups
+  - docs
+  - README.md
