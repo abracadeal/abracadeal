@@ -37,6 +37,24 @@
     <div class="metric"><span>STOP / opposition</span><strong id="mStop">0</strong></div>
   </section>
 
+  <section class="card" id="trackCard">
+    <h2>Suivi : qui a cliqué ?</h2>
+    <p class="small">Chaque mail contient un lien personnel vers l’offre Fondateurs. On compte les vrais clics (les antivirus qui testent le lien à la réception sont ignorés) et les comptes créés ensuite. Les ouvertures ne sont pas suivies (pas fiables, et à éviter côté CNIL).</p>
+    <section class="grid4">
+      <div class="metric"><span>Mails suivis</span><strong id="tSent">0</strong></div>
+      <div class="metric"><span>Ont cliqué</span><strong id="tClicked">0</strong></div>
+      <div class="metric"><span>Taux de clic</span><strong id="tRate">—</strong></div>
+      <div class="metric"><span>Comptes créés</span><strong id="tAccounts">0</strong></div>
+    </section>
+    <div class="small" id="tByCat" style="margin:8px 0"></div>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Envoyé</th><th>Clics</th><th>Dernier clic</th><th>Compte</th></tr></thead>
+        <tbody id="trackBody"><tr><td colspan="8" class="muted">Chargement…</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
   <section class="card">
     <h2>1. Importer le fichier prospects</h2>
     <div class="row">
@@ -148,8 +166,8 @@
     </div>
     <div class="tablewrap">
       <table>
-        <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Statut</th><th>Dernier envoi</th><th>Action</th></tr></thead>
-        <tbody id="prospectsBody"><tr><td colspan="7" class="muted">Chargement…</td></tr></tbody>
+        <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Statut</th><th>Dernier envoi</th><th>Clics</th><th>Action</th></tr></thead>
+        <tbody id="prospectsBody"><tr><td colspan="8" class="muted">Chargement…</td></tr></tbody>
       </table>
     </div>
   </section>
@@ -161,6 +179,6 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261016-samedi"></script>
+<script src="assets/admin-prospection.js?v=20261017-clics"></script>
 </body>
 </html>

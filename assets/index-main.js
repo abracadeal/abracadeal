@@ -640,10 +640,13 @@ $('#signupForm').addEventListener('submit',async e=>{
     }
     const legalAcceptance=await window.confirmLegalRegistration();
     if(!legalAcceptance)return;
+    // Prospect arrivé par le lien personnel d'un mail de prospection (pro-fondateur.html?r=…), gardé 90 jours
+    let prospect_ref=null;
+    try{const ref=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');if(ref&&/^[a-z0-9]{8}$/.test(ref.code)&&Date.now()-Number(ref.at||0)<90*864e5)prospect_ref=ref.code;}catch(_){}
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,pro_sector:proSector||null,...(company_registration?{company_registration}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,pro_sector:proSector||null,...(company_registration?{company_registration}:{}),...(prospect_ref?{prospect_ref}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();

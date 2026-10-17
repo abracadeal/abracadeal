@@ -71,7 +71,7 @@ async function loadProspects(){
   const st=$('statusFilter').value;if(st)q=q.eq('status',st);
   const cat=$('categoryFilter').value;if(cat)q=q.eq('category',cat);
   const {data,error}=await q;
-  if(error){$('prospectsBody').innerHTML='<tr><td colspan="7">Erreur : '+esc(error.message)+'</td></tr>';return}
+  if(error){$('prospectsBody').innerHTML='<tr><td colspan="8">Erreur : '+esc(error.message)+'</td></tr>';return}
   allRows=data||[];
   $('prospectsBody').innerHTML=allRows.length?allRows.map(r=>`<tr>
     <td><b>${esc(r.company)}</b></td>
@@ -80,14 +80,32 @@ async function loadProspects(){
     <td>${esc(r.city||'—')}</td>
     <td><span class="pill ${esc(r.status)}">${esc(({ready:'Prêt',sent:'Envoyé',error:'Erreur',opted_out:'STOP',paused:'Pause',sending:'Envoi'})[r.status]||r.status)}</span></td>
     <td>${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR'):'—'}</td>
+    <td>${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</td>
     <td>${r.status==='opted_out'
       ?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>'
       :'<button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}
     </td>
-  </tr>`).join(''):'<tr><td colspan="7" class="muted">Aucun prospect.</td></tr>';
+  </tr>`).join(''):'<tr><td colspan="8" class="muted">Aucun prospect.</td></tr>';
 }
 
-async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer()])}
+async function loadTracking(){
+  const {data,error}=await sb.rpc('admin_prospect_tracking');
+  if(error){$('trackBody').innerHTML='<tr><td colspan="8">Erreur : '+esc(error.message)+'</td></tr>';return}
+  const t=data||{},sent=Number(t.sent||0),clicked=Number(t.clicked||0);
+  $('tSent').textContent=sent;$('tClicked').textContent=clicked;$('tAccounts').textContent=Number(t.accounts||0);
+  $('tRate').textContent=sent?(clicked/sent*100).toLocaleString('fr-FR',{maximumFractionDigits:1})+' %':'—';
+  $('tByCat').innerHTML=(t.tracked_since?'Suivi depuis le '+esc(fmtDate(t.tracked_since))+'. ':'Aucun mail suivi pour l’instant : le suivi démarre avec les prochains envois. ')+
+    (t.by_category||[]).map(c=>'<b>'+esc(c.category)+'</b> : '+c.clicked+' clic(s) / '+c.sent+' mail(s)'+(c.accounts?' · '+c.accounts+' compte(s)':'')).join(' — ');
+  const rows=t.rows||[];
+  $('trackBody').innerHTML=rows.length?rows.map(r=>`<tr>
+    <td><b>${esc(r.company)}</b></td><td>${esc(r.email)}</td><td>${esc(r.category||'—')}</td><td>${esc(r.city||'—')}</td>
+    <td>${esc(fmtDate(r.sent_at))}${r.followup_sent_at?'<br><span class="muted">relance '+esc(fmtDate(r.followup_sent_at))+'</span>':''}</td>
+    <td>${Number(r.click_count||0)||'—'}</td><td>${esc(fmtDate(r.last_clicked_at))||'—'}</td>
+    <td>${r.account_at?'<b>Oui</b> · '+esc(fmtDate(r.account_at))+(r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<br><span class="muted">'+esc(r.account_email)+'</span>':''):'—'}</td>
+  </tr>`).join(''):'<tr><td colspan="8" class="muted">Personne n’a encore cliqué.</td></tr>';
+}
+
+async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking()])}
 
 async function markStop(id){
   if(!confirm('Ajouter ce prospect à la liste d’opposition ? Il ne sera plus envoyé.'))return;

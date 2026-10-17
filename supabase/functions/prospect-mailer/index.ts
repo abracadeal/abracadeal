@@ -1,8 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-// Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026.
+// Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026, v3 13/10/2026 (relance J+5 dans le même fil),
+// v4 13/10/2026 : test A/B (A = mail avec lien, B = sans lien, on invite à répondre), variante stable par prospect.
+// v5 17/10/2026 : suivi des clics — le lien pro-fondateur.html reçoit un code personnel ?r=xxxxxxxx (aucun pixel d'ouverture).
 // Actions :
 //   POST {action:"verify", mailbox}         admin connecté : teste l'identifiant SMTP sans rien envoyer
-//   POST {action:"test", mailbox, category} admin connecté : envoie UN message de test (version du métier) à l'adresse de l'admin
+//   POST {action:"test", mailbox, category, followup?, variant?} admin connecté : envoie UN message de test à l'adresse de l'admin
 //   POST {action:"run"}                     cron (clé interne) : envoie seulement si le « feu vert » est donné
 //   POST {action:"unsubscribe", u, t}       page abracadeal.fr/desinscription.html
 //   POST ?u=..&t=.. (List-Unsubscribe-Post) désinscription en un clic depuis la messagerie
@@ -33,7 +35,6 @@ function b64(s: string | Uint8Array) {
   return btoa(bin);
 }
 
-// ---------- Client SMTP minimal (TLS implicite) ----------
 type Creds = { email: string; display_name: string; host: string; port: number; password: string | null };
 async function smtp(c: Creds, mail?: { to: string; data: string }) {
   if (!c.password) throw new Error("Mot de passe non enregistré");
@@ -78,11 +79,36 @@ function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B
 function fill(t: string, company: string, from: string) {
   return t.replaceAll("{{societe}}", company || "votre entreprise").replaceAll("{{expediteur}}", from);
 }
-async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: { subject: string; body: string }) {
+// Ajoute le code de suivi personnel au lien de l'offre Fondateurs. En cas d'échec, le mail part avec le lien normal.
+const FOUNDER_LINK = /https:\/\/abracadeal\.fr\/pro-fondateur\.html(?![?#\w-]|\.\w)/g;
+async function withTracking(body: string, prospectId: string) {
+  if (!FOUNDER_LINK.test(body)) return body;
+  FOUNDER_LINK.lastIndex = 0;
+  try {
+    const { data: code, error } = await admin.rpc("prospect_ref_code", { p_id: prospectId });
+    if (error || typeof code !== "string" || !/^[a-z0-9]{8}$/.test(code)) return body;
+    return body.replace(FOUNDER_LINK, `https://abracadeal.fr/pro-fondateur.html?r=${code}`);
+  } catch { return body; }
+}
+type Tpl = { subject: string; body: string };
+async function templates(category: string, followup: boolean, variant: string): Promise<Tpl> {
+  const { data: first } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: category || "", p_variant: variant });
+  if (!followup) return first as Tpl;
+  const { data: rel } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: "relance", p_variant: variant });
+  // la relance part dans le même fil que le 1er mail : même objet précédé de « Re: »
+  return { subject: "Re: " + (first as Tpl).subject, body: (rel as Tpl).body };
+}
+async function variantOf(id: string, stored?: string | null) {
+  if (stored === "A" || stored === "B") return stored;
+  const { data } = await admin.rpc("prospect_ab_variant", { p_id: id });
+  return data === "B" ? "B" : "A";
+}
+async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null) {
   const from = c.email;
   let body = fill(tpl.body, company, from);
   let unsubHeader = "";
   if (prospectId) {
+    body = await withTracking(body, prospectId);
     const t = await sign(prospectId);
     const page = `https://abracadeal.fr/desinscription.html?u=${prospectId}&t=${t}`;
     const oneClick = `${SUPABASE_URL}/functions/v1/prospect-mailer?u=${prospectId}&t=${t}`;
@@ -90,12 +116,13 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
       `Pour ne plus recevoir nos e-mails : ${page}\nAbracadeal — iDream Lab SASU`;
     unsubHeader = `List-Unsubscribe: <${oneClick}>, <mailto:${from}?subject=STOP>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n`;
   }
+  const thread = inReplyTo && /^<[^<>\s]+>$/.test(inReplyTo) ? `In-Reply-To: ${inReplyTo}\r\nReferences: ${inReplyTo}\r\n` : "";
   const msgId = `<${crypto.randomUUID()}@${from.split("@")[1]}>`;
   const b = b64(body.replace(/\r?\n/g, "\r\n")).replace(/.{1,76}/g, "$&\r\n").trimEnd();
   const data =
     `From: ${encHeader(c.display_name)} <${from}>\r\nTo: <${to}>\r\nReply-To: <${from}>\r\n` +
     `Subject: ${encHeader(fill(tpl.subject, company, from).replace(/[\r\n]/g, " "))}\r\nDate: ${new Date().toUTCString().replace("GMT", "+0000")}\r\n` +
-    `Message-ID: ${msgId}\r\nMIME-Version: 1.0\r\n${unsubHeader}` +
+    `Message-ID: ${msgId}\r\n${thread}MIME-Version: 1.0\r\n${unsubHeader}` +
     `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`;
   return { data, msgId };
 }
@@ -122,7 +149,6 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
   if (req.method !== "POST") return json({ error: "Méthode non autorisée" }, 405);
   const url = new URL(req.url);
-  // Désinscription en un clic (RFC 8058) : POST sur l'URL avec ?u=&t=
   if (url.searchParams.get("u")) {
     const ok = await unsubscribe(url.searchParams.get("u")!, url.searchParams.get("t") || "");
     return json({ ok }, ok ? 200 : 400);
@@ -146,9 +172,9 @@ Deno.serve(async (req) => {
         await admin.rpc("prospect_mailer_verified", { p_email: c.email, p_ok: true, p_error: null });
         return json({ ok: true, message: "Connexion réussie : identifiant et mot de passe acceptés par OVH. Aucun e-mail envoyé." });
       }
-      const { data: tpl } = await admin.rpc("prospect_mailer_template_for", { p_category: String(body.category || "Garage / concession auto") });
+      const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A");
       const to = String(user.email || "");
-      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl as { subject: string; body: string });
+      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null);
       await smtp(c, { to, data });
       return json({ ok: true, message: `Message de test envoyé à ${to} depuis ${c.email}.` });
     } catch (e) {
@@ -162,21 +188,28 @@ Deno.serve(async (req) => {
     if (!req.headers.get("x-internal-key") || req.headers.get("x-internal-key") !== await secret("prospect_crawler_internal")) return json({ error: "Non autorisé" }, 401);
     const { data: jobs, error } = await admin.rpc("prospect_mailer_claim");
     if (error) return json({ error: error.message }, 500);
-    const list = (jobs || []) as { id: string; email: string; company: string; mailbox: string; category: string | null }[];
+    const list = (jobs || []) as { id: string; email: string; company: string; mailbox: string; category: string | null; kind?: string; in_reply_to?: string | null }[];
     if (!list.length) return json({ ok: true, sent: 0 });
     const res: Record<string, string> = {};
     for (const j of list) {
+      const followup = j.kind === "followup";
       try {
+        const { data: row } = await admin.from("prospection_prospects").select("ab_variant").eq("id", j.id).single();
+        const variant = await variantOf(j.id, row?.ab_variant);
         const c = await creds(j.mailbox);
-        const { data: tpl } = await admin.rpc("prospect_mailer_template_for", { p_category: j.category || "" });
-        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl as { subject: string; body: string });
+        const tpl = await templates(j.category || "", followup, variant);
+        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null);
         await smtp(c, { to: j.email, data });
-        await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: true, p_error: null, p_message_id: msgId });
-        res[j.mailbox] = "envoyé";
+        if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
+        else {
+          await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: true, p_error: null, p_message_id: msgId });
+          await admin.from("prospection_prospects").update({ ab_variant: variant }).eq("id", j.id);
+        }
+        res[j.mailbox] = (followup ? "relance envoyée" : "envoyé") + " (" + variant + ")";
       } catch (e) {
         const msg = String((e as Error).message || e);
-        await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: false, p_error: msg, p_message_id: null });
-        // Identifiants refusés : on coupe cette boîte jusqu'à une nouvelle vérification
+        if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: false, p_error: msg });
+        else await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: false, p_error: msg, p_message_id: null });
         if (/SMTP 5(35|34)|authentication|auth/i.test(msg)) await admin.rpc("prospect_mailer_verified", { p_email: j.mailbox, p_ok: false, p_error: msg });
         res[j.mailbox] = "erreur : " + msg.slice(0, 120);
       }
