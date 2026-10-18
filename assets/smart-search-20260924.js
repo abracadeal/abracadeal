@@ -6,8 +6,23 @@ const $=id=>document.getElementById(id);
 const fold=s=>String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const brands=['mercedes','renault','peugeot','citroen','bmw','audi','volkswagen','toyota','ford','fiat','opel','tesla','volvo','porsche','yamaha','honda','kawasaki','suzuki','ducati','ktm','triumph','harley davidson','apple','samsung'];
 const places=['cannes','nice','antibes','monaco','menton','grasse','frejus','saint-tropez','paris','marseille','lyon','bordeaux','toulouse','lille','nantes','montpellier'];
+const fuzzyWords=['trottinette','scooter','moto','voiture','vehicule','appartement','immobilier','maison','villa','terrain','vacances','location','mercedes','renault','peugeot','citroen','volkswagen','yamaha','kawasaki','suzuki','telephone','ordinateur','tablette','television','canape','fauteuil','velo'];
+function distance(a,b){
+ const m=a.length,n=b.length,prev=Array.from({length:n+1},(_,i)=>i),cur=new Array(n+1);
+ for(let i=1;i<=m;i++){cur[0]=i;for(let j=1;j<=n;j++)cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));for(let j=0;j<=n;j++)prev[j]=cur[j];}
+ return prev[n];
+}
+function correctTypos(input){
+ return fold(input).split(/(\s+)/).map(word=>{
+   if(!/^[a-z0-9-]{4,}$/.test(word))return word;
+   let best=word,bestDistance=99;
+   for(const candidate of fuzzyWords){const d=distance(word,candidate);if(d<bestDistance){bestDistance=d;best=candidate;}}
+   const max=word.length>=8?2:1;
+   return bestDistance>0&&bestDistance<=max?best:word;
+ }).join('');
+}
 function interpret(input){
- const text=fold(input),found={},removed=[];
+ const text=correctTypos(input),found={},removed=[];
  const category=/\b(appartement|studio|maison|villa|terrain|immobilier|logement)\b/.test(text)?'immobilier':/\b(vacances|saisonniere|sejour|hebergement|gite)\b/.test(text)?'vacances':/\b(moto|scooter|yamaha|kawasaki|ducati|ktm|triumph)\b/.test(text)?'vehicules':/\b(voiture|auto|vehicule|mercedes|renault|peugeot|bmw|audi|tesla)\b/.test(text)?'vehicules':'';
  if(category)found.category=category;
  const budget=text.match(/(?:moins de|maximum|max|budget(?: de)?|jusqu.a|sous)\s*(\d[\d\s.,]*)\s*(k\s*€|k€|€|euros?)/);
@@ -28,6 +43,15 @@ function interpret(input){
  return found;
 }
 function apply(id,value){const el=$(id);if(el&&value!==undefined&&value!==null){el.value=String(value);el.dispatchEvent(new Event('input',{bubbles:true}));el.dispatchEvent(new Event('change',{bubbles:true}));}}
+function resetCatalogueScope(){
+ // Une recherche depuis la barre IA est toujours globale : elle ne doit jamais hériter
+ // d'une catégorie ouverte auparavant (Maison, Auto, Moto, etc.). Les critères compris
+ // dans la nouvelle requête sont ensuite réappliqués juste après.
+ try{if(typeof activeCategory!=='undefined')activeCategory='';}catch(_){}
+ try{if(typeof activeVehicleSubcategory!=='undefined')activeVehicleSubcategory='';}catch(_){}
+ apply('filterCategory','');
+ apply('filterSubcategory','');
+}
 function init(){
  const query=$('searchQuery'),search=$('searchBtn');
  if(!query||!search||search.dataset.smartSearchAuto)return;
@@ -38,13 +62,13 @@ function init(){
  info.style.cssText='font-size:12px;margin-top:5px;min-height:16px;color:inherit';
  const host=query.closest('.search-card');
  host?.insertAdjacentElement('afterend',info);
- // Capture phase: interpret before the site's existing click handler reads filters.
- // Enter already triggers search.click() in the site's own keydown handler.
+ // Capture phase: reset + interprétation avant le gestionnaire de recherche principal.
+ // Entrée déclenche déjà search.click() dans le gestionnaire du site.
  search.addEventListener('click',()=>{
   const original=query.value.trim();
   if(!original){info.textContent='';return;}
+  resetCatalogueScope();
   const f=interpret(original);
-  if(!Object.keys(f).some(k=>k!=='query')){info.textContent='';return;}
   if(f.category)apply('filterCategory',f.category);
   if(f.sub)apply('filterSubcategory',f.sub);
   if(f.maxPrice)apply('filterPriceMax',f.maxPrice);
@@ -55,7 +79,7 @@ function init(){
   if(f.city)apply('searchCity',f.city);
   query.value=f.query;
   const labels=[f.category,f.brand,f.city,f.maxPrice?'≤ '+f.maxPrice.toLocaleString('fr-FR')+' €':'',f.maxKm?'≤ '+f.maxKm.toLocaleString('fr-FR')+' km':'',f.minArea?'≥ '+f.minArea+' m²':''].filter(Boolean);
-  info.textContent='✦ Recherche intelligente : '+labels.join(' · ')+(f.query?' · Mots-clés : '+f.query:'');
+  info.textContent=labels.length?'✦ Recherche intelligente : '+labels.join(' · ')+(f.query?' · Mots-clés : '+f.query:''):'';
  },true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
