@@ -62,7 +62,7 @@
   const loginForm=document.getElementById('loginForm');
   const signupForm=document.getElementById('signupForm');
   const blocks=[];
-  if(loginForm){const b=buildBlock('login');loginForm.prepend(b);blocks.push(b);}
+  if(loginForm){const b=buildBlock('login');const intro=loginForm.querySelector('.auth-intro');if(intro)intro.after(b);else loginForm.prepend(b);blocks.push(b);}
   if(signupForm){const b=buildBlock('signup');signupForm.prepend(b);blocks.push(b);}
 
   // Inscription rapide = comptes particuliers uniquement

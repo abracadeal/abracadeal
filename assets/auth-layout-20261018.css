@@ -1,0 +1,45 @@
+/* Mise en page de la fenêtre Connexion (18/10/2026 — Claude).
+   Pour revenir en arrière : retirer la balise <link> de ce fichier dans index.html. */
+
+/* Onglet Connexion : la fenêtre s'adapte au contenu au lieu de garder un grand vide en bas */
+@media (min-width:761px){
+  #accountModal>.modal:has(#authLoginMode:checked):has(#loggedInAccount.hidden){
+    height:auto!important;
+  }
+  #accountModal.modal-backdrop:has(#authLoginMode:checked):has(#loggedInAccount.hidden){
+    align-items:center!important;
+  }
+}
+
+/* Introduction */
+#accountModal .auth-intro{display:flex;flex-direction:column;gap:4px;margin:6px 0 18px;text-align:center}
+#accountModal .auth-intro strong{font-size:1.15rem;color:#24152d}
+#accountModal .auth-intro span{font-size:.92rem;color:#6f5d78;line-height:1.45}
+
+/* Boutons Google / Facebook */
+#accountModal .social-auth{gap:10px;margin:0 0 18px}
+#accountModal .social-auth-btn{min-height:50px;border:1px solid #ddd0e5;border-radius:14px;background:#fff;color:#24152d;font-size:1rem;font-weight:700;box-shadow:0 2px 8px rgba(60,20,80,.06);transition:background .15s,border-color .15s,box-shadow .15s,transform .15s}
+#accountModal .social-auth-btn:hover{background:#faf6fc;border-color:#b993cc;box-shadow:0 6px 16px rgba(60,20,80,.10)}
+#accountModal .social-auth-btn:active{transform:scale(.99)}
+#accountModal .social-auth-sep{margin-top:6px;font-size:.85rem;color:#8a7a92}
+
+/* Champs */
+#accountModal .auth-login-panel .form-grid{gap:14px}
+#accountModal .auth-login-panel label{font-weight:700;color:#2d1838}
+#accountModal .auth-login-panel .input{min-height:50px;border-radius:14px}
+#accountModal .auth-label-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+#accountModal .auth-link{border:0;background:none;padding:0;color:#8b2ca8;font:inherit;font-size:.88rem;font-weight:700;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#accountModal .auth-link:hover{color:#5e1c80}
+
+/* Bouton Se connecter pleine largeur */
+#accountModal .auth-login-actions{display:block!important;margin-top:20px}
+#accountModal .auth-login-actions .btn.primary{width:100%;min-height:52px;border-radius:14px;font-size:1.02rem;font-weight:800}
+
+/* Lien vers la création de compte */
+#accountModal .auth-switch{margin:18px 0 4px;text-align:center;font-size:.92rem;color:#6f5d78}
+#accountModal .auth-switch label{color:#8b2ca8!important;font-weight:800;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+#accountModal .auth-switch label:hover{color:#5e1c80}
+
+@media (max-width:760px){
+  #accountModal .auth-intro{margin-top:2px}
+}
