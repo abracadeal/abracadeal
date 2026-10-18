@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Miniatures des photos (liste d'annonces plus rapide)
+- **Constat :** photos bien compressées (≈ 150 Ko, 1600 px max) mais les vignettes de la liste chargeaient la grande photo.
+- **Changé :**
+  - Base (`supabase/2026-10-18-listing-thumbs.sql`, appliqué) : bucket public `listing-thumbs` (JPEG, 512 Ko max, écriture serveur uniquement) ; suivi `private.listing_photo_thumbs` ; fonctions `thumbs_next_batch`, `thumbs_mark`, `thumbs_orphans`, `thumbs_forget` (service_role uniquement) ; cron `abracadeal-listing-thumbs` chaque minute (5 photos par passage).
+  - Nouvelle fonction `generate-listing-thumbs` (clé interne `pro_stock_moderation_internal`) : miniature 480 px JPEG qualité 70 au même chemin que la photo d'origine ; supprime les miniatures dont la photo n'existe plus. Testée : 3 miniatures de 19 à 32 Ko pour des originaux de 113 à 183 Ko.
+  - `assets/index-main.js` : `thumbUrl()` / `thumbImgAttrs()` ; les vignettes (liste, sections de l'accueil) chargent la miniature, avec retour automatique à la photo d'origine si la miniature n'existe pas encore. Fiche annonce et carrousel inchangés (grande photo). `index.html` : `index-main.js?v=20261018-thumbs`.
+- **À savoir :** les nouvelles photos ont leur miniature 1 à 2 minutes après validation ; en attendant, la grande photo s'affiche.
+
 ### 18/10/2026 — Claude — Vélos : plus de champs « véhicule » inutiles
 - **Changé :** `assets/index-main.js` : `velos` retiré de `VEHICLE_DETAIL_TYPES`. Pour la sous-catégorie Vélos, le dépôt n'affiche plus les champs de voiture (marque/modèle auto, kilométrage, carburant, boîte, Crit'Air, puissance…) ; il garde titre, description, prix, état et photos, comme les équipements. `index.html` : `index-main.js?v=20261018-velo`.
 - **Pourquoi :** remarque d'Anthony (champs motorisation sans intérêt pour un vélo).

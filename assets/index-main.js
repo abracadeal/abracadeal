@@ -165,6 +165,17 @@ function photoUrl(path){
   const {data}=sb.storage.from('listing-images').getPublicUrl(path);
   return data?.publicUrl||'';
 }
+// 18/10/2026 : miniatures des vignettes (bucket public « listing-thumbs », générées côté serveur par
+// generate-listing-thumbs). Si la miniature n'existe pas encore, l'image d'origine est chargée à la place.
+function thumbUrl(path){
+  if(!path||privatePhotoUrls.has(path)||/^https?:\/\//i.test(String(path))||!sb) return photoUrl(path);
+  const {data}=sb.storage.from('listing-thumbs').getPublicUrl(path);
+  return data?.publicUrl||photoUrl(path);
+}
+function thumbImgAttrs(path){
+  const full=photoUrl(path), t=thumbUrl(path);
+  return t===full?`src="${esc(full)}"`:`src="${esc(t)}" data-full="${esc(full)}" onerror="this.onerror=null;this.src=this.dataset.full"`;
+}
 function normalizeType(v){return String(v||'').toLowerCase().startsWith('pro')?'professionnel':'particulier'}
 
 function setModerationButtonLabel(label='Modérer'){
@@ -3594,7 +3605,7 @@ function rememberSearch(){
 // (import automatique) ne passent pas par là : on affiche alors le filigrane en surimpression.
 function abracaWmOverlay(a){return String(a?.source||'').startsWith('feed:')?' photo-watermark--overlay':'';}
 function personalizedCard(a,extra=''){
-  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+  const photos=visiblePhotosFor(a);const pic=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${adSeoTitle(a)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
 }
 function renderRecentViewed(){
@@ -3643,7 +3654,7 @@ function renderHomeFeatured(){
   const picked=selectMixedFeatured(candidates,8);
   grid.innerHTML=picked.map(a=>{
     const photos=visiblePhotosFor(a);
-    const img=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+    const img=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
     return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
@@ -3733,7 +3744,7 @@ function renderAds(){
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
-    const img=photoUrls.length?`<img class="ad-photo-img" src="${photoUrls[0]}" alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
+    const img=photoUrls.length?`<img class="ad-photo-img" ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
     const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button><div class="carousel-dots">${photoUrls.map((_,i)=>`<span class="carousel-dot${i===0?' active':''}"></span>`).join('')}</div>`:'';
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
