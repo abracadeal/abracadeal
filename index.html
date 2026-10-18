@@ -167,7 +167,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 </style>
 <link rel="stylesheet" href="assets/bottom-nav-always-20261007.css?v=3">
 <link rel="stylesheet" href="assets/auth-layout-20261018.css?v=2">
-<link rel="stylesheet" href="assets/admin-account-layout-20261018.css?v=2">
+<link rel="stylesheet" href="assets/admin-account-layout-20261018.css?v=3">
 <style>.abraca-seo-intro{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}</style>
 <script>window.abracaTabletAsMobile&&window.abracaTabletAsMobile.applyToStyles();</script>
 <script src="assets/legal-registration.js?v=20261015" defer></script>
@@ -1834,41 +1834,44 @@ document.addEventListener('DOMContentLoaded',function(){
       <a class="close-btn" data-close="mobileAdminModal" href="#" aria-label="Fermer">×</a>
     </div>
     <div class="modal-body">
-      <p class="admin-mobile-intro">Accès rapide aux outils d’administration Abracadeal.</p>
+      <p class="admin-mobile-intro">Outils d’administration</p>
       <div class="admin-mobile-grid">
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="moderation">
-          <span class="admin-mobile-action-icon" aria-hidden="true">🛡️</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
           <strong>Modération</strong>
           <small>Annonces en attente et contrôles.</small>
           <span class="admin-mobile-action-badge" id="mobileAdminModerationBadge">0</span>
         </button>
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="flows">
-          <span class="admin-mobile-action-icon" aria-hidden="true">🔄</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg></span>
           <strong>Flux</strong>
           <small>Erreurs et synchronisations actives.</small>
           <span class="admin-mobile-action-badge" id="mobileAdminFlowBadge">0</span>
         </button>
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="database">
-          <span class="admin-mobile-action-icon" aria-hidden="true">🗂️</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
           <strong>Base de données</strong>
           <small>Rechercher une annonce ou un vendeur.</small>
         </button>
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="stats">
-          <span class="admin-mobile-action-icon" aria-hidden="true">📊</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg></span>
           <strong>Statistiques</strong>
           <small>Comptes, pros, plans et activité.</small>
         </button>
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="b2b">
-          <span class="admin-mobile-action-icon" aria-hidden="true">🤝</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/></svg></span>
           <strong>Pro / Pro</strong>
           <small>Catalogue et relations professionnelles.</small>
         </button>
         <button class="admin-mobile-action" type="button" data-admin-mobile-action="messages">
-          <span class="admin-mobile-action-icon" aria-hidden="true">💬</span>
+          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span>
           <strong>Messages</strong>
           <small>Accéder rapidement à la messagerie.</small>
         </button>
-      </div>
+        <a class="admin-mobile-action" href="admin-pilotage.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span><strong>Finances</strong><small>Encaissements et seuils de TVA.</small></a>
+        <a class="admin-mobile-action" href="admin-prospection.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg></span><strong>Prospection</strong><small>Mails aux pros et suivi des clics.</small></a>
+        <a class="admin-mobile-action" href="admin-vacances.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span><strong>Vacances</strong><small>Logements, hôtes et demandes.</small></a>
+        </div>
     </div>
   </div>
 </div>

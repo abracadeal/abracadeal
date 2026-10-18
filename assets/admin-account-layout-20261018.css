@@ -77,3 +77,14 @@
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box h3{font-size:1.05rem!important}
 #loggedInAccount.abraca-admin-layout.aal-has-import .aal-pro .aal-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+
+/* Fenêtre « Administration » (onglet Admin de la barre du bas) : même style de tuiles que le compte */
+#mobileAdminModal .admin-mobile-intro{margin:0 0 12px 2px!important;font-size:.78rem!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#7a6a83!important}
+#mobileAdminModal .admin-mobile-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}
+#mobileAdminModal .admin-mobile-action{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:92px!important;padding:12px 6px!important;border:1px solid #ecdff2!important;border-radius:16px!important;background:linear-gradient(160deg,#fff,#f8f0fc)!important;color:#2c0f3b!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(70,20,90,.06)!important;font:inherit;cursor:pointer}
+#mobileAdminModal .admin-mobile-action-icon{display:flex!important;margin:0!important;font-size:0!important}
+#mobileAdminModal .admin-mobile-action-icon svg{width:24px;height:24px;fill:none;stroke:#7b27a0;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#mobileAdminModal .admin-mobile-action strong{font-size:.8rem!important;font-weight:800;line-height:1.15;color:#2c0f3b!important}
+#mobileAdminModal .admin-mobile-action small{display:none!important}
+#mobileAdminModal .admin-mobile-action-badge{position:absolute!important;top:7px!important;right:7px!important;left:auto!important;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#e2459f!important;color:#fff!important;font-size:.7rem;font-weight:900;line-height:20px;align-items:center;justify-content:center;box-sizing:border-box}
+@media(min-width:761px){#mobileAdminModal .admin-mobile-action small{display:block!important;font-size:.7rem!important;color:#806f87!important;font-weight:600}}
