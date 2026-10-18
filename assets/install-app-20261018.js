@@ -72,7 +72,8 @@
     '.abraca-install-sheet .ais-ico{display:inline-block;vertical-align:-4px;width:20px;height:20px;color:#2f7cf6}' +
     '.abraca-install-sheet .ais-ok{display:block;width:100%;margin-top:16px;border:0;border-radius:999px;padding:13px;font-weight:800;font-size:1rem;color:#fff;' +
     'background:linear-gradient(120deg,#7b27a0,#ee42a5);cursor:pointer}' +
-    '[data-abraca-install]{cursor:pointer}';
+    '[data-abraca-install]{cursor:pointer}' +
+    '.account-info-links [data-abraca-install]{grid-column:1/-1;justify-self:start;text-align:left}';
   var style = document.createElement('style');
   style.id = 'abracaInstallAppStyle';
   style.textContent = css;
@@ -179,8 +180,7 @@
       a.setAttribute('data-abraca-install', '');
       a.textContent = '📲 Télécharger l’application';
       a.addEventListener('click', function (e) { e.preventDefault(); install(); });
-      var h = el.querySelector('.account-info-title');
-      if (h && h.nextSibling) el.insertBefore(a, h.nextSibling); else el.appendChild(a);
+      el.appendChild(a);
     });
   }
 

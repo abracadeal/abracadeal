@@ -1,0 +1,74 @@
+/* Abracadeal — mise en page « Mon compte » administrateur (18/10/2026).
+   Tout est limité à #loggedInAccount.abraca-admin-layout (classe posée seulement pour un admin). */
+.aal-ico{width:22px;height:22px;flex:0 0 auto;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#loggedInAccount:not(.abraca-admin-layout) .aal-title,
+#loggedInAccount:not(.abraca-admin-layout) .aal-admin,
+#loggedInAccount:not(.abraca-admin-layout) .aal-logout,
+#loggedInAccount:not(.abraca-admin-layout) .aal-infos,
+#loggedInAccount:not(.abraca-admin-layout) .aal-subtitle{display:none!important}
+
+#loggedInAccount.abraca-admin-layout{--aal-ink:#2c0f3b;--aal-sub:#7a6a83;--aal-line:#ecdff2;--aal-soft:#faf6fc;--aal-accent:#7b27a0;--aal-pink:#e2459f}
+
+/* Identité */
+#loggedInAccount.abraca-admin-layout .aal-identity{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border:1px solid var(--aal-line);border-radius:18px;background:linear-gradient(135deg,#fbf7fd,#f4eafa)}
+#loggedInAccount.abraca-admin-layout .aal-identity .account-user{flex:1 1 auto;min-width:0;padding:0!important;border:0!important;background:none!important;margin:0!important}
+#loggedInAccount.abraca-admin-layout .aal-identity .account-user strong{font-size:1.05rem!important;margin-bottom:2px!important;color:var(--aal-ink)}
+#loggedInAccount.abraca-admin-layout .aal-identity .account-user *{overflow-wrap:anywhere}
+#loggedInAccount.abraca-admin-layout .aal-identity .account-user .small,
+#loggedInAccount.abraca-admin-layout .aal-identity .account-user span{font-size:.82rem!important}
+#loggedInAccount.abraca-admin-layout .aal-logout{flex:0 0 auto;display:inline-flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--aal-line);background:#fff;color:var(--aal-accent);border-radius:14px;padding:8px 10px;font:inherit;font-size:.7rem;font-weight:800;cursor:pointer}
+#loggedInAccount.abraca-admin-layout .aal-logout .aal-ico{width:20px;height:20px}
+#loggedInAccount.abraca-admin-layout .account-logout-row{display:none!important}
+
+/* Sections */
+#loggedInAccount.abraca-admin-layout .aal-section{margin:18px 0 0}
+#loggedInAccount.abraca-admin-layout .aal-title{margin:0 0 10px 2px;font-size:.78rem!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:var(--aal-sub)}
+
+/* Tuiles (Administration + Mon espace) */
+#loggedInAccount.abraca-admin-layout .aal-grid,
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important;margin:0!important}
+#loggedInAccount.abraca-admin-layout .aal-tile,
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:84px;padding:12px 6px!important;border:1px solid var(--aal-line)!important;border-radius:16px!important;background:#fff!important;color:var(--aal-ink)!important;font:inherit;font-size:.8rem!important;font-weight:800!important;line-height:1.15!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(70,20,90,.06)!important;cursor:pointer;white-space:normal!important;width:auto!important;margin:0!important}
+#loggedInAccount.abraca-admin-layout .aal-tile .aal-ico,
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn .aal-ico{width:24px;height:24px;color:var(--aal-accent)}
+#loggedInAccount.abraca-admin-layout .aal-tile:active,
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn:active{transform:scale(.97)}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile{background:linear-gradient(160deg,#fff,#f8f0fc)!important}
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.admin-account-shortcut{display:none!important}
+#loggedInAccount.abraca-admin-layout .aal-badge{position:absolute;top:7px;right:7px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--aal-pink);color:#fff;font-size:.7rem;font-weight:900;line-height:20px;text-align:center;box-sizing:border-box}
+#loggedInAccount.abraca-admin-layout .aal-badge[hidden]{display:none}
+/* Le bouton Pro/Pro d'origine est remplacé par sa tuile */
+#loggedInAccount.abraca-admin-layout #b2bAccountBtn{display:none!important}
+
+/* Tableau de bord */
+#loggedInAccount.abraca-admin-layout #adminStatsPanel{margin-top:18px!important;padding:16px!important;border:1px solid var(--aal-line)!important;border-radius:18px!important;background:var(--aal-soft)!important}
+#loggedInAccount.abraca-admin-layout .admin-stats-head{align-items:center!important;margin-bottom:12px!important}
+#loggedInAccount.abraca-admin-layout .admin-stats-head h3{font-size:1.05rem!important}
+#loggedInAccount.abraca-admin-layout .admin-stats-head p{font-size:.78rem!important}
+#loggedInAccount.abraca-admin-layout #refreshAdminStatsBtn{flex:0 0 auto;width:42px!important;height:42px!important;min-height:0!important;padding:0!important;display:inline-flex!important;align-items:center;justify-content:center;border-radius:13px!important}
+#loggedInAccount.abraca-admin-layout .admin-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:8px!important}
+@media(min-width:761px){#loggedInAccount.abraca-admin-layout .admin-stat-grid{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))!important}}
+#loggedInAccount.abraca-admin-layout .admin-stat-card{display:flex!important;flex-direction:column;justify-content:center;min-height:0!important;padding:10px 12px!important;border-radius:13px!important}
+#loggedInAccount.abraca-admin-layout .admin-stat-value{font-size:1.3rem!important}
+#loggedInAccount.abraca-admin-layout .admin-stat-label{margin-top:4px!important;font-size:.7rem!important;line-height:1.2!important}
+#loggedInAccount.abraca-admin-layout .aal-subtitle{margin:14px 0 8px 2px;font-size:.72rem;font-weight:900;letter-spacing:.06em;text-transform:uppercase;color:var(--aal-sub)}
+#loggedInAccount.abraca-admin-layout .admin-plan-grid{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-top:0!important}
+#loggedInAccount.abraca-admin-layout .admin-plan-chip{padding:8px 6px!important;text-align:center;border-radius:12px!important}
+#loggedInAccount.abraca-admin-layout .admin-plan-chip b{font-size:1.05rem!important}
+#loggedInAccount.abraca-admin-layout .admin-plan-chip span{font-size:.62rem!important;line-height:1.15}
+#loggedInAccount.abraca-admin-layout .aal-hidden{display:none!important}
+/* Bloc « Gains, boosters… » : accessible par la tuile Finances */
+#loggedInAccount.abraca-admin-layout #adminStatsPanel>div[style]{display:none!important}
+
+/* Base de données */
+#loggedInAccount.abraca-admin-layout #adminDatabasePanel{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
+#loggedInAccount.abraca-admin-layout #adminDatabasePanel h3{font-size:1.05rem!important}
+#loggedInAccount.abraca-admin-layout #adminDatabasePanel .note{font-size:.8rem!important}
+#loggedInAccount.abraca-admin-layout .admin-db-search{gap:8px!important;margin:12px 0 6px!important}
+@media(max-width:760px){#loggedInAccount.abraca-admin-layout .admin-db-search{grid-template-columns:minmax(0,1fr) auto!important}
+  #loggedInAccount.abraca-admin-layout .admin-db-search .input{grid-column:1/-1}
+  #loggedInAccount.abraca-admin-layout #adminDbSearchBtn{min-height:0!important;padding:0 18px!important}}
+
+/* Mes informations */
+#loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
+#loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box h3{font-size:1.05rem!important}
