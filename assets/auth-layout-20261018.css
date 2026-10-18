@@ -43,3 +43,15 @@
 @media (max-width:760px){
   #accountModal .auth-intro{margin-top:2px}
 }
+
+/* Cartes d'attente pendant le chargement du catalogue (remplacées dès que les annonces arrivent) */
+#adsGrid .ad-skeleton{pointer-events:none;overflow:hidden}
+#adsGrid .ad-skeleton .ad-photo,#adsGrid .ad-skeleton .ad-body span{background:linear-gradient(90deg,rgba(255,255,255,.05) 0%,rgba(255,255,255,.14) 50%,rgba(255,255,255,.05) 100%)!important;background-size:200% 100%!important;animation:abracaSkeleton 1.2s ease-in-out infinite}
+#adsGrid .ad-skeleton .ad-photo{aspect-ratio:4/3;min-height:0}
+#adsGrid .ad-skeleton .ad-body{display:flex;flex-direction:column;gap:10px;padding:14px}
+#adsGrid .ad-skeleton .ad-body span{display:block;height:12px;border-radius:6px}
+#adsGrid .ad-skeleton .ad-body span:nth-child(1){width:45%}
+#adsGrid .ad-skeleton .ad-body span:nth-child(2){width:85%;height:16px}
+#adsGrid .ad-skeleton .ad-body span:nth-child(3){width:35%;height:18px}
+@keyframes abracaSkeleton{0%{background-position:200% 0}100%{background-position:-200% 0}}
+@media (prefers-reduced-motion:reduce){#adsGrid .ad-skeleton .ad-photo,#adsGrid .ad-skeleton .ad-body span{animation:none}}

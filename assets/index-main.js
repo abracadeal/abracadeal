@@ -3203,6 +3203,30 @@ function listingReferenceQuery(value){
   return match?'ABR-'+match[1]+'-'+match[2]:'';
 }
 
+// Chargement rapide du catalogue public (18/10/2026 — Claude) :
+// pendant les premières secondes, une seule requête est partagée entre les appels de loadAds()
+// (démarrage, événement de session, stabilisation à 700 ms), et elle part dès le chargement
+// du script, en parallèle de la vérification du compte, au lieu d'attendre la fin de celle-ci.
+const PUBLIC_CATALOG_SELECT='id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)';
+const PUBLIC_CATALOG_STARTUP_MS=6000;
+let publicCatalogPromise=null;
+let publicCatalogAt=0;
+let catalogLoadedOnce=false;
+function fetchPublicCatalog(){
+  return sb.from('listings').select(PUBLIC_CATALOG_SELECT)
+    .is('revision_of',null).eq('status','active').eq('visibility_scope','public')
+    .order('created_at',{ascending:false});
+}
+function getPublicCatalog(){
+  const now=performance.now();
+  const startup=now<PUBLIC_CATALOG_STARTUP_MS;
+  if(startup && publicCatalogPromise && now-publicCatalogAt<PUBLIC_CATALOG_STARTUP_MS) return publicCatalogPromise;
+  publicCatalogAt=now;
+  publicCatalogPromise=Promise.resolve(fetchPublicCatalog()).catch(error=>({data:null,error}));
+  if(!startup){const p=publicCatalogPromise;setTimeout(()=>{if(publicCatalogPromise===p)publicCatalogPromise=null;},0);}
+  return publicCatalogPromise;
+}
+
 async function loadAds(){
   const sequence=++adsLoadSequence;
   const viewerId=currentUser?.id;
@@ -3252,15 +3276,23 @@ async function loadAds(){
       (mods||[]).forEach(m=>risks.set(m.listing_id,m));
     }
   }else{
-    let q=sb.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
-    q=q.is('revision_of',null);
     const reference=listingReferenceQuery($('#searchQuery')?.value);
-    if(reference)q=q.eq('listing_reference',reference);
-    if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
-    else q=q.eq('status','active').eq('visibility_scope','public');
-    const {data,error}=await q.order('created_at',{ascending:false});
-    if(error){console.error(error);toast('Impossible de charger les annonces');return}
-    loadedAds=data||[];
+    if(!onlyMine && !reference){
+      // Catalogue public : requête partagée (voir getPublicCatalog) pour éviter 3 chargements identiques au démarrage.
+      const {data,error}=await getPublicCatalog();
+      if(!isCurrent()) return;
+      if(error){console.error(error);toast('Impossible de charger les annonces');return}
+      loadedAds=(data||[]).slice();
+    }else{
+      let q=sb.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
+      q=q.is('revision_of',null);
+      if(reference)q=q.eq('listing_reference',reference);
+      if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
+      else q=q.eq('status','active').eq('visibility_scope','public');
+      const {data,error}=await q.order('created_at',{ascending:false});
+      if(error){console.error(error);toast('Impossible de charger les annonces');return}
+      loadedAds=data||[];
+    }
   }
 
   await hydratePrivatePhotos(loadedAds);
@@ -3279,6 +3311,7 @@ async function loadAds(){
   }
 
   allAds=loadedAds;
+  catalogLoadedOnce=true;
   moderationRiskById.clear();
   risks.forEach((v,k)=>moderationRiskById.set(k,v));
   if(favoritesMode) allAds=allAds.filter(a=>favoriteIds.has(a.id));
@@ -3607,6 +3640,9 @@ function renderAds(){
   });
   $('#backToAllAds').classList.toggle('hidden',!favoritesMode&&!onlyMine);
   let ads=filteredAds(), grid=$('#adsGrid');
+  // Tant que le premier chargement n'est pas arrivé, on garde les cartes d'attente au lieu d'afficher « aucune annonce ».
+  if(!catalogLoadedOnce && !ads.length && !onlyMine && !favoritesMode && !moderationMode) return;
+  grid.removeAttribute('aria-busy');
 
   if(
     !moderationMode &&
@@ -5323,6 +5359,7 @@ const passwordRecovery = (()=>{
 })();
 
 if(sb){
+  try{getPublicCatalog();}catch(_){}
   (async()=>{
     try{await refreshAuth();}
     catch(error){console.error('Initialisation du compte impossible',error);}
