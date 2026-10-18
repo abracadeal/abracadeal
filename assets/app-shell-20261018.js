@@ -11,6 +11,9 @@
   'use strict';
   if (window.__abracaAppShell) return;
   window.__abracaAppShell = true;
+  // Page affichée dans une autre page (ex. Espace Hôte intégré à Vacances) : la page parente a déjà sa barre.
+  var embedded = false; try { embedded = window.self !== window.top; } catch (_) { embedded = true; }
+  if (embedded || /[?&]embedded=1\b/.test(location.search)) return;
   var mq = window.matchMedia ? window.matchMedia('(max-width:760px)') : null;
   if (!mq || !mq.matches) return;
 

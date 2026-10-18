@@ -35,3 +35,8 @@
   body.abs-doc main h3{font-size:17px!important;margin-top:26px!important}
   body.abs-doc main h2{font-size:20px!important}
 }
+/* Champs date sur iPhone : restent dans leur cadre, texte aligné à gauche (aussi dans les pages intégrées) */
+@media (max-width:760px){
+  input[type="date"],input[type="datetime-local"],input[type="time"]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;text-align:left}
+  input[type="date"]::-webkit-date-and-time-value{text-align:left}
+}
