@@ -23,7 +23,10 @@ function correctTypos(input){
 }
 function interpret(input){
  const text=correctTypos(input),found={},removed=[];
- const category=/\b(appartement|studio|maison|villa|terrain|immobilier|logement)\b/.test(text)?'immobilier':/\b(vacances|saisonniere|sejour|hebergement|gite)\b/.test(text)?'vacances':/\b(moto|scooter|yamaha|kawasaki|ducati|ktm|triumph)\b/.test(text)?'vehicules':/\b(voiture|auto|vehicule|mercedes|renault|peugeot|bmw|audi|tesla)\b/.test(text)?'vehicules':'';
+ const category=/\b(appartement|studio|maison|villa|terrain|immobilier|logement)\b/.test(text)?'immobilier':/\b(vacances|saisonniere|sejour|hebergement|gite)\b/.test(text)?'vacances':/\b(moto|motos|scooter)\b/.test(text)?'vehicules':/\b(voiture|voitures|auto|vehicule|vehicules)\b/.test(text)?'vehicules':'';
+ // 18/10/2026 : une marque seule (ex. « Mercedes ») reste une recherche globale par mot-clé,
+ // toutes catégories (voitures, pièces, jantes, vêtements…). La catégorie n'est choisie que si
+ // le type est écrit (voiture, moto, scooter, appartement…).
  if(category)found.category=category;
  const budget=text.match(/(?:moins de|maximum|max|budget(?: de)?|jusqu.a|sous)\s*(\d[\d\s.,]*)\s*(k\s*€|k€|€|euros?)/);
  if(budget){let n=Number(budget[1].replace(/[\s,]/g,''));if(budget[2].startsWith('k'))n*=1000;if(n>0&&n<100000000)found.maxPrice=Math.round(n);removed.push(budget[0]);}
@@ -35,7 +38,7 @@ function interpret(input){
  if(city){found.city=city;removed.push(new RegExp('(?:\\b(?:a|sur|vers|pres de|autour de|dans)\\s+)?'+city.replace('-','[-\\s]'),'i'));}
  const brand=brands.find(b=>new RegExp('\\b'+b+'\\b').test(text));
  if(brand&&category==='vehicules'){found.brand=brand;removed.push(new RegExp('\\b'+brand+'\\b','i'));}
- if(category==='vehicules')found.sub=/\b(moto|scooter|yamaha|kawasaki|ducati|ktm|triumph)\b/.test(text)?'motos':/\b(voiture|auto|mercedes|renault|peugeot|bmw|audi|tesla)\b/.test(text)?'voitures':'';
+ if(category==='vehicules')found.sub=/\b(moto|motos|scooter)\b/.test(text)?'motos':/\b(voiture|voitures|auto)\b/.test(text)?'voitures':'';
  if(category==='immobilier'){if(/\b(location|louer|loue)\b/.test(text))found.transaction='location';else if(/\b(achat|acheter|vente|vendre)\b/.test(text))found.transaction='vente';}
  let rest=text;for(const piece of removed)rest=rest.replace(piece,' ');
  rest=rest.replace(/\b(je cherche|recherche|cherche|je veux|un|une|des|de|du|avec|pour|en|a|et|moins|plus|budget|voiture|auto|vehicule|moto|immobilier|appartement|maison|villa|vacances|saisonniere|location|achat|acheter|vente|vendre|noire?|blanche?)\b/g,' ');

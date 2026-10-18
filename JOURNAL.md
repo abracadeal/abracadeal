@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Recherche IA : une marque seule reste globale
+- **Changé :** `assets/smart-search-20260924.js` (version `?v=20261018-global` dans `index.html`).
+  - « Mercedes », « Yamaha »… seuls : plus de bascule automatique en Voitures/Motos, recherche par mot-clé dans tout le site.
+  - La catégorie n'est choisie que si le type est écrit : « voiture mercedes » → Voitures + marque Mercedes ; « moto yamaha » → Motos.
+- **Pourquoi :** demande d'Anthony ; une marque peut concerner des pièces, jantes, vêtements, etc.
+
 ### 18/10/2026 — Claude — Bouton retour ‹ (mobile) corrigé
 - **Changé :** `assets/app-shell-20261018.js` (fonction `goBack`), version passée à `?v=5` sur les 36 pages.
   - Pages admin et Modération : le ‹ va directement à la page parente (Modération → `index.html#accountModal`, le compte).
