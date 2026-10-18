@@ -23,6 +23,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Pourquoi :** remarque d'Anthony (champs motorisation sans intérêt pour un vélo).
 - **À savoir :** la fiche d'une ancienne annonce vélo n'affiche plus le bloc de caractéristiques véhicule.
 
+### 18/10/2026 — Claude — « Santé & mobilité » déplacée de Maison vers Autres
+- **Changé :** `assets/index-main.js` : sous-catégorie `sante-mobilite` retirée de `SUBCATEGORIES.maison` et ajoutée à `SUBCATEGORIES.autres` (avant « Divers »). `index.html` : `index-main.js?v=20261018-sante2`.
+- **Base :** l'annonce déjà publiée (« Béquille Herdegen… », `0f24edc0-…`) passée de `maison` à `autres` (écriture interne, sans re-modération ni remontée).
+- **Pourquoi :** demande d'Anthony (pas à sa place dans Maison).
+
 ### 18/10/2026 — Claude — Nouvelle sous-catégorie Maison « Santé & mobilité »
 - **Changé :** `assets/index-main.js` (`SUBCATEGORIES.maison`) : ajout de `sante-mobilite` « Santé & mobilité (béquilles, fauteuil roulant…) », avant « Autre maison ». Utilisée automatiquement par le dépôt d'annonce et les filtres. `index.html` : `index-main.js?v=20261018-sante`.
 - **Pourquoi :** Anthony ne savait pas où mettre des béquilles (pas de rubrique matériel médical).

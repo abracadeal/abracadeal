@@ -1659,7 +1659,6 @@ const SUBCATEGORIES = {
     ['cuisine','Cuisine'],
     ['linge-maison','Linge de maison'],
     ['luminaire','Luminaires'],
-    ['sante-mobilite','Santé & mobilité (béquilles, fauteuil roulant…)'],
     ['autre-maison','Autre maison']
   ],
   mode: [
@@ -1704,6 +1703,7 @@ const SUBCATEGORIES = {
     ['animaux','Animaux'],
     ['materiel-pro','Matériel professionnel'],
     ['enfants','Enfants'],
+    ['sante-mobilite','Santé & mobilité (béquilles, fauteuil roulant…)'],
     ['divers','Divers']
   ]
 };
