@@ -1609,7 +1609,7 @@ document.addEventListener('keydown',e=>{
 });
 
 
-const VEHICLE_DETAIL_TYPES=['voitures','motos','utilitaires','caravaning','nautisme','velos'];
+const VEHICLE_DETAIL_TYPES=['voitures','motos','utilitaires','caravaning','nautisme'];
 const EQUIPMENT_TYPES=['equipement-auto','equipement-moto','equipement-caravaning','equipement-nautisme','equipement-velo','pieces-detachees'];
 
 const SUBCATEGORIES = {

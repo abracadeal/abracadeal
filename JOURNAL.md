@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Vélos : plus de champs « véhicule » inutiles
+- **Changé :** `assets/index-main.js` : `velos` retiré de `VEHICLE_DETAIL_TYPES`. Pour la sous-catégorie Vélos, le dépôt n'affiche plus les champs de voiture (marque/modèle auto, kilométrage, carburant, boîte, Crit'Air, puissance…) ; il garde titre, description, prix, état et photos, comme les équipements. `index.html` : `index-main.js?v=20261018-velo`.
+- **Pourquoi :** remarque d'Anthony (champs motorisation sans intérêt pour un vélo).
+- **À savoir :** la fiche d'une ancienne annonce vélo n'affiche plus le bloc de caractéristiques véhicule.
+
 ### 18/10/2026 — Claude — Nouvelle sous-catégorie Maison « Santé & mobilité »
 - **Changé :** `assets/index-main.js` (`SUBCATEGORIES.maison`) : ajout de `sante-mobilite` « Santé & mobilité (béquilles, fauteuil roulant…) », avant « Autre maison ». Utilisée automatiquement par le dépôt d'annonce et les filtres. `index.html` : `index-main.js?v=20261018-sante`.
 - **Pourquoi :** Anthony ne savait pas où mettre des béquilles (pas de rubrique matériel médical).
