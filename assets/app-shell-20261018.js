@@ -59,6 +59,12 @@
     if (!body || document.querySelector('.abs-bar')) return;
     body.classList.add('abs-on');
     if (/^(aide|cgu|cgv|classement-annonces|confidentialite|contact|cookies|mentions-legales|regles-diffusion|securite)\.html$/.test(page)) body.classList.add('abs-doc');
+    if (/^(admin-[a-z-]+|moderation)\.html$/.test(page)) {
+      body.classList.add('abs-admin');
+      /* Titre plus court : « Abracadeal · Pilotage administrateur » -> « Pilotage administrateur » */
+      var h = document.querySelector('main h1, h1');
+      if (h && /^\s*abracadeal\s*[·—–-]\s*/i.test(h.textContent)) h.textContent = h.textContent.replace(/^\s*abracadeal\s*[·—–-]\s*/i, '');
+    }
 
     /* Barre */
     var bar = el('header', 'abs-bar');

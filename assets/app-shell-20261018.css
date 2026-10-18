@@ -40,3 +40,40 @@
   input[type="date"],input[type="datetime-local"],input[type="time"]{-webkit-appearance:none;appearance:none;display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;text-align:left}
   input[type="date"]::-webkit-date-and-time-value{text-align:left}
 }
+/* Pages d'administration (admin-*, moderation) : même thème sombre, compact, partout */
+@media (max-width:760px){
+  body.abs-admin{--aa-bg:#130c1a;--aa-card:#21142d;--aa-card2:#1a1024;--aa-line:rgba(255,255,255,.09);--aa-ink:#f4ecfa;--aa-sub:#b9a7c6;--aa-accent:#c55ad6;
+    background:radial-gradient(120% 40% at 50% 0,rgba(123,42,168,.28),transparent 60%),var(--aa-bg)!important;color:var(--aa-ink)!important;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important}
+  body.abs-admin main,body.abs-admin .wrap,body.abs-admin .shell{width:auto!important;max-width:none!important;margin:0!important;padding:16px 14px 28px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
+  body.abs-admin main main,body.abs-admin .wrap .wrap{padding:0!important}
+  body.abs-admin h1{font-size:26px!important;line-height:1.15!important;margin:4px 0 6px!important;color:#fff!important;letter-spacing:-.02em}
+  body.abs-admin h2{font-size:18px!important;margin:4px 0 8px!important;color:#fff!important}
+  body.abs-admin h3{font-size:16px!important;color:#fff!important}
+  body.abs-admin main>p,body.abs-admin .hero p,body.abs-admin #status,body.abs-admin .note,body.abs-admin .muted{color:var(--aa-sub)!important;font-size:14px!important;line-height:1.5!important}
+  body.abs-admin .hero{padding:0!important;margin:0 0 12px!important;background:none!important;border:0!important;box-shadow:none!important}
+  /* Cartes */
+  body.abs-admin section:not(.hero),body.abs-admin .card,body.abs-admin .metric,body.abs-admin .item,body.abs-admin .kv,body.abs-admin .notice,body.abs-admin form#offerForm{
+    background:var(--aa-card)!important;border:1px solid var(--aa-line)!important;border-radius:16px!important;padding:14px!important;margin:0 0 12px!important;box-shadow:0 6px 18px rgba(0,0,0,.18)!important;color:var(--aa-ink)}
+  body.abs-admin section section,body.abs-admin .card .card,body.abs-admin .card .item{background:var(--aa-card2)!important;box-shadow:none!important}
+  body.abs-admin section.grid4{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important}
+  body.abs-admin .grid4 .metric{margin:0!important;padding:12px!important}
+  body.abs-admin .grid4 .metric strong{font-size:22px!important}
+  body.abs-admin h1,body.abs-admin h2,body.abs-admin h3{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important}
+  body.abs-admin .grid,body.abs-admin .metrics,body.abs-admin .stats{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px!important}
+  body.abs-admin .grid>section,body.abs-admin .metrics>*,body.abs-admin .stats>*{margin:0!important;font-size:13px!important;color:var(--aa-sub)!important}
+  body.abs-admin .metric b,body.abs-admin .grid .metric,body.abs-admin .metrics b,body.abs-admin .stats b{color:#fff!important}
+  body.abs-admin .grid .metric{background:none!important;border:0!important;box-shadow:none!important;padding:4px 0 0!important;margin:0!important;font-size:22px!important;font-weight:800}
+  /* Liens rapides (ex. « CRM prospection · Accueil ») en pastilles */
+  body.abs-admin #app>p:first-child{display:flex;flex-wrap:wrap;gap:8px;font-size:0!important;margin:4px 0 14px!important}
+  body.abs-admin #app>p:first-child a{font-size:14px!important;display:inline-flex;align-items:center;height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid var(--aa-line);color:#fff!important;text-decoration:none!important;font-weight:600}
+  /* Champs et boutons */
+  body.abs-admin input:not([type=checkbox]):not([type=radio]),body.abs-admin select,body.abs-admin textarea{background:#0f0a14!important;color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:12px!important;min-height:44px;padding:10px 12px!important;box-sizing:border-box;max-width:100%}
+  body.abs-admin button,body.abs-admin .btn{border-radius:12px!important;min-height:42px;font-weight:700!important}
+  body.abs-admin a{color:#e7b6f2}
+  /* Tableaux : défilement horizontal au lieu de casser la page */
+  body.abs-admin table{display:block!important;width:100%!important;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;background:var(--aa-card2)!important}
+  body.abs-admin th,body.abs-admin td{white-space:nowrap;font-size:13px!important;padding:9px 10px!important;color:var(--aa-ink)!important;border-color:var(--aa-line)!important}
+  body.abs-admin th{background:#2a1a36!important;color:#fff!important}
+  body.abs-admin pre,body.abs-admin code{background:#0f0a14!important;color:#eadcf3!important;border-radius:10px}
+}
