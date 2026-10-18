@@ -82,10 +82,40 @@
     orphans = 0;
   }
 
-  window.addEventListener('popstate', function(){
-    if (ignorePops > 0){ ignorePops--; return; }
+  /* 18/10/2026 : quitter la page (ex. vers Pro/Pro) juste apres avoir ferme une fenetre
+     lancait un "retour" de l'historique en meme temps que le changement de page :
+     le retour arriere devenait incoherent. abracaGo(url) nettoie d'abord l'historique
+     de la fenetre fermee, puis change de page. */
+  var pendingUrl = null;
+  window.abracaGo = function(url){
+    clearTimeout(flushTimer);
+    var n = orphans;
+    orphans = 0;
+    if (n <= 0){ location.href = url; return; }
+    pendingUrl = url;
+    ignorePops++;
+    history.go(-n);
+    setTimeout(function(){ if (pendingUrl){ var u = pendingUrl; pendingUrl = null; location.href = u; } }, 400);
+  };
+  window.addEventListener('pageshow', function(e){
+    if (!e.persisted) return;
+    pendingUrl = null; ignorePops = 0; orphans = 0; clearTimeout(flushTimer);
+    /* Fenetres refermees pendant l'absence : on les retire de la pile. */
+    stack = stack.filter(function(el){ var l = layerOf(el); return l && el.classList.contains(l.cls); });
+  });
+
+  window.addEventListener('popstate', function(e){
+    if (ignorePops > 0){
+      ignorePops--;
+      if (pendingUrl){ var u = pendingUrl; pendingUrl = null; location.href = u; }
+      return;
+    }
     var el = stack.pop();
-    if (!el) return;
+    if (!el){
+      /* Entree d'une fenetre qui n'existe plus (page rechargee) : on la saute. */
+      if (e.state && e.state.abracaLayer && isTouchLayout()) history.back();
+      return;
+    }
     var layer = layerOf(el);
     if (layer && el.classList.contains(layer.cls)) layer.close(el);
   });

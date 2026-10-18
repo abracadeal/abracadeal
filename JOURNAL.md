@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Retour arrière, annonces retirées et affichage mobile plus rapide
+- **Changé :**
+  - `assets/index-main.js` : « Mes annonces » n'affiche plus les annonces retirées (par l'admin ou supprimées) ; seules les vendues et expirées restent visibles. Rechargement automatique de « Mes annonces » toutes les 30 s au lieu de 4 s. Le rechargement complet au `pageshow` ne se fait plus qu'au vrai retour arrière (page restaurée par Safari), plus au premier affichage. Le catalogue public s'affiche dès qu'il arrive, sans attendre la vérification du compte.
+  - `assets/back-gesture-20261007.js` (v3) : nouvelle fonction `window.abracaGo(url)`. Quitter la page juste après la fermeture d'une fenêtre (ex. Compte → Pro/Pro, Admin → Modération) lançait un retour d'historique en même temps que le changement de page : le retour arrière devenait incohérent. Les entrées d'historique « fantômes » (fenêtre disparue après rechargement) sont sautées.
+  - `assets/index-app.js` : les liens vers Pro/Pro et Modération passent par `abracaGo`.
+  - `index.html` : Supabase JS chargé en bas de page (avec preload + preconnect) au lieu de bloquer l'affichage dans `<head>`.
+- **Pourquoi :** signalement d'Anthony (retour arrière qui déconne, annonces retirées toujours affichées, site mobile lent à s'afficher).
+- **À savoir :** pour toute nouvelle navigation vers une autre page depuis une fenêtre de l'accueil, utiliser `window.abracaGo(url)` plutôt que `location.href = url`.
+
 ### 18/10/2026 — Claude — Miniatures : correctif des vignettes « Abracadeal » par défaut
 - **Bug :** tant qu'une miniature n'était pas encore générée, le gestionnaire global d'erreurs d'image (`assets/index-app.js`, Fix 21/09) passait avant le retour prévu vers la photo d'origine et affichait la photo Abracadeal par défaut (vidéo d'Anthony).
 - **Changé :** `assets/index-app.js` (`mark()`) : si l'image a un `data-full` (photo d'origine) pas encore essayé, on charge d'abord celle-ci ; la photo par défaut ne s'affiche que si l'originale est aussi introuvable. `index.html` : `index-app.js?v=20261018-thumbs`.

@@ -840,7 +840,7 @@ $('#accountModerationBtn')?.addEventListener('click',()=>{
   if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
   closeModal('accountModal');
   // Même page dédiée que le raccourci Admin, sur mobile, tablette et desktop.
-  location.href='moderation.html';
+  (window.abracaGo?window.abracaGo('moderation.html'):location.href='moderation.html');
 });
 $('#accountFlowBtn')?.addEventListener('click',()=>{
   closeModal('accountModal');
@@ -3357,7 +3357,7 @@ async function loadAds(){
       let q=sb.from('listings').select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)');
       q=q.is('revision_of',null);
       if(reference)q=q.eq('listing_reference',reference);
-      if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected');
+      if(onlyMine && currentUser) q=q.eq('owner_id',currentUser.id).neq('status','rejected').or('status.neq.archived,archive_reason.in.(sold,expired)');
       else q=q.eq('status','active').eq('visibility_scope','public');
       const {data,error}=await q.order('created_at',{ascending:false});
       if(error){console.error(error);toast('Impossible de charger les annonces');return}
@@ -5305,7 +5305,7 @@ window.toggleAdminModeration=async()=>{
   // Sur desktop, la modération doit vivre sur sa page dédiée et non sous le catalogue.
   const tabletMobileUi=window.matchMedia('(min-width:761px) and (max-width:1366px) and (min-height:550px) and (any-pointer:coarse)').matches;
   if(window.matchMedia('(min-width:761px)').matches && !tabletMobileUi){
-    location.href='moderation.html';
+    (window.abracaGo?window.abracaGo('moderation.html'):location.href='moderation.html');
     return;
   }
   moderationMode=!moderationMode;
@@ -5429,7 +5429,9 @@ const passwordRecovery = (()=>{
 })();
 
 if(sb){
-  try{getPublicCatalog();}catch(_){}
+  // 18/10/2026 : affichage plus rapide sur mobile — le catalogue public s'affiche dès qu'il arrive,
+  // sans attendre la vérification du compte ; il est ensuite rafraîchi normalement.
+  try{Promise.resolve(getPublicCatalog()).then(()=>{if(!catalogLoadedOnce&&!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});});}catch(_){}
   (async()=>{
     try{await refreshAuth();}
     catch(error){console.error('Initialisation du compte impossible',error);}
@@ -5477,7 +5479,8 @@ if(sb){
 }
 // Vérification automatique des nouveaux messages sans recharger la page.
 // 4 secondes : suffisamment réactif pour la V1 sans modifier Supabase.
-setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine) loadAds();}},4000);
+let lastMineAutoRefresh=Date.now();
+setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine&&Date.now()-lastMineAutoRefresh>=30000){lastMineAutoRefresh=Date.now();loadAds();}}},4000);
 
 // Rafraîchit aussi immédiatement quand l'utilisateur revient sur l'onglet / la fenêtre.
 document.addEventListener('visibilitychange',()=>{
@@ -5495,8 +5498,8 @@ window.addEventListener('focus',()=>{
 
 // Safari/iPhone peut restaurer une page depuis son cache mémoire.
 // On resynchronise toujours la session au retour sur la page.
-window.addEventListener('pageshow',()=>{
-  if(!sb)return;
+window.addEventListener('pageshow',e=>{
+  if(!sb||!e.persisted)return;
   setTimeout(async()=>{
     try{
       const wasLoggedIn=!!currentUser;

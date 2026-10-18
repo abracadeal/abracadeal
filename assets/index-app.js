@@ -71,7 +71,7 @@
    if(same(v))await refreshPendingCount();
   }catch(error){if(same(v))msg('b2bStatus',errorText(error));}
  }
- async function open(){location.href='pro-pro.html';}
+ async function open(){if(window.abracaGo)window.abracaGo('pro-pro.html');else location.href='pro-pro.html';}
  node('b2bNavBtn').addEventListener('click',open);node('b2bAccountBtn').addEventListener('click',open);node('b2bRefresh').addEventListener('click',load);
  window.addEventListener('abracadeal:auth',()=>{if(userId!==(currentUser?.id||null)){clearPrivate();userId=currentUser?.id||null;node('b2bPriceRequestForm').reset();node('b2bOfferForm').reset();if(node('b2bModal').classList.contains('open'))load();}});
  async function loadProListings(){
@@ -900,7 +900,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     var action=btn.getAttribute('data-mobile-action');
     if(action==='b2b'){
       e.preventDefault();
-      location.href='pro-pro.html';
+      if(window.abracaGo)window.abracaGo('pro-pro.html');else location.href='pro-pro.html';
     }else if(action==='search'){
       e.preventDefault();
       setActive('search');
@@ -1039,7 +1039,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(!isAdmin()){closeModal('mobileAdminModal');toast('Accès administrateur requis');return;}
     if(action==='moderation'){
       closeModal('mobileAdminModal');
-      location.href='moderation.html';
+      if(window.abracaGo)window.abracaGo('moderation.html');else location.href='moderation.html';
     }else if(action==='flows'){
       closeModal('mobileAdminModal');
       window.openAdminFlowErrors?.();
