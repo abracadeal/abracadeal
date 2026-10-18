@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Offre Fondateurs sans carte à l'inscription (SQL préparé, PAS appliqué)
+- **Préparé :** `supabase/2026-10-18-founder-no-card.sql` — registre des anciens Fondateurs (empreintes SHA-256 du SIRET, de l'e-mail et du téléphone, enregistrées au démarrage réel de l'abonnement Fondateur) ; refus d'une nouvelle place (`founder_already_used`) ; inactivité (aucune annonce en ligne : mail à J45, offre perdue à J60, cron `abracadeal-founder-inactivity`) ; pause des annonces Pro (`status = 'hidden'`, colonnes `billing_paused_at` / `billing_paused_status`) quand un abonnement Fondateur s'arrête, reprise automatique dès qu'un abonnement redémarre ; nouveaux types de mails (`founder_inactivity_warning`, `founder_lost_inactivity`, `founder_trial_ended`) et rappel `j30`.
+- **Pourquoi :** décision d'Anthony (18/10) : plus de carte/SEPA à l'inscription Fondateur, offre perdue si inactif 60 jours ou compte supprimé, tarif public au retour, annonces en pause à la fin des 12 mois sans paiement.
+- **État :** application sur Supabase **annulée** par Anthony le 18/10 — **rien n'est appliqué**. Ne pas l'appliquer sans son accord.
+- **Reste à faire (une fois le SQL validé) :** `create-pro-subscription-order` (abonnement Fondateur créé sans passage Stripe Checkout, toujours en Pro 20), `change-pro-subscription-plan` (passage 20 → 50 seulement à 20 annonces), `process-pro-billing-reminders` (J-30 + texte « ajoutez un moyen de paiement »), `process-pro-transactional-emails` (3 nouveaux mails), `sweep-cancelled-pro-trials` (arrêt Stripe des Fondateurs inactifs), textes (`index.html`, `pro-fondateur.html`, CGU, CGV, aide, modèles de prospection).
+
 ### 18/10/2026 — Claude — Pages d'administration harmonisées sur mobile
 - **Changé :** `assets/app-shell-20261018.js` v4 / `.css` v5. Sur mobile, les pages `admin-*.html` et `moderation.html` reçoivent la classe `abs-admin` : même thème sombre partout (fond, cartes arrondies, titres, champs, boutons, tableaux qui défilent horizontalement au lieu de casser la page), statistiques en 2 colonnes (Pilotage, Prospection), liens rapides en pastilles, et le préfixe « Abracadeal · » retiré des grands titres (ex. « Pilotage administrateur »).
 - `admin-commerce.html` (qui était en clair) passe au même thème sombre sur mobile.
