@@ -1825,8 +1825,19 @@ $('#vehicleMake')?.addEventListener('change',()=>populateVehicleModels(''));
 
 let locationSearchTimer=null;
 let lastLocationSuggestions=[];
+// 18/10/2026 : autocomplétion ville / code postal revue (Paris, Lyon, Marseille : tous les arrondissements ;
+// recherche par début de code postal ; réponses lentes ignorées ; remplissage automatique quand il n'y a qu'un choix).
+let locationSearchSeq=0;
+const LOCATION_MAX_ROWS=30;
+const deptCommunesCache=new Map();
+const normLoc=v=>String(v||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[-’']/g,' ').replace(/\s+/g,' ').trim();
 function hideLocationSuggestions(exceptId=''){
   ['citySuggestions','postalSuggestions'].forEach(id=>{if(id!==exceptId) $('#'+id)?.classList.add('hidden')});
+}
+function applyLocation(r){
+  if(!r)return;
+  $('#adCity').value=r.nom; $('#adPostalCode').value=r.codePostal;
+  hideLocationSuggestions();
 }
 function renderLocationSuggestions(targetId,rows){
   const box=$('#'+targetId); if(!box) return;
@@ -1834,27 +1845,48 @@ function renderLocationSuggestions(targetId,rows){
   if(!rows.length){box.innerHTML='<div class="location-help" style="padding:9px 10px">Aucune commune trouvée.</div>';box.classList.remove('hidden');return;}
   box.innerHTML=rows.map((r,i)=>`<button type="button" class="location-suggestion" data-location-index="${i}"><b>${esc(r.nom)}</b><span>${esc(r.codePostal)}</span></button>`).join('');
   box.classList.remove('hidden');
-  box.querySelectorAll('[data-location-index]').forEach(btn=>btn.addEventListener('click',()=>{
-    const r=rows[Number(btn.dataset.locationIndex)]; if(!r)return;
-    $('#adCity').value=r.nom; $('#adPostalCode').value=r.codePostal;
-    hideLocationSuggestions(); box.classList.add('hidden');
-  }));
+  box.querySelectorAll('[data-location-index]').forEach(btn=>{
+    // mousedown empêché : le champ garde le focus sur ordinateur ; au doigt, le clic ne part pas si on fait défiler la liste.
+    btn.addEventListener('mousedown',e=>e.preventDefault());
+    btn.addEventListener('click',e=>{e.preventDefault();applyLocation(rows[Number(btn.dataset.locationIndex)]);});
+  });
+}
+function communeRows(data){
+  const rows=[];
+  for(const c of Array.isArray(data)?data:[]){
+    for(const cp of [...(c.codesPostaux||[])].sort()) rows.push({nom:c.nom,codePostal:cp,departement:c.codeDepartement||''});
+  }
+  const seen=new Set();
+  return rows.filter(r=>{const k=r.nom+'|'+r.codePostal;if(seen.has(k))return false;seen.add(k);return true});
+}
+async function geoCommunes(query){
+  const res=await fetch('https://geo.api.gouv.fr/communes?'+query+'&fields=nom,codesPostaux,codeDepartement&format=json',{headers:{Accept:'application/json'}});
+  return res.ok?await res.json():[];
+}
+async function communesOfDepartement(dep){
+  if(!deptCommunesCache.has(dep)) deptCommunesCache.set(dep,geoCommunes('codeDepartement='+encodeURIComponent(dep)).catch(()=>[]));
+  return deptCommunesCache.get(dep);
 }
 async function fetchFrenchCommunes(value,mode='city'){
   const q=String(value||'').trim();
-  if((mode==='city'&&q.length<2)||(mode==='postal'&&q.length<2)) return [];
+  if(q.length<2) return [];
   try{
-    const url=mode==='postal'
-      ?`https://geo.api.gouv.fr/communes?codePostal=${encodeURIComponent(q)}&fields=nom,codesPostaux,codeDepartement&format=json&limit=10`
-      :`https://geo.api.gouv.fr/communes?nom=${encodeURIComponent(q)}&fields=nom,codesPostaux,codeDepartement&format=json&boost=population&limit=10`;
-    const res=await fetch(url,{headers:{Accept:'application/json'}}); if(!res.ok) return [];
-    const data=await res.json();
-    const rows=[];
-    for(const c of Array.isArray(data)?data:[]){
-      for(const cp of (c.codesPostaux||[])) rows.push({nom:c.nom,codePostal:cp,departement:c.codeDepartement||''});
+    if(mode==='postal'){
+      const digits=q.replace(/\D/g,'');
+      if(digits.length===5) return communeRows(await geoCommunes('codePostal='+digits)).filter(r=>r.codePostal===digits).slice(0,LOCATION_MAX_ROWS);
+      // Début de code postal (ex. « 750 ») : communes du département, filtrées sur le début du code.
+      let deps=[digits.slice(0,2)];
+      if(digits.startsWith('20')) deps=['2A','2B'];
+      else if(/^9[78]/.test(digits)){if(digits.length<3)return [];deps=[digits.slice(0,3)];}
+      const lists=await Promise.all(deps.map(communesOfDepartement));
+      return communeRows(lists.flat()).filter(r=>r.codePostal.startsWith(digits)).sort((x,y)=>x.codePostal.localeCompare(y.codePostal)||x.nom.localeCompare(y.nom)).slice(0,LOCATION_MAX_ROWS);
     }
-    const seen=new Set();
-    return rows.filter(r=>{const k=r.nom+'|'+r.codePostal;if(seen.has(k))return false;seen.add(k);return true}).slice(0,10);
+    const data=await geoCommunes('nom='+encodeURIComponent(q)+'&boost=population&limit=15');
+    const target=normLoc(q);
+    const list=Array.isArray(data)?data:[];
+    // Le nom exact d'abord (avec tous ses codes postaux), puis les autres communes.
+    const exact=list.filter(c=>normLoc(c.nom)===target), others=list.filter(c=>normLoc(c.nom)!==target);
+    return [...communeRows(exact),...communeRows(others)].slice(0,LOCATION_MAX_ROWS);
   }catch(e){console.warn('Autocomplétion commune indisponible',e);return []}
 }
 function scheduleLocationSearch(mode){
@@ -1863,13 +1895,39 @@ function scheduleLocationSearch(mode){
   const target=mode==='city'?'citySuggestions':'postalSuggestions';
   const value=input?.value||'';
   hideLocationSuggestions(target);
+  const seq=++locationSearchSeq;
   if(value.trim().length<2){$('#'+target)?.classList.add('hidden');return;}
-  locationSearchTimer=setTimeout(async()=>renderLocationSuggestions(target,await fetchFrenchCommunes(value,mode)),260);
+  locationSearchTimer=setTimeout(async()=>{
+    const rows=await fetchFrenchCommunes(value,mode);
+    // Une réponse arrivée après une frappe plus récente est ignorée (elle afficherait une liste périmée).
+    if(seq!==locationSearchSeq||(input?.value||'')!==value)return;
+    renderLocationSuggestions(target,rows);
+  },260);
+}
+// En quittant un champ sans choisir dans la liste : on complète l'autre champ s'il n'y a qu'une possibilité.
+async function autoCompleteLocation(mode){
+  const city=$('#adCity')?.value.trim()||'', postal=$('#adPostalCode')?.value.trim()||'';
+  if(mode==='postal'&&/^\d{5}$/.test(postal)){
+    const rows=await fetchFrenchCommunes(postal,'postal');
+    if(($('#adPostalCode')?.value.trim()||'')!==postal)return;
+    const match=rows.find(r=>normLoc(r.nom)===normLoc(city));
+    if(match){$('#adCity').value=match.nom;return;}
+    if(rows.length===1)$('#adCity').value=rows[0].nom;
+  }else if(mode==='city'&&city.length>=2){
+    const rows=(await fetchFrenchCommunes(city,'city')).filter(r=>normLoc(r.nom)===normLoc(city));
+    if(($('#adCity')?.value.trim()||'')!==city||!rows.length)return;
+    $('#adCity').value=rows[0].nom;
+    if(rows.length===1){$('#adPostalCode').value=rows[0].codePostal;return;}
+    // Plusieurs codes (Paris, Lyon, Marseille…) : on propose directement la liste des codes de cette ville.
+    if(!rows.some(r=>r.codePostal===postal)){$('#adPostalCode').value='';renderLocationSuggestions('postalSuggestions',rows.slice(0,LOCATION_MAX_ROWS));}
+  }
 }
 $('#adCity')?.addEventListener('input',()=>scheduleLocationSearch('city'));
 $('#adCity')?.addEventListener('focus',()=>{if($('#adCity').value.trim().length>=2)scheduleLocationSearch('city')});
+$('#adCity')?.addEventListener('change',()=>autoCompleteLocation('city'));
 $('#adPostalCode')?.addEventListener('input',()=>{ $('#adPostalCode').value=$('#adPostalCode').value.replace(/\D/g,'').slice(0,5); scheduleLocationSearch('postal'); });
 $('#adPostalCode')?.addEventListener('focus',()=>{if($('#adPostalCode').value.trim().length>=2)scheduleLocationSearch('postal')});
+$('#adPostalCode')?.addEventListener('change',()=>autoCompleteLocation('postal'));
 document.addEventListener('click',e=>{if(!e.target.closest('.autocomplete-wrap'))hideLocationSuggestions()});
 
 function updatePublishFields(){
