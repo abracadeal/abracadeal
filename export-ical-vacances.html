@@ -12,6 +12,7 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+<link rel="stylesheet" href="/assets/app-shell-20261018.css?v=2">
 </head><body>
 <header class="top"><div class="topin"><b>Abracadeal Hôte · Export iCal</b><a href="espace-hote.html">← Espace Hôte</a></div></header>
 <main class="wrap">
@@ -34,4 +35,5 @@ $('generate').onclick=async()=>{const id=$('listing').value;if(!id){alert('Ajout
 $('copy').onclick=async()=>{await navigator.clipboard.writeText($('url').value);$('copy').textContent='Copié ✓';setTimeout(()=>$('copy').textContent='Copier',1500)}
 boot();
 </script><script src="vacation-presence.js?v=20260920-1"></script>
+<script src="/assets/app-shell-20261018.js?v=2" defer></script>
 </body></html>
