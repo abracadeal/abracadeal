@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://abracadeal.fr/annonces/</loc></url>
+  <url><loc>https://abracadeal.fr/annonces/alfortville/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/cannes/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/maison/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/maison/paris/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/paris/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/</loc></url>
+  <url><loc>https://abracadeal.fr/annonces/vehicules/alfortville/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/cannes/</loc></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/paris/</loc></url>
 </urlset>
