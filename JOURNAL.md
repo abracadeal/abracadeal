@@ -30,6 +30,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   2. Créer les identifiants Google (Google Cloud Console) et Facebook (Meta for Developers), puis les coller dans Supabase → Authentication → Sign In / Providers. URL de rappel : `https://jplzvxmpbpjssyinozap.supabase.co/auth/v1/callback`.
   3. Vérifier que `https://abracadeal.fr/` est dans Authentication → URL Configuration → Redirect URLs.
   4. Les pages Vacances ont leur propre connexion : pas encore de boutons Google/Facebook dessus.
+- SQL 2026-10-18-social-login.sql appliqué par ChatGPT le 18/10/2026 11:22 (+02:00)
 
 ### 17/10/2026 — Claude — Fichiers internes retirés du site public
 - **Changé :** ajout de `_config.yml` : `JOURNAL.md`, `supabase/`, `tests/`, `scripts/`, `backups/` et `docs/` ne sont plus publiés sur abracadeal.fr (ils restent dans le dépôt).
