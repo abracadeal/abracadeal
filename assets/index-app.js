@@ -1371,6 +1371,13 @@ document.addEventListener('DOMContentLoaded',()=>{
   function mark(img){
     if(!img || !img.matches || !img.matches(selector)) return;
     if(img.dataset.abracaFallback) return;
+    // 18/10/2026 : miniature pas encore générée -> on charge d'abord la photo d'origine (data-full),
+    // la photo Abracadeal par défaut ne sert que si l'originale est elle aussi introuvable.
+    if(img.dataset.full && img.getAttribute('src')!==img.dataset.full){
+      img.onerror=null;
+      img.src=img.dataset.full;
+      return;
+    }
     img.dataset.abracaFallback='1';
     img.onerror=null;
     img.src=(typeof ABRACA_DEFAULT_LISTING_PHOTO!=='undefined'?ABRACA_DEFAULT_LISTING_PHOTO:'assets/default-listing-photo-20260921.jpg');
