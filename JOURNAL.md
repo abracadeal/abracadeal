@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 18/10/2026 — Claude — Bouton retour ‹ (mobile) corrigé
+- **Changé :** `assets/app-shell-20261018.js` (fonction `goBack`), version passée à `?v=5` sur les 36 pages.
+  - Pages admin et Modération : le ‹ va directement à la page parente (Modération → `index.html#accountModal`, le compte).
+  - Arrivée depuis l'accueil : idem, page parente directe.
+  - Autres cas : retour à la page précédente ; si rien ne se passe après 600 ms, page parente.
+- **Pourquoi :** sur Modération, le ‹ ne faisait rien : le retour tombait sur les entrées d'historique des fenêtres de l'accueil (compte, publier…) au lieu de quitter la page.
+
 ### 18/10/2026 — Claude — Retour arrière, annonces retirées et affichage mobile plus rapide
 - **Changé :**
   - `assets/index-main.js` : « Mes annonces » n'affiche plus les annonces retirées (par l'admin ou supprimées) ; seules les vendues et expirées restent visibles. Rechargement automatique de « Mes annonces » toutes les 30 s au lieu de 4 s. Le rechargement complet au `pageshow` ne se fait plus qu'au vrai retour arrière (page restaurée par Safari), plus au premier affichage. Le catalogue public s'affiche dès qu'il arrive, sans attendre la vérification du compte.

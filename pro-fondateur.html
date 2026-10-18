@@ -64,5 +64,5 @@ const qs=new URLSearchParams(location.search);if(qs.get('pro_subscription')==='f
 try{localStorage.setItem('abraca_prospect_ref',JSON.stringify({code:r,at:Date.now()}))}catch(_){}
 u.searchParams.delete('r');try{history.replaceState(null,'',u.pathname+(u.search||'')+u.hash)}catch(_){}
 sb.rpc('track_prospect_click',{p_code:r}).then(()=>{},()=>{});}catch(_){}})();</script>
-<script src="/assets/app-shell-20261018.js?v=4" defer></script>
+<script src="/assets/app-shell-20261018.js?v=5" defer></script>
 </body></html>

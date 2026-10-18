@@ -47,11 +47,27 @@
   }
   function el(tag, cls, html) { var e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; }
 
+  /* 18/10/2026 : le retour par l'historique bloquait (ex. Modération) quand on venait de l'accueil :
+     l'accueil garde dans l'historique des entrées de fenêtres (compte, publier…) qui renvoyaient
+     sur place. Désormais :
+     - pages admin / modération, ou arrivée depuis l'accueil → on va directement à la page parente ;
+     - sinon retour à la page précédente, avec sécurité : si rien ne s'est passé après 600 ms,
+       on va à la page parente. */
   function goBack() {
-    var sameOrigin = false;
-    try { sameOrigin = !!document.referrer && new URL(document.referrer).origin === location.origin && document.referrer !== location.href; } catch (_) {}
-    if (sameOrigin && history.length > 1) { history.back(); return; }
-    location.href = parent;
+    var ref = null;
+    try { ref = document.referrer ? new URL(document.referrer) : null; } catch (_) {}
+    var sameOrigin = !!ref && ref.origin === location.origin && ref.href !== location.href;
+    var fromHome = sameOrigin && /^\/(index\.html)?$/i.test(ref.pathname);
+    var isAdmin = /^(admin-[a-z-]+|moderation)\.html$/.test(page);
+    if (!sameOrigin || fromHome || isAdmin || history.length <= 1) { location.href = parent; return; }
+    var here = location.href, left = false;
+    var onHide = function () { left = true; };
+    window.addEventListener('pagehide', onHide, { once: true });
+    history.back();
+    setTimeout(function () {
+      window.removeEventListener('pagehide', onHide);
+      if (!left && location.href === here && document.visibilityState !== 'hidden') location.href = parent;
+    }, 600);
   }
 
   function start() {
