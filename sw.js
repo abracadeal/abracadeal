@@ -4,7 +4,7 @@
    et à afficher une page propre quand il n'y a pas de connexion.
    Pour le désactiver : remplacer ce fichier par un service worker qui appelle
    self.registration.unregister() (voir JOURNAL.md). */
-const SW_VERSION = 'abraca-sw-20261018-1';
+const SW_VERSION = 'abraca-sw-20261018-2';
 
 self.addEventListener('install', () => self.skipWaiting());
 self.addEventListener('activate', event => event.waitUntil(self.clients.claim()));
@@ -31,8 +31,12 @@ self.addEventListener('fetch', event => {
   // On ne touche qu'à l'ouverture des pages du site ; tout le reste passe normalement.
   if (req.method !== 'GET' || req.mode !== 'navigate') return;
   if (new URL(req.url).origin !== self.location.origin) return;
+  // Les pages sont toujours redemandées au serveur (pas de vieille version gardée par le téléphone
+  // après une mise à jour du site). Si la variante échoue, on retombe sur la requête normale.
+  let fresh = null;
+  try { fresh = new Request(req, { cache: 'no-cache' }); } catch (_) { fresh = null; }
   event.respondWith(
-    fetch(req).catch(() => new Response(OFFLINE_HTML, {
+    (fresh ? fetch(fresh).catch(() => fetch(req)) : fetch(req)).catch(() => new Response(OFFLINE_HTML, {
       status: 503,
       headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' }
     }))
