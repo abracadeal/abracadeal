@@ -32,6 +32,11 @@
   .social-complete-dialog .check{display:flex;gap:10px;font-weight:400;line-height:1.5}
   .social-complete-dialog .check input{flex:none;width:20px;height:20px;margin-top:2px}
   .social-complete-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap}
+  .social-complete-dialog{position:relative}
+  .social-complete-close{position:absolute;top:12px;right:14px;width:36px;height:36px;border:0;border-radius:50%;background:#f3eef6;color:#24152d;font-size:22px;line-height:1;cursor:pointer}
+  .social-complete-close:hover{background:#e6dcec}
+  .social-complete-cancel{min-height:44px;padding:0 16px;border:1px solid #cbbcd6;border-radius:12px;background:#fff;color:#24152d;font:inherit;font-weight:700;cursor:pointer}
+  .social-complete-cancel:hover{background:#f7f2fa}
   .social-complete-status{color:#b3261e;font-weight:700;min-height:1.2em;margin-top:10px}`;
   document.head.append(css);
 
@@ -150,7 +155,7 @@
     const d=document.createElement('dialog');
     d.className='social-complete-dialog';
     d.setAttribute('aria-labelledby','social-complete-title');
-    d.innerHTML=`<form>
+    d.innerHTML=`<button type="button" class="social-complete-close" data-cancel aria-label="Annuler et se déconnecter">×</button><form>
       <h2 id="social-complete-title">Finalisez votre compte</h2>
       <p class="note" style="margin:0">Il ne manque que quelques informations pour utiliser Abracadeal.</p>
       <label for="socialName">Nom public / pseudo</label>
@@ -163,7 +168,7 @@
       <p class="note">Cette acceptation ne vaut pas accord pour recevoir de la publicité.</p>`:''}
       <div class="social-complete-status" role="status" aria-live="polite"></div>
       <div class="social-complete-actions">
-        <button class="btn ghost" type="button" data-cancel>Annuler et se déconnecter</button>
+        <button class="social-complete-cancel" type="button" data-cancel>Annuler et se déconnecter</button>
         <button class="btn primary" type="submit">Valider</button>
       </div></form>`;
     document.body.append(d);
@@ -171,11 +176,18 @@
     nameInput.value=(currentProfile?.display_name||'').trim()||suggestedName(currentUser);
     const status=d.querySelector('.social-complete-status');
     const close=()=>{d.remove();dialogOpen=false;};
-    d.addEventListener('cancel',e=>e.preventDefault());
-    d.querySelector('[data-cancel]').onclick=async()=>{
-      close();clearPending();
-      if(typeof signOutUser==='function')await signOutUser(true);else await sb.auth.signOut({scope:'local'});
-    };
+    // Annuler (bouton, croix ou Échap) : déconnexion complète puis rechargement, pour ne pas retomber sur la fenêtre.
+    let cancelling=false;
+    async function cancelAndSignOut(){
+      if(cancelling)return;cancelling=true;
+      clearPending();
+      try{await sb.auth.signOut({scope:'local'});}catch(e){console.error(e);}
+      try{abracaAuthStorage.removeItem(SUPABASE_AUTH_STORAGE_KEY);}catch(_){}
+      close();
+      location.replace(location.origin+location.pathname);
+    }
+    d.addEventListener('cancel',e=>{e.preventDefault();cancelAndSignOut();});
+    d.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=cancelAndSignOut);
     d.querySelector('form').onsubmit=async e=>{
       e.preventDefault();
       status.textContent='';
@@ -192,7 +204,9 @@
         const payload={display_name};
         if(needPhone){
           const check=await abracaPhoneAvailable(d.querySelector('#socialPhone').value.trim(),'particulier');
-          if(!check.ok)throw new Error(check.message);
+          if(!check.ok)throw new Error(/déjà utilisé/i.test(check.message)
+            ?'Ce numéro est déjà associé à un autre compte Abracadeal. Annulez, puis connectez-vous avec ce compte (e-mail et mot de passe).'
+            :check.message);
           payload.phone=check.normalized;
         }
         const {error:pErr}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
