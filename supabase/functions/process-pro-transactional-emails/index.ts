@@ -69,7 +69,8 @@ function build(type: string, p: any) {
       const title = "Bienvenue parmi les Fondateurs Abracadeal";
       const paras = [
         `Votre inscription est confirmée : vous êtes <strong>Fondateur n°${esc(p.founder_number)}</strong> avec la formule <strong>${formule}</strong>.`,
-        `Vos annonces sont publiées <strong>gratuitement jusqu’au ${dateFr(p.free_until)}</strong>. Aucun prélèvement n’aura lieu avant cette date ; ensuite, l’abonnement passe au tarif public de ${euros(p.amount_cents)} HT par mois.`,
+        `Vos annonces sont publiées <strong>gratuitement jusqu’au ${dateFr(p.free_until)}</strong>. Aucune carte bancaire n’est demandée : pour continuer ensuite au tarif public de ${euros(p.amount_cents)} HT par mois, il suffira d’ajouter un moyen de paiement depuis « Mon compte » avant cette date (nous vous le rappellerons 30, 7 et 3 jours avant). Sinon, vos annonces seront simplement mises en pause, sans aucun prélèvement.`,
+        `L’offre est réservée aux professionnels actifs : sans annonce en ligne pendant 60 jours, la place Fondateur est libérée. Dès vos 20 annonces en ligne, vous pouvez passer gratuitement à la formule 50 annonces.`,
         `Vous pouvez résilier en un clic depuis « Mon compte ». Une résiliation pendant la période gratuite arrête l’abonnement immédiatement, sans aucun prélèvement, et fait perdre définitivement le statut Fondateur.`,
       ];
       const bullets = [`Jusqu’à ${formule} actives`, photos, "Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Modifications incluses"].filter(Boolean);
