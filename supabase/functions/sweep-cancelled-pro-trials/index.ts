@@ -27,5 +27,18 @@ Deno.serve(async req=>{
     await admin.from("pro_subscriptions").update({status:"canceled",updated_at:new Date().toISOString()}).eq("stripe_subscription_id",id);
     results.push({id,canceled:true});
   }
-  return json({ok:true,checked:(rows||[]).length,results});
+  // 18/10/2026 : Fondateurs ayant perdu l'offre pour inactivité (60 jours sans annonce en ligne) : arrêt immédiat chez Stripe.
+  const {data:lost}=await admin.from("founder_enrollments").select("user_id").eq("revoked_reason","inactivity");
+  const lostIds=(lost||[]).map((x:any)=>x.user_id);
+  let inactive:any[]=[];
+  if(lostIds.length){const {data:subs}=await admin.from("pro_subscriptions").select("user_id,stripe_subscription_id").in("user_id",lostIds).in("status",["trialing","active"]).not("founder_number","is",null).not("stripe_subscription_id","is",null);inactive=subs||[];}
+  for(const row of inactive){
+    const id=String(row.stripe_subscription_id);
+    const g=await stripe("subscriptions/"+encodeURIComponent(id));
+    if(!g.ok){results.push({id,inactivity:true,skipped:"lecture_impossible"});continue;}
+    if(g.d?.status!=="canceled"){const d=await stripe("subscriptions/"+encodeURIComponent(id),"DELETE",new URLSearchParams({invoice_now:"false",prorate:"false"}));if(!d.ok){results.push({id,inactivity:true,error:d.d?.error?.message||"annulation_impossible"});continue;}}
+    await admin.from("pro_subscriptions").update({status:"canceled",updated_at:new Date().toISOString()}).eq("stripe_subscription_id",id);
+    results.push({id,inactivity:true,canceled:true});
+  }
+  return json({ok:true,checked:(rows||[]).length,inactive:inactive.length,results});
 });

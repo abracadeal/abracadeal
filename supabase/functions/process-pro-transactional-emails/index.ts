@@ -37,6 +37,33 @@ function build(type: string, p: any) {
   const formule = `${esc(p.listing_limit)} annonces`;
   const photos = p.photo_limit ? `${esc(p.photo_limit)} photos par annonce` : "";
   const founder = p.founder_number != null && p.status === "trialing";
+  // 18/10/2026 : mails de l'offre Fondateurs sans carte (inactivité, fin des 12 mois sans moyen de paiement).
+  if (type === "founder_inactivity_warning") {
+    const title = "Votre place Fondateur est en jeu";
+    const paras = [
+      `Vous n’avez plus aucune annonce en ligne sur Abracadeal depuis 45 jours.`,
+      `L’offre Fondateurs est réservée aux professionnels actifs : <strong>publiez au moins une annonce avant le ${dateFr(p.deadline)}</strong> pour garder vos 12 mois gratuits.`,
+      `Sans annonce en ligne à cette date, votre place Fondateur sera libérée pour un autre professionnel et ne pourra plus être récupérée.`,
+    ];
+    return { subject: "Publiez une annonce pour garder votre place Fondateur", title, paras, bullets: ["Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Ou dépôt manuel en quelques minutes"] };
+  }
+  if (type === "founder_lost_inactivity") {
+    const title = "Votre place Fondateur a été libérée";
+    const paras = [
+      `Faute d’annonce en ligne pendant 60 jours, votre offre Fondateur a pris fin et votre place a été attribuée à un autre professionnel. <strong>Aucun prélèvement n’a été effectué.</strong>`,
+      `Votre compte professionnel reste ouvert. Vous pouvez reprendre une formule à tout moment, au tarif public, depuis la page des tarifs professionnels.`,
+    ];
+    return { subject: "Fin de votre offre Fondateur Abracadeal", title, paras, bullets: [] as string[] };
+  }
+  if (type === "founder_trial_ended") {
+    const title = "Vos 12 mois offerts sont terminés";
+    const paras = [
+      `Votre période gratuite Fondateur est arrivée à son terme et aucun moyen de paiement n’a été enregistré : <strong>vos annonces sont mises en pause</strong>. Elles ne sont plus visibles, mais elles ne sont pas supprimées.`,
+      `Pour les remettre en ligne, reprenez une formule depuis la page des tarifs professionnels (formule ${formule} : ${euros(p.amount_cents)} HT par mois, sans engagement). Vos annonces réapparaissent automatiquement dès l’activation.`,
+      `Aucun prélèvement n’a été effectué.`,
+    ];
+    return { subject: "Vos annonces Abracadeal sont en pause", title, paras, bullets: [] as string[] };
+  }
   if (type === "subscription_started") {
     if (founder) {
       const title = "Bienvenue parmi les Fondateurs Abracadeal";
