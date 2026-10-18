@@ -105,7 +105,7 @@
     wrap.setAttribute('role', 'dialog');
     wrap.setAttribute('aria-modal', 'true');
     wrap.setAttribute('aria-label', 'Installer l’application Abracadeal');
-    wrap.innerHTML = '<div class="ais-card"><div class="ais-head"><img src="/icon-192.png?v=4" alt=""><div><h3>Installer Abracadeal</h3>' +
+    wrap.innerHTML = '<div class="ais-card"><div class="ais-head"><img src="/icon-192.png?v=5" alt=""><div><h3>Installer Abracadeal</h3>' +
       '<p>Gratuit, sans passer par un store, en 3 étapes.</p></div></div><ol>' + steps + '</ol>' +
       '<button type="button" class="ais-ok">J’ai compris</button></div>';
     wrap.addEventListener('click', function (e) { if (e.target === wrap || e.target.closest('.ais-ok')) closeSheet(); });
@@ -146,7 +146,7 @@
     banner.className = 'abraca-install-banner';
     banner.setAttribute('role', 'region');
     banner.setAttribute('aria-label', 'Installer l’application');
-    banner.innerHTML = '<img src="/icon-192.png?v=4" alt="">' +
+    banner.innerHTML = '<img src="/icon-192.png?v=5" alt="">' +
       '<div class="aib-text"><strong>L’appli Abracadeal</strong><span>Gratuite, sur votre écran d’accueil</span></div>' +
       '<button type="button" class="aib-go">Installer</button>' +
       '<button type="button" class="aib-close" aria-label="Fermer">×</button>';
