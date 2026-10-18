@@ -1659,6 +1659,7 @@ const SUBCATEGORIES = {
     ['cuisine','Cuisine'],
     ['linge-maison','Linge de maison'],
     ['luminaire','Luminaires'],
+    ['sante-mobilite','Santé & mobilité (béquilles, fauteuil roulant…)'],
     ['autre-maison','Autre maison']
   ],
   mode: [
