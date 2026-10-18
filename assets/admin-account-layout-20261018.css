@@ -7,6 +7,10 @@
 #loggedInAccount:not(.abraca-admin-layout) .aal-infos,
 #loggedInAccount:not(.abraca-admin-layout) .aal-subtitle{display:none!important}
 
+#loggedInAccount.abraca-admin-layout:not(.aal-is-admin) .aal-admin{display:none!important}
+#loggedInAccount.abraca-admin-layout:not(.aal-is-pro) .aal-pro{display:none!important}
+#loggedInAccount.abraca-admin-layout:not(.aal-has-import) .aal-import{display:none!important}
+#loggedInAccount.abraca-admin-layout #proImportBtn{display:none!important}
 #loggedInAccount.abraca-admin-layout{--aal-ink:#2c0f3b;--aal-sub:#7a6a83;--aal-line:#ecdff2;--aal-soft:#faf6fc;--aal-accent:#7b27a0;--aal-pink:#e2459f}
 
 /* Identité */
@@ -72,3 +76,4 @@
 /* Mes informations */
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box h3{font-size:1.05rem!important}
+#loggedInAccount.abraca-admin-layout.aal-has-import .aal-pro .aal-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}

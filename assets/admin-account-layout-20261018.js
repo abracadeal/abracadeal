@@ -1,6 +1,7 @@
-/* Abracadeal — mise en page de « Mon compte » pour l'administrateur (18/10/2026).
-   S'applique UNIQUEMENT quand le compte connecté est administrateur (bouton « Modérer » visible).
-   Rien ne change pour les particuliers et les pros.
+/* Abracadeal — mise en page de « Mon compte » (18/10/2026), pour tous les comptes connectés.
+   - Particuliers : identité + déconnexion, « Mon espace » en tuiles, mes informations.
+   - Pros : en plus, une rubrique « Espace Pro » (Pro/Pro, importer mon stock, ma vitrine, formules).
+   - Administrateur : en plus, « Administration », tableau de bord et base de données (ci-dessous).
    - Carte identité avec « Se déconnecter » intégré.
    - Tuiles « Administration » : Modérer (avec le nombre d'annonces en attente), Flux, Pro/Pro,
      Finances, Prospection, Recherche d'annonces. Les tuiles cliquent sur les boutons d'origine
@@ -66,6 +67,16 @@
     out.addEventListener('click', clickOf('#logoutBtn'));
     idWrap.appendChild(out);
 
+    /* Espace Pro (comptes professionnels, hors admin) */
+    var pro = section('Espace Pro', 'aal-pro');
+    var pgrid = document.createElement('div'); pgrid.className = 'aal-grid';
+    pgrid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
+    var imp = tile('Importer mon stock', 'flux', clickOf('#proImportBtn')); imp.classList.add('aal-import'); pgrid.appendChild(imp);
+    pgrid.appendChild(tile('Ma vitrine', 'star', function () { var c = $('#companyAccountSection'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    pgrid.appendChild(tile('Formules', 'finance', null, 'pro-fondateur.html'));
+    pro.appendChild(pgrid);
+    dash.insertBefore(pro, dash.firstChild);
+
     /* Administration */
     var admin = section('Administration', 'aal-admin');
     var grid = document.createElement('div'); grid.className = 'aal-grid';
@@ -105,6 +116,7 @@
 
     /* Mon espace */
     var nav = dash.querySelector('.account-shortcuts');
+    var adminAnchor = admin;
     if (nav) {
       var mine = section('Mon espace', 'aal-mine');
       nav.parentNode.insertBefore(mine, nav);
@@ -123,18 +135,24 @@
     }
   }
 
+  function visible(sel) { var e = $(sel); return !!e && !e.classList.contains('hidden'); }
   function check() {
-    var mod = $('#accountModerationBtn');
-    var isAdmin = !!mod && !mod.classList.contains('hidden');
-    if (isAdmin && !built) build();
     var root = $('#loggedInAccount');
-    if (root) root.classList.toggle('abraca-admin-layout', isAdmin && built);
+    if (!root) return;
+    var loggedIn = !root.classList.contains('hidden');
+    if (loggedIn && !built) build();
+    var isAdmin = visible('#accountModerationBtn');
+    var isPro = !isAdmin && visible('#b2bAccountBtn');
+    root.classList.toggle('abraca-admin-layout', loggedIn && built);
+    root.classList.toggle('aal-is-admin', isAdmin);
+    root.classList.toggle('aal-is-pro', isPro);
+    root.classList.toggle('aal-has-import', visible('#proImportBtn'));
   }
 
   function start() {
-    var mod = $('#accountModerationBtn');
-    if (!mod) return;
-    new MutationObserver(check).observe(mod, { attributes: true, attributeFilter: ['class'] });
+    var targets = ['#loggedInAccount', '#accountModerationBtn', '#b2bAccountBtn', '#proImportBtn'];
+    var mo = new MutationObserver(check);
+    targets.forEach(function (sel) { var e = $(sel); if (e) mo.observe(e, { attributes: true, attributeFilter: ['class'] }); });
     check();
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();

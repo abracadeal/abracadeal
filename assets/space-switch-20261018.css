@@ -1,0 +1,8 @@
+/* Sélecteur « Annonces | Vacances » (mobile). */
+.abraca-space-switch{display:none}
+@media (max-width:760px){
+  .abraca-has-switch{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px}
+  .abraca-space-switch{display:inline-flex;flex:0 0 auto;margin-left:auto;padding:3px;border-radius:999px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14)}
+  html body .abraca-space-switch a{display:inline-flex!important;align-items:center;height:32px!important;min-height:0!important;width:auto!important;padding:0 13px!important;margin:0!important;border:0!important;border-radius:999px!important;background:transparent!important;box-shadow:none!important;color:#e9dcf2!important;font:700 13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;text-decoration:none!important;white-space:nowrap;-webkit-tap-highlight-color:transparent}
+  html body .abraca-space-switch a.is-on{background:linear-gradient(120deg,#7b27a0,#e2459f)!important;color:#fff!important;box-shadow:0 4px 12px rgba(226,69,159,.35)!important}
+}
