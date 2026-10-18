@@ -468,14 +468,45 @@
     justify-content:center!important;
     text-align:center!important;
   }
+  /* 18/10/2026 : liens légaux en petit texte dans le pied de page mobile
+     (accès pour les visiteurs non connectés, retirés de l'écran Connexion) */
   footer .footer-links{
-    display:none!important;
+    display:flex!important;
+    flex-wrap:wrap!important;
+    justify-content:center!important;
+    gap:6px 14px!important;
+    margin-top:10px!important;
+    font-size:11px!important;
+    line-height:1.4!important;
   }
+  footer .footer-links a{opacity:.8}
   .account-info-links{
     margin-top:16px;
     padding-top:14px;
   }
 }
+/* 18/10/2026 : Aide & infos légales = liste discrète, uniquement une fois connecté */
+.account-info-title{
+  grid-column:1/-1;
+  margin:0 0 2px;
+  font-size:.9rem;
+  color:#451657;
+}
+.account-info-links{gap:4px 14px}
+.account-info-links a{
+  min-height:36px;
+  justify-content:flex-start;
+  padding:6px 0;
+  border:0;
+  border-radius:0;
+  background:none;
+  font-size:.82rem;
+  font-weight:700;
+  text-decoration:underline;
+  text-underline-offset:3px;
+  text-decoration-color:#d9c4e2;
+}
+.account-info-links a:last-child:nth-child(odd){grid-column:auto}
 
 
 /* ===== ABRACADEAL — MAQUETTE DESKTOP PC / MAC ===== */
