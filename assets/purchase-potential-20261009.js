@@ -7,7 +7,12 @@
   'use strict';
   if(typeof sb==='undefined'||!sb) return;
 
-  const LEAD_CATEGORIES=['vehicules','immobilier'];
+  // Questions réservées aux achats où elles ont du sens : voitures, utilitaires, motos
+  // et immobilier à vendre (pas les pièces, équipements, vélos, locations, ni les autres catégories).
+  const LEAD_SUBCATEGORIES={
+    vehicules:['voitures','utilitaires','motos'],
+    immobilier:['vente-appartement','vente-maison','vente-terrain']
+  };
   const TIMELINE={immediate:'Achat immédiat',under_1_month:'Sous 1 mois','1_3_months':'1 à 3 mois',browsing:'Se renseigne'};
   const FINANCING={cash:'Comptant',credit:'Crédit',undecided:'Financement à définir'};
   const STATUS={new:'Nouveau',called:'Rappelé',meeting:'RDV',sold:'Vendu',lost:'Perdu'};
@@ -64,14 +69,17 @@
   const categoryCache=new Map();
 
   async function listingCategory(listingId){
-    if(!listingId) return null;
+    if(!listingId) return {category:null,sub:''};
     if(categoryCache.has(listingId)) return categoryCache.get(listingId);
-    let cat=(typeof allAds!=='undefined'?allAds:[]).find(a=>a.id===listingId)?.category||null;
-    if(!cat){
-      try{const {data}=await sb.from('listings').select('category').eq('id',listingId).maybeSingle();cat=data?.category||null;}catch(_){}
+    let ad=(typeof allAds!=='undefined'?allAds:[]).find(a=>a.id===listingId)||null;
+    if(!ad){
+      try{const {data}=await sb.from('listings').select('category,description').eq('id',listingId).maybeSingle();ad=data||null;}catch(_){}
     }
-    categoryCache.set(listingId,cat);
-    return cat;
+    const category=ad?.category||null;
+    const sub=String(ad?.subcategory||ad?.vehicle_subcategory||(String(ad?.description||'').match(/^\[ABRACA_SUB:([^\]]+)\]/m)||[])[1]||'').trim().toLowerCase();
+    const info={category,sub};
+    categoryCache.set(listingId,info);
+    return info;
   }
 
   function removePanel(){document.getElementById('leadPanel')?.remove();}
@@ -119,10 +127,10 @@
       if((msgs||[]).length){ if(leadState.conversationId===convId) leadState.answers={}; removePanel(); return; }
       if(leadState.conversationId===convId&&document.getElementById('leadPanel')) return;
       const conv=(messageConversations||[]).find(c=>c.conversation_id===convId);
-      const category=await listingCategory(conv?.listing_id);
+      const {category,sub}=await listingCategory(conv?.listing_id)||{};
       if(convId!==currentConversationId) return;
       leadState={conversationId:convId,category,answers:{}};
-      if(LEAD_CATEGORIES.includes(category)) renderPanel(category); else removePanel();
+      if((LEAD_SUBCATEGORIES[category]||[]).includes(sub)) renderPanel(category); else removePanel();
     }catch(err){console.error(err);removePanel();}
   };
 
