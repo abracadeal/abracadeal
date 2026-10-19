@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — 2e liste manuelle d'Anthony (garages)
+- **Base :** 79 lignes → 73 adresses uniques, toutes vérifiées OK par `prospect-email-check`, aucune désinscrite. 12 déjà envoyées aujourd'hui (ignorées), 8 déjà en base en pause remises en `ready`, 53 ajoutées (`ready`, `petit_pro`, source « Ajout manuel (Anthony) »). Les 61 sont en tête de la file garages (created_at 01/10).
+- **Vérifié :** le coup d'accélérateur de 17 h 05 a bien été annulé à 18 h 05 (limites 25/25, mix 32/34/34).
+
 ### 19/10/2026 — Claude — Mails pros réécrits (accroche « Marre de payer trop cher ? ») + mail d'aide à l'import
 - **Prospection (base) :** les 6 modèles de premier contact (garage, moto, immo × A/B) sont remplacés par une version courte (~150 mots) : accroche « Marre de payer trop cher… ? Faites d'Abracadeal votre partenaire officiel », site toutes catégories, puis 4 points (12 mois gratuits sans carte, une page par annonce trouvable sur Google, partage WhatsApp/Facebook/SMS, synchro du stock). Objets et relances inchangés. Anciennes versions dans `private.prospect_mailer_templates_backup`.
 - **Fonction `process-pro-transactional-emails` v4 :** nouveau type `founder_onboarding` (mêmes arguments, pour aider un Fondateur inscrit à mettre son stock en ligne) ; contrainte `pro_email_outbox_email_type_check` élargie. Envoyé à Auto Cévennes (Fondateur n°1) le 19/10 vers 17 h 30.
