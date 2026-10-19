@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Prospection : ajout manuel Auto Cévennes (Alès)
+- **Changé (base) :** nouveau prospect « Auto Cévennes » (auto.cevennes@free.fr, Alès, garage, `petit_pro`, `ready`, source « Ajout manuel (Anthony) »), placé en tête de la file garages (date de création antidatée au 01/10) pour partir au prochain envoi garage.
+- **Décision :** pas de robot sur Ronpoin.fr (site d'annonces concurrent : extraction systématique de leur base = risque juridique). Les pros repérés au cas par cas par Anthony peuvent être ajoutés à la main.
+
 ### 19/10/2026 — Claude — Prospection : rebond Eden Motors
 - **Changé (base, pas de code) :** `prospection_prospects` « Eden Motors » (contact@eden-motors.fr) passé de `sent` à `error` avec la raison dans `last_error` : rebond « 554 5.7.1 Relay access denied » du serveur du destinataire (altair-mail01.eskemm.net) pour le mail envoyé à 14 h 24. La relance J+5 ne partira donc pas (elle ne vise que `status = 'sent'`).
 - **Pourquoi :** l'adresse n'est pas acceptée par le serveur de ce garage ; ce n'est ni un blocage anti-spam ni un problème d'Abracadeal.
