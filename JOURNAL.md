@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Messagerie mobile : panneau « Aidez le vendeur… » corrigé
+- **Changé :** `assets/purchase-potential-20261009.js` (cache `?v=2` dans `index.html`). Le panneau des 3 questions acheteur est placé juste au-dessus de la zone de saisie (et non plus dans le formulaire, dont la grille 2 colonnes l'écrasait dans une colonne étroite : « Passer » cassé lettre par lettre, fil de messages réduit à rien). Sur mobile : panneau pleine largeur, plus compact, hauteur max 34 % de l'écran avec défilement interne ; mention « Liens de paiement interdits » passée sous le champ.
+- **Desktop :** inchangé visuellement, fil un peu moins haut tant que le panneau est affiché.
+
 ### 18/10/2026 — Claude — Recherche IA : une marque seule reste globale
 - **Changé :** `assets/smart-search-20260924.js` (version `?v=20261018-global` dans `index.html`).
   - « Mercedes », « Yamaha »… seuls : plus de bascule automatique en Voitures/Motos, recherche par mot-clé dans tout le site.
@@ -227,7 +231,3 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Pourquoi :** savoir quels pros cliquent et s'inscrivent, sans pixel d'ouverture (peu fiable et à éviter côté CNIL).
 - **Règles de comptage :** clic dans les 60 s après l'envoi = antivirus, ignoré ; visites répétées en moins de 30 min = 1 clic.
 - **À savoir / à faire :** le suivi démarre avec les envois du 17/10 à 16 h 56 (les 94 mails précédents n'ont pas de code). La variante B (sans lien) ne peut pas être suivie en clics. Si un modèle de mail est modifié, garder exactement le lien `https://abracadeal.fr/pro-fondateur.html` pour que le code soit ajouté.
-
-## 2026-10-19 — Claude — Messagerie mobile : panneau « Aidez le vendeur… » mal affiché
-- **Quoi :** `assets/purchase-potential-20261009.js` (cache `?v=2` dans `index.html`). Le panneau des 3 questions acheteur est placé juste au-dessus de la zone de saisie (et non plus dans le formulaire, dont la grille 2 colonnes l'écrasait dans une colonne étroite : « Passer » cassé lettre par lettre, fil de messages réduit à rien). Sur mobile : panneau pleine largeur, plus compact, hauteur max 34 % de l'écran avec défilement interne ; mention « Liens de paiement interdits » passée sous le champ.
-- **Desktop :** inchangé visuellement, fil un peu moins haut tant que le panneau est affiché.
