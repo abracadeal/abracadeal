@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Mails pros réécrits (accroche « Marre de payer trop cher ? ») + mail d'aide à l'import
+- **Prospection (base) :** les 6 modèles de premier contact (garage, moto, immo × A/B) sont remplacés par une version courte (~150 mots) : accroche « Marre de payer trop cher… ? Faites d'Abracadeal votre partenaire officiel », site toutes catégories, puis 4 points (12 mois gratuits sans carte, une page par annonce trouvable sur Google, partage WhatsApp/Facebook/SMS, synchro du stock). Objets et relances inchangés. Anciennes versions dans `private.prospect_mailer_templates_backup`.
+- **Fonction `process-pro-transactional-emails` v4 :** nouveau type `founder_onboarding` (mêmes arguments, pour aider un Fondateur inscrit à mettre son stock en ligne) ; contrainte `pro_email_outbox_email_type_check` élargie. Envoyé à Auto Cévennes (Fondateur n°1) le 19/10 vers 17 h 30.
+- **Idée pour plus tard :** envoyer `founder_onboarding` automatiquement à chaque nouveau Fondateur sans annonce après 24-48 h.
+
 ### 19/10/2026 — Claude — Mail de prospection : argument « site toutes catégories »
 - **Changé (base) :** `private.prospect_mailer_settings.templates`, les 6 modèles de premier contact (garage, moto, immo, variantes A et B) ont un nouveau paragraphe : Abracadeal est un site toutes catégories, donc les annonces du pro sont vues aussi par les visiteurs venus pour autre chose (contrairement aux sites spécialisés). Relances inchangées. Sauvegarde des anciens modèles dans `private.prospect_mailer_templates_backup`.
 - **Pourquoi :** demande d'Anthony. Formulation volontairement factuelle (pas de chiffre de trafic promis, le site vient d'ouvrir).

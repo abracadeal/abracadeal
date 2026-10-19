@@ -47,6 +47,22 @@ function build(type: string, p: any) {
     ];
     return { subject: "Publiez une annonce pour garder votre place Fondateur", title, paras, bullets: ["Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Ou dépôt manuel en quelques minutes"] };
   }
+  // 19/10/2026 : mail d'aide à la mise en ligne du stock (argument « site toutes catégories »).
+  if (type === "founder_onboarding") {
+    const title = "Marre de payer trop cher ? Faites d’Abracadeal votre partenaire officiel";
+    const paras = [
+      `Merci pour votre inscription${p.founder_number != null ? ` : vous êtes <strong>Fondateur n°${esc(p.founder_number)}</strong>` : ""} !`,
+      `Abracadeal est un site de petites annonces <strong>toutes catégories</strong>. Contrairement aux sites spécialisés, il attire aussi ceux qui cherchent un logement, un téléphone ou un meuble : vos annonces profitent de <strong>tout le trafic du site</strong>.`,
+      `Pour en profiter au plus vite, mettez votre stock en ligne depuis votre Espace Pro :`,
+    ];
+    const bullets = [
+      "<strong>Rien à ressaisir</strong> : importez votre fichier (CSV, Excel, XML) ou collez une fois le lien du flux de votre logiciel, vos annonces se mettent à jour toutes seules.",
+      "<strong>Visible sur Google</strong> : chaque annonce a sa propre page, conçue pour être trouvée par les moteurs de recherche.",
+      "<strong>Partage en un clic</strong> sur WhatsApp, Facebook ou par SMS, pour toucher vos clients dès le premier jour.",
+      "Plus de 20 véhicules ? La formule 50 annonces est elle aussi <strong>gratuite pendant 12 mois</strong>.",
+    ];
+    return { subject: "Bienvenue sur Abracadeal — mettez votre stock en vitrine", title, paras, bullets };
+  }
   if (type === "founder_lost_inactivity") {
     const title = "Votre place Fondateur a été libérée";
     const paras = [
