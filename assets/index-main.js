@@ -473,6 +473,8 @@ function syncHomeMarketingVisibility(){
   $('#b2bDiscovery')?.classList.toggle('hidden',proExperience||particularExperience);
   $('#vacancesDiscovery')?.classList.toggle('hidden',proExperience);
   $('#pros')?.classList.toggle('hidden',!!currentUser);
+  // 19/10/2026 : bandeau Fondateurs aussi sur mobile pour les visiteurs non connectés.
+  $('#founderTopbar')?.classList.toggle('show-mobile',!currentUser);
 }
 function updateAuthUI(preserveEditing=false){
   const keep=preserveEditing && currentUser && displayedAccountId===currentUser.id;

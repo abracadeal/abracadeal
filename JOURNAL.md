@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Bandeau Offre Fondateurs visible sur mobile (non connectés)
+- **Changé :** `assets/index-main.js` (classe `show-mobile` posée sur `#founderTopbar` tant que personne n'est connecté ; `?v=20261019-fondateurs`) + nouvelle feuille `assets/founder-mobile-20261019.css`. Sur mobile, le bandeau (texte, compteur de places, bouton « Voir l'offre ») s'affiche en haut de l'accueil pour les visiteurs non connectés ; il était réservé au desktop et la section #pros est masquée sur mobile.
+- **Pourquoi :** signalé par Anthony, un pro arrivant sur mobile sans compte ne voyait jamais l'offre.
+
 ### 19/10/2026 — Claude — Prospection : ajout manuel Auto Cévennes (Alès)
 - **Changé (base) :** nouveau prospect « Auto Cévennes » (auto.cevennes@free.fr, Alès, garage, `petit_pro`, `ready`, source « Ajout manuel (Anthony) »), placé en tête de la file garages (date de création antidatée au 01/10) pour partir au prochain envoi garage.
 - **Décision :** pas de robot sur Ronpoin.fr (site d'annonces concurrent : extraction systématique de leur base = risque juridique). Les pros repérés au cas par cas par Anthony peuvent être ajoutés à la main.

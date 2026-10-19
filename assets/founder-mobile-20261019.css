@@ -1,0 +1,16 @@
+/* 19/10/2026 : bandeau « Offre Fondateurs » visible sur mobile pour les visiteurs non connectés
+   (il était réservé au desktop, donc un pro arrivant sur mobile ne voyait jamais l'offre).
+   La classe show-mobile est posée par index-main.js tant que personne n'est connecté. */
+@media (max-width:760px){
+  html body .founder-topbar.show-mobile{display:block!important}
+  html body .founder-topbar.show-mobile .founder-topbar-inner{
+    display:grid!important;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 10px;
+    width:100%!important;padding:9px 14px!important;font-size:.8rem;text-align:left;
+  }
+  html body .founder-topbar.show-mobile .founder-topbar-text{grid-column:1;line-height:1.3}
+  html body .founder-topbar.show-mobile .founder-counter{grid-column:1;justify-self:start;font-size:.74rem;margin:0}
+  html body .founder-topbar.show-mobile .founder-topbar-cta{
+    grid-column:2;grid-row:1 / span 2;align-self:center;text-decoration:none;
+    background:#fff;color:#3c1d61;border-radius:999px;padding:8px 12px;font-size:.8rem;
+  }
+}
