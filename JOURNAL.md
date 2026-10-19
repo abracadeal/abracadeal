@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Profil vendeur : textes blancs invisibles
+- **Changé :** `assets/index-core.css` (`?v=20261019-profil` dans `index.html`). Dans la fenêtre « Profil vendeur », « Vous souhaitez laisser un avis ? », « Annonces actives », « Avis » et les titres des annonces héritaient du blanc du thème sombre du site : couleur foncée forcée. Les vignettes d'annonces ne débordent plus à droite sur mobile (titre coupé avec « … »).
+
 ### 19/10/2026 — Claude — Recherche par mots-clés corrigée (accents, pluriel, fautes)
 - **Changé :** `assets/index-main.js` (`filteredAds` + fonctions `kwFold`, `kwStem`, `keywordMatches` ; `?v=20261019-recherche`).
   - Cause du bug : la barre IA retire les accents (« béquille » → « bequille ») mais le texte des annonces gardait les siens, donc rien ne ressortait. Et la recherche exigeait la phrase exacte.

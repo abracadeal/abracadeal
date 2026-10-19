@@ -1741,8 +1741,13 @@ a.btn{cursor:pointer}
 .seller-listing-mini span{font-size:.8rem;color:#7f7088}
 @media(max-width:600px){
  .seller-profile-head{display:block}.seller-score{text-align:left;margin-top:12px}
- .seller-listings-mini{grid-template-columns:1fr}
+ .seller-listings-mini{grid-template-columns:minmax(0,1fr)}
 }
+/* Fix 19/10/2026 : textes du profil vendeur invisibles (blanc hérité du thème sombre du site)
+   et vignettes d'annonces qui débordaient à droite sur mobile. */
+#sellerProfileModal .modal{color:#2b1636}
+#sellerProfileModal .review-form b,#sellerProfileModal .review-section h3,#sellerProfileModal .seller-listing-mini b{color:#2b1636}
+#sellerProfileModal .seller-listing-mini{min-width:0;overflow:hidden}
 
 
 /* Correctifs Mon compte */
