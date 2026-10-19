@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Le robot continue de chercher (feu vert permanent)
+- **Constat :** les robots tournent (aucune erreur), mais l'import SIRENE garages/motos était terminé depuis le 13/10 ; sur ~92 000 pros de l'annuaire, ~88 000 restent sans site trouvé (`guess_failed`, le robot devine le domaine sans recherche Google), d'où presque plus de nouveaux contacts depuis le 16/10.
+- **Changé (base, fichier `supabase/2026-10-19-prospection-feu-vert.sql`) :** `private.promote_annuaire_leads` insère désormais les nouveaux pros en `ready` (plus de pause) ; import SIRENE relancé sur les agences immobilières (NAF 68.31Z, 101 départements).
+- **Levier principal restant :** recherche Google (API payante type Serper) pour trouver le site des ~88 000 pros sans site.
+
 ### 19/10/2026 — Claude — Feu vert général (demande d'Anthony)
 - **Base :** tous les prospects en pause avec un e-mail valide, hors réseaux (`phase2_reseau`), exclus et désinscrits, passés en `ready`. File : ~7 750 pros (4 736 immo, 2 147 garages, 865 motos). Ordre inchangé : `petit_pro` d'abord (listes d'Anthony et pros avec stock en ligne en tête), puis le reste.
 - **Limite réelle :** 50 envois/jour (2 boîtes × 25). Toute hausse doit être progressive pour ne pas abîmer la réputation des domaines.
