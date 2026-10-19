@@ -16,9 +16,21 @@
 
   const style=document.createElement('style');
   style.textContent=`
-  .lead-panel{border:1px solid #e8d8ee;background:#faf5fc;border-radius:14px;padding:10px 12px;margin:0 0 8px;width:100%;box-sizing:border-box}
-  .lead-panel-title{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:800;color:#451657;font-size:.9rem;margin-bottom:6px}
-  .lead-panel-title button{border:0;background:none;color:#7a5a86;font-size:.8rem;text-decoration:underline;cursor:pointer;padding:0}
+  .lead-panel{border:1px solid #e8d8ee;background:#faf5fc;border-radius:14px;padding:10px 12px;margin:8px 13px 0;box-sizing:border-box;flex:0 0 auto;min-width:0}
+  .lead-panel-title{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;font-weight:800;color:#451657;font-size:.9rem;margin-bottom:6px}
+  .lead-panel-title span{flex:1 1 auto;min-width:0}
+  .lead-panel-title button{flex:0 0 auto;white-space:nowrap;border:0;background:none;color:#7a5a86;font-size:.8rem;text-decoration:underline;cursor:pointer;padding:2px 0}
+  @media(min-width:721px){.message-chat:has(#leadPanel) .message-thread{min-height:200px}}
+  @media(max-width:720px){
+    #messagesModal .lead-panel{margin:0;border-radius:0;border-width:1px 0 0;padding:9px 12px;max-height:34dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain}
+    #messagesModal .lead-panel-title{font-size:.84rem;margin-bottom:4px}
+    #messagesModal .lead-q{margin:5px 0}
+    #messagesModal .lead-q>span{font-size:.76rem;margin-bottom:3px}
+    #messagesModal .lead-chips{gap:5px}
+    #messagesModal .lead-chip{padding:4px 10px;font-size:.78rem}
+    #messagesModal .lead-panel small{font-size:.7rem;margin-top:4px}
+    #messagesModal .message-composer>small{grid-column:1/-1;order:3}
+  }
   .lead-q{margin:6px 0}
   .lead-q>span{display:block;font-size:.8rem;color:#5b4565;margin-bottom:4px}
   .lead-chips{display:flex;flex-wrap:wrap;gap:6px}
@@ -93,7 +105,9 @@
       panel.querySelectorAll(`[data-lead-group="${g}"]`).forEach(b=>b.classList.remove('on'));
       if(already){delete leadState.answers[g];}else{leadState.answers[g]=v;chip.classList.add('on');}
     });
-    form.insertBefore(panel,form.firstChild);
+    // Panneau placé juste au-dessus de la zone de saisie (et non dans le formulaire,
+    // dont la mise en page en ligne/grille l'écrasait sur mobile).
+    form.parentNode.insertBefore(panel,form);
   }
 
   // Appelé par loadConversationMessages après chaque affichage du fil.
