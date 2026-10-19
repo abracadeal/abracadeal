@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Fenêtres Ville / Prix / Filtres qui passaient derrière les vignettes
+- **Changé :** `assets/index-main.js` (`?v=20261019-qf` dans `index.html`). Les fenêtres des filtres rapides (Ville, Prix, Marque, Type de bien) et leur fond sombre sont déplacés dans `<body>` au chargement : dans la section des annonces, ils restaient sous les vignettes. Elles ne se ferment plus non plus quand on tape dedans (l'ouverture du clavier mobile fait défiler la page).
+- **Pourquoi :** bug signalé par Anthony sur iPhone.
+
 ### 19/10/2026 — Claude — Questions acheteur limitées à Auto / Moto / Immo à vendre
 - **Changé :** `assets/purchase-potential-20261009.js` (`?v=3` dans `index.html`). Le panneau « Aidez le vendeur… » (quand, reprise, financement) ne s'affiche plus que pour Voitures, Utilitaires, Motos et Immobilier à vendre (appartement, maison, terrain). Plus rien pour pièces détachées, équipements, vélos, nautisme, caravaning, locations, bureaux, ni les autres catégories (mode, high-tech…).
 - **Pourquoi :** demande d'Anthony, ces questions n'ont pas de sens pour un particulier qui vend des baskets ou une pièce.

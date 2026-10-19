@@ -5230,9 +5230,14 @@ function positionQuickFilterPopover(chip,pop){
   pop.style.left=left+'px';
   pop.style.top=top+'px';
 }
+// Fix 19/10/2026 : les fenêtres Ville/Prix/Marque/Type et leur fond sombre sont déplacés
+// directement dans <body>. Restés dans la section des annonces, ils étaient pris dans son
+// empilement et passaient derrière les vignettes (surtout sur mobile).
+(function(){const bd=document.getElementById('qfPopoverBackdrop');if(bd&&bd.parentNode!==document.body)document.body.appendChild(bd);})();
 function setupQuickFilterChip(chipId,popoverId,onOpen,onConfirm){
   const chip=$('#'+chipId),pop=$('#'+popoverId);
   if(!chip||!pop) return;
+  if(pop.parentNode!==document.body) document.body.appendChild(pop);
   chip.addEventListener('click',(e)=>{
     e.stopPropagation();
     const willOpen=pop.classList.contains('hidden');
@@ -5247,8 +5252,9 @@ function setupQuickFilterChip(chipId,popoverId,onOpen,onConfirm){
   pop.addEventListener('click',e=>e.stopPropagation());
   pop.querySelector('.qf-popover-ok')?.addEventListener('click',()=>{if(onConfirm)onConfirm();pop.classList.add('hidden');$('#qfPopoverBackdrop')?.classList.add('hidden');});
 }
-window.addEventListener('scroll',()=>closeAllQuickFilterPopovers(),true);
-window.addEventListener('resize',()=>closeAllQuickFilterPopovers());
+// Ne pas fermer pendant la saisie : sur mobile, l'ouverture du clavier fait défiler la page.
+window.addEventListener('scroll',()=>{if(document.activeElement?.closest?.('.quick-filter-popover'))return;closeAllQuickFilterPopovers();},true);
+window.addEventListener('resize',()=>{if(document.activeElement?.closest?.('.quick-filter-popover'))return;closeAllQuickFilterPopovers();});
 setupQuickFilterChip('qfCityChip','qfCityPopover',()=>{if($('#qfCityInput'))$('#qfCityInput').value=$('#searchCity')?.value||'';},()=>$('#searchBtn')?.click());
 setupQuickFilterChip('qfPriceChip','qfPricePopover',()=>{
   if($('#qfPriceMinInput'))$('#qfPriceMinInput').value=$('#filterPriceMin')?.value||'';
