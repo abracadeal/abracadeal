@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Recherche par mots-clés corrigée (accents, pluriel, fautes)
+- **Changé :** `assets/index-main.js` (`filteredAds` + fonctions `kwFold`, `kwStem`, `keywordMatches` ; `?v=20261019-recherche`).
+  - Cause du bug : la barre IA retire les accents (« béquille » → « bequille ») mais le texte des annonces gardait les siens, donc rien ne ressortait. Et la recherche exigeait la phrase exacte.
+  - Maintenant : comparaison sans accents ni majuscules, chaque mot cherché n'importe où (titre, description, catégorie, sous-catégorie, ville, marque, caractéristiques), singulier/pluriel, 1 faute tolérée (2 pour les mots de 8 lettres et plus), mots vides ignorés (« pour », « une »…).
+  - Testé : béquille / bequille / béquilles / bequile → les 2 béquilles ; « bequille trotinette » → celle de trottinette ; « echapement » → l'échappement Suzuki.
+- **À savoir pour plus tard :** le catalogue est chargé en entier dans le navigateur (29 annonces aujourd'hui). Supabase renvoie 1 000 lignes max par requête : au-delà, il faudra passer la recherche côté serveur (recherche plein texte Postgres + extension `unaccent`/`pg_trgm`).
+
 ### 19/10/2026 — Claude — Fiche annonce mobile repensée (style grandes plateformes)
 - **Changé :** `assets/index-main.js` (`openAd`, `hydrateSellerCard`, `viewListingPhone` ; `?v=20261019-fiche`) + nouvelle feuille `assets/detail-mobile-20261019.css` chargée en dernier dans `index.html`.
   - Mobile uniquement (≤ 720 px) : fiche plein écran, barre du haut (retour, titre, partager, favori + compteur), photo bord à bord, carte vendeur cliquable sous le prix (initiales, avis, badge PRO/Particulier, nombre d'annonces en ligne), section « Les + de cette annonce » (4 premiers équipements en pictos + « Voir les N équipements »), informations clés avec pictos, bloc vendeur du bas épuré, lien « Signaler » avec drapeau, barre fixe en bas « Voir le numéro » / « Message » (le numéro remplace le bouton une fois affiché). La barre de navigation du site est masquée pendant la fiche.

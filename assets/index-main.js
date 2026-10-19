@@ -3445,8 +3445,53 @@ function resetSearchFilters({keepMode=false}={}){
   refreshFilterCount();
   if(!keepMode){onlyMine=false;moderationMode=false;favoritesMode=false;}
 }
+
+/* Recherche par mots-clés (19/10/2026) : insensible aux accents et à la casse,
+   singulier/pluriel, petites fautes de frappe, et chaque mot peut se trouver n'importe où
+   (titre, description, catégorie, ville, marque…). Ex. « bequile » trouve « Béquilles ». */
+const KW_STOPWORDS=new Set(['le','la','les','un','une','des','de','du','d','l','au','aux','et','ou','pour','avec','sans','en','a','sur','je','cherche','recherche','veux']);
+function kwFold(s){return String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,' ').trim();}
+function kwStem(w){
+  if(w.length>4&&/(aux)$/.test(w))return w.slice(0,-3)+'al';
+  if(w.length>3&&/[sx]$/.test(w))return w.slice(0,-1);
+  return w;
+}
+function kwDistance(a,b,max){
+  if(Math.abs(a.length-b.length)>max)return max+1;
+  let prev=Array.from({length:b.length+1},(_,i)=>i);
+  for(let i=1;i<=a.length;i++){
+    const cur=[i];let rowMin=i;
+    for(let j=1;j<=b.length;j++){cur[j]=Math.min(cur[j-1]+1,prev[j]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));if(cur[j]<rowMin)rowMin=cur[j];}
+    if(rowMin>max)return max+1;
+    prev=cur;
+  }
+  return prev[b.length];
+}
+const kwHayCache=new Map();
+function kwPrepareHay(hay){
+  let h=kwHayCache.get(hay);
+  if(h)return h;
+  const text=kwFold(hay);
+  h={text,words:[...new Set(text.split(' ').filter(Boolean).map(kwStem))]};
+  if(kwHayCache.size>5000)kwHayCache.clear();
+  kwHayCache.set(hay,h);
+  return h;
+}
+function kwTokens(q){return kwFold(q).split(' ').filter(t=>t&&!KW_STOPWORDS.has(t));}
+function keywordMatches(hay,tokens){
+  if(!tokens.length)return true;
+  const h=kwPrepareHay(hay);
+  return tokens.every(t=>{
+    const st=kwStem(t);
+    if(h.text.includes(t)||h.text.includes(st))return true;
+    if(st.length<4)return false;
+    const tol=st.length>=8?2:1;
+    return h.words.some(w=>w.startsWith(st)||(Math.abs(w.length-st.length)<=tol&&kwDistance(st,w,tol)<=tol));
+  });
+}
 function filteredAds(){
   const q=$('#searchQuery').value.trim().toLowerCase();
+  const qTokens=kwTokens(q);
   const reference=listingReferenceQuery(q);
   const city=$('#searchCity').value.trim().toLowerCase();
   const minPrice=Number($('#filterPriceMin')?.value||0);
@@ -3484,7 +3529,7 @@ function filteredAds(){
 
   let ads=allAds.filter(a=>{
     if(reference)return a.listing_reference===reference;
-    const hay=`${a.title||''} ${cleanDescription(a)} ${a.item_condition||''} ${equipmentTypeOf(a)} ${subcategoryLabel(a.category,vehicleSubcategoryOf(a))} ${a.city||''} ${a.postal_code||''} ${a.vehicle_make||''} ${a.vehicle_model||''} ${a.crit_air||''} ${vehicleMetaSearchText(a)} ${realEstateMetaSearchText(a)}`.toLowerCase();
+    const hay=`${a.title||''} ${cleanDescription(a)} ${a.item_condition||''} ${equipmentTypeOf(a)} ${subcategoryLabel(a.category,vehicleSubcategoryOf(a))} ${a.city||''} ${a.postal_code||''} ${a.vehicle_make||''} ${a.vehicle_model||''} ${a.crit_air||''} ${vehicleMetaSearchText(a)} ${realEstateMetaSearchText(a)} ${catLabel(a.category)}`.toLowerCase();
     const locationHay=`${a.city||''} ${a.postal_code||''}`.toLowerCase();
     const price=(a.price===null||a.price==='')?null:Number(a.price);
     const categoryOk=!effectiveCategory||a.category===effectiveCategory;
@@ -3518,7 +3563,7 @@ function filteredAds(){
     const immoRadiusOk=!immoOnly||!immoRadiusActive||(immoRadiusState.ready&&Number(immoRadiusState.distances.get(a.id))<=immoRadius);
     const immoNearbyOk=!immoOnly||!immoNearbyFilterState.active||(immoNearbyFilterState.ready&&Number(immoNearbyFilterState.distances.get(a.id))<=immoNearbyFilterState.radius);
     const cityOk=(!city)||(immoOnly&&immoRadiusActive?immoRadiusOk:locationHay.includes(city));
-    return (!q||hay.includes(q))&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
+    return (!q||keywordMatches(hay,qTokens))&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
   });
   const sort=$('#sortAds')?.value||'newest';
   ads.sort((a,b)=>{
