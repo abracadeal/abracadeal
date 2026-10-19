@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Feu vert aux pros qui ont un stock en ligne sur leur site
+- **Constat :** le robot `prospect-qualifier` avait déjà repéré la page stock (`stock_page_url`) et estimé le nombre d'annonces (`nb_annonces`) de beaucoup de pros, mais ils étaient restés en pause (« en attente du feu vert »).
+- **Base :** ~380 pros (299 garages + 81 motos) avec un stock de 10 à 80 véhicules publié sur leur propre site, hors réseaux (`phase2_reseau`) et désinscrits, passés en `ready` / `petit_pro` (placés après les listes d'Anthony).
+- **Décision :** pas de collecte sur les sites d'annonces concurrents (Leboncoin, La Centrale, Ronpoin…). **Idée suivante :** sur le site du pro lui-même, détecter les liens/logos vers ces plateformes (preuve qu'il y vend déjà) et les prioriser.
+
 ### 19/10/2026 — Claude — Garages prioritaires pendant 3 jours
 - **Base :** `category_mix` passé à 70 % garages / 15 % moto / 15 % immo (au lieu de 34/32/34) pour envoyer vite les garages des listes d'Anthony, mélangés aux 25 premiers garages de la file. Tâche cron `abracadeal-prospect-mix-restore-20261022` : retour à 32/34/34 le mercredi 22/10 à 18 h 05 (Paris), puis suppression d'elle-même.
 - **Constat (19/10) :** 163 mails envoyés au total ; garages choisis à la main par Anthony : 11 envoyés → 3 clics, 2 comptes créés ; garages du robot suivis depuis le 17/10 : ~55 → 3 clics, 0 inscrit. Piste : prioriser les garages qui ont un stock en ligne (champ `stock_page_url`).
