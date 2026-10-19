@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — 2e liste : envoi complet sur décision d'Anthony
+- **Base :** à la demande d'Anthony (18 h 50), les 48 garages restants de la 2e liste repassés en `ready` (`qualif_notes` : « Envoi demandé par Anthony »). Au total 62 garages de cette liste partent à partir du 20/10 9 h. Risque juridique (extraction de la base Ronpoin) signalé à Anthony, décision prise en connaissance de cause.
+
 ### 19/10/2026 — Claude — 2e liste : origine Ronpoin, re-sourcing
 - **Décision d'Anthony :** la 2e liste venait de Ronpoin.fr ; il a accepté de ne contacter que les garages retrouvés par une source publique légitime.
 - **Base :** les 53 nouveaux de la 2e liste repassés en `paused` (`qualif_status = todo`, note « à retrouver par une source publique »). Retrouvés et remis en `ready` : AB Motors, Garage du Fort, GT Vintage, Pax Automobiles (adresse publiée sur leur propre site, `source_url` renseignée) ; Bain Autos Sport via l'adresse de l'annuaire déjà en base (la variante de la liste passée en `error` doublon). Les 8 déjà en base avant la liste (sources robot/annuaire) restent en `ready`.
