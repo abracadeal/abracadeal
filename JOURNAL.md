@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — 2e liste : origine Ronpoin, re-sourcing
+- **Décision d'Anthony :** la 2e liste venait de Ronpoin.fr ; il a accepté de ne contacter que les garages retrouvés par une source publique légitime.
+- **Base :** les 53 nouveaux de la 2e liste repassés en `paused` (`qualif_status = todo`, note « à retrouver par une source publique »). Retrouvés et remis en `ready` : AB Motors, Garage du Fort, GT Vintage, Pax Automobiles (adresse publiée sur leur propre site, `source_url` renseignée) ; Bain Autos Sport via l'adresse de l'annuaire déjà en base (la variante de la liste passée en `error` doublon). Les 8 déjà en base avant la liste (sources robot/annuaire) restent en `ready`.
+- **Fonction `prospect-email-check` v2 :** mode `"site"` qui vérifie qu'une adresse est publiée sur le site officiel du domaine (accueil + contact + mentions légales).
+- **Limite :** les adresses gratuites (gmail, orange…) ne peuvent être confirmées que par une recherche Google (pas d'API payante pour l'instant) ; recherche web manuelle peu concluante.
+
 ### 19/10/2026 — Claude — 2e liste manuelle d'Anthony (garages)
 - **Base :** 79 lignes → 73 adresses uniques, toutes vérifiées OK par `prospect-email-check`, aucune désinscrite. 12 déjà envoyées aujourd'hui (ignorées), 8 déjà en base en pause remises en `ready`, 53 ajoutées (`ready`, `petit_pro`, source « Ajout manuel (Anthony) »). Les 61 sont en tête de la file garages (created_at 01/10).
 - **Vérifié :** le coup d'accélérateur de 17 h 05 a bien été annulé à 18 h 05 (limites 25/25, mix 32/34/34).
