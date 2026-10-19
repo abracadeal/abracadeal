@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Coup d'accélérateur ponctuel sur la liste manuelle
+- **Changé (base, temporaire) :** à 17 h 05, limite quotidienne des 2 boîtes 25 → 31 et `category_mix` 100 % garages pour envoyer tout de suite les 12 garages d'Anthony. Tâche cron `abracadeal-prospect-boost-restore-20261019` programmée à 18 h 05 (Paris) pour remettre 25/25 et le mix 32/34/34, puis se supprimer elle-même.
+- **À vérifier :** demain matin, limites à 25 et mix normal.
+
 ### 19/10/2026 — Claude — Vérification des listes manuelles + 12 garages d'Anthony
 - **Nouvelle fonction Supabase :** `prospect-email-check` (v1, code dans `supabase/functions/prospect-email-check/index.ts`, appel interne avec `x-internal-key` comme prospect-mailer, n'envoie rien). Vérifie format, domaine qui reçoit des mails (MX, sinon A), adresse jetable, domaine gratuit. Appel depuis SQL : `net.http_post(... '/functions/v1/prospect-email-check', body {"emails":[...]})` puis lire `net._http_response`.
 - **Base :** 12 garages de la liste d'Anthony tous vérifiés OK (aucun désinscrit). 10 ajoutés (`ready`, `petit_pro`, source « Ajout manuel (Anthony) »), 2 déjà présents remis en `ready` (CAC Motors, Ewigo Grenoble). Tous antidatés au 01/10 pour passer en tête de la file garages.
