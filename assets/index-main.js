@@ -4020,6 +4020,91 @@ async function renderApproxMap(a){
   }
 }
 
+
+/* ===== Fiche annonce mobile façon « grandes plateformes » (19/10/2026) =====
+   Éléments ajoutés à la fiche et visibles uniquement sur mobile (CSS detail-mobile-20261019.css) :
+   barre du haut (retour, titre, partager, favori), carte vendeur cliquable sous le prix,
+   « Les + de cette annonce » en pictos, icônes sur les informations clés et barre d'actions
+   fixe en bas (Voir le numéro / Message). Le desktop n'affiche aucun de ces éléments. */
+const DM_SVG=d=>`<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">${d}</svg>`;
+const DM_ICONS={
+  brand:'<path d="M4 6h16M4 12h16M4 18h10"/><circle cx="19" cy="18" r="1.4"/>',
+  car:'<path d="M5 16V11l2-5h10l2 5v5"/><path d="M3 16h18v3H3z"/><circle cx="7.5" cy="13.5" r=".9"/><circle cx="16.5" cy="13.5" r=".9"/>',
+  calendar:'<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M8 3v4M16 3v4"/>',
+  gauge:'<path d="M4.5 17a8 8 0 1 1 15 0"/><path d="m12 13 3.5-3.5"/><circle cx="12" cy="13" r="1.2"/>',
+  fuel:'<path d="M5 20V5a1 1 0 0 1 1-1h7a1 1 0 0 1 1 1v15M4 20h11M5 10h9"/><path d="M14 8h2l2 2v7a1.5 1.5 0 0 0 3 0v-6l-2-3"/>',
+  gear:'<path d="M6 4v16M12 4v8M18 4v8M6 12h12"/><circle cx="6" cy="4" r="1.3"/><circle cx="12" cy="4" r="1.3"/><circle cx="18" cy="4" r="1.3"/><circle cx="6" cy="20" r="1.3"/>',
+  leaf:'<path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z"/><path d="M5 19 13 11"/>',
+  star:'<path d="m12 4 2.4 5 5.4.6-4 3.7 1.1 5.3L12 16l-4.9 2.6 1.1-5.3-4-3.7 5.4-.6z"/>',
+  tag:'<path d="M4 12V4h8l8 8-8 8z"/><circle cx="8.5" cy="8.5" r="1.3"/>',
+  door:'<rect x="6" y="3" width="12" height="18" rx="1.5"/><circle cx="14.5" cy="12" r=".9"/>',
+  seat:'<path d="M7 4h4v9H7zM13 4h4v9h-4z"/><path d="M5 13h14v4H5zM7 17v3M17 17v3"/>',
+  palette:'<path d="M12 4a8 8 0 1 0 0 16c1.2 0 1.6-1 1-2-.7-1.2.2-2.4 1.5-2.4H17a3 3 0 0 0 3-3C20 7.5 16.4 4 12 4z"/><circle cx="8" cy="11" r="1"/><circle cx="11" cy="8" r="1"/><circle cx="15" cy="8.5" r="1"/>',
+  power:'<path d="M13 3 6 13h5l-1 8 7-10h-5z"/>',
+  shield:'<path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/>',
+  wrench:'<path d="M15 4a4 4 0 0 0-4.6 5.4L4 15.8 6.2 18l6.4-6.4A4 4 0 0 0 18 7l-2.4 2.4-2-2L16 5z"/>',
+  history:'<path d="M4 12a8 8 0 1 0 2.3-5.6"/><path d="M4 4v4h4M12 8v4l3 2"/>',
+  area:'<rect x="4" y="4" width="16" height="16" rx="1"/><path d="M4 9h5M15 20v-5M9 4v5M20 15h-5"/>',
+  rooms:'<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10M10 20v-6h4v6"/>',
+  bed:'<path d="M3 18V7M3 13h18v5M21 18v-3a3 3 0 0 0-3-3h-7v1"/><circle cx="7" cy="11" r="1.6"/>',
+  bath:'<path d="M4 12h16v3a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M6 12V6a2 2 0 0 1 4 0M7 19l-1 2M17 19l1 2"/>',
+  floors:'<path d="M5 20V8l7-4 7 4v12M5 12h14M5 16h14M9 20v-2h6v2"/>',
+  pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
+  euro:'<path d="M17 6.5A6.5 6.5 0 1 0 17 17.5M4 10h9M4 14h9"/>',
+  heat:'<path d="M8 4c-1.5 2 1.5 3 0 5s1.5 3 0 5M12 4c-1.5 2 1.5 3 0 5s1.5 3 0 5M16 4c-1.5 2 1.5 3 0 5s1.5 3 0 5"/><path d="M5 19h14"/>',
+  sun:'<circle cx="12" cy="12" r="3.5"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4"/>',
+  sofa:'<path d="M5 11V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v3"/><path d="M3 11a2 2 0 0 1 4 0v3h10v-3a2 2 0 0 1 4 0v6H3z"/><path d="M5 17v2M19 17v2"/>',
+  doc:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 12h6M9 16h6"/>',
+  check:'<path d="m5 12.5 4.5 4.5L19 7.5"/>',
+  parking:'<rect x="4" y="4" width="16" height="16" rx="3"/><path d="M10 16V8h3a2.5 2.5 0 0 1 0 5h-3"/>',
+  snow:'<path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/><path d="m9.5 4.5 2.5 2 2.5-2M9.5 19.5l2.5-2 2.5 2"/>',
+  light:'<path d="M14 6a6 6 0 0 1 0 12z"/><path d="M3 8h7M3 12h7M3 16h7"/>',
+  cruise:'<circle cx="12" cy="12" r="8"/><path d="m12 12 3-3"/><circle cx="12" cy="12" r="1.2"/><path d="M8 16h8"/>',
+  phone:'<rect x="7" y="3" width="10" height="18" rx="2"/><path d="M11 18h2"/>',
+  camera:'<path d="M4 8h3l2-2h6l2 2h3v11H4z"/><circle cx="12" cy="13" r="3.2"/>',
+  roof:'<path d="M3 12 12 5l9 7"/><path d="M8 9.5h8"/>',
+  wheel:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2"/><path d="M12 4v6M5.5 15.5 10.3 13M18.5 15.5 13.7 13"/>',
+  pool:'<path d="M3 17c2 1.3 4 1.3 6 0s4-1.3 6 0 4 1.3 6 0M3 20.5c2 1.3 4 1.3 6 0s4-1.3 6 0 4 1.3 6 0"/><path d="M8 15V5a2 2 0 0 1 4 0M14 15V5a2 2 0 0 1 4 0M8 9h6"/>',
+  lift:'<rect x="5" y="3" width="14" height="18" rx="1.5"/><path d="m9.5 9 2.5-2.5L14.5 9M9.5 15l2.5 2.5 2.5-2.5"/>',
+  tree:'<path d="M12 3 6 11h3l-4 6h14l-4-6h3z"/><path d="M12 17v4"/>',
+  back:'<path d="M19 12H5M11 6l-6 6 6 6"/>',
+  share:'<path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/>',
+  chevron:'<path d="m9 6 6 6-6 6"/>',
+  flag:'<path d="M6 21V4M6 4h10l-2 4 2 4H6"/>'
+};
+function dmIcon(name){return DM_SVG(DM_ICONS[name]||DM_ICONS.check);}
+function dmSpecIcon(label){
+  const l=String(label||'').toLowerCase();
+  const rules=[
+    [/marque/,'brand'],[/mod[eè]le|version|finition|carrosserie/,'car'],[/kilom/,'gauge'],[/carburant|[ée]nergie/,'fuel'],
+    [/bo[iî]te/,'gear'],[/crit|co₂|co2/,'leaf'],[/^[ée]tat/,'star'],[/type|produit/,'tag'],[/porte/,'door'],[/place|sellerie/,'seat'],
+    [/couleur/,'palette'],[/puissance/,'power'],[/garantie/,'shield'],[/entretien|contr[oô]le/,'wrench'],[/historique/,'history'],
+    [/permis/,'doc'],[/ann[ée]e|mise en circulation|disponible|construction/,'calendar'],[/surface|terrain/,'area'],
+    [/pi[eè]ces/,'rooms'],[/chambre/,'bed'],[/salle/,'bath'],[/[ée]tage/,'floors'],[/quartier|secteur/,'pin'],
+    [/charge|taxe|d[ée]p[oô]t|honoraire/,'euro'],[/chauffage/,'heat'],[/exposition/,'sun'],[/meubl/,'sofa'],
+    [/copropri|lots|r[ée]f[ée]rence|mandat/,'doc']
+  ];
+  const hit=rules.find(([re])=>re.test(l));
+  return dmIcon(hit?hit[1]:'check');
+}
+function dmEquipmentIcon(label){
+  const l=String(label||'').toLowerCase();
+  const rules=[
+    [/stationnement|radar|park/,'parking'],[/cam[ée]ra/,'camera'],[/chauffant/,'seat'],[/si[eè]ge|cuir|sellerie/,'seat'],
+    [/led|x[ée]non|phare|feux/,'light'],[/r[ée]gulateur|limiteur/,'cruise'],[/gps|navigation/,'pin'],[/clim/,'snow'],
+    [/toit|cabriolet|capote/,'roof'],[/bluetooth|carplay|android|usb|t[ée]l[ée]phone|audio/,'phone'],[/jante|roue/,'wheel'],
+    [/attelage|crochet/,'wrench'],[/balcon|terrasse|jardin/,'tree'],[/piscine/,'pool'],[/ascenseur/,'lift'],
+    [/parking|garage|box/,'parking'],[/cave|cellier|grenier/,'rooms'],[/gardien|digicode|interphone|alarme|s[ée]curit/,'shield'],
+    [/chemin[ée]e|chauffage/,'heat'],[/vue|lumineux|exposition/,'sun'],[/meubl/,'sofa'],[/cuisine/,'rooms']
+  ];
+  const hit=rules.find(([re])=>re.test(l));
+  return dmIcon(hit?hit[1]:'check');
+}
+function dmInitials(name){
+  const parts=String(name||'').trim().split(/\s+/).filter(Boolean);
+  return (parts.length>1?parts[0][0]+parts[1][0]:(parts[0]||'A').slice(0,2)).toUpperCase();
+}
+
 window.openAd=id=>{
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);if(!a)return;
   if(a.category==='vacances'){
@@ -4074,8 +4159,36 @@ window.openAd=id=>{
     :`<div class="detail-gallery"><div class="detail-main-wrap"><img class="detail-main-photo abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal"></div></div>`;
 
   $('#detailTitle').textContent='Annonce';
+  const dmFavActive=favoriteIds.has(a.id);
+  const dmEquipment=listingEquipmentOf(a);
+  const dmTopbar=`<div class="dm-topbar">
+      <button type="button" class="dm-icon-btn" aria-label="Retour" onclick="closeModal('detailModal')">${dmIcon('back')}</button>
+      <div class="dm-topbar-title">${esc(a.title||'Annonce')}</div>
+      <button type="button" class="dm-icon-btn" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)">${dmIcon('share')}</button>
+      <button type="button" class="dm-icon-btn dm-fav ${dmFavActive?'active':''}" data-favorite-id="${a.id}" aria-label="${dmFavActive?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="dm-fav-count" data-fav-count-id="${a.id}"></span><span class="heart-icon">${dmFavActive?'♥':'♡'}</span></button>
+    </div>`;
+  const dmSeller=a.is_showroom?'':`<button type="button" class="dm-seller" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">
+      <span class="dm-seller-avatar" id="dmSellerAvatar-${a.id}">${dmInitials(sellerLabel)}</span>
+      <span class="dm-seller-info">
+        <b id="dmSellerName-${a.id}">${sellerLabel}</b>
+        <span class="dm-seller-rating" id="dmSellerRating-${a.id}"><span class="dm-stars">☆☆☆☆☆</span></span>
+        <span class="dm-seller-badge">${a.seller_type==='professionnel'?'PRO':'Particulier'}</span>
+        <span class="dm-seller-count" id="dmSellerCount-${a.id}"></span>
+      </span>
+      <span class="dm-chevron">${dmIcon('chevron')}</span>
+    </button>`;
+  const dmPlus=dmEquipment.length?`<section class="dm-plus">
+      <h3>Les + de cette annonce</h3>
+      <div class="dm-plus-grid">${dmEquipment.slice(0,4).map(x=>`<div class="dm-plus-item"><span class="dm-plus-icon">${dmEquipmentIcon(x)}</span><span class="dm-plus-label">${esc(x)}</span></div>`).join('')}</div>
+      ${dmEquipment.length>4?`<button type="button" class="dm-link-btn" data-equipment-list="${esc(encodeURIComponent(JSON.stringify(dmEquipment)))}">Voir les ${dmEquipment.length} équipements</button>`:''}
+    </section>`:'';
+  const dmActions=isOwner?'':`<div class="dm-actions">
+      ${a.show_phone?`<button type="button" class="dm-action dm-action-ghost" id="dmPhoneBtn-${a.id}" onclick="viewListingPhone('${a.id}')">Voir le numéro</button>`:''}
+      <button type="button" class="dm-action dm-action-primary" onclick="startMessageForListing('${a.id}')">Message</button>
+    </div>`;
   $('#detailBody').innerHTML=`
-    <div class="listing-detail">
+    <div class="listing-detail${isOwner?'':' dm-has-actions'}">
+      ${dmTopbar}
       ${gallery}
       <div class="detail-content">
         <main>
@@ -4089,13 +4202,17 @@ window.openAd=id=>{
             </div>
           </div>
 
+          ${dmSeller}
+
           ${detailModerationActions}
+
+          ${dmPlus}
 
           ${specs.length?`
           <section class="detail-section">
             <h3>Les informations clés</h3>
             <div class="detail-specs">
-              ${specs.map(([label,value])=>`<div class="detail-spec"><span>${esc(label)}</span><b>${esc(value)}</b></div>`).join('')}
+              ${specs.map(([label,value])=>`<div class="detail-spec"><span><i class="dm-spec-icon">${dmSpecIcon(label)}</i>${esc(label)}</span><b>${esc(value)}</b></div>`).join('')}
             </div>
             ${a.category==='immobilier'&&listingEquipmentOf(a).length?`
               <div class="detail-immo-equipment-block">
@@ -4118,7 +4235,7 @@ window.openAd=id=>{
           </section>`:''}
 
           ${a.category!=='immobilier'&&listingEquipmentOf(a).length?`
-          <section class="detail-section">
+          <section class="detail-section dm-hide-mobile">
             <h3>Équipements</h3>
             <div class="detail-equipment-summary">
               <div class="detail-equipment-preview">${listingEquipmentOf(a).slice(0,6).map(x=>`<span class="detail-equipment-chip">✓ ${esc(x)}</span>`).join('')}</div>
@@ -4191,7 +4308,7 @@ window.openAd=id=>{
 
             ${currentUser&&!isOwner&&!a.is_showroom?`
               <div class="detail-report">
-                <button class="report-link" onclick="reportAd('${a.id}')">Signaler cette annonce</button>
+                <button class="report-link" onclick="reportAd('${a.id}')"><i class="dm-flag">${dmIcon('flag')}</i>Signaler cette annonce</button>
               </div>`:''}
           </div>
         </aside>
@@ -4214,6 +4331,7 @@ window.openAd=id=>{
           <div class="detail-related-scroller" id="interestAds-${a.id}"></div>
         </section>
       </div>
+      ${dmActions}
     </div>`;
   openModal('detailModal');
   if(!a.is_showroom) hydrateSellerCard(a.owner_id,a.id);
@@ -4687,11 +4805,14 @@ window.viewListingPhone=async(listingId)=>{
   if(error){toast(error.message||'Impossible d’afficher le numéro');return;}
   const host=document.getElementById(`phoneContact-${listingId}`);
   if(!data){
+    document.getElementById(`dmPhoneBtn-${listingId}`)?.remove();
     if(host) host.innerHTML='<div class="note">Aucun numéro affiché par le vendeur.</div>';
     toast('Aucun numéro affiché par le vendeur');
     return;
   }
   if(host) host.innerHTML=`<a class="btn ghost" href="tel:${esc(data)}">📞 ${esc(data)}</a><div class="contact-login-note">Numéro visible car vous êtes connecté.</div>`;
+  const barBtn=document.getElementById(`dmPhoneBtn-${listingId}`);
+  if(barBtn) barBtn.outerHTML=`<a class="dm-action dm-action-ghost" id="dmPhoneBtn-${esc(listingId)}" href="tel:${esc(data)}">${esc(data)}</a>`;
 };
 
 const messageInputEl=document.getElementById('messageInput');
@@ -4737,6 +4858,18 @@ async function hydrateSellerCard(sellerId,listingId){
   ]);
   const list=reviews||[];
   const avg=list.length?list.reduce((s,r)=>s+Number(r.rating),0)/list.length:0;
+  try{
+    const name=profile?.display_name||(profile?.account_type==='professionnel'?'Vendeur professionnel':'Vendeur particulier');
+    const nameEl=document.getElementById(`dmSellerName-${listingId}`);if(nameEl)nameEl.textContent=name;
+    const av=document.getElementById(`dmSellerAvatar-${listingId}`);if(av)av.textContent=dmInitials(profile?.display_name||name);
+    const rt=document.getElementById(`dmSellerRating-${listingId}`);
+    if(rt)rt.innerHTML=list.length?`<span class="dm-stars">${starsText(avg)}</span><span>${list.length} avis</span>`:`<span class="dm-muted">Pas encore d’avis</span>`;
+    if(document.getElementById(`dmSellerCount-${listingId}`)){
+      sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',sellerId).eq('status','active').eq('visibility_scope','public')
+        .then(({count})=>{const el=document.getElementById(`dmSellerCount-${listingId}`);if(el&&Number.isFinite(count)&&count>0)el.textContent=`${count} annonce${count>1?'s':''}`;})
+        .catch(()=>{});
+    }
+  }catch(_){}
   host.innerHTML=`
     <h3>${esc(profile?.display_name || (profile?.account_type==='professionnel'?'Vendeur professionnel':'Vendeur particulier'))}</h3>
     <p>${esc(profile?.city||'')}</p>

@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Fiche annonce mobile repensée (style grandes plateformes)
+- **Changé :** `assets/index-main.js` (`openAd`, `hydrateSellerCard`, `viewListingPhone` ; `?v=20261019-fiche`) + nouvelle feuille `assets/detail-mobile-20261019.css` chargée en dernier dans `index.html`.
+  - Mobile uniquement (≤ 720 px) : fiche plein écran, barre du haut (retour, titre, partager, favori + compteur), photo bord à bord, carte vendeur cliquable sous le prix (initiales, avis, badge PRO/Particulier, nombre d'annonces en ligne), section « Les + de cette annonce » (4 premiers équipements en pictos + « Voir les N équipements »), informations clés avec pictos, bloc vendeur du bas épuré, lien « Signaler » avec drapeau, barre fixe en bas « Voir le numéro » / « Message » (le numéro remplace le bouton une fois affiché). La barre de navigation du site est masquée pendant la fiche.
+  - Desktop : aucun changement (les nouveaux éléments y sont masqués).
+- **Pourquoi :** demande d'Anthony, mise en page inspirée de Leboncoin aux couleurs Abracadeal.
+- **À vérifier :** rendu sur un vrai iPhone (encoche, barre du bas), compteur « N annonces » du vendeur.
+
 ### 19/10/2026 — Claude — Fenêtres Ville / Prix / Filtres qui passaient derrière les vignettes
 - **Changé :** `assets/index-main.js` (`?v=20261019-qf` dans `index.html`). Les fenêtres des filtres rapides (Ville, Prix, Marque, Type de bien) et leur fond sombre sont déplacés dans `<body>` au chargement : dans la section des annonces, ils restaient sous les vignettes. Elles ne se ferment plus non plus quand on tape dedans (l'ouverture du clavier mobile fait défiler la page).
 - **Pourquoi :** bug signalé par Anthony sur iPhone.
