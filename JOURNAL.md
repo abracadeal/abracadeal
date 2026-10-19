@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 19/10/2026 — Claude — Garages prioritaires pendant 3 jours
+- **Base :** `category_mix` passé à 70 % garages / 15 % moto / 15 % immo (au lieu de 34/32/34) pour envoyer vite les garages des listes d'Anthony, mélangés aux 25 premiers garages de la file. Tâche cron `abracadeal-prospect-mix-restore-20261022` : retour à 32/34/34 le mercredi 22/10 à 18 h 05 (Paris), puis suppression d'elle-même.
+- **Constat (19/10) :** 163 mails envoyés au total ; garages choisis à la main par Anthony : 11 envoyés → 3 clics, 2 comptes créés ; garages du robot suivis depuis le 17/10 : ~55 → 3 clics, 0 inscrit. Piste : prioriser les garages qui ont un stock en ligne (champ `stock_page_url`).
+
 ### 19/10/2026 — Claude — 2e liste mélangée à la file
 - **Base :** à la demande d'Anthony, les 62 garages de la 2e liste ne sont plus en tête de file : leur `created_at` est réparti au hasard parmi les autres garages `ready`, pour qu'ils partent mélangés aux autres (103 garages en file, environ 6 jours d'envois au rythme normal).
 
