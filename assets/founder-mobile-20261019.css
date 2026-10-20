@@ -14,3 +14,8 @@
     background:#fff;color:#3c1d61;border-radius:999px;padding:8px 12px;font-size:.8rem;
   }
 }
+
+/* 20/10/2026 : dans la modale Fondateurs, un seul CTA clair pendant les 12 mois gratuits. */
+#founderOfferModal .form-actions .btn.ghost[href="pro-fondateur.html"]{display:none!important}
+#founderOfferModal .form-actions .btn.primary{font-size:0}
+#founderOfferModal .form-actions .btn.primary::after{content:"S’inscrire gratuitement";font-size:14px}
