@@ -338,3 +338,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Pourquoi :** savoir quels pros cliquent et s'inscrivent, sans pixel d'ouverture (peu fiable et à éviter côté CNIL).
 - **Règles de comptage :** clic dans les 60 s après l'envoi = antivirus, ignoré ; visites répétées en moins de 30 min = 1 clic.
 - **À savoir / à faire :** le suivi démarre avec les envois du 17/10 à 16 h 56 (les 94 mails précédents n'ont pas de code). La variante B (sans lien) ne peut pas être suivie en clics. Si un modèle de mail est modifié, garder exactement le lien `https://abracadeal.fr/pro-fondateur.html` pour que le code soit ajouté.
+
+### 20/10/2026 — Claude — Page Fondateurs : plus aucune mention de prix pour les visiteurs
+- **Changé :** `pro-fondateur.html`, partie visible sans compte Pro : retrait de « Les tarifs détaillés restent réservés… », « Puis tarif public normal à partir du 13e mois », de la carte « Tarifs privés », de la note « annonce à l'unité / perte du statut » et des blocs bas « prix HT, packs… » / « Cette grille tarifaire est réservée aux comptes Pro ». Remplacés par des arguments (import du stock, Google, partage 1 clic, sans carte ni engagement) et des boutons d'inscription (« Je réserve ma place Fondateur », « Créer mon compte Pro gratuitement », « Activer mon compte Pro »).
+- **Pourquoi :** demande d'Anthony — la page doit vendre et chercher des inscriptions, sans parler de prix.
+- **À savoir :** la grille de prix pour les comptes Pro connectés (`#privatePricing`) n'a pas changé.
+- **Aussi le 20/10 (base) :** purge de `cron.job_run_details` (historique > 2 jours supprimé, ~130 000 lignes) + nouvelle tâche planifiée `abracadeal-purge-cron-history` chaque nuit à 4h23, pour réduire le Disk IO Supabase.
