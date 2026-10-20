@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 20/10/2026 — Claude — Auto + Moto regroupés en « Véhicules »
+- **Changé :** `index.html` uniquement.
+  - Bloc catégories de l'accueil : les cartes « Auto » et « Moto » sont remplacées par une seule carte « Véhicules » (ouvre toutes les annonces véhicules).
+  - Menu du haut (ordinateur) : « Auto » et « Moto » fusionnés en « Véhicules », avec toutes les sous-catégories (Voitures, Motos / Scooters, Utilitaires, Caravaning, Nautisme, Vélos, Équipement auto, Équipement moto, Pièces détachées).
+- **Pourquoi :** demande d'Anthony.
+- **Non touché :** catégories en base, filtres, formulaire de dépôt, page SEO `/auto/`, bandeau « Offre Fondateurs · Auto, Moto & Immobilier ».
+
 ### 19/10/2026 — Claude — Le robot continue de chercher (feu vert permanent)
 - **Constat :** les robots tournent (aucune erreur), mais l'import SIRENE garages/motos était terminé depuis le 13/10 ; sur ~92 000 pros de l'annuaire, ~88 000 restent sans site trouvé (`guess_failed`, le robot devine le domaine sans recherche Google), d'où presque plus de nouveaux contacts depuis le 16/10.
 - **Changé (base, fichier `supabase/2026-10-19-prospection-feu-vert.sql`) :** `private.promote_annuaire_leads` insère désormais les nouveaux pros en `ready` (plus de pause) ; import SIRENE relancé sur les agences immobilières (NAF 68.31Z, 101 départements).
