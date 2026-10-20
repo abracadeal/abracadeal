@@ -1,0 +1,12 @@
+/* 20/10/2026 — 8 catégories dans le menu du haut : boutons plus compacts sur les écrans d'ordinateur étroits. */
+@media (min-width:1024px) and (max-width:1249px) and (pointer:fine){
+  header .desktop-category-nav{gap:5px!important}
+  header .desktop-category-link{padding:0 10px!important;font-size:12.5px!important;white-space:nowrap!important}
+}
+@media (min-width:1024px) and (max-width:1099px) and (pointer:fine){
+  header .desktop-category-nav{gap:4px!important}
+  header .desktop-category-link{padding:0 8px!important;font-size:12px!important}
+}
+@media (min-width:1024px) and (max-width:1249px) and (pointer:fine){
+  header .desktop-category-nav>.desktop-nav-item:not(.desktop-propro-nav-item){flex:0 0 auto!important;width:auto!important}
+}

@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 20/10/2026 — Claude — « Emploi & Services » séparé en « Emploi » et « Services »
+- **Changé :**
+  - `index.html` : carte d'accueil « Emploi & Services » remplacée par deux cartes « Emploi » (💼) et « Services » (🛠️) ; menu du haut séparé en deux entrées, chacune avec « Tous les emplois » / « Tous les services » et toutes ses sous-catégories (Services : ajout de Transport / Livraison, Informatique, Beauté / Bien-être, Événementiel) ; filtre « Services (Emploi & Services) » renommé « Services ».
+  - Nouveau `assets/nav-compact-20261020.css` : boutons du menu du haut un peu plus compacts entre 1024 et 1249 px de large, pour que les 8 catégories ne se chevauchent plus.
+- **Pourquoi :** demande d'Anthony (suite au regroupement Véhicules). Corrige aussi un bug : la carte « Emploi & Services » n'affichait que les offres d'emploi, jamais les services.
+- **Non touché :** catégories en base (`emploi` et `services` existaient déjà séparément), formulaire de dépôt, règles de diffusion.
+
 ### 20/10/2026 — Claude — Auto + Moto regroupés en « Véhicules »
 - **Changé :** `index.html` uniquement.
   - Bloc catégories de l'accueil : les cartes « Auto » et « Moto » sont remplacées par une seule carte « Véhicules » (ouvre toutes les annonces véhicules).

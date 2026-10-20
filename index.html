@@ -177,6 +177,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <link rel="stylesheet" href="assets/space-switch-20261018.css?v=2">
 <link rel="stylesheet" href="assets/detail-mobile-20261019.css?v=1">
 <link rel="stylesheet" href="assets/founder-mobile-20261019.css?v=1">
+<link rel="stylesheet" href="assets/nav-compact-20261020.css?v=1">
 </head>
 <body>
 
@@ -277,8 +278,9 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
         </div>
       </div>
       <div class="desktop-nav-item">
-        <a class="desktop-category-link category-link" href="#resultats" data-category="emploi">Emploi & Services</a>
-        <div class="desktop-submenu desktop-submenu-right" aria-label="Sous-catégories Emploi et Services">
+        <a class="desktop-category-link category-link" href="#resultats" data-category="emploi">Emploi</a>
+        <div class="desktop-submenu desktop-submenu-right" aria-label="Sous-catégories Emploi">
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="">Tous les emplois</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="cdi">CDI</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="cdd">CDD</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="interim">Intérim</a>
@@ -286,14 +288,23 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="alternance">Alternance</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="freelance">Freelance</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="emploi" data-sub="saisonnier">Saisonnier</a>
-          <div class="desktop-submenu-separator" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="desktop-nav-item">
+        <a class="desktop-category-link category-link" href="#resultats" data-category="services">Services</a>
+        <div class="desktop-submenu desktop-submenu-right" aria-label="Sous-catégories Services">
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="">Tous les services</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="artisans-travaux">Artisans / Travaux</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="menage">Ménage</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="jardinage">Jardinage</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="demenagement">Déménagement</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="depannage">Dépannage</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="reparation-vehicules">Réparation véhicules</a>
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="transport">Transport / Livraison</a>
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="informatique">Informatique</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="cours">Cours / Formation</a>
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="beaute-bienetre">Beauté / Bien-être</a>
+          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="evenementiel">Événementiel</a>
           <a class="desktop-subcategory-link category-link" href="#resultats" data-category="services" data-sub="services-entreprises">Services aux entreprises</a>
         </div>
       </div>
@@ -471,7 +482,8 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
         <a class="cat category-link" href="#resultats" data-category="hightech"><div class="cat-icon">📱</div><div><h3>High-tech</h3><small>Téléphones, ordinateurs et accessoires</small></div></a>
         <a class="cat category-link" href="#resultats" data-category="maison"><div class="cat-icon">🛋️</div><div><h3>Maison</h3><small>Mobilier, déco, jardin et équipement</small></div></a>
         <a class="cat category-link" href="#resultats" data-category="mode"><div class="cat-icon">👗</div><div><h3>Mode</h3><small>Vêtements, chaussures et accessoires</small></div></a>
-        <a class="cat category-link category-premium" href="#resultats" data-category="emploi"><div class="cat-icon">💼</div><div><h3>Emploi & Services</h3><small>Emploi, artisans et services professionnels</small></div></a>
+        <a class="cat category-link category-premium" href="#resultats" data-category="emploi"><div class="cat-icon">💼</div><div><h3>Emploi</h3><small>CDI, CDD, intérim, stages et alternance</small></div></a>
+        <a class="cat category-link" href="#resultats" data-category="services"><div class="cat-icon">🛠️</div><div><h3>Services</h3><small>Artisans, dépannage, cours et prestations</small></div></a>
       </div>
     </div>
   </section>
@@ -555,7 +567,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
               <option value="maison">Maison</option>
               <option value="mode">Mode</option>
               <option value="emploi">Emploi</option>
-              <option value="services">Services (Emploi & Services)</option>
+              <option value="services">Services</option>
               <option value="autres">Autres</option>
             </select>
           </div>
