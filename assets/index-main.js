@@ -3785,6 +3785,12 @@ function renderAds(){
       :(activeCategory?catLabel(activeCategory):'Les annonces'))));
   const waitingImmoRadius=(($('#filterCategory')?.value||activeCategory||'')==='immobilier'&&Number($('#filterImmoRadius')?.value||0)&&($('#searchCity')?.value||'').trim()&&!immoRadiusState.ready);
   $('#resultSubtitle').textContent=waitingImmoRadius?'Calcul du rayon autour de la ville…':(moderationMode?(ads.length?`${ads.length} annonce${ads.length>1?'s':''} nécessite${ads.length>1?'nt':''} votre décision.`:'Tout est automatisé : aucune annonce ne nécessite votre intervention.'):(ads.length?(ads.length>=30?`${ads.length} annonce${ads.length>1?'s':''} affichée${ads.length>1?'s':''}.`:'Les dernières annonces publiées.'):'Aucune annonce ne correspond pour le moment.'));
+  const emptyCat=$('#filterCategory')?.value||activeCategory||'';
+  if(!ads.length&&!moderationMode&&!onlyMine&&!favoritesMode&&(emptyCat==='vehicules'||emptyCat==='immobilier')){
+    const proWord=emptyCat==='immobilier'?'agence immobilière':'garage';
+    grid.innerHTML='<div class="empty-state" style="grid-column:1/-1"><b>Les premières annonces arrivent</b>Vous êtes un '+proWord+' ? Soyez parmi les premiers professionnels de votre région : vos annonces seront les premières vues.<br><a class="btn primary" style="margin-top:12px;display:inline-flex" href="pro-fondateur.html">⭐ Réserver ma place Fondateur</a><br><button type="button" class="btn" style="margin-top:8px" onclick="document.querySelector(\'.publish-trigger\')?.click()">＋ Particulier : déposer une annonce gratuitement</button></div>';
+    return;
+  }
   if(!ads.length){grid.innerHTML=moderationMode?'<div class="empty-state" style="grid-column:1/-1"><b>Rien à modérer ✓</b>Les annonces propres sont publiées automatiquement. Seules les exceptions apparaissent ici.</div>':'<div class="empty-state" style="grid-column:1/-1"><b>Soyez le premier à publier ici</b>Abracadeal vient d’ouvrir : une annonce déposée maintenant sera en tête de liste.<br><button type="button" class="btn primary" style="margin-top:12px" onclick="document.querySelector(\'.publish-trigger\')?.click()">＋ Déposer une annonce gratuitement</button></div>';return}
   grid.innerHTML=ads.map(a=>{
     const photos=visiblePhotosFor(a);
