@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 22/10/2026 — Claude — Prospection : 35 mails/jour/boîte + contrôle du domaine avant envoi
+- **Changé (fonction `prospect-mailer` v7, déployée) :** avant chaque 1er mail, vérification DNS du domaine du destinataire (MX, ou A à défaut). Domaine inexistant → pas d'envoi, prospect passé en erreur « Domaine inexistant ». Panne DNS passagère → envoi normal. Relances non concernées.
+- **Changé (base) :** `private.prospect_mailboxes.daily_limit` 25 → 35 pour contact@ et partenaires@ (70 mails/jour au total). Les 2 adresses @ymf-reseau.com (domaine inexistant, retour OVH du 22/10) passées en erreur.
+- **Pourquoi :** Anthony veut envoyer plus. ~5 % d'erreurs sur les 221 premiers envois ; il faut limiter les retours avant de monter en volume. Prochaine marche possible : 50/boîte si les erreurs restent sous 2 % pendant une semaine.
+
 ### 22/10/2026 — Claude — Mails de prospection : bloc « Pas le temps ? » plus visible
 - **Changé (base, `supabase/2026-10-22-prospect-mailer-pas-le-temps-visible.sql`, appliqué) :** dans les 6 modèles de premier mail et le modèle par défaut, le paragraphe « Pas le temps ? » devient un bloc encadré par deux lignes ━━━, titre « PAS LE TEMPS ? ON S'OCCUPE DE TOUT, GRATUITEMENT. » et 3 étapes numérotées (variante A : 1. créer son compte Pro via le lien, 2. répondre avec l'adresse du site, 3. import ; variante B sans lien : 1. répondre, 2. on envoie le lien, 3. import). Relances inchangées.
 - **Pourquoi :** Anthony trouvait le paragraphe peu compréhensible et peu visible. Mails en texte brut, donc pas d'encadré coloré HTML.

@@ -126,6 +126,20 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
     `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`;
   return { data, msgId };
 }
+// v6 22/10/2026 : avant un 1er mail, on vérifie que le domaine du destinataire existe (MX, ou A à défaut).
+// Domaine inexistant → pas d'envoi (évite les retours « Host not found » qui abîment la réputation des boîtes).
+// Panne DNS passagère (autre erreur) → on envoie quand même.
+async function domainReceivesMail(email: string) {
+  const domain = email.split("@")[1] || "";
+  if (!domain) return false;
+  const missing = (e: unknown) => e instanceof Deno.errors.NotFound || /no record|nxdomain|not found/i.test(String((e as Error)?.message || e));
+  let notFound = 0;
+  for (const type of ["MX", "A"] as const) {
+    try { if ((await Deno.resolveDns(domain, type)).length) return true; notFound++; }
+    catch (e) { if (missing(e)) notFound++; else return true; }
+  }
+  return notFound < 2;
+}
 async function creds(mailbox: string): Promise<Creds> {
   const { data, error } = await admin.rpc("prospect_mailer_creds", { p_email: mailbox });
   if (error || !data) throw new Error("Adresse d'envoi inconnue");
@@ -196,6 +210,7 @@ Deno.serve(async (req) => {
       try {
         const { data: row } = await admin.from("prospection_prospects").select("ab_variant").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
+        if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         const c = await creds(j.mailbox);
         const tpl = await templates(j.category || "", followup, variant);
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null);
