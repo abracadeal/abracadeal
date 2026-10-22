@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 22/10/2026 — Claude — Mails de prospection : « Pas le temps ? »
+- **Changé (base, `private.prospect_mailer_settings`) :** ajout dans les 6 modèles de premier mail (Garage auto, Concession moto, Agence immobilière, variantes A et B) et dans le modèle par défaut du paragraphe : « Pas le temps ? Répondez simplement à ce mail avec l'adresse de votre site : avec votre accord, nous mettons votre stock en ligne pour vous. Vous n'aurez plus qu'à le mettre à jour ensuite. » Relances inchangées.
+- **Pourquoi :** demande d'Anthony, lever le frein « pas le temps » des petits garages.
+- **À savoir :** les réponses arrivent dans les boîtes contact@ / partenaires@. Importer uniquement depuis le site du pro (pas depuis Leboncoin / La Centrale, dont les conditions l'interdisent), et garder sa réponse comme preuve d'accord.
+
 ### 22/10/2026 — Claude — Catégories Véhicules / Immobilier vides : message pour les pros
 - **Changé :** `assets/index-main.js` : quand Véhicules (ou une sous-catégorie) ou Immobilier n'a aucune annonce, le message « Soyez le premier à publier ici » est remplacé par « Les premières annonces arrivent — Vous êtes un garage / une agence immobilière ? Soyez parmi les premiers pros de votre région : vos annonces seront les premières vues » + bouton vers `pro-fondateur.html`, et un bouton secondaire pour les particuliers. `index.html` : version du script passée à `20261022-vide-pros`. `pro-fondateur.html` : même phrase « premiers professionnels de votre région » ajoutée dans le bloc Offre Fondateurs.
 - **Pourquoi :** le site n'a pas encore de voitures ; transformer le vide en argument pour les premiers garages.
