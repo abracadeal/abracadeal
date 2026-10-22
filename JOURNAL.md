@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 22/10/2026 — Claude — Mailer de prospection relancé seul
+- **Base (`supabase/2026-10-22-prospect-mailer-relance.sql`) :** `sending_enabled = true` et tâche cron `abracadeal-prospect-mailer` recréée toutes les 5 min (au lieu de 2). Envois lundi → samedi, 9 h → 18 h, 50/jour (2 × 25).
+- **Pourquoi :** accord d'Anthony. Le mailer n'était pas en cause dans la saturation du 21/10.
+- **Toujours arrêtés :** les robots de recherche (n°21, 22, 24, 25, 26). Ne pas les relancer chaque minute ; s'ils reviennent un jour : fréquence basse, hors heures d'envoi, un seul à la fois.
+
 ### 22/10/2026 — Claude — Bilan de l'incident « robots qui saturent Supabase » (21/10)
 - **Constat :** dans la nuit du 20 au 21/10 (≈ 2 h → 10 h, heure de Paris), les robots de prospection lancés chaque minute (`prospect-qualifier` n°21, `prospect-sirene-import` n°22, `prospect-email-crawler` n°24, `prospect-domain-guess` n°26, + `promote_annuaire_leads` n°25) ont saturé la base : ~350 tâches cron sur 420 en « job startup timeout » par heure, ~1 000 connexions refusées, requêtes coupées par « statement timeout » → connexion au site impossible.
 - **Déjà fait le 21/10 vers 10 h (non noté au journal) :** ces tâches ont été supprimées de `cron.job`, ainsi que le mailer `abracadeal-prospect-mailer` (n°30, arrêté le 20/10 à 0 h 10). Depuis le 21/10 11 h : 0 échec cron, aucune erreur base, connexion OK.
