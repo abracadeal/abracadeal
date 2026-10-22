@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 22/10/2026 — Claude — Bilan de l'incident « robots qui saturent Supabase » (21/10)
+- **Constat :** dans la nuit du 20 au 21/10 (≈ 2 h → 10 h, heure de Paris), les robots de prospection lancés chaque minute (`prospect-qualifier` n°21, `prospect-sirene-import` n°22, `prospect-email-crawler` n°24, `prospect-domain-guess` n°26, + `promote_annuaire_leads` n°25) ont saturé la base : ~350 tâches cron sur 420 en « job startup timeout » par heure, ~1 000 connexions refusées, requêtes coupées par « statement timeout » → connexion au site impossible.
+- **Déjà fait le 21/10 vers 10 h (non noté au journal) :** ces tâches ont été supprimées de `cron.job`, ainsi que le mailer `abracadeal-prospect-mailer` (n°30, arrêté le 20/10 à 0 h 10). Depuis le 21/10 11 h : 0 échec cron, aucune erreur base, connexion OK.
+- **Conséquence :** plus aucun mail de prospection depuis le 20/10 (50 envoyés le 20/10, 0 le 21 et le 22). File : 8 488 pros en `ready`.
+- **Rappel :** la tâche n°34 (retour du mix 32/34/34 ce soir 18 h 05) tourne toujours, sans effet tant que le mailer est arrêté.
+- **À décider (Anthony) :** relancer le mailer seul (léger), les robots de recherche restent arrêtés.
+
 ### 20/10/2026 — Claude — « Emploi & Services » séparé en « Emploi » et « Services »
 - **Changé :**
   - `index.html` : carte d'accueil « Emploi & Services » remplacée par deux cartes « Emploi » (💼) et « Services » (🛠️) ; menu du haut séparé en deux entrées, chacune avec « Tous les emplois » / « Tous les services » et toutes ses sous-catégories (Services : ajout de Transport / Livraison, Informatique, Beauté / Bien-être, Événementiel) ; filtre « Services (Emploi & Services) » renommé « Services ».
