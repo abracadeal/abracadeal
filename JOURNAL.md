@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 22/10/2026 — Claude — Prospection : relances et premiers mails mélangés
+- **Changé (base, `supabase/2026-10-22-prospect-mailer-mix-relances.sql`, appliqué) :** `prospect_mailer_claim()` alterne désormais premiers mails et relances, moitié-moitié par boîte et par jour (avant : relances toujours prioritaires). Si l'un des deux manque, l'autre prend la place. Quotas inchangés (25/jour/boîte, étalés 9 h → 18 h).
+- **Pourquoi :** ~190 relances en attente bloquaient les nouveaux premiers mails (avec le paragraphe « Pas le temps ? ») pendant 3-4 jours. Accord d'Anthony.
+
 ### 22/10/2026 — Claude — Mails de prospection : « Pas le temps ? »
 - **Changé (base, `private.prospect_mailer_settings`) :** ajout dans les 6 modèles de premier mail (Garage auto, Concession moto, Agence immobilière, variantes A et B) et dans le modèle par défaut du paragraphe : « Pas le temps ? Répondez simplement à ce mail avec l'adresse de votre site : avec votre accord, nous mettons votre stock en ligne pour vous. Vous n'aurez plus qu'à le mettre à jour ensuite. » Relances inchangées.
 - **Pourquoi :** demande d'Anthony, lever le frein « pas le temps » des petits garages.
