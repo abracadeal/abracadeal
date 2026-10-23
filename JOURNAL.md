@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 23/10/2026 — Claude — Pages Google (annonce, catégories/villes, /auto/) : même affichage que le site
+- **Changé :** `scripts/build_share_pages.py` (VERSION 6, toutes les pages régénérées) :
+  - les visiteurs qui ouvrent `annonce/<id>/` (depuis Google, WhatsApp, Facebook…) sont envoyés tout de suite sur la vraie fiche `/?annonce=<id>` (même fiche que sur le site, avec « Voir le numéro » / « Message ») ; les robots (Google, Bing, aperçus WhatsApp/Facebook…) continuent de lire la page statique (rendu dynamique, même contenu) ;
+  - sur les pages catégories/villes, les vignettes ouvrent directement la vraie fiche pour les visiteurs (le lien reste `/annonce/<id>/` pour Google) ;
+  - nouvelle apparence de ces pages : polices DM Sans / Fraunces, en-tête du site (logo, « Achetez - Vendez », bouton rose « Déposer une annonce »), couleurs et vignettes du site, 2 colonnes sur mobile.
+- `scripts/build_auto_seo_pages.py` : pages `/auto/` alignées (même en-tête, styles et liens directs).
+- **Pourquoi :** Anthony n'aimait pas que ces pages s'ouvrent avec un affichage différent du site.
+- **À savoir :** la liste des robots est `BOT_RE` dans `build_share_pages.py`. Page « vendue / expirée » : pas de redirection (la fiche n'existe plus), seulement le nouveau style. Les pages catégories ne s'ouvrent pas encore dans l'accueil filtré (le site ne lit pas de catégorie dans l'adresse) : piste possible plus tard.
+
 ### 22/10/2026 — Claude — Prospection : 35 mails/jour/boîte + contrôle du domaine avant envoi
 - **Changé (fonction `prospect-mailer` v7, déployée) :** avant chaque 1er mail, vérification DNS du domaine du destinataire (MX, ou A à défaut). Domaine inexistant → pas d'envoi, prospect passé en erreur « Domaine inexistant ». Panne DNS passagère → envoi normal. Relances non concernées.
 - **Changé (base) :** `private.prospect_mailboxes.daily_limit` 25 → 35 pour contact@ et partenaires@ (70 mails/jour au total). Les 2 adresses @ymf-reseau.com (domaine inexistant, retour OVH du 22/10) passées en erreur.

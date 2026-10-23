@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "5"  # à incrémenter pour forcer la régénération de toutes les pages
+VERSION = "6"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -364,25 +364,54 @@ def crumbs_html(crumbs):
     return '<nav class="crumbs" aria-label="Fil d’Ariane">' + " › ".join(parts + [e(crumbs[-1][0])]) + "</nav>"
 
 
-CSS = """*{box-sizing:border-box}body{margin:0;background:#f7f3fa;color:#21132d;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
-a{color:#6f218c}header{background:#24102f;padding:12px 16px}header a{color:#fff;text-decoration:none;font-weight:800;font-size:1.15rem;display:inline-flex;align-items:center;gap:8px}
-header img{width:30px;height:30px;border-radius:8px}main{max-width:900px;margin:0 auto;padding:16px}
-nav.crumbs{font-size:.85rem;color:#6b5a78;margin:4px 0 12px}nav.crumbs a{color:#6b5a78}
-.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -16px 16px;padding:0 16px;scrollbar-width:thin}
-.gallery img{flex:0 0 86%;width:86%;height:min(58vh,440px);object-fit:contain;border-radius:12px;background:#ece3f2;scroll-snap-align:center}
+FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
+         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
+         '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">')
+# Robots (Google, Bing, aperçus WhatsApp/Facebook…) : ils lisent la page statique.
+BOT_RE = ("bot|crawl|spider|slurp|google|bing|yandex|baidu|duckduck|qwant|ecosia|seznam|petal|facebookexternalhit|"
+          "facebot|whatsapp|twitter|linkedin|telegram|discord|skype|slack|pinterest|embedly|preview|lighthouse|"
+          "pagespeed|headless|ahrefs|semrush|applebot|validator")
+# Visiteurs réels : ouverts directement dans la vraie fiche du site (même affichage que le reste d'Abracadeal).
+# Même contenu que la page statique (rendu dynamique), pas de cloaking.
+HUMAN_TO_APP = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
+                "document.documentElement.style.visibility='hidden';"
+                "location.replace('/?annonce='+encodeURIComponent('{lid}'));}catch(e){}})();</script>")
+HUMAN_LINKS = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
+               "document.addEventListener('DOMContentLoaded',function(){var a=document.querySelectorAll('a[href^=\"/annonce/\"]');"
+               "for(var i=0;i<a.length;i++){var m=a[i].getAttribute('href').match(/^\\/annonce\\/([0-9a-f-]{36})\\/$/i);"
+               "if(m)a[i].setAttribute('href','/?annonce='+m[1]);}});}catch(e){}})();</script>")
+HEADER = ('<header class="site"><div class="in"><a class="brand" href="/" aria-label="Accueil Abracadeal">'
+          '<img src="/icon-192.png" alt="" width="38" height="38"><span><strong>Abracadeal</strong><small>Achetez - Vendez</small></span></a>'
+          '<a class="dep" href="/?deposer=1" rel="nofollow">Déposer une annonce</a></div></header>')
+
+
+CSS = """*{box-sizing:border-box}body{margin:0;background:#faf7fd;color:#22162f;font-family:'DM Sans',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+a{color:#8b2aa6}
+header.site{position:sticky;top:0;z-index:20;background:rgba(27,13,45,.96);border-bottom:1px solid rgba(255,255,255,.08)}
+header.site .in{max-width:1180px;margin:0 auto;padding:0 14px;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header.site .brand{color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+header.site .brand img{width:38px;height:38px;border-radius:12px}
+header.site .brand strong{display:block;font-family:Fraunces,Georgia,serif;font-size:1.3rem;line-height:1.05}
+header.site .brand small{display:block;color:#cfa8ef;font-size:.72rem;font-weight:600}
+header.site .dep{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:13px;background:linear-gradient(135deg,#ec409d,#ff69bd);color:#fff;font-weight:700;text-decoration:none;font-size:.92rem;white-space:nowrap}
+main{max-width:1180px;margin:0 auto;padding:16px 14px}
+nav.crumbs{font-size:.85rem;color:#756a7e;margin:4px 0 12px}nav.crumbs a{color:#756a7e}
+.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -14px 16px;padding:0 14px;scrollbar-width:thin}
+.gallery img{flex:0 0 86%;width:86%;height:min(58vh,440px);object-fit:contain;border-radius:16px;background:#1b0d2d;scroll-snap-align:center}
 .gallery img:only-child{flex-basis:100%;width:100%}
 @media(min-width:700px){.gallery{margin:0 0 16px;padding:0}.gallery img{flex-basis:62%;width:62%}}
-.gallery-hint{font-size:.8rem;color:#6b5a78;margin:-10px 0 14px}
-h1{font-size:1.5rem;line-height:1.25;margin:0 0 6px}.price{font-size:1.6rem;font-weight:850;color:#6f218c;margin:0}
-.where{color:#4a3a57;margin:4px 0 14px}.card{background:#fff;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 2px 10px rgba(36,16,47,.06)}
-.cta{display:block;text-align:center;background:#6f218c;color:#fff;font-weight:800;padding:14px;border-radius:12px;text-decoration:none;margin:14px 0}
-table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid #efe6f4;vertical-align:top}th{color:#6b5a78;font-weight:600;width:45%}
-.desc{white-space:pre-line;overflow-wrap:anywhere}h2{font-size:1.1rem;margin:0 0 8px}footer{text-align:center;font-size:.8rem;color:#6b5a78;padding:24px 16px}
-.badge{display:inline-block;background:#f1e7f5;color:#6f218c;font-weight:700;font-size:.78rem;padding:3px 9px;border-radius:999px;margin-bottom:8px}
-.intro{color:#4a3a57;margin:0 0 14px}.list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:12px}
-.list a{display:flex;flex-direction:column;background:#fff;border-radius:14px;overflow:hidden;text-decoration:none;color:#21132d;box-shadow:0 2px 10px rgba(36,16,47,.06);height:100%}
-.list img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#e9dff0}.list .t{font-weight:700;padding:10px 12px 2px}.list .p{color:#6f218c;font-weight:800;padding:0 12px}.list .c{color:#6b5a78;font-size:.85rem;padding:2px 12px 12px}
-.links{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none;margin:0}.links a{display:inline-block;background:#fff;border:1px solid #e4d6ec;border-radius:999px;padding:6px 12px;text-decoration:none;font-size:.9rem}"""
+.gallery-hint{font-size:.8rem;color:#756a7e;margin:-10px 0 14px}
+h1{font-family:Fraunces,Georgia,serif;font-size:1.65rem;line-height:1.2;margin:0 0 6px;color:#26122f}.price{font-size:1.6rem;font-weight:700;color:#8b2aa6;margin:0}
+.where{color:#756a7e;margin:4px 0 14px}.card{background:#fff;border:1px solid #ebe4ef;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 7px 20px rgba(35,17,48,.055)}
+.cta{display:block;text-align:center;background:linear-gradient(135deg,#ec409d,#ff69bd);color:#fff;font-weight:700;padding:14px;border-radius:14px;text-decoration:none;margin:14px 0}
+table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 4px;border-bottom:1px solid #ece6f1;vertical-align:top}th{color:#756a7e;font-weight:600;width:45%}
+.desc{white-space:pre-line;overflow-wrap:anywhere}h2{font-family:Fraunces,Georgia,serif;font-size:1.2rem;margin:0 0 8px;color:#26122f}footer{text-align:center;font-size:.8rem;color:#756a7e;padding:24px 16px}
+.badge{display:inline-block;background:#f4eaf8;color:#8b2aa6;font-weight:700;font-size:.78rem;padding:3px 10px;border-radius:999px;margin-bottom:8px}
+.intro{color:#756a7e;margin:0 0 14px}.list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+@media(max-width:620px){.list{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}h1{font-size:1.4rem}}
+.list a{display:flex;flex-direction:column;background:#fff;border:1px solid #ebe4ef;border-radius:16px;overflow:hidden;text-decoration:none;color:#26122f;box-shadow:0 7px 20px rgba(35,17,48,.055);height:100%}
+.list img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#f5eff7}.list .t{font-weight:700;padding:10px 12px 2px;line-height:1.25;font-size:.95rem}.list .p{color:#8b2aa6;font-weight:800;padding:2px 12px 0}.list .c{color:#756a7e;font-size:.82rem;padding:2px 12px 12px}
+.links{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none;margin:0}.links a{display:inline-block;background:#fff;border:1px solid #e4d6ec;border-radius:999px;padding:7px 13px;text-decoration:none;font-size:.9rem;color:#4e2c62;font-weight:600}"""
 
 
 def page_head(title, desc, url, robots="index,follow,max-image-preview:large", og_image=None, extra=""):
@@ -403,10 +432,12 @@ def page_head(title, desc, url, robots="index,follow,max-image-preview:large", o
 <meta property="og:description" content="{e(desc)}">
 <meta property="og:url" content="{e(url)}">
 {og}<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+{FONTS}
 <style>{CSS}</style>
+{HUMAN_LINKS}
 {extra}
 </head><body>
-<header><a href="{SITE}/"><img src="/icon-192.png" alt="" width="30" height="30">Abracadeal</a></header>
+{HEADER}
 <main>
 """
 
@@ -470,6 +501,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     rows = "".join(f"<tr><th>{e(k)}</th><td>{e(v)}</td></tr>" for k, v in specs)
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
+{HUMAN_TO_APP.replace("{lid}", e(lid))}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="index,follow,max-image-preview:large">
 <title>{e(head_title)} | Abracadeal</title>
@@ -492,10 +524,12 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
 <meta name="twitter:description" content="{e(og_desc)}">
 <meta name="twitter:image" content="{e(image)}">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
+{FONTS}
 <style>{CSS}</style>
+{HUMAN_LINKS}
 {json_ld(listing, meta, photos, page_url, desc_src or head_title, crumbs)}
 </head><body>
-<header><a href="{SITE}/"><img src="/icon-192.png" alt="" width="30" height="30">Abracadeal</a></header>
+{HEADER}
 <main>
 {crumbs_html(crumbs)}
 {f'<div class="gallery">{gallery}</div>' if gallery else ''}
