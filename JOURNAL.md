@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 23/10/2026 — ChatGPT — Mails de prospection plus percutants
+- **Changé :** nouveaux premiers mails (6 modèles + défaut). Accroche « Et si vos véhicules / motos / biens étaient vus par plus d’acheteurs… », plus de « Marre de payer », plus de jargon XML/CSV/JSON. Étapes « Pas le temps ? » qui expliquent la reprise des annonces depuis le site du pro, puis la simple mise à jour depuis l’espace Pro. Lien `https://abracadeal.fr/pro-fondateur.html` inchangé, donc le suivi des clics fonctionne toujours.
+- **Pourquoi :** demande d’Anthony, un mail plus percutant et plus clair.
+- **À savoir :** anciens mails sauvegardés dans `private.prospect_mailer_templates_backup`.
+
 ### 23/10/2026 — Claude — Pages catégories/villes Google : ouverture sur l'accueil filtré
 - **Changé :**
   - `assets/index-main.js` (v=20261023-url-cat, `index.html` mis à jour) : l'accueil lit `?categorie=` (vehicules, immobilier, hightech, maison, mode, emploi, services, autres), `&sous=` (sous-catégorie véhicules : voitures, motos, utilitaires…) et `&ville=` → même affichage que le clic sur une catégorie du menu (filtre ville dans « Ville »). Appliqué au démarrage et après la « stabilisation » de 700 ms (qui remettait les filtres à zéro). Ces paramètres sont retirés de l'adresse dès que le visiteur change de catégorie.
