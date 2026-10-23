@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 23/10/2026 — Claude — Pages catégories/villes Google : ouverture sur l'accueil filtré
+- **Changé :**
+  - `assets/index-main.js` (v=20261023-url-cat, `index.html` mis à jour) : l'accueil lit `?categorie=` (vehicules, immobilier, hightech, maison, mode, emploi, services, autres), `&sous=` (sous-catégorie véhicules : voitures, motos, utilitaires…) et `&ville=` → même affichage que le clic sur une catégorie du menu (filtre ville dans « Ville »). Appliqué au démarrage et après la « stabilisation » de 700 ms (qui remettait les filtres à zéro). Ces paramètres sont retirés de l'adresse dès que le visiteur change de catégorie.
+  - `scripts/build_share_pages.py` (VERSION 7) : les visiteurs qui ouvrent `annonces/…` sont envoyés sur l'accueil filtré (ex. `annonces/maison/` → `/?categorie=maison`, `annonces/vehicules/cannes/` → `/?categorie=vehicules&ville=Cannes`, `annonces/locations-vacances/` → `vacances.html`, `annonces/` → accueil). Les robots lisent toujours la page statique (`HUB_TO_APP`, `app_target()`).
+- **Pourquoi :** Anthony : un clic sur « Maison et jardin » dans Google doit ouvrir la vraie page Maison du site.
+- **À savoir :** les pages `/auto/` (marques, modèles) restent des pages statiques (style du site) : le site n'a pas encore de filtre marque/modèle dans l'adresse.
+
 ### 23/10/2026 — Claude — Pages Google (annonce, catégories/villes, /auto/) : même affichage que le site
 - **Changé :** `scripts/build_share_pages.py` (VERSION 6, toutes les pages régénérées) :
   - les visiteurs qui ouvrent `annonce/<id>/` (depuis Google, WhatsApp, Facebook…) sont envoyés tout de suite sur la vraie fiche `/?annonce=<id>` (même fiche que sur le site, avec « Voir le numéro » / « Message ») ; les robots (Google, Bing, aperçus WhatsApp/Facebook…) continuent de lire la page statique (rendu dynamique, même contenu) ;

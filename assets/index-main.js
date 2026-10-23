@@ -5273,6 +5273,7 @@ window.deleteAd=async id=>{
 
 
 async function navigateCatalogue(category='',subcategory='',target='#resultats'){
+  try{if(/[?&](categorie|ville)=/.test(location.search))history.replaceState(null,'',location.pathname+location.hash);}catch(_){}
   resetSearchFilters();
   activeCategory=category;activeVehicleSubcategory=subcategory;
   syncFilterCategory(category,subcategory);refreshFilterCount();
@@ -5620,10 +5621,41 @@ const passwordRecovery = (()=>{
   return {handleAuth};
 })();
 
+// 23/10/2026 : arrivée depuis une page Google « annonces/<catégorie>/<ville>/ » :
+// /?categorie=maison&ville=Paris ouvre l'accueil déjà filtré (même affichage que le menu Catégories).
+const URL_CATEGORIES=new Set(['vehicules','immobilier','vacances','hightech','maison','mode','emploi','services','autres']);
+function urlCatalogueFilters(){
+  try{
+    const qs=new URLSearchParams(location.search);
+    if(qs.get('annonce')||qs.get('admin_preview'))return null;
+    const cat=(qs.get('categorie')||'').trim().toLowerCase();
+    const sub=(qs.get('sous')||'').trim().toLowerCase().replace(/[^a-z-]/g,'').slice(0,40);
+    const ville=(qs.get('ville')||'').trim().slice(0,80);
+    if(!URL_CATEGORIES.has(cat)&&!ville)return null;
+    return {cat:URL_CATEGORIES.has(cat)?cat:'',sub:cat==='vehicules'?sub:'',ville};
+  }catch(_){return null}
+}
+function applyUrlCatalogueFilters(){
+  const f=urlCatalogueFilters();
+  if(!f)return false;
+  activeCategory=f.cat;activeVehicleSubcategory=f.sub;
+  syncFilterCategory(f.cat,f.sub);
+  if(f.ville&&$('#searchCity'))$('#searchCity').value=f.ville;
+  refreshFilterCount();
+  return true;
+}
+let urlCatalogueScrolled=false;
+function scrollToUrlCatalogue(){
+  if(urlCatalogueScrolled||!urlCatalogueFilters())return;
+  urlCatalogueScrolled=true;
+  document.querySelector('#resultats')?.scrollIntoView({block:'start'});
+}
+
 if(sb){
   // 18/10/2026 : affichage plus rapide sur mobile — le catalogue public s'affiche dès qu'il arrive,
   // sans attendre la vérification du compte ; il est ensuite rafraîchi normalement.
   try{Promise.resolve(getPublicCatalog()).then(()=>{if(!catalogLoadedOnce&&!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});});}catch(_){}
+  try{applyUrlCatalogueFilters();}catch(_){}
   (async()=>{
     try{await refreshAuth();}
     catch(error){console.error('Initialisation du compte impossible',error);}
@@ -5638,7 +5670,9 @@ if(sb){
       try{
         if(!onlyMine&&!favoritesMode&&!moderationMode){
           resetSearchFilters();
+          const fromUrl=applyUrlCatalogueFilters();
           await loadAds();
+          if(fromUrl)scrollToUrlCatalogue();
         }
       }catch(error){
         console.error('Stabilisation du catalogue impossible',error);

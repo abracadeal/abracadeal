@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "6"  # à incrémenter pour forcer la régénération de toutes les pages
+VERSION = "7"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -380,6 +380,34 @@ HUMAN_LINKS = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.user
                "document.addEventListener('DOMContentLoaded',function(){var a=document.querySelectorAll('a[href^=\"/annonce/\"]');"
                "for(var i=0;i<a.length;i++){var m=a[i].getAttribute('href').match(/^\\/annonce\\/([0-9a-f-]{36})\\/$/i);"
                "if(m)a[i].setAttribute('href','/?annonce='+m[1]);}});}catch(e){}})();</script>")
+# Pages catégories / villes : les visiteurs réels ouvrent l'accueil du site déjà filtré
+# (même affichage que le menu Catégories) ; les robots lisent la page statique.
+HUB_TO_APP = {"voitures-occasion": ("vehicules", "voitures"), "motos": ("vehicules", "motos"),
+              "utilitaires": ("vehicules", "utilitaires"), "vehicules": ("vehicules", ""),
+              "immobilier": ("immobilier", ""), "high-tech": ("hightech", ""), "maison": ("maison", ""),
+              "mode": ("mode", ""), "emploi": ("emploi", ""), "services": ("services", "")}
+
+
+def app_target(cat_slug=None, city_name=None):
+    if cat_slug == "locations-vacances":
+        return "/vacances.html"
+    q = []
+    if cat_slug in HUB_TO_APP:
+        c, sub = HUB_TO_APP[cat_slug]
+        q.append(("categorie", c))
+        if sub:
+            q.append(("sous", sub))
+    if city_name:
+        q.append(("ville", city_name))
+    return "/" + ("?" + urllib.parse.urlencode(q) if q else "")
+
+
+def human_redirect(target):
+    return ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
+            "document.documentElement.style.visibility='hidden';"
+            "location.replace(" + json.dumps(target) + ");}catch(e){}})();</script>")
+
+
 HEADER = ('<header class="site"><div class="in"><a class="brand" href="/" aria-label="Accueil Abracadeal">'
           '<img src="/icon-192.png" alt="" width="38" height="38"><span><strong>Abracadeal</strong><small>Achetez - Vendez</small></span></a>'
           '<a class="dep" href="/?deposer=1" rel="nofollow">Déposer une annonce</a></div></header>')
@@ -414,12 +442,13 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 4px;
 .links{display:flex;flex-wrap:wrap;gap:8px;padding:0;list-style:none;margin:0}.links a{display:inline-block;background:#fff;border:1px solid #e4d6ec;border-radius:999px;padding:7px 13px;text-decoration:none;font-size:.9rem;color:#4e2c62;font-weight:600}"""
 
 
-def page_head(title, desc, url, robots="index,follow,max-image-preview:large", og_image=None, extra=""):
+def page_head(title, desc, url, robots="index,follow,max-image-preview:large", og_image=None, extra="", redirect=None):
     e = lambda s: html.escape(str(s), quote=True)
     og = (f'<meta property="og:image" content="{e(og_image)}">\n'
           f'<meta name="twitter:card" content="summary_large_image">\n') if og_image else ""
     return f"""<!doctype html>
 <html lang="fr"><head><meta charset="utf-8">
+{human_redirect(redirect) if redirect else ''}
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="{robots}">
 <title>{e(title)}</title>
@@ -568,7 +597,7 @@ def listing_card(item):
             f'<span class="c">{e(l.get("city") or "")}</span></a></li>')
 
 
-def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links):
+def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links, redirect=None):
     e = lambda s: html.escape(str(s), quote=True)
     robots = "index,follow" if items else "noindex,follow"
     shown = items[:MAX_HUB_LISTINGS]
@@ -587,7 +616,7 @@ def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links):
     if links:
         body.append(f'<section class="card"><h2>{e(links_title)}</h2><ul class="links">'
                     + "".join(f'<li><a href="{e(u)}">{e(n)}</a></li>' for n, u in links) + "</ul></section>")
-    return page_head(title, desc, url, robots=robots, extra=extra) + "\n".join(body) + "\n" + PAGE_FOOT
+    return page_head(title, desc, url, robots=robots, extra=extra, redirect=redirect) + "\n".join(body) + "\n" + PAGE_FOOT
 
 
 def build_hubs(items):
@@ -631,7 +660,7 @@ def build_hubs(items):
                           "Toutes les annonces en ligne sur Abracadeal, classées par catégorie et par ville : voitures d’occasion, "
                           "motos, immobilier, locations de vacances, high-tech et bien plus, publiées par des particuliers et des professionnels.",
                           "Parcourez les petites annonces Abracadeal par catégorie (voitures d’occasion, motos, immobilier...) et par ville (Cannes, Nice, Marseille...).",
-                          hub_url(), [home, root], items, "Catégories et villes", links), bool(items))
+                          hub_url(), [home, root], items, "Catégories et villes", links, redirect=app_target()), bool(items))
 
     # Catégories
     for c in cats:
@@ -639,7 +668,7 @@ def build_hubs(items):
         its = by_cat[c]
         pages[c] = (hub_page(f"{name} : annonces entre particuliers et pros | Abracadeal", f"{name}",
                              intro, f"{name} : {len(its)} annonce{'s' if len(its) > 1 else ''} en ligne sur Abracadeal. {intro[:110].rsplit(' ', 1)[0]}…",
-                             hub_url(c), [home, root, (name, hub_url(c))], its, f"{name} par ville", city_links(c)), bool(its))
+                             hub_url(c), [home, root, (name, hub_url(c))], its, f"{name} par ville", city_links(c), redirect=app_target(c)), bool(its))
 
     # Villes et catégorie + ville
     for k, cname in cities.items():
@@ -655,7 +684,7 @@ def build_hubs(items):
                              f"Petites annonces à {cname} : {len(its)} annonce{'s' if len(its) > 1 else ''} de particuliers et de professionnels "
                              f"(voitures, motos, immobilier, high-tech...) sur Abracadeal.",
                              hub_url(None, k), [home, root, (f"Annonces à {cname}", hub_url(None, k))], its,
-                             f"Rubriques à {cname}", cat_links), bool(its))
+                             f"Rubriques à {cname}", cat_links, redirect=app_target(None, cname)), bool(its))
         for c in cats:
             sub = [it for it in its if c in it["cats"]]
             if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
@@ -667,7 +696,7 @@ def build_hubs(items):
                 f"{name} à {cname} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural} publiée{'s' if len(sub) > 1 else ''} "
                 f"par des particuliers et des professionnels sur Abracadeal.",
                 hub_url(c, k), [home, root, (name, hub_url(c)), (cname, hub_url(c, k))], sub,
-                f"Autres rubriques à {cname}", [(n, u) for n, u in cat_links if u != hub_url(c, k)]), bool(sub))
+                f"Autres rubriques à {cname}", [(n, u) for n, u in cat_links if u != hub_url(c, k)], redirect=app_target(c, cname)), bool(sub))
 
     # Fil d'Ariane de chaque annonce : catégorie la plus précise, puis ville si elle a sa page
     for it in items:
