@@ -1,4 +1,4 @@
--- ⚠️ PAS ENCORE APPLIQUÉ (23/10/2026 11:05) : exécution annulée, en attente de l'accord d'Anthony. Ne pas exécuter sans son feu vert.
+-- Appliqué le 23/10/2026 par ChatGPT (accord d'Anthony).
 -- 23/10/2026 : mails de prospection plus percutants (6 modèles + modèle par défaut). Relances inchangées.
 insert into private.prospect_mailer_templates_backup(saved_at,subject,body,templates)
   select now(),subject,body,templates from private.prospect_mailer_settings;
