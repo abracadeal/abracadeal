@@ -25,7 +25,7 @@
 const app=document.getElementById('app');
 const CDN='https://auto.cdn-rivamedia.com/photos/annoncecli/';
 let profile={display_name:'Life Cars',city:'Mouans-Sartoux',joined_at:'2026-10-24'},
-showroom={banner_url:'https://www.lifecars.fr/images/graphic/societe3.jpg',logo_url:'',
+showroom={banner_url:'https://www.lifecars.fr/images/graphic/logo.png',logo_url:'',
 description:"Passionnée par l’automobile et l’esprit de service, l’équipe Life Cars vous accompagne dans l’achat de votre prochain véhicule.\nVéhicules premium sélectionnés, préparés et garantis 6 mois. Reprise et financement possibles.\n\n352 chemin de la Nartassière, 06370 Mouans-Sartoux\nDu lundi au vendredi 9h30-12h / 14h-18h30 · le samedi 10h-19h"},
 listings=[
 {id:'maybach',title:'Mercedes Classe S Maybach 580 Limousine',price:154990,city:'Mouans-Sartoux',category:'vehicules',created_at:'2026-10-24T10:00:00Z',photo:CDN+'intermediate/mercedes-classe-s-maybach-580-limousine-2022-503ch-francaise-entretien-complet-mercedes-211025810.jpg'},
@@ -54,7 +54,7 @@ function renderShell(){
   const r=rating(),banner=showroom.banner_url,logo=showroom.logo_url;
   document.title=(profile.display_name||'Professionnel')+' · Showroom Abracadeal';
   app.innerHTML='<div class="card">'+
-    '<div class="banner"'+(banner?' style="background-image:url(&quot;'+esc(banner)+'&quot;);background-position:center top"':'')+'></div>'+
+    '<div class="banner"'+(banner?' style="background-image:url(&quot;'+esc(banner)+'&quot;);background-color:#111;background-size:contain;background-position:center;background-origin:content-box;padding:4% 8%"':'')+'></div>'+
     '<div class="identity"><div class="logo"'+(logo?' style="background-image:url(&quot;'+esc(logo)+'&quot;)"':'')+'>'+(logo?'':esc(initials(profile.display_name)))+'</div>'+
     '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+'<span>★ '+esc(r.label)+'</span><span id="followersCount">'+followerCount+' abonné'+(followerCount>1?'s':'')+'</span></div></div>'+
     '<div class="identity-actions"><button class="follow'+(isFollowing?' following':'')+'" id="followBtn" type="button">'+(isFollowing?'✓ Abonné':'♡ S’abonner')+'</button><button class="contact-toggle" id="contactBtn" type="button">Contacter</button><button class="share" id="shareBtn" type="button">Partager</button></div></div>'+

@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Démo Life Cars : bannière = logo Life Cars
+- **Changé :** la bannière du showroom de démo affiche le logo « LIFE CARS » (`lifecars.fr/images/graphic/logo.png`) entier, centré sur fond sombre, à la place de la photo `societe3.jpg`.
+- **Pourquoi :** Anthony : la bannière doit être là où il y a écrit Life Cars.
+
 ### 24/10/2026 — Claude — Démo Life Cars : cadrage de la bannière
 - **Changé :** bannière du showroom de démo cadrée sur le haut de l’image (`background-position:center top`) pour garder l’enseigne au-dessus des véhicules.
 
