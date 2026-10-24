@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Données structurées Google (Search Console)
+- **Changé :** `scripts/build_share_pages.py` (VERSION 8) :
+  - marque (`brand`) ajoutée au balisage Product des objets quand elle est citée dans le titre ou la description (liste `KNOWN_BRANDS`, « de marque X » prioritaire, ex. Givi, NGK, Nike, Triumph, Piaggio…) ; 23 annonces sur 29 en ont une ;
+  - plus de balisage Product/Offer pour immobilier, vacances, emploi et services (fil d'Ariane seul).
+- **Pourquoi :** mails Search Console « Extraits de produits » et « Fiches de marchand » (avertissements non critiques). « Identifiant global manquant » corrigé quand la marque est connue.
+- **Volontairement non corrigé :** `review`, `aggregateRating` (pas d'avis sur une annonce, ne jamais en inventer), `hasMerchantReturnPolicy`, `shippingDetails` (Abracadeal ne vend ni n'expédie rien). Ces avertissements resteront, sans conséquence.
+- **À faire plus tard :** un champ « Marque » au dépôt d'annonce (hors véhicules) donnerait la marque sur toutes les annonces.
+
 ### 23/10/2026 — ChatGPT — Mails de prospection plus percutants
 - **Changé :** nouveaux premiers mails (6 modèles + défaut). Accroche « Et si vos véhicules / motos / biens étaient vus par plus d’acheteurs… », plus de « Marre de payer », plus de jargon XML/CSV/JSON. Étapes « Pas le temps ? » qui expliquent la reprise des annonces depuis le site du pro, puis la simple mise à jour depuis l’espace Pro. Lien `https://abracadeal.fr/pro-fondateur.html` inchangé, donc le suivi des clics fonctionne toujours.
 - **Pourquoi :** demande d’Anthony, un mail plus percutant et plus clair.

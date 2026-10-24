@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "7"  # à incrémenter pour forcer la régénération de toutes les pages
+VERSION = "8"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -315,7 +315,58 @@ def seo_title(listing, meta):
     return " – ".join(parts)
 
 
+# Catégories qui ne sont pas des produits : pas de balisage Product/Offer (Google les traiterait
+# comme des fiches marchand et réclamerait marque, livraison, retours, avis...).
+NON_PRODUCT_CATEGORIES = ("immobilier", "vacances", "emploi", "services")
+
+# Marques courantes repérées dans le titre (ou la description) quand le vendeur ne l'a pas saisie
+# à part. Mots ambigus en français (Smart, Mini, Seat, Orange...) volontairement exclus.
+KNOWN_BRANDS = [
+    "Harley Davidson", "Harley-Davidson", "Land Rover", "Alfa Romeo", "Royal Enfield", "Moto Guzzi",
+    "Mercedes", "BMW", "Audi", "Volkswagen", "Peugeot", "Renault", "Citroën", "Citroen", "Dacia", "Toyota",
+    "Nissan", "Ford", "Opel", "Fiat", "Kia", "Hyundai", "Skoda", "Volvo", "Porsche", "Tesla", "Mazda", "Suzuki",
+    "Honda", "Yamaha", "Kawasaki", "Ducati", "Triumph", "KTM", "Aprilia", "Piaggio", "Vespa", "Benelli",
+    "Leoncino", "Kymco", "Sym", "MV Agusta", "Husqvarna", "Sherco",
+    "Givi", "Shad", "Shark", "Arai", "Shoei", "AGV", "HJC", "Dainese", "Alpinestars", "Ixon", "Furygan",
+    "Akrapovic", "NGK", "Michelin", "Pirelli", "Bridgestone", "Continental", "Dunlop", "Metzeler",
+    "Brembo", "Bosch", "Valeo", "Herdegen", "Oxelo", "Decathlon", "Décathlon", "Btwin", "B'twin", "Xiaomi",
+    "Dualtron", "Segway", "Ninebot", "Trek", "Specialized", "Cannondale", "Lapierre", 
+    "Nike", "Adidas", "Puma", "Converse", "Vans", "Reebok", "New Balance", "Asics", "Lacoste", "Levi's",
+    "Zara", "Gucci", "Louis Vuitton", "Chanel", "Dior", "Hermès", "Hermes", "Prada", "Rolex", "Omega",
+    "Swatch", "Casio", "Ray-Ban", "Apple", "iPhone", "Samsung", "Sony", "PlayStation", "Nintendo", "Microsoft",
+    "Xbox", "Huawei", "Oppo", "Google Pixel", "LG", "Philips", "Panasonic", "Canon", "Nikon", "Fujifilm",
+    "GoPro", "DJI", "Dyson", "Moulinex", "Tefal", "Krups", "Delonghi", "De'Longhi", "Nespresso",
+    "Thermomix", "Kitchenaid", "KitchenAid", "Ikea", "Lego", "Playmobil",
+]
+_BRAND_ALIASES = {"iPhone": "Apple", "PlayStation": "Sony", "Xbox": "Microsoft", "Google Pixel": "Google",
+                  "Citroen": "Citroën", "Décathlon": "Decathlon", "Hermes": "Hermès", "B'twin": "Btwin",
+                  "Harley-Davidson": "Harley Davidson", "De'Longhi": "Delonghi", "Kitchenaid": "KitchenAid",
+                  "Leoncino": "Benelli"}
+_BRAND_RE = [(b, re.compile(r"(?<![\w-])" + re.escape(b) + r"(?![\w-])", re.I))
+             for b in sorted(KNOWN_BRANDS, key=len, reverse=True)]
+
+
+def detect_brand(listing, desc=""):
+    """Marque citée dans le titre (en priorité) puis dans la description ; None si aucune."""
+    if listing.get("vehicle_make"):
+        return str(listing["vehicle_make"]).strip()
+    for text in ((listing.get("title") or ""), (desc or "")[:600]):
+        for name, rx in _BRAND_RE:  # « de marque NGK » l'emporte sur « bougies BMW »
+            if re.search(r"\bmarque\s+" + rx.pattern, text, re.I):
+                return _BRAND_ALIASES.get(name, name)
+        best = None
+        for name, rx in _BRAND_RE:
+            m = rx.search(text)
+            if m and (best is None or m.start() < best[0]):
+                best = (m.start(), name)
+        if best:
+            return _BRAND_ALIASES.get(best[1], best[1])
+    return None
+
+
 def json_ld(listing, meta, photos, page_url, desc, crumbs):
+    if listing.get("category") in NON_PRODUCT_CATEGORIES:
+        return ld_script(breadcrumb_ld(crumbs))
     price = listing.get("price")
     offer = {"@type": "Offer", "url": page_url, "priceCurrency": "EUR",
              "availability": "https://schema.org/InStock",
@@ -331,6 +382,9 @@ def json_ld(listing, meta, photos, page_url, desc, crumbs):
             "description": desc[:5000], "url": page_url, "sku": listing["id"], "offers": offer}
     if photos:
         data["image"] = photos
+    brand = detect_brand(listing, desc)
+    if brand:
+        data["brand"] = {"@type": "Brand", "name": brand}
     if listing.get("category") == "vehicules" and (listing.get("vehicle_make") or listing.get("mileage")):
         data["@type"] = ["Product", "Car"]
         if listing.get("vehicle_make"):
