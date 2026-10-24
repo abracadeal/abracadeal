@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Démo Life Cars : showroom Pro réel + fiche annonce
+- **Changé :** `demo/life-cars/index.html` est maintenant une copie de `pro.html` (vrai showroom Pro : bannière, logo, S’abonner / Contacter / Partager, onglets Annonces / À propos / Avis) avec les données de Life Cars en dur, sans Supabase. L’ancienne page devient `demo/life-cars/annonce.html?v=<maybach|rangerover|r8>` : elle ouvre directement la fiche annonce au style de l’accueil ; le bloc vendeur renvoie au showroom.
+- **Pourquoi :** Anthony : « la vraie page pro n’est pas comme ça ».
+- **À faire :** supprimer `demo/` après le rendez-vous.
+
 ### 24/10/2026 — Claude — Démo Life Cars : même apparence que le site
 - **Changé :** `demo/life-cars/index.html` reprend maintenant les vraies feuilles de style du site (`/assets/index-*.css`…), l'en-tête et la barre du bas, la bannière, les cartes `ad-card` et la fiche annonce (`detailModal`, mêmes classes que `openAd`).
 - **Pourquoi :** Anthony trouvait la première version trop différente du site (couleurs, logo en haut à gauche).
