@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Démo Life Cars : même apparence que le site
+- **Changé :** `demo/life-cars/index.html` reprend maintenant les vraies feuilles de style du site (`/assets/index-*.css`…), l'en-tête et la barre du bas, la bannière, les cartes `ad-card` et la fiche annonce (`detailModal`, mêmes classes que `openAd`).
+- **Pourquoi :** Anthony trouvait la première version trop différente du site (couleurs, logo en haut à gauche).
+- **À savoir :** si le style de la fiche annonce change dans `index-main.js`, la démo ne suit pas automatiquement. Toujours à supprimer après le rendez-vous.
+
 ### 24/10/2026 — Claude — Page de démo privée pour Life Cars
 - **Changé :** nouvelle page `demo/life-cars/index.html` (noindex, non liée depuis le site) et `Disallow: /demo/` dans `robots.txt`.
 - **Pourquoi :** Anthony va présenter Abracadeal en personne à Life Cars (marchand VO, Mouans-Sartoux, 41 véhicules). La page montre 3 de leurs véhicules (Maybach S580, Range Rover Sport P550e, Audi R8 Spyder) au format Abracadeal, photos chargées depuis leur hébergeur d'annonces.
