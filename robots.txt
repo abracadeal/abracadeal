@@ -38,6 +38,7 @@ Disallow: /export-ical-vacances.html
 Disallow: /ical.html
 
 # Fichiers techniques
+Disallow: /demo/
 Disallow: /backups/
 Disallow: /docs/
 Disallow: /emails/

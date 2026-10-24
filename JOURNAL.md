@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Page de démo privée pour Life Cars
+- **Changé :** nouvelle page `demo/life-cars/index.html` (noindex, non liée depuis le site) et `Disallow: /demo/` dans `robots.txt`.
+- **Pourquoi :** Anthony va présenter Abracadeal en personne à Life Cars (marchand VO, Mouans-Sartoux, 41 véhicules). La page montre 3 de leurs véhicules (Maybach S580, Range Rover Sport P550e, Audi R8 Spyder) au format Abracadeal, photos chargées depuis leur hébergeur d'annonces.
+- **À faire :** supprimer `demo/life-cars/` après le rendez-vous, ou dès que Life Cars refuse. Rien n'est en base Supabase.
+
 ### 24/10/2026 — Claude — Données structurées Google (Search Console)
 - **Changé :** `scripts/build_share_pages.py` (VERSION 8) :
   - marque (`brand`) ajoutée au balisage Product des objets quand elle est citée dans le titre ou la description (liste `KNOWN_BRANDS`, « de marque X » prioritaire, ex. Givi, NGK, Nike, Triumph, Piaggio…) ; 23 annonces sur 29 en ont une ;

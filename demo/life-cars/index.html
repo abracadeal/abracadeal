@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<title>Life Cars sur Abracadeal – aperçu</title>
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#faf7fd;color:#22162f;font-family:'DM Sans',system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.55}
+a{color:#8b2aa6}
+header.site{position:sticky;top:0;z-index:20;background:rgba(27,13,45,.96);border-bottom:1px solid rgba(255,255,255,.08)}
+header.site .in{max-width:1180px;margin:0 auto;padding:0 14px;min-height:62px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.brand{color:#fff;text-decoration:none;display:inline-flex;align-items:center;gap:10px}
+.brand img{width:38px;height:38px;border-radius:12px}
+.brand strong{display:block;font-family:Fraunces,Georgia,serif;font-size:1.3rem;line-height:1.05}
+.brand small{display:block;color:#cfa8ef;font-size:.72rem;font-weight:600}
+.dep{display:inline-flex;align-items:center;min-height:40px;padding:0 16px;border-radius:13px;background:linear-gradient(135deg,#ec409d,#ff69bd);color:#fff;font-weight:700;text-decoration:none;font-size:.92rem;white-space:nowrap}
+.preview{background:#f4eaf8;color:#6d2b88;text-align:center;font-size:.8rem;font-weight:600;padding:6px 14px}
+main{max-width:1180px;margin:0 auto;padding:16px 14px 40px}
+h1,h2{font-family:Fraunces,Georgia,serif;color:#26122f}
+.card{background:#fff;border:1px solid #ebe4ef;border-radius:16px;padding:16px;margin:14px 0;box-shadow:0 7px 20px rgba(35,17,48,.055)}
+.pro{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pro .logo{width:64px;height:64px;border-radius:16px;background:#1b0d2d;color:#fff;display:grid;place-items:center;font-family:Fraunces,Georgia,serif;font-weight:700;font-size:1.15rem;flex:0 0 auto}
+.pro h1{margin:0;font-size:1.5rem;line-height:1.2}
+.pro p{margin:2px 0 0;color:#756a7e;font-size:.92rem}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chip{display:inline-block;background:#f4eaf8;color:#8b2aa6;font-weight:700;font-size:.76rem;padding:3px 10px;border-radius:999px}
+.chip.ok{background:#e7f6ec;color:#1f7a3f}
+.list{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.list a{display:flex;flex-direction:column;background:#fff;border:1px solid #ebe4ef;border-radius:16px;overflow:hidden;text-decoration:none;color:#26122f;box-shadow:0 7px 20px rgba(35,17,48,.055);height:100%;position:relative}
+.list img{width:100%;aspect-ratio:4/3;object-fit:cover;background:#f5eff7;display:block}
+.list .t{font-weight:700;padding:10px 12px 2px;line-height:1.25}
+.list .p{color:#8b2aa6;font-weight:800;padding:2px 12px 0;font-variant-numeric:tabular-nums}
+.list .c{color:#756a7e;font-size:.82rem;padding:2px 12px 12px}
+.list .tag{position:absolute;top:10px;left:10px;background:rgba(27,13,45,.85);color:#fff;font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px}
+.ad{scroll-margin-top:110px;margin-top:34px}
+.gallery{display:flex;gap:8px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;margin:0 -14px 8px;padding:0 14px;scrollbar-width:thin}
+.gallery img{flex:0 0 86%;width:86%;height:min(58vh,440px);object-fit:cover;border-radius:16px;background:#1b0d2d;scroll-snap-align:center}
+@media(min-width:700px){.gallery{margin:0 0 8px;padding:0}.gallery img{flex-basis:62%;width:62%}}
+.hint{font-size:.8rem;color:#756a7e;margin:0 0 12px}
+.ad h2.title{font-size:1.5rem;line-height:1.2;margin:6px 0 4px}
+.price{font-size:1.6rem;font-weight:700;color:#8b2aa6;margin:0;font-variant-numeric:tabular-nums}
+.price small{font-size:.85rem;color:#756a7e;font-weight:600}
+.where{color:#756a7e;margin:4px 0 12px}
+.keys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:12px 0}
+.keys div{background:#fff;border:1px solid #ebe4ef;border-radius:12px;padding:8px 10px}
+.keys b{display:block;font-size:.98rem;font-variant-numeric:tabular-nums}
+.keys span{font-size:.75rem;color:#756a7e;text-transform:uppercase;letter-spacing:.04em}
+@media(max-width:560px){.keys{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.btn{flex:1 1 180px;display:inline-flex;justify-content:center;align-items:center;gap:6px;min-height:46px;border-radius:14px;font-weight:700;text-decoration:none;border:0;font:inherit;font-weight:700;cursor:pointer}
+.btn.main{background:linear-gradient(135deg,#ec409d,#ff69bd);color:#fff}
+.btn.sec{background:#fff;color:#4e2c62;border:1px solid #e4d6ec}
+.share{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:.85rem;color:#756a7e}
+.share span.s{background:#fff;border:1px solid #e4d6ec;border-radius:999px;padding:5px 12px;color:#4e2c62;font-weight:600}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:7px 4px;border-bottom:1px solid #ece6f1;vertical-align:top}
+th{color:#756a7e;font-weight:600;width:45%}
+.card h3{font-family:Fraunces,Georgia,serif;font-size:1.15rem;margin:0 0 8px;color:#26122f}
+.eq{list-style:none;padding:0;margin:0;display:flex;flex-wrap:wrap;gap:6px}
+.eq li{background:#faf6fc;border:1px solid #eee5f0;border-radius:999px;padding:4px 11px;font-size:.86rem}
+.desc{margin:0}
+.back{display:inline-block;margin-top:6px;font-size:.88rem;font-weight:600}
+.pitch{background:#1b0d2d;color:#fff;border-radius:18px;padding:20px;margin-top:36px}
+.pitch h2{color:#fff;margin:0 0 8px;font-size:1.35rem}
+.pitch ul{margin:0;padding-left:18px}
+.pitch li{margin:4px 0}
+.pitch p{color:#cfa8ef;margin:10px 0 0;font-size:.9rem}
+footer{text-align:center;font-size:.8rem;color:#756a7e;padding:24px 16px}
+:focus-visible{outline:3px solid #ec409d;outline-offset:2px}
+</style>
+</head><body>
+<header class="site"><div class="in"><a class="brand" href="/" aria-label="Accueil Abracadeal"><img src="/icon-192.png" alt="" width="38" height="38"><span><strong>Abracadeal</strong><small>Achetez - Vendez</small></span></a><a class="dep" href="#ad-maybach">Voir le stock</a></div></header>
+<div class="preview">Aperçu préparé pour Life Cars · non publié sur le site</div>
+<main>
+
+<section class="card pro" aria-label="Vendeur">
+  <div class="logo">LC</div>
+  <div style="min-width:0">
+    <h1>Life Cars</h1>
+    <p>Professionnel automobile · Mouans-Sartoux (06) · 41 véhicules en stock</p>
+    <div class="chips"><span class="chip ok">✓ Pro vérifié</span><span class="chip">Garantie 6 mois</span><span class="chip">Reprise possible</span></div>
+  </div>
+</section>
+
+<h2 style="margin:22px 0 10px;font-size:1.25rem">Véhicules en vente</h2>
+<ul class="list" id="grid"></ul>
+
+<div id="ads"></div>
+
+<section class="pitch">
+  <h2>Votre stock sur Abracadeal, sans rien ressaisir</h2>
+  <ul>
+    <li>On reprend vos annonces depuis votre site, avec votre accord. Toutes vos photos sont gardées.</li>
+    <li>Vos annonces se mettent à jour toutes seules quand vous vendez ou ajoutez un véhicule.</li>
+    <li>Chaque annonce a sa propre page trouvable sur Google, et se partage en un clic sur WhatsApp ou Facebook.</li>
+    <li>12 mois offerts, sans carte bancaire, sans engagement.</li>
+  </ul>
+  <p>Les 3 annonces ci-dessus ont été préparées à partir de lifecars.fr, uniquement pour cet aperçu.</p>
+</section>
+</main>
+<footer>Abracadeal — petites annonces partout en France · édité par iDream Lab</footer>
+
+<script>
+var CDN='https://auto.cdn-rivamedia.com/photos/annoncecli/';
+var CARS=[
+{id:'maybach',tag:'1re main',title:'Mercedes Classe S Maybach 580 Limousine',sub:'503 ch · française · entretien complet Mercedes',price:'154 990 €',
+ slug:'mercedes-classe-s-maybach-580-limousine-2022-503ch-francaise-entretien-complet-mercedes',
+ photos:[211025810,211025811,211025812,211025813,211025814,211025815,211025816,211025817],total:42,
+ keys:[['Année','02/2022'],['Kilométrage','22 000 km'],['Énergie','Essence'],['Boîte','Auto 9 rapports']],
+ specs:[['Puissance','503 ch (371 kW)'],['Puissance fiscale','40 CV'],['Couleur','Noir obsidienne'],['Sellerie','Cuir nappa Maybach'],['Portes','4'],['Historique','Première main'],['Garantie','6 mois garage'],['CO₂','242 g/km']],
+ eq:['Pack Première classe','Pack Business class','Sièges arrière individuels climatisés','Sièges avant massants','Burmester 4D','Tablette MBUX arrière','Compartiment réfrigéré','Portes arrière automatiques','E-Active Body Control','Roues arrière directrices','Toit panoramique','Affichage tête haute','Caméra 360°','Régulateur adaptatif'],
+ desc:'Maybach S 580 de février 2022, première main, française, 22 000 km. Entretien complet chez Mercedes. Configuration très complète avec les packs Première classe et Business class : sièges arrière individuels climatisés et inclinables, divertissement MBUX arrière, compartiment réfrigéré, Burmester 4D.'},
+{id:'rangerover',tag:'1re main',title:'Land Rover Range Rover Sport P550e Autobiography',sub:'550 ch hybride rechargeable · TVA récupérable · garantie constructeur',price:'114 990 €',
+ slug:'land-rover-range-rover-sport-3-0-p550e-550ch-phev-autobiography-1ere-main-2025-tva-recuperable-garantie-constructeur',
+ photos:[217841675,217841676,217841677,217841678,217841679,217841680,217841681,217841684],total:30,
+ keys:[['Année','12/2024'],['Kilométrage','14 919 km'],['Énergie','Hybride rechargeable'],['Boîte','Auto 8 rapports']],
+ specs:[['Puissance','550 ch (405 kW)'],['Puissance fiscale','28 CV'],['Couleur','Santorini Black métallisé'],['Sellerie','Cuir semi-aniline Ebony'],['Portes','5'],['Historique','Première main'],['Garantie','Constructeur + 6 mois garage'],['CO₂','18 g/km']],
+ eq:['Jantes 23"','Pack Confort Plus','Meridian 400 W','Quatre roues directrices','Toit panoramique','Affichage tête haute','Caméra 360°','Régulateur adaptatif','Accès sans clé','Sièges chauffants à mémoire','Pare-brise athermique','Angles morts'],
+ desc:'Range Rover Sport P550e Autobiography mis en circulation en décembre 2024, première main, 14 919 km. Hybride rechargeable de 550 ch, TVA récupérable, encore sous garantie constructeur. Santorini Black, jantes 23 pouces, quatre roues directrices et pack Confort Plus.'},
+{id:'r8',tag:'Boîte manuelle',title:'Audi R8 Spyder V10 5.2 FSI quattro',sub:'525 ch · boîte manuelle · kit carrosserie Razor',price:'134 990 €',
+ slug:'audi-r8-spyder-2014-5-2-v10-fsi-boite-manuelle-525ch-quattro-entretien-complet-2eme-main-kit-carrosserie-razor',
+ photos:[214878638,214878639,214878640,214878641,214878643,214878644,214878645,214878646],total:32,
+ keys:[['Année','07/2014'],['Kilométrage','27 869 km'],['Énergie','Essence'],['Boîte','Manuelle 6 rapports']],
+ specs:[['Puissance','525 ch (387 kW)'],['Puissance fiscale','45 CV'],['Carrosserie','Cabriolet 2 places'],['Transmission','quattro'],['Portes','2'],['Historique','Deuxième main'],['Garantie','6 mois garage'],['CO₂','349 g/km']],
+ eq:['Boîte manuelle 6','Sièges baquets','Carbone Sigma','Bang & Olufsen','Capote électrique','Suspension adaptative','Caméra de recul','Phares LED','Volant sport méplat','Sièges chauffants'],
+ desc:'R8 Spyder V10 5.2 FSI de juillet 2014 en boîte manuelle, une configuration devenue rare. Deuxième main, 27 869 km, entretien complet. Kit carrosserie Razor, sièges baquets, inserts carbone Sigma et système audio Bang & Olufsen.'}
+];
+function img(c,i,size){return CDN+size+'/'+c.slug+'-'+c.photos[i]+'.jpg'}
+function esc(s){return String(s).replace(/[&<>"]/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]})}
+var g='',a='';
+CARS.forEach(function(c){
+ g+='<li><a href="#ad-'+c.id+'"><span class="tag">'+esc(c.tag)+'</span><img loading="lazy" src="'+img(c,0,'intermediate')+'" alt="'+esc(c.title)+'"><span class="t">'+esc(c.title)+'</span><span class="p">'+c.price+'</span><span class="c">'+c.keys[0][1].slice(-4)+' · '+c.keys[1][1]+' · Mouans-Sartoux</span></a></li>';
+ var ph=c.photos.map(function(_,i){return '<img loading="lazy" src="'+img(c,i,'big')+'" alt="'+esc(c.title)+' – photo '+(i+1)+'">'}).join('');
+ a+='<article class="ad" id="ad-'+c.id+'"><div class="gallery">'+ph+'</div><p class="hint">'+c.total+' photos · faites glisser pour les voir</p>'
+  +'<span class="chip">Pro · Voitures</span><h2 class="title">'+esc(c.title)+'</h2><p class="where" style="margin:0 0 6px">'+esc(c.sub)+'</p>'
+  +'<p class="price">'+c.price+' <small>TTC</small></p><p class="where">📍 Mouans-Sartoux (06370) · Life Cars</p>'
+  +'<div class="keys">'+c.keys.map(function(k){return '<div><span>'+k[0]+'</span><b>'+esc(k[1])+'</b></div>'}).join('')+'</div>'
+  +'<div class="actions"><button class="btn main" type="button">Envoyer un message</button><button class="btn sec" type="button">Voir le numéro</button></div>'
+  +'<div class="share">Partager : <span class="s">WhatsApp</span><span class="s">SMS</span><span class="s">Facebook</span><span class="s">Copier le lien</span></div>'
+  +'<section class="card"><h3>Caractéristiques</h3><table>'+c.specs.map(function(s){return '<tr><th>'+s[0]+'</th><td>'+esc(s[1])+'</td></tr>'}).join('')+'</table></section>'
+  +'<section class="card"><h3>Équipements</h3><ul class="eq">'+c.eq.map(function(e){return '<li>'+esc(e)+'</li>'}).join('')+'</ul></section>'
+  +'<section class="card"><h3>Description</h3><p class="desc">'+esc(c.desc)+'</p></section>'
+  +'<a class="back" href="#grid">↑ Retour aux véhicules</a></article>';
+});
+document.getElementById('grid').innerHTML=g;
+document.getElementById('ads').innerHTML=a;
+document.querySelectorAll('.actions .btn').forEach(function(b){b.addEventListener('click',function(){b.textContent='Disponible une fois en ligne';});});
+</script>
+</body></html>
