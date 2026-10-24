@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 24/10/2026 — Claude — Démo Life Cars : bannière de Life Cars
+- **Changé :** la bannière du showroom de démo (`demo/life-cars/index.html`) utilise l’image de Life Cars (`lifecars.fr/images/graphic/societe3.jpg`) au lieu d’une photo de la Maybach.
+- **Pourquoi :** demande d’Anthony.
+
 ### 24/10/2026 — Claude — Démo Life Cars : showroom Pro réel + fiche annonce
 - **Changé :** `demo/life-cars/index.html` est maintenant une copie de `pro.html` (vrai showroom Pro : bannière, logo, S’abonner / Contacter / Partager, onglets Annonces / À propos / Avis) avec les données de Life Cars en dur, sans Supabase. L’ancienne page devient `demo/life-cars/annonce.html?v=<maybach|rangerover|r8>` : elle ouvre directement la fiche annonce au style de l’accueil ; le bloc vendeur renvoie au showroom.
 - **Pourquoi :** Anthony : « la vraie page pro n’est pas comme ça ».
