@@ -70,3 +70,9 @@ html body .cat.vacances-cat .cat-icon{color:inherit}
   html body .mobile-topbar{min-height:0!important;padding-top:calc(6px + env(safe-area-inset-top,0px))!important;padding-bottom:6px!important}
   html body .mobile-topbar .mobile-brand-name{font-size:1.45rem!important;line-height:1.1!important}
 }
+
+/* 26/10/2026 : cartes d'annonces plus épurées — sur écran tactile, pas de flèches sur la photo (on fait glisser du doigt, les points restent) */
+@media (hover:none),(max-width:760px){
+  html body .ad-card .carousel-arrow{display:none!important}
+}
+.ad-card .ad-age{color:inherit;opacity:.75;font-weight:500}

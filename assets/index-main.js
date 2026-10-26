@@ -2969,8 +2969,28 @@ function diagnosticScaleHtml(kind,grade){
 
 // SEO : titre de carte = vrai lien <a href> vers la page publique /annonce/<id>/ (crawlable par Google).
 // Clic normal : on ouvre la fiche dans l'application comme avant ; Ctrl/Cmd/clic molette : nouvel onglet.
+// 26/10/2026 : titres tout en MAJUSCULES affichés en minuscules (1re lettre en majuscule) ; le titre du vendeur n'est pas modifié en base.
+function displayListingTitle(raw){
+  const t=String(raw||'').trim();
+  const letters=t.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g,'');
+  if(letters.length<6) return t;
+  const upper=letters.replace(/[^A-ZÀ-ÖØ-Þ]/g,'').length;
+  if(upper/letters.length<0.7) return t;
+  const low=t.toLocaleLowerCase('fr-FR');
+  return low.charAt(0).toLocaleUpperCase('fr-FR')+low.slice(1);
+}
+window.displayListingTitle=displayListingTitle;
+function listingAgeLabel(a){
+  const d=new Date(a&&a.created_at||0); if(!a||!a.created_at||isNaN(d)) return '';
+  const days=Math.floor((Date.now()-d.getTime())/86400000);
+  if(days<=0) return "aujourd’hui";
+  if(days===1) return 'hier';
+  if(days<30) return 'il y a '+days+' jours';
+  const m=Math.floor(days/30); if(m<12) return 'il y a '+m+' mois';
+  return 'il y a plus d’un an';
+}
 function adSeoTitle(a){
-  const t=esc(a.title);
+  const t=esc(displayListingTitle(a.title));
   const isPublic=a&&a.status==='active'&&(a.visibility_scope||'public')==='public'&&!a.revision_of&&/^[0-9a-f-]{36}$/i.test(String(a.id||''));
   return isPublic?`<a href="/annonce/${a.id}/" class="ad-seo-link" style="color:inherit;text-decoration:none" onclick="return adSeoClick(event,'${a.id}')">${t}</a>`:t;
 }
@@ -3152,7 +3172,7 @@ function listingCardActions(a){
   const active=favoriteIds.has(a.id);
   const share=`<button type="button" class="card-action-btn share-action" data-share-listing="${a.id}" aria-label="Partager l’annonce" title="Partager" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg></button>`;
   if(a.is_showroom) return `<div class="card-photo-actions" onclick="event.stopPropagation()">${share}</div>`;
-  return `<div class="card-photo-actions" onclick="event.stopPropagation()">${share}<button type="button" data-favorite-id="${a.id}" class="card-action-btn favorite-action ${active?'active':''}" aria-label="${active?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${active?'♥':'♡'}</span><span class="fav-count-inline" data-fav-count-id="${a.id}"></span></button></div>`;
+  return `<div class="card-photo-actions" onclick="event.stopPropagation()"><button type="button" data-favorite-id="${a.id}" class="card-action-btn favorite-action ${active?'active':''}" aria-label="${active?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${active?'♥':'♡'}</span><span class="fav-count-inline" data-fav-count-id="${a.id}"></span></button></div>`;
 }
 
 window.carouselStep=function(el,dir){
@@ -3830,7 +3850,7 @@ function renderAds(){
         ${moderationRiskHTML(a)}
         ${statusBadge}
         ${secondCheckBadge}
-        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Professionnel':'Particulier'}</div>
+        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''}</div>
         <h3 class="ad-title">${adSeoTitle(a)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
@@ -3841,7 +3861,7 @@ function renderAds(){
           ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
           ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
         </div>`:''}
-        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
+        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}${listingAgeLabel(a)?`<span class="ad-age"> · ${listingAgeLabel(a)}</span>`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
