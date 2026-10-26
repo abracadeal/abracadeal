@@ -573,3 +573,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Lien direct vers l'espace Pro (?espace=pro)
 - **Changé :** `assets/index-main.js` (v=20261026-espacepro) : `https://abracadeal.fr/?espace=pro` ouvre directement le tableau de bord Pro (ou la connexion si le pro n'est pas connecté, puis le tableau de bord après connexion). `process-pro-transactional-emails` v6 : le bouton « Accéder à mon espace Pro » de tous les mails Pro pointe vers ce lien (avant : simple page d'accueil).
+
+### 26/10/2026 — Claude — Aide à l'import automatique pour les pros sans annonce
+- **Changé (base, appliqué) :** `supabase/2026-10-26-pro-aide-import-auto.sql` : fonction `queue_pro_import_help()` + tâche `abracadeal-pro-import-help` (lun-sam 8 h UTC). Tout compte Pro (hors admin) inscrit depuis 3 à 60 jours, sans aucune annonce, reçoit une seule fois « Voulez-vous qu'on mette vos annonces en ligne pour vous ? » (+ « jusqu'à 50 annonces gratuitement » s'il est Fondateur). Clé `import-help-<user_id>`.
+- **Premier envoi :** Oxoto le 27/10 vers 9 h (Paris). Auto Cévennes est exclu (il a déjà son message programmé, clé contenant « import »).
