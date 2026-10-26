@@ -479,3 +479,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Capital social (50 €) moins visible
 - **Changé :** `mentions-legales.html`, `cgu.html`, `cgv.html`, `index.html`, `vacances.html` : « au capital de **50 €** » retiré des phrases d'introduction (CGU/CGV/mentions). Le capital reste indiqué dans les mentions légales, en petit gris en bas (« Capital social de la société éditrice : 50 € »).
 - **Pourquoi :** demande d'Anthony. **Ne pas le supprimer complètement** : le capital social est une mention obligatoire pour une société (loi LCEN, art. 6).
+
+### 26/10/2026 — Claude — Ligne de confiance sortie du bloc de recherche collant
+- **Changé :** `index.html` : `.hero-trust-line` déplacée hors de `.search-wrap` (la recherche devient collante en haut au scroll sur mobile et emmenait la ligne avec elle, par-dessus les annonces).
