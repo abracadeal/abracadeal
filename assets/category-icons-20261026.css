@@ -59,3 +59,7 @@ html body .cat.vacances-cat .cat-icon{color:inherit}
   html body #annonces .cat h3{margin:0!important;color:#f8f1fb!important;font-size:.9rem!important;font-weight:800!important}
   html body #annonces .cat small{display:none!important}
 }
+/* Coches dorées dessinées (l'emoji ✔ s'affichait noir sur iPhone) */
+.hero-trust-line span{display:inline-flex;align-items:center;gap:5px}
+.hero-trust-line svg{width:15px;height:15px;flex:0 0 15px;fill:none;stroke:#f2c46d;stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+@media (max-width:760px){.hero-trust-line svg{width:13px;height:13px;flex-basis:13px}}

@@ -465,3 +465,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - ligne de confiance sous la recherche : « ✔ Annonces modérées · ✔ Dépôt gratuit · ✔ Contact direct » ;
   - ordinateur : la section `#annonces` (catégories, masquée jusque-là) s'affiche en 8 ronds dorés sous la recherche ; le bandeau Pro/Pro passe après la liste des annonces.
 - **Pas fait :** masquer la liste quand le site est vide — 29 annonces actives au 26/10, inutile.
+
+### 26/10/2026 — Claude — Ligne de confiance : coches dorées
+- **Changé :** `index.html` + `assets/category-icons-20261026.css` (v=4) : les « ✔ » (affichés en emoji noir sur iPhone) remplacés par des coches SVG dorées.
