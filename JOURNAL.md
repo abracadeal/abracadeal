@@ -555,3 +555,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Démo Life Cars : formulation gratuite alignée
 - **Changé :** `demo/life-cars/annonce.html` : « 12 mois offerts… » → « Publication gratuite, sans carte bancaire, sans engagement. » (même règle que le reste du site). Rendez-vous Life Cars prévu le 27/10.
+
+### 26/10/2026 — Claude — Page de démo privée pour Centurion Motors
+- **Changé :** `demo/centurion-motors/` (index + annonce, copie de la démo Life Cars ; noindex, `/demo/` déjà bloqué dans robots.txt, non liée depuis le site). Centurion Motors : 616 route de Serra Capeou, 06110 Le Cannet, 60 véhicules sur AutoScout24 (gérant : Pierre Visciglia, pas de site propre trouvé). 3 véhicules : Lamborghini Revuelto, Urus Mansory Venatus, Ferrari 812 GTS — 1 photo chacun, chargée depuis AutoScout24 (taille 720/1280, repli auto sur la vignette 250x188 si indisponible). Descriptions limitées aux infos publiques (année, km, puissance, financement possible).
+- **À faire :** supprimer `demo/centurion-motors/` après le rendez-vous (27/10) ou en cas de refus. Rien en base.
