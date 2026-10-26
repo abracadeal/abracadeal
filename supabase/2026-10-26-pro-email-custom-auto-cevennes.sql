@@ -17,6 +17,6 @@ values ('custom-auto-cevennes-aide-import-20261027', '5d62b961-2766-4ebb-97ee-7f
     'subject', 'Voulez-vous qu’on mette vos annonces en ligne pour vous ?',
     'title', 'Bonjour,',
     'paras', jsonb_build_array(
-      'Merci pour votre inscription sur Abracadeal !',
+      'Merci pour votre inscription sur Abracadeal ! En tant que Fondateur, vous pouvez publier <strong>jusqu’à 50 annonces gratuitement</strong>.',
       'Voulez-vous qu’on mette vos annonces en ligne pour vous ? Envoyez-nous simplement l’adresse de votre site (ou de vos annonces) en répondant à ce mail : avec votre accord, on s’occupe de tout, vous n’aurez plus qu’à les tenir à jour.')),
   '2026-10-27 08:00:00+00');
