@@ -530,3 +530,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Prospection : variante B = mail court
 - **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-variante-B-courte.sql` : modèles B (garage, moto, agence, relance) remplacés par une version courte (5-6 lignes, sans emoji ni lien, « Pendant notre lancement… gratuitement, sans carte bancaire ni engagement », reprise des annonces du site proposée, question « Seriez-vous intéressé ? »). La variante A (longue, avec lien) ne change pas : test A/B.
 - **Pour comparer :** B n'a pas de lien, donc pas de clics suivis : comparer le nombre de **réponses** reçues A vs B (colonne `ab_variant` des prospects).
+
+### 26/10/2026 — Claude — Prospection : « Pourquoi gratuit ? C'est donnant-donnant »
+- **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-pourquoi-gratuit.sql` : phrase « Pourquoi gratuit ? C'est donnant-donnant : vous gagnez de la visibilité en plus, et nous, des annonces pour lancer le site. » ajoutée aux 6 premiers mails (A et B, garage/moto/agence) et au modèle par défaut. Relances inchangées.
+- **Pourquoi :** idée d'Anthony, pour lever le doute « c'est une arnaque ».
