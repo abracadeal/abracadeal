@@ -475,3 +475,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Modale Fondateurs : import par le pro lui-même
 - **Changé :** `index.html` : avantage « Votre stock en ligne, sans ressaisie — importez-le vous-même en quelques clics, ou on le reprend pour vous… » ; « Conditions de l'offre » → « Voir les conditions ».
+
+### 26/10/2026 — Claude — Capital social (50 €) moins visible
+- **Changé :** `mentions-legales.html`, `cgu.html`, `cgv.html`, `index.html`, `vacances.html` : « au capital de **50 €** » retiré des phrases d'introduction (CGU/CGV/mentions). Le capital reste indiqué dans les mentions légales, en petit gris en bas (« Capital social de la société éditrice : 50 € »).
+- **Pourquoi :** demande d'Anthony. **Ne pas le supprimer complètement** : le capital social est une mention obligatoire pour une société (loi LCEN, art. 6).
