@@ -526,3 +526,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Changé (base, appliqué) :** `private.prospect_mailer_settings` via `supabase/2026-10-26-prospection-sans-12-mois.sql` : puce « Offre Fondateurs : 12 mois gratuits, jusqu'à 50 annonces » → « Jusqu'à 50 annonces publiées gratuitement, sans carte bancaire » (tous les modèles A et B) ; relance : « 12 mois de diffusion 100 % gratuite » → « vos annonces diffusées gratuitement » ; ligne « Conditions des places Fondateurs : https://abracadeal.fr/pro-fondateur.html » ajoutée sous la signature des premiers mails (la durée y reste indiquée, pour rester honnête).
 - **Pourquoi :** Anthony — « 12 mois gratuits » laisse entendre « payant ensuite ».
 - **À savoir :** `assets/email/email-pros.html` est un ancien modèle non utilisé par `prospect-mailer`.
+
+### 26/10/2026 — Claude — Prospection : variante B = mail court
+- **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-variante-B-courte.sql` : modèles B (garage, moto, agence, relance) remplacés par une version courte (5-6 lignes, sans emoji ni lien, « Pendant notre lancement… gratuitement, sans carte bancaire ni engagement », reprise des annonces du site proposée, question « Seriez-vous intéressé ? »). La variante A (longue, avec lien) ne change pas : test A/B.
+- **Pour comparer :** B n'a pas de lien, donc pas de clics suivis : comparer le nombre de **réponses** reçues A vs B (colonne `ab_variant` des prospects).
