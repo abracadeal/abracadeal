@@ -115,8 +115,7 @@
     if(!ta||$('descriptionHelperBtn'))return;
     var bar=document.createElement('div');
     bar.style.cssText='display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:8px';
-    bar.innerHTML='<button type="button" id="descriptionHelperBtn" style="border:1px solid #d9c3e6;background:#f6eefa;color:#6f218c;font:inherit;font-weight:800;font-size:.9rem;padding:9px 14px;border-radius:999px;cursor:pointer">✨ M’aider à rédiger</button>'
-      +'<span style="font-size:.8rem;color:#7a6a86">Modèle adapté à la catégorie, à compléter et relire.</span>';
+    bar.innerHTML='<button type="button" id="descriptionHelperBtn" style="border:1px solid #d9c3e6;background:#f6eefa;color:#6f218c;font:inherit;font-weight:800;font-size:.9rem;padding:9px 14px;border-radius:999px;cursor:pointer">✨ M’aider à rédiger</button>';
     ta.insertAdjacentElement('afterend',bar);
     $('descriptionHelperBtn').addEventListener('click',fill);
   }

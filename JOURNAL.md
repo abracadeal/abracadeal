@@ -534,3 +534,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Prospection : « Pourquoi gratuit ? C'est donnant-donnant »
 - **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-pourquoi-gratuit.sql` : phrase « Pourquoi gratuit ? C'est donnant-donnant : vous gagnez de la visibilité en plus, et nous, des annonces pour lancer le site. » ajoutée aux 6 premiers mails (A et B, garage/moto/agence) et au modèle par défaut. Relances inchangées.
 - **Pourquoi :** idée d'Anthony, pour lever le doute « c'est une arnaque ».
+
+### 26/10/2026 — Claude — Formulaire « Publier une annonce » allégé
+- **Changé :** `index.html` : astuce photo raccourcie et lisible (texte foncé, elle était blanche sur fond clair) ; note « Choisissez la sous-catégorie la plus précise… » supprimée ; explication sous « Afficher mon numéro » supprimée ; notes photo réduites à « La 1re photo est la photo principale » ; `assets/description-helper-original-20261013.js` (v=3) : texte « Modèle adapté à la catégorie… » sous « M'aider à rédiger » retiré. `assets/category-icons-20261026.css` (v=12) : titre « Galerie de l'annonce » et compteur « 0 / 3 ajoutée » (blanc invisible) masqués, Ville + Code postal côte à côte sur mobile.

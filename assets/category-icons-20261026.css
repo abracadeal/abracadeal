@@ -103,3 +103,18 @@ html body .card-photo-actions .share-action{order:0!important}
 .pss-sms{background:#5b5bd6}
 .pss-link{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
 .publish-share-later{margin-top:14px;border:0;background:transparent;color:#cdbbd9;font-weight:700;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* 26/10/2026 : formulaire « Publier une annonce » plus simple et lisible */
+#publishModal .photo-tip{color:#5b3a0e!important;background:#fff6e3!important;border:1px solid #f0d49a!important;font-size:.84rem;padding:8px 12px}
+#publishModal .photo-tip strong{color:#a5650c!important}
+#publishModal .photo-gallery-head{display:none!important}
+#publishModal #photoQuotaTitle,#publishModal #photoCount{display:none!important}
+#publishModal .photo-footer-info{background:transparent!important;border:0!important;padding:4px 2px 0!important;box-shadow:none!important}
+#publishModal .phone-choice{padding:10px 12px!important}
+#publishModal .form-row>label{font-size:.9rem;margin-bottom:6px}
+@media (max-width:760px){
+  /* Ville et code postal côte à côte */
+  #publishModal .form-grid{display:grid!important;grid-template-columns:1fr 1fr!important;column-gap:10px}
+  #publishModal .form-grid>.form-row{grid-column:1 / -1}
+  #publishModal .form-grid>.form-row:has(#adCity),#publishModal .form-grid>.form-row:has(#adPostalCode){grid-column:auto}
+}
