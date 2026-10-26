@@ -37,6 +37,12 @@ function build(type: string, p: any) {
   const formule = `${esc(p.listing_limit)} annonces`;
   const photos = p.photo_limit ? `${esc(p.photo_limit)} photos par annonce` : "";
   const founder = p.founder_number != null && p.status === "trialing";
+  // 26/10/2026 : message ponctuel rédigé à la main (payload : subject, title, paras[], bullets[]), texte déjà en HTML sûr.
+  if (type === "custom_message") {
+    const paras = Array.isArray(p.paras) ? p.paras.map((x: unknown) => String(x)) : [];
+    const bullets = Array.isArray(p.bullets) ? p.bullets.map((x: unknown) => String(x)) : [];
+    return { subject: String(p.subject || "Abracadeal"), title: String(p.title || ""), paras, bullets };
+  }
   // 18/10/2026 : mails de l'offre Fondateurs sans carte (inactivité, fin des 12 mois sans moyen de paiement).
   if (type === "founder_inactivity_warning") {
     const title = "Votre place Fondateur est en jeu";

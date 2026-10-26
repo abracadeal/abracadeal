@@ -564,3 +564,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Bug :** Auto Cévennes (Alès, inscrit Fondateur n°1 le 19/10, 0 annonce) a reçu la relance « seriez-vous intéressé ? » le 26/10 à 16 h 45, puis a recliqué. `prospect_mailer_claim` ne vérifiait pas l'existence d'un compte.
 - **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-pas-de-relance-aux-inscrits.sql` : premiers mails et relances exclus si l'e-mail du prospect ou son code ?r= correspond à un compte existant (3 conditions ajoutées). Seul Auto Cévennes était concerné. Oxoto (inscrit le 19/10) n'avait pas encore reçu de relance : il n'en recevra pas.
 - **À faire (Anthony) :** Auto Cévennes et Oxoto sont inscrits mais n'ont aucune annonce ; ils perdent leur place après 60 jours sans annonce (vers le 18/12).
+
+### 26/10/2026 — Claude — Mails ponctuels aux pros + aide à Auto Cévennes
+- **Changé :** `process-pro-transactional-emails` v5 déployée (et resynchronisée dans le dépôt) : nouveau type `custom_message` (payload `subject`, `title`, `paras[]`, `bullets[]`, envoyé via Resend depuis contact@abracadeal.fr). Contrainte `pro_email_outbox_email_type_check` élargie. Fichier : `supabase/2026-10-26-pro-email-custom-auto-cevennes.sql`.
+- **Programmé :** message « Voulez-vous qu'on mette vos annonces en ligne pour vous ? » à Auto Cévennes (Fondateur n°1, 0 annonce) le 27/10/2026 à 9 h (Paris) — ligne `custom-auto-cevennes-aide-import-20261027`. Les réponses arrivent sur contact@abracadeal.fr.
+- **Pour envoyer un autre message ponctuel :** insérer une ligne `custom_message` dans `pro_email_outbox` avec `available_at` = heure voulue.
+- **À revoir :** le mail automatique `founder_onboarding` dit encore « Marre de payer trop cher ? » et « gratuite pendant 12 mois » (formulations abandonnées par Anthony).
