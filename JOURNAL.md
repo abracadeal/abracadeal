@@ -552,3 +552,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — SEO : recherches génériques « déposer une annonce gratuite »
 - **Changé :** nouvelle page `deposer-une-annonce-gratuite.html` (indexable, visible des humains : pas de redirection) : H1 « Déposer une petite annonce gratuite », 3 étapes, avantages, catégories liées, FAQ (+ balisage FAQPage), boutons vers `/?deposer=1`. Ajoutée à `sitemap-pages.xml` et liée en bas de l'accueil. `index.html` : titre « Petites annonces gratuites entre particuliers et pros » et description orientée « Déposez gratuitement… ».
 - **À savoir :** pas de noms de concurrents (Leboncoin, Vivastreet…) dans le site : risque de sanction Google et de contrefaçon de marque.
+
+### 26/10/2026 — Claude — Démo Life Cars : formulation gratuite alignée
+- **Changé :** `demo/life-cars/annonce.html` : « 12 mois offerts… » → « Publication gratuite, sans carte bancaire, sans engagement. » (même règle que le reste du site). Rendez-vous Life Cars prévu le 27/10.
