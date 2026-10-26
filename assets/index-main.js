@@ -2989,6 +2989,8 @@ function listingAgeLabel(a){
   const m=Math.floor(days/30); if(m<12) return 'il y a '+m+' mois';
   return 'il y a plus d’un an';
 }
+// 26/10/2026 : on n'affiche plus l'ancienneté (« il y a 12 jours » joue contre nous tant que le trafic est faible) ; seulement un badge « Nouveau » de moins de 3 jours.
+function listingIsNew(a){const d=new Date(a&&a.created_at||0);return !!(a&&a.created_at&&!isNaN(d)&&(Date.now()-d.getTime())<3*86400000);}
 function adSeoTitle(a){
   const t=esc(displayListingTitle(a.title));
   const isPublic=a&&a.status==='active'&&(a.visibility_scope||'public')==='public'&&!a.revision_of&&/^[0-9a-f-]{36}$/i.test(String(a.id||''));
@@ -3861,7 +3863,7 @@ function renderAds(){
           ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
           ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
         </div>`:''}
-        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}${listingAgeLabel(a)?`<span class="ad-age"> · ${listingAgeLabel(a)}</span>`:''}</div>
+        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}${listingIsNew(a)?`<span class="ad-new">Nouveau</span>`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
