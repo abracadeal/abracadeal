@@ -2754,6 +2754,7 @@ $('#publishForm').addEventListener('submit',async e=>{
     resetPublishForm();
     document.querySelector('#resultats')?.scrollIntoView({behavior:'smooth'});
     toast(autoPublished?'Annonce vérifiée et mise en ligne':'Annonce envoyée pour vérification');
+    if(!wasEditing&&autoPublished&&listingId) setTimeout(()=>window.showPublishShareScreen?.(listingId),450);
   }catch(err){
     console.error(err);
     if(status) status.textContent='Échec de la publication';
@@ -3127,6 +3128,39 @@ window.shareListingWhatsApp=id=>{if(!shareActionOnce('whatsapp:'+id))return;cons
 window.shareListingFacebook=id=>{if(!shareActionOnce('facebook:'+id))return;const url=encodeURIComponent(publicListingUrl(id));window.open('https://www.facebook.com/sharer/sharer.php?u='+url,'_blank','noopener,width=700,height=600');};
 window.shareListingSms=id=>{if(!shareActionOnce('sms:'+id))return;const body=encodeURIComponent(listingShareText(id)+' '+publicListingUrl(id));location.href='sms:?&body='+body;};
 window.shareListingNative=async id=>{if(!shareActionOnce('native:'+id))return;const url=publicListingUrl(id),text=listingShareText(id);if(navigator.share){try{await navigator.share({title:'Abracadeal',text,url})}catch(e){if(e?.name!=='AbortError')console.warn(e)}}else{await copyListingLink(id)}closeShareMenu();};
+/* 26/10/2026 : écran « Partagez votre annonce » juste après une mise en ligne réussie
+   (le vendeur est le plus motivé à ce moment-là : chaque partage amène des visiteurs gratuits). */
+window.showPublishShareScreen=function(id){
+  if(!id) return;
+  let wrap=document.getElementById('publishShareScreen');
+  if(!wrap){
+    wrap=document.createElement('div');
+    wrap.id='publishShareScreen';wrap.className='publish-share-backdrop';
+    wrap.setAttribute('role','dialog');wrap.setAttribute('aria-modal','true');wrap.setAttribute('aria-labelledby','publishShareTitle');
+    document.body.appendChild(wrap);
+    wrap.addEventListener('click',e=>{if(e.target===wrap||e.target.closest('[data-pss-close]'))wrap.classList.remove('open');});
+  }
+  const ic={
+    wa:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.7 11.8 11.8 0 0 0 4.5 4c1.7.7 2.3.8 3.2.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.4-.3Z"/></svg>',
+    fb:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 8h3V4h-3c-2.8 0-4 1.8-4 4.3V10H7v4h3v8h4v-8h3l1-4h-4V8.6c0-.4.3-.6.6-.6Z"/></svg>',
+    sms:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M4 5h16v11H9l-5 4V5Z"/></svg>',
+    link:'<svg viewBox="0 0 24 24" aria-hidden="true"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3A4 4 0 0 0 11 18.7l1-1"/></svg>'
+  };
+  wrap.innerHTML=`<div class="publish-share-card">
+    <button type="button" class="publish-share-close" data-pss-close aria-label="Fermer">×</button>
+    <div class="publish-share-emoji" aria-hidden="true">🎉</div>
+    <h2 id="publishShareTitle">Votre annonce est en ligne !</h2>
+    <p>Partagez-la maintenant pour <strong>vendre plus vite</strong> : vos contacts la voient tout de suite.</p>
+    <div class="publish-share-grid">
+      <button type="button" class="pss-btn pss-wa" onclick="shareListingWhatsApp('${id}')">${ic.wa}<span>WhatsApp</span></button>
+      <button type="button" class="pss-btn pss-fb" onclick="shareListingFacebook('${id}')">${ic.fb}<span>Facebook</span></button>
+      <button type="button" class="pss-btn pss-sms" onclick="shareListingSms('${id}')">${ic.sms}<span>SMS</span></button>
+      <button type="button" class="pss-btn pss-link" onclick="copyListingLink('${id}')">${ic.link}<span>Copier le lien</span></button>
+    </div>
+    <button type="button" class="publish-share-later" data-pss-close>Plus tard</button>
+  </div>`;
+  wrap.classList.add('open');
+};
 window.shareListingSmart=(id,event)=>{
   if(event){event.preventDefault();event.stopPropagation();}
   const pop=ensureGlobalSharePopover();

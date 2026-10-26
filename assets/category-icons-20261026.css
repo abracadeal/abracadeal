@@ -84,3 +84,22 @@ html body .card-photo-actions .share-action{order:0!important}
 /* 26/10/2026 : astuce photo dans le dépôt d'annonce */
 .photo-tip{margin:4px 0 10px;padding:9px 12px;border-radius:12px;background:rgba(242,196,109,.10);border:1px solid rgba(242,196,109,.35);color:inherit;font-size:.85rem;line-height:1.45}
 .photo-tip strong{color:#d79a2b}
+
+/* 26/10/2026 : écran « Partagez votre annonce » après publication */
+.publish-share-backdrop{position:fixed;inset:0;z-index:100000;display:none;align-items:center;justify-content:center;padding:18px;background:rgba(10,4,18,.72);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.publish-share-backdrop.open{display:flex}
+.publish-share-card{position:relative;width:min(420px,100%);box-sizing:border-box;padding:26px 22px 18px;border-radius:24px;text-align:center;color:#fff;
+  background:radial-gradient(120% 90% at 50% 0%,#4b1d68 0%,#2a0f3c 60%,#1d0a2a 100%);border:1px solid rgba(242,196,109,.45);box-shadow:0 24px 70px rgba(0,0,0,.5)}
+.publish-share-close{position:absolute;top:10px;right:12px;width:36px;height:36px;border:0;background:transparent;color:#e9dcf2;font-size:1.6rem;cursor:pointer}
+.publish-share-emoji{font-size:2.4rem;line-height:1;margin-bottom:8px}
+.publish-share-card h2{margin:0 0 8px;font-size:1.35rem;font-weight:900;color:#fff}
+.publish-share-card p{margin:0 0 18px;color:#e9dcf2;font-size:.95rem;line-height:1.45}
+.publish-share-card p strong{color:#f2c46d}
+.publish-share-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pss-btn{display:flex;align-items:center;justify-content:center;gap:8px;min-height:52px;border-radius:14px;border:0;font-weight:800;font-size:.95rem;color:#fff;cursor:pointer}
+.pss-btn svg{width:22px;height:22px;flex:0 0 22px}
+.pss-wa{background:#25d366;color:#08331a}
+.pss-fb{background:#1877f2}
+.pss-sms{background:#5b5bd6}
+.pss-link{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2)}
+.publish-share-later{margin-top:14px;border:0;background:transparent;color:#cdbbd9;font-weight:700;font-size:.9rem;text-decoration:underline;text-underline-offset:3px;cursor:pointer}

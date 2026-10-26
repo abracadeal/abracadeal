@@ -517,3 +517,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Catégorie retirée des vignettes
 - **Changé :** `assets/index-main.js` (v=cards4) : la ligne catégorie (« Véhicules », « Équipement moto · Accessoires »…) n'apparaît plus sur les vignettes publiques ; gardée dans « Mes annonces » et en modération.
+
+### 26/10/2026 — Claude — Écran « Partagez votre annonce » après publication
+- **Changé :** `assets/index-main.js` (v=share) : `showPublishShareScreen(id)` s'ouvre ~0,5 s après une **nouvelle** annonce mise en ligne automatiquement (pas pour une modification, pas pour une annonce en attente de vérification — son lien ne marcherait pas encore, pas pour le parcours options payantes). Boutons WhatsApp / Facebook / SMS / Copier le lien (fonctions de partage existantes) + « Plus tard ». Styles dans `assets/category-icons-20261026.css` (v=11).
+- **Pourquoi :** stratégie trafic sans pub : chaque vendeur qui partage amène des visiteurs.
