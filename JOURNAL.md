@@ -472,3 +472,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — « Offre » retiré des accroches Fondateurs
 - **Changé :** bandeau du haut (« 🎉 Pros Auto, Moto & Immobilier · Publication gratuite… », bouton « Découvrir → » au lieu de « Voir l'offre »), bloc Pros et titre inscription Pro (« Pros Fondateurs »), `pro-fondateur.html` (pastille, titre de page, description Google, « Places Fondateurs : réservées… »).
 - **Pourquoi :** Anthony trouve que « offre » fait penser à « payant ». Les conditions détaillées et la grille privée Pro n'ont pas changé.
+
+### 26/10/2026 — Claude — Modale Fondateurs : import par le pro lui-même
+- **Changé :** `index.html` : avantage « Votre stock en ligne, sans ressaisie — importez-le vous-même en quelques clics, ou on le reprend pour vous… » ; « Conditions de l'offre » → « Voir les conditions ».
