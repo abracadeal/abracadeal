@@ -5837,6 +5837,26 @@ document.addEventListener('click',e=>{
    setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),80);
  }
 });
+// 26/10/2026 : lien direct vers l'espace Pro depuis les e-mails (https://abracadeal.fr/?espace=pro).
+// Connecté en Pro : ouvre le tableau de bord. Pas connecté : ouvre la connexion, puis le tableau de bord après connexion.
+(function(){
+ let wantPro=false;
+ try{wantPro=new URLSearchParams(location.search).get('espace')==='pro';}catch(_){}
+ if(!wantPro)return;
+ try{history.replaceState(null,'',location.pathname+location.hash);}catch(_){}
+ let done=false,askedLogin=false;
+ function openPro(){
+   if(done)return;
+   if(currentUser&&currentProfile?.account_type==='professionnel'){
+     done=true;openModal('accountModal');
+     setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),120);
+   }else if(!currentUser&&!askedLogin){
+     askedLogin=true;try{window.setAuthTab?.('login');}catch(_){} openModal('accountModal');
+   }
+ }
+ window.addEventListener('abracadeal:auth',()=>setTimeout(openPro,150));
+ setTimeout(openPro,2500);
+})();
 
 let proShowroomMediaDirty=false;
 let proShowroomRecord={description:'',banner_path:null,logo_path:null,updated_at:null};

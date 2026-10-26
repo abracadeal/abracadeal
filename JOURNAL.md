@@ -570,3 +570,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Programmé :** message « Voulez-vous qu'on mette vos annonces en ligne pour vous ? » à Auto Cévennes (Fondateur n°1, 0 annonce) le 27/10/2026 à 9 h (Paris) — ligne `custom-auto-cevennes-aide-import-20261027`. Les réponses arrivent sur contact@abracadeal.fr.
 - **Pour envoyer un autre message ponctuel :** insérer une ligne `custom_message` dans `pro_email_outbox` avec `available_at` = heure voulue.
 - **À revoir :** le mail automatique `founder_onboarding` dit encore « Marre de payer trop cher ? » et « gratuite pendant 12 mois » (formulations abandonnées par Anthony).
+
+### 26/10/2026 — Claude — Lien direct vers l'espace Pro (?espace=pro)
+- **Changé :** `assets/index-main.js` (v=20261026-espacepro) : `https://abracadeal.fr/?espace=pro` ouvre directement le tableau de bord Pro (ou la connexion si le pro n'est pas connecté, puis le tableau de bord après connexion). `process-pro-transactional-emails` v6 : le bouton « Accéder à mon espace Pro » de tous les mails Pro pointe vers ce lien (avant : simple page d'accueil).

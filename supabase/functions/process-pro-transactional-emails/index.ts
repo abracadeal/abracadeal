@@ -8,6 +8,7 @@ const SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY") || "";
 const FROM_EMAIL = "Abracadeal <contact@abracadeal.fr>";
 const SITE = "https://abracadeal.fr/";
+const PRO_SPACE = "https://abracadeal.fr/?espace=pro"; // ouvre directement l'espace Pro (connexion demandée si besoin)
 
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -25,13 +26,13 @@ function layout(title: string, paragraphs: string[], bullets: string[] = []) {
 <tr><td style="background:#1c0b2b;padding:20px 28px;color:#ffffff;font-size:20px;font-weight:bold;">Abracadeal</td></tr>
 <tr><td style="padding:28px;">
 <h1 style="margin:0 0 18px 0;font-size:21px;color:#4a1766;">${title}</h1>${p}${ul}
-<p style="margin:22px 0 0 0;"><a href="${SITE}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;">Accéder à mon espace Pro</a></p>
+<p style="margin:22px 0 0 0;"><a href="${PRO_SPACE}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;">Accéder à mon espace Pro</a></p>
 </td></tr>
 <tr><td style="padding:16px 28px;background:#f3ecf6;color:#77677f;font-size:12px;line-height:1.5;">Le Service Pros Abracadeal · <a href="mailto:contact@abracadeal.fr" style="color:#6f218c;">contact@abracadeal.fr</a> · abracadeal.fr<br>Vous recevez ce message car vous avez un compte professionnel Abracadeal.</td></tr>
 </table></td></tr></table></body></html>`;
 }
 const toText = (title: string, paragraphs: string[], bullets: string[] = []) =>
-  [title, "", ...paragraphs.map((x) => x.replace(/<[^>]+>/g, "")), ...(bullets.length ? ["", ...bullets.map((b) => "- " + b.replace(/<[^>]+>/g, ""))] : []), "", "Accéder à mon espace Pro : " + SITE, "", "Le Service Pros Abracadeal — contact@abracadeal.fr"].join("\n");
+  [title, "", ...paragraphs.map((x) => x.replace(/<[^>]+>/g, "")), ...(bullets.length ? ["", ...bullets.map((b) => "- " + b.replace(/<[^>]+>/g, ""))] : []), "", "Accéder à mon espace Pro : " + PRO_SPACE, "", "Le Service Pros Abracadeal — contact@abracadeal.fr"].join("\n");
 
 function build(type: string, p: any) {
   const formule = `${esc(p.listing_limit)} annonces`;
