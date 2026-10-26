@@ -504,3 +504,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Ancienneté remplacée par un badge « Nouveau »
 - **Changé :** `assets/index-main.js` (v=cards3) + `assets/category-icons-20261026.css` (v=7) : plus de « il y a X jours » sur les cartes ; petit badge doré « Nouveau » seulement pour les annonces de moins de 3 jours (`listingIsNew`).
 - **Pourquoi :** Anthony — avec peu de trafic, l'ancienneté affichée fait « site qui ne bouge pas ».
+
+### 26/10/2026 — Claude — Cartes : Partager sous le cœur
+- **Changé :** `assets/category-icons-20261026.css` (v=8) : sur la photo des cartes, cœur en haut et bouton Partager en dessous (empilés). Anthony hésite avec un bouton Partager dans la partie texte de la carte.

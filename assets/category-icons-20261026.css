@@ -77,3 +77,6 @@ html body .cat.vacances-cat .cat-icon{color:inherit}
 }
 .ad-card .ad-age{color:inherit;opacity:.75;font-weight:500}
 .ad-card .ad-new{display:inline-block;margin-left:6px;padding:1px 6px;border-radius:999px;background:rgba(242,196,109,.14);border:1px solid rgba(242,196,109,.45);color:#f2c46d;font-size:10px!important;line-height:1.5;font-weight:800;letter-spacing:.02em;vertical-align:1px;white-space:nowrap}
+/* 26/10/2026 : sur les cartes, cœur en haut et bouton Partager juste en dessous */
+html body .ad-card .card-photo-actions{flex-direction:column!important;align-items:flex-end!important;gap:8px!important}
+html body .ad-card .card-photo-actions .favorite-action{order:-1}
