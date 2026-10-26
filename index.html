@@ -176,7 +176,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <style id="legal-tables-style">.legal-static-content table,.legal-modal table,.vac-legal-body table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}.legal-static-content th,.legal-static-content td,.legal-modal th,.legal-modal td,.vac-legal-body th,.vac-legal-body td{padding:10px 8px;border:1px solid #e9e0ed;text-align:left;vertical-align:top;overflow-wrap:anywhere}.legal-static-content th,.legal-modal th,.vac-legal-body th{background:#faf6fc}.legal-static-content td:first-child,.legal-modal td:first-child,.vac-legal-body td:first-child{width:36%}</style>
 <link rel="stylesheet" href="assets/space-switch-20261018.css?v=2">
 <link rel="stylesheet" href="assets/detail-mobile-20261019.css?v=1">
-<link rel="stylesheet" href="assets/founder-mobile-20261019.css?v=1">
+<link rel="stylesheet" href="assets/founder-mobile-20261019.css?v=2">
 <link rel="stylesheet" href="assets/nav-compact-20261020.css?v=1">
 </head>
 <body>
@@ -1050,24 +1050,25 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <!-- Offre Fondateurs : détail volontairement discret, sans grille tarifaire complète sur l’accueil. -->
 <div class="modal-backdrop" id="founderOfferModal" aria-hidden="true">
   <div class="modal founder-offer-modal" role="dialog" aria-modal="true" aria-labelledby="founderOfferTitle">
-    <div class="modal-head"><h2 id="founderOfferTitle">Offre Fondateurs professionnels</h2><a class="close-btn" data-close="founderOfferModal" href="#" aria-label="Fermer">×</a></div>
-    <div class="modal-body">
-      <p><strong>Réservée aux 500 premiers comptes professionnels éligibles.</strong></p>
-      <div class="founder-counter" data-founder-counter data-state="loading"><span class="founder-counter-dot"></span><span>Calcul des places…</span></div>
-      <div class="founder-progress" aria-hidden="true"><span data-founder-progress></span></div>
-      <div class="founder-progress-note" data-founder-progress-note>Le compteur se base sur les professionnels vérifiés.</div>
-      <div class="founder-steps">
-        <div><b>Offre Fondateurs</b><span>12 mois gratuits sur les formules 20 ou 50 annonces pour les Pros Auto, Moto et Immobilier. Puis tarif public normal à partir du 13e mois. Au-delà de votre formule, annonce supplémentaire à l’unité.</span></div>
+    <div class="modal-head"><h2 id="founderOfferTitle">Devenez Pro Fondateur</h2><a class="close-btn" data-close="founderOfferModal" href="#" aria-label="Fermer">×</a></div>
+    <div class="modal-body fo-body">
+      <div class="fo-hero">
+        <span class="fo-pill">⭐ Places limitées · réparties par région</span>
+        <p class="fo-lead">Publiez vos annonces <strong>gratuitement</strong> sur Abracadeal.</p>
+        <p class="fo-sub">Sans carte bancaire. Sans engagement. Vos annonces en ligne en quelques minutes.</p>
       </div>
-      <p class="note">Les tarifs détaillés, quotas, packs et options Pro sont visibles uniquement après création ou connexion à un compte professionnel.</p>
-      <!-- Fix 20/09/2026 : bouton "S'inscrire" demande par l'admin, pour convertir directement
-           depuis la modale au lieu de forcer un aller-retour manuel vers l'inscription.
-           Reutilise openProfessionalSignup() (deja utilisee par #proAccountBtn) qui bascule
-           sur l'onglet inscription, preselectionne "Professionnel" et ouvre accountModal. -->
-      <div class="form-actions" style="margin-top:18px">
-        <button type="button" class="btn primary" onclick="closeModal('founderOfferModal');openProfessionalSignup();">S’inscrire</button>
-      <a class="btn ghost" href="pro-fondateur.html">Voir l’offre et les tarifs Pro</a>
-      </div>
+      <ul class="fo-perks">
+        <li><span class="fo-ico" aria-hidden="true">📦</span><div><strong>On met votre stock en ligne</strong><span>Repris depuis votre site, avec votre accord. Vous n’avez plus qu’à le tenir à jour.</span></div></li>
+        <li><span class="fo-ico" aria-hidden="true">🔍</span><div><strong>Trouvé sur Google</strong><span>Chaque véhicule et chaque bien a sa propre page.</span></div></li>
+        <li><span class="fo-ico" aria-hidden="true">📲</span><div><strong>Partage en 1 clic</strong><span>WhatsApp, Facebook, SMS : vos clients voient vos annonces tout de suite.</span></div></li>
+        <li><span class="fo-ico" aria-hidden="true">🔓</span><div><strong>Zéro risque</strong><span>Aucune carte demandée, donc aucun prélèvement surprise. Vous restez parce que ça marche.</span></div></li>
+      </ul>
+      <button type="button" class="btn primary fo-cta" onclick="closeModal('founderOfferModal');openProfessionalSignup();">Je réserve ma place gratuitement</button>
+      <p class="fo-reassure">Inscription en 2 minutes · Garages, marchands Auto/Moto, agences immobilières</p>
+      <details class="fo-terms">
+        <summary>Conditions de l’offre</summary>
+        <p>Réservée aux 500 premiers professionnels Auto, Moto et Immobilier éligibles. Formules 20 ou 50 annonces, gratuité garantie pendant 12 mois. Ensuite, vous choisissez librement de continuer au tarif Pro en vigueur ; sans moyen de paiement, vos annonces sont simplement mises en pause, sans aucun prélèvement. Au-delà de votre formule, annonce supplémentaire à l’unité. Place libérée après 60 jours sans annonce en ligne.</p>
+      </details>
     </div>
   </div>
 </div>

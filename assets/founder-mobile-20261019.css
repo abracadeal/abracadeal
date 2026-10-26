@@ -20,7 +20,26 @@
    reste une information à valoriser une fois le professionnel inscrit. */
 #founderTopbar .founder-counter{display:none!important}
 
-/* 20/10/2026 : dans la modale Fondateurs, un seul CTA clair pendant les 12 mois gratuits. */
-#founderOfferModal .form-actions .btn.ghost[href="pro-fondateur.html"]{display:none!important}
-#founderOfferModal .form-actions .btn.primary{font-size:0}
-#founderOfferModal .form-actions .btn.primary::after{content:"S’inscrire gratuitement";font-size:14px}
+/* 26/10/2026 : modale Fondateurs refaite en version « pub » (un seul bouton, avantages, conditions repliées). */
+#founderOfferModal .modal.founder-offer-modal{max-width:560px!important;width:min(560px,calc(100% - 20px))!important}
+#founderOfferModal .fo-body{padding:22px 24px 24px;color:#26182d}
+#founderOfferModal .fo-hero{text-align:center;padding:4px 0 18px}
+#founderOfferModal .fo-pill{display:inline-block;padding:6px 12px;border-radius:999px;background:#f6ecfa;border:1px solid #ead8f2;color:#6c1f8a;font-weight:800;font-size:.78rem}
+#founderOfferModal .fo-lead{margin:14px 0 6px;font-size:1.45rem;line-height:1.25;font-weight:800;color:#2b1238}
+#founderOfferModal .fo-lead strong{color:#c2269a}
+#founderOfferModal .fo-sub{margin:0;color:#6b5a74;font-size:.95rem;line-height:1.5}
+#founderOfferModal .fo-perks{list-style:none;margin:0 0 20px;padding:0;display:grid;gap:10px}
+#founderOfferModal .fo-perks li{display:flex;gap:12px;align-items:flex-start;padding:12px 14px;border:1px solid #eee2f3;border-radius:14px;background:#fbf8fd}
+#founderOfferModal .fo-ico{flex:0 0 36px;height:36px;display:grid;place-items:center;border-radius:10px;background:#fff;border:1px solid #eee2f3;font-size:1.1rem}
+#founderOfferModal .fo-perks strong{display:block;font-size:.95rem;color:#2b1238;margin-bottom:2px}
+#founderOfferModal .fo-perks span:not(.fo-ico){display:block;font-size:.85rem;line-height:1.45;color:#6b5a74}
+#founderOfferModal .fo-cta{display:flex;width:100%;min-height:52px;align-items:center;justify-content:center;font-size:1rem;font-weight:800}
+#founderOfferModal .fo-reassure{margin:10px 0 0;text-align:center;font-size:.8rem;color:#857590}
+#founderOfferModal .fo-terms{margin-top:16px;border-top:1px solid #f0e6f4;padding-top:12px}
+#founderOfferModal .fo-terms summary{cursor:pointer;font-size:.82rem;font-weight:700;color:#7a5a88}
+#founderOfferModal .fo-terms p{margin:8px 0 0;font-size:.8rem;line-height:1.5;color:#7a6a84}
+@media (max-width:760px){
+  #founderOfferModal .fo-body{padding:18px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+  #founderOfferModal .fo-lead{font-size:1.3rem}
+  #founderOfferModal .fo-perks li{padding:11px 12px}
+}
