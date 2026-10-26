@@ -11,3 +11,21 @@ html body #annonces .cat:nth-child(n) .cat-icon{
 html body #annonces .cat:active .cat-icon{border-color:rgba(242,196,109,.9)!important}
 /* Hors mobile (tuiles claires éventuelles) */
 html body .cat.vacances-cat .cat-icon{color:inherit}
+
+/* 26/10/2026 : « Déposer une annonce » plus visible sur mobile (il se fondait dans la bannière dorée) */
+@media (max-width:760px){
+  html body .hero .hero-publish-button{
+    display:flex!important;width:calc(100% - 32px)!important;max-width:none!important;box-sizing:border-box!important;
+    min-height:54px!important;margin:14px auto 12px!important;padding:12px 18px!important;
+    border-radius:16px!important;font-size:1.05rem!important;font-weight:900!important;letter-spacing:.01em;
+    background:linear-gradient(120deg,#ffe08f 0%,#ffbf45 55%,#ff9f2e 100%)!important;color:#2a0f3a!important;
+    border:1px solid rgba(255,236,180,.9)!important;
+    box-shadow:0 0 0 4px rgba(255,191,69,.16),0 10px 26px rgba(255,159,46,.38)!important;
+    animation:abracaPublishGlow 2.8s ease-in-out infinite;
+  }
+}
+@keyframes abracaPublishGlow{
+  0%,100%{box-shadow:0 0 0 4px rgba(255,191,69,.14),0 10px 26px rgba(255,159,46,.32)}
+  50%{box-shadow:0 0 0 7px rgba(255,191,69,.24),0 12px 32px rgba(255,159,46,.5)}
+}
+@media (prefers-reduced-motion:reduce){html body .hero .hero-publish-button{animation:none!important}}

@@ -453,3 +453,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Accueil : icônes de catégories dorées au trait
 - **Changé :** `index.html` : les 8 emojis des catégories (🚗 🏠 🏖️ 📱 🛋️ 👗 💼 🛠️) remplacés par des icônes SVG au trait (voiture, maison, coucher de soleil sur la mer, téléphone, canapé, t-shirt, mallette, clé). Nouveau `assets/category-icons-20261026.css` : même rond violet foncé + liseré doré pour toutes les catégories (fini les couleurs différentes), icônes dorées #f2c46d.
 - **Pourquoi :** demande d'Anthony — rendu plus haut de gamme, cohérent avec la lampe dorée, identique sur iPhone/Android.
+
+### 26/10/2026 — Claude — Accueil mobile : bouton « Déposer une annonce » plus visible
+- **Changé :** `assets/category-icons-20261026.css` (v=2) : sur mobile, le bouton passe en pleine largeur (aligné sur la bannière), plus haut (54 px), texte plus gros, doré plus lumineux avec un halo qui pulse doucement (désactivé si l'utilisateur a demandé moins d'animations).
+- **Pourquoi :** Anthony trouvait le bouton noyé sous la bannière dorée.
