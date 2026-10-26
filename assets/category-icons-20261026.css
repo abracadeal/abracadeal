@@ -81,3 +81,6 @@ html body .cat.vacances-cat .cat-icon{color:inherit}
 html body .card-photo-actions,html body .ad-card .card-photo-actions,html body .immo-card .card-photo-actions{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:flex-end!important;gap:8px!important}
 html body .card-photo-actions .favorite-action{order:-1!important}
 html body .card-photo-actions .share-action{order:0!important}
+/* 26/10/2026 : astuce photo dans le dépôt d'annonce */
+.photo-tip{margin:4px 0 10px;padding:9px 12px;border-radius:12px;background:rgba(242,196,109,.10);border:1px solid rgba(242,196,109,.35);color:inherit;font-size:.85rem;line-height:1.45}
+.photo-tip strong{color:#d79a2b}

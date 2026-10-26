@@ -510,3 +510,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Cœur/Partager empilés sur toutes les vignettes
 - **Changé :** `assets/category-icons-20261026.css` (v=9) : la règle « cœur en haut, Partager dessous » s'applique à toutes les `.card-photo-actions` (elle ne visait que `.ad-card`, d'où des vignettes côte à côte ailleurs, ex. sections À la une / près de vous).
+
+### 26/10/2026 — Claude — Astuce photo dans le dépôt d'annonce
+- **Changé :** `index.html` : ligne « 📸 Astuce : tenez votre téléphone à l'horizontale… » au-dessus du bouton « Ajouter vos photos » ; style dans `assets/category-icons-20261026.css` (v=10).
+- **Pourquoi :** beaucoup de photos verticales donnent des vignettes avec bandes floues.
