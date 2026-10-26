@@ -490,3 +490,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Barre du logo mobile affinée
 - **Changé :** `assets/category-icons-20261026.css` (v=5) : sur mobile, « Achetez - Vendez » masqué sous le logo et barre plus fine (marge haute iPhone conservée). Logo gardé : bouton accueil et repère de marque hors de l'accueil.
+
+### 26/10/2026 — Claude — Identité société allégée sur les pages secondaires
+- **Changé :** `cookies.html`, `classement-annonces.html` : intro réduite à « Abracadeal est édité par iDream Lab (voir les mentions légales) ». `confidentialite.html`, `contact.html` : capital 50 € retiré (oubliés le matin).
+- **À savoir :** l'identité complète (RCS, siège) reste volontairement dans mentions légales (obligatoire, LCEN), CGU/CGV (identité du professionnel) et confidentialité (responsable de traitement, RGPD). Le capital n'apparaît plus qu'en petit en bas des mentions légales.
