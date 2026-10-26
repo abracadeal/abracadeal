@@ -29,3 +29,33 @@ html body .cat.vacances-cat .cat-icon{color:inherit}
   50%{box-shadow:0 0 0 7px rgba(255,191,69,.24),0 12px 32px rgba(255,159,46,.5)}
 }
 @media (prefers-reduced-motion:reduce){html body .hero .hero-publish-button{animation:none!important}}
+
+/* 26/10/2026 : bandeau Fondateurs court sur mobile (1 ligne au lieu de 3) */
+.founder-topbar .ft-short{display:none}
+@media (max-width:760px){
+  .founder-topbar .ft-long{display:none}
+  .founder-topbar .ft-short{display:inline}
+}
+
+/* 26/10/2026 : ligne de confiance sous la recherche */
+.hero-trust-line{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 16px;margin:10px auto 0;font-size:.82rem;font-weight:700;color:#e9dcf2}
+.hero-trust-line span{white-space:nowrap}
+@media (max-width:760px){.hero-trust-line{gap:4px 10px;font-size:.74rem;margin-top:8px;padding:0 8px}}
+
+/* 26/10/2026 : ordinateur — catégories en ronds dorés sous la recherche, Pro/Pro après les annonces */
+@media (min-width:761px){
+  html body main#top>#annonces{display:block!important;order:2!important;padding:18px 0 6px!important;background:transparent!important}
+  html body main#top>#homeFeaturedSection{order:3!important}
+  html body main#top>#resultats{order:5!important}
+  html body main#top>#b2bDiscovery{order:6!important}
+  html body #annonces .section-head{display:none!important}
+  html body #annonces .categories{display:grid!important;grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:12px!important;max-width:980px;margin:0 auto!important;overflow:visible!important}
+  html body #annonces .cat{display:flex!important;flex-direction:column!important;align-items:center!important;gap:9px!important;padding:6px 0!important;background:transparent!important;border:0!important;box-shadow:none!important;text-align:center!important;min-height:0!important}
+  html body #annonces .cat::before,html body #annonces .cat::after{display:none!important}
+  html body #annonces .cat>div:last-child{display:block}
+  html body #annonces .cat .cat-icon{width:66px!important;height:66px!important;flex:0 0 66px!important;border-radius:50%!important;display:grid!important;place-items:center!important;margin:0!important;transition:transform .18s ease,border-color .18s ease}
+  html body #annonces .cat .cat-icon svg{width:30px;height:30px}
+  html body #annonces .cat:hover .cat-icon{transform:translateY(-3px);border-color:rgba(242,196,109,.95)!important}
+  html body #annonces .cat h3{margin:0!important;color:#f8f1fb!important;font-size:.9rem!important;font-weight:800!important}
+  html body #annonces .cat small{display:none!important}
+}

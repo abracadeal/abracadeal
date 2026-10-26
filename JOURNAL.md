@@ -457,3 +457,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Accueil mobile : bouton « Déposer une annonce » plus visible
 - **Changé :** `assets/category-icons-20261026.css` (v=2) : sur mobile, le bouton passe en pleine largeur (aligné sur la bannière), plus haut (54 px), texte plus gros, doré plus lumineux avec un halo qui pulse doucement (désactivé si l'utilisateur a demandé moins d'animations).
 - **Pourquoi :** Anthony trouvait le bouton noyé sous la bannière dorée.
+
+### 26/10/2026 — Claude — Accueil : bandeau court, recherche, confiance, catégories desktop
+- **Changé :** `index.html` + `assets/category-icons-20261026.css` (v=3) :
+  - bandeau Fondateurs sur mobile réduit à 1 ligne (« 🎉 Pros : publiez gratuitement »), texte complet gardé sur ordinateur ;
+  - placeholder de recherche : « ✦ Recherche IA : Clio, T2 Cannes… » (on garde « IA », demande d'Anthony) ;
+  - ligne de confiance sous la recherche : « ✔ Annonces modérées · ✔ Dépôt gratuit · ✔ Contact direct » ;
+  - ordinateur : la section `#annonces` (catégories, masquée jusque-là) s'affiche en 8 ronds dorés sous la recherche ; le bandeau Pro/Pro passe après la liste des annonces.
+- **Pas fait :** masquer la liste quand le site est vide — 29 annonces actives au 26/10, inutile.
