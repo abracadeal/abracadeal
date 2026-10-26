@@ -521,3 +521,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Écran « Partagez votre annonce » après publication
 - **Changé :** `assets/index-main.js` (v=share) : `showPublishShareScreen(id)` s'ouvre ~0,5 s après une **nouvelle** annonce mise en ligne automatiquement (pas pour une modification, pas pour une annonce en attente de vérification — son lien ne marcherait pas encore, pas pour le parcours options payantes). Boutons WhatsApp / Facebook / SMS / Copier le lien (fonctions de partage existantes) + « Plus tard ». Styles dans `assets/category-icons-20261026.css` (v=11).
 - **Pourquoi :** stratégie trafic sans pub : chaque vendeur qui partage amène des visiteurs.
+
+### 26/10/2026 — Claude — Mails de prospection : plus de « 12 mois gratuits » en avant
+- **Changé (base, appliqué) :** `private.prospect_mailer_settings` via `supabase/2026-10-26-prospection-sans-12-mois.sql` : puce « Offre Fondateurs : 12 mois gratuits, jusqu'à 50 annonces » → « Jusqu'à 50 annonces publiées gratuitement, sans carte bancaire » (tous les modèles A et B) ; relance : « 12 mois de diffusion 100 % gratuite » → « vos annonces diffusées gratuitement » ; ligne « Conditions des places Fondateurs : https://abracadeal.fr/pro-fondateur.html » ajoutée sous la signature des premiers mails (la durée y reste indiquée, pour rester honnête).
+- **Pourquoi :** Anthony — « 12 mois gratuits » laisse entendre « payant ensuite ».
+- **À savoir :** `assets/email/email-pros.html` est un ancien modèle non utilisé par `prospect-mailer`.
