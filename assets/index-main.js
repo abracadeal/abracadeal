@@ -3172,7 +3172,7 @@ function listingCardActions(a){
   const active=favoriteIds.has(a.id);
   const share=`<button type="button" class="card-action-btn share-action" data-share-listing="${a.id}" aria-label="Partager l’annonce" title="Partager" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg></button>`;
   if(a.is_showroom) return `<div class="card-photo-actions" onclick="event.stopPropagation()">${share}</div>`;
-  return `<div class="card-photo-actions" onclick="event.stopPropagation()"><button type="button" data-favorite-id="${a.id}" class="card-action-btn favorite-action ${active?'active':''}" aria-label="${active?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${active?'♥':'♡'}</span><span class="fav-count-inline" data-fav-count-id="${a.id}"></span></button></div>`;
+  return `<div class="card-photo-actions" onclick="event.stopPropagation()">${share}<button type="button" data-favorite-id="${a.id}" class="card-action-btn favorite-action ${active?'active':''}" aria-label="${active?'Retirer des favoris':'Ajouter aux favoris'}" title="Favori" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${active?'♥':'♡'}</span><span class="fav-count-inline" data-fav-count-id="${a.id}"></span></button></div>`;
 }
 
 window.carouselStep=function(el,dir){

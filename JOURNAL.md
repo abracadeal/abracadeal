@@ -497,3 +497,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Cartes d'annonces épurées
 - **Changé :** `assets/index-main.js` (v=20261026-cards) : bouton Partager retiré des cartes (reste dans la fiche annonce et sur les showrooms) ; « · Particulier / · Professionnel » retiré de la ligne catégorie (badge PRO conservé sur la photo) ; titres écrits à 70 %+ en MAJUSCULES affichés en minuscules avec majuscule initiale (`displayListingTitle`, affichage seulement, base inchangée) ; ancienneté ajoutée après la ville (« aujourd'hui », « hier », « il y a 3 jours »… depuis `created_at`). `assets/category-icons-20261026.css` (v=6) : flèches du carrousel masquées sur écran tactile (glisser du doigt + points).
+
+### 26/10/2026 — Claude — Bouton Partager remis sur les cartes
+- **Changé :** `assets/index-main.js` : bouton Partager de nouveau sur chaque carte (choix d'Anthony : partage instantané = visibilité). Les autres changements des cartes restent.
