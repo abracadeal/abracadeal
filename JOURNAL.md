@@ -487,3 +487,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Changé :** `index.html` : sélecteur mobile « Annonces | Vacances » désactivé sur l'accueil (script `space-switch` mis en commentaire), entrée « Vacances » du menu ordinateur masquée, encart `#vacancesDiscovery` masqué. **Gardés :** le rond Vacances dans les catégories (demande d'Anthony), « Location saisonnière » dans le sous-menu Immobilier, la page `vacances.html` et son propre sélecteur.
 - **Pourquoi :** seulement 2 logements Vacances au 26/10 ; un espace vide décrédibilise le site.
 - **Pour réafficher :** décommenter la ligne `space-switch-20261018.js` en bas de `index.html`, retirer `hidden style="display:none!important"` sur l'item Vacances du menu et sur `#vacancesDiscovery`.
+
+### 26/10/2026 — Claude — Barre du logo mobile affinée
+- **Changé :** `assets/category-icons-20261026.css` (v=5) : sur mobile, « Achetez - Vendez » masqué sous le logo et barre plus fine (marge haute iPhone conservée). Logo gardé : bouton accueil et repère de marque hors de l'accueil.
