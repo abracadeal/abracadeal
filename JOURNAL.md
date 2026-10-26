@@ -548,3 +548,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Constat :** `prospect_ab_variant` renvoyait toujours `A` → 356 mails envoyés depuis le 15/10, **tous en A**, aucun B. Bilan A au 26/10 18 h : 356 envoyés, 12 prospects ont cliqué (~3,4 %), 0 réponse enregistrée, 4 désinscriptions, 136 relances.
 - **Changé (base, appliqué) :** `supabase/2026-10-26-prospect-ab-variant-50-50.sql` : répartition 50/50 stable par prospect (hash md5 de l'id). ~5 277 A / 5 240 B parmi les 10 517 restants.
 - **Pour le bilan :** comparer à partir du 26/10 18 h ; A = clics + réponses, B = réponses uniquement (pas de lien).
+
+### 26/10/2026 — Claude — SEO : recherches génériques « déposer une annonce gratuite »
+- **Changé :** nouvelle page `deposer-une-annonce-gratuite.html` (indexable, visible des humains : pas de redirection) : H1 « Déposer une petite annonce gratuite », 3 étapes, avantages, catégories liées, FAQ (+ balisage FAQPage), boutons vers `/?deposer=1`. Ajoutée à `sitemap-pages.xml` et liée en bas de l'accueil. `index.html` : titre « Petites annonces gratuites entre particuliers et pros » et description orientée « Déposez gratuitement… ».
+- **À savoir :** pas de noms de concurrents (Leboncoin, Vivastreet…) dans le site : risque de sanction Google et de contrefaçon de marque.
