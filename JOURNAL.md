@@ -468,3 +468,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Ligne de confiance : coches dorées
 - **Changé :** `index.html` + `assets/category-icons-20261026.css` (v=4) : les « ✔ » (affichés en emoji noir sur iPhone) remplacés par des coches SVG dorées.
+
+### 26/10/2026 — Claude — « Offre » retiré des accroches Fondateurs
+- **Changé :** bandeau du haut (« 🎉 Pros Auto, Moto & Immobilier · Publication gratuite… », bouton « Découvrir → » au lieu de « Voir l'offre »), bloc Pros et titre inscription Pro (« Pros Fondateurs »), `pro-fondateur.html` (pastille, titre de page, description Google, « Places Fondateurs : réservées… »).
+- **Pourquoi :** Anthony trouve que « offre » fait penser à « payant ». Les conditions détaillées et la grille privée Pro n'ont pas changé.
