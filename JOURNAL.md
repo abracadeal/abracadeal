@@ -482,3 +482,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Ligne de confiance sortie du bloc de recherche collant
 - **Changé :** `index.html` : `.hero-trust-line` déplacée hors de `.search-wrap` (la recherche devient collante en haut au scroll sur mobile et emmenait la ligne avec elle, par-dessus les annonces).
+
+### 26/10/2026 — Claude — Vacances masqué de la navigation de l'accueil
+- **Changé :** `index.html` : sélecteur mobile « Annonces | Vacances » désactivé sur l'accueil (script `space-switch` mis en commentaire), entrée « Vacances » du menu ordinateur masquée, encart `#vacancesDiscovery` masqué. **Gardés :** le rond Vacances dans les catégories (demande d'Anthony), « Location saisonnière » dans le sous-menu Immobilier, la page `vacances.html` et son propre sélecteur.
+- **Pourquoi :** seulement 2 logements Vacances au 26/10 ; un espace vide décrédibilise le site.
+- **Pour réafficher :** décommenter la ligne `space-switch-20261018.js` en bas de `index.html`, retirer `hidden style="display:none!important"` sur l'item Vacances du menu et sur `#vacancesDiscovery`.

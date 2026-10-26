@@ -231,7 +231,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="" data-immo-property="bureaux-commerces">Bureaux / Commerces</a>
         </div>
       </div>
-      <div class="desktop-nav-item">
+      <div class="desktop-nav-item" hidden style="display:none!important"><!-- 26/10/2026 : Vacances masqué du menu (peu de logements) -->
         <a class="desktop-category-link" href="vacances.html">Vacances</a>
         <div class="desktop-submenu" aria-label="Sous-menu Vacances">
           <a class="desktop-subcategory-link" id="vacancesModeLink" href="vacances.html">Locations de vacances</a>
@@ -408,7 +408,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
     </div>
   </section>
 
-  <aside class="container vacances-discovery" id="vacancesDiscovery" aria-labelledby="vacancesDiscoveryTitle">
+  <aside class="container vacances-discovery" id="vacancesDiscovery" aria-labelledby="vacancesDiscoveryTitle" hidden style="display:none!important">
     <div><h2 id="vacancesDiscoveryTitle">Abracadeal Vacances</h2><p>Locations saisonnières en direct · <strong>500 premiers logements publiés gratuitement</strong> · 0 % de commission.</p></div>
     <a class="vacances-discovery-tag" href="vacances.html">Découvrir Vacances</a>
   </aside>
@@ -1935,6 +1935,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <script src="assets/thumb-fit-20261009.js?v=1"></script>
 <script src="assets/install-app-20261018.js?v=5" defer></script>
 <script src="assets/admin-account-layout-20261018.js?v=2" defer></script>
-<script src="assets/space-switch-20261018.js?v=1" defer></script>
+<!-- 26/10/2026 : sélecteur Annonces | Vacances masqué sur l'accueil tant qu'il y a peu de logements (remettre la ligne ci-dessous pour le réafficher) -->
+<!-- <script src="assets/space-switch-20261018.js?v=1" defer></script> -->
 </body>
 </html>
