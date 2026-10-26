@@ -543,3 +543,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Immobilier : l'essentiel d'abord dans « Publier une annonce »
 - **Changé :** `assets/publish-more-details-20261026.js` (v=3, généralisé véhicules + immobilier) : en immobilier restent visibles surface, pièces, meublé, DPE, GES, dépenses d'énergie min/max, copropriété/lots/charges, honoraires (+ charges/dépôt en location, surface terrain) = **mentions obligatoires d'une annonce immobilière, ne pas les replier**. Repliés sous « Plus de détails (facultatif) » : chambres, salles de bain, étage, nb d'étages, année, état, chauffage, exposition, quartier, mandat, disponibilité, consommation kWh, date DPE, taxe foncière, équipements. Bouton placé juste avant « Titre de l'annonce ». `index.html` : libellés raccourcis (Surface (m²), Pièces, Énergie / an : min / max). CSS v=15 : titres de sections immo masqués, champs par paires sur mobile.
+
+### 26/10/2026 — Claude — Test A/B des mails réactivé (B n'était jamais envoyé)
+- **Constat :** `prospect_ab_variant` renvoyait toujours `A` → 356 mails envoyés depuis le 15/10, **tous en A**, aucun B. Bilan A au 26/10 18 h : 356 envoyés, 12 prospects ont cliqué (~3,4 %), 0 réponse enregistrée, 4 désinscriptions, 136 relances.
+- **Changé (base, appliqué) :** `supabase/2026-10-26-prospect-ab-variant-50-50.sql` : répartition 50/50 stable par prospect (hash md5 de l'id). ~5 277 A / 5 240 B parmi les 10 517 restants.
+- **Pour le bilan :** comparer à partir du 26/10 18 h ; A = clics + réponses, B = réponses uniquement (pas de lien).
