@@ -14,29 +14,6 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
 
 (()=>{
   const root=document;
-  const money=new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR'});
-  const total=root.getElementById('platformTotal');
-  const net=root.getElementById('ownerNet');
-  const direct=root.getElementById('directPrice');
-  const saving=root.getElementById('travelerSaving');
-  const gain=root.getElementById('ownerGain');
-  const calcMessage=root.getElementById('calcMessage');
-  function calc(){
-    const t=Math.max(0,Number(total.value)||0);
-    const n=Math.max(0,Number(net.value)||0);
-    calcMessage.className='calc-message';
-    if(!t||!n){calcMessage.textContent='Renseignez les deux montants.';calcMessage.classList.add('error');return false;}
-    if(n>t){calcMessage.textContent='Le montant que vous percevez doit être inférieur ou égal au prix payé par le voyageur.';calcMessage.classList.add('error');return false;}
-    const d=(t+n)/2;
-    direct.textContent=money.format(d);
-    saving.textContent=money.format(t-d);
-    gain.textContent=money.format(d-n);
-    calcMessage.textContent='';
-    return true;
-  }
-  total.addEventListener('input',calc);
-  net.addEventListener('input',calc);
-  calc();
 
   const form=root.getElementById('vacationSearch');
   const state=root.getElementById('searchState');
@@ -388,7 +365,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function emptyHtml(){
     return '<div class="vac-listing-empty">'
       +'<strong>Aucun logement publié pour le moment.</strong>'
-      +'<p>Les premiers hôtes arrivent bientôt — 500 logements gratuits pendant 12 mois pour le lancement.</p>'
+      +'<p>Les premiers hôtes arrivent bientôt — publication gratuite pour les 500 premiers logements.</p>'
       +'<a class="btn primary" href="vacances.html?mode=hote&host_signup=1">Devenir hôte</a>'
     +'</div>';
   }

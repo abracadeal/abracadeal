@@ -433,3 +433,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Pourquoi :** demande d'Anthony — la page doit vendre et chercher des inscriptions, sans parler de prix.
 - **À savoir :** la grille de prix pour les comptes Pro connectés (`#privatePricing`) n'a pas changé.
 - **Aussi le 20/10 (base) :** purge de `cron.job_run_details` (historique > 2 jours supprimé, ~130 000 lignes) + nouvelle tâche planifiée `abracadeal-purge-cron-history` chaque nuit à 4h23, pour réduire le Disk IO Supabase.
+
+### 26/10/2026 — Claude — Vacances : simulateur retiré, bloc « Devenir hôte » refait + nouvelle formulation Fondateurs
+- **Changé :**
+  - `vacances.html` : simulateur de prix direct supprimé (HTML + script dans `assets/vacances-main.js`). Nouveau bloc « Devenir hôte » (titre, texte, 2 boutons, 4 avantages : prix libre, contact direct, 0 % de commission, 15 photos), styles dans le nouveau `assets/vacances-host-cta-20261026.css` (desktop 2 colonnes, tablette empilé, mobile boutons pleine largeur). Cartes « Un prix direct hôte » : 4 colonnes sur desktop, 2 sur tablette (il restait une carte seule).
+  - Formulation Fondateurs : les titres/accroches ne mettent plus « 12 mois gratuits » en avant (ça laisse penser « payant ensuite »). À la place : « Publiez gratuitement, sans carte bancaire ni engagement », et la durée passe en second plan (« gratuité garantie 12 mois »). Fichiers : `index.html` (bandeau du haut, bloc Pros, bouton « Je publie gratuitement », encart Vacances, titre inscription Pro), `pro-fondateur.html` (titre + paragraphe), `vacances.html` (carte « Publication offerte »), `assets/vacances-main.js` (message sans logement).
+- **Pourquoi :** demande d'Anthony.
+- **À savoir :** les conditions détaillées (modale « Voir les conditions », texte d'inscription Pro, grille privée) mentionnent toujours clairement les 12 mois : ne pas les retirer, la durée doit rester indiquée.
