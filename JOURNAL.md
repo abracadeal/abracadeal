@@ -559,3 +559,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Page de démo privée pour Centurion Motors
 - **Changé :** `demo/centurion-motors/` (index + annonce, copie de la démo Life Cars ; noindex, `/demo/` déjà bloqué dans robots.txt, non liée depuis le site). Centurion Motors : 616 route de Serra Capeou, 06110 Le Cannet, 60 véhicules sur AutoScout24 (gérant : Pierre Visciglia, pas de site propre trouvé). 3 véhicules : Lamborghini Revuelto, Urus Mansory Venatus, Ferrari 812 GTS — 1 photo chacun, chargée depuis AutoScout24 (taille 720/1280, repli auto sur la vignette 250x188 si indisponible). Descriptions limitées aux infos publiques (année, km, puissance, financement possible).
 - **À faire :** supprimer `demo/centurion-motors/` après le rendez-vous (27/10) ou en cas de refus. Rien en base.
+
+### 26/10/2026 — Claude — Plus de mails de prospection aux pros déjà inscrits
+- **Bug :** Auto Cévennes (Alès, inscrit Fondateur n°1 le 19/10, 0 annonce) a reçu la relance « seriez-vous intéressé ? » le 26/10 à 16 h 45, puis a recliqué. `prospect_mailer_claim` ne vérifiait pas l'existence d'un compte.
+- **Changé (base, appliqué) :** `supabase/2026-10-26-prospection-pas-de-relance-aux-inscrits.sql` : premiers mails et relances exclus si l'e-mail du prospect ou son code ?r= correspond à un compte existant (3 conditions ajoutées). Seul Auto Cévennes était concerné. Oxoto (inscrit le 19/10) n'avait pas encore reçu de relance : il n'en recevra pas.
+- **À faire (Anthony) :** Auto Cévennes et Oxoto sont inscrits mais n'ont aucune annonce ; ils perdent leur place après 60 jours sans annonce (vers le 18/12).
