@@ -1,0 +1,13 @@
+/* 26/10/2026 : icônes de catégories au trait doré (remplacent les emojis), une seule couleur pour toutes. */
+.cat .cat-icon{color:#f2c46d}
+.cat .cat-icon svg{width:26px;height:26px;display:block}
+html body #annonces .cat .cat-icon,
+html body #annonces .cat:nth-child(n) .cat-icon{
+  background:radial-gradient(circle at 32% 25%,#4b1d68 0%,#2c0f3e 62%,#1e0a2b 100%)!important;
+  border:1px solid rgba(242,196,109,.45)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 3px rgba(242,196,109,.06),0 8px 18px rgba(0,0,0,.28)!important;
+  color:#f2c46d!important;
+}
+html body #annonces .cat:active .cat-icon{border-color:rgba(242,196,109,.9)!important}
+/* Hors mobile (tuiles claires éventuelles) */
+html body .cat.vacances-cat .cat-icon{color:inherit}
