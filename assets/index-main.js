@@ -3852,7 +3852,7 @@ function renderAds(){
         ${moderationRiskHTML(a)}
         ${statusBadge}
         ${secondCheckBadge}
-        <div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''}</div>
+        ${(moderationMode||onlyMine)?`<div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''}</div>`:''}
         <h3 class="ad-title">${adSeoTitle(a)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}

@@ -514,3 +514,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Astuce photo dans le dépôt d'annonce
 - **Changé :** `index.html` : ligne « 📸 Astuce : tenez votre téléphone à l'horizontale… » au-dessus du bouton « Ajouter vos photos » ; style dans `assets/category-icons-20261026.css` (v=10).
 - **Pourquoi :** beaucoup de photos verticales donnent des vignettes avec bandes floues.
+
+### 26/10/2026 — Claude — Catégorie retirée des vignettes
+- **Changé :** `assets/index-main.js` (v=cards4) : la ligne catégorie (« Véhicules », « Équipement moto · Accessoires »…) n'apparaît plus sur les vignettes publiques ; gardée dans « Mes annonces » et en modération.
