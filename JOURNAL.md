@@ -507,3 +507,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 26/10/2026 — Claude — Cartes : Partager sous le cœur
 - **Changé :** `assets/category-icons-20261026.css` (v=8) : sur la photo des cartes, cœur en haut et bouton Partager en dessous (empilés). Anthony hésite avec un bouton Partager dans la partie texte de la carte.
+
+### 26/10/2026 — Claude — Cœur/Partager empilés sur toutes les vignettes
+- **Changé :** `assets/category-icons-20261026.css` (v=9) : la règle « cœur en haut, Partager dessous » s'applique à toutes les `.card-photo-actions` (elle ne visait que `.ad-card`, d'où des vignettes côte à côte ailleurs, ex. sections À la une / près de vous).
