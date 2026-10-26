@@ -120,7 +120,8 @@ html body .card-photo-actions .share-action{order:0!important}
 }
 
 /* 26/10/2026 : véhicules — détails secondaires repliés sous « Plus de détails (facultatif) » */
-#publishForm:not(.veh-more-open) .veh-extra-row{display:none!important}
+#publishForm:not(.more-open-vehicle) .more-extra-vehicle,#publishForm:not(.more-open-immo) .more-extra-immo{display:none!important}
+#publishForm .realestate-detail-heading{display:none!important}
 #publishForm .veh-more-row{margin:2px 0 4px}
 #publishForm .veh-more-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;min-height:46px;border-radius:14px;border:1px dashed #cfb3de;background:#faf5fd;color:#6f218c;font:inherit;font-weight:800;font-size:.92rem;cursor:pointer}
 #publishForm .veh-more-plus{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:#6f218c;color:#fff;font-size:1rem;line-height:1}
@@ -131,4 +132,11 @@ html body .card-photo-actions .share-action{order:0!important}
   #publishModal .form-grid>.form-row:has(#vehicleMake),#publishModal .form-grid>.form-row:has(#vehicleModel),
   #publishModal .form-grid>.form-row:has(#vehicleYear),#publishModal .form-grid>.form-row:has(#vehicleMileage),
   #publishModal .form-grid>.form-row:has(#vehicleFuel),#publishModal .form-grid>.form-row:has(#vehicleTransmission){grid-column:auto}
+}
+/* Mobile : immobilier par paires (surface/pièces, DPE/GES, dépenses min/max, lots/charges) */
+@media (max-width:760px){
+  #publishModal .form-grid>.form-row:has(#immoSurface),#publishModal .form-grid>.form-row:has(#immoRooms),
+  #publishModal .form-grid>.form-row:has(#immoDpe),#publishModal .form-grid>.form-row:has(#immoGes),
+  #publishModal .form-grid>.form-row:has(#immoEnergyCostMin),#publishModal .form-grid>.form-row:has(#immoEnergyCostMax),
+  #publishModal .form-grid>.form-row:has(#immoLots),#publishModal .form-grid>.form-row:has(#immoAnnualCharges){grid-column:auto}
 }
