@@ -4427,3 +4427,10 @@ header #flowErrorsBtn{
 .pub-row.on .pub-tick{background:#7b2a96;border-color:#7b2a96}
 .pub-row.on .pub-row-price{color:#5f1e76}
 #publishPackHelp:empty{display:none}
+
+/* Accueil rangé par univers (27/10/2026) */
+.home-group-head{grid-column:1/-1;display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin-top:22px;padding-bottom:6px;border-bottom:1px solid rgba(110,60,180,.18)}
+.home-group-head.first{margin-top:0}
+.home-group-head h3{margin:0;font-size:1.15rem;font-weight:850}
+.home-group-more{background:none;border:0;padding:4px 0;color:#6b2fb3;font-weight:800;cursor:pointer;white-space:nowrap}
+.home-group-more:hover{text-decoration:underline}

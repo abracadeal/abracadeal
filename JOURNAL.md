@@ -583,3 +583,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 27/10/2026 — Claude — Liste d'annonces mélangée par vendeur
 - **Changé :** `assets/index-main.js` (v=20261027-mixvendeurs) : nouvelle fonction `diversifyBySeller()`. En tri « plus récentes » sans mot-clé, jamais plus de 2 annonces d'affilée du même vendeur (`owner_id`) : les suivantes sont décalées plus bas, aucune n'est retirée. Tri par prix, recherche par mot-clé, modération, « mes annonces » et favoris : ordre exact inchangé. Les annonces « À la une » restent insérées en positions 1, 4, 7 après ce mélange.
+
+### 27/10/2026 — Claude — Accueil rangé par univers
+- **Changé :** `assets/index-main.js` (v=20261027-accueil-univers) + `assets/index-core.css` (v=20261027-univers) : sur l'accueil par défaut (aucune recherche, filtre ni catégorie, tri « plus récentes »), les annonces sont regroupées sous des titres : « 🚗 Auto & Moto » (8 max), « 🏠 Immobilier » (8 max), puis « 🛍️ Toutes les autres annonces ». Bouton « Voir les N annonces → » quand une rangée en contient plus (ouvre la catégorie). Rangée vide = masquée. Fonctions `HOME_GROUPS`, `isHomeDefaultView()`, `groupHomeAds()`, `homeGroupHeaderHtml()`. Dès qu'un filtre/tri/catégorie est choisi : liste unique classique.
+- **Changé :** `classement-annonces.html` (section 2. Tri) : explique le regroupement par univers et la règle « 2 annonces max d'un même vendeur d'affilée » (transparence du classement).

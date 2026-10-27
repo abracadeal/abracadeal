@@ -3820,6 +3820,33 @@ window.renewPrivateListing=async(id,button)=>{
   finally{if(button)button.disabled=false;}
 };
 
+// Accueil par défaut : annonces rangées par univers (Auto & Moto, puis Immobilier, puis le reste),
+// pour ne jamais mélanger une voiture et une paire de baskets. Dès qu'un filtre, une recherche,
+// une catégorie ou un tri par prix est choisi, on revient à la liste unique classique.
+const HOME_GROUPS=[
+  {key:'vehicules',title:'🚗 Auto & Moto',test:a=>a.category==='vehicules',limit:8},
+  {key:'immobilier',title:'🏠 Immobilier',test:a=>a.category==='immobilier',limit:8},
+  {key:'',title:'🛍️ Toutes les autres annonces',test:()=>true,limit:Infinity}
+];
+function isHomeDefaultView(){
+  return !onlyMine&&!favoritesMode&&!moderationMode&&!hasActiveCatalogueFilters()&&($('#sortAds')?.value||'newest')==='newest';
+}
+function groupHomeAds(ads){
+  const rest=[...ads],out=[];
+  for(const g of HOME_GROUPS){
+    const items=rest.filter(g.test);
+    if(!items.length)continue;
+    items.forEach(a=>rest.splice(rest.indexOf(a),1));
+    const shown=items.slice(0,g.limit);
+    out.push({__homeHeader:true,key:g.key,title:g.title,total:items.length,shown:shown.length,first:!out.length});
+    out.push(...shown);
+  }
+  return out;
+}
+function homeGroupHeaderHtml(h){
+  const more=h.key&&h.total>h.shown?`<button type="button" class="home-group-more" onclick="navigateCatalogue('${h.key}','','#resultats')">Voir les ${h.total} annonces →</button>`:'';
+  return `<div class="home-group-head${h.first?' first':''}"><h3>${esc(h.title)}</h3>${more}</div>`;
+}
 function renderAds(){
   if(!onlyMine&&!favoritesMode&&!moderationMode){ renderHomeFeatured(); renderPersonalizedHome(); }
   $$('.banner-hotspot').forEach(el=>{
@@ -3864,7 +3891,9 @@ function renderAds(){
     return;
   }
   if(!ads.length){grid.innerHTML=moderationMode?'<div class="empty-state" style="grid-column:1/-1"><b>Rien à modérer ✓</b>Les annonces propres sont publiées automatiquement. Seules les exceptions apparaissent ici.</div>':'<div class="empty-state" style="grid-column:1/-1"><b>Soyez le premier à publier ici</b>Abracadeal vient d’ouvrir : une annonce déposée maintenant sera en tête de liste.<br><button type="button" class="btn primary" style="margin-top:12px" onclick="document.querySelector(\'.publish-trigger\')?.click()">＋ Déposer une annonce gratuitement</button></div>';return}
+  if(isHomeDefaultView()) ads=groupHomeAds(ads);
   grid.innerHTML=ads.map(a=>{
+    if(a.__homeHeader) return homeGroupHeaderHtml(a);
     const photos=visiblePhotosFor(a);
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
