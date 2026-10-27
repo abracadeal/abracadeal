@@ -608,3 +608,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Site :** `assets/photos-vacances.js` (publication : place Fondateur d'abord, sinon paiement 4,99 € TTC/HT), `pro-fondateur.html` (offre Vacances à l'unité non listée côté pro), textes `aide.html`, `espace-hote.html`, `assets/espace-hote.js`, bandeau `vacances.html` revenu à « Propriétaires & hébergeurs ».
 - **Testé :** RPC en transaction annulée (attribution, 2e appel « already », autre propriétaire refusé, places 500 → 499). Paiement réel pro non testé de bout en bout.
 - **À faire plus tard :** e-mail de rappel avant la fin des 12 mois gratuits d'un logement ; éventuel plafond de places par compte (une conciergerie peut aujourd'hui prendre beaucoup de places).
+
+### 27/10/2026 — Claude — Accueil par univers : icônes et bouton
+- **Changé :** titres de rangées sans émoji, avec l'icône dorée des catégories (voiture, maison, sac) dans une pastille ronde (`.home-group-icon`) ; « Voir les N annonces » devient un bouton dégradé violet → rose, sans flèche. `assets/index-main.js` (v=20261027-univers-icones), `assets/index-core.css` (v=20261027-univers2).

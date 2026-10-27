@@ -3824,9 +3824,9 @@ window.renewPrivateListing=async(id,button)=>{
 // pour ne jamais mélanger une voiture et une paire de baskets. Dès qu'un filtre, une recherche,
 // une catégorie ou un tri par prix est choisi, on revient à la liste unique classique.
 const HOME_GROUPS=[
-  {key:'vehicules',title:'🚗 Auto & Moto',test:a=>a.category==='vehicules',limit:8},
-  {key:'immobilier',title:'🏠 Immobilier',test:a=>a.category==='immobilier',limit:8},
-  {key:'',title:'🛍️ Toutes les autres annonces',test:()=>true,limit:Infinity}
+  {key:'vehicules',title:'Auto & Moto',icon:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',test:a=>a.category==='vehicules',limit:8},
+  {key:'immobilier',title:'Immobilier',icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.2V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.2"/>',test:a=>a.category==='immobilier',limit:8},
+  {key:'',title:'Toutes les autres annonces',icon:'<path d="M6 7h12l-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>',test:()=>true,limit:Infinity}
 ];
 function isHomeDefaultView(){
   return !onlyMine&&!favoritesMode&&!moderationMode&&!hasActiveCatalogueFilters()&&($('#sortAds')?.value||'newest')==='newest';
@@ -3838,14 +3838,14 @@ function groupHomeAds(ads){
     if(!items.length)continue;
     items.forEach(a=>rest.splice(rest.indexOf(a),1));
     const shown=items.slice(0,g.limit);
-    out.push({__homeHeader:true,key:g.key,title:g.title,total:items.length,shown:shown.length,first:!out.length});
+    out.push({__homeHeader:true,key:g.key,title:g.title,icon:g.icon,total:items.length,shown:shown.length,first:!out.length});
     out.push(...shown);
   }
   return out;
 }
 function homeGroupHeaderHtml(h){
-  const more=h.key&&h.total>h.shown?`<button type="button" class="home-group-more" onclick="navigateCatalogue('${h.key}','','#resultats')">Voir les ${h.total} annonces →</button>`:'';
-  return `<div class="home-group-head${h.first?' first':''}"><h3>${esc(h.title)}</h3>${more}</div>`;
+  const more=h.key&&h.total>h.shown?`<button type="button" class="home-group-more" onclick="navigateCatalogue('${h.key}','','#resultats')">Voir les ${h.total} annonces</button>`:'';
+  return `<div class="home-group-head${h.first?' first':''}"><h3><span class="home-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${h.icon||''}</svg></span>${esc(h.title)}</h3>${more}</div>`;
 }
 function renderAds(){
   if(!onlyMine&&!favoritesMode&&!moderationMode){ renderHomeFeatured(); renderPersonalizedHome(); }
