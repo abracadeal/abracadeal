@@ -1,11 +1,11 @@
-/* 27/10/2026 : pied de page aligné — liens à gauche, « © 2026 Abracadeal · iDream Lab » discret à droite, sur la même ligne */
+/* 27/10/2026 (v3) : pied de page centré et aéré — logo (accueil), liens centrés, puis « © 2026 Abracadeal · iDream Lab » discret, centré sous un filet fin */
 @media(min-width:761px){
-  html body footer .footer-row{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:24px!important}
-  html body footer .desktop-footer-brand{order:0;flex:none}
+  html body footer .footer-row{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:14px!important;text-align:center!important}
+  html body footer .desktop-footer-brand{order:0;margin:0 auto}
   html body footer .footer-links,
-  html body footer .vac-legal-links{order:1;flex:1 1 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin:0}
-  html body footer .footer-copyright{order:2;flex:none;margin:0 0 0 auto!important;text-align:right;font-size:.76rem;opacity:.7;white-space:nowrap}
+  html body footer .vac-legal-links{order:1;display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:8px 22px!important;margin:0 auto!important;max-width:980px}
+  html body footer .footer-copyright{order:2;margin:4px auto 0!important;padding-top:12px;border-top:1px solid rgba(190,160,215,.18);min-width:260px;text-align:center!important;font-size:.76rem;opacity:.65;white-space:nowrap}
 }
 @media(max-width:760px){
-  html body #vacTravelerFooter .footer-copyright{order:99;width:100%;text-align:right;font-size:10px;opacity:.7}
+  html body #vacTravelerFooter .footer-copyright{order:99;width:100%;text-align:center;font-size:10px;opacity:.7}
 }

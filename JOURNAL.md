@@ -617,5 +617,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Changé :** `vacances.html` (badge « Partout en France », 3 cartes « Pourquoi réserver en direct », 4 avantages « Devenir hôte »), `espace-hote.html` (4 actions rapides), `logement-vacances.html` (bouton admin Booster), `assets/vacances-main.js` (v=20261027-icones : étoile de note de l'hôte, logement sans photo) : émojis → icônes SVG au trait doré. Styles dans le nouveau `assets/vac-icons-20261027.css` (inclus dans les 3 pages). Le « ☰ » du menu hôte est conservé.
 
 ### 27/10/2026 — Claude — Pied de page aligné + pastille Vacances retirée
-- **Changé :** `assets/footer-copyright-20261027.css` (v=2, accueil + Vacances) : sur ordinateur, liens à gauche et « © 2026 Abracadeal · iDream Lab » discret à droite, sur la même ligne et alignés verticalement.
+- **Changé :** `assets/footer-copyright-20261027.css` (v=3, accueil + Vacances) : sur ordinateur, pied de page centré — logo (accueil), liens centrés, puis « © 2026 Abracadeal · iDream Lab » discret centré sous un filet fin.
 - **Retiré :** pastille « Places limitées » du bandeau Vacances (redondante avec « 500 premiers logements »).
