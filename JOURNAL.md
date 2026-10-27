@@ -627,3 +627,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 27/10/2026 — Claude — Bouton « Tableau de bord » de l'accueil différencié de « Déposer une annonce »
 - **Changé :** `assets/index-overrides.css` (v=20261027-dash-btn dans `index.html`) : `.hero-pro-dashboard-button` n'est plus doré plein (trop proche de « Déposer une annonce ») — fond violet foncé translucide, bordure et texte dorés, icône graphique dorée (`::before`), sans ombre dorée.
+
+### 27/10/2026 — Claude — CGV : fin possible de l'offre Fondateurs pour les nouveaux inscrits
+- **Changé :** `cgv.html`, paragraphe « Offre Fondateurs » : ajout « Abracadeal peut mettre fin à l'offre Fondateurs à tout moment pour les nouvelles inscriptions, y compris avant l'attribution de toutes les places ; les Fondateurs déjà inscrits conservent leurs avantages jusqu'à leur terme ». Décision d'Anthony : tenir les 12 mois des Fondateurs inscrits, mais pouvoir fermer l'offre aux nouveaux quand le site aura assez d'annonces.
