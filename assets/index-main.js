@@ -5853,10 +5853,11 @@ function refreshProDashboard(){
   const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v};
   set('proDashActiveValue',active); set('proDashPendingValue',pending);
   set('proDashQuotaValue',active+' / …');
-  sb.from('pro_subscriptions').select('plan_code,status').eq('user_id',currentUser.id).maybeSingle().then(({data})=>{
+  sb.from('pro_subscriptions').select('plan_code,status,founder_number,listing_limit').eq('user_id',currentUser.id).maybeSingle().then(({data})=>{
     const enabled=!!data&&['active','trialing'].includes(String(data.status||'').toLowerCase());
     const code=enabled?String(data.plan_code||'').toLowerCase():'';
-    const quota=(code.match(/250|100|50|20/)||[])[0];
+    let quota=(code.match(/250|100|50|20/)||[])[0];
+    if(enabled&&data.founder_number!=null&&String(data.status||'').toLowerCase()==='trialing')quota=String(Math.max(100,Number(quota||0))); /* 27/10/2026 : Fondateur = 100 pendant les 12 mois */
     set('proDashQuotaValue',quota?(active+' / '+quota):'Aucune formule');
   });
   const unread=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesUnread');
