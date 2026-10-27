@@ -589,4 +589,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Changé :** `classement-annonces.html` (section 2. Tri) : explique le regroupement par univers et la règle « 2 annonces max d'un même vendeur d'affilée » (transparence du classement).
 
 ### 27/10/2026 — Claude — Bandeau Fondateurs plus visible (ordinateur)
-- **Changé :** nouveau `assets/founder-strip-20261027.css` (chargé en dernier dans `index.html`) : sur ordinateur uniquement, bandeau plus haut, texte plus grand, bordure dorée et bouton doré (style « Déposer une annonce »). Mobile inchangé. Texte : « Publiez vos annonces gratuitement, sans carte bancaire » ; bouton « Devenir Fondateur → » (avant « Découvrir → »).
+- **Changé :** nouveau `assets/founder-strip-20261027.css` (chargé en dernier dans `index.html`) : sur ordinateur uniquement, bandeau plus haut, texte plus grand, bordure dorée et bouton blanc à texte violet (distinct de « Déposer une annonce »). Mobile inchangé. Texte : « Publiez vos annonces gratuitement, sans carte bancaire » ; bouton « Devenir Fondateur » (sans flèche) (avant « Découvrir → »).
