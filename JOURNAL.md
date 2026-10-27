@@ -591,3 +591,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 27/10/2026 — Claude — Bandeau Fondateurs plus visible (ordinateur)
 - **Changé :** nouveau `assets/founder-strip-20261027.css` (chargé en dernier dans `index.html`) : sur ordinateur uniquement, bandeau plus haut, texte plus grand, bordure dorée et bouton blanc à texte violet (distinct de « Déposer une annonce »). Mobile inchangé. Texte : « Publiez vos annonces gratuitement, sans carte bancaire » ; bouton « Devenir Fondateur » (sans flèche) (avant « Découvrir → »).
 - **Ajouté (27/10) :** pastille dorée « Places limitées par région » dans le bandeau Fondateurs (ordinateur uniquement, classe `.ft-limit`).
+
+### 27/10/2026 — Claude — Bandeau « 500 premiers logements » sur Vacances
+- **Changé :** `vacances.html` + nouveau `assets/vacances-founder-strip-20261027.css` : bandeau sous l'en-tête (même style que le bandeau Fondateurs de l'accueil) « 🏡 Propriétaires & hébergeurs · Publication offerte aux 500 premiers logements, sans carte bancaire » + pastille « Places limitées » + bouton blanc « Publier mon logement » (→ `vacances.html?mode=hote&host_signup=1`). Version courte sur mobile.

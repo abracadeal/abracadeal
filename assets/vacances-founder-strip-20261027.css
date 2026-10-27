@@ -1,0 +1,14 @@
+/* 27/10/2026 : bandeau « 500 premiers logements » sur Abracadeal Vacances (même esprit que le bandeau Fondateurs de l'accueil) */
+.vac-founder-strip{background:linear-gradient(90deg,#3a1263 0%,#6b1f8f 50%,#3a1263 100%);border-top:1px solid rgba(242,190,90,.45);border-bottom:1px solid rgba(242,190,90,.45);color:#fff}
+.vac-founder-strip-inner{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:12px 20px;padding:14px 20px;font-size:1.02rem;font-weight:750;text-align:center}
+.vac-founder-strip strong{color:#f6c96a}
+.vac-founder-strip .vfs-limit{display:inline-block;margin-left:10px;padding:3px 10px;border:1px solid rgba(246,201,106,.7);border-radius:999px;color:#f6c96a;font-size:.85rem;font-weight:800;vertical-align:1px}
+.vac-founder-strip .vfs-cta{display:inline-flex;align-items:center;background:#fff;color:#5a1a86;padding:9px 20px;border-radius:999px;font-weight:900;text-decoration:none;white-space:nowrap;box-shadow:0 4px 14px rgba(0,0,0,.25);transition:transform .15s ease,box-shadow .15s ease}
+.vac-founder-strip .vfs-cta:hover{background:#f6eefc;transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.vac-founder-strip .vfs-short{display:none}
+@media(max-width:760px){
+  .vac-founder-strip-inner{padding:10px 14px;font-size:.9rem;gap:8px 12px}
+  .vac-founder-strip .vfs-long{display:none}
+  .vac-founder-strip .vfs-short{display:inline}
+  .vac-founder-strip .vfs-cta{padding:7px 14px;font-size:.88rem}
+}
