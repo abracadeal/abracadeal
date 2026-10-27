@@ -641,3 +641,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Fonctions déployées :** `create-pro-subscription-order` v29 (suppression du blocage « l'offre démarre avec la formule 20 ») ; `change-pro-subscription-plan` v7 (plus besoin d'avoir 20 annonces en ligne pour passer de 20 à 50 en Fondateur). Copies du dépôt à jour.
 - **Site :** `pro-fondateur.html` : texte « Jusqu'à 50 annonces en ligne, gratuitement pendant 12 mois » ; carte formule 20 masquée pour un futur Fondateur ; badge Fondateurs seulement sur la formule 50 ; émojis des 4 avantages remplacés par des icônes dorées ; « CSV, XML, JSON » remplacé par une phrase simple. Textes alignés dans `index.html` (encart formules + inscription), `aide.html`, `cgv.html`, `assets/admin-prospection.js`.
 - **Reste :** Auto Cévennes Alès (seul Fondateur actuel) est en formule 20 Fondateur ; il peut passer en 50 depuis sa page Formules (gratuit pendant ses 12 mois). Pas de bascule faite à sa place (change le tarif prévu après 12 mois).
+
+### 27/10/2026 — Claude — Carte Fondateurs : « valeur … € HT » retiré
+- **Changé :** `pro-fondateur.html` : la carte formule 50 Fondateurs affiche seulement « 12 mois offerts » (plus de « valeur 3 599,88 € HT », ni d'émoji cadeau).
