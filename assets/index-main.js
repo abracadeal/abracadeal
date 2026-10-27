@@ -3645,6 +3645,9 @@ function filteredAds(){
     }
     return new Date(b.created_at||0)-new Date(a.created_at||0);
   });
+  if(!moderationMode && !onlyMine && !favoritesMode && sort==='newest' && !q){
+    ads=diversifyBySeller(ads,2);
+  }
   if(!moderationMode && !onlyMine && !favoritesMode){
     const featured=ads.filter(listingIsFeatured);
     if(featured.length){
@@ -3662,6 +3665,19 @@ function filteredAds(){
     }
   }
   return ads;
+}
+// Évite qu'un même vendeur occupe tout le haut de la liste (ex : import de stock d'un garage).
+// Au plus `maxRun` annonces d'affilée du même vendeur ; les suivantes sont décalées plus bas, jamais retirées.
+function diversifyBySeller(items,maxRun=2){
+  const queue=[...items],out=[];
+  while(queue.length){
+    const last=out.slice(-maxRun);
+    const blocked=last.length===maxRun&&last.every(x=>x.owner_id&&x.owner_id===last[0].owner_id)?last[0].owner_id:null;
+    let idx=0;
+    if(blocked){const j=queue.findIndex(x=>x.owner_id!==blocked);if(j>=0)idx=j;}
+    out.push(queue.splice(idx,1)[0]);
+  }
+  return out;
 }
 function shuffleCopy(items){
   const out=[...items];

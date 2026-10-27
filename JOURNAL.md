@@ -580,3 +580,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 27/10/2026 — Claude — Aide : offre Fondateurs sans IBAN
 - **Changé :** `aide.html` (FAQ « Qu'est-ce que l'offre Fondateurs ? ») : précise en gras qu'aucune carte ni IBAN n'est demandé à l'inscription ni pendant les 12 mois ; la mention « ajoutez une carte ou un IBAN » (lue comme une obligation) est remplacée par « vous décidez librement de continuer ou non ». Corrigé aussi : « formule 20 » → « formule 20 ou 50 ».
+
+### 27/10/2026 — Claude — Liste d'annonces mélangée par vendeur
+- **Changé :** `assets/index-main.js` (v=20261027-mixvendeurs) : nouvelle fonction `diversifyBySeller()`. En tri « plus récentes » sans mot-clé, jamais plus de 2 annonces d'affilée du même vendeur (`owner_id`) : les suivantes sont décalées plus bas, aucune n'est retirée. Tri par prix, recherche par mot-clé, modération, « mes annonces » et favoris : ordre exact inchangé. Les annonces « À la une » restent insérées en positions 1, 4, 7 après ce mélange.
