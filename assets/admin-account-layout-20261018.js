@@ -26,6 +26,7 @@
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>',
+    lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
     upload: '<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'
   };
@@ -95,6 +96,25 @@
     grid.appendChild(tile('Annonces', 'search', function () {
       var p = $('#adminDatabasePanel'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { var q = $('#adminDbQuery'); if (q) q.focus({ preventScroll: true }); }, 450); }
     }));
+    /* 27/10/2026 : interrupteur « Offre Fondateurs » (ferme / rouvre les nouvelles inscriptions Fondateurs) */
+    var fo = tile('Offre Fondateurs', 'lock', null); fo.classList.add('aal-founder-switch');
+    var foState = document.createElement('span'); foState.className = 'aal-founder-state'; foState.textContent = '…'; fo.appendChild(foState);
+    var foOpen = null;
+    function foRender() { foState.textContent = foOpen === null ? '…' : (foOpen ? 'Ouverte' : 'Fermée'); fo.classList.toggle('is-closed', foOpen === false); }
+    function foLoad() { if (typeof sb === 'undefined' || !sb) return; sb.rpc('get_founder_offer_open').then(function (r) { if (!r.error) { foOpen = r.data !== false; foRender(); } }); }
+    fo.addEventListener('click', function () {
+      if (foOpen === null || typeof sb === 'undefined' || !sb) return;
+      var msg = foOpen
+        ? 'Fermer l’offre Fondateurs aux nouveaux inscrits ?\n\nLe bandeau, le compteur et l’encart Fondateurs disparaissent du site. Les nouveaux pros verront directement les formules payantes.\nLes Fondateurs déjà inscrits gardent leurs 12 mois gratuits.'
+        : 'Rouvrir l’offre Fondateurs aux nouveaux inscrits ?';
+      if (!confirm(msg)) return;
+      sb.rpc('admin_set_founder_offer_closed', { p_closed: foOpen }).then(function (r) {
+        if (r.error) { alert(r.error.message || 'Action impossible'); return; }
+        foOpen = !!(r.data && r.data.open); foRender();
+        alert(foOpen ? 'Offre Fondateurs rouverte.' : 'Offre Fondateurs fermée aux nouveaux inscrits.');
+      });
+    });
+    grid.appendChild(fo); foLoad();
     admin.appendChild(grid);
     dash.insertBefore(admin, dash.firstChild);
 

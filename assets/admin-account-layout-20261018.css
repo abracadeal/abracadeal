@@ -93,3 +93,7 @@
 #mobileAdminModal .admin-mobile-action small{display:none!important}
 #mobileAdminModal .admin-mobile-action-badge{position:absolute!important;top:7px!important;right:7px!important;left:auto!important;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#e2459f!important;color:#fff!important;font-size:.7rem;font-weight:900;line-height:20px;align-items:center;justify-content:center;box-sizing:border-box}
 @media(min-width:761px){#mobileAdminModal .admin-mobile-action small{display:block!important;font-size:.7rem!important;color:#806f87!important;font-weight:600}}
+
+/* 27/10/2026 : tuile « Offre Fondateurs » (interrupteur) */
+#loggedInAccount.abraca-admin-layout .aal-founder-state{font-size:.68rem;font-weight:900;border-radius:999px;padding:2px 8px;background:#e6f6ec;color:#1d7a3e}
+#loggedInAccount.abraca-admin-layout .aal-founder-switch.is-closed .aal-founder-state{background:#fde8ec;color:#b3263f}

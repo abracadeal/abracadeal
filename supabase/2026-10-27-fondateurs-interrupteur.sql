@@ -1,0 +1,4 @@
+-- 27/10/2026 (appliqué : migration founder_offer_close_switch)
+-- private.founder_quota_settings.closed_at : offre Fondateurs fermée aux nouvelles inscriptions si renseigné.
+-- public.get_founder_offer_open() (anon) ; public.admin_set_founder_offer_closed(p_closed) (admin uniquement).
+-- claim_founder_slot : refus « founder_offer_full (founder_offer_closed) » si fermée ; get_my_founder_availability : blocked_reason 'founder_offer_closed' + champ 'closed'.
