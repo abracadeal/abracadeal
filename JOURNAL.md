@@ -612,3 +612,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 27/10/2026 — Claude — Accueil par univers : icônes et bouton
 - **Changé :** titres de rangées sans émoji, avec l'icône dorée des catégories (voiture, maison, sac) dans une pastille ronde (`.home-group-icon`) ; « Voir les N annonces » devient un bouton dégradé violet → rose, sans flèche. `assets/index-main.js` (v=20261027-univers-icones), `assets/index-core.css` (v=20261027-univers2).
 - **27/10 :** Vacances réaffiché dans le menu des catégories en haut (desktop) dans `index.html` (sous-menu « Locations de vacances » / « Devenir hôte »). Le sélecteur Annonces | Vacances et l'encart Vacances restent masqués.
+
+### 27/10/2026 — Claude — Vacances : émojis remplacés par des icônes
+- **Changé :** `vacances.html` (badge « Partout en France », 3 cartes « Pourquoi réserver en direct », 4 avantages « Devenir hôte »), `espace-hote.html` (4 actions rapides), `logement-vacances.html` (bouton admin Booster), `assets/vacances-main.js` (v=20261027-icones : étoile de note de l'hôte, logement sans photo) : émojis → icônes SVG au trait doré. Styles dans le nouveau `assets/vac-icons-20261027.css` (inclus dans les 3 pages). Le « ☰ » du menu hôte est conservé.

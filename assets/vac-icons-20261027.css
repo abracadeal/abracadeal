@@ -1,0 +1,8 @@
+/* 27/10/2026 : icônes au trait (remplacent les émojis) sur les pages Vacances */
+.vac-ico{width:1.15em;height:1.15em;display:inline-block;vertical-align:-.2em;flex:none}
+.hero-badge .vac-ico{margin-right:6px;color:#f2c46d}
+.value-card .icon .vac-ico{width:28px;height:28px;color:#f2c46d;vertical-align:middle}
+.host-cta-ico .vac-ico{width:22px;height:22px;color:#f2c46d;vertical-align:middle}
+.vac-listing-photo-empty .vac-ico{width:44px;height:44px;color:#c9a0e8}
+.vac-listing-host .vac-star{width:.95em;height:.95em;margin-right:3px;color:#f2c46d;fill:#f2c46d;vertical-align:-.1em}
+.btn .vac-ico,button strong .vac-ico{margin-right:8px;color:#b06ad9}

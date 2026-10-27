@@ -349,8 +349,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape')document.que
   function money(v){return new Intl.NumberFormat('fr-FR',{style:'currency',currency:'EUR',maximumFractionDigits:0}).format(Number(v||0))}
   function cardHtml(x,sb,featuredIds){
     const url=x.photo_path?(String(x.photo_path).startsWith('http')?x.photo_path:sb.storage.from('listing-images').getPublicUrl(x.photo_path).data.publicUrl):null;
-    const rating=x.host_rating?('⭐ '+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis'):'Nouvel hôte';
-    const photo=url?'<img src="'+url+'" alt="" loading="lazy">':'<span class="vac-listing-photo-empty" aria-hidden="true">🏡</span>';
+    const rating=x.host_rating?('<svg class="vac-ico vac-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>'+String(x.host_rating).replace('.',',')+' · '+x.host_review_count+' avis'):'Nouvel hôte';
+    const photo=url?'<img src="'+url+'" alt="" loading="lazy">':'<span class="vac-listing-photo-empty" aria-hidden="true"><svg class="vac-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.2V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.2"/></svg></span>';
     const badge=featuredIds&&featuredIds.has(x.id)?'<span class="vac-listing-featured-badge">À LA UNE</span>':'';
     return '<a class="vac-listing-card" href="logement-vacances.html?id='+encodeURIComponent(x.id)+'">'
       +'<span class="vac-listing-photo">'+photo+badge+'</span>'

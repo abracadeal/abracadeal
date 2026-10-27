@@ -22,6 +22,7 @@ if(new URLSearchParams(location.search).get('embedded')==='1'){
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
 <script src="assets/legal-registration.js?v=20261015" defer></script>
 <link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
+<link rel="stylesheet" href="assets/vac-icons-20261027.css?v=1">
 </head>
 <body>
 <header class="top">
@@ -218,10 +219,10 @@ if(new URLSearchParams(location.search).get('embedded')==='1'){
       <div class="card">
         <div class="cardhead"><div><h2>Actions rapides</h2><div class="sub">Les tâches principales d’un hôte.</div></div></div>
         <div class="quick">
-          <button onclick="showView('listings');openListingForm()"><strong>🏠 Publier un logement</strong><span>Créer une annonce Vacances complète.</span></button>
-          <button onclick="showView('ical')"><strong>🔄 Synchroniser iCal</strong><span>Airbnb, Booking, Abritel et autres flux .ics.</span></button>
-          <button onclick="location.href='demandes-hote.html'"><strong>📨 Demandes de séjour</strong><span>Accepter ou refuser les demandes voyageurs.</span></button>
-          <button onclick="showView('calendar')"><strong>📅 Bloquer des dates</strong><span>Fermer manuellement une période indisponible.</span></button>
+          <button onclick="showView('listings');openListingForm()"><strong><svg class="vac-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.2V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.2"/></svg>Publier un logement</strong><span>Créer une annonce Vacances complète.</span></button>
+          <button onclick="showView('ical')"><strong><svg class="vac-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 0 0-14.5-4.5L4 8"/><path d="M4 4v4h4"/><path d="M4 13a8 8 0 0 0 14.5 4.5L20 16"/><path d="M20 20v-4h-4"/></svg>Synchroniser iCal</strong><span>Airbnb, Booking, Abritel et autres flux .ics.</span></button>
+          <button onclick="location.href='demandes-hote.html'"><strong><svg class="vac-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.5 6.5 8.5 6.5 8.5-6.5"/></svg>Demandes de séjour</strong><span>Accepter ou refuser les demandes voyageurs.</span></button>
+          <button onclick="showView('calendar')"><strong><svg class="vac-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>Bloquer des dates</strong><span>Fermer manuellement une période indisponible.</span></button>
         </div>
       </div>
       <div class="card">
