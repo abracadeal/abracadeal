@@ -11,7 +11,7 @@ Je me permets de vous contacter au sujet de {{societe}}.
 Marre de payer trop cher ? Faites d’Abracadeal votre partenaire officiel : l’associé qui fait du bien à vos comptes.
 Abracadeal est une nouvelle plateforme de petites annonces ouverte aux particuliers comme aux professionnels.
 
-Pour les petits garages qui souhaitent tester avec une dizaine ou une vingtaine de véhicules, les 500 premiers professionnels inscrits bénéficient de jusqu’à 20 annonces actives gratuites pendant 12 mois, avec 15 photos par annonce (30 photos en formule 50 annonces).
+Pour les petits garages qui souhaitent tester avec une dizaine ou une vingtaine de véhicules, les 500 premiers professionnels inscrits bénéficient de jusqu’à 50 annonces actives gratuites pendant 12 mois, avec 30 photos par annonce.
 
 Vos annonces peuvent être importées directement par flux, CSV ou XML, sans ressaisie.
 
