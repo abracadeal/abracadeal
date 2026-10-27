@@ -2,7 +2,8 @@
 (() => {
   const icons = {
     vacances:'<span aria-hidden="true">✦</span>',
-    favoris:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 4.8a5.3 5.3 0 0 0-7.5 0L12 6.1l-1.3-1.3a5.3 5.3 0 1 0-7.5 7.5L12 21l8.8-8.7a5.3 5.3 0 0 0 0-7.5Z"></path></svg>',
+    favoris:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"></path></svg>',
+    hote:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 9.5V21h14V9.5"></path><path d="M10 21v-6h4v6"></path></svg>',
     messages:'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"></path><path d="M8 9h8M8 13h5"></path></svg>',
     compte:'<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"></circle><path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path></svg>'
   };
@@ -23,6 +24,8 @@
     if(!link) return;
     const label=link.querySelector('span');
     const state=document.body.dataset.vacSpace||'traveler';
+    const svg=link.querySelector('svg');const wantHost=state==='host'||state==='host-pending';
+    if(svg&&svg.dataset.kind!==(wantHost?'host':'traveler')){const t=document.createElement('span');t.innerHTML=wantHost?icons.hote:icons.favoris;const n=t.firstElementChild;n.dataset.kind=wantHost?'host':'traveler';svg.replaceWith(n);}
     if(state==='host'){
       if(label) label.textContent='Espace Hôte';
       link.href='vacances.html?mode=hote';
