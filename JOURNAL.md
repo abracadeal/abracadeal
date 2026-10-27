@@ -624,3 +624,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 27/10/2026 — Claude — Bouton « Importer mon stock » mis en avant (Espace Pro)
 - **Changé :** `assets/admin-account-layout-20261018.js` (v=3) : la tuile « Importer mon stock » passe en tête de l'Espace Pro, pleine largeur, dégradé violet → rose, nouvelle icône « upload » + sous-titre « Toutes vos annonces en ligne d'un coup, sans ressaisie ». Pro/Pro, Ma vitrine, Formules restent dessous sur 3 colonnes. Styles dans `assets/admin-account-layout-20261018.css` (v=4).
 - **Changé :** `index.html` : dans « Mon activité Pro », bouton « ⬆️ Importer » remplacé par « Importer mon stock » en bouton plein dégradé, pleine largeur, en premier (icône SVG, plus d'émoji) — classe `.pro-dash-import`.
+
+### 27/10/2026 — Claude — Bouton « Tableau de bord » de l'accueil différencié de « Déposer une annonce »
+- **Changé :** `assets/index-overrides.css` (v=20261027-dash-btn dans `index.html`) : `.hero-pro-dashboard-button` n'est plus doré plein (trop proche de « Déposer une annonce ») — fond violet foncé translucide, bordure et texte dorés, icône graphique dorée (`::before`), sans ombre dorée.
