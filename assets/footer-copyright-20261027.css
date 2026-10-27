@@ -1,8 +1,10 @@
-/* 27/10/2026 : mention « © 2026 Abracadeal · iDream Lab » plus discrète, en bas à droite */
+/* 27/10/2026 : pied de page aligné — liens à gauche, « © 2026 Abracadeal · iDream Lab » discret à droite, sur la même ligne */
 @media(min-width:761px){
-  html body footer .footer-row{flex-wrap:wrap}
-  html body footer .footer-copyright,
-  html body #vacTravelerFooter .footer-copyright{order:99;flex-basis:100%;text-align:right;font-size:.74rem;opacity:.7;margin-top:6px}
+  html body footer .footer-row{display:flex!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:space-between!important;gap:24px!important}
+  html body footer .desktop-footer-brand{order:0;flex:none}
+  html body footer .footer-links,
+  html body footer .vac-legal-links{order:1;flex:1 1 auto;display:flex;flex-wrap:wrap;align-items:center;gap:8px 18px;margin:0}
+  html body footer .footer-copyright{order:2;flex:none;margin:0 0 0 auto!important;text-align:right;font-size:.76rem;opacity:.7;white-space:nowrap}
 }
 @media(max-width:760px){
   html body #vacTravelerFooter .footer-copyright{order:99;width:100%;text-align:right;font-size:10px;opacity:.7}
