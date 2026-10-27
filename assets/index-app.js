@@ -442,7 +442,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     put('statPlan20',stats.plan_counts?.pro_20);
     put('statPlan50',stats.plan_counts?.pro_50);
     put('statPlan100',stats.plan_counts?.pro_100);
-    put('statPlan200',stats.plan_counts?.pro_200);
+    put('statPlan200',stats.plan_counts?.founders); /* 27/10/2026 : pastille Fondateurs */
     put('statPlan250',stats.plan_counts?.pro_250);
     const mrr=document.getElementById('statMrr');
     if(mrr)mrr.textContent=moneyFromCents(stats.theoretical_mrr_cents||0);

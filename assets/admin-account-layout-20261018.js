@@ -133,10 +133,10 @@
       var h = stats.querySelector('.admin-stats-head h3'); if (h) h.textContent = 'Tableau de bord';
       var rb = $('#refreshAdminStatsBtn');
       if (rb && !rb.querySelector('.aal-ico')) { rb.textContent = ''; rb.appendChild(icon('refresh')); rb.setAttribute('aria-label', 'Actualiser'); rb.title = 'Actualiser'; }
-      var p200 = $('#statPlan200'); if (p200 && p200.parentNode) p200.parentNode.classList.add('aal-hidden');
+      /* 27/10/2026 : #statPlan200 = pastille « Fondateurs » (plus de formule 200) */
       var p250 = $('#statPlan250'); if (p250 && p250.nextElementSibling) p250.nextElementSibling.textContent = 'Sur devis (+100)';
       var plans = stats.querySelector('.admin-plan-grid');
-      if (plans && !stats.querySelector('.aal-subtitle')) { var st = document.createElement('div'); st.className = 'aal-subtitle'; st.textContent = 'Abonnements Pro par formule'; plans.parentNode.insertBefore(st, plans); }
+      if (plans && !stats.querySelector('.aal-subtitle')) { var st = document.createElement('div'); st.className = 'aal-subtitle'; st.textContent = 'Abonnements Pro'; plans.parentNode.insertBefore(st, plans); }
     }
 
     /* Mon espace */

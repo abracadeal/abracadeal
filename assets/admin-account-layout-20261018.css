@@ -97,3 +97,7 @@
 /* 27/10/2026 : tuile « Offre Fondateurs » (interrupteur) */
 #loggedInAccount.abraca-admin-layout .aal-founder-state{font-size:.68rem;font-weight:900;border-radius:999px;padding:2px 8px;background:#e6f6ec;color:#1d7a3e}
 #loggedInAccount.abraca-admin-layout .aal-founder-switch.is-closed .aal-founder-state{background:#fde8ec;color:#b3263f}
+
+/* 27/10/2026 : pastille « Fondateurs » pleine largeur au-dessus des formules ; tuile « Offre Fondateurs » pleine largeur */
+.admin-plan-grid .admin-plan-founders{grid-column:1/-1;background:linear-gradient(120deg,#f4e6fa,#fbe9f3)!important;border-color:#e4c7ef!important}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-founder-switch{grid-column:1/-1;flex-direction:row!important;min-height:58px!important;gap:10px!important}

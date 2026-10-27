@@ -659,3 +659,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Admin :** nouvelle tuile « Offre Fondateurs » (Ouverte / Fermée) dans Administration (`assets/admin-account-layout-20261018.js` v=4, css v=5), avec confirmation.
 - **Site :** nouveau `assets/founder-offer-state-20261027.js` (accueil + `pro-fondateur.html`) : si l'offre est fermée, bandeau, compteurs, encart d'inscription, encart formules, section Fondateurs disparaissent et les textes Pros deviennent neutres. Les Fondateurs inscrits gardent leurs avantages.
 - **Corrigé :** le bouton « Tableau de bord » de l'accueil s'affichait aussi aux visiteurs non connectés depuis son nouveau style (`display` forcé) → `.hero-pro-dashboard-button.hidden{display:none!important}` (`index-overrides.css` v=20261027-dash-btn2).
+
+### 27/10/2026 — Claude — Tableau de bord admin : pastille « Fondateurs »
+- **Base (appliqué) :** `get_admin_dashboard_stats()` renvoie `plan_counts.founders` (Fondateurs en période gratuite) ; Plan 20 / 50 / 100 ne comptent plus que les abonnements hors période gratuite Fondateur (migration `admin_stats_founders_chip`).
+- **Site :** `index.html` : pastille « Fondateurs (gratuit 12 mois) » pleine largeur en tête (réutilise `#statPlan200`, plus de formule 200), puis Plan 20 / 50 / 100 / Sur devis ; `assets/index-app.js` (v=20261027-fondateurs) ; titre « Abonnements Pro » ; tuile « Offre Fondateurs » pleine largeur dans Administration (`admin-account-layout` js v=5, css v=6).
