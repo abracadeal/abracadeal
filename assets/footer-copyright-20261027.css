@@ -1,0 +1,9 @@
+/* 27/10/2026 : mention « © 2026 Abracadeal · iDream Lab » plus discrète, en bas à droite */
+@media(min-width:761px){
+  html body footer .footer-row{flex-wrap:wrap}
+  html body footer .footer-copyright,
+  html body #vacTravelerFooter .footer-copyright{order:99;flex-basis:100%;text-align:right;font-size:.74rem;opacity:.7;margin-top:6px}
+}
+@media(max-width:760px){
+  html body #vacTravelerFooter .footer-copyright{order:99;width:100%;text-align:right;font-size:10px;opacity:.7}
+}

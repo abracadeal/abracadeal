@@ -595,3 +595,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 27/10/2026 — Claude — Bandeau « 500 premiers logements » sur Vacances
 - **Changé :** `vacances.html` + nouveau `assets/vacances-founder-strip-20261027.css` : bandeau sous l'en-tête (même style que le bandeau Fondateurs de l'accueil) « 🏡 Propriétaires & hébergeurs · Publication offerte aux 500 premiers logements, sans carte bancaire » + pastille « Places limitées » + bouton blanc « Publier mon logement » (→ `vacances.html?mode=hote&host_signup=1`). Version courte sur mobile.
 - **Modifié (27/10, 11h45) :** bandeau Vacances déplacé tout en haut (juste sous l'en-tête, au-dessus de la bannière lampe). Émojis des deux bandeaux remplacés par des icônes dessinées dorées (`.strip-ico` : maison sur Vacances, étoile sur l'accueil). `assets/vacances-tail.js` : icône « Espace voyageur » = avion (au lieu du cœur), « Espace Hôte » = maison.
+
+### 27/10/2026 — Claude — Tarif Vacances « hors offre Fondateurs », pied de page, bandeau Vacances ciblé pros
+- **Changé :** `espace-hote.html` : « Tarification (hors offre Fondateurs) : … » + « Offre Fondateurs : publication offerte aux 500 premiers logements des hébergeurs professionnels ».
+- **Corrigé :** bandeau `vacances.html` : « Hébergeurs pros & conciergeries » au lieu de « Propriétaires & hébergeurs ». Les 500 places (`reserve_vacation_launch_slots`) ne concernent que les formules Pro ; un particulier paie 4,99 € TTC / 30 jours (`photos-vacances.js`), le bandeau promettait donc à tort la gratuité aux particuliers.
+- **Changé :** nouveau `assets/footer-copyright-20261027.css` (accueil + Vacances) : « © 2026 Abracadeal · iDream Lab » plus petit, aligné à droite sous les liens.
