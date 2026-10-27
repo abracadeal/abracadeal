@@ -619,3 +619,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 27/10/2026 — Claude — Pied de page aligné + pastille Vacances retirée
 - **Changé :** `assets/footer-copyright-20261027.css` (v=3, accueil + Vacances) : sur ordinateur, pied de page centré — logo (accueil), liens centrés, puis « © 2026 Abracadeal · iDream Lab » discret centré sous un filet fin.
 - **Retiré :** pastille « Places limitées » du bandeau Vacances (redondante avec « 500 premiers logements »).
+- **27/10 (suite) :** pied de page v4 — liens en `.88rem` sur toute la largeur pour tenir sur une ligne ; « Télécharger l'application » sans émoji (`assets/install-app-20261018.js` v=6).

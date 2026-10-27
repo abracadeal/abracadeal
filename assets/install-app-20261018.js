@@ -178,7 +178,7 @@
       var a = document.createElement('a');
       a.href = '#';
       a.setAttribute('data-abraca-install', '');
-      a.textContent = '📲 Télécharger l’application';
+      a.textContent = 'Télécharger l’application';
       a.addEventListener('click', function (e) { e.preventDefault(); install(); });
       el.appendChild(a);
     });

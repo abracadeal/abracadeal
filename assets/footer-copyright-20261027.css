@@ -3,7 +3,7 @@
   html body footer .footer-row{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:14px!important;text-align:center!important}
   html body footer .desktop-footer-brand{order:0;margin:0 auto}
   html body footer .footer-links,
-  html body footer .vac-legal-links{order:1;display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:8px 22px!important;margin:0 auto!important;max-width:980px}
+  html body footer .vac-legal-links{order:1;display:flex!important;flex-wrap:wrap!important;justify-content:center!important;align-items:center!important;gap:8px 20px!important;margin:0 auto!important;max-width:none;font-size:.88rem}
   html body footer .footer-copyright{order:2;margin:4px auto 0!important;padding-top:12px;border-top:1px solid rgba(190,160,215,.18);min-width:260px;text-align:center!important;font-size:.76rem;opacity:.65;white-space:nowrap}
 }
 @media(max-width:760px){
