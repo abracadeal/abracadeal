@@ -76,7 +76,12 @@
 /* Mes informations */
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box h3{font-size:1.05rem!important}
-#loggedInAccount.abraca-admin-layout.aal-has-import .aal-pro .aal-grid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+/* 27/10/2026 : tuile « Importer mon stock » mise en avant (pleine largeur, dégradé, icône + sous-titre) */
+#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#7b27a0,#e2459f)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(150,40,140,.28)!important}
+#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import .aal-ico{width:26px;height:26px;padding:9px;box-sizing:content-box;border-radius:14px;background:rgba(255,255,255,.18);color:#fff!important}
+#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import .aal-tile-label{display:flex;flex-direction:column;gap:3px;font-size:1rem!important;font-weight:900}
+#loggedInAccount.abraca-admin-layout .aal-import-sub{font-size:.78rem;font-weight:600;opacity:.92}
+#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import:hover{filter:brightness(1.05)}
 
 /* Fenêtre « Administration » (onglet Admin de la barre du bas) : même style de tuiles que le compte */
 #mobileAdminModal .admin-mobile-intro{margin:0 0 12px 2px!important;font-size:.78rem!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#7a6a83!important}

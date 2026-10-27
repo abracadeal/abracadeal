@@ -26,6 +26,7 @@
     star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/>',
     user: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
     logout: '<path d="M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3"/><path d="M10 17l-5-5 5-5"/><path d="M5 12h11"/>',
+    upload: '<path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/>',
     refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>'
   };
   function icon(name) {
@@ -70,8 +71,12 @@
     /* Espace Pro (comptes professionnels, hors admin) */
     var pro = section('Espace Pro', 'aal-pro');
     var pgrid = document.createElement('div'); pgrid.className = 'aal-grid';
+    /* 27/10/2026 : import mis en avant — grande tuile en tête, pleine largeur, dégradé violet → rose */
+    var imp = tile('Importer mon stock', 'upload', clickOf('#proImportBtn')); imp.classList.add('aal-import');
+    var isub = document.createElement('span'); isub.className = 'aal-import-sub'; isub.textContent = 'Toutes vos annonces en ligne d’un coup, sans ressaisie';
+    imp.querySelector('.aal-tile-label').appendChild(isub);
+    pgrid.appendChild(imp);
     pgrid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
-    var imp = tile('Importer mon stock', 'flux', clickOf('#proImportBtn')); imp.classList.add('aal-import'); pgrid.appendChild(imp);
     pgrid.appendChild(tile('Ma vitrine', 'star', function () { var c = $('#companyAccountSection'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
     pgrid.appendChild(tile('Formules', 'finance', null, 'pro-fondateur.html'));
     pro.appendChild(pgrid);

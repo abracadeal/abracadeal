@@ -620,3 +620,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Changé :** `assets/footer-copyright-20261027.css` (v=3, accueil + Vacances) : sur ordinateur, pied de page centré — logo (accueil), liens centrés, puis « © 2026 Abracadeal · iDream Lab » discret centré sous un filet fin.
 - **Retiré :** pastille « Places limitées » du bandeau Vacances (redondante avec « 500 premiers logements »).
 - **27/10 (suite) :** pied de page v4 — liens en `.88rem` sur toute la largeur pour tenir sur une ligne ; « Télécharger l'application » sans émoji (`assets/install-app-20261018.js` v=6).
+
+### 27/10/2026 — Claude — Bouton « Importer mon stock » mis en avant (Espace Pro)
+- **Changé :** `assets/admin-account-layout-20261018.js` (v=3) : la tuile « Importer mon stock » passe en tête de l'Espace Pro, pleine largeur, dégradé violet → rose, nouvelle icône « upload » + sous-titre « Toutes vos annonces en ligne d'un coup, sans ressaisie ». Pro/Pro, Ma vitrine, Formules restent dessous sur 3 colonnes. Styles dans `assets/admin-account-layout-20261018.css` (v=4).
+- **Changé :** `index.html` : dans « Mon activité Pro », bouton « ⬆️ Importer » remplacé par « Importer mon stock » en bouton plein dégradé, pleine largeur, en premier (icône SVG, plus d'émoji) — classe `.pro-dash-import`.
