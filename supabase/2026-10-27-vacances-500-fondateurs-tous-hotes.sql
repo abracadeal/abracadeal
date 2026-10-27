@@ -1,0 +1,7 @@
+-- Appliqué le 27/10/2026 (migrations vacances_500_fondateurs_tous_hotes + vacances_activation_sans_double_extension).
+-- 500 premiers logements Vacances (particuliers ET pros) : publication offerte 12 mois.
+-- Ensuite / au-delà : 4,99 € par logement / 30 jours (TTC particulier = private_vacances_30, HT pro = pro_vacances_30).
+-- Objets : table vacation_founder_listings ; RPC claim_vacation_founder_listing(uuid) ; get_vacation_founder_remaining() ;
+-- offre commerce pro_vacances_30 (sans prix Stripe : price_data HT, tax_behavior exclusive) ;
+-- vacances_20 / vacances_60 désactivées ; trigger activate_private_vacation_listing_purchase étendu au pro.
+-- Voir le détail dans l'historique des migrations Supabase.

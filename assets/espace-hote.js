@@ -368,7 +368,7 @@ $('completeHostBtn').onclick=async()=>{
     if(hostPendingErr){onboardingMsg(hostPendingErr.message,true);return}
 
     clearHostDraft();
-    onboardingMsg(profile?.account_type==='professionnel'?'Inscription hôte enregistrée. Ajoutez vos photos puis choisissez votre formule Vacances Pro.':'Inscription hôte enregistrée. Ajoutez vos photos ; la publication Particulier est à 4,99 € TTC pour 30 jours.');
+    onboardingMsg('Inscription hôte enregistrée. Ajoutez vos photos : si votre logement fait partie des 500 premiers, sa publication est offerte pendant 12 mois.');
     location.href='photos-vacances.html?listing='+encodeURIComponent(listingId);
   }finally{btn.disabled=false}
 };
