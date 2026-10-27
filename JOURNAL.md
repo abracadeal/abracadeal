@@ -577,3 +577,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 26/10/2026 — Claude — Aide à l'import automatique pour les pros sans annonce
 - **Changé (base, appliqué) :** `supabase/2026-10-26-pro-aide-import-auto.sql` : fonction `queue_pro_import_help()` + tâche `abracadeal-pro-import-help` (lun-sam 8 h UTC). Tout compte Pro (hors admin) inscrit depuis 3 à 60 jours, sans aucune annonce, reçoit une seule fois « Voulez-vous qu'on mette vos annonces en ligne pour vous ? » (+ « jusqu'à 50 annonces gratuitement » s'il est Fondateur). Clé `import-help-<user_id>`.
 - **Premier envoi :** Oxoto le 27/10 vers 9 h (Paris). Auto Cévennes est exclu (il a déjà son message programmé, clé contenant « import »).
+
+### 27/10/2026 — Claude — Aide : offre Fondateurs sans IBAN
+- **Changé :** `aide.html` (FAQ « Qu'est-ce que l'offre Fondateurs ? ») : précise en gras qu'aucune carte ni IBAN n'est demandé à l'inscription ni pendant les 12 mois ; la mention « ajoutez une carte ou un IBAN » (lue comme une obligation) est remplacée par « vous décidez librement de continuer ou non ». Corrigé aussi : « formule 20 » → « formule 20 ou 50 ».
