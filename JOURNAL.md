@@ -644,3 +644,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 27/10/2026 — Claude — Carte Fondateurs : « valeur … € HT » retiré
 - **Changé :** `pro-fondateur.html` : la carte formule 50 Fondateurs affiche seulement « 12 mois offerts » (plus de « valeur 3 599,88 € HT », ni d'émoji cadeau).
+
+### 27/10/2026 — Claude — Encart « Pros Fondateurs » de l'inscription simplifié
+- **Changé :** `index.html` (formulaire d'inscription, `#signupFounderOffer`) : le paragraphe « Offre de lancement… » est remplacé par 4 points cochés (Jusqu'à 50 annonces en ligne · Gratuit pendant 12 mois · Sans carte bancaire, sans engagement · Votre stock mis en ligne pour vous) + « Réservé aux 500 premiers professionnels Auto, Moto et Immobilier ». Le détail (au-delà de 50, 60 jours sans annonce…) reste dans « Voir les conditions ». Icône étoile SVG au lieu de « ✦ ». Styles inline `#signup-founder-list-20261027`.
