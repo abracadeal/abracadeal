@@ -1,4 +1,4 @@
-/* 27/10/2026 (v3) : pied de page centré et aéré — logo (accueil), liens centrés, puis « © 2026 Abracadeal · iDream Lab » discret, centré sous un filet fin */
+/* 27/10/2026 (v3) : pied de page centré et aéré — logo (accueil), liens centrés, puis « © 2026 Abracadeal » discret, centré sous un filet fin */
 @media(min-width:761px){
   html body footer .footer-row{display:flex!important;flex-direction:column!important;flex-wrap:nowrap!important;align-items:center!important;justify-content:center!important;gap:14px!important;text-align:center!important}
   html body footer .desktop-footer-brand{order:0;margin:0 auto}
