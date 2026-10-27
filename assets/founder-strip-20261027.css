@@ -20,3 +20,7 @@
   }
   html body #founderTopbar .founder-topbar-cta:hover{color:#5a1a86;background:#f6eefc;transform:translateY(-1px);box-shadow:0 6px 18px rgba(0,0,0,.3)}
 }
+#founderTopbar .ft-limit{display:none}
+@media(min-width:761px){
+  html body #founderTopbar .ft-limit{display:inline-block;margin-left:10px;padding:3px 10px;border:1px solid rgba(246,201,106,.7);border-radius:999px;color:#f6c96a;font-size:.85rem;font-weight:800;vertical-align:1px}
+}
