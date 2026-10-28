@@ -3,8 +3,14 @@
 Le site ERA utilise des données de recherche embarquées dans son état SSR
 `ng-state`. Le lecteur générique de données schema.org ne les reconnaissait pas.
 Le connecteur dédié lit uniquement la recherche locale présente dans l’HTML
-de l’adresse demandée. Il n’appelle pas l’API ERA, ne parcourt pas les autres
-villes et ne suit pas la pagination. Le résultat est toujours partiel.
+de l’adresse demandée et suit les liens de pagination de cette même recherche.
+Il n’appelle pas l’API ERA et ne parcourt pas les autres villes. La lecture
+commence en page 1, déduplique les références et vérifie que le nombre de biens
+lus correspond exactement au total annoncé, sur toutes les pages attendues.
+Une page absente, une redirection inattendue, un total changeant ou des doublons
+empêchant de couvrir le total provoquent une erreur explicite : aucun aperçu
+partiel n’est présenté comme complet. Limites : 50 pages et budget de boucle
+de 75 secondes (hors dernier téléchargement en cours).
 
 Le lien fourni cible une recherche de biens à Cannes, pas une agence unique.
 Les recommandations et autres recherches du site sont exclues. Les fiches
@@ -24,7 +30,7 @@ Validation :
 node --test scripts/era-preview.test.mjs tests/pro-stock-moderation.test.mjs
 ```
 
-15 tests locaux (données synthétiques et transport simulé), et vérification de
+20 tests locaux (données synthétiques et transport simulé), et vérification de
 syntaxe du JavaScript de l’administration. Lecture réelle de l’HTML public
 effectuée uniquement en mémoire pour vérifier le parseur, avec compteurs en sortie,
 sans téléchargement d’image ni enregistrement du contenu source.
