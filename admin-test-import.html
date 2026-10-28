@@ -164,16 +164,18 @@ async function load(ev){
 function render(data,sector){
  const immo=sector==='immobilier';
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
- const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:0),0);
+ const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:Number(r.source_photo_count||0)),0);
  E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">lecture partielle (site très grand)</span>':'');
- E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],[data.preview_only?'Fiches lisibles':'Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ if(data.photos_withheld)E('status').innerHTML+=' · Aperçu uniquement : '+ROWS.length+' fiches sur '+esc(data.source_total??'?')+' annoncées. Photos repérées, sans téléchargement ni import.';
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
   const errs=(NORM[i]?.errors||[]);
   if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
   const ph=r.photos?String(r.photos).split('|'):[];
+  const photoLabel=ph.length?ph.length+' photos':Number(r.source_photo_count||0)+' photos repérées';
   const chips=(immo?[r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
-  return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
+  return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+esc(photoLabel)+'</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
  }).join('');
 }
 function openCar(i){
@@ -192,3 +194,4 @@ E('dlg').addEventListener('click',e=>{if(e.target===E('dlg'))E('dlg').close()});
 init();
 </script>
 </body></html>
+
