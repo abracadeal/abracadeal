@@ -121,7 +121,7 @@ async function loadReqs(){
 }
 async function act(a,i,btn){
  const r=REQS[i];if(!r)return;
- if(a==='preview'){btn.disabled=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu · '+(r.company||r.site_url);E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').scrollIntoView({behavior:'smooth'});
+ if(a==='preview'){btn.disabled=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu · '+(r.company||r.site_url);E('status').textContent='Lecture du site en cours… (jusqu\'à deux minutes)';E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').scrollIntoView({behavior:'smooth'});
   try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_feed',feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
    if(!data?.ok){E('status').innerHTML='<span style="color:var(--bad)">'+esc(data?.error||'Lecture impossible')+'</span>';}
    else{ROWS=data.raw||[];NORM=data.rows||[];render(data,r.sector);}
@@ -151,7 +151,7 @@ async function runSync(r,btn){
 async function load(ev){
  ev.preventDefault();
  const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu';
- E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';
+ E('status').textContent='Lecture du site en cours… (jusqu\'à deux minutes)';
  let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
  try{
   const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true}});
@@ -166,6 +166,7 @@ function render(data,sector){
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
  const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:0),0);
  E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">lecture partielle (site très grand)</span>':'');
+ if(data.reader_used==='secondary')E('status').innerHTML+=' · <b>Lecteur de secours</b> · '+esc(data.fallback_reason||'Relais automatique après échec du lecteur principal.')+' Aucun retrait automatique sur cette lecture partielle.';
  E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
@@ -192,3 +193,4 @@ E('dlg').addEventListener('click',e=>{if(e.target===E('dlg'))E('dlg').close()});
 init();
 </script>
 </body></html>
+
