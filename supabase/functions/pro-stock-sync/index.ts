@@ -205,6 +205,103 @@ async function readWooSite(origin:URL){
   rows.push(o);}}));
  return rows;
 }
+// Autres sites (garages ou agences) : lecture des « données structurées » (schema.org JSON-LD : Car, Vehicle, Product,
+// RealEstateListing, Apartment, House…)
+// que la plupart des sites publient pour Google. Pages trouvées via le sitemap et les liens de la page d'accueil.
+// Si aucune fiche véhicule n'est trouvée : erreur (rien n'est archivé) et le site est signalé à l'admin.
+function ldBlocks(html:string){const out:any[]=[];for(const m of html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1].trim().replace(/^<!--|-->$/g,''));const walk=(x:any)=>{if(!x)return;if(Array.isArray(x)){x.forEach(walk);return;}if(typeof x!=='object')return;out.push(x);if(x['@graph'])walk(x['@graph']);if(x.itemOffered)walk(x.itemOffered);};walk(j);}catch{}}return out;}
+const ldTypes=(x:any)=>(Array.isArray(x?.['@type'])?x['@type']:[x?.['@type']]).map((t:any)=>String(t||'').toLowerCase());
+const ldText=(v:any):string=>{if(v==null)return'';if(Array.isArray(v))return ldText(v[0]);if(typeof v==='object')return ldText(v.name??v.value??v['@value']??'');return decodeEntities(String(v)).trim();};
+function ldVehicle(html:string,url:string){
+ const items=ldBlocks(html);
+ const v=items.find(x=>ldTypes(x).some((t:string)=>['car','vehicle','motorcycle','motorizedbicycle','busorcoach'].includes(t)))
+  ||items.find(x=>ldTypes(x).includes('product')&&(x.offers||x.mileageFromOdometer||x.vehicleEngine));
+ if(!v)return null;
+ const offer=Array.isArray(v.offers)?v.offers[0]:(v.offers?.offers?.[0]||v.offers||{});
+ const avail=String(offer?.availability||'').toLowerCase();
+ const o:any={url,titre:ldText(v.name),etat:'occasion'};
+ if(/soldout|discontinued|outofstock/.test(avail))o._sold=1;
+ const price=Number(String(offer?.price??offer?.lowPrice??offer?.priceSpecification?.price??'').replace(/[^\d.]/g,''));if(price>0)o.prix=String(Math.round(price));
+ const brand=ldText(v.brand||v.manufacturer);if(brand)o.marque=brand;
+ const model=ldText(v.model);if(model)o.modele=model;
+ const km=ldText(v.mileageFromOdometer);if(km)o.kilometrage=km;
+ const date=ldText(v.dateVehicleFirstRegistered||v.vehicleModelDate||v.productionDate||v.modelDate||v.releaseDate);const y=date.match(/(19|20)\d{2}/);if(y){o.annee=y[0];o.mise_en_circulation=date;}
+ const fuel=ldText(v.fuelType||v.vehicleEngine?.fuelType);if(fuel)o.carburant=fuel.replace(/^https?:\/\/[^/]+\//,'');
+ const tr=ldText(v.vehicleTransmission);if(tr)o.boite=/manual|manuel|m[ée]ca/i.test(tr)?'manuelle':/auto/i.test(tr)?'automatique':tr;
+ const color=ldText(v.color);if(color)o.couleur=color;
+ const doors=ldText(v.numberOfDoors);if(doors)o.portes=doors;
+ const power=ldText(v.vehicleEngine?.enginePower);if(power)o.puissance_din=power;
+ const body=ldText(v.bodyType||v.vehicleConfiguration||v.category);if(body)o.carrosserie=body;
+ if(RSS_MOTO.test(ldTypes(v).join(' ')+' '+body))o.type='moto';else if(/utilitaire|fourgon|van\b|commercial/i.test(body))o.type='utilitaire';else o.type='voiture';
+ const desc=aaClean(String(v.description||'').replace(/<\/p>/gi,'\n'));if(desc)o.description=desc.slice(0,6000);
+ const photos:string[]=[];const addImg=(x:any)=>{if(!x)return;if(Array.isArray(x)){x.forEach(addImg);return;}const u=typeof x==='string'?x:(x.contentUrl||x.url||'');try{const abs=new URL(decodeEntities(String(u)),url).toString();if(/^https?:/i.test(abs)&&!photos.includes(abs))photos.push(abs);}catch{}};addImg(v.image);
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ const id=ldText(v.sku||v.productID||v.vehicleIdentificationNumber||offer?.sku);
+ o.reference=(id||new URL(url).pathname.replace(/\/+$/,'').split('/').pop()||url).slice(0,80);
+ // Fiche de stock seulement : prix et photo obligatoires (écarte les pages « modèles neufs », services, etc.).
+ return o.titre&&o.prix&&o.photos?o:null;
+}
+const IMMO_TYPES=['realestatelisting','apartment','house','singlefamilyresidence','residence','accommodation','room','suite','landform','offerforlease','offerforpurchase'];
+function ldImmo(html:string,url:string){
+ const items=ldBlocks(html);
+ let v=items.find(x=>ldTypes(x).some((t:string)=>IMMO_TYPES.includes(t)))||items.find(x=>ldTypes(x).includes('product')&&x.offers&&/(m²|m2|pi[eè]ce|chambre|appartement|maison|terrain)/i.test(ldText(x.name)+' '+ldText(x.description)));
+ if(!v)return null;
+ const about=v.mainEntity||v.about||v.itemOffered;if(about&&typeof about==='object'&&!Array.isArray(about))v={...about,...v};
+ const offer=Array.isArray(v.offers)?v.offers[0]:(v.offers||{});
+ const o:any={url,titre:ldText(v.name)};
+ if(/soldout|discontinued|outofstock/i.test(String(offer?.availability||'')))o._sold=1;
+ const price=Number(String(offer?.price??v.price??offer?.priceSpecification?.price??'').replace(/[^\d.]/g,''));if(price>0)o.prix=String(Math.round(price));
+ const addr=v.address||v.location?.address||{};const city=ldText(addr.addressLocality);if(city)o.ville=city;const cp=ldText(addr.postalCode);if(cp)o.code_postal=cp;
+ const surf=ldText(v.floorSize);if(surf)o.surface=surf;const rooms=ldText(v.numberOfRooms);if(rooms)o.pieces=rooms;const bed=ldText(v.numberOfBedrooms);if(bed)o.chambres=bed;const bath=ldText(v.numberOfBathroomsTotal);if(bath)o.salles_de_bain=bath;
+ const t=ldTypes(v).join(' ')+' '+o.titre+' '+url;
+ o.type_bien=/terrain|land/i.test(t)?'terrain':/maison|villa|house|residence/i.test(t)?'maison':/parking|garage|box/i.test(t)?'parking':/bureau|local|commerce/i.test(t)?'bureau':'appartement';
+ o.transaction=/(louer|location|rent|lease)/i.test(t+' '+ldText(offer?.businessFunction))?'location':'vente';
+ const desc=aaClean(String(v.description||'').replace(/<\/p>/gi,'\n'));if(desc)o.description=desc.slice(0,6000);
+ const photos:string[]=[];const addImg=(x:any)=>{if(!x)return;if(Array.isArray(x)){x.forEach(addImg);return;}const u=typeof x==='string'?x:(x.contentUrl||x.url||'');try{const abs=new URL(decodeEntities(String(u)),url).toString();if(/^https?:/i.test(abs)&&!photos.includes(abs))photos.push(abs);}catch{}};addImg(v.image||v.photo);
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ const id=ldText(v.sku||v.productID||v.identifier||offer?.sku);
+ o.reference=(id||new URL(url).pathname.replace(/\/+$/,'').split('/').pop()||url).slice(0,80);
+ return o.titre&&o.prix?o:null;
+}
+const IMMO_PATH=/(bien|vente|location|achat|immobilier|annonce|appartement|maison|villa|terrain|propri[eé]t|property|listing|detail|fiche|produit)/i;
+const VEHICLE_PATH=/(v[ée]hicule|voiture|occasion|annonce|stock|vo\b|vn\b|auto|moto|produit|product|car|detail|fiche)/i;
+async function siteCandidateUrls(origin:URL,homeHtml:string,PATH:RegExp){
+ const urls=new Set<string>();const add=(u:string)=>{try{const x=new URL(decodeEntities(u),origin);x.hash='';if(x.hostname===origin.hostname&&!/\.(jpe?g|png|webp|gif|svg|pdf|css|js|xml|ico)(\?|$)/i.test(x.pathname))urls.add(x.toString());}catch{}};
+ // Sitemaps (index compris) : la source la plus complète.
+ const maps=[new URL('/sitemap.xml',origin).toString(),new URL('/sitemap_index.xml',origin).toString()];
+ try{const{text}=await fetchSiteHtml(new URL('/robots.txt',origin));for(const m of text.matchAll(/^sitemap:\s*(\S+)/gim))maps.unshift(m[1]);}catch{}
+ const seenMaps=new Set<string>();
+ for(let i=0;i<maps.length&&seenMaps.size<12;i++){const sm=maps[i];if(seenMaps.has(sm))continue;seenMaps.add(sm);
+  try{const{text}=await fetchSiteHtml(new URL(sm));for(const m of text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)){const loc=decodeEntities(m[1]);if(/\.xml(\?|$)/i.test(loc)){if(!/(post|page|categor|tag|author|blog|actualit)/i.test(loc))maps.push(loc);}else add(loc);}}catch{}}
+ for(const m of homeHtml.matchAll(/href=["']([^"'#]+)["']/gi))add(m[1]);
+ const list=[...urls];
+ return list.filter(u=>PATH.test(new URL(u).pathname)).concat(list.filter(u=>!PATH.test(new URL(u).pathname)));
+}
+async function readGenericSite(origin:URL,homeHtml:string,sector='vehicules'){
+ const immo=sector==='immobilier';const PATH=immo?IMMO_PATH:VEHICLE_PATH;const parse=immo?ldImmo:ldVehicle;
+ const t0=Date.now();const rows:any[]=[];const refs=new Set<string>();
+ // Les pages « liste » du site peuvent mener aux fiches : on suit aussi les liens des pages visitées.
+ const queue=await siteCandidateUrls(origin,homeHtml,PATH);const visited=new Set<string>();let i=0,pages=0;
+ await Promise.all(Array.from({length:4},async()=>{
+  while(i<queue.length&&pages<400&&Date.now()-t0<50000){
+   const u=queue[i++];if(visited.has(u))continue;visited.add(u);pages++;
+   try{const{text}=await fetchSiteHtml(new URL(u));const o=parse(text,u);
+    if(o){if(!o._sold&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}}
+    else if(PATH.test(new URL(u).pathname)&&queue.length<1500){for(const m of text.matchAll(/href=["']([^"'#]+)["']/gi)){try{const x=new URL(decodeEntities(m[1]),u);x.hash='';if(x.hostname===origin.hostname&&PATH.test(x.pathname)&&!visited.has(x.toString())&&!queue.includes(x.toString()))queue.push(x.toString());}catch{}}}
+   }catch{}
+  }}));
+ if(!rows.length)throw Error(`Aucune fiche ${immo?'de bien':'véhicule'} lisible automatiquement sur ce site : il faudra une préparation manuelle (rien n'a été modifié).`);
+ // Lecture partielle (temps dépassé) : on le signale pour ne rien archiver par erreur.
+ if(i<queue.length&&pages>=1)(rows as any).partial=true;
+ return rows;
+}
+// Prestataire du site (pour savoir quel connecteur ajouter quand le site n'est pas encore lisible).
+const SITE_PROVIDERS:[RegExp,string][]=[[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\./i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
+function detectSitePlatform(html:string){
+ for(const[re,name]of SITE_PROVIDERS)if(re.test(html))return name;
+ const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
+ return m?('Site réalisé par '+decodeEntities(m[1]).trim()):'Inconnu';
+}
 async function readFeed(feed:any){
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
@@ -236,9 +333,14 @@ async function readFeed(feed:any){
   if(text.length>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   const ct=(r.headers.get('content-type')||'').toLowerCase();
   if(ct.includes('html')||/^\s*<(?:!doctype html|html)/i.test(text)){
-    if(isAaSiteHtml(text))return await readAaSite(new URL(url.origin));
-    if(/wp-content|wp-json/i.test(text)&&await isWooSite(new URL(url.origin)))return await readWooSite(new URL(url.origin));
-    throw new Error("Cette adresse est une page web, pas un flux d'annonces, et ce type de site n'est pas encore pris en charge.");
+    // Adresse d'un site de garage (pas d'un flux) : on choisit le lecteur selon le type de site.
+    const origin=new URL(url.origin);let rows:any[];let platform:string;
+    if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
+    else{platform=detectSitePlatform(text);
+      try{rows=await readGenericSite(origin,text,feed.sector);platform+=' · données structurées';}
+      catch(e){const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}
+    (rows as any).platform=platform;return rows;
   }
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
@@ -252,7 +354,9 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
  const runResult=await admin.from('pro_stock_sync_runs').insert({feed_id:feed.id}).select('id').single();
  if(runResult.error)throw runResult.error;
  const run=runResult.data;
- let created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0,unchanged=0;
+ let created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0,unchanged=0,deferred=0;
+ // Budget de temps : au-delà, les annonces restent « en attente » et la relance de modération (cron) prend le relais.
+ const t0=Date.now();let archiveSkipped:string|null=null;
  const failures:string[]=[];
  const seen=new Set<string>();const source=`feed:${feed.id}`;
  const must=(r:any)=>{if(r.error)throw r.error;return r.data;};
@@ -322,12 +426,20 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      stock_import_photo_ids:importedPhotos.map((p:any)=>p.id).sort()},{onConflict:'listing_id'}));
     // The shared function downloads external photos into private storage, hashes them,
     // scans text + every photo with OpenAI, and alone publishes approved content.
-    await moderateListingInternal(listingId);
-    moderated++;
+    if(Date.now()-t0<60000){await moderateListingInternal(listingId);moderated++;}else deferred++;
    }catch(e){console.error(e);errors++;failures.push(e instanceof Error?e.message:String(e));}
   }
   const mode=modeOverride||feed.sync_mode;
+  // Sécurité des sites lus automatiquement : lecture partielle, ou beaucoup moins de véhicules que d'habitude
+  // (site en panne, mise en page changée) => on n'archive rien cette fois-ci.
   if(mode==='full'){
+   if((rawRows as any).partial)archiveSkipped='lecture partielle du site';
+   else if(feed.source_kind==='site'){
+    const{count}=await admin.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',feed.owner_id).eq('source',source).in('status',['active','pending']);
+    if((count||0)>=5&&seen.size<(count||0)*0.5)archiveSkipped=`seulement ${seen.size} véhicules lus pour ${count} en ligne`;
+   }
+  }
+  if(mode==='full'&&!archiveSkipped){
    const old=must(await admin.from('listings').select('id,external_id,status').eq('owner_id',feed.owner_id).eq('source',source).not('external_id','is',null));
    for(const l of old||[]){
     if(l.external_id&&!seen.has(l.external_id)&&!['archived','hidden','rejected'].includes(l.status)){
@@ -335,10 +447,10 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     }
    }
   }
-  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:null;
-  must(await admin.from('pro_stock_feeds').update({last_run_at:new Date().toISOString(),...(errors?{}:{last_success_at:new Date().toISOString()}),last_error:errorMessage,updated_at:new Date().toISOString()}).eq('id',feed.id));
+  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:(archiveSkipped?`Retraits non appliqués : ${archiveSkipped}`:null);
+  must(await admin.from('pro_stock_feeds').update({...((rawRows as any).platform?{site_platform:(rawRows as any).platform}:{}),last_run_at:new Date().toISOString(),...(errors?{}:{last_success_at:new Date().toISOString()}),last_error:errorMessage,updated_at:new Date().toISOString()}).eq('id',feed.id));
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
-  return{ok:true,feed_id:feed.id,sector:feed.sector||'vehicules',received:rawRows.length,created,updated,archived,errors,moderated,unchanged,photo_truncated_count:photoTruncated,photo_policy:'Limite photos du compte et de chaque annonce conservée'};
+  return{ok:true,feed_id:feed.id,sector:feed.sector||'vehicules',platform:(rawRows as any).platform||null,received:rawRows.length,created,updated,archived,archive_skipped:archiveSkipped,errors,moderated,moderation_deferred:deferred,unchanged,photo_truncated_count:photoTruncated,photo_policy:'Limite photos du compte et de chaque annonce conservée'};
  }catch(e){
   const msg=e instanceof Error?e.message:String(e);
   await admin.from('pro_stock_feeds').update({last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);
@@ -347,4 +459,23 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
  }
 }
 
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto'}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector,rows:await normalizeRows(rows,sector,user.id)});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null);const results=[];for(const f of feeds||[]){try{results.push(await sync(f,await readFeed(f)));}catch(e){results.push({ok:false,feed_id:f.id,error:e instanceof Error?e.message:String(e)});}}return json({ok:true,results});}const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const feedId=String(body?.feed_id||'');if(!feedId)return json({error:'feed_id manquant'},400);const{data:feed}=await admin.from('pro_stock_feeds').select('*').eq('id',feedId).maybeSingle();if(!feed)return json({error:'Flux introuvable'},404);const{data:profile}=await admin.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();if(feed.owner_id!==user.id&&!profile?.is_admin)return json({error:'Accès refusé'},403);return json(await sync(feed,await readFeed(feed),body?.sync_mode));}catch(e){console.error(e);return json({error:e instanceof Error?e.message:'Erreur de synchronisation'},500);}});
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,sector,user.id)});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const results=[];const start=Date.now();for(const f of feeds||[]){
+ // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.
+ if(f.source_kind==='site'&&f.last_run_at&&Date.now()-new Date(f.last_run_at).getTime()<175*60000)continue;
+ // Le reste passera au prochain passage du cron (toutes les 15 min), les plus anciens d'abord.
+ if(Date.now()-start>40000){results.push({ok:false,feed_id:f.id,skipped:'reporté au prochain passage'});continue;}
+ try{results.push(await sync(f,await readFeed(f)));}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',f.id);results.push({ok:false,feed_id:f.id,error:msg});}}return json({ok:true,results});}const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const feedId=String(body?.feed_id||'');if(!feedId)return json({error:'feed_id manquant'},400);const{data:feed}=await admin.from('pro_stock_feeds').select('*').eq('id',feedId).maybeSingle();if(!feed)return json({error:'Flux introuvable'},404);const{data:profile}=await admin.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();const isAdmin=!!profile?.is_admin;if(feed.owner_id!==user.id&&!isAdmin)return json({error:'Accès refusé'},403);
+ // Aperçu admin d'un site en attente : lecture seule, rien n'est écrit sauf le prestataire détecté / l'erreur.
+ if(body?.action==='preview_feed'){
+  if(!isAdmin)return json({error:'Accès administrateur requis'},403);
+  try{const rows=await readFeed(feed);const platform=(rows as any).platform||null;
+   await admin.from('pro_stock_feeds').update({site_platform:platform,last_error:null,updated_at:new Date().toISOString()}).eq('id',feed.id);
+   return json({ok:true,platform,partial:!!(rows as any).partial,sector:feed.sector,raw:rows,rows:await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id)});}
+  catch(e){const msg=e instanceof Error?e.message:String(e);const platform=(e as any)?.platform||null;
+   await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);
+   return json({ok:false,error:msg,platform});}
+ }
+ // Un site en attente de validation ne peut être synchronisé que par l'admin (après « Activer »).
+ if(feed.review_status&&feed.review_status!=='approved'&&!isAdmin)return json({error:'Import en attente de validation par Abracadeal'},403);
+ let rows:any[];try{rows=await readFeed(feed);}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);throw e;}
+ return json(await sync(feed,rows,body?.sync_mode));}catch(e){console.error(e);return json({error:e instanceof Error?e.message:'Erreur de synchronisation'},500);}});
