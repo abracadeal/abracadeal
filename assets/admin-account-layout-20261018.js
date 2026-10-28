@@ -93,8 +93,11 @@
     grid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
     grid.appendChild(tile('Finances', 'finance', null, 'admin-pilotage.html'));
     grid.appendChild(tile('Prospection', 'prospect', null, 'admin-prospection.html'));
-    /* 28/10/2026 : aperçu du stock d'un site garage (Annonces-Automobile), lecture seule */
-    grid.appendChild(tile('Test import', 'flux', null, 'admin-test-import.html'));
+    /* 28/10/2026 : imports depuis les sites des pros (demandes à valider, aperçu, activation) */
+    var imp = tile('Imports sites', 'flux', null, 'admin-test-import.html');
+    var impBadge = document.createElement('span'); impBadge.className = 'aal-badge'; impBadge.hidden = true; imp.appendChild(impBadge);
+    grid.appendChild(imp);
+    try { if (typeof sb !== 'undefined' && sb) sb.rpc('admin_list_site_imports').then(function (r) { var n = (r.data || []).filter(function (x) { return x.review_status === 'pending'; }).length; if (!r.error && n) { impBadge.textContent = String(n); impBadge.hidden = false; } }); } catch (e) {}
     grid.appendChild(tile('Annonces', 'search', function () {
       var p = $('#adminDatabasePanel'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { var q = $('#adminDbQuery'); if (q) q.focus({ preventScroll: true }); }, 450); }
     }));

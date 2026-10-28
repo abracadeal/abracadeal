@@ -347,7 +347,19 @@ async function refreshAuth({preserveEditing=true}={}){
 
   if(sessionError&&!session)console.warn('Session Supabase indisponible',sessionError);
   await applyAuthSession(session,{preserveEditing});
+  claimSignupSiteImport(session);
   return !!session;
+}
+// Case « reprise de mes annonces depuis mon site » cochée à l'inscription : la demande est créée à la
+// première connexion (le compte peut attendre la confirmation de l'e-mail). Une fois par session.
+let siteImportClaimed=false;
+function claimSignupSiteImport(session){
+  try{
+    const site=session?.user?.user_metadata?.stock_site;
+    if(siteImportClaimed||!sb||!site?.consent)return;
+    siteImportClaimed=true;
+    sb.rpc('claim_signup_site_import').then(({error})=>{if(error)console.warn('Demande d’import du site',error);});
+  }catch(error){console.warn('Demande d’import du site',error);}
 }
 // Données déclaratives : ne jamais utiliser user_metadata pour accorder un statut vérifié.
 function syncCompanyFields(prefix){
@@ -582,7 +594,7 @@ async function abracaPhoneAvailable(phone,accountType='particulier'){
 
 // Brouillon limité à cet onglet. Aucun mot de passe enregistré.
 const signupDraftKey='abracadeal.signupDraft.v1';
-const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSector','signupSiret','signupVatStatus','signupVat'];
+const signupDraftIds=['signupName','signupEmail','signupPhone','signupType','signupCompany','signupSector','signupSiret','signupVatStatus','signupVat','signupSiteUrl'];
 function saveSignupDraft(){
   try{sessionStorage.setItem(signupDraftKey,JSON.stringify(Object.fromEntries(signupDraftIds.map(id=>[id,$('#'+id).value]))));}catch(_){}
 }
@@ -634,9 +646,16 @@ $('#signupForm').addEventListener('submit',async e=>{
   btn.disabled=true;
   const name=$('#signupName').value.trim(), type=$('#signupType').value;
   const proSector=type==='professionnel'?String($('#signupSector')?.value||'').trim():'';
-  if(type==='professionnel'&&!proSector){status.textContent='Choisis ton domaine professionnel.';return;}
   const rawPhone=$('#signupPhone').value.trim();
   try{
+    if(type==='professionnel'&&!proSector){status.textContent='Choisis ton domaine professionnel.';return;}
+    // 28/10/2026 : adresse du site du pro + autorisation de reprise automatique des annonces (facultatif).
+    const siteUrl=type==='professionnel'?String($('#signupSiteUrl')?.value||'').trim():'';
+    const siteConsent=!!$('#signupSiteConsent')?.checked;
+    if(siteUrl&&!/^(https?:\/\/)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/\S*)?$/i.test(siteUrl)){status.textContent='L’adresse du site ne semble pas valide (exemple : www.mon-garage.fr).';$('#signupSiteUrl').focus();return;}
+    if(siteUrl&&/(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|facebook|instagram)\./i.test(siteUrl)){status.textContent='Indique l’adresse de ton propre site (pas celle d’un site d’annonces ou d’un réseau social).';$('#signupSiteUrl').focus();return;}
+    if(siteUrl&&!siteConsent){status.textContent='Coche la case d’autorisation pour que nous puissions reprendre les annonces de ton site (ou laisse l’adresse vide).';$('#signupSiteConsent').focus();return;}
+    const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
     const phoneCheck=await abracaPhoneAvailable(rawPhone,type);
     if(!phoneCheck.ok){
       status.textContent=phoneCheck.message;
@@ -659,7 +678,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const {data,error}=await sb.auth.signUp({
       email:$('#signupEmail').value.trim(),
       password:$('#signupPassword').value,
-      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,pro_sector:proSector||null,...(company_registration?{company_registration}:{}),...(prospect_ref?{prospect_ref}:{})}}
+      options:{emailRedirectTo:'https://abracadeal.fr/',data:{...legalAcceptance,display_name:name,account_type:type,phone,pro_sector:proSector||null,...(company_registration?{company_registration}:{}),...(prospect_ref?{prospect_ref}:{}),...(stock_site?{stock_site}:{})}}
     });
     if(error) throw error;
     clearSignupDraft();
@@ -667,6 +686,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     if(data.session){
       status.textContent='Compte créé et connecté.';
       await refreshAuth();
+      if(stock_site)toast('Merci ! Nous préparons la mise en ligne des annonces de votre site.');
       if(company_registration){
         try{await requestCompanyCheck('verify',company_registration.siret);}
         catch(verificationError){

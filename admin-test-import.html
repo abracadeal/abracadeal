@@ -1,5 +1,5 @@
 <!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>Abracadeal · Test import site garage</title>
+<meta name="robots" content="noindex,nofollow"><title>Abracadeal · Imports de sites</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="icon" href="/favicon.ico?v=3" sizes="any"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <style>
@@ -41,13 +41,36 @@ dialog::backdrop{background:rgba(0,0,0,.75)}
 table{width:100%;border-collapse:collapse;margin:10px 0}td{padding:8px;border-bottom:1px solid var(--line);font-size:15px}td:first-child{color:var(--muted);width:45%}
 .desc{white-space:pre-line;background:#1b1124;padding:12px;border-radius:10px;font-size:14px;color:#e8dcef;max-height:320px;overflow:auto}
 @media (max-width:520px){main{padding:12px}h1{font-size:20px}.grid{grid-template-columns:1fr}dialog{border-radius:0;height:100dvh}}
+
+h2.sec{font-size:18px;color:var(--violet);margin:26px 0 10px}
+select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px}
+.reqs{display:grid;gap:12px}
+.req{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--line)}
+.req.pending{border-color:var(--gold)}
+.req-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.req h3{margin:0;font-size:17px}
+.st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.st.pending{background:#4a3a14;color:#ffe7b5}.st.on{background:#183d2c;color:#9ff0c6}.st.off{background:#3b2946;color:var(--muted)}.st.rej{background:#4a1d27;color:#ffb3c0}
+.meta{margin:8px 0;font-size:14px;color:var(--muted);display:grid;gap:3px;word-break:break-word}
+.meta b{color:#fff;font-weight:600}
+.warn{background:#3a1d24;border-radius:10px;padding:8px 10px;color:#ffc2cd;font-size:14px;margin:8px 0;word-break:break-word}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sbtn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#3b2946;color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.sbtn.ok{background:#1f6b48;border-color:#2e8a5f}.sbtn.no{background:#5a2330;border-color:#7a3141}
+.sbtn[disabled]{opacity:.6;cursor:wait}
+.empty{background:var(--card);border-radius:14px;padding:16px;color:var(--muted)}
+.errline{color:var(--bad);font-size:13px}
 </style></head><body><main>
 <a class="back" href="index.html#accountModal">← Retour à Admin</a>
-<h1>Test import · site d'un garage</h1>
-<p class="muted">Lit le stock du site d'un garage et le montre comme il apparaîtrait sur Abracadeal. Sites pris en charge : réalisés par Annonces-Automobile, ou sous WordPress avec boutique WooCommerce.</p>
-<div class="banner"><b>Aperçu uniquement.</b> Rien n'est enregistré ni publié sur Abracadeal. Page visible seulement par un administrateur connecté.</div>
+<h1>Imports depuis les sites des pros</h1>
+<p class="muted">Les pros qui donnent l'adresse de leur site à l'inscription (et cochent l'autorisation) apparaissent ici. Rien n'est publié tant que vous n'avez pas cliqué sur « Activer ».</p>
 <div id="app" hidden>
- <form class="bar" id="form"><input id="url" type="url" value="https://www.lifecars.fr" placeholder="https://www.site-du-garage.fr" required><button class="btn" id="go">Lire le stock</button></form>
+ <h2 class="sec">Demandes</h2>
+ <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
+ <h2 class="sec">Tester une adresse</h2>
+ <form class="bar" id="form"><input id="url" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
+ <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
+ <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
  <p id="status" class="muted"></p>
  <div class="stats" id="stats" hidden></div>
  <div class="grid" id="grid"></div>
@@ -62,48 +85,105 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):null};
 const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
 const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
-let ROWS=[];
+const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
+let ROWS=[],NORM=[],REQS=[];
+async function fnError(error){let msg=error?.message||String(error);try{const b=await error.context.json();msg=b.error||msg}catch{}return msg}
 async function init(){
  const{data:{user}}=await sb.auth.getUser();
  if(!user){E('gate').innerHTML='Connectez-vous d\'abord sur <a href="index.html">Abracadeal</a> avec le compte administrateur.';return}
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
- E('gate').hidden=true;E('app').hidden=false;
+ E('gate').hidden=true;E('app').hidden=false;loadReqs();
+}
+async function loadReqs(){
+ const{data,error}=await sb.rpc('admin_list_site_imports');
+ if(error){E('reqs').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
+ REQS=data||[];
+ if(!REQS.length){E('reqs').innerHTML='<div class="empty">Aucune demande pour l\'instant. Elles arriveront ici quand un pro donnera l\'adresse de son site à l\'inscription.</div>';return}
+ E('reqs').innerHTML=REQS.map((r,i)=>{
+  const st=r.review_status==='pending'?['pending','En attente']:r.review_status==='rejected'?['rej','Refusé']:r.active?['on','Actif']:['off','En pause'];
+  const acts=[];
+  acts.push('<button class="sbtn" data-a="preview" data-i="'+i+'">Aperçu</button>');
+  if(!r.active&&r.review_status!=='rejected')acts.push('<button class="sbtn ok" data-a="approve" data-i="'+i+'">Activer</button>');
+  if(r.active)acts.push('<button class="sbtn" data-a="sync" data-i="'+i+'">Synchroniser maintenant</button><button class="sbtn" data-a="pause" data-i="'+i+'">Mettre en pause</button>');
+  if(r.review_status==='pending')acts.push('<button class="sbtn no" data-a="reject" data-i="'+i+'">Refuser</button>');
+  if(r.review_status==='rejected')acts.push('<button class="sbtn ok" data-a="approve" data-i="'+i+'">Activer quand même</button>');
+  return '<div class="req '+(r.review_status==='pending'?'pending':'')+'"><div class="req-top"><h3>'+esc(r.company||'Pro sans nom')+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div>'+
+   '<div class="meta"><span>Site : <a href="'+esc(r.site_url)+'" target="_blank" rel="noopener">'+esc(r.site_url)+'</a></span>'+
+   '<span>Contact : <b>'+esc(r.email||'')+'</b>'+(r.phone?' · '+esc(r.phone):'')+'</span>'+
+   '<span>Domaine : <b>'+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</b> · Type de site : <b>'+esc(r.site_platform||'pas encore lu')+'</b></span>'+
+   '<span>Autorisation cochée le <b>'+dt(r.authorized_at)+'</b></span>'+
+   '<span>Dernière synchro : <b>'+dt(r.last_run_at)+'</b> · En ligne : <b>'+(r.listings_online||0)+'</b> · En vérification : <b>'+(r.listings_pending||0)+'</b></span></div>'+
+   (r.last_error?'<div class="warn">'+esc(r.last_error)+'</div>':'')+
+   '<div class="acts">'+acts.join('')+'</div></div>';
+ }).join('');
+}
+async function act(a,i,btn){
+ const r=REQS[i];if(!r)return;
+ if(a==='preview'){btn.disabled=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu · '+(r.company||r.site_url);E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').scrollIntoView({behavior:'smooth'});
+  try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_feed',feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
+   if(!data?.ok){E('status').innerHTML='<span style="color:var(--bad)">'+esc(data?.error||'Lecture impossible')+'</span>';}
+   else{ROWS=data.raw||[];NORM=data.rows||[];render(data,r.sector);}
+  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
+  finally{btn.disabled=false;loadReqs();}
+  return}
+ if(a==='approve'){
+  if(!confirm('Activer la synchronisation de '+(r.company||r.site_url)+' ?\n\nSes annonces seront importées puis vérifiées par la modération avant d\'être en ligne, et mises à jour automatiquement environ toutes les 3 heures.'))return;
+  btn.disabled=true;
+  const{error}=await sb.rpc('admin_review_site_import',{p_feed_id:r.feed_id,p_decision:'approve'});
+  if(error){alert(error.message);btn.disabled=false;return}
+  await runSync(r,btn);return}
+ if(a==='sync'){btn.disabled=true;await runSync(r,btn);return}
+ if(a==='pause'||a==='reject'){
+  if(!confirm(a==='pause'?'Mettre en pause ? Les annonces déjà en ligne restent, mais ne sont plus mises à jour.':'Refuser cette demande ? Rien ne sera importé.'))return;
+  btn.disabled=true;const{error}=await sb.rpc('admin_review_site_import',{p_feed_id:r.feed_id,p_decision:a});
+  if(error)alert(error.message);loadReqs();}
+}
+async function runSync(r,btn){
+ E('resTitle').hidden=false;E('resTitle').textContent='Synchronisation · '+(r.company||r.site_url);E('grid').innerHTML='';E('stats').hidden=true;
+ E('status').textContent='Import en cours… (jusqu\'à 2 minutes, ne fermez pas la page)';E('resTitle').scrollIntoView({behavior:'smooth'});
+ try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
+  E('status').innerHTML='Terminé : <b>'+(data.received||0)+'</b> lus · <b>'+(data.created||0)+'</b> créés · <b>'+(data.updated||0)+'</b> mis à jour · <b>'+(data.archived||0)+'</b> retirés · <b>'+(data.errors||0)+'</b> en erreur.'+(data.moderation_deferred?' '+data.moderation_deferred+' annonces seront vérifiées dans les prochaines minutes.':'')+(data.archive_skipped?' Retraits non appliqués : '+esc(data.archive_skipped)+'.':'')+' Les annonces passent en ligne après la modération.';
+ }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
+ finally{btn.disabled=false;loadReqs();}
 }
 async function load(ev){
  ev.preventDefault();
- const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('stats').hidden=true;
- E('status').textContent='Lecture du site en cours… (quelques secondes)';
+ const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu';
+ E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';
+ let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
  try{
-  const{data,error}=await sb.functions.invoke('aa-site-preview',{body:{url:E('url').value}});
-  if(error){let msg=error.message;try{const b=await error.context.json();msg=b.error||msg}catch{}throw Error(msg)}
+  const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true}});
+  if(error)throw Error(await fnError(error));
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
-  ROWS=data.rows||[];render(data);
+  ROWS=data.raw||[];NORM=data.rows||[];render(data,E('sector').value);
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
-function render(data){
- const ok=ROWS.filter(r=>r.titre),bad=ROWS.length-ok.length;
- const photos=ok.reduce((n,r)=>n+(r.photos?r.photos.split('|').length:0),0);
- const types={};ok.forEach(r=>types[r.type]=(types[r.type]||0)+1);
- E('status').textContent='Site '+(data.kind||'')+' · lu sur '+data.site+' en '+(data.ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s.';
- E('stats').innerHTML=[['Véhicules lus',ok.length],['Photos trouvées',photos],['Voitures',types.voiture||0],['Utilitaires',types.utilitaire||0],['Motos',types.moto||0],['Fiches illisibles',bad]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+function render(data,sector){
+ const immo=sector==='immobilier';
+ const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
+ const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:0),0);
+ E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">lecture partielle (site très grand)</span>':'');
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
-  if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche n°'+esc(r.reference)+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
-  const ph=r.photos?r.photos.split('|'):[];
-  const chips=[r.annee,km(r.kilometrage),r.carburant,r.boite].filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
-  return '<div class="car" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(r.type||'')+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div></div></div>';
+  const errs=(NORM[i]?.errors||[]);
+  if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
+  const ph=r.photos?String(r.photos).split('|'):[];
+  const chips=(immo?[r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
+  return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
  }).join('');
 }
 function openCar(i){
- const r=ROWS[i];if(!r||!r.titre)return;const ph=r.photos?r.photos.split('|'):[];
+ const r=ROWS[i];if(!r||!r.titre)return;const ph=r.photos?String(r.photos).split('|'):[];
  E('dt').textContent=euro(r.prix);
- const rows=[['Marque',r.marque],['Modèle',r.modele],['Finition',r.finition],['Catégorie',r.carrosserie],['Mise en circulation',r.mise_en_circulation],['Kilométrage',km(r.kilometrage)],['Énergie',r.carburant],['Boîte',r.boite],['Puissance',r.puissance_din],['Puissance fiscale',r.puissance_fiscale],['CO2',r.co2],['Portes',r.portes],['Couleur',r.couleur],['Garantie',r.garantie],['Référence garage',r.reference]].filter(x=>x[1]);
- E('db').innerHTML='<h2 style="margin:0 0 10px;font-size:18px">'+esc(r.titre)+'</h2>'+(ph.length?'<div class="big"><img id="bigimg" src="'+esc(ph[0])+'" alt=""></div><div class="thumbs">'+ph.map((u,k)=>'<img loading="lazy" data-k="'+k+'" class="'+(k?'':'on')+'" src="'+esc(u)+'" alt="">').join('')+'</div><p class="muted" style="margin:0">'+ph.length+' photos en grand format</p>':'<p class="muted">Aucune photo trouvée</p>')+'<table>'+rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('')+'</table>'+(r.description?'<h3 style="font-size:16px">Description et équipements</h3><div class="desc">'+esc(r.description)+'</div>':'')+'<p><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Voir la fiche sur le site du garage</a></p>';
+ const rows=[['Marque',r.marque],['Modèle',r.modele],['Finition',r.finition],['Catégorie',r.carrosserie],['Mise en circulation',r.mise_en_circulation],['Kilométrage',km(r.kilometrage)],['Énergie',r.carburant],['Boîte',r.boite],['Puissance',r.puissance_din],['Puissance fiscale',r.puissance_fiscale],['CO2',r.co2],['Portes',r.portes],['Couleur',r.couleur],['Garantie',r.garantie],['Type de bien',r.type_bien],['Transaction',r.transaction],['Ville',r.ville],['Code postal',r.code_postal],['Surface',r.surface],['Pièces',r.pieces],['Chambres',r.chambres],['Référence',r.reference]].filter(x=>x[1]);
+ E('db').innerHTML='<h2 style="margin:0 0 10px;font-size:18px">'+esc(r.titre)+'</h2>'+(ph.length?'<div class="big"><img id="bigimg" src="'+esc(ph[0])+'" alt=""></div><div class="thumbs">'+ph.map((u,k)=>'<img loading="lazy" data-k="'+k+'" class="'+(k?'':'on')+'" src="'+esc(u)+'" alt="">').join('')+'</div><p class="muted" style="margin:0">'+ph.length+' photos</p>':'<p class="muted">Aucune photo trouvée</p>')+'<table>'+rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('')+'</table>'+(r.description?'<h3 style="font-size:16px">Description</h3><div class="desc">'+esc(r.description)+'</div>':'')+(r.url?'<p><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Voir la fiche sur le site du pro</a></p>':'');
  E('dlg').showModal();E('dlg').scrollTop=0;
 }
 E('form').addEventListener('submit',load);
+E('reqs').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b)act(b.dataset.a,Number(b.dataset.i),b)});
 E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');if(c)openCar(Number(c.dataset.i))});
 E('db').addEventListener('click',e=>{const t=e.target.closest('.thumbs img');if(!t)return;E('bigimg').src=t.src;E('db').querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t))});
 E('dx').addEventListener('click',()=>E('dlg').close());
