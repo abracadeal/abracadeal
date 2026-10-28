@@ -796,3 +796,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **`pro-pages.json` :** adresse de chaque page, stable même si le nom change (une page sans annonce disparaît mais son adresse reste réservée).
 - **Espace Pro (`index.html`, `assets/index-main.js` v=20261029-page-pro) :** encadré « Stock synchronisé avec votre site » (adresse, dernière mise à jour, « rien à gérer ici ») ou « reprise en préparation » ; encadré « Votre page sur Google » avec le lien et « Copier le lien ». La gestion manuelle (Mes annonces, Importer mon stock) reste disponible au cas où.
 - Testé hors ligne avec des données d'exemple (garage + agence) : pages, annuaires, sitemap et registre générés, rendu vérifié à 390 px.
+- **Corrigé le jour même :** l'étape « Publier » du workflow échouait tant qu'aucun dossier garage/immo/professionnel n'existe (0 pro en ligne) ; ces dossiers ne sont ajoutés que s'ils existent. Workflow vérifié en succès.
