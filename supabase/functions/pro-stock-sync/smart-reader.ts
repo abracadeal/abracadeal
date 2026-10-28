@@ -61,7 +61,7 @@ function longestText(html:string){
   let best='';
   for(const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)){
     if(chunk.length<120)continue;const t=clean(chunk);
-    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200)))best=t;
+    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200))&&!/capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t))best=t;
   }
   return best.slice(0,6000);
 }
@@ -92,7 +92,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;const v=num(m[1]);if(v>0)return v;}return NaN;};
   const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
   if(declared)prix=num(declared.replace(/[.,]\d{2}$/,''));
-  if(!(prix>0))prix=firstAmount(head,priceRe);
+  const metaDesc=(metaAll(headHtml,'description')[0]||'')+' \n'+(metaAll(headHtml,'og:description')[0]||'');
+  if(!(prix>0))prix=firstAmount(head+' \n'+metaDesc,priceRe);
   if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
   if(!(prix>0))prix=firstAmount(text,new RegExp('(?:prix|loyer|tarif)[^0-9€]{0,40}'+priceRe.source,'iu'));
   if(!(prix>0))prix=firstAmount(text,priceRe);

@@ -124,7 +124,7 @@ var SR = (() => {
     for (const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)) {
       if (chunk.length < 120) continue;
       const t = clean(chunk);
-      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200))) best = t;
+      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200)) && !/capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t)) best = t;
     }
     return best.slice(0, 6e3);
   }
@@ -161,7 +161,8 @@ var SR = (() => {
     };
     const declared = metaAll(headHtml, "product:price:amount")[0] || metaAll(headHtml, "og:price:amount")[0] || (region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1] || "");
     if (declared) prix = num(declared.replace(/[.,]\d{2}$/, ""));
-    if (!(prix > 0)) prix = firstAmount(head, priceRe);
+    const metaDesc = (metaAll(headHtml, "description")[0] || "") + " \n" + (metaAll(headHtml, "og:description")[0] || "");
+    if (!(prix > 0)) prix = firstAmount(head + " \n" + metaDesc, priceRe);
     if (!(prix > 0)) {
       const j = jsonVal(region, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
       if (/^\d{3,9}(\.\d+)?$/.test(j)) prix = Number(j);
