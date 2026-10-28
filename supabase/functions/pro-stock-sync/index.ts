@@ -1,5 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { eraPreviewScope, parseEraPreview } from "./era-preview.ts";
+import { eraPreviewScope, readAllEraPreview } from "./era-preview.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -482,9 +482,7 @@ async function readPreviewFeed(feed:any){
  const requested=new URL(String(feed.feed_url));
  if(!eraPreviewScope(requested))return await readFeed(feed);
  if(feed.sector!=='immobilier')throw Error('Sélectionnez Immobilier pour cet aperçu ERA.');
- const page=await fetchSiteHtml(requested);
- if(page.url.origin!==requested.origin||page.url.pathname!==requested.pathname)throw Error('Aperçu ERA : la page a redirigé vers une autre recherche.');
- return parseEraPreview(page.text,page.url.toString());
+ return await readAllEraPreview(requested,fetchSiteHtml);
 }
 async function moderationSecret(){const{data}=await admin.from('integration_secrets').select('secret_value').eq('name','pro_stock_moderation_internal').maybeSingle();return String(data?.secret_value||'');}
 async function moderateListingInternal(listingId:string){const secret=await moderationSecret();if(!secret)throw new Error('Secret de modération interne absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({listing_id:listingId}),signal:AbortSignal.timeout(90000)});const body=await r.json().catch(()=>({}));if(!r.ok||!body?.ok||!body?.ai_checked)throw new Error(body?.ai_error||body?.error||`Modération incomplète (${r.status})`);return body;}
