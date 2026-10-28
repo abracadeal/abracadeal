@@ -32,7 +32,11 @@ jobs:
       - run: python scripts/build_pro_pages.py
       - name: Publier les changements
         run: |
-          git add -A annonce annonces auto garage immo professionnel pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml
+          git add -A annonce annonces auto pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml
+          # Dossiers des pages pros : absents tant qu'aucun pro n'a d'annonce en ligne (git add échouerait)
+          for p in garage immo professionnel; do
+            if [ -e "$p" ] || git ls-files --error-unmatch "$p" >/dev/null 2>&1; then git add -A "$p"; fi
+          done
           if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
           git config user.name "abracadeal-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
