@@ -101,7 +101,10 @@ var SR = (() => {
     }
     if (!all.length) return [];
     const sizeless = (u) => u.split("?")[0].replace(/\/\d{2,4}x(?:\d{2,4}|auto)(?=\/)/gi, "").replace(/\/(?:thumbs?|small|medium|large|mini|xs|sm|md|lg)(?=\/)/gi, "");
-    const key = (u) => sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i, "");
+    const key = (u) => {
+      const b = sizeless(u).split("/").pop() || "";
+      return b.replace(/\.\w+$/, "").length >= 8 ? b.replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i, "") : sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i, "");
+    };
     const dir = (u) => sizeless(u).replace(/\/[^/]*$/, "");
     const counts = /* @__PURE__ */ new Map();
     for (const u of all) counts.set(dir(u), (counts.get(dir(u)) || 0) + 1);
@@ -120,7 +123,7 @@ var SR = (() => {
       const k = key(u);
       if (seen.has(k)) {
         const i = pos.get(k);
-        if (sizeOf(u) > sizeOf(out[i])) out[i] = u;
+        if (sizeOf(u) > sizeOf(out[i]) || out[i].includes("?") && !u.includes("?")) out[i] = u;
         continue;
       }
       seen.add(k);
@@ -135,7 +138,7 @@ var SR = (() => {
     for (const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)) {
       if (chunk.length < 120) continue;
       const t = clean(chunk);
-      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200)) && !/object\(|=>|string\(\d|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t)) best = t;
+      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200)) && !/object\(|=>|string\(\d|donn[ée]es personnelles|informations recueillies|\bRGPD\b|sous-traitant|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t)) best = t;
     }
     return best.slice(0, 6e3);
   }
@@ -218,7 +221,8 @@ var SR = (() => {
       const all = head + " " + base.pathname + " " + text.slice(0, 4e3);
       o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
       const kind = head + " " + base.pathname;
-      o.type_bien = /appartement|studio|duplex|triplex|loft|penthouse|\b[TF]\d\b/i.test(kind) ? "appartement" : /maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|ferme\b/i.test(kind) ? "maison" : /terrain/i.test(kind) ? "terrain" : /bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind) ? "bureau" : /parking|garage|\bbox\b|stationnement/i.test(kind) ? "parking" : "appartement";
+      const isHouse = /maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i, isFlat = /appartement|studio|duplex|triplex|loft|penthouse/i;
+      o.type_bien = isHouse.test(head) ? "maison" : isFlat.test(head) ? "appartement" : isHouse.test(kind) ? "maison" : isFlat.test(kind) || /\b[TF]\d\b/i.test(kind) ? "appartement" : /terrain/i.test(kind) ? "terrain" : /bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind) ? "bureau" : /parking|garage|\bbox\b|stationnement/i.test(kind) ? "parking" : "appartement";
       const sm = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);
       if (sm) o.surface = sm[1];
       const pm2 = all.match(/(\d{1,2})\s*pi[eè]ces?/i) || all.match(/\b[TF](\d)\b/);
@@ -265,7 +269,7 @@ var SR = (() => {
     }
     return o;
   }
-  async function readSmartSite(origin, homeHtml, sector, fetchHtml, extraStarts = []) {
+  async function readSmartSite(origin, homeHtml, sector, fetchHtml, extraStarts = [], ldParse) {
     const t0 = Date.now();
     const host = origin.hostname.replace(/^www\./, "");
     const seenPages = /* @__PURE__ */ new Set();
@@ -304,6 +308,38 @@ var SR = (() => {
       detailQ.length = 0;
       detailQ.push(...keep);
     }
+    if (detailQ.length < 5) {
+      const maps = [new URL("/sitemap.xml", origin).toString()];
+      try {
+        const { text } = await fetchHtml(new URL("/robots.txt", origin));
+        for (const m of text.matchAll(/^sitemap:\s*(\S+)/gim)) maps.unshift(m[1]);
+      } catch {
+      }
+      const seenMaps = /* @__PURE__ */ new Set();
+      const fromMaps = [];
+      for (let k = 0; k < maps.length && seenMaps.size < 10 && Date.now() - t0 < 25e3; k++) {
+        const sm = maps[k];
+        if (seenMaps.has(sm)) continue;
+        seenMaps.add(sm);
+        try {
+          const { text } = await fetchHtml(new URL(sm));
+          for (const m of text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)) {
+            const loc = sDecode(m[1]);
+            if (/\.xml(\?|$)/i.test(loc)) {
+              if (!/(post|page|categor|tag|author|blog|actualit|news)/i.test(loc)) maps.push(loc);
+            } else fromMaps.push(loc);
+          }
+        } catch {
+        }
+      }
+      const fake = fromMaps.slice(0, 5e3).map((u) => `<a href="${u.replace(/"/g, "&quot;")}">`).join("");
+      take(fake, origin);
+      if (scope && scope.split("/").length >= 3) {
+        const keep = detailQ.filter(inScope);
+        detailQ.length = 0;
+        detailQ.push(...keep);
+      }
+    }
     let i = 0;
     await Promise.all(Array.from({ length: 4 }, async () => {
       while (i < detailQ.length && pages < 400 && Date.now() - t0 < 5e4) {
@@ -313,7 +349,19 @@ var SR = (() => {
         pages++;
         try {
           const { text, url } = await fetchHtml(new URL(u));
-          const o = smartDetail(text, url.toString(), sector);
+          let o = null;
+          if (ldParse) {
+            try {
+              o = ldParse(text, url.toString());
+            } catch {
+              o = null;
+            }
+            if (o?._sold) {
+              misses++;
+              continue;
+            }
+          }
+          if (!o) o = smartDetail(text, url.toString(), sector);
           if (o && !refs.has(o.reference)) {
             refs.add(o.reference);
             rows.push(o);

@@ -43,7 +43,7 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
   if(!all.length)return[];
   // Les variantes de taille (« 1200xauto », « -300x200 », « thumb »…) comptent comme la même photo et le même dossier.
   const sizeless=(u:string)=>u.split('?')[0].replace(/\/\d{2,4}x(?:\d{2,4}|auto)(?=\/)/gi,'').replace(/\/(?:thumbs?|small|medium|large|mini|xs|sm|md|lg)(?=\/)/gi,'');
-  const key=(u:string)=>sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,'');
+  const key=(u:string)=>{const b=sizeless(u).split('/').pop()||'';return b.replace(/\.\w+$/,'').length>=8?b.replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,''):sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,'');};
   const dir=(u:string)=>sizeless(u).replace(/\/[^/]*$/,'');
   // Groupe principal : dossier de l'image de partage, ou dossier le plus fourni, ou fichiers portant la référence.
   const counts=new Map<string,number>();for(const u of all)counts.set(dir(u),(counts.get(dir(u))||0)+1);
@@ -54,7 +54,7 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
   const out:string[]=[];const seen=new Set<string>();
   const sizeOf=(u:string)=>{const m=u.match(/\/(\d{2,4})x(?:\d{2,4}|auto)\//i)||u.match(/[-_](\d{2,4})x\d{2,4}(?=\.\w+$)/i);return m?Number(m[1]):(/thumb|small|mini/i.test(u)?1:5000);};
   const pos=new Map<string,number>();
-  for(const u of chosen){const k=key(u);if(seen.has(k)){const i=pos.get(k)!;if(sizeOf(u)>sizeOf(out[i]))out[i]=u;continue;}seen.add(k);pos.set(k,out.length);out.push(u);}
+  for(const u of chosen){const k=key(u);if(seen.has(k)){const i=pos.get(k)!;if(sizeOf(u)>sizeOf(out[i])||(out[i].includes('?')&&!u.includes('?')))out[i]=u;continue;}seen.add(k);pos.set(k,out.length);out.push(u);}
   // Préfère la version sans paramètres de redimensionnement quand elle existe.
   return out.map(u=>/[?&](w|h|width|height|fit|size|resize)=/i.test(u)&&chosen.some(c=>c===u.split('?')[0])?u.split('?')[0]:u).slice(0,45);
 }
@@ -65,7 +65,7 @@ function longestText(html:string){
   let best='';
   for(const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)){
     if(chunk.length<120)continue;const t=clean(chunk);
-    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200))&&!/object\(|=>|string\(\d|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t))best=t;
+    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200))&&!/object\(|=>|string\(\d|donn[ée]es personnelles|informations recueillies|\bRGPD\b|sous-traitant|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t))best=t;
   }
   return best.slice(0,6000);
 }
@@ -121,7 +121,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
     o.transaction=/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
     const kind=head+' '+base.pathname;
-    o.type_bien=/appartement|studio|duplex|triplex|loft|penthouse|\b[TF]\d\b/i.test(kind)?'appartement':/maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|ferme\b/i.test(kind)?'maison':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
+    const isHouse=/maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
+    o.type_bien=isHouse.test(head)?'maison':isFlat.test(head)?'appartement':isHouse.test(kind)?'maison':isFlat.test(kind)||/\b[TF]\d\b/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
     const sm=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);if(sm)o.surface=sm[1];
     const pm2=all.match(/(\d{1,2})\s*pi[eè]ces?/i)||all.match(/\b[TF](\d)\b/);if(pm2)o.pieces=pm2[1];else if(/studio/i.test(head))o.pieces='1';
     const c=all.match(/(\d{1,2})\s*chambres?/i);if(c)o.chambres=c[1];
@@ -150,7 +151,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
 }
 
 // Parcours : accueil + pages de liste, puis fiches détectées. Budget en temps et en pages.
-export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[]){
+export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any){
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
   const take=(html:string,page:URL)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details)if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
@@ -167,11 +168,21 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
     await Promise.all(batch.map(async u=>{try{const{text,url}=await fetchHtml(new URL(u));take(text.length>700000?text.slice(0,700000):text,url);}catch{}}));
   }
   if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(inScope);detailQ.length=0;detailQ.push(...keep);}
+  // Listes chargées en JavaScript : les fiches sont souvent dans le plan du site (sitemap).
+  if(detailQ.length<5){
+    const maps=[new URL('/sitemap.xml',origin).toString()];
+    try{const{text}=await fetchHtml(new URL('/robots.txt',origin));for(const m of text.matchAll(/^sitemap:\s*(\S+)/gim))maps.unshift(m[1]);}catch{}
+    const seenMaps=new Set<string>();const fromMaps:string[]=[];
+    for(let k=0;k<maps.length&&seenMaps.size<10&&Date.now()-t0<25000;k++){const sm=maps[k];if(seenMaps.has(sm))continue;seenMaps.add(sm);
+      try{const{text}=await fetchHtml(new URL(sm));for(const m of text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)){const loc=sDecode(m[1]);if(/\.xml(\?|$)/i.test(loc)){if(!/(post|page|categor|tag|author|blog|actualit|news)/i.test(loc))maps.push(loc);}else fromMaps.push(loc);}}catch{}}
+    const fake=fromMaps.slice(0,5000).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');take(fake,origin);
+    if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(inScope);detailQ.length=0;detailQ.push(...keep);}
+  }
   let i=0;
   await Promise.all(Array.from({length:4},async()=>{
     while(i<detailQ.length&&pages<400&&Date.now()-t0<50000){
       const u=detailQ[i++];if(seenPages.has(u))continue;seenPages.add(u);pages++;
-      try{const{text,url}=await fetchHtml(new URL(u));const o=smartDetail(text,url.toString(),sector);
+      try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).
         if(detailQ.length<40&&text.length<400000)take(text,url);
