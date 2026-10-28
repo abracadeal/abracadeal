@@ -148,24 +148,26 @@ var SR = (() => {
     const head = h1 + " \n" + ogTitle + " \n" + docTitle;
     const priceRe = /(?<![\p{L}\d][\s  .]?)(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
     let prix = NaN;
+    const rental = immo && /\b(louer|location|loyer|a-louer)\b/i.test(head + " " + base.pathname);
+    const firstAmount = (src, re) => {
+      for (const m of src.matchAll(new RegExp(re.source, "giu"))) {
+        const after = src.slice((m.index || 0) + m[0].length, (m.index || 0) + m[0].length + 14);
+        const before = src.slice(Math.max(0, (m.index || 0) - 30), m.index || 0);
+        if (!rental && (/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after) || /(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before))) continue;
+        const v = num(m[1]);
+        if (v > 0) return v;
+      }
+      return NaN;
+    };
     const declared = metaAll(headHtml, "product:price:amount")[0] || metaAll(headHtml, "og:price:amount")[0] || (region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1] || "");
     if (declared) prix = num(declared.replace(/[.,]\d{2}$/, ""));
-    if (!(prix > 0)) {
-      const pm = head.match(priceRe);
-      if (pm) prix = num(pm[1]);
-    }
+    if (!(prix > 0)) prix = firstAmount(head, priceRe);
     if (!(prix > 0)) {
       const j = jsonVal(region, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
       if (/^\d{3,9}(\.\d+)?$/.test(j)) prix = Number(j);
     }
-    if (!(prix > 0)) {
-      const lm = text.match(new RegExp("(?:prix|loyer|tarif)[^0-9\u20AC]{0,40}" + priceRe.source, "iu"));
-      if (lm) prix = num(lm[1]);
-    }
-    if (!(prix > 0)) {
-      const fm = text.match(priceRe);
-      if (fm) prix = num(fm[1]);
-    }
+    if (!(prix > 0)) prix = firstAmount(text, new RegExp("(?:prix|loyer|tarif)[^0-9\u20AC]{0,40}" + priceRe.source, "iu"));
+    if (!(prix > 0)) prix = firstAmount(text, priceRe);
     if (!(prix >= 50 && prix < 1e8)) return null;
     const refM = base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
     const reference = (refM?.[1] || jsonVal(region, ["itemId", "reference"]) || base.pathname.replace(/\/+$/, "").split("/").pop() || "").slice(0, 80);
@@ -204,7 +206,7 @@ var SR = (() => {
       const all = head + " " + base.pathname + " " + text.slice(0, 4e3);
       o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
       o.type_bien = /terrain/i.test(head) ? "terrain" : /parking|garage|box|stationnement/i.test(head) ? "parking" : /bureau|local|commerce|boutique|fonds/i.test(head) ? "bureau" : /maison|villa|mas\b|propri[ée]t[ée]|chalet|bastide/i.test(head) ? "maison" : "appartement";
-      const sm = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)\b/i);
+      const sm = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);
       if (sm) o.surface = sm[1];
       const pm2 = all.match(/(\d{1,2})\s*pi[eè]ces?/i) || all.match(/\b[TF](\d)\b/);
       if (pm2) o.pieces = pm2[1];
@@ -213,7 +215,7 @@ var SR = (() => {
       if (c) o.chambres = c[1];
       const sdb = text.match(/(\d)\s*salles? (?:de bains?|d['’]eau)/i);
       if (sdb) o.salles_de_bain = sdb[1];
-      const land = text.match(/terrain[^0-9]{0,30}(\d[\d\s.]*)\s*m(?:²|2)/i);
+      const land = text.match(/terrain[^0-9]{0,30}(\d[\d\s.]*)\s*m(?:²|2)(?![a-z0-9])/i);
       if (land && o.type_bien !== "terrain") o.surface_terrain = land[1].replace(/\s/g, "");
       if (o.type_bien === "terrain" && o.surface) {
         o.surface_terrain = o.surface;
@@ -259,26 +261,35 @@ var SR = (() => {
     const rows = [];
     const refs = /* @__PURE__ */ new Set();
     const take = (html, page) => {
-      const { details, lists } = smartLinks(html, page, host);
+      const { details, lists: lists2 } = smartLinks(html, page, host);
       for (const d of details) if (!seenPages.has(d) && !detailQ.includes(d)) detailQ.push(d);
-      for (const l of lists) if (!seenPages.has(l) && !listQ.includes(l) && listQ.length < 60) listQ.push(l);
+      for (const l of lists2) if (!seenPages.has(l) && !listQ.includes(l) && listQ.length < 60) listQ.push(l);
     };
     take(homeHtml, origin);
     seenPages.add(origin.toString());
     for (const s of extraStarts) if (!listQ.includes(s)) listQ.unshift(s);
     let pages = 0;
     let misses = 0;
-    while (listQ.length && pages < 60 && Date.now() - t0 < 2e4) {
-      const batch = listQ.splice(0, 4).filter((u) => !seenPages.has(u));
+    const scope = extraStarts[0] ? new URL(extraStarts[0]).pathname.replace(/\/+$/, "") : "";
+    const inScope = (u) => !scope || scope.split("/").length < 3 || new URL(u).pathname.startsWith(scope);
+    let lists = 0;
+    while (listQ.length && lists < 20 && Date.now() - t0 < 2e4) {
+      const batch = listQ.splice(0, 4).filter((u) => !seenPages.has(u) && inScope(u));
       batch.forEach((u) => seenPages.add(u));
       pages += batch.length;
+      lists += batch.length;
       await Promise.all(batch.map(async (u) => {
         try {
           const { text, url } = await fetchHtml(new URL(u));
-          take(text, url);
+          take(text.length > 7e5 ? text.slice(0, 7e5) : text, url);
         } catch {
         }
       }));
+    }
+    if (scope && scope.split("/").length >= 3) {
+      const keep = detailQ.filter(inScope);
+      detailQ.length = 0;
+      detailQ.push(...keep);
     }
     let i = 0;
     await Promise.all(Array.from({ length: 4 }, async () => {
