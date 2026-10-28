@@ -726,3 +726,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Adresse nationale d'un réseau (century21.fr, orpi.com, laforet.com…) : message clair demandant l'adresse de l'agence.
 - Test : Century 21 Agence Gastaldy → 39 biens en ~2,4 s.
 - Page admin « Imports sites » : les anciens chiffres de l'aperçu restaient affichés après une erreur (attribut hidden écrasé par display:grid) — corrigé.
+
+## 28/10/2026 — Mails de prospection ultra-courts — Claude
+- Variantes A et B remplacées par un message de 3 phrases : gratuit pendant le lancement + « inscrivez-vous avec l'adresse de votre site, en quelques minutes toutes vos annonces sont en ligne » + lien d'inscription. Relance raccourcie de même.
+- A et B ne diffèrent plus que par l'objet (test A/B des objets).
+- Corrigé : l'ancien texte annonçait « jusqu'à 50 annonces » alors que l'offre Fondateurs est à 100.
+- SQL : supabase/2026-10-28-prospection-mails-ultra-courts.sql (appliqué).
