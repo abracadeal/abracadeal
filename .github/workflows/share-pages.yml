@@ -1,5 +1,5 @@
 # Pages publiques des annonces (referencement Google + apercu WhatsApp/Facebook), pages categories/villes
-# et hubs SEO Auto (marques, modeles, energies, budgets).
+# hubs SEO Auto (marques, modeles, energies, budgets) et pages des pros (garage/, immo/, professionnel/).
 name: Pages de partage des annonces
 
 on:
@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, .github/workflows/share-pages.yml]
+    paths: [scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, scripts/build_pro_pages.py, .github/workflows/share-pages.yml]
 
 permissions:
   contents: write
@@ -29,9 +29,10 @@ jobs:
       - run: pip install pillow==10.4.0
       - run: python scripts/build_share_pages.py
       - run: python scripts/build_auto_seo_pages.py
+      - run: python scripts/build_pro_pages.py
       - name: Publier les changements
         run: |
-          git add -A annonce annonces auto sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml
+          git add -A annonce annonces auto garage immo professionnel pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml
           if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
           git config user.name "abracadeal-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

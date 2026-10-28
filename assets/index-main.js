@@ -5888,7 +5888,37 @@ function refreshProDashboard(){
   });
   const unread=document.querySelector('#accountBtn .account-unread-badge, #headerMessagesUnread');
   set('proDashMessagesValue',(unread?.textContent||'0').trim()||'0');
+  refreshProDashSyncAndPage();
 }
+// 29/10/2026 : stock repris depuis le site du pro (rien à gérer) + lien de sa page Garage / Immo publique.
+function refreshProDashSyncAndPage(){
+  const uid=currentUser?.id;if(!uid||!sb)return;
+  const box=document.getElementById('proDashSync');
+  sb.rpc('get_my_site_import').then(({data})=>{
+    if(!box)return;
+    const d=data&&typeof data==='object'?data:null;
+    if(!d||!d.url||d.status==='rejected'){box.classList.add('hidden');return}
+    const site=String(d.url).replace(/^https?:\/\//,'').replace(/\/$/,'');
+    const when=d.last_success_at?new Date(d.last_success_at).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'';
+    box.innerHTML=d.active
+      ?'<strong style="display:block">Stock synchronisé avec votre site</strong>Vos annonces sont reprises automatiquement depuis <b>'+esc(site)+'</b>, environ toutes les 3 heures'+(when?' (dernière mise à jour : '+esc(when)+')':'')+'. Vous n’avez rien à gérer ici : un véhicule ajouté sur votre site apparaît, un véhicule vendu disparaît.'
+      :'<strong style="display:block">Reprise de votre site en préparation</strong>Nous vérifions la lecture de <b>'+esc(site)+'</b>. Vos annonces apparaîtront automatiquement, sans saisie de votre part.';
+    box.classList.remove('hidden');
+  }).catch(()=>{});
+  fetch('/pro-pages.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(map=>{
+    const page=document.getElementById('proDashPage'),link=document.getElementById('proDashPageLink');
+    const entry=map&&map[uid];
+    if(!page||!link||!entry||!entry.active){page?.classList.add('hidden');return}
+    const url='https://abracadeal.fr/'+entry.path+'/';
+    link.href=url;link.textContent=url.replace('https://','');
+    page.classList.remove('hidden');
+  }).catch(()=>{});
+}
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#proDashPageCopy'))return;
+  const url=document.getElementById('proDashPageLink')?.href;if(!url)return;
+  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>toast('Lien copié')).catch(()=>prompt('Copiez ce lien :',url));
+});
 document.addEventListener('click',e=>{
   if(e.target.closest('#proDashActive,#proDashStockBtn')){closeModal('accountModal');openMyAds();}
   if(e.target.closest('#proDashPending')){closeModal('accountModal');openMyAds();}
