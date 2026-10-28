@@ -79,7 +79,7 @@ async function ownerLocation(userId:string|null|undefined){if(!userId)return nul
 // Véhicules : tous au garage, donc ville et code postal du garage sur chaque annonce (adresse du compte pro,
 // sinon adresse publiée sur le site). Immobilier : la ville de chaque bien, celle du compte seulement si elle manque.
 // preferSite : aperçu d'une adresse testée par quelqu'un d'autre que le garage (ex. l'admin) => adresse du site d'abord.
-async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(loc?.city&&(r.category==='vehicules'||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);out.push(r);}return out;}
+async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);out.push(r);}return out;}
 
 async function authUser(req:Request){const h=req.headers.get('Authorization')||'';if(!h)return null;const c=createClient(SUPABASE_URL,ANON_KEY,{global:{headers:{Authorization:h}},auth:{persistSession:false}});const{data}=await c.auth.getUser();return data?.user||null;}
 async function cronOk(req:Request){const tok=req.headers.get('x-cron-token')||'';if(!tok)return false;const hash=await sha256(tok);const{data}=await admin.from('pro_sync_secrets').select('value_hash').eq('name','cron_sync').maybeSingle();return!!data&&data.value_hash===hash;}
@@ -278,6 +278,60 @@ async function readStarterreSite(origin:URL,html:string){
   const main=String(d.photoPrincipale||'').split('/').pop();if(main){const k=photos.findIndex(p=>p.endsWith('/'+main));if(k>0)photos.unshift(...photos.splice(k,1));}
   if(photos.length)o.photos=photos.slice(0,45).join('|');
   rows.push(o);}}));
+ return rows;
+}
+// Réseau « L'Agence Automobilière » (agenceauto.com, site Next.js) : une page par agence (/fr/fr/agences/<ville>).
+// Liste du stock de l'agence : /fr/fr/vehicules?agencyId=<id>&page=N ; chaque fiche contient l'objet « vehicle »
+// complet (photos, caractéristiques, description, agence) dans les données Next.js de la page.
+const isAgenceAutoSite=(u:URL)=>/(^|\.)agenceauto\.com$/i.test(u.hostname);
+function nextFlightText(html:string){let out='';for(const m of html.matchAll(/self\.__next_f\.push\(\[1,"((?:[^"\\]|\\.)*)"\]\)/g)){try{out+=JSON.parse('"'+m[1]+'"');}catch{}}return out;}
+function jsonObjectAt(text:string,start:number){let depth=0,inStr=false,esc=false;for(let i=start;i<text.length;i++){const c=text[i];if(inStr){if(esc)esc=false;else if(c==='\\')esc=true;else if(c==='"')inStr=false;continue;}if(c==='"')inStr=true;else if(c==='{')depth++;else if(c==='}'){depth--;if(!depth){try{return JSON.parse(text.slice(start,i+1));}catch{return null;}}}}return null;}
+const aaVal=(v:any)=>{const x=String(v??'').trim();return !x||x==='$undefined'||/^n\/a$/i.test(x)||x==='/'?'':x;};
+function parseAgenceAutoDetail(html:string,url:string){
+ const flight=nextFlightText(html);const k=flight.indexOf('"vehicle":{');if(k<0)return null;
+ const v=jsonObjectAt(flight,k+'"vehicle":'.length);if(!v||!v.reference)return null;
+ if(v.isSold||v.isUnavailable||v.isUnderSaleAgreement)return{_sold:1,reference:String(v.reference)};
+ const ch:Record<string,string>={};for(const c of [...(v.characteristics||[]),...(v.historique||[])]){const l=String(c?.label||'').toLowerCase();const val=aaVal(c?.value);if(l&&val&&!ch[l])ch[l]=val;}
+ const o:any={reference:String(v.reference),url,titre:[aaVal(v.title),aaVal(v.subtitle)].filter(Boolean).join(' ').replace(/\s+/g,' ').trim(),etat:v.isNew?'neuf':'occasion'};
+ const price=String(v.price?.total||'').replace(/[^\d]/g,'');if(price)o.prix=price;
+ const ag=v.agency||{};if(aaVal(ag.location))o.ville=aaVal(ag.location);if(aaVal(ag.zipCode))o.code_postal=aaVal(ag.zipCode);
+ o.marque=aaVal(v.make?.name)||ch['marque']||'';if(ch['modèle'])o.modele=ch['modèle'];if(ch['moteur / finition'])o.finition=ch['moteur / finition'];
+ const km=(ch['kilométrage']||v.specs?.mileage||'').replace(/[^\d]/g,'');if(km)o.kilometrage=km;
+ const mec=ch['date de 1ère mise en circulation']||ch['année']||aaVal(v.specs?.year);const y=mec.match(/((?:19|20)\d{2})/);if(y){o.annee=y[1];o.mise_en_circulation=mec;}
+ const fuel=ch['carburant']||aaVal(v.specs?.fuel);if(fuel)o.carburant=fuel;const bv=ch['boîte de vitesse']||aaVal(v.specs?.gearbox);if(bv)o.boite=bv;
+ if(ch['couleur'])o.couleur=ch['couleur'];if(ch['intérieur'])o.sellerie=ch['intérieur'];
+ const din=(ch['puissance din']||'').replace(/[^\d]/g,'');if(din)o.puissance_din=din;const cv=(ch['puissance fiscale']||'').replace(/[^\d]/g,'');if(cv)o.puissance_fiscale=cv;
+ const portes=(ch['nombre de portes']||'').replace(/[^\d]/g,'');if(portes)o.portes=portes;const places=(ch['nombre de places']||'').replace(/[^\d]/g,'');if(places)o.places=places;
+ const crit=(ch['critair']||'').replace(/[^\d]/g,'');if(crit)o.crit_air=crit;
+ if(ch['contrôle technique'])o.controle_technique=ch['contrôle technique'];if(ch["historique d'entretien"])o.entretien=ch["historique d'entretien"];
+ const gar=ch['garantie commerciale']||aaVal(v.guarantee);if(gar)o.garantie=gar;
+ const usage=(ch['type de véhicule']||ch["type d'usage"]||'').toUpperCase();
+ o.type=/MOTO|SCOOTER|QUAD|MTL/.test(usage)?'moto':/CAMPING|VASP/.test(usage)?'camping-car':/^(VU|CTTE|DERIV)/.test(usage)?'utilitaire':'voiture';
+ const equip=(Array.isArray(v.equipment)?v.equipment:[]).map((e:any)=>aaVal(typeof e==='string'?e:(e?.label||e?.name))).filter(Boolean);if(equip.length)o.equipements=equip.join('|');
+ const pres=aaVal(v.presentation).replace(/\r/g,'');o.description=[pres,equip.length?'Équipements : '+equip.join(', ')+'.':''].filter(Boolean).join('\n\n').slice(0,6000);
+ const photos:string[]=[];for(const im of Array.isArray(v.images)?v.images:[]){const u=String(im||'');if(/^https?:\/\//i.test(u)&&!photos.includes(u))photos.push(u);}
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ return o;
+}
+async function readAgenceAuto(url:URL,html:string){
+ const m=url.pathname.match(/^\/([a-z]{2})\/([a-z]{2})\/[a-z]+\/([a-z0-9-]+)/i);
+ let agencyId=url.searchParams.get('agencyId')||'';
+ if(!agencyId&&m&&/\/(agences|agentschap|agenturen|agenzie|agencias|agencies)\//i.test(url.pathname)){
+  let page=html;if(/\.html$/i.test(url.pathname)){({text:page}=await fetchSiteHtml(new URL(`/${m[1]}/${m[2]}/agences/${m[3]}`,url)));}
+  agencyId=page.match(/vehicules\?agencyId=(\d+)/)?.[1]||'';
+ }
+ if(!/^\d+$/.test(agencyId)){const err:any=new Error("C'est le site du réseau L'Agence Automobilière (toutes les agences) : entrez l'adresse de la page de votre agence, par exemple https://agenceauto.com/fr/fr/agences/epone.");err.platform="L'Agence Automobilière (réseau)";throw err;}
+ const base=`/${m?.[1]||'fr'}/${m?.[2]||'fr'}/vehicules`;const links=new Set<string>();
+ for(let page=1;page<=20;page++){
+  const u=new URL(base,url);u.searchParams.set('agencyId',agencyId);if(page>1)u.searchParams.set('page',String(page));
+  const{text}=await fetchSiteHtml(u).catch(e=>{throw Error(`Liste des véhicules illisible (page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
+  const before=links.size;for(const x of text.matchAll(/href="(\/[a-z]{2}\/[a-z]{2}\/agences\/[a-z0-9-]+\/[a-z0-9-]+\.html)"/gi))links.add(new URL(x[1],url).toString());
+  if(links.size===before||!text.includes(`page=${page+1}`))break;
+ }
+ if(!links.size)throw Error("Aucun véhicule trouvé pour cette agence : synchronisation annulée par sécurité.");
+ const list=[...links].slice(0,300);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<list.length){const u=list[i++];const id=u.match(/-([0-9a-f]{10,})\.html$/i)?.[1]||u;
+  try{const{text}=await fetchSiteHtml(new URL(u));const o=parseAgenceAutoDetail(text,u);if(o&&!o._sold)rows.push(o);else if(!o)rows.push({reference:id,url:u});}catch{rows.push({reference:id,url:u});}}}));
  return rows;
 }
 // Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
@@ -505,7 +559,7 @@ function siteLocation(html:string){
  const[postal,city]=best[0].split('|');return{city,postal};
 }
 // Prestataire du site (pour savoir quel connecteur ajouter quand le site n'est pas encore lisible).
-const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo|staticlbi\.com/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\.|media\.apimo\.pro/i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/starterre/i,'Starterre'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
+const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo|staticlbi\.com/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\.|media\.apimo\.pro/i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/starterre/i,'Starterre'],[/agenceauto\.com|agence\.auto\/webgest/i,"L'Agence Automobilière"],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
 function detectSitePlatform(html:string){
  for(const[re,name]of SITE_PROVIDERS)if(re.test(html))return name;
  const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
@@ -558,6 +612,7 @@ async function readFeed(feed:any){
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
+    else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
     else if(isStarterreSite(text)){rows=await readStarterreSite(origin,text);platform='Starterre';}
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);

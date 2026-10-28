@@ -768,3 +768,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - Starterre : titre sans répétition modèle/version (« C3 Aircross BlueHDi… » au lieu de « C3 Aircross Aircross… »).
 - Base : `private.kick_site_auto_review` appelée par `claim_signup_site_import` et `request_site_import` (fichier supabase/2026-10-28-import-site-activation-auto.sql).
 - Test sans écriture sur autoca.fr : Starterre, 31/31 véhicules complets, ville Alès 30100, 13 à 16 photos.
+
+## 28/10/2026 — Connecteur « L'Agence Automobilière » (agenceauto.com) + lecteur générique plus complet — Claude
+- Anthony : sur agenceauto.com le robot lisait 74 véhicules mais 1 photo chacun, « ville manquante », description incomplète.
+- Cause : site Next.js d'un **réseau** (YESCAR, des dizaines d'agences). Les données complètes (toutes les photos, caractéristiques, description, agence) sont dans le bloc de données Next.js de chaque fiche ; le lecteur générique ne lisait que les données Google (1 photo). Rien à voir avec les cookies.
+- `pro-stock-sync` v27 :
+  - Connecteur `readAgenceAuto` : adresse de la page d'une agence (ex. /fr/fr/agences/epone) → stock de cette agence seulement (/fr/fr/vehicules?agencyId=…, toutes les pages), puis chaque fiche (objet « vehicle » : photos, prix, km, mise en circulation, carburant, boîte, couleur, puissances, Crit'Air, garantie, équipements, description, ville et CP de l'agence). Véhicules vendus / sous compromis / indisponibles exclus. Adresse nationale (agenceauto.com) => message : entrez la page de votre agence.
+  - Lecteur générique : quand les données structurées d'une fiche sont maigres (1 photo, description courte), on complète avec la galerie et le texte de la page.
+  - Ville : pour les véhicules, la ville du compte pro écrase celle de l'annonce (garage) ; sans compte pro (aperçu admin), la ville lue sur l'annonce est gardée et celle du site ne sert qu'à combler un manque.

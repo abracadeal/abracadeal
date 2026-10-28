@@ -183,6 +183,8 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
     while(i<detailQ.length&&pages<400&&Date.now()-t0<50000){
       const u=detailQ[i++];if(seenPages.has(u))continue;seenPages.add(u);pages++;
       try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
+        // Données structurées souvent incomplètes (1 photo, pas de description) : on complète avec la lecture de la page.
+        else{const sd=smartDetail(text,url.toString(),sector);if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(sd.photos)>n(o.photos))o.photos=sd.photos;for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).
         if(detailQ.length<40&&text.length<400000)take(text,url);
