@@ -1,0 +1,107 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Abracadeal · Lecteur parallèle</title><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.4"></script><style>
+:root{--bg:#130c1a;--card:#25172e;--card2:#2f1f3a;--line:#4a3656;--txt:#fff;--muted:#cbbbd3;--violet:#e6b8ff;--gold:#f2c46d;--ok:#43ba80;--bad:#f45b73}
+*{box-sizing:border-box}html,body{margin:0;max-width:100%;overflow-x:hidden}
+body{background:var(--bg);color:var(--txt);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+main{max-width:1200px;margin:auto;padding:16px}
+a{color:var(--violet)}
+.back{display:inline-flex;gap:8px;padding:9px 14px;background:#3b2946;color:#fff;border:1px solid #755a85;border-radius:10px;text-decoration:none;font-size:15px}
+h1{color:var(--violet);font-size:24px;margin:16px 0 4px}
+.muted{color:var(--muted)}
+.banner{background:#3a2a12;border:1px solid var(--gold);color:#ffe7b5;padding:12px 14px;border-radius:12px;margin:14px 0;font-size:15px}
+.bar{display:flex;gap:10px;flex-wrap:wrap;background:var(--card);padding:14px;border-radius:14px}
+.bar input{flex:1 1 240px;min-width:0;padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px}
+.btn{padding:12px 18px;border-radius:10px;border:0;background:linear-gradient(135deg,#8c3fd1,#c35bd8);color:#fff;font-weight:700;font-size:16px;cursor:pointer}
+.btn[disabled]{opacity:.6;cursor:wait}
+#status{margin:12px 2px;min-height:22px}
+[hidden]{display:none!important}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin:8px 0 16px}
+.stat{background:var(--card);border-radius:12px;padding:12px}.stat b{display:block;font-size:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.car{background:var(--card);border-radius:14px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;border:1px solid transparent;transition:border-color .15s}
+.car:hover{border-color:var(--violet)}
+.ph{position:relative;aspect-ratio:4/3;background:#1b1124}
+.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.cnt{position:absolute;right:8px;bottom:8px;background:rgba(0,0,0,.7);padding:3px 8px;border-radius:8px;font-size:13px}
+.kind{position:absolute;left:8px;top:8px;background:rgba(19,12,26,.85);padding:3px 8px;border-radius:8px;font-size:12px;text-transform:capitalize}
+.body{padding:12px;display:flex;flex-direction:column;gap:8px;flex:1}
+.ttl{font-weight:600;font-size:15px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.price{color:var(--gold);font-weight:800;font-size:20px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{background:var(--card2);padding:3px 8px;border-radius:999px;font-size:13px;color:var(--muted)}
+.err{border-color:var(--bad)}.err .ttl{color:var(--bad)}
+dialog{width:min(900px,100vw);max-width:100vw;max-height:100dvh;padding:0;border:0;border-radius:16px;background:var(--card);color:#fff}
+dialog::backdrop{background:rgba(0,0,0,.75)}
+.dh{position:sticky;top:0;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:var(--card);border-bottom:1px solid var(--line)}
+.dh b{font-size:16px}.x{background:#3b2946;border:0;color:#fff;font-size:20px;width:40px;height:40px;border-radius:10px;cursor:pointer;flex:none}
+.db{padding:14px}
+.big{aspect-ratio:4/3;background:#000;border-radius:12px;overflow:hidden}.big img{width:100%;height:100%;object-fit:contain}
+.thumbs{display:flex;gap:6px;overflow-x:auto;padding:8px 0}.thumbs img{width:76px;height:57px;object-fit:cover;border-radius:6px;cursor:pointer;opacity:.6;flex:none}.thumbs img.on{opacity:1;outline:2px solid var(--violet)}
+table{width:100%;border-collapse:collapse;margin:10px 0}td{padding:8px;border-bottom:1px solid var(--line);font-size:15px}td:first-child{color:var(--muted);width:45%}
+.desc{white-space:pre-line;background:#1b1124;padding:12px;border-radius:10px;font-size:14px;color:#e8dcef;max-height:320px;overflow:auto}
+@media (max-width:520px){main{padding:12px}h1{font-size:20px}.grid{grid-template-columns:1fr}dialog{border-radius:0;height:100dvh}}
+
+h2.sec{font-size:18px;color:var(--violet);margin:26px 0 10px}
+select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px}
+.reqs{display:grid;gap:12px}
+.req{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--line)}
+.req.pending{border-color:var(--gold)}
+.req-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
+.req h3{margin:0;font-size:17px}
+.st{display:inline-block;padding:3px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.st.pending{background:#4a3a14;color:#ffe7b5}.st.on{background:#183d2c;color:#9ff0c6}.st.off{background:#3b2946;color:var(--muted)}.st.rej{background:#4a1d27;color:#ffb3c0}
+.meta{margin:8px 0;font-size:14px;color:var(--muted);display:grid;gap:3px;word-break:break-word}
+.meta b{color:#fff;font-weight:600}
+.warn{background:#3a1d24;border-radius:10px;padding:8px 10px;color:#ffc2cd;font-size:14px;margin:8px 0;word-break:break-word}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.sbtn{padding:10px 14px;border-radius:10px;border:1px solid var(--line);background:#3b2946;color:#fff;font-weight:600;font-size:15px;cursor:pointer}
+.sbtn.ok{background:#1f6b48;border-color:#2e8a5f}.sbtn.no{background:#5a2330;border-color:#7a3141}
+.sbtn[disabled]{opacity:.6;cursor:wait}
+.empty{background:var(--card);border-radius:14px;padding:16px;color:var(--muted)}
+.errline{color:var(--bad);font-size:13px}
+</style></head><body><main><a class="back" href="index.html#accountModal">← Retour à Admin</a>
+<h1>Lecteur parallèle · Test de sites</h1><p class="muted">Ce lecteur est indépendant du lecteur habituel. Aperçu uniquement : aucune annonce n’est importée ou modifiée.</p><a href="admin-test-import.html">Ouvrir le lecteur habituel</a>
+<div id="app" hidden><h2 class="sec">Tester une adresse</h2><form class="bar" id="form"><input id="url" type="url" placeholder="https://site-du-professionnel.fr" value="https://www.eraimmobilier.com/achat/provence-alpes-cote-dazur-17/alpes-maritimes-10/cannes-6465" required><select class="sel" id="sector"><option value="immobilier">Immobilier</option><option value="vehicules">Auto / Moto</option></select><button class="btn" id="go">Lire le site</button></form><h2 class="sec" id="resTitle" hidden>Aperçu</h2><p id="status" role="status" aria-live="polite"></p><div class="stats" id="stats" hidden></div><div class="grid" id="grid"></div></div><p id="gate">Vérification des droits…</p></main>
+<dialog id="dlg"><div class="dh"><b id="dt"></b><button class="x" id="dx" aria-label="Fermer">×</button></div><div class="db" id="db"></div></dialog>
+<script>
+const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+const E=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):null};
+const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
+const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
+const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
+let ROWS=[],NORM=[];
+const safeHttp=value=>{try{const u=new URL(value);return ['https:','http:'].includes(u.protocol)&&!u.username&&!u.password?u.toString():''}catch{return''}};
+async function init(){const{data:{user}}=await sb.auth.getUser();if(!user){E('gate').innerHTML='Connectez-vous sur <a href="index.html#accountModal">Abracadeal</a> avec votre compte administrateur, puis revenez ici.';return}const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}E('gate').hidden=true;E('app').hidden=false;}
+async function load(ev){ev.preventDefault();const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=false;E('status').textContent='Lecture en cours… Cela peut prendre jusqu’à deux minutes.';try{const{data,error}=await sb.functions.invoke('site-reader-preview',{body:{action:'preview_url',url:E('url').value.trim(),sector:E('sector').value}});if(error){let msg='Lecture impossible.';try{const result=await error.context.json();msg=result.error||msg}catch{}throw Error(msg)}if(!data?.ok)throw Error(data?.error||'Lecture impossible');ROWS=(data.raw||[]).map(r=>({...r,url:safeHttp(r.url||''),photos:String(r.photos||'').split('|').map(safeHttp).filter(Boolean).join('|')}));NORM=data.rows||[];render(data,E('sector').value);if(data.connector_id)E('status').append(document.createTextNode(' · Lecteur : '+data.platform));}catch(error){E('status').textContent=error.message||'Lecture impossible.'}finally{btn.disabled=false}}
+function render(data,sector){
+ const immo=sector==='immobilier';
+ const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
+ const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:Number(r.source_photo_count||0)),0);
+ E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">lecture partielle (site très grand)</span>':'');
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],[data.preview_only?'Fiches lisibles':'Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ if(data.photos_withheld)E('status').innerHTML+=' · Aperçu uniquement : '+ROWS.length+' fiches sur '+esc(data.source_total??'?')+' annoncées. Photos repérées, sans téléchargement ni import.';
+ if(data.reader_used==='secondary')E('status').innerHTML+=' · Lecteur de secours : couverture partielle, vérification nécessaire.';
+ E('stats').hidden=false;
+ E('grid').innerHTML=ROWS.map((r,i)=>{
+  const errs=(NORM[i]?.errors||[]);
+  if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
+  const ph=r.photos?String(r.photos).split('|'):[];
+  const photoLabel=ph.length?ph.length+' photos':Number(r.source_photo_count||0)+' photos repérées';
+  const chips=(immo?[r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
+  return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+esc(photoLabel)+'</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
+ }).join('');
+}
+function openCar(i){
+ const r=ROWS[i];if(!r||!r.titre)return;const ph=r.photos?String(r.photos).split('|'):[];
+ E('dt').textContent=euro(r.prix);
+ const rows=[['Marque',r.marque],['Modèle',r.modele],['Finition',r.finition],['Catégorie',r.carrosserie],['Mise en circulation',r.mise_en_circulation],['Kilométrage',km(r.kilometrage)],['Énergie',r.carburant],['Boîte',r.boite],['Puissance',r.puissance_din],['Puissance fiscale',r.puissance_fiscale],['CO2',r.co2],['Portes',r.portes],['Couleur',r.couleur],['Garantie',r.garantie],['Type de bien',r.type_bien],['Transaction',r.transaction],['Ville',r.ville],['Code postal',r.code_postal],['Surface',r.surface],['Pièces',r.pieces],['Chambres',r.chambres],['Référence',r.reference]].filter(x=>x[1]);
+ E('db').innerHTML='<h2 style="margin:0 0 10px;font-size:18px">'+esc(r.titre)+'</h2>'+(ph.length?'<div class="big"><img id="bigimg" src="'+esc(ph[0])+'" alt=""></div><div class="thumbs">'+ph.map((u,k)=>'<img loading="lazy" data-k="'+k+'" class="'+(k?'':'on')+'" src="'+esc(u)+'" alt="">').join('')+'</div><p class="muted" style="margin:0">'+ph.length+' photos</p>':'<p class="muted">Aucune photo trouvée</p>')+'<table>'+rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('')+'</table>'+(r.description?'<h3 style="font-size:16px">Description</h3><div class="desc">'+esc(r.description)+'</div>':'')+(r.url?'<p><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Voir la fiche sur le site du pro</a></p>':'');
+ E('dlg').showModal();E('dlg').scrollTop=0;
+}
+
+E('form').addEventListener('submit',load);
+E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');if(c)openCar(Number(c.dataset.i))});
+E('db').addEventListener('click',e=>{const t=e.target.closest('.thumbs img');if(!t)return;E('bigimg').src=t.src;E('db').querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t))});
+E('dx').addEventListener('click',()=>E('dlg').close());
+E('dlg').addEventListener('click',e=>{if(e.target===E('dlg'))E('dlg').close()});init();
+</script></body></html>
