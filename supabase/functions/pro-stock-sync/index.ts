@@ -205,6 +205,45 @@ async function readWooSite(origin:URL){
   rows.push(o);}}));
  return rows;
 }
+// Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
+// puis chaque fiche, dont toutes les données sont dans l'attribut data-estate (JSON).
+const ORPI_ENERGY=['','A','B','C','D','E','F','G'];
+function orpiAgencySlug(u:URL){if(!/(^|\.)orpi\.com$/i.test(u.hostname))return null;const s=u.pathname.split('/').filter(Boolean)[0]||'';return /^[a-z0-9-]{2,60}$/i.test(s)&&!/^(annonce|acheter|louer|vendre|estimer|agences?|recherche)/i.test(s)?s:null;}
+function parseOrpiEstate(html:string,url:string){
+ const raw=html.match(/data-estate="([^"]*)"/)?.[1];if(!raw)return null;
+ let e:any;try{e=JSON.parse(decodeEntities(raw));}catch{return null;}
+ if(!e||e.sold||e.enabled===false)return null;
+ const o:any={reference:String(e.reference||e.id||''),url,titre:decodeEntities(String(e.seo?.metaTitle||e.title||'')).replace(/\s*\|\s*Orpi\s*$/i,'').replace(/,\s*[\d\s\u00a0\u202f.]+€\s*$/,'').replace(/(\d)?\s+m²/,(m:string,d:string)=>d?m:'').replace(/\s{2,}/g,' ').trim()};
+ if(Number(e.price)>0)o.prix=String(Math.round(Number(e.price)));
+ o.transaction=/rent|location|louer/i.test(String(e.transaction||''))?'location':'vente';
+ const t=String(e.type||'').toLowerCase();o.type_bien=/stationnement|parking|garage|box/.test(t)?'parking':/terrain/.test(t)?'terrain':/maison|villa/.test(t)?'maison':/local|bureau|commerce/.test(t)?'bureau':t||'appartement';
+ if(e.city?.name)o.ville=decodeEntities(String(e.city.name));if(e.zipCode||e.zipcode)o.code_postal=String(e.zipCode||e.zipcode);
+ if(e.surface)o.surface=String(e.surface);if(e.nbRooms)o.pieces=String(e.nbRooms);if(e.nbBedrooms)o.chambres=String(e.nbBedrooms);if(e.nbWashrooms)o.salles_de_bain=String(e.nbWashrooms);
+ if(e.story!=null&&e.story!=='')o.etage=String(e.story);
+ if(e.dpeDisplay!==false){const c=ORPI_ENERGY[Number(e.consumptionIndex)||0],g=ORPI_ENERGY[Number(e.emissionIndex)||0];if(c&&g){o.dpe=c;o.ges=g;}if(e.consumptionValue)o.consommation_energie=String(e.consumptionValue);if(e.energyMin)o.cout_energie_min=String(e.energyMin);if(e.energyMax)o.cout_energie_max=String(e.energyMax);if(e.dpeDate)o.date_dpe=String(e.dpeDate).slice(0,10);}
+ if(e.fees)o.honoraires=decodeEntities(String(e.fees));if(e.condoCharge&&o.transaction==='vente')o.charges_annuelles=String(e.condoCharge);
+ const feats=[e.elevator&&'Ascenseur',e.garage&&'Garage',e.nbParkingSpaces&&'Parking',e.cellar&&'Cave',e.terrace&&'Terrasse',e.balcony&&'Balcon',e.garden&&'Jardin',e.swimmingPool&&'Piscine',e.disabledAccess&&'Accès handicapé'].filter(Boolean);if(feats.length)o.prestations=feats.join('|');
+ if(e.longAd)o.description=decodeEntities(String(e.longAd)).replace(/\r/g,'').slice(0,6000);
+ const photos:string[]=[];for(const u of [...(e.imagesFull||[]),...(e.images||[])]){const x=decodeEntities(String(u||''));if(/^https?:\/\//i.test(x)){const id=x.split('?')[0];if(!photos.some(p=>p.split('?')[0]===id))photos.push(x);}}
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ return o.reference&&o.titre?o:null;
+}
+async function readOrpiAgency(origin:URL,slug:string){
+ const links=new Map<string,string>();
+ for(const listPath of [`/${slug}/acheter`,`/${slug}/louer/biens-en-location`]){
+  for(let page=1;page<=20;page++){
+   const u=new URL(listPath,origin);if(page>1)u.searchParams.set('page',String(page));
+   const{text}=await fetchSiteHtml(u).catch(e=>{throw Error(`Liste des biens illisible (${listPath}, page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
+   const before=links.size;
+   for(const m of text.matchAll(/href="(\/annonce-[a-z0-9-]+-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?[^"]*)"/gi)){if(!links.has(m[2]))links.set(m[2],new URL(decodeEntities(m[1]),origin).toString());}
+   if(links.size===before)break;
+  }
+ }
+ if(!links.size)throw Error('Aucun bien trouvé sur la page de l\'agence Orpi : synchronisation annulée par sécurité.');
+ const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
+ return rows;
+}
 // Autres sites (garages ou agences) : lecture des « données structurées » (schema.org JSON-LD : Car, Vehicle, Product,
 // RealEstateListing, Apartment, House…)
 // que la plupart des sites publient pour Google. Pages trouvées via le sitemap et les liens de la page d'accueil.
@@ -296,7 +335,7 @@ async function readGenericSite(origin:URL,homeHtml:string,sector='vehicules'){
  return rows;
 }
 // Prestataire du site (pour savoir quel connecteur ajouter quand le site n'est pas encore lisible).
-const SITE_PROVIDERS:[RegExp,string][]=[[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\./i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
+const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\./i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
 function detectSitePlatform(html:string){
  for(const[re,name]of SITE_PROVIDERS)if(re.test(html))return name;
  const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
@@ -335,7 +374,9 @@ async function readFeed(feed:any){
   if(ct.includes('html')||/^\s*<(?:!doctype html|html)/i.test(text)){
     // Adresse d'un site de garage (pas d'un flux) : on choisit le lecteur selon le type de site.
     const origin=new URL(url.origin);let rows:any[];let platform:string;
-    if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    const orpiSlug=orpiAgencySlug(url)||orpiAgencySlug(new URL(String(feed.feed_url)));
+    if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';}
+    else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else{platform=detectSitePlatform(text);
       try{rows=await readGenericSite(origin,text,feed.sector);platform+=' · données structurées';}

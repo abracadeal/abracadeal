@@ -710,3 +710,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Dessous :** Tableau de bord et Base de données en cartes homogènes (titres lisibles, bouton Actualiser en icône, encart « Gains… / tableau de bord financier » masqué dans ce menu car doublon de la tuile Finances).
 - **Corrigé :** titre « Tableau de bord Abracadeal » → « Tableau de bord » ; pastille « Sur devis (+200) » → « (+100) » dans le HTML (formule 200 supprimée).
 - Fichiers : `index.html` (menu), `assets/admin-mobile-merge-20261028.js/.css` v=2. Vérifié en capture d'écran mobile (390 px).
+
+## 28/10/2026 — Connecteur Orpi (pages agence) — Claude
+- `pro-stock-sync` v21 : les adresses `orpi.com/<agence>` sont lues directement (listes « acheter » + « louer », puis chaque fiche via l'attribut `data-estate`).
+- Champs repris : titre, prix, vente/location, type de bien, ville, CP, surface, pièces, chambres, SDB, étage, DPE/GES (si les deux sont présents), honoraires, charges, prestations, description, toutes les photos (45 max).
+- Test : Ag Immo Les Mimosas (orpi.com/agimmo) → 102 biens (90 ventes, 12 locations) en ~21 s.
+- Détection du prestataire étendue aux réseaux (Orpi, Century 21, Laforêt, Guy Hoquet, Stéphane Plaza, Nestenn, Foncia, SweepBright).
+- Fonction de test `aa-site-preview-tmp` désactivée (réponse 410), à supprimer depuis le tableau de bord.
