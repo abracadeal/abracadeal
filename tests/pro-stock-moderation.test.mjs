@@ -27,7 +27,7 @@ function harness({existing=null,apiFailure=false}={}){
   calls.push({url,body:JSON.parse(opts.body),headers:opts.headers});
   return Response.json(apiFailure?{ok:false,status:'pending',ai_checked:false,ai_error:'OpenAI unavailable'}:{ok:true,status:'pending',ai_checked:true});
  },crypto:webcrypto,TextEncoder,Response,Request,URL,AbortController,AbortSignal,DOMException,btoa,setTimeout,clearTimeout,console:{error(){},warn(){}}});
- vm.runInContext(stripTypeScriptTypes(source.replace(/^import[^\n]+\n/,'')),context);
+ vm.runInContext(stripTypeScriptTypes(source.replace(/^import[^\n]+\n/gm,'')),context);
  return {context,writes,calls,get handler(){return handler}};
 }
 const feed={id:'feed',owner_id:'owner',sector:'vehicules',sync_mode:'upsert'};
@@ -80,3 +80,4 @@ test('flux inchangé : pas de réécriture ni de remise en attente à chaque pol
  const changed=harness({existing:{...existing,title:'Titre changé'}});changed.context.feed=feed;changed.context.rows=[raw];
  const result2=await vm.runInContext('sync(feed,rows)',changed.context);assert.equal(result2.unchanged,0);assert.equal(changed.calls.length,1);
 });
+
