@@ -5,7 +5,7 @@ import {stripTypeScriptTypes} from 'node:module';
 import vm from 'node:vm';
 import {webcrypto} from 'node:crypto';
 const source=readFileSync(new URL('../supabase/functions/pro-stock-sync/index.ts',import.meta.url),'utf8');
-function harness({existing=null,apiFailure=false}={}){
+function harness({existing=null,apiFailure=false,existingByUrl=false}={}){
  const writes=[],calls=[];let handler;let photoState=existing?.listing_photos||[];
  const admin={auth:{admin:{getUserById:async()=>({data:{user:{email:'test@example.test'}}})}},from(table){
   let op='select',payload,filters=[];
@@ -14,7 +14,7 @@ function harness({existing=null,apiFailure=false}={}){
    if(op!=='select')writes.push({table,op,payload});
    let data=null;
    if(table==='pro_stock_sync_runs')data={id:'run'};
-   if(table==='listings')data=op==='select'?existing:{id:existing?.id||'new-listing',photo_limit:3};
+   if(table==='listings')data=op==='select'?(existingByUrl&&filters.some(([k])=>k==='external_id')?null:existing):{id:existing?.id||'new-listing',photo_limit:3};
    if(table==='listing_photos'){if(op==='insert')photoState=payload.map((p,i)=>({...p,id:'photo-'+i}));if(op==='delete')photoState=[];data=photoState;}
    if(table==='profiles')data={phone:null};
    if(table==='integration_secrets')data={secret_value:'fake-secret'};
@@ -27,7 +27,7 @@ function harness({existing=null,apiFailure=false}={}){
   calls.push({url,body:JSON.parse(opts.body),headers:opts.headers});
   return Response.json(apiFailure?{ok:false,status:'pending',ai_checked:false,ai_error:'OpenAI unavailable'}:{ok:true,status:'pending',ai_checked:true});
  },crypto:webcrypto,TextEncoder,Response,Request,URL,AbortController,AbortSignal,DOMException,btoa,setTimeout,clearTimeout,console:{error(){},warn(){}}});
- vm.runInContext(stripTypeScriptTypes(source.replace(/^import[^\n]+\n/,'')),context);
+ vm.runInContext(stripTypeScriptTypes(source.replace(/^import[^\n]+\n/gm,'')),context);
  return {context,writes,calls,get handler(){return handler}};
 }
 const feed={id:'feed',owner_id:'owner',sector:'vehicules',sync_mode:'upsert'};
@@ -79,4 +79,22 @@ test('flux inchangé : pas de réécriture ni de remise en attente à chaque pol
  assert.equal(result.unchanged,1);assert.equal(next.calls.length,0);assert.ok(next.writes.every(w=>!['listings','listing_photos'].includes(w.table)));
  const changed=harness({existing:{...existing,title:'Titre changé'}});changed.context.feed=feed;changed.context.rows=[raw];
  const result2=await vm.runInContext('sync(feed,rows)',changed.context);assert.equal(result2.unchanged,0);assert.equal(changed.calls.length,1);
+});
+
+
+test('lecteur de secours : aucun archivage sur une lecture partielle',async()=>{
+ const h=harness();h.context.feed={...feed,sync_mode:'full'};
+ h.context.rows=[raw];h.context.rows.partial=true;h.context.rows.reader_used='secondary';
+ const result=await vm.runInContext('sync(feed,rows)',h.context);
+ assert.equal(result.archived,0);assert.equal(result.archive_skipped,'lecture partielle du site');
+ assert.equal(result.reader_used,'secondary');
+ assert.ok(!h.writes.some(w=>w.table==='listings'&&w.payload?.status==='archived'));
+});
+test('changement de lecteur : la même URL conserve la référence et met à jour au lieu de créer',async()=>{
+ const h=harness({existing:{id:'old-listing',external_id:'original-reference',status:'active',photo_limit:3},existingByUrl:true});
+ h.context.feed=feed;h.context.rows=[{...raw,reference:'fallback-reference',url:'https://garage.test/annonce/42'}];
+ const result=await vm.runInContext('sync(feed,rows)',h.context);
+ assert.equal(result.created,0);assert.equal(result.updated,1);
+ const write=h.writes.find(w=>w.table==='listings');
+ assert.equal(write.op,'update');assert.equal(write.payload.external_id,'original-reference');
 });
