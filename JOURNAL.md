@@ -776,3 +776,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - Connecteur `readAgenceAuto` : adresse de la page d'une agence (ex. /fr/fr/agences/epone) → stock de cette agence seulement (/fr/fr/vehicules?agencyId=…, toutes les pages), puis chaque fiche (objet « vehicle » : photos, prix, km, mise en circulation, carburant, boîte, couleur, puissances, Crit'Air, garantie, équipements, description, ville et CP de l'agence). Véhicules vendus / sous compromis / indisponibles exclus. Adresse nationale (agenceauto.com) => message : entrez la page de votre agence.
   - Lecteur générique : quand les données structurées d'une fiche sont maigres (1 photo, description courte), on complète avec la galerie et le texte de la page.
   - Ville : pour les véhicules, la ville du compte pro écrase celle de l'annonce (garage) ; sans compte pro (aperçu admin), la ville lue sur l'annonce est gardée et celle du site ne sert qu'à combler un manque.
+
+## 2026-10-28 — Robot de lecture : photos, année, caractéristiques WooCommerce (pro-stock-sync v29)
+- Photos : les variantes de taille d'une même photo (dossiers « 1200xauto », « gallery_625x470 », « large »…) sont regroupées ; on garde la galerie de l'annonce en grand format, sans les vignettes des « véhicules similaires ». Corrige les sites Dealer K et RCM qui ne donnaient qu'une photo.
+- Année : dates au format « 23-11-2020 » ou « 2020-11-23 » après « Mise en circulation », « MEC », « 1ère immatriculation ».
+- WooCommerce : lecture des attributs produit (marque, énergie, boîte, mise en circulation, kilométrage, couleur, puissance, portes, places).

@@ -200,6 +200,12 @@ async function readWooSite(origin:URL){
   if(raw>0)o.prix=String(Math.round(raw/10**minor));
   const brand=(p.brands||[])[0]?.name||(p.categories||[]).map((c:any)=>c.name).find((n:string)=>!/^(disponibles?|vendus?|sold|non class)/i.test(n));if(brand)o.marque=decodeEntities(brand);
   const desc=aaClean(String(p.description||p.short_description||'').replace(/<\/p>/gi,'\n'));if(desc)o.description=desc.slice(0,6000);
+  // Attributs WooCommerce (Marque, Énergie, Boîte, Mise en circulation, Kilométrage, Couleur…).
+  for(const at of Array.isArray(p.attributes)?p.attributes:[]){const n=norm(at?.name);const v=decodeEntities(String((at?.terms||[]).map((t:any)=>t?.name).filter(Boolean).join(', '))).trim();if(!v)continue;
+   if(/marque|brand/.test(n))o.marque=v;else if(/modele|model/.test(n))o.modele=v;else if(/energie|carburant|fuel/.test(n))o.carburant=v;else if(/boite|transmission/.test(n))o.boite=v;else if(/couleur|color/.test(n))o.couleur=v;
+   else if(/circulation|immatriculation|annee|year/.test(n)){const y=v.match(/((?:19|20)\d{2})/);if(y){o.annee=y[1];o.mise_en_circulation=v;}}
+   else if(/kilometrage|km|mileage/.test(n)&&/^\d[\d\s.]*$/.test(v))o.kilometrage=v.replace(/\D/g,'');
+   else if(/puissance_fiscale|cv_fiscaux/.test(n))o.puissance_fiscale=v.replace(/\D/g,'');else if(/puissance|ch_din/.test(n))o.puissance_din=v.replace(/[^\d]/g,'');else if(/portes/.test(n))o.portes=v.replace(/\D/g,'');else if(/places/.test(n))o.places=v.replace(/\D/g,'');}
   const photos:string[]=[];for(const im of p.images||[]){const u=String(im?.src||'');if(/^https?:\/\//i.test(u)&&!photos.includes(u))photos.push(u);}
   if(photos.length)o.photos=photos.slice(0,45).join('|');
   if(/\b(sprinter|vito|transporter|trafic|master|jumper|boxer|ducato|fourgon|utilitaire)\b/i.test(o.titre))o.type='utilitaire';

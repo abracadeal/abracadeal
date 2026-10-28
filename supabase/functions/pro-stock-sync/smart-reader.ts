@@ -41,18 +41,28 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
   for(const m of html.matchAll(/(?:src|data-src|data-lazy|data-original|data-full|data-zoom-image|data-image|data-big|data-large|href|content)=["']([^"']+\.(?:jpe?g|png|webp|avif)(?:\?[^"']*)?)["']/gi))add(m[1]);
   for(const m of html.matchAll(/srcset=["']([^"']+)["']/gi)){const parts=m[1].split(',').map(x=>x.trim().split(/\s+/)[0]);add(parts[parts.length-1]);}
   if(!all.length)return[];
-  // Les variantes de taille (« 1200xauto », « -300x200 », « thumb »…) comptent comme la même photo et le même dossier.
-  const sizeless=(u:string)=>u.split('?')[0].replace(/\/\d{2,4}x(?:\d{2,4}|auto)(?=\/)/gi,'').replace(/\/(?:thumbs?|small|medium|large|mini|xs|sm|md|lg)(?=\/)/gi,'');
+  // Les variantes de taille comptent comme la même photo : dossiers « 1200xauto », « 800x0 », « gallery_625x470 », « large »,
+  // ou suffixes « -300x200 » dans le nom du fichier.
+  const SIZE_SEG=/\/(?:[a-z]+_)?\d{1,4}x(?:\d{1,4}|auto)(?=\/)|\/(?:thumbs?|small|medium|large|big|mini|xs|sm|md|lg|xl|xlarge|full|original|zoom)(?=\/)/gi;
+  const sizeless=(u:string)=>u.split('?')[0].replace(SIZE_SEG,'');
   const key=(u:string)=>{const b=sizeless(u).split('/').pop()||'';return b.replace(/\.\w+$/,'').length>=8?b.replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,''):sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,'');};
+  const rawDir=(u:string)=>u.split('?')[0].replace(/\/[^/]*$/,'');
   const dir=(u:string)=>sizeless(u).replace(/\/[^/]*$/,'');
-  // Groupe principal : dossier de l'image de partage, ou dossier le plus fourni, ou fichiers portant la référence.
-  const counts=new Map<string,number>();for(const u of all)counts.set(dir(u),(counts.get(dir(u))||0)+1);
+  const sizeOf=(u:string)=>{const p=u.split('?')[0];const m=p.match(/(\d{1,4})x(\d{1,4}|auto)(?=[\/._-])/i);if(m)return Math.max(Number(m[1])||0,m[2]==='auto'?Number(m[1])||0:Number(m[2])||0)||1;if(/\/(original|full|zoom|xlarge|xl|big|large)\//i.test(p))return 2000;if(/thumb|small|mini|list_/i.test(p))return 1;return 1500;};
+  // Famille principale : celle de l'image de partage, sinon la plus fournie (ou les fichiers portant la référence).
+  const fam=new Map<string,number>();for(const u of all)fam.set(dir(u),(fam.get(dir(u))||0)+1);
   const ogDir=ogs.length?dir(new URL(ogs[0],base).toString()):'';
-  let mainDir=ogDir&&counts.get(ogDir)?ogDir:[...counts.entries()].sort((a,b)=>b[1]-a[1])[0][0];
+  const mainDir=ogDir&&(fam.get(ogDir)||0)>=2?ogDir:[...fam.entries()].sort((a,b)=>b[1]-a[1])[0][0];
+  const inFam=all.filter(u=>dir(u)===mainDir);
+  // Dans la famille, le dossier de la plus grande taille qui contient plusieurs photos (la galerie de l'annonce,
+  // pas les vignettes des « véhicules similaires »).
+  const groups=new Map<string,{n:Set<string>,size:number}>();for(const u of inFam){const g=groups.get(rawDir(u))||{n:new Set<string>(),size:0};g.n.add(key(u));g.size=Math.max(g.size,sizeOf(u));groups.set(rawDir(u),g);}
+  const maxN=Math.max(...[...groups.values()].map(g=>g.n.size));
+  const best=[...groups.entries()].filter(([,g])=>g.n.size>=Math.max(2,Math.ceil(maxN*0.5))).sort((a,b)=>b[1].size-a[1].size||b[1].n.size-a[1].n.size)[0];
+  const keep=best&&groups.size>1?new Set(best[1].n):null;
   const refOk=ref&&ref.length>=4;
-  const chosen=all.filter(u=>dir(u)===mainDir||(refOk&&u.split('?')[0].includes(ref)));
+  const chosen=all.filter(u=>(dir(u)===mainDir&&(!keep||keep.has(key(u))))||(refOk&&u.split('?')[0].includes(ref)));
   const out:string[]=[];const seen=new Set<string>();
-  const sizeOf=(u:string)=>{const m=u.match(/\/(\d{2,4})x(?:\d{2,4}|auto)\//i)||u.match(/[-_](\d{2,4})x\d{2,4}(?=\.\w+$)/i);return m?Number(m[1]):(/thumb|small|mini/i.test(u)?1:5000);};
   const pos=new Map<string,number>();
   for(const u of chosen){const k=key(u);if(seen.has(k)){const i=pos.get(k)!;if(sizeOf(u)>sizeOf(out[i])||(out[i].includes('?')&&!u.includes('?')))out[i]=u;continue;}seen.add(k);pos.set(k,out.length);out.push(u);}
   // Préfère la version sans paramètres de redimensionnement quand elle existe.
@@ -138,7 +148,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const all=head+' \n'+text.slice(0,6000);
     const km=all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})/i)||all.match(/(?<![\p{L}\d][\s\u00a0.]?)(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})\s*km\b/iu);
     if(km)o.kilometrage=km[1].replace(/[\s.\u00a0]/g,'');
-    const y=all.match(/(?:ann[ée]e|mise en circulation|\bMEC\b|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}\/)?((?:19[5-9]|20[0-3])\d)\b/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
+    const y=all.match(/(?:ann[ée]e|mise en (?:circulation|service)|\bMEC\b|1[èe]re immatriculation|immatricul[ée]e? le|date d'immatriculation|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}[\/.\-]){0,2}((?:19[5-9]|20[0-3])\d)\b/i)||all.match(/(?:mise en circulation|immatricul\w*|\bMEC\b)[^0-9]{0,30}((?:19[5-9]|20[0-3])\d)-\d{2}-\d{2}/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
     for(const [re,v] of FUEL)if(re.test(all)){o.carburant=v;break;}
     if(/bo[iî]te\s*(?:de vitesses?\s*)?:?\s*auto|automatique|\bBVA\b|\bDSG\b|\bEAT\d/i.test(all))o.boite='automatique';else if(/manuelle|\bBVM\b|m[ée]canique/i.test(all))o.boite='manuelle';
     const ch=all.match(/(\d{2,4})\s*(?:ch|cv din)\b/i);if(ch)o.puissance_din=ch[1];
