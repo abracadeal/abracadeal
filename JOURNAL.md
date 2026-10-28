@@ -797,3 +797,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Espace Pro (`index.html`, `assets/index-main.js` v=20261029-page-pro) :** encadré « Stock synchronisé avec votre site » (adresse, dernière mise à jour, « rien à gérer ici ») ou « reprise en préparation » ; encadré « Votre page sur Google » avec le lien et « Copier le lien ». La gestion manuelle (Mes annonces, Importer mon stock) reste disponible au cas où.
 - Testé hors ligne avec des données d'exemple (garage + agence) : pages, annuaires, sitemap et registre générés, rendu vérifié à 390 px.
 - **Corrigé le jour même :** l'étape « Publier » du workflow échouait tant qu'aucun dossier garage/immo/professionnel n'existe (0 pro en ligne) ; ces dossiers ne sont ajoutés que s'ils existent. Workflow vérifié en succès.
+
+## 29/10/2026 — Robot de lecture v30 : photos Annonces-Automobile + photo obligatoire — Claude
+- **Signalé par Anthony :** deux sites Annonces-Automobile testés : véhicules lus et « prêts à publier », mais 0 photo.
+- **Corrigé :** les photos AA sont lues dans la galerie de la fiche (#sliderdetail, avant la description) quel que soit l'hôte ou le dossier (big / intermediate / small regroupées par numéro, la plus grande gardée ; liens sans « https: » acceptés) ; repli sur toutes les photos rivamedia de la page (hors similaires), puis og:image.
+- **Règle :** une annonce sans photo est en erreur « aucune photo » (véhicules et immobilier) : jamais créée, et plus comptée « prête à publier » dans l'aperçu.
+- **Déploiement v30 (nouveau mode) :** la fonction déployée `pro-stock-sync` ne contient qu'un import du code du dépôt figé par commit (`raw.githubusercontent.com/abracadeal/abracadeal/<commit>/supabase/functions/pro-stock-sync/index.ts`, qui charge `smart-reader.ts` à côté). Pour une nouvelle version : pousser le code, puis redéployer ce petit fichier avec le nouveau numéro de commit (commit actuel f7761a55).
+- **Vérifié après déploiement :** la fonction démarre (401 sans connexion) ; test sans écriture `auto_review_dry` sur lifecars.fr : 49/49 véhicules complets, 30,5 photos en moyenne, ville Mouans-Sartoux 06370.
