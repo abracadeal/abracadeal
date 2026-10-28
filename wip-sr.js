@@ -119,37 +119,39 @@ var SR = (() => {
     return out.map((u) => /[?&](w|h|width|height|fit|size|resize)=/i.test(u) && chosen.some((c) => c === u.split("?")[0]) ? u.split("?")[0] : u).slice(0, 45);
   }
   function longestText(html) {
-    const body = html.replace(/<(script|style|svg|noscript|nav|header|footer|form|select|button)[\s\S]*?<\/\1>/gi, " ");
+    const body = html.replace(/<(script|style|svg|noscript|nav|header|footer|form|select|button)\b[\s\S]*?<\/\1>/gi, " ");
     let best = "";
-    for (const m of body.matchAll(/<(p|div|section|article|span|td)[^>]*>((?:(?!<\/?(?:div|section|article|table|ul|ol)\b)[\s\S]){120,8000}?)<\/\1>/gi)) {
-      const t = clean(m[2]);
+    for (const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)) {
+      if (chunk.length < 120) continue;
+      const t = clean(chunk);
       if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200))) best = t;
     }
     return best.slice(0, 6e3);
   }
   const FUEL = [[/hybride rechargeable|plug-?in/i, "hybride rechargeable"], [/hybride/i, "hybride"], [/[ée]lectrique/i, "\xE9lectrique"], [/diesel|gazole|hdi|tdi|dci|crdi|bluehdi/i, "diesel"], [/essence|tsi|tfsi|puretech|vti/i, "essence"], [/gpl/i, "gpl"]];
-  function smartDetail(html, pageUrl, sector) {
+  function smartDetail(rawHtml, pageUrl, sector) {
     const base = new URL(pageUrl);
     const immo = sector === "immobilier";
-    if (/<meta[^>]+robots[^>]+noindex/i.test(html) && !/(€|eur)/i.test(html)) return null;
+    const html = rawHtml.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi, " ").replace(/<(style|svg)\b[\s\S]*?<\/\1>/gi, " ").slice(0, 6e5);
+    const dataHtml = rawHtml.length > 15e5 ? rawHtml.slice(0, 15e5) : rawHtml;
     const ogTitle = metaAll(html, "og:title")[0] || "";
     const h1 = clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "");
     const docTitle = clean(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "");
     let titre = (h1 && h1.length >= 6 && h1.length <= 160 ? h1 : "") || ogTitle || docTitle;
     titre = titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/, (m) => /€|\d/.test(m) ? m : "").replace(/\s+/g, " ").trim();
     if (!titre) return null;
-    const text = clean(html.replace(/<(script|style|svg|noscript)[\s\S]*?<\/\1>/gi, " ").replace(/<(nav|header|footer)[\s\S]*?<\/\1>/gi, " "));
+    const text = clean(html.replace(/<(noscript|nav|header|footer)\b[\s\S]*?<\/\1>/gi, " ")).slice(0, 6e4);
     const head = h1 + " " + ogTitle + " " + docTitle;
     const priceRe = /(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/i;
     let prix = NaN;
     const pm = head.match(priceRe);
     if (pm) prix = num(pm[1]);
     if (!(prix > 0)) {
-      const j = jsonVal(html, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
+      const j = jsonVal(dataHtml, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
       if (/^\d{3,9}(\.\d+)?$/.test(j)) prix = Number(j);
     }
     if (!(prix > 0)) {
-      const lm = text.match(new RegExp("(?:prix|loyer|tarif)[^0-9\u20AC]{0,40}" + priceRe.source, "i"));
+      const lm = text.match(new RegExp("(?:prix|loyer|tarif)[^0-9\u20AC]{0,40}" + priceRe.source, "iu"));
       if (lm) prix = num(lm[1]);
     }
     if (!(prix > 0)) {
@@ -158,20 +160,34 @@ var SR = (() => {
     }
     if (!(prix >= 50 && prix < 1e8)) return null;
     const refM = base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
-    const reference = (jsonVal(html, ["itemId", "reference", "ref", "mandat"]) || refM?.[1] || base.pathname.replace(/\/+$/, "").split("/").pop() || "").slice(0, 80);
-    const photos = pickPhotos(html, base, [...metaAll(html, "og:image"), ...Array.from({ length: 45 }, (_, i) => metaAll(html, "og:image_" + i)[0]).filter(Boolean)], refM?.[1] || "");
+    const reference = (jsonVal(dataHtml, ["itemId", "reference", "ref", "mandat"]) || refM?.[1] || base.pathname.replace(/\/+$/, "").split("/").pop() || "").slice(0, 80);
+    const photos = pickPhotos(rawHtml.slice(0, 15e5), base, [...metaAll(html, "og:image"), ...Array.from({ length: 45 }, (_, i) => metaAll(html, "og:image_" + i)[0]).filter(Boolean)], refM?.[1] || "");
     if (!photos.length) return null;
     const o = { reference, url: pageUrl, titre: titre.slice(0, 160), prix: String(Math.round(prix)), photos: photos.join("|") };
     const ogDesc = metaAll(html, "og:description")[0] || metaAll(html, "description")[0] || "";
     const long = longestText(html);
     o.description = (long.length > ogDesc.replace(/\.{3}|…$/, "").length ? long : ogDesc).slice(0, 6e3);
-    const cityJ = jsonVal(html, ["itemCity", "addressLocality", "city", "ville", "commune"]);
-    const cpJ = jsonVal(html, ["itemZipcode", "postalCode", "zipcode", "zipCode", "codePostal", "code_postal", "cp"]);
-    const cpM = (head + " " + text.slice(0, 3e3)).match(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{1,40}?)\s*\(?\b((?:0[1-9]|[1-8]\d|9[0-5]|97)\d{3})\b\)?/);
-    if (cityJ && !/^\d+$/.test(cityJ)) o.ville = cityJ;
-    else if (cpM) o.ville = cpM[1].trim();
-    if (/^\d{5}$/.test(cpJ)) o.code_postal = cpJ;
-    else if (cpM) o.code_postal = cpM[2];
+    if (immo) {
+      const cityJ = jsonVal(dataHtml, ["itemCity", "addressLocality", "city", "ville", "commune"]);
+      const cpJ = jsonVal(dataHtml, ["itemZipcode", "postalCode", "zipcode", "zipCode", "codePostal", "code_postal"]);
+      const zone = head + " \n" + text.slice(0, 4e3);
+      const cpM = zone.match(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{2,40}?)\s*\((\d{5})\)/) || zone.match(/\b(\d{5})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{2,30}(?:[ -][A-ZÀ-Ýa-zà-ÿ'-]{2,20}){0,3})/);
+      const bad = /kilom|prix|surface|ann[ée]e|t[ée]l|r[ée]f/i;
+      let city = "", cp = "";
+      if (cpM) {
+        if (/^\d/.test(cpM[1])) {
+          cp = cpM[1];
+          city = cpM[2];
+        } else {
+          city = cpM[1];
+          cp = cpM[2];
+        }
+      }
+      if (cityJ && !/^\d+$/.test(cityJ)) o.ville = cityJ;
+      else if (city && !bad.test(city)) o.ville = city.trim();
+      if (/^\d{5}$/.test(cpJ)) o.code_postal = cpJ;
+      else if (cp && o.ville) o.code_postal = cp;
+    }
     if (immo) {
       const all = head + " " + base.pathname + " " + text.slice(0, 4e3);
       o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|cc\b|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
@@ -214,6 +230,8 @@ var SR = (() => {
       o.etat = /\bneuf\b|0\s*km/i.test(head) ? "neuf" : "occasion";
       o.type = /\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head + " " + base.pathname) ? "moto" : /\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head) ? "camping-car" : /\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit|kangoo van|partner van)\b/i.test(head) ? "utilitaire" : "voiture";
     }
+    if (immo && !(o.surface || o.pieces || o.chambres || o.surface_terrain)) return null;
+    if (!immo && !(o.kilometrage || o.annee)) return null;
     return o;
   }
   async function readSmartSite(origin, homeHtml, sector, fetchHtml, extraStarts = []) {
