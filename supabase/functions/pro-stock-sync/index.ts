@@ -747,12 +747,16 @@ async function autoReviewSite(feed:any,dryRun=false){
  const mark=async(reason:string,platform:string|null)=>{if(dryRun)return{ok:false,auto_review:'pending',reason,platform};await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_run_at:new Date().toISOString(),last_error:'Validation manuelle nécessaire : '+reason,updated_at:new Date().toISOString()}).eq('id',feed.id).eq('review_status','pending');return{ok:false,feed_id:feed.id,auto_review:'pending',reason};};
  let rows:any[];try{rows=await readFeed(feed);}catch(e){return mark(e instanceof Error?e.message:String(e),(e as any)?.platform||null);}
  const platform=(rows as any).platform||null;
- if((rows as any).partial)return mark('lecture partielle du site (trop long à lire en une fois)',platform);
+ if((rows as any).partial&&!dryRun)return mark('lecture partielle du site (trop long à lire en une fois)',platform);
  const norm=await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id);
  const good=norm.filter((r:any)=>!r.errors?.length&&Number(r.price)>0&&r.photos?.length>=1).length;
- if(!norm.length||!good)return mark('aucune annonce complète lue sur le site',platform);
- if(good<norm.length*0.8)return mark(`seulement ${good} annonce(s) complète(s) sur ${norm.length} lues`,platform);
- if(dryRun)return{ok:true,auto_review:'approved',platform,read:norm.length,complete:good,city:norm[0]?.city||null,postal:norm[0]?.postal||null,sample:norm.slice(0,2).map((r:any)=>({title:r.title,price:r.price,city:r.city,postal:r.postal,photos:r.photos?.length,errors:r.errors}))};
+ const verdict=!norm.length||!good?'aucune annonce complète lue sur le site':good<norm.length*0.8?`seulement ${good} annonce(s) complète(s) sur ${norm.length} lues`:'';
+ if(verdict&&!dryRun)return mark(verdict,platform);
+ if(dryRun&&!norm.length)return mark(verdict,platform);
+ if(dryRun){const n=norm.length,pc=(f:(r:any)=>any)=>Math.round(100*norm.filter(f).length/n);const errs:Record<string,number>={};for(const r of norm)for(const e of r.errors||[])errs[e]=(errs[e]||0)+1;
+  return{ok:!verdict,auto_review:verdict?'pending':'approved',reason:verdict||undefined,platform,read:n,complete:good,partial:!!(rows as any).partial,city:norm[0]?.city||null,postal:norm[0]?.postal||null,
+   fill:{photos_moy:Math.round(10*norm.reduce((a:number,r:any)=>a+(r.photos?.length||0),0)/n)/10,photos_1:pc(r=>(r.photos?.length||0)<=1),prix:pc(r=>Number(r.price)>0),km:pc(r=>r.mileage!=null),annee:pc(r=>r.year!=null),carburant:pc(r=>!!r.fuel),boite:pc(r=>!!r.transmission),marque:pc(r=>!!r.make),description:pc(r=>String(r.description||'').length>=80),ville:pc(r=>!!r.city),surface:pc(r=>r.surface!=null),pieces:pc(r=>r.rooms!=null),dpe:pc(r=>!!r.dpe)},errors:errs,
+   sample:norm.slice(0,3).map((r:any)=>({title:r.title,price:r.price,city:r.city,photos:r.photos?.length,km:r.mileage,year:r.year,fuel:r.fuel,desc:String(r.description||'').slice(0,120),errors:r.errors}))};}
  const{data:upd}=await admin.from('pro_stock_feeds').update({review_status:'approved',active:true,reviewed_at:new Date().toISOString(),reviewed_by:null,site_platform:platform,last_error:null,updated_at:new Date().toISOString()}).eq('id',feed.id).eq('review_status','pending').select('*').maybeSingle();
  if(!upd)return{ok:false,feed_id:feed.id,auto_review:'déjà traité'};
  return{...(await sync(upd,rows)),auto_review:'approved'};
