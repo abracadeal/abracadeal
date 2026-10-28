@@ -120,11 +120,13 @@ function aaPhotos(html:string,pageUrl:string){
  const start=html.search(/id="(?:sliderdetail|bigimg|bxslider)"/i);
  let zone=start>=0?html.slice(start,start+120000):html;
  const stop=zone.search(/id="(?:description|similaires|annonces-similaires|caracteristiques)"/i);if(stop>0)zone=zone.slice(0,stop);
- const rank=(u:string)=>/\/(?:big|large|xlarge|grande?|original|hd)\//i.test(u)?3:/\/(?:intermediate|medium|moyenne?)\//i.test(u)?2:/\/(?:small|thumb|thumbnail|mini|petite?)\//i.test(u)?0:1;
+ // Taille dans le dossier (/big/) ou dans le nom (215930456-ibig.jpg, -intermediate.jpg, -small.jpg).
+ const SIZE='i?big|large|xlarge|grande?|original|hd|intermediate|medium|moyenne?|small|thumb|thumbnail|mini|petite?';
+ const rank=(u:string)=>/[\/_-](?:i?big|large|xlarge|grande?|original|hd)(?:[\/.]|$)/i.test(u)?3:/[\/_-](?:intermediate|medium|moyenne?)(?:[\/.]|$)/i.test(u)?2:/[\/_-](?:small|thumb|thumbnail|mini|petite?)(?:[\/.]|$)/i.test(u)?0:1;
  const byKey=new Map<string,string>();const order:string[]=[];
  const add=(raw:string)=>{let u=decodeEntities(raw.trim());if(u.startsWith('//'))u='https:'+u;try{u=new URL(u,pageUrl).toString();}catch{return;}
   if(!/\.(?:jpe?g|png|webp)(?:\?|$)/i.test(u)||/logo|icon|sprite|blank|placeholder|picto|drapeau|flag/i.test(u))return;
-  const file=(u.split('?')[0].split('/').pop()||'').toLowerCase();const key=(file.match(/-(\d{4,})\.(?:jpe?g|png|webp)$/)?.[1])||file;
+  const file=(u.split('?')[0].split('/').pop()||'').toLowerCase().replace(new RegExp(`[-_](?:${SIZE})(?=\\.(?:jpe?g|png|webp)$)`,'i'),'');const key=(file.match(/(\d{4,})\.(?:jpe?g|png|webp)$/)?.[1])||file;
   const cur=byKey.get(key);if(!cur){byKey.set(key,u);order.push(key);}else if(rank(u)>rank(cur))byKey.set(key,u);};
  for(const m of zone.matchAll(/(?:href|src|data-src|data-original|data-lazy|data-zoom-image|data-big)="([^"]+)"/gi))add(m[1]);
  // Pas de galerie reconnue : photos rivamedia de toute la page (hors véhicules similaires), puis image principale.
