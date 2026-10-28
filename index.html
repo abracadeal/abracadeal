@@ -1359,7 +1359,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
         </div>
 <section id="adminStatsPanel" class="admin-stats-panel hidden" aria-live="polite">
   <div class="admin-stats-head">
-    <div><h3>Tableau de bord Abracadeal</h3><p>Les chiffres essentiels du site en un coup d’œil.</p></div>
+    <div><h3>Tableau de bord</h3><p>Les chiffres essentiels du site en un coup d’œil.</p></div>
     <button type="button" class="btn ghost" id="refreshAdminStatsBtn">Actualiser</button>
   </div>
   <div class="admin-stat-grid">
@@ -1374,7 +1374,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
     <div class="admin-stat-card"><span class="admin-stat-value" id="statProsToFinalize">—</span><span class="admin-stat-label">Pros à finaliser</span></div>
     <div class="admin-stat-card"><span class="admin-stat-value" id="statMrr">—</span><span class="admin-stat-label">MRR théorique après gratuités</span></div>
   </div>
-  <div style="margin-top:16px;padding:16px;border:1px solid #e8d8ee;border-radius:15px;background:#faf5fc;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+  <div class="admin-finance-box" style="margin-top:16px;padding:16px;border:1px solid #e8d8ee;border-radius:15px;background:#faf5fc;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap">
     <div><strong style="display:block;color:#451657">Gains, boosters, achats et demandes acheteurs</strong><span class="note">Encaissements connus, recherches sauvegardées et suivi indicatif des seuils de TVA.</span></div>
     <a class="btn primary" href="admin-pilotage.html" style="text-decoration:none">Ouvrir le tableau de bord financier →</a>
   </div>
@@ -1383,7 +1383,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
     <div class="admin-plan-chip"><b id="statPlan20">—</b><span>Plan 20 annonces</span></div>
     <div class="admin-plan-chip"><b id="statPlan50">—</b><span>Plan 50 annonces</span></div>
     <div class="admin-plan-chip"><b id="statPlan100">—</b><span>Plan 100 annonces</span></div>
-    <div class="admin-plan-chip"><b id="statPlan250">—</b><span>Sur devis (+200)</span></div>
+    <div class="admin-plan-chip"><b id="statPlan250">—</b><span>Sur devis (+100)</span></div>
   </div>
 </section>
 
@@ -1853,45 +1853,24 @@ document.addEventListener('DOMContentLoaded',function(){
       <a class="close-btn" data-close="mobileAdminModal" href="#" aria-label="Fermer">×</a>
     </div>
     <div class="modal-body">
-      <p class="admin-mobile-intro">Outils d’administration</p>
+      <p class="admin-mobile-intro">À traiter</p>
       <div class="admin-mobile-grid">
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="moderation">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span>
-          <strong>Modération</strong>
-          <small>Annonces en attente et contrôles.</small>
-          <span class="admin-mobile-action-badge" id="mobileAdminModerationBadge">0</span>
-        </button>
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="flows">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg></span>
-          <strong>Flux</strong>
-          <small>Erreurs et synchronisations actives.</small>
-          <span class="admin-mobile-action-badge" id="mobileAdminFlowBadge">0</span>
-        </button>
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="database">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg></span>
-          <strong>Base de données</strong>
-          <small>Rechercher une annonce ou un vendeur.</small>
-        </button>
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="stats">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 16v-4M12 16V8M16 16v-6"/></svg></span>
-          <strong>Statistiques</strong>
-          <small>Comptes, pros, plans et activité.</small>
-        </button>
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="b2b">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/></svg></span>
-          <strong>Pro / Pro</strong>
-          <small>Catalogue et relations professionnelles.</small>
-        </button>
-        <button class="admin-mobile-action" type="button" data-admin-mobile-action="messages">
-          <span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 15a4 4 0 0 1-4 4H8l-5 3V7a4 4 0 0 1 4-4h10a4 4 0 0 1 4 4Z"/></svg></span>
-          <strong>Messages</strong>
-          <small>Accéder rapidement à la messagerie.</small>
-        </button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="moderation"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/></svg></span><strong>Modération</strong><small>Annonces en attente et contrôles.</small><span class="admin-mobile-action-badge" id="mobileAdminModerationBadge">0</span></button>
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="flows"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/></svg></span><strong>Flux</strong><small>Erreurs et synchronisations actives.</small><span class="admin-mobile-action-badge" id="mobileAdminFlowBadge">0</span></button>
+        <a class="admin-mobile-action" href="admin-test-import.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span><strong>Imports sites</strong><small>Sites des pros à valider.</small><span class="admin-mobile-action-badge" id="mobileAdminImportBadge">0</span></a>
+      </div>
+      <p class="admin-mobile-intro">Gestion</p>
+      <div class="admin-mobile-grid">
         <a class="admin-mobile-action" href="admin-pilotage.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg></span><strong>Finances</strong><small>Encaissements et seuils de TVA.</small></a>
         <a class="admin-mobile-action" href="admin-prospection.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg></span><strong>Prospection</strong><small>Mails aux pros et suivi des clics.</small></a>
-        <a class="admin-mobile-action" href="admin-test-import.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4"/><path d="m7 9 5-5 5 5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg></span><strong>Imports sites</strong><small>Sites des pros à valider et synchroniser.</small><span class="admin-mobile-action-badge" id="mobileAdminImportBadge">0</span></a>
         <a class="admin-mobile-action" href="admin-vacances.html"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/></svg></span><strong>Vacances</strong><small>Logements, hôtes et demandes.</small></a>
-        </div>
+      </div>
+      <p class="admin-mobile-intro">Professionnels</p>
+      <div class="admin-mobile-grid">
+        <button class="admin-mobile-action" type="button" data-admin-mobile-action="b2b"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/></svg></span><strong>Pro / Pro</strong><small>Catalogue et relations professionnelles.</small></button>
+        <button class="admin-mobile-action admin-mobile-founder" type="button" id="mobileAdminFounderBtn"><span class="admin-mobile-action-icon" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><strong>Offre Fondateurs</strong><span class="admin-mobile-founder-state" id="mobileAdminFounderState">…</span></button>
+      </div>
+      </div>
     </div>
   </div>
 </div>
@@ -1941,8 +1920,8 @@ document.addEventListener('DOMContentLoaded',function(){
 <script src="assets/thumb-fit-20261009.js?v=1"></script>
 <script src="assets/install-app-20261018.js?v=6" defer></script>
 <script src="assets/admin-account-layout-20261018.js?v=7" defer></script>
-<link rel="stylesheet" href="assets/admin-mobile-merge-20261028.css?v=1">
-<script src="assets/admin-mobile-merge-20261028.js?v=1" defer></script>
+<link rel="stylesheet" href="assets/admin-mobile-merge-20261028.css?v=2">
+<script src="assets/admin-mobile-merge-20261028.js?v=2" defer></script>
 <!-- 26/10/2026 : sélecteur Annonces | Vacances masqué sur l'accueil tant qu'il y a peu de logements (remettre la ligne ci-dessous pour le réafficher) -->
 <!-- <script src="assets/space-switch-20261018.js?v=1" defer></script> -->
 </body>

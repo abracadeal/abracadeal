@@ -704,3 +704,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Ajouté :** `assets/admin-mobile-merge-20261028.js` + `.css` (chargés dans `index.html`). Sur mobile (≤ 760 px), pour l'admin : la rubrique « Administration » est masquée dans Compte ; le Tableau de bord, la Base de données et l'interrupteur « Offre Fondateurs » sont déplacés dans le menu Admin (sous les outils). Sur ordinateur, rien ne change.
 - **Menu Admin :** nouvelle entrée « Imports sites » (pastille = demandes en attente). « Statistiques » et « Base de données » font défiler le menu Admin au lieu d'ouvrir Compte (`assets/index-app.js` v=20261028-admin-mobile).
 - Pour annuler : retirer le script et la feuille de style `admin-mobile-merge-20261028` dans `index.html`.
+
+### 28/10/2026 — Claude — Menu Admin mobile : nouvelle mise en page
+- **Rubriques :** « À traiter » (Modération, Flux, Imports sites — avec pastilles), « Gestion » (Finances, Prospection, Vacances), « Professionnels » (Pro / Pro + tuile « Offre Fondateurs » Ouverte/Fermée sur deux colonnes, même action qu'avant). Tuiles « Statistiques », « Base de données » et « Messages » retirées (doublons : panneaux juste en dessous, Messages dans la barre du bas).
+- **Dessous :** Tableau de bord et Base de données en cartes homogènes (titres lisibles, bouton Actualiser en icône, encart « Gains… / tableau de bord financier » masqué dans ce menu car doublon de la tuile Finances).
+- **Corrigé :** titre « Tableau de bord Abracadeal » → « Tableau de bord » ; pastille « Sur devis (+200) » → « (+100) » dans le HTML (formule 200 supprimée).
+- Fichiers : `index.html` (menu), `assets/admin-mobile-merge-20261028.js/.css` v=2. Vérifié en capture d'écran mobile (390 px).

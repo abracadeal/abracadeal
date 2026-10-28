@@ -1,7 +1,31 @@
-/* 28/10/2026 : mobile — l'administratif est dans le menu Admin, « Compte » reste personnel. */
+/* 28/10/2026 : menu Admin (barre du bas) — rubriques claires ; sur mobile « Compte » reste personnel. */
+#mobileAdminModal .admin-mobile-grid + .admin-mobile-intro { margin-top: 22px !important; }
+#mobileAdminModal .admin-mobile-founder { grid-column: span 2; flex-direction: row !important; gap: 10px !important; }
+#mobileAdminModal .admin-mobile-founder-state { font-size: .72rem; font-weight: 900; border-radius: 999px; padding: 3px 10px; background: #e6f6ec; color: #1d7a3e; }
+#mobileAdminModal .admin-mobile-founder.is-closed .admin-mobile-founder-state { background: #fde8ec; color: #b3263f; }
+
 @media (max-width: 760px) {
   #loggedInAccount.aal-is-admin .aal-admin { display: none !important; }
-  .mobile-admin-extra { display: grid; gap: 16px; margin-top: 18px; }
-  .mobile-admin-extra .aal-founder-switch { width: 100%; }
-  .mobile-admin-extra #adminStatsPanel, .mobile-admin-extra #adminDatabasePanel { margin: 0; }
+  .mobile-admin-extra { display: grid; gap: 22px; margin-top: 26px; }
+  /* Tableau de bord et recherche : même carte, titres lisibles, sans doublon avec la tuile Finances */
+  .mobile-admin-extra #adminStatsPanel, .mobile-admin-extra #adminDatabasePanel {
+    margin: 0 !important; padding: 16px !important; border: 1px solid #ecdff2 !important; border-radius: 18px !important;
+    background: linear-gradient(160deg, #fff, #fbf6fd) !important; box-shadow: 0 4px 14px rgba(70,20,90,.06) !important;
+  }
+  .mobile-admin-extra .admin-finance-box { display: none !important; }
+  .mobile-admin-extra .admin-stats-head { display: flex !important; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+  .mobile-admin-extra .admin-stats-head h3, .mobile-admin-extra .admin-db-head h3 { margin: 0 0 4px !important; font-size: 1.15rem !important; color: #2c0f3b !important; }
+  .mobile-admin-extra .admin-stats-head p, .mobile-admin-extra .admin-db-head .note { margin: 0 !important; font-size: .82rem !important; color: #7a6a83 !important; }
+  .mobile-admin-extra #refreshAdminStatsBtn { flex: none; width: 42px; height: 42px; min-height: 0 !important; padding: 0 !important; border-radius: 12px !important; font-size: 0 !important; display: inline-flex; align-items: center; justify-content: center; }
+  .mobile-admin-extra #refreshAdminStatsBtn::before { content: ""; width: 20px; height: 20px; background: #7b27a0;
+    -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 1 0-2.3 5.7'/%3E%3Cpath d='M20 4v7h-7'/%3E%3C/svg%3E") center/contain no-repeat;
+            mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 11a8 8 0 1 0-2.3 5.7'/%3E%3Cpath d='M20 4v7h-7'/%3E%3C/svg%3E") center/contain no-repeat; }
+  .mobile-admin-extra #refreshAdminStatsBtn .aal-ico { display: none; }
+  .mobile-admin-extra .admin-stat-grid { gap: 8px !important; }
+  .mobile-admin-extra .admin-stat-card { min-height: 0 !important; padding: 10px 12px !important; border-radius: 14px !important; }
+  .mobile-admin-extra .admin-stat-value { font-size: 1.35rem !important; }
+  .mobile-admin-extra .admin-stat-label { font-size: .74rem !important; }
+  .mobile-admin-extra .admin-plan-grid { gap: 8px !important; margin-top: 12px !important; }
+  .mobile-admin-extra .admin-plan-chip { padding: 10px 12px !important; border-radius: 14px !important; }
+  .mobile-admin-extra .admin-db-search { display: grid; gap: 10px; margin-top: 12px; }
 }

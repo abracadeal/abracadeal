@@ -1,7 +1,7 @@
 /* Abracadeal — 28/10/2026 : sur mobile, tout l'administratif est dans le menu « Admin » de la barre du bas.
    « Compte » ne garde que l'espace personnel (identité, Mon espace, Mes informations).
-   Sur mobile (≤ 760 px), on déplace dans le menu Admin : le tableau de bord, la base de données et
-   l'interrupteur « Offre Fondateurs ». Sur ordinateur, rien ne change (ils restent dans « Mon compte »).
+   Sur mobile (≤ 760 px), on déplace dans le menu Admin le tableau de bord et la base de données ;
+   le menu Admin a sa propre tuile « Offre Fondateurs ». Sur ordinateur, rien ne change.
    Pour annuler : retirer ce script et sa feuille de style dans index.html. */
 (function () {
   'use strict';
@@ -20,7 +20,7 @@
     return zone;
   }
   function items() {
-    return [['founder', $('.aal-founder-switch')], ['stats', $('#adminStatsPanel')], ['db', $('#adminDatabasePanel')]];
+    return [['stats', $('#adminStatsPanel')], ['db', $('#adminDatabasePanel')]];
   }
   function place() {
     var zone = extraZone(); if (!zone) return;
@@ -30,7 +30,7 @@
       var key = it[0], el = it[1]; if (!el) return;
       if (mq.matches && isAdmin) {
         if (el.parentNode !== zone) { remember(key, el); zone.appendChild(el); }
-        if (key !== 'founder') el.classList.remove('hidden');
+        el.classList.remove('hidden');
       } else if (el.parentNode === zone && homes[key]) {
         var h = homes[key];
         if (h.next && h.next.parentNode === h.parent) h.parent.insertBefore(el, h.next); else h.parent.appendChild(el);
@@ -45,10 +45,35 @@
       b.textContent = n > 99 ? '99+' : String(n); b.classList.toggle('show', n > 0);
     });
   }
+  // Tuile « Offre Fondateurs » du menu Admin (même action que dans « Mon compte » sur ordinateur).
+  var foOpen = null;
+  function foRender() {
+    var st = $('#mobileAdminFounderState'), btn = $('#mobileAdminFounderBtn'); if (!st || !btn) return;
+    st.textContent = foOpen === null ? '…' : (foOpen ? 'Ouverte' : 'Fermée');
+    btn.classList.toggle('is-closed', foOpen === false);
+  }
+  function foLoad() {
+    if (typeof sb === 'undefined' || !sb) return;
+    sb.rpc('get_founder_offer_open').then(function (r) { if (!r.error) { foOpen = r.data !== false; foRender(); } });
+  }
+  document.addEventListener('click', function (e) {
+    if (!e.target.closest('#mobileAdminFounderBtn')) return;
+    e.preventDefault();
+    if (foOpen === null || typeof sb === 'undefined' || !sb) return;
+    var msg = foOpen
+      ? 'Fermer l’offre Fondateurs aux nouveaux inscrits ?\n\nLe bandeau, le compteur et l’encart Fondateurs disparaissent du site. Les nouveaux pros verront directement les formules payantes.\nLes Fondateurs déjà inscrits gardent leurs 12 mois gratuits.'
+      : 'Rouvrir l’offre Fondateurs aux nouveaux inscrits ?';
+    if (!confirm(msg)) return;
+    sb.rpc('admin_set_founder_offer_closed', { p_closed: foOpen }).then(function (r) {
+      if (r.error) { alert(r.error.message || 'Action impossible'); return; }
+      foOpen = !!(r.data && r.data.open); foRender();
+      var desk = document.querySelector('.aal-founder-state'); if (desk) desk.textContent = foOpen ? 'Ouverte' : 'Fermée';
+    });
+  });
   // Le menu Admin s'ouvre : on y range les blocs, puis on rafraîchit les chiffres.
   document.addEventListener('click', function (e) {
     if (e.target.closest('#mobileFavoritesAdminBtn')) {
-      setTimeout(function () { place(); if (mq.matches) { try { window.loadAdminDashboardStats && window.loadAdminDashboardStats(); } catch (er) {} syncImportBadge(); } }, 60);
+      setTimeout(function () { place(); foLoad(); syncImportBadge(); if (mq.matches) { try { window.loadAdminDashboardStats && window.loadAdminDashboardStats(); } catch (er) {} } }, 60);
     }
   }, true);
   if (mq.addEventListener) mq.addEventListener('change', place); else if (mq.addListener) mq.addListener(place);
