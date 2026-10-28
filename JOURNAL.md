@@ -747,3 +747,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Testé : Laforêt Cannes (28 biens, 8-20 photos), La Boîte Immo (agencelacanopee.com 40 biens, reseau-expertimo.fr), Apimo/Mira (cannes-impact.com, 1 photo par bien seulement), garages WooCommerce/Annonces-Automobile (déjà couverts par leurs connecteurs).
 - Pas encore : Guy Hoquet (liste chargée en JavaScript), Stéphane Plaza (bloque les robots), Foncia (application), Spoticar (JavaScript).
 - Fonction de test `aa-site-preview-tmp` désactivée (410). Fonctions SQL de test private.tmp_probe / tmp_probe_res à supprimer (suppression refusée par l'outil ; non accessibles aux clients).
+
+## 28/10/2026 — Retrait du lecteur parallèle (ChatGPT) — Claude
+- Vérifié à la demande d'Anthony : `site-reader-preview` démarrait bien (401 sans connexion admin), mais son connecteur ERA lisait une **recherche par ville** du site national ERA (biens de toutes les agences ERA de la ville, pas le stock d'une agence), sans photos ni description, en aperçu seulement. Le reste était une copie de pro-stock-sync v22.
+- Retiré : fonction désactivée (410, à supprimer depuis le tableau de bord) + fichiers admin-reader-parallel.html, docs/parallel-reader-deployment.md, scripts/parallel-preview.test.mjs, supabase/functions/site-reader-preview/.
+- Règle : un seul robot, `pro-stock-sync`. Toute amélioration des lecteurs se fait dedans (et dans ce journal).
