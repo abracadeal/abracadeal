@@ -44,7 +44,7 @@ table{width:100%;border-collapse:collapse;margin:10px 0}td{padding:8px;border-bo
 </style></head><body><main>
 <a class="back" href="index.html#accountModal">← Retour à Admin</a>
 <h1>Test import · site d'un garage</h1>
-<p class="muted">Lit le stock d'un site réalisé par Annonces-Automobile et le montre comme il apparaîtrait sur Abracadeal.</p>
+<p class="muted">Lit le stock du site d'un garage et le montre comme il apparaîtrait sur Abracadeal. Sites pris en charge : réalisés par Annonces-Automobile, ou sous WordPress avec boutique WooCommerce.</p>
 <div class="banner"><b>Aperçu uniquement.</b> Rien n'est enregistré ni publié sur Abracadeal. Page visible seulement par un administrateur connecté.</div>
 <div id="app" hidden>
  <form class="bar" id="form"><input id="url" type="url" value="https://www.lifecars.fr" placeholder="https://www.site-du-garage.fr" required><button class="btn" id="go">Lire le stock</button></form>
@@ -86,7 +86,7 @@ function render(data){
  const ok=ROWS.filter(r=>r.titre),bad=ROWS.length-ok.length;
  const photos=ok.reduce((n,r)=>n+(r.photos?r.photos.split('|').length:0),0);
  const types={};ok.forEach(r=>types[r.type]=(types[r.type]||0)+1);
- E('status').textContent='Lu sur '+data.site+' en '+(data.ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s.';
+ E('status').textContent='Site '+(data.kind||'')+' · lu sur '+data.site+' en '+(data.ms/1000).toLocaleString('fr-FR',{maximumFractionDigits:1})+' s.';
  E('stats').innerHTML=[['Véhicules lus',ok.length],['Photos trouvées',photos],['Voitures',types.voiture||0],['Utilitaires',types.utilitaire||0],['Motos',types.moto||0],['Fiches illisibles',bad]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{

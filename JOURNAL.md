@@ -676,3 +676,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Fonction déployée :** `aa-site-preview` v3 (lecture seule, aucun accès en écriture) : vérifie que l'appelant est admin (`profiles.is_admin`), lit le site avec le même code que `pro-stock-sync`. Copie dans `supabase/functions/aa-site-preview/`. Testé : refus 401 sans connexion.
 - **Admin :** tuile « Test import » dans Administration (`assets/admin-account-layout-20261018.js`, `index.html` v=6) ; retour vers Admin dans `app-shell`.
 - **Corrigé :** espace insécable écrit ` ` dans la lecture du prix (`pro-stock-sync`), identique en comportement.
+
+### 28/10/2026 — Claude — Sites garages WordPress/WooCommerce (ex. Centurion Motors)
+- **Ajouté :** lecteur WooCommerce dans `aa-site-preview` (déployé v4) et `pro-stock-sync` (dépôt, pas encore déployé) : API publique WooCommerce Store (`/wp-json/wc/store/v1/products`) pour nom, prix, toutes les photos, description, marque ; puis la fiche du véhicule pour km, année, puissance, boîte, carburant, couleurs, portes. Véhicules en catégorie « vendus » (ou hors stock) exclus ; si une catégorie « disponible » existe, seuls ceux-là sont repris. Prix 0 = prix non renseigné.
+- **Détection :** l'aperçu lit la page d'accueil : site Annonces-Automobile → lecteur AA ; sinon WooCommerce → lecteur Woo ; sinon message « type de site pas encore pris en charge ». Dans `pro-stock-sync`, une URL de page web qui n'est ni AA ni WooCommerce donne une erreur claire.
+- **Testé (lecture seule) sur centurionmotors.fr :** 173 produits, 78 disponibles lus en 8,5 s, avec km, année, carburant, boîte, puissance et 18 à 45 photos chacun. Fonction de test `aa-site-preview-tmp` désactivée (410, peut être supprimée).
+- **Page :** `admin-test-import.html` indique le type de site lu.
