@@ -70,68 +70,73 @@ const FUEL:[RegExp,string][]=[[/hybride rechargeable|plug-?in/i,'hybride recharg
 
 export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const base=new URL(pageUrl);const immo=sector==='immobilier';
-  // Pages très lourdes : on retire scripts/styles/SVG (sauf JSON-LD) et on borne la taille pour rester rapide.
-  const html=rawHtml.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<(style|svg)\b[\s\S]*?<\/\1>/gi,' ').slice(0,600000);
-  const dataHtml=rawHtml.length>1500000?rawHtml.slice(0,1500000):rawHtml;
-    const ogTitle=metaAll(html,'og:title')[0]||'';
+  // Économie de calcul (limite CPU des fonctions) : on ne travaille que sur l'en-tête et la zone autour du titre principal.
+  const headEnd=rawHtml.search(/<\/head>/i);const headHtml=rawHtml.slice(0,headEnd>0?Math.min(headEnd,200000):60000);
+  const h1At=rawHtml.search(/<h1[\s>]/i);
+  const from=h1At>0?Math.max(headEnd>0?headEnd:0,h1At-30000):(headEnd>0?headEnd:0);
+  const region=rawHtml.slice(from,from+220000);
+  const html=region.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<(style|svg|noscript)\b[\s\S]*?<\/\1>/gi,' ');
+  const ogTitle=metaAll(headHtml,'og:title')[0]||'';
   const h1=clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
-  const docTitle=clean(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
+  const docTitle=clean(headHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
   let titre=(h1&&h1.length>=6&&h1.length<=160?h1:'')||ogTitle||docTitle;
-  titre=titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/,m=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
+  titre=titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/,(m)=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
   if(!titre)return null;
-  const text=clean(html.replace(/<(noscript|nav|header|footer)\b[\s\S]*?<\/\1>/gi,' ')).slice(0,60000);
-  const head=(h1+' '+ogTitle+' '+docTitle);
-  // Prix : titre d'abord, puis données de la page, puis libellé « Prix » dans le texte.
-  const priceRe=/(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/i;
+  const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]*?<\/\1>/gi,' ')).slice(0,40000);
+  const head=h1+' \n'+ogTitle+' \n'+docTitle;
+  // Prix : données de prix déclarées, titre, données de la page, libellé « Prix », premier montant.
+  const priceRe=/(?<![\p{L}\d][\s  .]?)(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
   let prix=NaN;
-  const pm=head.match(priceRe);if(pm)prix=num(pm[1]);
-  if(!(prix>0)){const j=jsonVal(dataHtml,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
+  const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
+  if(declared)prix=num(declared.replace(/[.,]\d{2}$/,''));
+  if(!(prix>0)){const pm=head.match(priceRe);if(pm)prix=num(pm[1]);}
+  if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
   if(!(prix>0)){const lm=text.match(new RegExp('(?:prix|loyer|tarif)[^0-9€]{0,40}'+priceRe.source,'iu'));if(lm)prix=num(lm[1]);}
   if(!(prix>0)){const fm=text.match(priceRe);if(fm)prix=num(fm[1]);}
   if(!(prix>=50&&prix<100000000))return null;
   const refM=base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
-  const reference=(jsonVal(dataHtml,['itemId','reference','ref','mandat'])||refM?.[1]||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
-  const photos=pickPhotos(rawHtml.slice(0,1500000),base,[...metaAll(html,'og:image'),...Array.from({length:45},(_,i)=>metaAll(html,'og:image_'+i)[0]).filter(Boolean) as string[]],refM?.[1]||'');
+  const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
+  const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
+  const photos=pickPhotos(region,base,ogs,refM?.[1]||'');
   if(!photos.length)return null;
   const o:any={reference,url:pageUrl,titre:titre.slice(0,160),prix:String(Math.round(prix)),photos:photos.join('|')};
-  const ogDesc=metaAll(html,'og:description')[0]||metaAll(html,'description')[0]||'';
-  const long=longestText(html);o.description=(long.length>ogDesc.replace(/\.{3}|…$/,'').length?long:ogDesc).slice(0,6000);
+  const ogDesc=metaAll(headHtml,'og:description')[0]||metaAll(headHtml,'description')[0]||'';
+  const long=longestText(html);o.description=(long.length>ogDesc.replace(/(\.{3}|…)$/,'').length?long:ogDesc).slice(0,6000);
   if(immo){
-    const cityJ=jsonVal(dataHtml,['itemCity','addressLocality','city','ville','commune']);const cpJ=jsonVal(dataHtml,['itemZipcode','postalCode','zipcode','zipCode','codePostal','code_postal']);
+    const cityJ=jsonVal(region,['itemCity','addressLocality','city','ville','commune']);const cpJ=jsonVal(region,['itemZipcode','postalCode','zipcode','zipCode','codePostal','code_postal']);
     const zone=head+' \n'+text.slice(0,4000);
     const cpM=zone.match(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{2,40}?)\s*\((\d{5})\)/)||zone.match(/\b(\d{5})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{2,30}(?:[ -][A-ZÀ-Ýa-zà-ÿ'-]{2,20}){0,3})/);
     const bad=/kilom|prix|surface|ann[ée]e|t[ée]l|r[ée]f/i;
     let city='',cp='';if(cpM){if(/^\d/.test(cpM[1])){cp=cpM[1];city=cpM[2];}else{city=cpM[1];cp=cpM[2];}}
     if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
     if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
-  }
-  if(immo){
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
-    o.transaction=/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|cc\b|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
+    o.transaction=/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
     o.type_bien=/terrain/i.test(head)?'terrain':/parking|garage|box|stationnement/i.test(head)?'parking':/bureau|local|commerce|boutique|fonds/i.test(head)?'bureau':/maison|villa|mas\b|propri[ée]t[ée]|chalet|bastide/i.test(head)?'maison':'appartement';
-    const s=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)\b/i);if(s)o.surface=s[1];
-    const p=all.match(/(\d{1,2})\s*pi[eè]ces?/i)||all.match(/\bT(\d)\b/);if(p)o.pieces=p[1];else if(/studio/i.test(head))o.pieces='1';
+    const sm=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)\b/i);if(sm)o.surface=sm[1];
+    const pm2=all.match(/(\d{1,2})\s*pi[eè]ces?/i)||all.match(/\b[TF](\d)\b/);if(pm2)o.pieces=pm2[1];else if(/studio/i.test(head))o.pieces='1';
     const c=all.match(/(\d{1,2})\s*chambres?/i);if(c)o.chambres=c[1];
     const sdb=text.match(/(\d)\s*salles? (?:de bains?|d['’]eau)/i);if(sdb)o.salles_de_bain=sdb[1];
     const land=text.match(/terrain[^0-9]{0,30}(\d[\d\s.]*)\s*m(?:²|2)/i);if(land&&o.type_bien!=='terrain')o.surface_terrain=land[1].replace(/\s/g,'');
+    if(o.type_bien==='terrain'&&o.surface){o.surface_terrain=o.surface;delete o.surface;}
     const dpe=(text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
     const ges=(text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
     if(dpe&&ges){o.dpe=dpe.toUpperCase();o.ges=ges.toUpperCase();}
     const hon=text.match(/honoraires[^.\n]{0,120}/i);if(hon)o.honoraires=hon[0].trim();
+    if(!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;
   }else{
-    const all=head+' '+text.slice(0,5000);
-    const km=all.match(/(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})\s*km\b/i);if(km)o.kilometrage=km[1].replace(/[\s. ]/g,'');
-    const y=all.match(/(?:ann[ée]e|mise en circulation|\bMEC|1[èe]re main|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}\/)?((?:19[5-9]|20[0-3])\d)\b/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
+    const all=head+' \n'+text.slice(0,6000);
+    const km=all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})/i)||all.match(/(?<![\p{L}\d][\s .]?)(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})\s*km\b/iu);
+    if(km)o.kilometrage=km[1].replace(/[\s. ]/g,'');
+    const y=all.match(/(?:ann[ée]e|mise en circulation|\bMEC\b|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}\/)?((?:19[5-9]|20[0-3])\d)\b/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
     for(const [re,v] of FUEL)if(re.test(all)){o.carburant=v;break;}
     if(/bo[iî]te\s*(?:de vitesses?\s*)?:?\s*auto|automatique|\bBVA\b|\bDSG\b|\bEAT\d/i.test(all))o.boite='automatique';else if(/manuelle|\bBVM\b|m[ée]canique/i.test(all))o.boite='manuelle';
     const ch=all.match(/(\d{2,4})\s*(?:ch|cv din)\b/i);if(ch)o.puissance_din=ch[1];
     const make=head.trim().split(/\s+/)[0];if(make&&/^[A-Za-zÀ-ÿ-]{2,}$/.test(make)&&!/^(vente|achat|occasion|voiture|v[ée]hicule|annonce)$/i.test(make))o.marque=make;
-    o.etat=/\bneuf\b|0\s*km/i.test(head)?'neuf':'occasion';
-    o.type=/\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head+' '+base.pathname)?'moto':/\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head)?'camping-car':/\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit|kangoo van|partner van)\b/i.test(head)?'utilitaire':'voiture';
+    o.etat=/\bneuf\b|\b0\s*km\b/i.test(head)?'neuf':'occasion';
+    o.type=/\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head+' '+base.pathname)?'moto':/\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head)?'camping-car':/\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit)\b/i.test(head)?'utilitaire':'voiture';
+    if(!(o.kilometrage||o.annee))return null;
   }
-  // Une vraie fiche a au moins une caractéristique : sinon c'est une page de présentation ou de liste.
-  if(immo&&!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;
-  if(!immo&&!(o.kilometrage||o.annee))return null;
   return o;
 }
 
@@ -155,7 +160,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       try{const{text,url}=await fetchHtml(new URL(u));const o=smartDetail(text,url.toString(),sector);
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).
-        if(detailQ.length<1500)take(text,url);
+        if(detailQ.length<40&&text.length<400000)take(text,url);
       }catch{misses++;}
     }}));
   (rows as any).partial=i<detailQ.length;

@@ -132,22 +132,30 @@ var SR = (() => {
   function smartDetail(rawHtml, pageUrl, sector) {
     const base = new URL(pageUrl);
     const immo = sector === "immobilier";
-    const html = rawHtml.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi, " ").replace(/<(style|svg)\b[\s\S]*?<\/\1>/gi, " ").slice(0, 6e5);
-    const dataHtml = rawHtml.length > 15e5 ? rawHtml.slice(0, 15e5) : rawHtml;
-    const ogTitle = metaAll(html, "og:title")[0] || "";
+    const headEnd = rawHtml.search(/<\/head>/i);
+    const headHtml = rawHtml.slice(0, headEnd > 0 ? Math.min(headEnd, 2e5) : 6e4);
+    const h1At = rawHtml.search(/<h1[\s>]/i);
+    const from = h1At > 0 ? Math.max(headEnd > 0 ? headEnd : 0, h1At - 3e4) : headEnd > 0 ? headEnd : 0;
+    const region = rawHtml.slice(from, from + 22e4);
+    const html = region.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi, " ").replace(/<(style|svg|noscript)\b[\s\S]*?<\/\1>/gi, " ");
+    const ogTitle = metaAll(headHtml, "og:title")[0] || "";
     const h1 = clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1] || "");
-    const docTitle = clean(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "");
+    const docTitle = clean(headHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || "");
     let titre = (h1 && h1.length >= 6 && h1.length <= 160 ? h1 : "") || ogTitle || docTitle;
     titre = titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/, (m) => /€|\d/.test(m) ? m : "").replace(/\s+/g, " ").trim();
     if (!titre) return null;
-    const text = clean(html.replace(/<(noscript|nav|header|footer)\b[\s\S]*?<\/\1>/gi, " ")).slice(0, 6e4);
-    const head = h1 + " " + ogTitle + " " + docTitle;
-    const priceRe = /(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/i;
+    const text = clean(html.replace(/<(nav|header|footer)\b[\s\S]*?<\/\1>/gi, " ")).slice(0, 4e4);
+    const head = h1 + " \n" + ogTitle + " \n" + docTitle;
+    const priceRe = /(?<![\p{L}\d][\s  .]?)(\d{1,3}(?:[\s  .]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
     let prix = NaN;
-    const pm = head.match(priceRe);
-    if (pm) prix = num(pm[1]);
+    const declared = metaAll(headHtml, "product:price:amount")[0] || metaAll(headHtml, "og:price:amount")[0] || (region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1] || "");
+    if (declared) prix = num(declared.replace(/[.,]\d{2}$/, ""));
     if (!(prix > 0)) {
-      const j = jsonVal(dataHtml, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
+      const pm = head.match(priceRe);
+      if (pm) prix = num(pm[1]);
+    }
+    if (!(prix > 0)) {
+      const j = jsonVal(region, ["itemPrice", "price", "prix", "prixVente", "prix_vente", "sale_price", "salePrice"]);
       if (/^\d{3,9}(\.\d+)?$/.test(j)) prix = Number(j);
     }
     if (!(prix > 0)) {
@@ -160,16 +168,22 @@ var SR = (() => {
     }
     if (!(prix >= 50 && prix < 1e8)) return null;
     const refM = base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
-    const reference = (jsonVal(dataHtml, ["itemId", "reference", "ref", "mandat"]) || refM?.[1] || base.pathname.replace(/\/+$/, "").split("/").pop() || "").slice(0, 80);
-    const photos = pickPhotos(rawHtml.slice(0, 15e5), base, [...metaAll(html, "og:image"), ...Array.from({ length: 45 }, (_, i) => metaAll(html, "og:image_" + i)[0]).filter(Boolean)], refM?.[1] || "");
+    const reference = (refM?.[1] || jsonVal(region, ["itemId", "reference"]) || base.pathname.replace(/\/+$/, "").split("/").pop() || "").slice(0, 80);
+    const ogs = [...metaAll(headHtml, "og:image"), ...metaAll(headHtml, "og:image:url")];
+    for (let i = 0; i < 45; i++) {
+      const v = metaAll(headHtml, "og:image_" + i)[0];
+      if (!v) break;
+      ogs.push(v);
+    }
+    const photos = pickPhotos(region, base, ogs, refM?.[1] || "");
     if (!photos.length) return null;
     const o = { reference, url: pageUrl, titre: titre.slice(0, 160), prix: String(Math.round(prix)), photos: photos.join("|") };
-    const ogDesc = metaAll(html, "og:description")[0] || metaAll(html, "description")[0] || "";
+    const ogDesc = metaAll(headHtml, "og:description")[0] || metaAll(headHtml, "description")[0] || "";
     const long = longestText(html);
-    o.description = (long.length > ogDesc.replace(/\.{3}|…$/, "").length ? long : ogDesc).slice(0, 6e3);
+    o.description = (long.length > ogDesc.replace(/(\.{3}|…)$/, "").length ? long : ogDesc).slice(0, 6e3);
     if (immo) {
-      const cityJ = jsonVal(dataHtml, ["itemCity", "addressLocality", "city", "ville", "commune"]);
-      const cpJ = jsonVal(dataHtml, ["itemZipcode", "postalCode", "zipcode", "zipCode", "codePostal", "code_postal"]);
+      const cityJ = jsonVal(region, ["itemCity", "addressLocality", "city", "ville", "commune"]);
+      const cpJ = jsonVal(region, ["itemZipcode", "postalCode", "zipcode", "zipCode", "codePostal", "code_postal"]);
       const zone = head + " \n" + text.slice(0, 4e3);
       const cpM = zone.match(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{2,40}?)\s*\((\d{5})\)/) || zone.match(/\b(\d{5})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{2,30}(?:[ -][A-ZÀ-Ýa-zà-ÿ'-]{2,20}){0,3})/);
       const bad = /kilom|prix|surface|ann[ée]e|t[ée]l|r[ée]f/i;
@@ -187,15 +201,13 @@ var SR = (() => {
       else if (city && !bad.test(city)) o.ville = city.trim();
       if (/^\d{5}$/.test(cpJ)) o.code_postal = cpJ;
       else if (cp && o.ville) o.code_postal = cp;
-    }
-    if (immo) {
       const all = head + " " + base.pathname + " " + text.slice(0, 4e3);
-      o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|cc\b|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
+      o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
       o.type_bien = /terrain/i.test(head) ? "terrain" : /parking|garage|box|stationnement/i.test(head) ? "parking" : /bureau|local|commerce|boutique|fonds/i.test(head) ? "bureau" : /maison|villa|mas\b|propri[ée]t[ée]|chalet|bastide/i.test(head) ? "maison" : "appartement";
-      const s = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)\b/i);
-      if (s) o.surface = s[1];
-      const p = all.match(/(\d{1,2})\s*pi[eè]ces?/i) || all.match(/\bT(\d)\b/);
-      if (p) o.pieces = p[1];
+      const sm = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)\b/i);
+      if (sm) o.surface = sm[1];
+      const pm2 = all.match(/(\d{1,2})\s*pi[eè]ces?/i) || all.match(/\b[TF](\d)\b/);
+      if (pm2) o.pieces = pm2[1];
       else if (/studio/i.test(head)) o.pieces = "1";
       const c = all.match(/(\d{1,2})\s*chambres?/i);
       if (c) o.chambres = c[1];
@@ -203,6 +215,10 @@ var SR = (() => {
       if (sdb) o.salles_de_bain = sdb[1];
       const land = text.match(/terrain[^0-9]{0,30}(\d[\d\s.]*)\s*m(?:²|2)/i);
       if (land && o.type_bien !== "terrain") o.surface_terrain = land[1].replace(/\s/g, "");
+      if (o.type_bien === "terrain" && o.surface) {
+        o.surface_terrain = o.surface;
+        delete o.surface;
+      }
       const dpe = (text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i) || html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
       const ges = (text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i) || html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
       if (dpe && ges) {
@@ -211,11 +227,12 @@ var SR = (() => {
       }
       const hon = text.match(/honoraires[^.\n]{0,120}/i);
       if (hon) o.honoraires = hon[0].trim();
+      if (!(o.surface || o.pieces || o.chambres || o.surface_terrain)) return null;
     } else {
-      const all = head + " " + text.slice(0, 5e3);
-      const km = all.match(/(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})\s*km\b/i);
+      const all = head + " \n" + text.slice(0, 6e3);
+      const km = all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})/i) || all.match(/(?<![\p{L}\d][\s .]?)(\d{1,3}(?:[\s. ]\d{3})+|\d{1,6})\s*km\b/iu);
       if (km) o.kilometrage = km[1].replace(/[\s. ]/g, "");
-      const y = all.match(/(?:ann[ée]e|mise en circulation|\bMEC|1[èe]re main|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}\/)?((?:19[5-9]|20[0-3])\d)\b/i) || head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);
+      const y = all.match(/(?:ann[ée]e|mise en circulation|\bMEC\b|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}\/)?((?:19[5-9]|20[0-3])\d)\b/i) || head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);
       if (y) o.annee = y[1];
       for (const [re, v] of FUEL) if (re.test(all)) {
         o.carburant = v;
@@ -227,11 +244,10 @@ var SR = (() => {
       if (ch) o.puissance_din = ch[1];
       const make = head.trim().split(/\s+/)[0];
       if (make && /^[A-Za-zÀ-ÿ-]{2,}$/.test(make) && !/^(vente|achat|occasion|voiture|v[ée]hicule|annonce)$/i.test(make)) o.marque = make;
-      o.etat = /\bneuf\b|0\s*km/i.test(head) ? "neuf" : "occasion";
-      o.type = /\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head + " " + base.pathname) ? "moto" : /\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head) ? "camping-car" : /\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit|kangoo van|partner van)\b/i.test(head) ? "utilitaire" : "voiture";
+      o.etat = /\bneuf\b|\b0\s*km\b/i.test(head) ? "neuf" : "occasion";
+      o.type = /\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head + " " + base.pathname) ? "moto" : /\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head) ? "camping-car" : /\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit)\b/i.test(head) ? "utilitaire" : "voiture";
+      if (!(o.kilometrage || o.annee)) return null;
     }
-    if (immo && !(o.surface || o.pieces || o.chambres || o.surface_terrain)) return null;
-    if (!immo && !(o.kilometrage || o.annee)) return null;
     return o;
   }
   async function readSmartSite(origin, homeHtml, sector, fetchHtml, extraStarts = []) {
@@ -278,7 +294,7 @@ var SR = (() => {
             refs.add(o.reference);
             rows.push(o);
           } else if (!o) misses++;
-          if (detailQ.length < 1500) take(text, url);
+          if (detailQ.length < 40 && text.length < 4e5) take(text, url);
         } catch {
           misses++;
         }
