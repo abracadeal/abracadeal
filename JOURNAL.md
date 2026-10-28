@@ -806,3 +806,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Vérifié après déploiement :** la fonction démarre (401 sans connexion) ; test sans écriture `auto_review_dry` sur lifecars.fr : 49/49 véhicules complets, 30,5 photos en moyenne, ville Mouans-Sartoux 06370.
 - 29/10/2026 : prix de l'aperçu « Imports sites » en dégradé violet-rose comme les boutons (au lieu de doré), demande d'Anthony.
 - 29/10/2026 : croix « × » dans les champs d'adresse de site (inscription d'un garage et « Tester une adresse ») pour les effacer d'un geste, demande d'Anthony.
+
+## 29/10/2026 — Robot v31 : ville du garage sur les sites Annonces-Automobile — Claude
+- **Signalé par Anthony :** beaucoup d'erreurs « ville manquante » à l'aperçu des sites Annonces-Automobile (il va prospecter en priorité ces garages).
+- **Corrigé :** chaque fiche AA contient un bloc « Nos coordonnées » (NOM / ADRESSE / CP VILLE) : le code postal et la ville y sont lus pour chaque véhicule (puis corrigés par la base des communes comme avant). Pour un garage inscrit, la ville de son compte reste prioritaire.
+- Déployé : `pro-stock-sync` v31 = commit 7518722f (même mode d'import par commit que v30).
