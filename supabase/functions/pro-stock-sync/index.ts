@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { eraPreviewScope, readAllEraPreview } from "./era-preview.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -477,6 +478,12 @@ async function readFeed(feed:any){
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
 }
+async function readPreviewFeed(feed:any){
+ const requested=new URL(String(feed.feed_url));
+ if(!eraPreviewScope(requested))return await readFeed(feed);
+ if(feed.sector!=='immobilier')throw Error('Sélectionnez Immobilier pour cet aperçu ERA.');
+ return await readAllEraPreview(requested,fetchSiteHtml);
+}
 async function moderationSecret(){const{data}=await admin.from('integration_secrets').select('secret_value').eq('name','pro_stock_moderation_internal').maybeSingle();return String(data?.secret_value||'');}
 async function moderateListingInternal(listingId:string){const secret=await moderationSecret();if(!secret)throw new Error('Secret de modération interne absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({listing_id:listingId}),signal:AbortSignal.timeout(90000)});const body=await r.json().catch(()=>({}));if(!r.ok||!body?.ok||!body?.ai_checked)throw new Error(body?.ai_error||body?.error||`Modération incomplète (${r.status})`);return body;}
 async function upsertContact(ownerId:string,listingId:string){const [{data:p},{data:u}]=await Promise.all([admin.from('profiles').select('phone').eq('id',ownerId).maybeSingle(),admin.auth.admin.getUserById(ownerId)]);await admin.from('listing_contacts').upsert({listing_id:listingId,owner_id:ownerId,phone:p?.phone||null,contact_email:u?.user?.email||null},{onConflict:'listing_id'});}
@@ -591,7 +598,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
  }
 }
 
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,sector,user.id)});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const results=[];const start=Date.now();for(const f of feeds||[]){
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readPreviewFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,preview_only:!!(rows as any).preview_only,photos_withheld:!!(rows as any).photos_withheld,source_total:(rows as any).source_total??null,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,sector,user.id)});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const results=[];const start=Date.now();for(const f of feeds||[]){
  // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.
  if(f.source_kind==='site'&&f.last_run_at&&Date.now()-new Date(f.last_run_at).getTime()<175*60000)continue;
  // Le reste passera au prochain passage du cron (toutes les 15 min), les plus anciens d'abord.
@@ -600,9 +607,9 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
  // Aperçu admin d'un site en attente : lecture seule, rien n'est écrit sauf le prestataire détecté / l'erreur.
  if(body?.action==='preview_feed'){
   if(!isAdmin)return json({error:'Accès administrateur requis'},403);
-  try{const rows=await readFeed(feed);const platform=(rows as any).platform||null;
-   await admin.from('pro_stock_feeds').update({site_platform:platform,last_error:null,updated_at:new Date().toISOString()}).eq('id',feed.id);
-   return json({ok:true,platform,partial:!!(rows as any).partial,sector:feed.sector,raw:rows,rows:await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id)});}
+  try{const rows=await readPreviewFeed(feed);const platform=(rows as any).platform||null;
+   if(!(rows as any).preview_only)await admin.from('pro_stock_feeds').update({site_platform:platform,last_error:null,updated_at:new Date().toISOString()}).eq('id',feed.id);
+   return json({ok:true,platform,partial:!!(rows as any).partial,preview_only:!!(rows as any).preview_only,photos_withheld:!!(rows as any).photos_withheld,source_total:(rows as any).source_total??null,sector:feed.sector,raw:rows,rows:await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id)});}
   catch(e){const msg=e instanceof Error?e.message:String(e);const platform=(e as any)?.platform||null;
    await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);
    return json({ok:false,error:msg,platform});}
@@ -611,3 +618,4 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
  if(feed.review_status&&feed.review_status!=='approved'&&!isAdmin)return json({error:'Import en attente de validation par Abracadeal'},403);
  let rows:any[];try{rows=await readFeed(feed);}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);throw e;}
  return json(await sync(feed,rows,body?.sync_mode));}catch(e){console.error(e);return json({error:e instanceof Error?e.message:'Erreur de synchronisation'},500);}});
+
