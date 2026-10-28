@@ -114,7 +114,7 @@ function parseAaDetail(html:string,url:string,id:string){
  const pageTitle=html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]||'';
  if(!pageTitle.includes(id)&&!new RegExp(`itemprop="mpn">\\s*${id}\\s*<`).test(html)){o._aa_missing='1';return o;}
  o.titre=aaClean(html.match(/<h1 itemprop="name">([\s\S]*?)<\/h1>/i)?.[1]||'');
- const prix=html.match(/<div id="prix"[^>]*>\s*<span>([\d . ]+)<\/span>/i)?.[1];if(prix)o.prix=prix;
+ const prix=html.match(/<div id="prix"[^>]*>\s*<span>([\d .\u00a0]+)<\/span>/i)?.[1];if(prix)o.prix=prix;
  const map:[string,string][]=[['Marque','marque'],['Modèle','modele'],['Finition','finition'],['Catégorie','carrosserie'],['Kilométrage','kilometrage'],['Année mise circulation','mise_en_circulation'],['Garantie','garantie'],['Energie','carburant'],['Couleur extérieure','couleur'],['Couleur intérieure','sellerie'],['Puissance fiscale','puissance_fiscale'],['Puissance DIN','puissance_din'],['Transmission','boite'],['Emission de CO2','co2'],['Nombre de portes','portes']];
  for(const[label,key]of map){const v=aaCell(html,label);if(v)o[key]=v;}
  if(o.puissance_din)o.puissance_din=o.puissance_din.replace(/\(.*$/,'').trim();

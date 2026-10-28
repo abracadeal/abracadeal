@@ -93,6 +93,8 @@
     grid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
     grid.appendChild(tile('Finances', 'finance', null, 'admin-pilotage.html'));
     grid.appendChild(tile('Prospection', 'prospect', null, 'admin-prospection.html'));
+    /* 28/10/2026 : aperçu du stock d'un site garage (Annonces-Automobile), lecture seule */
+    grid.appendChild(tile('Test import', 'flux', null, 'admin-test-import.html'));
     grid.appendChild(tile('Annonces', 'search', function () {
       var p = $('#adminDatabasePanel'); if (p) { p.scrollIntoView({ behavior: 'smooth', block: 'start' }); setTimeout(function () { var q = $('#adminDbQuery'); if (q) q.focus({ preventScroll: true }); }, 450); }
     }));
