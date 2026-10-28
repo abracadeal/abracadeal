@@ -28,7 +28,7 @@ var SR = (() => {
   const clean = (v) => sDecode(String(v || "").replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h\d)>/gi, "\n").replace(/<[^>]+>/g, " ")).replace(/[ \t   ]+/g, " ").split("\n").map((l) => l.trim()).filter(Boolean).join("\n").trim();
   const SKIP_PATH = /(blog|actualit|news|article|conseil|guide|lexique|contact|mention|cgv|cgu|conditions|confidential|cookie|rgpd|recrut|emploi|carriere|estim|vendre|faire-gerer|gestion|syndic|financ|assurance|faq|aide|login|connexion|compte|favori|alerte|newsletter|plan-du-site|sitemap|avis|temoignage|equipe|agence(s)?\/?$|qui-sommes|a-propos|services?$|honoraires|bareme|print|imprim|share|partag|tel:|mailto:|javascript:|wp-admin|wp-login|feed|tag\/|categorie?\/|author)/i;
   const LIST_PATH = /(acheter|achat|vente|vendre-|a-vendre|louer|location|annonce|biens?|nos-biens|catalog|recherche|search|resultat|offres?|stock|vehicules?|voitures?|occasions?|motos?|utilitaires?|nos-|liste|programme|immobilier)/i;
-  const IMG_BAD = /(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default|no[-_]?photo|noimage|thumb_?nail_?small)/i;
+  const IMG_BAD = /(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|partners?\/|partenaires?\/|modules\/|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default|no[-_]?photo|noimage|thumb_?nail_?small)/i;
   function pathPattern(u) {
     return u.pathname.split("/").filter(Boolean).map((s) => /\d{3,}/.test(s) ? s.replace(/\d+/g, "#").length > 12 ? "*#" : "#" : s.split("-").length >= 4 ? "*" : s).join("/");
   }
@@ -100,8 +100,9 @@ var SR = (() => {
       add(parts[parts.length - 1]);
     }
     if (!all.length) return [];
-    const key = (u) => u.split("?")[0].replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i, "");
-    const dir = (u) => u.split("?")[0].replace(/\/[^/]*$/, "");
+    const sizeless = (u) => u.split("?")[0].replace(/\/\d{2,4}x(?:\d{2,4}|auto)(?=\/)/gi, "").replace(/\/(?:thumbs?|small|medium|large|mini|xs|sm|md|lg)(?=\/)/gi, "");
+    const key = (u) => sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i, "");
+    const dir = (u) => sizeless(u).replace(/\/[^/]*$/, "");
     const counts = /* @__PURE__ */ new Map();
     for (const u of all) counts.set(dir(u), (counts.get(dir(u)) || 0) + 1);
     const ogDir = ogs.length ? dir(new URL(ogs[0], base).toString()) : "";
@@ -110,10 +111,20 @@ var SR = (() => {
     const chosen = all.filter((u) => dir(u) === mainDir || refOk && u.split("?")[0].includes(ref));
     const out = [];
     const seen = /* @__PURE__ */ new Set();
+    const sizeOf = (u) => {
+      const m = u.match(/\/(\d{2,4})x(?:\d{2,4}|auto)\//i) || u.match(/[-_](\d{2,4})x\d{2,4}(?=\.\w+$)/i);
+      return m ? Number(m[1]) : /thumb|small|mini/i.test(u) ? 1 : 5e3;
+    };
+    const pos = /* @__PURE__ */ new Map();
     for (const u of chosen) {
       const k = key(u);
-      if (seen.has(k)) continue;
+      if (seen.has(k)) {
+        const i = pos.get(k);
+        if (sizeOf(u) > sizeOf(out[i])) out[i] = u;
+        continue;
+      }
       seen.add(k);
+      pos.set(k, out.length);
       out.push(u);
     }
     return out.map((u) => /[?&](w|h|width|height|fit|size|resize)=/i.test(u) && chosen.some((c) => c === u.split("?")[0]) ? u.split("?")[0] : u).slice(0, 45);
@@ -124,7 +135,7 @@ var SR = (() => {
     for (const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)) {
       if (chunk.length < 120) continue;
       const t = clean(chunk);
-      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200)) && !/capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t)) best = t;
+      if (t.length > best.length && t.split(/\s+/).length > 25 && !/[{};]\s*[a-z-]+\s*:/.test(t.slice(0, 200)) && !/object\(|=>|string\(\d|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t)) best = t;
     }
     return best.slice(0, 6e3);
   }
@@ -206,7 +217,8 @@ var SR = (() => {
       else if (cp && o.ville) o.code_postal = cp;
       const all = head + " " + base.pathname + " " + text.slice(0, 4e3);
       o.transaction = /\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head + " " + base.pathname) ? "location" : "vente";
-      o.type_bien = /terrain/i.test(head) ? "terrain" : /parking|garage|box|stationnement/i.test(head) ? "parking" : /bureau|local|commerce|boutique|fonds/i.test(head) ? "bureau" : /maison|villa|mas\b|propri[ée]t[ée]|chalet|bastide/i.test(head) ? "maison" : "appartement";
+      const kind = head + " " + base.pathname;
+      o.type_bien = /appartement|studio|duplex|triplex|loft|penthouse|\b[TF]\d\b/i.test(kind) ? "appartement" : /maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|ferme\b/i.test(kind) ? "maison" : /terrain/i.test(kind) ? "terrain" : /bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind) ? "bureau" : /parking|garage|\bbox\b|stationnement/i.test(kind) ? "parking" : "appartement";
       const sm = all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);
       if (sm) o.surface = sm[1];
       const pm2 = all.match(/(\d{1,2})\s*pi[eè]ces?/i) || all.match(/\b[TF](\d)\b/);
