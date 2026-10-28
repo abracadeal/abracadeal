@@ -30,3 +30,7 @@ create index if not exists pro_stock_feeds_review_idx on public.pro_stock_feeds 
 --   private.site_import_consent_text, private.normalize_site_url, private.upsert_site_import_request,
 --   public.claim_signup_site_import, public.request_site_import, public.get_my_site_import,
 --   public.admin_list_site_imports, public.admin_review_site_import, public.admin_create_site_import.
+
+-- 28/10/2026 (migration site_import_block_more_marketplaces) : liste des sites refusés élargie
+-- (leboncoin, lacentrale, autoscout24, paruvendu, seloger, bienici, logic-immo, pap, ouestfrance-auto/immo,
+--  largus, vinted, facebook, instagram, tiktok), même liste côté formulaire d'inscription.

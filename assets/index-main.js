@@ -653,7 +653,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     const siteUrl=type==='professionnel'?String($('#signupSiteUrl')?.value||'').trim():'';
     const siteConsent=!!$('#signupSiteConsent')?.checked;
     if(siteUrl&&!/^(https?:\/\/)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/\S*)?$/i.test(siteUrl)){status.textContent='L’adresse du site ne semble pas valide (exemple : www.mon-garage.fr).';$('#signupSiteUrl').focus();return;}
-    if(siteUrl&&/(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|facebook|instagram)\./i.test(siteUrl)){status.textContent='Indique l’adresse de ton propre site (pas celle d’un site d’annonces ou d’un réseau social).';$('#signupSiteUrl').focus();return;}
+    if(siteUrl&&/^(https?:\/\/)?([^\/]*\.)?(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|logic-immo|pap|ouestfrance-(?:auto|immo)|largus|vinted|facebook|instagram|tiktok)\./i.test(siteUrl)){status.textContent='Les sites d’annonces (leboncoin, La Centrale, SeLoger…) et les réseaux sociaux ne fonctionnent pas : indique l’adresse de ton propre site, ou laisse ce champ vide et, après l’inscription, importe ton stock (fichier CSV ou Excel) ou saisis tes annonces depuis ton espace Pro.';$('#signupSiteUrl').focus();return;}
     if(siteUrl&&!siteConsent){status.textContent='Coche la case d’autorisation pour que nous puissions reprendre les annonces de ton site (ou laisse l’adresse vide).';$('#signupSiteConsent').focus();return;}
     const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
     const phoneCheck=await abracaPhoneAvailable(rawPhone,type);

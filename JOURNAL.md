@@ -732,3 +732,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - A et B ne diffèrent plus que par l'objet (test A/B des objets).
 - Corrigé : l'ancien texte annonçait « jusqu'à 50 annonces » alors que l'offre Fondateurs est à 100.
 - SQL : supabase/2026-10-28-prospection-mails-ultra-courts.sql (appliqué).
+
+## 28/10/2026 — Inscription pro : sites d'annonces refusés, message clair — Claude
+- Sous le champ « Adresse de votre site officiel » : leboncoin, La Centrale, AutoScout24, SeLoger, PAP… et réseaux sociaux ne fonctionnent pas ; dans ce cas laisser vide et, après l'inscription, importer un fichier (CSV/Excel) ou saisir ses annonces depuis l'espace Pro.
+- Même consigne dans le message d'erreur si le pro entre une de ces adresses. Liste élargie et ancrée sur le domaine (côté page et côté base : private.normalize_site_url).
