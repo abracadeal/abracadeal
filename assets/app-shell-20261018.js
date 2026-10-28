@@ -25,8 +25,9 @@
     'recherche-vacances.html': 'vacances.html', 'espace-voyageur.html': 'vacances.html', 'espace-hote.html': 'vacances.html',
     'ical.html': 'vacances.html', 'admin-vacances.html': 'vacances.html',
     'admin-commerce.html': 'moderation.html', 'admin-retention.html': 'moderation.html',
-    'admin-pilotage.html': 'index.html#accountModal', 'admin-prospection.html': 'index.html#accountModal', 'admin-test-import.html': 'index.html#accountModal',
-    'admin-recherche.html': 'index.html#accountModal', 'moderation.html': 'index.html#accountModal',
+    /* 28/10/2026 : #admin rouvre le menu Admin (mobile) ou Mon compte (ordinateur), plus « Compte » sur mobile. */
+    'admin-pilotage.html': 'index.html#admin', 'admin-prospection.html': 'index.html#admin', 'admin-test-import.html': 'index.html#admin',
+    'admin-recherche.html': 'index.html#admin', 'moderation.html': 'index.html#admin',
     'pro.html': 'index.html#resultats'
   };
   var parent = PARENT[page] || 'index.html';

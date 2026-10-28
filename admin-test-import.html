@@ -61,11 +61,40 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
 .sbtn[disabled]{opacity:.6;cursor:wait}
 .empty{background:var(--card);border-radius:14px;padding:16px;color:var(--muted)}
 .errline{color:var(--bad);font-size:13px}
+.onb{background:var(--card);border:1px solid #6b4a80;border-radius:16px;padding:16px}
+.onb p.lead{margin:0 0 12px;color:var(--muted);font-size:15px}
+.fg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.fg label{display:flex;flex-direction:column;gap:6px;font-size:14px;color:var(--muted)}
+.fg .full{grid-column:1/-1}
+.fg input,.fg select{padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px;min-width:0;width:100%}
+.row2{display:flex;gap:8px}.row2 input{flex:1}
+.consent{display:flex!important;flex-direction:row!important;gap:10px;align-items:flex-start;color:#fff!important;line-height:1.45}
+.consent input{width:20px!important;height:20px;flex:none;margin-top:2px}
+.company{background:#1b1124;border-radius:10px;padding:10px 12px;font-size:14px;color:#e8dcef}
+.steps{list-style:none;margin:12px 0 0;padding:0;display:grid;gap:6px;font-size:15px}
+.steps li{display:flex;gap:8px;align-items:flex-start}.steps .ic{flex:none;width:20px;text-align:center}
+.steps .ok{color:var(--ok)}.steps .ko{color:var(--bad)}.steps .wait{color:var(--gold)}
+@media (max-width:520px){.fg{grid-template-columns:1fr}}
 </style></head><body><main>
-<a class="back" href="index.html#accountModal">← Retour à Admin</a>
+<a class="back" href="index.html#admin">← Retour à Admin</a>
 <h1>Imports depuis les sites des pros</h1>
 <p class="muted">Les pros qui donnent l'adresse de leur site à l'inscription (et cochent l'autorisation) apparaissent ici. Rien n'est publié tant que vous n'avez pas cliqué sur « Activer ».</p>
 <div id="app" hidden>
+ <h2 class="sec">Inscrire un garage qui a dit oui</h2>
+ <form class="onb" id="onbForm" autocomplete="off">
+  <p class="lead">Le pro a donné son accord ? Créez son compte et mettez son stock en ligne à sa place. Il reçoit ensuite un mail pour choisir son mot de passe, ses annonces sont déjà là.</p>
+  <div class="fg">
+   <label class="full">SIRET de l'établissement<span class="row2"><input id="oSiret" inputmode="numeric" maxlength="17" placeholder="14 chiffres" required><button class="sbtn" type="button" id="oLookup">Chercher</button></span></label>
+   <div class="company full" id="oCompany" hidden></div>
+   <label>E-mail du garage<input id="oEmail" type="email" inputmode="email" autocapitalize="none" placeholder="contact@garage.fr" required></label>
+   <label>Téléphone (affiché aux acheteurs)<input id="oPhone" type="tel" inputmode="tel" placeholder="04 93 00 00 00" required></label>
+   <label>Adresse de son site<input id="oSite" type="text" inputmode="url" autocapitalize="none" placeholder="www.garage.fr" required></label>
+   <label>Domaine<select id="oSector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select></label>
+   <label class="consent full"><input type="checkbox" id="oConsent" required>Le professionnel m'a donné son accord (en personne ou par écrit) pour créer son compte et diffuser les annonces de son site sur Abracadeal.</label>
+  </div>
+  <div class="acts"><button class="btn" id="oGo">Créer le compte et importer le stock</button></div>
+  <ul class="steps" id="oSteps" hidden></ul>
+ </form>
  <h2 class="sec">Demandes</h2>
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Tester une adresse</h2>
@@ -87,7 +116,7 @@ const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):nu
 const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
 const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
 const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
-let ROWS=[],NORM=[],REQS=[];
+let ROWS=[],NORM=[],REQS=[],lastSync=null;
 async function fnError(error){let msg=error?.message||String(error);try{const b=await error.context.json();msg=b.error||msg}catch{}return msg}
 async function init(){
  const{data:{user}}=await sb.auth.getUser();
@@ -144,9 +173,10 @@ async function runSync(r,btn){
  E('resTitle').hidden=false;E('resTitle').textContent='Synchronisation · '+(r.company||r.site_url);E('grid').innerHTML='';E('stats').hidden=true;
  E('status').textContent='Import en cours… (jusqu\'à 2 minutes, ne fermez pas la page)';E('resTitle').scrollIntoView({behavior:'smooth'});
  try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
+  lastSync=data;
   E('status').innerHTML='Terminé : <b>'+(data.received||0)+'</b> lus · <b>'+(data.created||0)+'</b> créés · <b>'+(data.updated||0)+'</b> mis à jour · <b>'+(data.archived||0)+'</b> retirés · <b>'+(data.errors||0)+'</b> en erreur.'+(data.moderation_deferred?' '+data.moderation_deferred+' annonces seront vérifiées dans les prochaines minutes.':'')+(data.archive_skipped?' Retraits non appliqués : '+esc(data.archive_skipped)+'.':'')+' Les annonces passent en ligne après la modération.';
- }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
- finally{btn.disabled=false;loadReqs();}
+ }catch(e){lastSync={error:e.message||String(e)};E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
+ finally{if(btn)btn.disabled=false;await loadReqs();}
 }
 async function load(ev){
  ev.preventDefault();
@@ -189,6 +219,52 @@ E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');
 E('db').addEventListener('click',e=>{const t=e.target.closest('.thumbs img');if(!t)return;E('bigimg').src=t.src;E('db').querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t))});
 E('dx').addEventListener('click',()=>E('dlg').close());
 E('dlg').addEventListener('click',e=>{if(e.target===E('dlg'))E('dlg').close()});
+// 28/10/2026 : inscription d'un garage par l'admin (fonction admin-onboard-pro).
+function step(text,state){const li=document.createElement('li');li.innerHTML='<span class="ic '+state+'">'+(state==='ok'?'✓':state==='ko'?'✕':'…')+'</span><span>'+text+'</span>';E('oSteps').appendChild(li);E('oSteps').hidden=false;return li}
+function setStep(li,text,state){li.innerHTML='<span class="ic '+state+'">'+(state==='ok'?'✓':state==='ko'?'✕':'…')+'</span><span>'+text+'</span>'}
+async function onboardCall(body){const{data,error}=await sb.functions.invoke('admin-onboard-pro',{body});if(error)throw Error(await fnError(error));if(!data?.ok)throw Error(data?.error||'Réponse inattendue');return data}
+E('oLookup').addEventListener('click',async()=>{
+ const siret=E('oSiret').value.replace(/\D/g,''),box=E('oCompany');box.hidden=false;
+ if(!/^\d{14}$/.test(siret)){box.textContent='Le SIRET doit contenir 14 chiffres.';return}
+ box.textContent='Recherche dans le registre…';E('oLookup').disabled=true;
+ try{const d=await onboardCall({action:'lookup',siret});const c=d.company;
+  box.innerHTML='<b>'+esc(c.company_name)+'</b>'+(c.company_city?' · '+esc(c.company_postal_code+' '+c.company_city):'')+'<br>'+esc(c.activity_label||c.activity_code||'')+(d.already_registered?'<br><span style="color:var(--gold)">Ce SIRET a déjà un compte Abracadeal : utilisez le même e-mail pour ajouter seulement l\'import.</span>':'');
+  if(c.business_sector==='immobilier'||c.business_sector==='vehicules')E('oSector').value=c.business_sector;
+ }catch(e){box.innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}finally{E('oLookup').disabled=false}
+});
+async function sendWelcome(userId,feedId,host){
+ const li=step('Envoi du mail au garage (lien pour choisir son mot de passe)…','wait');
+ const r=REQS.find(x=>x.feed_id===feedId)||{};
+ try{const d=await onboardCall({action:'welcome',user_id:userId,online:r.listings_online||0,pending:r.listings_pending||0});setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b>.','ok')}
+ catch(e){setStep(li,'Mail non envoyé : '+esc(e.message||e)+' ','ko');const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Réessayer l\'envoi';b.onclick=()=>{li.remove();sendWelcome(userId,feedId)};li.appendChild(b)}
+}
+E('onbForm').addEventListener('submit',async ev=>{
+ ev.preventDefault();
+ const go=E('oGo');if(go.disabled)return;
+ const body={action:'create',siret:E('oSiret').value.replace(/\D/g,''),email:E('oEmail').value.trim(),phone:E('oPhone').value.trim(),site_url:E('oSite').value.trim(),sector:E('oSector').value,consent:E('oConsent').checked};
+ if(!confirm('Créer le compte de ce garage et mettre son stock en ligne ?\n\n'+body.email+'\n'+body.site_url))return;
+ go.disabled=true;E('oSteps').innerHTML='';
+ let li=step('Création du compte, vérification du SIRET, offre Fondateur…','wait');
+ try{
+  const d=await onboardCall(body);
+  setStep(li,(d.existing?'Compte existant retrouvé':'Compte créé')+' : <b>'+esc(d.company?.company_name||'')+'</b>'+(d.founder?' · Fondateur n°'+esc(d.founder.number):''),'ok');
+  (d.warnings||[]).forEach(w=>step(esc(w),'ko'));
+  li=step('Activation de l\'import du site…','wait');
+  const{error}=await sb.rpc('admin_review_site_import',{p_feed_id:d.feed_id,p_decision:'approve'});
+  if(error){setStep(li,'Activation impossible : '+esc(error.message),'ko');await loadReqs();return}
+  setStep(li,'Import activé.','ok');
+  li=step('Lecture du site et mise en ligne des annonces (jusqu\'à 2 minutes, ne fermez pas la page)…','wait');
+  lastSync=null;await runSync({feed_id:d.feed_id,company:d.company?.company_name,site_url:body.site_url},null);
+  if(lastSync?.error){setStep(li,'Import en erreur : '+esc(lastSync.error)+'. Le mail n\'est pas envoyé : corrigez puis relancez « Synchroniser maintenant ».','ko');
+   const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Envoyer quand même le mail';b.onclick=()=>{b.remove();sendWelcome(d.user_id,d.feed_id)};li.appendChild(b);return}
+  E('oSteps').scrollIntoView({behavior:'smooth',block:'center'});
+  setStep(li,'<b>'+(lastSync?.created||0)+'</b> annonces créées, <b>'+(lastSync?.updated||0)+'</b> mises à jour (en ligne après la modération).','ok');
+  if(d.existing){step('Compte déjà existant : pas de mail de bienvenue envoyé.','ok');return}
+  await sendWelcome(d.user_id,d.feed_id);
+  E('onbForm').reset();E('oCompany').hidden=true;
+ }catch(e){setStep(li,esc(e.message||e),'ko')}
+ finally{go.disabled=false}
+});
 init();
 </script>
 </body></html>

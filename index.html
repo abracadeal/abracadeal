@@ -1271,6 +1271,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
         <div class="form-grid">
           <div class="form-row full"><label for="recoveryPassword">Nouveau mot de passe</label><input class="input" id="recoveryPassword" type="password" autocomplete="new-password" minlength="8" required></div>
           <div class="form-row full"><label for="recoveryPasswordConfirm">Confirmer le nouveau mot de passe</label><input class="input" id="recoveryPasswordConfirm" type="password" autocomplete="new-password" minlength="8" required></div>
+          <div class="form-row full hidden" id="recoveryLegalRow"><label style="display:flex;gap:10px;align-items:flex-start;line-height:1.5;font-weight:500"><input type="checkbox" id="recoveryLegal" style="flex:none;width:20px;height:20px;margin-top:2px">J’accepte les <a href="cgu.html" target="_blank" rel="noopener">CGU</a>, les <a href="cgv.html" target="_blank" rel="noopener">conditions de vente</a> et la <a href="confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>, et je confirme avoir au moins 18 ans.</label></div>
         </div>
         <p id="recoveryPasswordStatus" class="note" role="status" aria-live="polite"></p>
         <div class="form-actions"><button class="btn primary" type="submit">Enregistrer le mot de passe</button></div>
@@ -1790,7 +1791,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <!-- 18/10/2026 : Supabase chargé ici (et non plus dans <head>) pour que la page s’affiche sans l’attendre ; il est téléchargé en avance grâce au preload. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
-<script src="assets/index-main.js?v=20261028-site-import3"></script>
+<script src="assets/index-main.js?v=20261028-onboard-admin"></script>
 <script src="assets/social-login-20261018.js?v=3"></script>
 <script src="assets/description-helper-20261013.js?v=2" defer></script>
 <script src="assets/publish-more-details-20261026.js?v=3" defer></script>
@@ -1839,7 +1840,7 @@ document.addEventListener('DOMContentLoaded',function(){
     <button type="button" class="photo-lightbox-bottom-contact" id="photoLightboxContact">Contacter</button>
   </div>
 </div>
-<script src="assets/index-app.js?v=20261028-admin-mobile"></script>
+<script src="assets/index-app.js?v=20261028-retour-admin"></script>
 
 
 

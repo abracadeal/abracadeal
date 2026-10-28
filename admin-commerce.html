@@ -3,5 +3,5 @@
 const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF'),st=document.getElementById('status'),form=document.getElementById('offerForm');
 async function init(){const {data,error}=await sb.rpc('admin_get_listing_edit_offer');if(error||!data){st.textContent=error?.message||'Accès administrateur requis';return}document.getElementById('amount').value=(data.amount_cents/100).toFixed(2);document.getElementById('active').checked=data.active;form.hidden=false;st.textContent='Tarif actuel : '+(data.amount_cents/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' € TTC.';}
 form.onsubmit=async e=>{e.preventDefault();const save=document.getElementById('save');save.disabled=true;try{const {data,error}=await sb.rpc('admin_set_listing_edit_offer',{p_amount_cents:Math.round(Number(document.getElementById('amount').value)*100),p_active:document.getElementById('active').checked});if(error)throw error;st.textContent='Tarif enregistré : '+(data.amount_cents/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' € TTC.';}catch(e){st.textContent=e.message;}finally{save.disabled=false;}};init();
-</script><script src="/assets/app-shell-20261018.js?v=5" defer></script>
+</script><script src="/assets/app-shell-20261018.js?v=6" defer></script>
 </body></html>

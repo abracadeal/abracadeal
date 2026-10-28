@@ -1079,6 +1079,23 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
   else init();
   window.addEventListener('abracadeal:auth',()=>setTimeout(syncAdminNav,80));
+  // 28/10/2026 : retour depuis une page admin (index.html#admin) → menu Admin sur mobile, Mon compte sur ordinateur.
+  if(location.hash==='#admin'){
+    let done=false;
+    const clear=()=>{try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}};
+    const open=()=>{
+      if(done||!isAdmin())return;
+      done=true;clear();
+      if(window.matchMedia('(max-width: 760px)').matches){
+        syncAdminNav();
+        const nav=navBtn();
+        if(nav&&nav.dataset.mobileAction==='admin')nav.click();else openModal('mobileAdminModal');
+      }else openModal('accountModal');
+    };
+    window.addEventListener('abracadeal:auth',()=>setTimeout(open,150));
+    [300,1000,2500].forEach(t=>setTimeout(open,t));
+    setTimeout(()=>{if(done)return;done=true;clear();if(typeof currentUser!=='undefined'&&currentUser)return;window.setAuthTab?.('login');openModal('accountModal');},5000);
+  }
 })();
 
 
