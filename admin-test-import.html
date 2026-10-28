@@ -75,6 +75,11 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
 .steps li{display:flex;gap:8px;align-items:flex-start}.steps .ic{flex:none;width:20px;text-align:center}
 .steps .ok{color:var(--ok)}.steps .ko{color:var(--bad)}.steps .wait{color:var(--gold)}
 @media (max-width:520px){.fg{grid-template-columns:1fr}}
+.clr{position:relative;display:block;flex:1 1 240px;min-width:0}
+.fg .clr{flex:none}
+.clr input{width:100%;padding-right:46px!important;flex:none!important}
+.clr .x-clear{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:#3b2946;color:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+.clr .x-clear[hidden]{display:none!important}
 </style></head><body><main>
 <a class="back" href="index.html#admin">← Retour à Admin</a>
 <h1>Imports depuis les sites des pros</h1>
@@ -88,7 +93,7 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
    <div class="company full" id="oCompany" hidden></div>
    <label>E-mail du garage<input id="oEmail" type="email" inputmode="email" autocapitalize="none" placeholder="contact@garage.fr" required></label>
    <label>Téléphone (affiché aux acheteurs)<input id="oPhone" type="tel" inputmode="tel" placeholder="04 93 00 00 00" required></label>
-   <label>Adresse de son site<input id="oSite" type="text" inputmode="url" autocapitalize="none" placeholder="www.garage.fr" required></label>
+   <label>Adresse de son site<input id="oSite" class="clearable" type="text" inputmode="url" autocapitalize="none" placeholder="www.garage.fr" required></label>
    <label>Domaine<select id="oSector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select></label>
    <label class="consent full"><input type="checkbox" id="oConsent" required>Le professionnel m'a donné son accord (en personne ou par écrit) pour créer son compte et diffuser les annonces de son site sur Abracadeal.</label>
   </div>
@@ -98,7 +103,7 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
  <h2 class="sec">Demandes</h2>
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Tester une adresse</h2>
- <form class="bar" id="form"><input id="url" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
+ <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
  <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
  <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
  <p id="status" class="muted"></p>
@@ -213,6 +218,13 @@ function openCar(i){
  E('db').innerHTML='<h2 style="margin:0 0 10px;font-size:18px">'+esc(r.titre)+'</h2>'+(ph.length?'<div class="big"><img id="bigimg" src="'+esc(ph[0])+'" alt=""></div><div class="thumbs">'+ph.map((u,k)=>'<img loading="lazy" data-k="'+k+'" class="'+(k?'':'on')+'" src="'+esc(u)+'" alt="">').join('')+'</div><p class="muted" style="margin:0">'+ph.length+' photos</p>':'<p class="muted">Aucune photo trouvée</p>')+'<table>'+rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('')+'</table>'+(r.description?'<h3 style="font-size:16px">Description</h3><div class="desc">'+esc(r.description)+'</div>':'')+(r.url?'<p><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Voir la fiche sur le site du pro</a></p>':'');
  E('dlg').showModal();E('dlg').scrollTop=0;
 }
+// 29/10/2026 : croix pour effacer vite une adresse de site.
+document.querySelectorAll('input.clearable').forEach(inp=>{
+ const wrap=document.createElement('span');wrap.className='clr';inp.parentNode.insertBefore(wrap,inp);wrap.appendChild(inp);
+ const b=document.createElement('button');b.type='button';b.className='x-clear';b.setAttribute('aria-label','Effacer l\'adresse');b.textContent='×';wrap.appendChild(b);
+ const sync=()=>{b.hidden=!inp.value};inp.addEventListener('input',sync);sync();
+ b.addEventListener('click',()=>{inp.value='';sync();inp.focus()});
+});
 E('form').addEventListener('submit',load);
 E('reqs').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b)act(b.dataset.a,Number(b.dataset.i),b)});
 E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');if(c)openCar(Number(c.dataset.i))});
