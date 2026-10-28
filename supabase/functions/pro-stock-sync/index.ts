@@ -150,6 +150,9 @@ function parseAaDetail(html:string,url:string,id:string){
  if(/\b(moto|motos|scooter|scooters|quad|quads|deux[- ]roues)\b/i.test(o.carrosserie||''))o.type='moto';else if(cat.includes('utilitaire'))o.type='utilitaire';else if(/camping/.test(cat))o.type='camping-car';else o.type='voiture';
  o.etat='occasion';
  const desc=html.match(/<div id="description">[\s\S]*?<div class="box">([\s\S]*?)<\/div>/i)?.[1];if(desc)o.description=aaClean(desc).slice(0,6000);
+ // 29/10/2026 : ville du garage lue dans le bloc « Nos coordonnées » de la fiche (NOM<br>ADRESSE<br>CP VILLE).
+ {const co=html.match(/Nos coordonn(?:é|e|&eacute;)es\s*<\/h\d>\s*<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]||html.match(/id="contact-telephone"[\s\S]{0,400}?<p[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'';
+  for(const line of co.split(/<br\s*\/?>/i).map(l=>aaClean(l))){const m=line.match(/^(?:F-)?(\d{5})\s+(.{2,60})$/);if(m){o.code_postal=m[1];o.ville=m[2].trim().toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(x:string,a:string,b:string)=>a+b.toUpperCase());break;}}}
  o.photos=aaPhotos(html,url);
  if(!o.photos)delete o.photos;
  return o;
