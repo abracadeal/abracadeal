@@ -717,3 +717,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Test : Ag Immo Les Mimosas (orpi.com/agimmo) → 102 biens (90 ventes, 12 locations) en ~21 s.
 - Détection du prestataire étendue aux réseaux (Orpi, Century 21, Laforêt, Guy Hoquet, Stéphane Plaza, Nestenn, Foncia, SweepBright).
 - Fonction de test `aa-site-preview-tmp` désactivée (réponse 410), à supprimer depuis le tableau de bord.
+
+## 28/10/2026 — Connecteur Century 21 (sites d'agence) — Claude
+- `pro-stock-sync` v22 : les sites d'agence Century 21 (ex. century21-gastaldy-cap-d-ail.com) sont lus : listes /annonces/achat/ et /annonces/location/ (pages /page-N/), puis chaque fiche (JSON-LD + page).
+- Champs : titre, prix, vente/location, type, ville/CP, surface, pièces, chambres, SDB, étage, chauffage, taxe foncière, lots/charges, dépôt, honoraires, DPE/GES (lus sur l'étiquette SVG), date et coûts DPE, équipements, description, photos grand format.
+- Référence = n° de fiche du site ; la réf. agence est gardée comme n° de mandat.
+- Une fiche agence century21.fr/trouver_agence/agence/<id>/ renvoie vers le site de l'agence.
+- Adresse nationale d'un réseau (century21.fr, orpi.com, laforet.com…) : message clair demandant l'adresse de l'agence.
+- Test : Century 21 Agence Gastaldy → 39 biens en ~2,4 s.
+- Page admin « Imports sites » : les anciens chiffres de l'aperçu restaient affichés après une erreur (attribut hidden écrasé par display:grid) — corrigé.
