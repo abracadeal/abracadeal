@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {stripTypeScriptTypes} from 'node:module';
-import { eraPreviewScope, parseEraPreview } from '../supabase/functions/pro-stock-sync/era-preview.ts';
+import { eraPreviewScope, parseEraPreview, readAllEraPreview } from '../supabase/functions/pro-stock-sync/era-preview.ts';
 
 const url='https://www.eraimmobilier.com/achat/region-17/departement-10/cannes-6465';
 const item={id:42,geo_ville_id:6465,type_annonce:'Vente',type_bien:'Appartement',libelle:'Appartement de test',
@@ -36,12 +36,12 @@ const source=readFileSync(new URL('../supabase/functions/pro-stock-sync/index.ts
 stripTypeScriptTypes(source);
 const helper=stripTypeScriptTypes(source.slice(source.indexOf('async function readPreviewFeed('),source.indexOf('async function moderationSecret(')));
 function preview(fetchSiteHtml,readFeed=()=>{throw Error('Import reader must not run');}){
-  return new Function('eraPreviewScope','parseEraPreview','fetchSiteHtml','readFeed',helper+'; return readPreviewFeed;')
-    (eraPreviewScope,parseEraPreview,fetchSiteHtml,readFeed);
+  return new Function('eraPreviewScope','readAllEraPreview','fetchSiteHtml','readFeed',helper+'; return readPreviewFeed;')
+    (eraPreviewScope,readAllEraPreview,fetchSiteHtml,readFeed);
 }
 test('ERA preview downloads the requested HTML once and never runs the import reader',async()=>{
   let calls=0;
-  const rows=await preview(async requested=>{calls++;assert.equal(requested.toString(),url);return {url:requested,text:html({[key]:{data:[item]}})};})
+  const rows=await preview(async requested=>{calls++;assert.equal(requested.toString(),url);return {url:requested,text:html({[key]:{data:[item],meta:{total:1,per_page:10,page:1}}})};})
     ({feed_url:url,sector:'immobilier'});
   assert.equal(calls,1);assert.equal(rows.preview_only,true);
 });
@@ -52,4 +52,34 @@ test('wrong sector or cross-search redirects cannot widen ERA preview',async()=>
 test('other sites retain the existing reader',async()=>{
   const rows=await preview(()=>{throw Error('Must not fetch');},async()=>['existing'])({feed_url:'https://example.com',sector:'immobilier'});
   assert.deepEqual(rows,['existing']);
+});
+
+function pageHtml(page, {total=25, duplicate=false, links=true}={}) {
+ const count=page===3?5:10;
+ const data=Array.from({length:count},(_,i)=>({...item,id:duplicate?i+1:(page-1)*10+i+1}));
+ return html({[key.replace('page=1',`page=${page}`)]:{data,meta:{total,per_page:10,page}}})
+  +(links?[1,2,3].map(n=>`<a href="${new URL(url).pathname}?page=${n}">${n}</a>`).join(''):'');
+}
+test('reads all three pages and returns exactly 25 distinct properties',async()=>{
+ const calls=[];
+ const rows=await readAllEraPreview(new URL(url),async u=>{const page=Number(u.searchParams.get('page')||1);calls.push(page);return {url:u,text:pageHtml(page)};});
+ assert.deepEqual(calls,[1,2,3]);assert.equal(rows.length,25);assert.equal(rows.source_total,25);
+ assert.equal(rows.source_pages,3);assert.equal(rows.partial,false);assert.equal(rows.preview_only,true);
+ assert.ok(rows.every(row=>row.photos===''));
+});
+test('a starting page other than 1 still reads the entire search from page 1',async()=>{
+ const calls=[];
+ await readAllEraPreview(new URL(url+'?page=3'),async u=>{const n=Number(u.searchParams.get('page')||1);calls.push(n);return {url:u,text:pageHtml(n)};});
+ assert.deepEqual(calls,[1,2,3]);
+});
+test('missing pagination or duplicates cannot be reported as complete',async()=>{
+ for(const options of [{links:false},{duplicate:true}])await assert.rejects(readAllEraPreview(new URL(url),async u=>({url:u,text:pageHtml(Number(u.searchParams.get('page')||1),options)})),/incomplète/);
+});
+test('page failures and changing totals fail rather than silently returning 10 out of 25',async()=>{
+ await assert.rejects(readAllEraPreview(new URL(url),async u=>{if(u.searchParams.get('page')==='2')throw Error('HTTP 503');return {url:u,text:pageHtml(1)};}),/503/);
+ await assert.rejects(readAllEraPreview(new URL(url),async u=>{const n=Number(u.searchParams.get('page')||1);return {url:u,text:pageHtml(n,{total:n===1?25:24})};}),/changé/);
+});
+test('wrong server page and extra filters are rejected',async()=>{
+ await assert.rejects(readAllEraPreview(new URL(url),async u=>({url:u,text:pageHtml(1)})));
+ await assert.rejects(readAllEraPreview(new URL(url+'?type=maison'),async()=>{throw Error('Must not fetch');}),/filtre/);
 });
