@@ -90,6 +90,64 @@ async function publicFeedUrl(url:URL){
  const addresses=/^[\d.]+$/.test(host)||host.includes(':')?[host]:[...await Deno.resolveDns(host,'A').catch(()=>[]),...await Deno.resolveDns(host,'AAAA').catch(()=>[])];
  if(!addresses.length||addresses.some(privateIp))throw Error('Adresse de flux privée ou inaccessible');
 }
+// Sites vitrines de garages réalisés par « Annonces Automobile » (ex. lifecars.fr) : pas de flux public,
+// on lit la page /annonces (toutes les pages) puis chaque fiche pour récupérer champs + toutes les photos.
+// Fail closed : si la liste ne peut pas être lue entièrement, on lève une erreur (aucun archivage).
+const isAaSiteHtml=(t:string)=>/cdn-rivamedia\.com/i.test(t)&&/annonces-automobile\.com/i.test(t);
+async function fetchSiteHtml(start:URL){
+ let url=new URL(start.toString());
+ for(let redirects=0;;redirects++){
+  await publicFeedUrl(url);
+  const r=await fetch(url.toString(),{headers:{Accept:'text/html,*/*;q=0.5','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},redirect:'manual',signal:AbortSignal.timeout(20000)});
+  if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc||redirects>=4)throw Error('Redirection invalide');url=new URL(loc,url);continue;}
+  if(!r.ok)throw Error(`HTTP ${r.status}`);
+  const text=await r.text();if(text.length>5_000_000)throw Error('Page trop volumineuse');
+  return{text,url};
+ }
+}
+const aaClean=(v:string)=>decodeEntities(String(v||'').replace(/<span class="legendsup">[\s\S]*?<\/span>/gi,'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'')).replace(/[ \t]+/g,' ').split('\n').map(l=>l.trim()).join('\n').replace(/\n{3,}/g,'\n\n').trim();
+function aaListLinks(html:string,base:URL){const out=new Map<string,string>();for(const m of html.matchAll(/href="([^"]*\/annonce-[a-z0-9-]*?-(\d{5,}))"/gi)){try{const u=new URL(decodeEntities(m[1]),base);if(u.hostname===base.hostname&&!out.has(m[2]))out.set(m[2],u.toString());}catch{}}return out;}
+function aaCell(html:string,label:string){const esc=label.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');const m=html.match(new RegExp(`<td class="legend">\\s*${esc}\\s*</td>\\s*<td[^>]*>([\\s\\S]*?)</td>`,'i'));const v=m?aaClean(m[1]):'';return v==='-'?'':v;}
+function parseAaDetail(html:string,url:string,id:string){
+ const o:any={reference:id,url};
+ // Une fiche vendue renvoie vers une page de liste : sans « n°<id> » dans le titre, on ne lit rien.
+ const pageTitle=html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]||'';
+ if(!pageTitle.includes(id)&&!new RegExp(`itemprop="mpn">\\s*${id}\\s*<`).test(html)){o._aa_missing='1';return o;}
+ o.titre=aaClean(html.match(/<h1 itemprop="name">([\s\S]*?)<\/h1>/i)?.[1]||'');
+ const prix=html.match(/<div id="prix"[^>]*>\s*<span>([\d . ]+)<\/span>/i)?.[1];if(prix)o.prix=prix;
+ const map:[string,string][]=[['Marque','marque'],['Modèle','modele'],['Finition','finition'],['Catégorie','carrosserie'],['Kilométrage','kilometrage'],['Année mise circulation','mise_en_circulation'],['Garantie','garantie'],['Energie','carburant'],['Couleur extérieure','couleur'],['Couleur intérieure','sellerie'],['Puissance fiscale','puissance_fiscale'],['Puissance DIN','puissance_din'],['Transmission','boite'],['Emission de CO2','co2'],['Nombre de portes','portes']];
+ for(const[label,key]of map){const v=aaCell(html,label);if(v)o[key]=v;}
+ if(o.puissance_din)o.puissance_din=o.puissance_din.replace(/\(.*$/,'').trim();
+ if(o.boite&&/m[ée]canique/i.test(o.boite))o.boite='manuelle';
+ const mec=String(o.mise_en_circulation||'').match(/((?:19|20)\d{2})/);if(mec)o.annee=mec[1];
+ const cat=norm(o.carrosserie);
+ // Type lu dans la catégorie du site seulement (le titre peut contenir « Quad Cab », etc.).
+ if(/\b(moto|motos|scooter|scooters|quad|quads|deux[- ]roues)\b/i.test(o.carrosserie||''))o.type='moto';else if(cat.includes('utilitaire'))o.type='utilitaire';else if(/camping/.test(cat))o.type='camping-car';else o.type='voiture';
+ o.etat='occasion';
+ const desc=html.match(/<div id="description">[\s\S]*?<div class="box">([\s\S]*?)<\/div>/i)?.[1];if(desc)o.description=aaClean(desc).slice(0,6000);
+ const photos:string[]=[];const seenIds=new Set<string>();
+ for(const m of html.matchAll(/https?:\/\/auto\.cdn-rivamedia\.com\/photos\/annoncecli\/big\/[^"'\s)<>]+?-(\d+)\.(?:jpe?g|png|webp)/gi)){if(!seenIds.has(m[1])){seenIds.add(m[1]);photos.push(m[0]);}}
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ return o;
+}
+async function readAaSite(origin:URL){
+ const links=new Map<string,string>();
+ let page=new URL('/annonces',origin);
+ for(let p=1;p<=30;p++){
+  const{text,url}=await fetchSiteHtml(page).catch(e=>{throw Error(`Liste des véhicules illisible (page ${p}) : ${e instanceof Error?e.message:String(e)}`);});
+  const before=links.size;for(const[k,v]of aaListLinks(text.replace(/<div[^>]*id="(?:similaires|annonces-similaires)"[\s\S]*$/i,''),url))if(!links.has(k))links.set(k,v);
+  const next=text.match(/href="([^"]*[?&]p=(\d+))"[^>]*>\s*Page suivante/i);
+  if(!next||links.size===before)break;
+  page=new URL(decodeEntities(next[1]),url);
+ }
+ if(!links.size)throw Error('Aucun véhicule trouvé sur le site (mise en page inconnue) : synchronisation annulée par sécurité.');
+ const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseAaDetail(text,url,id);
+   // Fiche momentanément illisible ou vendue entre la liste et la fiche : la référence reste « vue » (pas d'archivage),
+   // et la ligne part en erreur (titre manquant) sans écraser l'annonce existante.
+   rows.push(o._aa_missing?{reference:id,url}:o);}catch{rows.push({reference:id,url});}}}));
+ return rows;
+}
 async function readFeed(feed:any){
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
@@ -120,6 +178,7 @@ async function readFeed(feed:any){
   const text=await r.text();
   if(text.length>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   const ct=(r.headers.get('content-type')||'').toLowerCase();
+  if((ct.includes('html')||/^\s*<(?:!doctype html|html)/i.test(text))&&isAaSiteHtml(text))return await readAaSite(new URL(url.origin));
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
 }
