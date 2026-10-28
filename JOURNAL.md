@@ -811,3 +811,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Signalé par Anthony :** beaucoup d'erreurs « ville manquante » à l'aperçu des sites Annonces-Automobile (il va prospecter en priorité ces garages).
 - **Corrigé :** chaque fiche AA contient un bloc « Nos coordonnées » (NOM / ADRESSE / CP VILLE) : le code postal et la ville y sont lus pour chaque véhicule (puis corrigés par la base des communes comme avant). Pour un garage inscrit, la ville de son compte reste prioritaire.
 - Déployé : `pro-stock-sync` v31 = commit 7518722f (même mode d'import par commit que v30).
+- **29/10/2026 — robot v32 (commit 75c20ee2) :** photos en double sur certains sites AA (ex. svartandmotors.com) : la taille y est dans le nom du fichier (`215930456-ibig.jpg` / `-intermediate.jpg`) et non dans un dossier ; les variantes sont maintenant regroupées par numéro, la plus grande gardée (Aston Martin Vanquish : 25 photos uniques au lieu de 45 avec doublons).
