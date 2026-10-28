@@ -737,3 +737,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Sous le champ « Adresse de votre site officiel » : leboncoin, La Centrale, AutoScout24, SeLoger, PAP… et réseaux sociaux ne fonctionnent pas ; dans ce cas laisser vide et, après l'inscription, importer un fichier (CSV/Excel) ou saisir ses annonces depuis l'espace Pro.
 - Même consigne dans le message d'erreur si le pro entre une de ces adresses. Liste élargie et ancrée sur le domaine (côté page et côté base : private.normalize_site_url).
 - Consigne complétée (demande d'Anthony) : flux ou API du logiciel du pro, en plus de l'import fichier et de la saisie.
+
+## 28/10/2026 — Lecteur « intelligent » des sites de pros — Claude
+- `pro-stock-sync` v23 (2 fichiers : index.ts + smart-reader.ts). Quand aucun connecteur dédié ne reconnaît le site, un lecteur générique :
+  repère les fiches (liens qui se répètent, sinon sitemap), lit titre, prix (en ignorant les mensualités), photos (galerie principale, plus grande taille, sans logos), surface/pièces/chambres/DPE/ville (immo) ou km/année/carburant/boîte (véhicules), description (hors mentions légales/RGPD).
+  Les données structurées (JSON-LD) restent prioritaires sur chaque fiche. Limites : 20 pages de liste, 400 pages, 50 s ; travail borné par page (limite CPU des fonctions).
+- Adresse d'agence dans un réseau (ex. laforet.com/agence-immobiliere/cannes) : la lecture reste sous ce chemin.
+- Nouveau : boutiques Shopify (/products.json). Sites protégés anti-robots (Cloudflare…) : message clair (flux ou import).
+- Testé : Laforêt Cannes (28 biens, 8-20 photos), La Boîte Immo (agencelacanopee.com 40 biens, reseau-expertimo.fr), Apimo/Mira (cannes-impact.com, 1 photo par bien seulement), garages WooCommerce/Annonces-Automobile (déjà couverts par leurs connecteurs).
+- Pas encore : Guy Hoquet (liste chargée en JavaScript), Stéphane Plaza (bloque les robots), Foncia (application), Spoticar (JavaScript).
+- Fonction de test `aa-site-preview-tmp` désactivée (410). Fonctions SQL de test private.tmp_probe / tmp_probe_res à supprimer (suppression refusée par l'outil ; non accessibles aux clients).

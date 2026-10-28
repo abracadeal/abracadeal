@@ -1,4 +1,5 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
+import { readSmartSite, sDecode } from "./smart-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -203,6 +204,28 @@ async function readWooSite(origin:URL){
    if(o.puissance_din&&/^\d+$/.test(o.puissance_din))o.puissance_din+=' ch';
    if(o.annee&&!o.mise_en_circulation)o.mise_en_circulation=o.annee;}}catch{}
   rows.push(o);}}));
+ return rows;
+}
+// Boutiques Shopify : catalogue public /products.json (titre, prix, photos, description, disponibilité).
+async function readShopify(origin:URL,sector:string){
+ const rows:any[]=[];
+ for(let page=1;page<=8;page++){
+  const{data}=await fetchSiteJson(new URL(`/products.json?limit=250&page=${page}`,origin)).catch(e=>{throw Error(`Catalogue Shopify illisible : ${e instanceof Error?e.message:String(e)}`);});
+  const list=Array.isArray(data?.products)?data.products:[];
+  for(const p of list){
+   const variants=Array.isArray(p.variants)?p.variants:[];if(variants.length&&!variants.some((v:any)=>v.available!==false))continue;
+   const price=Number(variants[0]?.price||0);if(!(price>0))continue;
+   const desc=aaClean(String(p.body_html||'').replace(/<\/p>/gi,'\n'));
+   const o:any={reference:String(p.id),url:new URL('/products/'+p.handle,origin).toString(),titre:sDecode(String(p.title||'')).trim(),prix:String(Math.round(price)),description:desc.slice(0,6000)};
+   const photos=(p.images||[]).map((im:any)=>String(im?.src||'')).filter((u:string)=>/^https?:/i.test(u));if(photos.length)o.photos=photos.slice(0,45).join('|');
+   const all=o.titre+' '+desc;
+   if(sector==='immobilier'){o.transaction=/louer|location|loyer/i.test(all)?'location':'vente';o.type_bien=/maison|villa/i.test(all)?'maison':/terrain/i.test(all)?'terrain':'appartement';const sm=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);if(sm)o.surface=sm[1];const pc=all.match(/(\d{1,2})\s*pi[eè]ces?/i);if(pc)o.pieces=pc[1];}
+   else{const km=all.match(/(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})\s*km\b/i);if(km)o.kilometrage=km[1].replace(/[\s.\u00a0]/g,'');const y=all.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];o.etat='occasion';o.type=/\b(moto|scooter|quad)\b/i.test(all)?'moto':'voiture';if(p.vendor)o.marque=String(p.vendor);}
+   rows.push(o);
+  }
+  if(list.length<250)break;
+ }
+ if(!rows.length)throw Error('Aucune annonce disponible trouvée dans la boutique Shopify : synchronisation annulée par sécurité.');
  return rows;
 }
 // Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
@@ -421,7 +444,7 @@ async function readGenericSite(origin:URL,homeHtml:string,sector='vehicules'){
  return rows;
 }
 // Prestataire du site (pour savoir quel connecteur ajouter quand le site n'est pas encore lisible).
-const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\./i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
+const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo|staticlbi\.com/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\.|media\.apimo\.pro/i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
 function detectSitePlatform(html:string){
  for(const[re,name]of SITE_PROVIDERS)if(re.test(html))return name;
  const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
@@ -451,7 +474,12 @@ async function readFeed(feed:any){
     if(e instanceof DOMException&&e.name==='AbortError')throw new Error('Délai dépassé lors du téléchargement du flux (25 s).');
     throw new Error(`Flux inaccessible : ${e instanceof Error?e.message:String(e)}`);
   }finally{clearTimeout(timer);}
-  if(!r.ok)throw new Error(`Flux HTTP ${r.status}${r.statusText?` ${r.statusText}`:''}`);
+  if(!r.ok){
+    // Protection anti-robots (Cloudflare, captcha…) : le site ne peut pas être lu automatiquement.
+    const body=r.status===403||r.status===429||r.status===503?await r.text().catch(()=>''):'';
+    if(/just a moment|cf-chl|challenge-platform|captcha|access denied|datadome/i.test(body)){const err:any=new Error('Ce site bloque la lecture automatique (protection anti-robots). Il faudra brancher le flux du logiciel de l\'agence ou du garage, ou importer un fichier (CSV/Excel).');err.platform='Protection anti-robots';throw err;}
+    throw new Error(`Flux HTTP ${r.status}${r.statusText?` ${r.statusText}`:''}`);
+  }
   const len=Number(r.headers.get('content-length')||0);
   if(len>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   const text=await r.text();
@@ -469,8 +497,12 @@ async function readFeed(feed:any){
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
+    else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
-      try{rows=await readGenericSite(origin,text,feed.sector);platform+=' · données structurées';}
+      // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
+      try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';rows=await readSmartSite(origin,text,sector,fetchSiteHtml,[url.toString()],sector==='immobilier'?ldImmo:ldVehicle);
+        if(!rows.length)throw Error(`Aucune fiche ${sector==='immobilier'?'de bien':'véhicule'} lisible automatiquement sur ce site : il faudra une préparation manuelle (rien n'a été modifié).`);
+        platform+=' · lecture automatique';}
       catch(e){const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}
     (rows as any).platform=platform;return rows;
   }
