@@ -228,6 +228,52 @@ async function readShopify(origin:URL,sector:string){
  if(!rows.length)throw Error('Aucune annonce disponible trouvée dans la boutique Shopify : synchronisation annulée par sécurité.');
  return rows;
 }
+// Sites de garages Starterre (ex. autoca.fr) : le catalogue vient du moteur de recherche Typesense de Starterre
+// (clé publique de recherche présente dans la page). Il mélange le stock du garage et le catalogue « Fournisseur »
+// du réseau : on ne garde que le stock propre du garage, puis chaque fiche pour toutes les photos.
+const isStarterreSite=(html:string)=>/StarterreTypesense\.key\s*=/.test(html)&&/resellerUniqueId\s*=/.test(html);
+async function readStarterreSite(origin:URL,html:string){
+ const key=html.match(/StarterreTypesense\.key\s*=\s*'([^']+)'/)?.[1];const host=html.match(/StarterreTypesense\.host\s*=\s*'([a-z0-9.-]+)'/i)?.[1]||'typesense.starterre.fr';
+ const reseller=html.match(/resellerUniqueId\s*=\s*'([0-9a-f-]{20,60})'/i)?.[1];
+ if(!key||!reseller||!/(^|\.)starterre\.(fr|net|com)$/i.test(host))throw Error('Site Starterre : paramètres du catalogue introuvables.');
+ const items:any[]=[];
+ for(let page=1;page<=20;page++){
+  const u=new URL(`https://${host}/collections/vehicles_tie_${reseller}/documents/search`);
+  u.searchParams.set('q','*');u.searchParams.set('per_page','250');u.searchParams.set('page',String(page));
+  // Stock propre du garage seulement (le catalogue « Fournisseur » est celui du réseau Starterre).
+  u.searchParams.set('filter_by','catalogue:!=Fournisseur');
+  await publicFeedUrl(u);
+  const r=await fetch(u.toString(),{headers:{'X-TYPESENSE-API-KEY':key,Accept:'application/json','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},signal:AbortSignal.timeout(20000)});
+  if(!r.ok){await r.body?.cancel();throw Error(`Catalogue Starterre illisible (HTTP ${r.status}) : synchronisation annulée par sécurité.`);}
+  const data=await r.json();const hits=Array.isArray(data?.hits)?data.hits:[];
+  for(const h of hits){const d=h?.document;if(d&&!/^fournisseur$/i.test(String(d.catalogue||'')))items.push(d);}
+  if(hits.length<250)break;
+ }
+ if(!items.length)throw Error('Aucun véhicule du garage trouvé dans le catalogue Starterre : synchronisation annulée par sécurité.');
+ const rows:any[]=[];let i=0;const list=items.slice(0,300);
+ await Promise.all(Array.from({length:4},async()=>{while(i<list.length){const d=list[i++];
+  const o:any={reference:String(d.ref||d.id),titre:[d.marque,d.modele,d.version].filter(Boolean).join(' ').replace(/\s+/g,' ').trim(),marque:d.marque||'',modele:d.modele||'',version:d.version||''};
+  if(Number(d.prix)>0)o.prix=String(Math.round(Number(d.prix)));
+  if(d.kmCompteur!=null)o.kilometrage=String(d.kmCompteur);
+  const date=String(d.dateImmatriculation||'');const y=date.match(/((?:19|20)\d{2})/);if(y){o.annee=y[1];o.mise_en_circulation=date;}
+  if(d.energie)o.carburant=String(d.energie);if(d.boiteVitesse)o.boite=String(d.boiteVitesse);if(d.couleur)o.couleur=String(d.couleur);
+  if(d.puissanceDin)o.puissance_din=String(d.puissanceDin);if(d.nbPlaces)o.places=String(d.nbPlaces).replace(/\D/g,'');
+  const cat=String(d.categorie||'');o.carrosserie=cat;
+  o.type=/camping|camion a chevaux/i.test(cat)?'camping-car':/utilitaire|pick up/i.test(cat)?'utilitaire':/moto|scooter|quad/i.test(cat)?'moto':'voiture';
+  o.etat=Number(d.occasion)===1||Number(d.kmCompteur)>100?'occasion':'neuf';
+  const equip=(Array.isArray(d.pictos)?d.pictos:[]).map((p:string)=>String(p).split('|')[0].trim()).filter(Boolean);if(equip.length)o.equipements=equip.join('|');
+  o.description=[d.specifOption?String(d.specifOption):'',equip.length?'Équipements : '+equip.join(', ')+'.':''].filter(Boolean).join('\n\n');
+  o.url=String(d.link||'');
+  const photos:string[]=[];
+  try{if(o.url&&new URL(o.url).hostname===origin.hostname){const{text}=await fetchSiteHtml(new URL(o.url));
+   for(const m of text.matchAll(/https:\/\/stx\.starterre\.net\/vehicules\/xlarge\/[^"'\s)<>]+\.(?:jpe?g|png|webp)/gi))if(!photos.includes(m[0]))photos.push(m[0]);}}catch{}
+  if(!photos.length&&d.photoPrincipale)photos.push(String(d.photoPrincipale));
+  // Photo principale en premier quand elle existe en grand format.
+  const main=String(d.photoPrincipale||'').split('/').pop();if(main){const k=photos.findIndex(p=>p.endsWith('/'+main));if(k>0)photos.unshift(...photos.splice(k,1));}
+  if(photos.length)o.photos=photos.slice(0,45).join('|');
+  rows.push(o);}}));
+ return rows;
+}
 // Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
 // puis chaque fiche, dont toutes les données sont dans l'attribut data-estate (JSON).
 const ORPI_ENERGY=['','A','B','C','D','E','F','G'];
@@ -444,7 +490,7 @@ async function readGenericSite(origin:URL,homeHtml:string,sector='vehicules'){
  return rows;
 }
 // Prestataire du site (pour savoir quel connecteur ajouter quand le site n'est pas encore lisible).
-const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo|staticlbi\.com/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\.|media\.apimo\.pro/i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
+const SITE_PROVIDERS:[RegExp,string][]=[[/orpi\.com/i,'Orpi'],[/century21\.fr/i,'Century 21'],[/laforet\.com/i,'Laforêt'],[/guy-hoquet\.com/i,'Guy Hoquet'],[/stephaneplazaimmobilier/i,'Stéphane Plaza'],[/nestenn\.com/i,'Nestenn'],[/foncia\.com/i,'Foncia'],[/sweepbright/i,'SweepBright'],[/annonces-automobile\.com|cdn-rivamedia/i,'Annonces-Automobile'],[/la-boite-immo|laboiteimmo|staticlbi\.com/i,'La Boîte Immo'],[/activimmo/i,'Activimmo'],[/apimo\.|media\.apimo\.pro/i,'Apimo'],[/hektor/i,'Hektor'],[/netty\.fr|immonot/i,'Netty / Immonot'],[/adapt-immo/i,'Adapt Immo'],[/ac3-distribution|immo-facile/i,'AC3'],[/twimmo/i,'Twimmo'],[/modelo\.fr/i,'Modelo'],[/starterre/i,'Starterre'],[/spider-?vo/i,'Spider VO'],[/kepler/i,'Kepler'],[/autobiz/i,'Autobiz'],[/wizards?vo|wizards\.fr/i,'Wizards'],[/dealerk|dealer-k/i,'Dealer K'],[/planete?-?vo/i,'Planète VO'],[/gestion-?vo|vo-?online/i,'VO Online'],[/eurotax|autoxpo/i,'Autoxpo'],[/wix\.com|wixstatic/i,'Wix'],[/shopify/i,'Shopify'],[/squarespace/i,'Squarespace'],[/webflow/i,'Webflow'],[/jimdo/i,'Jimdo'],[/wp-content/i,'WordPress']];
 function detectSitePlatform(html:string){
  for(const[re,name]of SITE_PROVIDERS)if(re.test(html))return name;
  const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
@@ -497,6 +543,7 @@ async function readFeed(feed:any){
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
+    else if(isStarterreSite(text)){rows=await readStarterreSite(origin,text);platform='Starterre';}
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
