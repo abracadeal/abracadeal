@@ -757,3 +757,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Problème : Anthony n'arrivait pas à importer autoca.fr (« site trop gros »). Le site est fait par **Starterre** : son catalogue (moteur Typesense de Starterre, clé publique de recherche dans la page) contient 2 747 véhicules, dont 2 716 du catalogue « Fournisseur » du réseau Starterre et seulement **31 du stock propre du garage**.
 - Changé : `pro-stock-sync` v24, nouveau lecteur `readStarterreSite` (détecté par `StarterreTypesense.key` + `resellerUniqueId` dans la page) : catalogue filtré `catalogue:!=Fournisseur`, champs (marque, modèle, version, prix, km, mise en circulation, carburant, boîte, couleur, puissance, places, carrosserie, équipements), puis chaque fiche du site pour toutes les photos grand format (stx.starterre.net/vehicules/xlarge). Prestataire « Starterre » ajouté à la détection.
 - Sécurité inchangée : aucune écriture en aperçu, erreur si aucun véhicule propre trouvé (rien n'est archivé).
+
+## 28/10/2026 — Activation automatique des sites + ville du garage sur les annonces véhicules — Claude
+- Demande d'Anthony : activer tout seuls les sites qui se lisent bien ; les annonces véhicules doivent porter la ville du garage.
+- `pro-stock-sync` v26 :
+  - Véhicules : ville + code postal du garage sur **toutes** les annonces (adresse du compte pro ; sinon adresse publiée sur le site, lue dans les données structurées ou le pied de page « 30100 ALES »). Immobilier inchangé (ville de chaque bien).
+  - « Tester une adresse » par l'admin : la ville vient du site testé, plus du compte admin.
+  - Nouvelle action `auto_review` (jeton cron) : lecture complète + ≥ 80 % d'annonces complètes (titre, prix, ville, photo) => flux activé et synchronisé ; sinon reste en attente avec « Validation manuelle nécessaire : <raison> ». `auto_review_dry` = même test sans rien écrire.
+  - Le cron traite aussi une demande en attente par passage (jamais essayée ou essai > 24 h).
+  - Starterre : titre sans répétition modèle/version (« C3 Aircross BlueHDi… » au lieu de « C3 Aircross Aircross… »).
+- Base : `private.kick_site_auto_review` appelée par `claim_signup_site_import` et `request_site_import` (fichier supabase/2026-10-28-import-site-activation-auto.sql).
+- Test sans écriture sur autoca.fr : Starterre, 31/31 véhicules complets, ville Alès 30100, 13 à 16 photos.
