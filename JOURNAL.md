@@ -736,3 +736,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ## 28/10/2026 — Inscription pro : sites d'annonces refusés, message clair — Claude
 - Sous le champ « Adresse de votre site officiel » : leboncoin, La Centrale, AutoScout24, SeLoger, PAP… et réseaux sociaux ne fonctionnent pas ; dans ce cas laisser vide et, après l'inscription, importer un fichier (CSV/Excel) ou saisir ses annonces depuis l'espace Pro.
 - Même consigne dans le message d'erreur si le pro entre une de ces adresses. Liste élargie et ancrée sur le domaine (côté page et côté base : private.normalize_site_url).
+- Consigne complétée (demande d'Anthony) : flux ou API du logiciel du pro, en plus de l'import fichier et de la saisie.
