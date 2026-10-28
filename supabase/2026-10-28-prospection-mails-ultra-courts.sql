@@ -2,17 +2,18 @@
 -- « inscrivez-vous et en quelques minutes toutes les annonces de votre site sont en ligne ».
 -- Remplace les variantes A (longues) et B (courtes). A et B ne diffèrent plus que par l'objet (test A/B des objets).
 -- Corrige au passage l'ancien « jusqu'à 50 annonces » (l'offre Fondateurs est à 100 annonces depuis le 27/10).
+-- Formulation retouchée le 28/10 à la demande d'Anthony : « Inscrivez-vous et entrez l'adresse de votre site officiel ».
 -- Le pied de page (désinscription + iDream Lab SASU) est ajouté automatiquement par prospect-mailer.
 do $$
 declare
   sig text := E'\n\nLe Service Pros Abracadeal\nabracadeal.fr – {{expediteur}}';
   link text := E'\n\nJe m''inscris : https://abracadeal.fr/pro-fondateur.html';
   free text := E'Abracadeal est un nouveau site d''annonces. Pendant le lancement, c''est gratuit pour les professionnels : sans carte bancaire, sans engagement.\n\n';
-  b_auto text := E'Bonjour,\n\n' || free || E'Inscrivez-vous avec l''adresse de votre site : en quelques minutes, tous vos véhicules sont en ligne, avec leurs photos et leurs prix. Ensuite, ils se mettent à jour tout seuls (nouveaux véhicules, prix, ventes).' || link || sig;
-  b_moto text := E'Bonjour,\n\n' || free || E'Inscrivez-vous avec l''adresse de votre site : en quelques minutes, toutes vos motos sont en ligne, avec leurs photos et leurs prix. Ensuite, elles se mettent à jour toutes seules (nouveautés, prix, ventes).' || link || sig;
-  b_immo text := E'Bonjour,\n\n' || free || E'Inscrivez-vous avec l''adresse de votre site : en quelques minutes, tous vos biens sont en ligne, avec leurs photos et leurs prix. Ensuite, ils se mettent à jour tout seuls (nouveaux biens, prix, ventes et locations).' || link || sig;
-  b_gen text := E'Bonjour,\n\n' || free || E'Inscrivez-vous avec l''adresse de votre site : en quelques minutes, toutes vos annonces sont en ligne, avec leurs photos et leurs prix. Ensuite, elles se mettent à jour toutes seules.' || link || sig;
-  b_rel text := E'Bonjour,\n\nPetit rappel : inscrivez-vous avec l''adresse de votre site, et en quelques minutes toutes vos annonces sont en ligne sur Abracadeal. Gratuit, sans carte bancaire, sans engagement.\n\nhttps://abracadeal.fr/pro-fondateur.html' || sig;
+  b_auto text := E'Bonjour,\n\n' || free || E'Inscrivez-vous et entrez l''adresse de votre site officiel : en quelques minutes, tous vos véhicules sont en ligne, avec leurs photos et leurs prix. Ensuite, ils se mettent à jour tout seuls (nouveaux véhicules, prix, ventes).' || link || sig;
+  b_moto text := E'Bonjour,\n\n' || free || E'Inscrivez-vous et entrez l''adresse de votre site officiel : en quelques minutes, toutes vos motos sont en ligne, avec leurs photos et leurs prix. Ensuite, elles se mettent à jour toutes seules (nouveautés, prix, ventes).' || link || sig;
+  b_immo text := E'Bonjour,\n\n' || free || E'Inscrivez-vous et entrez l''adresse de votre site officiel : en quelques minutes, tous vos biens sont en ligne, avec leurs photos et leurs prix. Ensuite, ils se mettent à jour tout seuls (nouveaux biens, prix, ventes et locations).' || link || sig;
+  b_gen text := E'Bonjour,\n\n' || free || E'Inscrivez-vous et entrez l''adresse de votre site officiel : en quelques minutes, toutes vos annonces sont en ligne, avec leurs photos et leurs prix. Ensuite, elles se mettent à jour toutes seules.' || link || sig;
+  b_rel text := E'Bonjour,\n\nPetit rappel : inscrivez-vous et entrez l''adresse de votre site officiel. En quelques minutes, toutes vos annonces sont en ligne sur Abracadeal. Gratuit, sans carte bancaire, sans engagement.\n\nhttps://abracadeal.fr/pro-fondateur.html' || sig;
 begin
   update private.prospect_mailer_settings set
     subject = '{{societe}} : vos annonces en ligne en quelques minutes',
