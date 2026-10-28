@@ -1,0 +1,7 @@
+/* 28/10/2026 : mobile — l'administratif est dans le menu Admin, « Compte » reste personnel. */
+@media (max-width: 760px) {
+  #loggedInAccount.aal-is-admin .aal-admin { display: none !important; }
+  .mobile-admin-extra { display: grid; gap: 16px; margin-top: 18px; }
+  .mobile-admin-extra .aal-founder-switch { width: 100%; }
+  .mobile-admin-extra #adminStatsPanel, .mobile-admin-extra #adminDatabasePanel { margin: 0; }
+}

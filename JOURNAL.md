@@ -698,3 +698,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Admin :** `admin-test-import.html` devient « Imports depuis les sites des pros » : liste des demandes (entreprise, contact, site, type de site détecté, date d'autorisation, dernière synchro, erreurs, annonces en ligne / en vérification), boutons Aperçu, Activer (valide puis lance l'import), Synchroniser maintenant, Mettre en pause, Refuser ; + « Tester une adresse » (via `pro-stock-sync` `preview_url`, auto/moto ou immobilier). Tuile « Imports sites » avec pastille du nombre de demandes en attente (`admin-account-layout-20261018.js?v=7` dans `index.html`).
 - **Pour un pro déjà inscrit (accord reçu par mail) :** RPC admin `admin_create_site_import(owner_id, url, sector)` (pas encore de bouton).
 - **Limites :** sites sans connecteur → erreur claire + prestataire affiché ; prochains connecteurs à prioriser selon les prestataires vus (La Boîte Immo, Activimmo…). `aa-site-preview` n'est plus utilisée par la page.
+
+### 28/10/2026 — Claude — Mobile : tout l'administratif dans « Admin », « Compte » reste personnel
+- **Demande d'Anthony :** doublon entre Compte et Admin sur mobile → tout l'admin dans le menu Admin.
+- **Ajouté :** `assets/admin-mobile-merge-20261028.js` + `.css` (chargés dans `index.html`). Sur mobile (≤ 760 px), pour l'admin : la rubrique « Administration » est masquée dans Compte ; le Tableau de bord, la Base de données et l'interrupteur « Offre Fondateurs » sont déplacés dans le menu Admin (sous les outils). Sur ordinateur, rien ne change.
+- **Menu Admin :** nouvelle entrée « Imports sites » (pastille = demandes en attente). « Statistiques » et « Base de données » font défiler le menu Admin au lieu d'ouvrir Compte (`assets/index-app.js` v=20261028-admin-mobile).
+- Pour annuler : retirer le script et la feuille de style `admin-mobile-merge-20261028` dans `index.html`.

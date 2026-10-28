@@ -999,6 +999,15 @@ document.addEventListener('DOMContentLoaded',()=>{
     paint('mobileAdminNavBadge',moderation+flows);
   }
   function openAccountSection(id){
+    // 28/10/2026 : sur mobile, Tableau de bord et Base de données sont dans le menu Admin lui-même.
+    const inAdmin=document.getElementById(id);
+    if(inAdmin&&inAdmin.closest('#mobileAdminModal')){
+      inAdmin.classList.remove('hidden');
+      inAdmin.scrollIntoView({behavior:'smooth',block:'start'});
+      window.loadAdminDashboardStats?.();
+      if(id==='adminDatabasePanel')setTimeout(()=>document.getElementById('adminDbQuery')?.focus({preventScroll:true}),350);
+      return;
+    }
     closeModal('mobileAdminModal');
     openModal('accountModal');
     setTimeout(function(){
