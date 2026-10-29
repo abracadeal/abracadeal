@@ -842,3 +842,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Signalé par Anthony :** encore des « GES manquant » sur immochevreux.com.
 - **Diagnostic (v40, commit 315a03bc) :** le test à blanc (`auto_review_dry`) liste maintenant les annonces en erreur (titre, adresse, erreurs, DPE/GES lus, extrait autour du GES). Les 5 lignes en erreur n'étaient pas des biens : pages « Vous êtes acquéreur », « Appartements », « Nos biens loués », « Nos prestations » et l'accueil, prises pour des fiches par le lecteur automatique (le « DPE B » d'une autre annonce y était lu, sans GES). Les vrais biens avaient bien leur GES.
 - **Corrigé (v41, commit 55a8fb37) :** lecture automatique : quand la plupart des fiches ont la même forme d'adresse (ex. `/details-…`), les autres pages sont écartées. Pour toutes les sources : une annonce dont le titre commence par VENDU, LOUÉ, SOUS COMPROMIS, COMPROMIS SIGNÉ ou RÉSERVÉ n'est jamais importée (et sera retirée à la synchro complète).
+
+## 29/10/2026 — Robot v42 : Orpi, stock complet de l'agence — Claude
+- **Signalé par Anthony :** une agence Orpi de Strasbourg : 31 biens lus, bien moins que ce qu'elle a.
+- **Cause :** le lecteur Orpi lisait `/<agence>/acheter`, qui ne montre qu'une sélection (≈ 9 biens). La liste complète est `/<agence>/acheter/biens-en-vente` (pages de 30, ex. 14 pages pour Orpi Action Immo Cannes).
+- **Corrigé (`pro-stock-sync` v42 = commit 00e09688) :** lecture de `/acheter/biens-en-vente` + `/louer/biens-en-location` (jusqu'à 40 pages chacune), `/acheter` en complément ; 6 fiches lues à la fois ; au-delà de 450 biens, lecture marquée partielle (aucun retrait pendant cette synchro).
+- Rappel : la page « Immobilier à Strasbourg » d'orpi.com (105 biens) regroupe toutes les agences Orpi de la ville, pas une seule agence.
