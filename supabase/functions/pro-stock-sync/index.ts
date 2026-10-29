@@ -519,8 +519,8 @@ async function readOrpiAgency(origin:URL,slug:string){
   }
  }
  if(!links.size)throw Error('Aucun bien trouvé sur la page de l\'agence Orpi : synchronisation annulée par sécurité.');
- const MAX=450;const entries=[...links.entries()].slice(0,MAX);const rows:any[]=[];let i=0;
- await Promise.all(Array.from({length:6},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
+ const MAX=220;const entries=[...links.entries()].slice(0,MAX);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
  // Stock plus grand que la limite : lecture partielle (aucun bien n'est retiré pour cette synchro).
  if(links.size>MAX)(rows as any).partial=true;
  return rows;
