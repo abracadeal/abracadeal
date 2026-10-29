@@ -934,5 +934,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## 29/10/2026 — Sites à apprendre : bouton « Supprimer » (Claude)
 - Demande d'Anthony : retirer un prospect qui ne l'intéresse pas depuis la liste « Sites à apprendre ».
+- Contrainte `prospection_prospects_segment_check` élargie à « exclu_admin » (sinon erreur au clic, signalée par Anthony).
 - RPC `admin_drop_prospect` (admin) : la ligne n'est pas effacée (sinon le robot de recherche de prospects pourrait la rajouter) mais marquée `segment='exclu_admin'`, statut ready → paused, note datée : plus jamais mailé (le tirage et le test excluent déjà « exclu% »), retiré de la liste et du mail du soir (pro-stock-sync v70).
 - admin-test-import.html : bouton rouge « Supprimer » avec confirmation.
