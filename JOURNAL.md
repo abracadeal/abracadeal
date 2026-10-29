@@ -1154,3 +1154,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - `supabase/functions/pro-stock-sync/index.ts` : « occasion » / « used » → aucun état. **Pas encore déployé** (le site masque déjà l'affichage).
 - **Inchangé :** « Neuf », « Très bon état »… s'ils sont indiqués par le garage ; annonces de particuliers.
 - **Base :** déclencheur prévu (`clear_pro_feed_vehicle_condition`) non appliqué (validation annulée deux fois) ; aucune annonce de pro en ligne au 29/10, rien à corriger.
+
+### 29/10/2026 — Claude — Mail de prospection « site testé » : réponse « OK » au lieu de l'inscription
+- **Demande d'Anthony :** le mail disait « nous avons testé votre site » puis « inscrivez-vous et entrez l'adresse de votre site » : contradictoire.
+- **Modifié (base, `private.prospect_mailer_settings.templates`) :** modèles Garage / concession auto, Concession moto, Agence immobilière (variantes A et B) et relances `relance` / `B:relance`. Nouveau message : site testé, tout est prêt → le pro répond simplement « OK », nous créons son espace (lien pour choisir son mot de passe), mise à jour automatique ensuite. Lien conservé en « Découvrir Abracadeal » (suivi `?r=` inchangé). Modèles « manuel » et « normal » inchangés.
+- Suite à une réponse « OK » : créer le compte Pro depuis l'admin et activer l'import du site (décision du 28/10).
