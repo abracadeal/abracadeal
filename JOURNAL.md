@@ -895,3 +895,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Résultat : Nestenn Orléans 56 lus (53 ventes + 3 locations), 56 complets, prix justes (ex. 192 600 €, 145 350 €). Immochevreux 30/30.
 - Outils : lecture à blanc renvoie `crawl` (pages, fiches, ratés) et `urls` (adresse, titre, prix, type) ; action `debug_detail` (cron) pour une fiche.
 - Reste : table de debug private.debug_html à supprimer (la suppression demande une confirmation).
+
+## 29/10/2026 — Robot v60 : locations et villes (lecteur automatique) (Claude)
+- Location reconnue quand le prix est suivi de « CC/Mois », « /mois », « par mois », ou quand la description commence par « À louer » (Nestenn « Duplex hyper-centre 690 € CC/Mois » était en vente). Un prix ≥ 20 000 € reste une vente.
+- Ville : « 27390 » caché suivi de « Partager ce bien » donnait la ville « Partager ce bien ». Les candidats « CP Ville » sont filtrés (mots d'interface écartés), la ville présente dans le titre est préférée, la zone autour du titre est aussi lue.
+- Contrôle : Nestenn Orléans 56/56 (3 locations), villes justes (Orléans, Fleury-les-Aubrais…) ; immochevreux 29/29.
