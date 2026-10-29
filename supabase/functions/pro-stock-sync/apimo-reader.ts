@@ -20,24 +20,25 @@ export function parseApimoDetail(raw:string,url:string){
   const id=new URL(url).pathname.match(/\+(\d+)\/?$/)?.[1];if(!id)return null;
   const modules=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi);
   const module=(name:string)=>modules.find(x=>new RegExp('class="[^"]*\\b'+name+'\\b').test(x))||'';
-  const info=module('property-info-template-2')||module('property-info-template-12');
+  const info=module('property-info-template-2')||module('property-info-template-12')||module('property-info-template-19');
   const variant12=/class="[^"]*\bproperty-info-template-12\b/.test(info);
+  const variant19=/class="[^"]*\bproperty-info-template-19\b/.test(info);
   const main=module('property-info-template-4');
   const summary=modules.find(x=>/\bsummary details\b/.test(x))||'';
   const surfaceBlock=module('property-info-template-5');
   const legal=module('property-info-template-7');
   const p=text(info.match(/class="title property-title[^"']*"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').split('\n');
-  const titre=text(main.match(/<h1\b[^>]*class="title[^"']*"[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
+  const titre=text(main.match(/<h[1-6]\b[^>]*class="title[^"']*"[^>]*>([\s\S]*?)<\/h[1-6]>/i)?.[1]||'');
   const description=text(main.match(/<p\b[^>]*class="comment"[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'');
   const infoText=text(info);const price=infoText.match(/(\d[\d\s.,]*)\s*€/);
   // Les données structurées doivent appartenir au bien, jamais à l'adresse de l'agence.
-  let property:any=null;for(const m of raw.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1]);const nodes=Array.isArray(j)?j:j['@graph']||[j];const listing=nodes.find((x:any)=>x['@type']==='RealEstateListing'&&String(x.about?.identifier)===id);if(listing)property=listing.about;}catch{}}
+  let property:any=null;for(const m of raw.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1]);const nodes=Array.isArray(j)?j:j['@graph']||[j];const listing=nodes.find((x:any)=>x['@type']==='RealEstateListing'&&(String(x.about?.identifier)===id||(()=>{try{return new URL(x.url).pathname===new URL(url).pathname;}catch{return false;}})()));if(listing)property=listing.about;}catch{}}
   const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
-  const ville=variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||'');
+  const ville=variant19?(property?.address?.addressLocality||text(info.match(/<h1\b[^>]*>[\s\S]*?<span\b[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'')):variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||'');
   if(!titre||!description||!ville)return null;
-  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12||variant19?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
   if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
-  if(variant12&&property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
+  if((variant12||variant19)&&property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   // Le module utilisateur de la fiche désigne son conseiller ; ne pas lire l'équipe du pied de page.
   const advisorModule=module('module-user');
   // Nom et numéro proviennent de la même carte, même si plusieurs conseillers sont affichés.
@@ -47,7 +48,7 @@ export function parseApimoDetail(raw:string,url:string){
   if(advisorName)o.contact_nom=text(advisorName).replace(/\s+/g,' ').trim();
   if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
   const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
-  const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if(variant12&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
+  const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if((variant12||variant19)&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
   for(const m of surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)){const t=text(m[1]);const land=t.match(/^\d+\s*(?:Terrain|Jardin)\s+(\d+(?:[.,]\d+)?)\s*m²/i);if(land&&!o.surface_terrain)o.surface_terrain=num(land[1]);const bath=t.match(/^(\d+)\s+Salle de (?:bains?|douche)/i);if(bath)baths+=Number(bath[1]);}
   if(baths)o.salles_de_bain=String(baths);
