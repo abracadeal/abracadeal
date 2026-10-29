@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Aperçu « Voir comme sur le site »
+- `admin-test-import.html` : après « Lire le stock », bouton « Voir comme sur le site » ; les fiches mises en forme (sans erreur, 220 max) sont stockées dans le navigateur (`abraca_import_preview`) et `index.html?apercu=import` les affiche avec les vraies vignettes et la vraie page annonce. Rien n'est publié ni enregistré en base.
+- `assets/index-main.js` : `IMPORT_PREVIEW` + bandeau « Aperçu de l'import » ; `loadAds` court-circuité en aperçu ; carte vendeur non chargée en aperçu. Version `v=20261029-apercu-import`.
+
 ### 29/10/2026 — ChatGPT — Conseiller et téléphone propres à chaque bien (v87)
 - Demande d’Anthony après Infinity : conserver nom/prénom et numéro du vendeur/conseiller associé à chaque annonce, les numéros pouvant différer entre les biens.
 - apimo-reader.ts : module-user de la fiche uniquement ; nom lié à /equipe/ ou /team/ et lien tel de la même carte. Ne pas prendre l’équipe de l’accueil, le pied de page, ni le numéro d’un autre conseiller. Premier conseiller désigné si plusieurs cartes ; pas de mélange de noms/numéros.

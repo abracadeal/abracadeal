@@ -112,7 +112,7 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
  <h2 class="sec">Tester une adresse</h2>
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
  <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
- <div style="margin:10px 0 0"><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
+ <div style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="sbtn ok" type="button" id="sitePreview" hidden>Voir comme sur le site</button><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
  <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
  <p id="status" class="muted"></p>
  <div class="stats" id="stats" hidden></div>
@@ -137,6 +137,7 @@ async function init(){
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
  E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();
+ E('sitePreview').onclick=previewSite;
  E('learnCur').onclick=()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;askLearn(u,E('sector').value,'',null);};
 }
 // 29/10/2026 : prospects au site illisible (test avant le 1er mail).
@@ -231,7 +232,7 @@ async function load(ev){
   const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true}});
   if(error)throw Error(await fnError(error));
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
-  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];LASTDATA=data;render(data,E('sector').value);
+  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];LASTDATA=data;render(data,E('sector').value);E('sitePreview').hidden=!NORM.length;
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
@@ -256,6 +257,27 @@ function render(data,sector){
 // 29/10/2026 (Anthony) : corriger une fiche à la main. La correction est gardée (site + référence) et réappliquée à chaque mise à jour du stock.
 const EDIT_FIELDS={vehicules:[['titre','Titre','text',1],['prix','Prix (€)','number'],['ville','Ville','text'],['code_postal','Code postal','text'],['marque','Marque','text'],['modele','Modèle','text'],['annee','Année','number'],['kilometrage','Kilométrage','number'],['carburant','Énergie','text'],['boite','Boîte','text'],['description','Description','area',1]],
  immobilier:[['titre','Titre','text',1],['prix','Prix ou loyer (€)','number'],['transaction','Vente ou location','sel:vente|location'],['type_bien','Type de bien','sel:appartement|maison|terrain|parking|bureau|immeuble'],['ville','Ville','text'],['code_postal','Code postal','text'],['surface','Surface (m²)','number'],['pieces','Pièces','number'],['chambres','Chambres','number'],['dpe','DPE','sel:|A|B|C|D|E|F|G|NON SOUMIS'],['ges','GES','sel:|A|B|C|D|E|F|G'],['honoraires','Honoraires','text'],['charges_annuelles','Charges de copropriété / an (€)','number'],['nombre_lots','Nombre de lots','number'],['taxe_fonciere','Taxe foncière / an (€)','number'],['charges_mensuelles','Charges / mois (location)','number'],['depot_garantie','Dépôt de garantie (€)','number'],['description','Description','area',1]]};
+// 29/10/2026 (Anthony) : voir les annonces lues exactement comme sur Abracadeal (vraies vignettes et vraie fiche).
+// Même mise en forme que la synchro (pro-stock-sync : description [ABRACA_SUB]/[ABRACA_IMETA]/[ABRACA_VMETA], photos dans l'ordre).
+const IMETA_KEYS=['surface','landSurface','rooms','bedrooms','bathrooms','floor','totalFloors','furnished','yearBuilt','propertyCondition','heating','orientation','neighborhood','dpe','ges','energyConsumption','dpeDate','energyCostMin','energyCostMax','coownership','lots','annualCharges','propertyTax','fees','rentCharges','deposit','mandate','procedure','availableDate','features'];
+const VMETA_KEYS=['firstRegistration','body','doors','seats','permit','finish','version','color','upholstery','fiscalPower','dinPower','co2','history','technicalInspection','maintenance','warranty','equipment'];
+function previewSite(){
+ const immo=E('sector').value==='immobilier';const now=new Date().toISOString();
+ const pick=(r,keys)=>{const m={};for(const k of keys){const v=r[k];if(v!==null&&v!==undefined&&v!==''&&(!Array.isArray(v)||v.length))m[k]=v;}return m;};
+ const ads=NORM.filter(r=>!(r.errors||[]).length).slice(0,220).map((r,i)=>{
+  const meta=r.category==='immobilier'?pick(r,IMETA_KEYS):pick(r,VMETA_KEYS);
+  let description=`[ABRACA_SUB:${r.sub||''}]\n[ABRACA_REF:${r.ref||''}]\n[ABRACA_SOURCE:feed:apercu]\n`;
+  if(r.category==='immobilier')description+=`[ABRACA_IMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;else if(Object.keys(meta).length)description+=`[ABRACA_VMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;
+  description+=r.description||'';
+  return {id:'apercu-'+i,owner_id:'apercu',category:r.category,title:r.title,description,price:r.price,city:r.city,postal_code:r.postal||null,seller_type:'professionnel',status:'active',source:'feed:apercu',external_id:r.ref,created_at:now,updated_at:now,show_phone:true,photo_limit:30,
+   vehicle_make:r.make||null,vehicle_model:r.model||null,vehicle_year:r.year==null?null:Math.round(r.year),mileage:r.mileage==null?null:Math.round(r.mileage),fuel:r.fuel||null,transmission:r.transmission||null,crit_air:r.critAir||null,item_condition:r.condition||null,
+   listing_photos:(r.photos||[]).slice(0,30).map((u,k)=>({id:'apercu-'+i+'-'+k,storage_path:u,position:k}))};
+ });
+ if(!ads.length){alert('Aucune annonce prête à publier à montrer.');return}
+ let site='';try{site=new URL((E('url').value.match(/^https?:/i)?'':'https://')+E('url').value.trim()).hostname.replace(/^www\./,'')}catch{}
+ try{localStorage.setItem('abraca_import_preview',JSON.stringify({at:now,site,ads}));}catch(e){alert('Aperçu trop gros pour le navigateur : '+e.message);return}
+ window.open('index.html?apercu=import','_blank');
+}
 function editCar(i){
  const r=ROWS[i]||{},n=NN[i]||{};const immo=E('sector').value==='immobilier';const host=(()=>{try{return new URL(r.url).hostname.replace(/^www\./,'')}catch{return''}})();
  if(!host||r.reference==null){alert('Fiche sans adresse ou sans référence : correction impossible.');return}

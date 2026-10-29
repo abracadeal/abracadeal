@@ -3409,7 +3409,18 @@ function getPublicCatalog(){
   return publicCatalogPromise;
 }
 
+// 29/10/2026 (Anthony) : aperçu d'un import « comme sur le site » (index.html?apercu=import), préparé par admin-test-import.html.
+// Les annonces viennent du navigateur (localStorage), rien n'est publié ni enregistré.
+const IMPORT_PREVIEW=(()=>{try{if(!/[?&]apercu=import\b/.test(location.search))return null;const d=JSON.parse(localStorage.getItem('abraca_import_preview')||'null');return d&&Array.isArray(d.ads)&&d.ads.length?d:null;}catch(_){return null;}})();
+function showImportPreviewBanner(){
+  if(!IMPORT_PREVIEW||document.getElementById('importPreviewBanner'))return;
+  const b=document.createElement('div');b.id='importPreviewBanner';
+  b.style.cssText='position:sticky;top:0;z-index:9999;background:#451657;color:#fff;padding:10px 14px;font-size:14px;line-height:1.4;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap';
+  b.innerHTML='<span><b>Aperçu de l’import</b> · '+IMPORT_PREVIEW.ads.length+' annonce'+(IMPORT_PREVIEW.ads.length>1?'s':'')+(IMPORT_PREVIEW.site?' de '+esc(IMPORT_PREVIEW.site):'')+' telles qu’elles apparaîtront sur Abracadeal. Rien n’est publié.</span><a href="index.html" style="color:#fff;font-weight:700">Quitter l’aperçu</a>';
+  document.body.prepend(b);
+}
 async function loadAds(){
+  if(IMPORT_PREVIEW){allAds=IMPORT_PREVIEW.ads;catalogLoadedOnce=true;IMPORT_PREVIEW.ads.forEach(a=>{try{detailAdsCache.set(a.id,a);}catch(_){}});renderAds();showImportPreviewBanner();return;}
   const sequence=++adsLoadSequence;
   const viewerId=currentUser?.id;
   const isCurrent=()=>sequence===adsLoadSequence && viewerId===currentUser?.id;
@@ -5083,7 +5094,7 @@ function formatReviewDate(v){
 }
 async function hydrateSellerCard(sellerId,listingId){
   const host=document.getElementById(`sellerPublic-${listingId}`);
-  if(!host) return;
+  if(!host||IMPORT_PREVIEW||!sb) return;
   const [{data:profile},{data:reviews}]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',sellerId).maybeSingle(),
     sb.from('reviews').select('rating').eq('seller_id',sellerId).eq('status','active')
