@@ -910,3 +910,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - N° de mandat : plus de recopie de la référence quand le site n'en donne pas. Honoraires « honoraires » (mot du menu) ignorés. Code postal pris avec la ville choisie (Nestenn « 27390 » caché).
 - Description : `dedupeDescription` après le découpage en lignes : titre recopié en tête retiré (et ses restes déjà répétés plus bas), badges seuls (Nouveauté, Exclusivité…), lignes répétées.
 - Taux mesurés (lecture à blanc, champ `fill`) — Nestenn Orléans : charges 59 %, taxe 82 %, lots 59 %, copro 100 %, procédure 63 %, mandat 98 % ; C21 Daumesnil : charges 76 %, lots 74 %, honoraires 100 %.
+
+## 29/10/2026 — Robot v66 : réseau L'Adresse (Claude)
+- Signalé par Anthony : L'Adresse Cannes illisible.
+- `readLadresseAgency` : adresse de page agence ladresse.com/agence/<nom>/<n°> → listes /acheter, /acheter/2… et /louer, fiches /annonce/(achat|location)/… lues par le lecteur automatique (220 max par passage). Adresse du site national ladresse.com : message « donnez l'adresse de la page de l'agence » (exemple fourni).
+- L'Adresse Cannes : 89 biens (82 ventes, 7 locations), 89 complets ; DPE 85 % (étiquettes en image « dpe-c.png » / classe « dpe dpe-c » : lues si une seule lettre), lots 58 %, charges 55 %, taxe 65 %, honoraires 99 %.
+- Corrigés au passage : bien « vendu loué » (« loyer : 450 € » dans la description) classé en location → reste une vente si prix ≥ 20 000 € ; locations : « Charges : 37 € », « 21 € de provision sur charges », « Meublé » (lettre accentuée en fin de mot) ; honoraires « 463.27 TTC » non coupés au point.
