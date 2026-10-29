@@ -1086,11 +1086,13 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
    const sector=job.category==='Agence immobilière'?'immobilier':'vehicules';let r:any;
    try{r=await autoReviewSite({id:null,feed_url:String(job.url),format:'auto',sector,owner_id:null},true);}catch(e){r={ok:false,reason:e instanceof Error?e.message:String(e)};}
    const n=Number(r?.total_on_site||r?.complete||0);const ok=!!r?.ok&&Number(r?.complete||0)>=1;
+   // Pas lisible : lien vers une boutique Leboncoin sur son site → mail « publiez vous-même » (29/10/2026).
+   if(!ok){try{const{text}=await fetchSiteHtml(new URL(String(job.url)));if(/href=["'][^"']*leboncoin\.fr\/(?:boutique|pro|ad\/|annonces\/|profile|profil)/i.test(text))r={...r,reason:'LEBONCOIN: '+String(r?.reason||'')};}catch{}}
    await admin.rpc('prospect_precheck_done',{p_id:job.id,p_ok:ok,p_count:ok?n:null,p_platform:r?.platform||null,p_reason:ok?null:String(r?.reason||'illisible')});
    return json({ok:true,checked:1,company:job.company,readable:ok,count:n,platform:r?.platform||null});}
   if(body?.action==='unreadable_digest'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
    const since=new Date(Date.now()-24*3600e3).toISOString();
-   const{data:pros}=await admin.from('prospection_prospects').select('company,category,city,source_url,site_check_platform,site_check_reason').eq('site_check_status','unreadable').or('segment.is.null,segment.not.like.exclu*').gte('site_checked_at',since).order('site_checked_at',{ascending:false}).limit(60);
+   const{data:pros}=await admin.from('prospection_prospects').select('company,category,city,source_url,site_check_platform,site_check_reason').in('site_check_status',['unreadable','generic']).or('segment.is.null,segment.not.like.exclu*').gte('site_checked_at',since).order('site_checked_at',{ascending:false}).limit(60);
    const{data:feeds}=await admin.from('pro_stock_feeds').select('feed_url,last_error,site_platform,updated_at').eq('source_kind','site').eq('review_status','pending').gte('updated_at',since).limit(30);
    const{count:okCount}=await admin.from('prospection_prospects').select('id',{count:'exact',head:true}).eq('site_check_status','ok').gte('site_checked_at',since);
    if(!(pros||[]).length&&!(feeds||[]).length)return json({ok:true,sent:false});
@@ -1100,9 +1102,9 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
    if(!tos.length)return json({error:'Aucun e-mail admin'},500);
    const esc=(x:any)=>String(x??'').replace(/[&<>"]/g,(c:string)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'} as any)[c]);
    const li=(u:string,t:string,why:string)=>`<li style="margin:0 0 10px"><a href="${esc(u)}">${esc(t)}</a><br><span style="color:#666;font-size:13px">${esc(why)}</span></li>`;
-   const html=`<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;line-height:1.5"><p>Bonjour Anthony,</p><p>Sites que le robot n'a pas réussi à lire ces dernières 24 h. Envoie ceux qui t'intéressent à Claude pour qu'il apprenne au robot à les lire.</p>`+
+   const html=`<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;line-height:1.5"><p>Bonjour Anthony,</p><p>Sites que le robot n'a pas réussi à lire ces dernières 24 h. Ils reçoivent le mail normal (après ceux dont le site est lu). Si un gros pro t'intéresse, appuie sur « Réparer » dans ton admin.</p>`+
     ((feeds||[]).length?`<h3 style="color:#7b2fbf">Inscriptions de pros en attente (${feeds!.length})</h3><ul>${feeds!.map((f:any)=>li(f.feed_url,f.feed_url,(f.site_platform?f.site_platform+' — ':'')+(f.last_error||''))).join('')}</ul>`:'')+
-    ((pros||[]).length?`<h3 style="color:#7b2fbf">Prospects : site illisible, mail non envoyé (${pros!.length})</h3><ul>${pros!.map((p:any)=>li(p.source_url,`${p.company||'Sans nom'} — ${p.category||''}${p.city?' — '+p.city:''}`,(p.site_check_platform?p.site_check_platform+' — ':'')+(p.site_check_reason||''))).join('')}</ul>`:'')+
+    ((pros||[]).length?`<h3 style="color:#7b2fbf">Prospects : site illisible, ils reçoivent le mail normal (${pros!.length})</h3><ul>${pros!.map((p:any)=>li(p.source_url,`${p.company||'Sans nom'} — ${p.category||''}${p.city?' — '+p.city:''}`,(p.site_check_platform?p.site_check_platform+' — ':'')+(p.site_check_reason||''))).join('')}</ul>`:'')+
     `<p style="color:#666;font-size:13px">Sites lus avec succès sur la même période : ${okCount||0} (ils reçoivent le mail avec leur nombre d'annonces).</p><p>Abracadeal</p></div>`;
    const rr=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`unreadable-digest-${new Date().toISOString().slice(0,10)}`},body:JSON.stringify({from:'Abracadeal <contact@abracadeal.fr>',to:tos,subject:`Robot : ${(pros||[]).length+(feeds||[]).length} site(s) à apprendre`,html})});
    return json({ok:rr.ok,sent:rr.ok,status:rr.status,to:tos.length});}

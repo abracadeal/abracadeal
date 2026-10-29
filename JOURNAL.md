@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Tri automatique des prospects (plus de prospect bloqué)
+- Décision d'Anthony : ne pas apprendre tous les sites ; envoyer d'abord à ceux que le robot lit.
+- Migration prospect_auto_sort_generic : `prospect_precheck_done` classe d'office — lu → `ok` ; lien Leboncoin sur le site (raison « LEBONCOIN: ») → `manual` ; sinon → `generic` (mail normal). Anciens `unreadable` passés en `generic`. `prospect_mailer_claim` : 1ers mails dans l'ordre ok/manual d'abord, puis generic.
+- pro-stock-sync : `prospect_precheck` détecte les liens leboncoin.fr/boutique|pro|ad|annonces|profil sur l'accueil quand le site n'est pas lisible ; mail du soir : liste les illisibles (qui reçoivent le mail normal) pour repérer les gros pros à « Réparer ».
+- admin-test-import.html : « Sites à apprendre » montre les illisibles pas encore mailés ; texte d'explication mis à jour. Les boutons restent utilisables (Réparer / Valider / Supprimer / Vend sur Leboncoin / Mail normal).
+
 ### 29/10/2026 — Claude — Bouton « Mail normal » (site qui bloque les robots)
 - Demande d'Anthony : Opti Immo bloque les robots, quel bouton pour lui envoyer un mail normal ?
 - Base (migration prospect_generic_mail) : `site_check_status` accepte « generic » ; RPC `admin_mark_prospect_generic` ; `prospect_mailer_claim` envoie aussi aux « generic » ; modèles « normal » et « relance_normal » (gratuit ; publier soi-même depuis le téléphone ou envoyer le flux / export du logiciel, « répondez à ce mail » ; aucune promesse de lecture du site).
