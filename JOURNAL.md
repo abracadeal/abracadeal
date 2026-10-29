@@ -1169,3 +1169,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 29/10/2026 — Claude — Mail « site testé » sans nombre d'annonces
 - **Demande d'Anthony :** ne plus mettre de nombre ; expliquer qu'après « OK » on s'occupe de tout et qu'ils reçoivent un mail pour choisir leur mot de passe et accéder à leur page pro et à leur stock.
 - **Modèles (base) :** Garage, Moto, Immo (A et B) + relances : « Nous avons testé le site de {{societe}} : Abracadeal peut reprendre automatiquement {{vos_annonces}}… », réponse « OK », création de l'espace pro, mail pour le mot de passe → page pro et stock. `{{annonces}}` (nombre) n'est plus utilisé dans ces modèles.
+
+### 29/10/2026 — Claude — Mail « site testé » : texte retravaillé
+- Modèles Garage / Moto / Immo (A et B) + relances réécrits plus simplement : « Nous sommes passés sur le site de {{societe}} : {{vos_annonces}} peuvent apparaître sur Abracadeal… Pour démarrer, répondez simplement « OK »… ». Objet A : « {{societe}} : {{vos_annonces}} sur Abracadeal, sans rien ressaisir » (objets B inchangés).
