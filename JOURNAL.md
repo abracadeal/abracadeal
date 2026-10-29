@@ -1177,3 +1177,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Corrigé : fiche précédemment rejetée car en-tête `property-info-template-19` et titre de description en `<h3>`, non reconnus. Lecture du prix, ville, type et titre sur ces modules ; code postal/chambres issus uniquement du JSON-LD du bien dont l'URL correspond (référence mandat distincte de l'identifiant URL).
 - Vérifié : fiche 87522659, 349 000 €, Cannes 06400, 44,45 m², 2 pièces, 1 chambre, 1 salle de bains, 8 photos uniques, DPE C / GES A, consommation 119. Pas de conseiller inventé depuis le pied de page.
 - Tests : `node --experimental-strip-types tests/apimo-cannisimmo.test.mjs` (fiche réelle, données structurées étrangères écartées, pagination et dédoublonnage) ; régression de lecture sur deux fiches Infinity avec leurs conseillers distincts : OK.
+
+### 29/10/2026 — ChatGPT — Cannisimmo déployé après accord d’Anthony
+- PR #11 fusionnée : `31f96409e0ed4f694f4a9ba1fb8b86dd56c54a7b` ; `pro-stock-sync` v89 ACTIVE, import épinglé sur ce commit, configuration d’authentification conservée.
+- Vérification réelle de production en lecture seule (`auto_review_dry`) : fiche 87522659, HTTP 200, 1 fiche complète, 349 000 €, Cannes 06400, 8 photos, surface/pièces/DPE renseignés, aucune erreur. Aucune annonce publiée par ce contrôle.
