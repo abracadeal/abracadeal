@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Opt’Immo : diagnostic de blocage anti-robot
+- Demande 143b5884-5a99-4591-bdb7-715a6db55a8c, https://www.agence-optimmo-pau.fr/. Test auto_review_dry : ok=false, aucune fiche lisible.
+- Accueil, domaine sans www, robots.txt et pages réelles de vente/location : HTTP 202 avec x-amzn-waf-action=challenge. La protection AWS WAF empêche le serveur du robot de recevoir les annonces ; ce n’est pas un défaut démontré du parseur. Les résultats en cache des moteurs ne valident pas une lecture directe.
+- Demande marquée failed avec explication simple. Pour poursuivre : accès autorisé au robot ou flux d’annonces fourni par l’agence. Aucun contournement, changement du lecteur ou déploiement ; pro-stock-sync reste v82.
+- Aucun statut de prospect modifié, aucun email, import ou publication.
+
 ### 29/10/2026 — ChatGPT — Orpi gmirleau.immo réparé : adresses avec point (v82)
 - Demande 69a0e95b-9898-4379-944b-c95c625fdabb, https://www.orpi.com/gmirleau.immo/, « Illisible ». Avant : orpiAgencySlug refusait les points, donc lecteur générique au lieu du lecteur Orpi ; test avant correction HTTP 503.
 - Correction limitée au nom de l’agence : lettres/chiffres/tirets/points internes acceptés, 2–60 caractères, pas de point initial/final ni doubles points ; routes nationales toujours exclues. Sert aussi à orpi.rostrenen, portovecchio.extremesud, etc. Lecteur des fiches et autres réseaux inchangés.
