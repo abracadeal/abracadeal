@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Réparer ≠ prospection
+- Précision d'Anthony : « Valider c'est pour valider, Tester pour tester. » Donc : **Réparer** (tâche du soir de Claude ou ChatGPT) = apprendre au robot à lire, sans jamais toucher à la prospection ; c'est Anthony qui appuie ensuite sur **Tester** puis **Valider** (prospect remis en test → mail s'il est lisible).
+- Tâche planifiée « Abracadeal : apprendre les sites au robot » mise à jour : ne modifie plus les prospects, ne prend jamais une demande déjà « in_progress » (ChatGPT), git pull --rebase avant chaque push. Guide `docs/APPRENDRE-AU-ROBOT.md` mis à jour.
+
 ### 29/10/2026 — Claude — Sites à apprendre : boutons renommés
 - Demande d'Anthony : « vérifier / revérifier » pas logique. Boutons dans l'ordre : **Tester** (aperçu), **Réparer** (= demande d'apprentissage, traitée par la tâche du soir), **Valider** (= remettre dans la file de test → mail si lisible ; ancien « Revérifier »), **Supprimer**, **Vend sur Leboncoin**. « Apprendre à lire ce site » → « Réparer ce site » ; rubrique « Apprentissage du robot » → « Sites en réparation » (statut « Réparé »). Explication des boutons affichée au-dessus de la liste.
 
