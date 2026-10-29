@@ -1181,3 +1181,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 29/10/2026 — ChatGPT — Cannisimmo déployé après accord d’Anthony
 - PR #11 fusionnée : `31f96409e0ed4f694f4a9ba1fb8b86dd56c54a7b` ; `pro-stock-sync` v89 ACTIVE, import épinglé sur ce commit, configuration d’authentification conservée.
 - Vérification réelle de production en lecture seule (`auto_review_dry`) : fiche 87522659, HTTP 200, 1 fiche complète, 349 000 €, Cannes 06400, 8 photos, surface/pièces/DPE renseignés, aucune erreur. Aucune annonce publiée par ce contrôle.
+- Contrôle du site entier : HTTP 200, 12 pages, 133 fiches lues sans lecture partielle, 121 après dédoublonnage (12 doublons), 1 467 photos, 119 fiches sans erreur de normalisation ; 2 fiches signalées « GES manquant ». Les diagnostics absents restent absents, aucune valeur inventée.
