@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Villaret : blocage anti-robot confirmé
+- Demande 7f6e1f1e-6833-46dd-bdb8-7896e8ac4dfe, https://www.villaret-immobilier.com. Accueil interrogé depuis le serveur du robot : HTTP 202, corps vide, x-amzn-waf-action=challenge (requête 182667). Test auto_review_dry 182668 : ok=false, aucune fiche lisible. Essai domaine sans www : délai TLS dépassé (182669).
+- Les pages mises en cache par les moteurs ne prouvent pas que le robot lit directement le site. Aucun contournement ni changement de parseur ne corrige l’accès refusé constaté ; pas de nouveau déploiement (v84 conservée).
+- Demande failed, raison visible : protection anti-robot ; accès autorisé ou flux d’annonces fourni par l’agence nécessaire pour poursuivre. Aucun prospect modifié, aucun mail/import/publication.
+
 ### 29/10/2026 — ChatGPT — Junot Saint-Georges : lecture des derniers biens actifs (v84)
 - Demande 8775c30b-49fc-493a-934a-7a2e786e632c : https://www.junot.fr/fr/agences/junot-saint-georges-9-eme-arrondissement-paris. Avant : aucune fiche, prestataire Apimo. Page publique HTTP 200 sans authentification ; le lecteur générique ne suivait pas les fiches hors du chemin agence.
 - Nouveau junot-reader.ts, sélectionné uniquement sur junot.fr ; réutilisable pour les pages /fr/agences/<slug>. Liens uniquement dans les onglets En vente/En location/À louer de la section de cette agence. Aucun lien de Vendus, d’autres agences ou de suggestions suivi. Fiche individuelle /fr/biens/<id>-<slug> également prise en charge.
