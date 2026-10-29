@@ -1,6 +1,7 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026, v3 13/10/2026 (relance J+5 dans le même fil),
 // v4 13/10/2026 : test A/B (A = mail avec lien, B = sans lien, on invite à répondre), variante stable par prospect.
+// v7 29/10/2026 : le 1er mail ne part qu'aux prospects dont le site a été lu par le robot ({{annonces}} = nombre trouvé).
 // v5 17/10/2026 : suivi des clics — le lien pro-fondateur.html reçoit un code personnel ?r=xxxxxxxx (aucun pixel d'ouverture).
 // Actions :
 //   POST {action:"verify", mailbox}         admin connecté : teste l'identifiant SMTP sans rien envoyer
@@ -76,8 +77,15 @@ async function smtp(c: Creds, mail?: { to: string; data: string }) {
 }
 
 function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${b64(s)}?=`; }
-function fill(t: string, company: string, from: string) {
-  return t.replaceAll("{{societe}}", company || "votre entreprise").replaceAll("{{expediteur}}", from);
+// v7 29/10/2026 : {{annonces}} = résultat du test du site du prospect (« vos 52 biens peuvent être », « votre véhicule peut être »).
+function stockPhrase(category: string, n: number | null | undefined) {
+  const k = Math.max(0, Number(n || 0));
+  const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
+  if (k <= 1) return `votre ${noun[0]} peut être`;
+  return `vos ${k} ${noun[1]} peuvent être`;
+}
+function fill(t: string, company: string, from: string, annonces = "vos annonces peuvent être") {
+  return t.replaceAll("{{societe}}", company || "votre entreprise").replaceAll("{{expediteur}}", from).replaceAll("{{annonces}}", annonces);
 }
 // Ajoute le code de suivi personnel au lien de l'offre Fondateurs. En cas d'échec, le mail part avec le lien normal.
 const FOUNDER_LINK = /https:\/\/abracadeal\.fr\/pro-fondateur\.html(?![?#\w-]|\.\w)/g;
@@ -103,9 +111,9 @@ async function variantOf(id: string, stored?: string | null) {
   const { data } = await admin.rpc("prospect_ab_variant", { p_id: id });
   return data === "B" ? "B" : "A";
 }
-async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null) {
+async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null, annonces?: string) {
   const from = c.email;
-  let body = fill(tpl.body, company, from);
+  let body = fill(tpl.body, company, from, annonces);
   let unsubHeader = "";
   if (prospectId) {
     body = await withTracking(body, prospectId);
@@ -121,7 +129,7 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
   const b = b64(body.replace(/\r?\n/g, "\r\n")).replace(/.{1,76}/g, "$&\r\n").trimEnd();
   const data =
     `From: ${encHeader(c.display_name)} <${from}>\r\nTo: <${to}>\r\nReply-To: <${from}>\r\n` +
-    `Subject: ${encHeader(fill(tpl.subject, company, from).replace(/[\r\n]/g, " "))}\r\nDate: ${new Date().toUTCString().replace("GMT", "+0000")}\r\n` +
+    `Subject: ${encHeader(fill(tpl.subject, company, from, annonces).replace(/[\r\n]/g, " "))}\r\nDate: ${new Date().toUTCString().replace("GMT", "+0000")}\r\n` +
     `Message-ID: ${msgId}\r\n${thread}MIME-Version: 1.0\r\n${unsubHeader}` +
     `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`;
   return { data, msgId };
@@ -188,7 +196,8 @@ Deno.serve(async (req) => {
       }
       const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A");
       const to = String(user.email || "");
-      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null);
+      const cat = String(body.category || "Garage / concession auto");
+      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null, stockPhrase(cat, 24));
       await smtp(c, { to, data });
       return json({ ok: true, message: `Message de test envoyé à ${to} depuis ${c.email}.` });
     } catch (e) {
@@ -208,12 +217,12 @@ Deno.serve(async (req) => {
     for (const j of list) {
       const followup = j.kind === "followup";
       try {
-        const { data: row } = await admin.from("prospection_prospects").select("ab_variant").eq("id", j.id).single();
+        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         const c = await creds(j.mailbox);
         const tpl = await templates(j.category || "", followup, variant);
-        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null);
+        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
         else {
