@@ -18,6 +18,17 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Junot Saint-Georges : lecture des derniers biens actifs (v84)
+- Demande 8775c30b-49fc-493a-934a-7a2e786e632c : https://www.junot.fr/fr/agences/junot-saint-georges-9-eme-arrondissement-paris. Avant : aucune fiche, prestataire Apimo. Page publique HTTP 200 sans authentification ; le lecteur générique ne suivait pas les fiches hors du chemin agence.
+- Nouveau junot-reader.ts, sélectionné uniquement sur junot.fr ; réutilisable pour les pages /fr/agences/<slug>. Liens uniquement dans les onglets En vente/En location/À louer de la section de cette agence. Aucun lien de Vendus, d’autres agences ou de suggestions suivi. Fiche individuelle /fr/biens/<id>-<slug> également prise en charge.
+- Description narrative product-description ; titre/type/prix de la fiche, ville et CP de sa métadonnée descriptive, surface Habitable prioritaire sur Total, pièces/chambres/salles d’eau, honoraires, galerie photos sans miniatures en double. DPE/GES SVG Apimo réutilisés après décodage des entités HTML, sans classes inventées. Charges annuelles et taxe lues, mentions copropriété via normalisation existante.
+- Limite explicite : la page annonce les « derniers biens proposés par votre agence », sans total exhaustif ni pagination d’agence constatée. partial=true conservé, pas de total inventé, archivage automatique interdit par la protection existante ; ne pas présenter cette réparation comme une reprise exhaustive du réseau.
+- pro-stock-sync v84, source 1b3e2e018f9fa15d855296f8db08c6bd100bfbac, base v83 Claude conservée. Tests locaux sélection active/vendus exclus, dédoublonnage photos, champs et partial, esbuild OK. Fiche 83270099 : 180,68 m² habitables (183,27 total), 11 photos, E/E, charges 6400 €/an, taxe 1760 €.
+- Test production à blanc : 20 fiches / 19 après dédoublonnage existant, 19 sans erreur bloquante, 221 photos ; description/prix/ville/surface/pièces 100 %, DPE 68 % (6 programmes neufs sans diagnostic), partial=true.
+- Témoins séquentiels : Nestenn 56/56 ; Chevreux 29/29 ; Orpi 54/52 ; C21 39/39 ; L’Adresse 88/88 ; Laugier 23/23 ; Spider VO ADN 20/18 ; WooCommerce 78/76. Défauts photos/prix connus et stocks évolutifs, lecteurs non Junot inchangés.
+- Demande done avec limite de lecture partielle dans le résultat. Aucun statut de prospect modifié, aucun mail, import ou publication.
+
+
 ### 29/10/2026 — Claude — Tri automatique des prospects (plus de prospect bloqué)
 - Décision d'Anthony : ne pas apprendre tous les sites ; envoyer d'abord à ceux que le robot lit.
 - Migration prospect_auto_sort_generic : `prospect_precheck_done` classe d'office — lu → `ok` ; lien Leboncoin sur le site (raison « LEBONCOIN: ») → `manual` ; sinon → `generic` (mail normal). Anciens `unreadable` passés en `generic`. `prospect_mailer_claim` : 1ers mails dans l'ordre ok/manual d'abord, puis generic.
