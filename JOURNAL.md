@@ -856,3 +856,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - DPE/GES qui ne sont pas une lettre (ex. une date) ignorés au lieu de bloquer l'annonce.
 - Types reconnus en plus : immeuble, propriété, ferme, longère, château, chalet, pavillon (maison) ; loft, duplex (appartement) ; stationnement (parking) ; entrepôt, hangar (bureaux-commerces).
 - Tests : immocannes 388 biens (220/220 lus OK), immodesvallois 432 biens (220/220 OK).
+
+## 29/10/2026 — Session mobile : plus de « Connectez-vous » après un passage en arrière-plan (Claude)
+- Cause : au retour dans l'appli après un long moment, le jeton est expiré et son rafraîchissement échoue le temps que le réseau revienne ; `refreshAuth` vidait alors `currentUser` alors que la session restait enregistrée (l'onglet Compte la montrait toujours).
+- `index-main.js` : erreur réseau ≠ déconnexion (`isAuthRejection`), le compte reste affiché et une nouvelle tentative part 4 s après ; au retour après plus d'1 min en arrière-plan, le jeton est rafraîchi tout de suite ; avant chaque « Connectez-vous pour… » (publier, messages, favoris, alertes, numéro, signaler, mes annonces, import pro), `ensureSessionUser()` relit d'abord la session enregistrée.
+- Version : index-main.js?v=20261029-session.

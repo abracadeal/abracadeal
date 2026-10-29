@@ -311,6 +311,34 @@ function readStoredAuthSession(){
   }
 }
 
+function isAuthRejection(error){
+  if(!error)return false;
+  const code=String(error.code||''),name=String(error.name||''),status=Number(error.status||0);
+  if(name==='AuthRetryableFetchError'||status===0||status>=500)return false;
+  return ['refresh_token_not_found','refresh_token_already_used','session_not_found','session_expired','invalid_grant','user_not_found'].includes(code)||status===400||status===401||status===403;
+}
+// Avant d'afficher « Connectez-vous » : si une session est enregistrée (appli restée en arrière-plan), on la relit d'abord.
+async function ensureSessionUser(){
+  if(currentUser)return true;
+  if(!sb||!readStoredAuthSession())return false;
+  try{await refreshAuth();}catch(_){}
+  return !!currentUser;
+}
+let hiddenSince=0;
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden'){hiddenSince=Date.now();return;}
+  if(!sb||!hiddenSince||Date.now()-hiddenSince<60000)return;
+  hiddenSince=0;
+  if(!readStoredAuthSession())return;
+  setTimeout(async()=>{
+    try{
+      const{data}=await sb.auth.getSession();
+      const exp=data?.session?.expires_at||0;
+      if(data?.session&&exp*1000-Date.now()<120000)await sb.auth.refreshSession();
+      if(!currentUser||!data?.session)await refreshAuth();
+    }catch(error){console.warn('Reprise de session au retour',error);}
+  },300);
+});
 async function refreshAuth({preserveEditing=true}={}){
   if(!sb){
     currentUser=null;
@@ -346,6 +374,12 @@ async function refreshAuth({preserveEditing=true}={}){
   }
 
   if(sessionError&&!session)console.warn('Session Supabase indisponible',sessionError);
+  // Retour d'arrière-plan (mobile) : le réseau n'est pas encore prêt, le rafraîchissement du jeton échoue.
+  // Tant que la session est encore enregistrée et que l'erreur n'est pas un refus du serveur, on garde le compte affiché.
+  if(!session&&currentUser&&readStoredAuthSession()&&!isAuthRejection(sessionError)){
+    clearTimeout(refreshAuth.retry);refreshAuth.retry=setTimeout(()=>refreshAuth().catch(()=>{}),4000);
+    return true;
+  }
   await applyAuthSession(session,{preserveEditing});
   claimSignupSiteImport(session);
   return !!session;
@@ -822,8 +856,8 @@ window.deleteSavedAlert=async(id)=>{
   toast('Alerte supprimée');
   loadMyAlerts();
 };
-$('#createAlertBtn')?.addEventListener('click',()=>{
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
+$('#createAlertBtn')?.addEventListener('click',async()=>{
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
   fillAlertFormFromCurrentSearch();
   openModal('alertsModal');
   loadMyAlerts();
@@ -831,7 +865,7 @@ $('#createAlertBtn')?.addEventListener('click',()=>{
 $('#accountAlertsBtn')?.addEventListener('click',()=>{closeModal('accountModal');openModal('alertsModal');loadMyAlerts();});
 $('#createAlertForm')?.addEventListener('submit',async(e)=>{
   e.preventDefault();
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour créer une alerte');return;}
   if(!sb) return;
   const status=$('#createAlertStatus');
   if(status) status.textContent='Enregistrement…';
@@ -1514,8 +1548,8 @@ async function refreshAutoFeedUi(){
     updateImportSectorCopy();
   }catch(err){if(status)status.textContent=err.message||'Impossible de charger la configuration automatique.';}
 }
-window.openProImport=()=>{
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous d’abord');return;}
+window.openProImport=async()=>{
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous d’abord');return;}
   if(currentProfile?.account_type!=='professionnel'){toast('Cette fonction est réservée aux comptes professionnels');return;}
   closeModal('accountModal'); resetProImport();
   openModal('proImportModal'); refreshAutoFeedUi().then(()=>updateImportSectorCopy()).catch(()=>updateImportSectorCopy());
@@ -2360,9 +2394,9 @@ function resetPublishForm(){
   if($('#publishStatus')) $('#publishStatus').textContent=''; populateSubcategories(''); updatePublishFields(); syncPublishVisibility();
   updatePublishStepUi();
 }
-$$('.publish-trigger').forEach(b=>b.addEventListener('click',e=>{
+$$('.publish-trigger').forEach(b=>b.addEventListener('click',async e=>{
   e.preventDefault();
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour publier');return}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour publier');return}
   resetPublishForm();
   $('#sellerType').value=currentProfile?.account_type==='professionnel'?'Professionnel':'Particulier'; $('#sellerType').disabled=currentProfile?.is_admin!==true; syncPublishVisibility(); renderPublishPackPicker();
   $('#adPhone').value=currentProfile?.phone||'';
@@ -3272,7 +3306,7 @@ window.carouselStep=function(el,dir){
 })();
 window.toggleFavorite=async(id,event)=>{
   if(event){event.preventDefault();event.stopPropagation();}
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour enregistrer vos favoris');return;}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour enregistrer vos favoris');return;}
   if(favoriteIds.has(id)){
     const {error}=await sb.from('favorites').delete().eq('user_id',currentUser.id).eq('listing_id',id);
     if(error){toast(error.message);return;}
@@ -4905,7 +4939,7 @@ window.deleteConversationForMe=async(id,event)=>{
 };
 
 window.openMessages=async(preferredId=null)=>{
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour accéder à la messagerie');return;}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour accéder à la messagerie');return;}
   $('#moderationNotices').innerHTML='';
   if(!preferredId && window.matchMedia?.('(max-width:720px)').matches){
     currentConversationId=null;
@@ -4964,7 +4998,7 @@ async function loadConversationMessages(scrollToBottom=true){
   await refreshUnreadMessages();
 }
 window.startMessageForListing=async(listingId)=>{
-  if(!currentUser){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour envoyer un message');return;}
+  if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour envoyer un message');return;}
   const ad=allAds.find(x=>x.id===listingId);
   if(ad&&ad.owner_id===currentUser.id){toast('C’est votre annonce');return;}
   const {data,error}=await sb.rpc('start_conversation',{p_listing_id:listingId});
@@ -4974,7 +5008,7 @@ window.startMessageForListing=async(listingId)=>{
   await openMessages(data);
 };
 window.viewListingPhone=async(listingId)=>{
-  if(!currentUser){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
+  if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
   const {data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId});
   if(error){toast(error.message||'Impossible d’afficher le numéro');return;}
   const host=document.getElementById(`phoneContact-${listingId}`);
@@ -5294,7 +5328,7 @@ window.deleteMyReview=async(reviewId,sellerId)=>{
 };
 
 window.reportReview=async reviewId=>{
-  if(!currentUser){toast('Connectez-vous pour signaler');return}
+  if(!currentUser&&!(await ensureSessionUser())){toast('Connectez-vous pour signaler');return}
   const reason=prompt('Pourquoi signalez-vous cet avis ?');
   if(!reason?.trim())return;
   const {error}=await sb.rpc('report_review',{p_review_id:reviewId,p_reason:reason.trim()});
@@ -5303,7 +5337,7 @@ window.reportReview=async reviewId=>{
 };
 
 window.reportAd=async id=>{
-  if(!currentUser){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour signaler');return}
+  if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour signaler');return}
   const reason=prompt('Pourquoi signalez-vous cette annonce ?');
   if(!reason)return;
   const {error}=await sb.from('reports').insert({listing_id:id,reporter_id:currentUser.id,reason:reason.trim()});
@@ -5593,7 +5627,7 @@ $('#heroFiltersBtn')?.addEventListener('click',()=>closeAllQuickFilterPopovers()
 updateQuickFilterLabels();
 
 async function openMyAds(){
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos annonces');return;}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos annonces');return;}
   resetSearchFilters();onlyMine=true;
   if(currentProfile?.is_admin) setModerationButtonLabel('Modérer');
   await loadAds();
@@ -5606,7 +5640,7 @@ window.openAdminFlowErrors=async()=>{
   await refreshFlowErrorsCount();
 };
 async function openFavorites(){
-  if(!currentUser){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos favoris');return;}
+  if(!currentUser&&!(await ensureSessionUser())){window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir vos favoris');return;}
   resetSearchFilters();favoritesMode=true;
   
   if(currentProfile?.is_admin) setModerationButtonLabel('Modérer');
