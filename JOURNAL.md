@@ -18,6 +18,271 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Guide « Apprendre un nouveau site au robot » pour ChatGPT
+- Demande d'Anthony : que ChatGPT puisse aussi apprendre de nouveaux sites au robot, en alternance avec Claude.
+- Nouveau fichier `docs/APPRENDRE-AU-ROBOT.md` : fonctionnement du robot, test à blanc (SQL), diagnostic d'une fiche, mise en ligne par commit, sites témoins à retester, prospects à remettre dans la file, répartition.
+- Journal remis en ordre : les entrées du 29/10 étaient ajoutées en bas, elles sont maintenant en haut (la plus récente d'abord), au format « ### date — auteur — sujet ».
+
+### 29/10/2026 — Claude — Aperçu admin : bouton « Modifier » une fiche
+- Demande d'Anthony : corriger directement une erreur vue dans l'aperçu.
+- Base (migration pro_stock_overrides) : table `pro_stock_overrides` (clé = site sans www + référence de la fiche, `fields` jsonb, RLS sans accès direct) ; RPC admin `admin_set_stock_override(host, ref, fields)` ({} = supprimer la correction).
+- pro-stock-sync v73 (`normalizeRows`) : corrections chargées pour les sites lus et appliquées à la fiche brute avant la mise en forme (mêmes noms : titre, prix, ville, code_postal, surface, pieces, chambres, dpe, ges, honoraires, charges_annuelles, nombre_lots, taxe_fonciere, charges_mensuelles, depot_garantie, transaction, type_bien, marque, modele, annee, kilometrage, carburant, boite, description) ; `_exclure` = jamais publiée (retirée à la synchro suivante si déjà en ligne). Fiche marquée `corrected`.
+- admin-test-import.html : bouton « Modifier » dans la fiche (formulaire selon auto/immo, case « Ne pas publier », « Supprimer ma correction »), badge « Corrigée à la main ». Affichage mis à jour tout de suite ; annonces déjà en ligne corrigées à la synchro suivante (≈ 3 h).
+
+### 29/10/2026 — Claude — Doublons de photos et d'annonces, tous sites
+- Demande d'Anthony : photos en double fréquentes (auto et immo) ; vérifier aussi les annonces en double.
+- pro-stock-sync v72 (`normalizeRows`) : `dedupePhotos` — même image reconnue malgré la taille (-300x200, -ibig/-intermediate, /thumbs/, ?w=400…), l'extension et les paramètres de taille ; la plus grande version est gardée (sans indication de taille = image d'origine). `listingKey` : même titre + prix + surface/km/année + ville dans un même site = une seule annonce (celle qui a le plus de photos). Lecture à blanc : `duplicates`, `photos_total`.
+- Aperçu admin : affichait les photos brutes de la page (ex. 45 pour la Lexus Laugier) et les villes avant correction ; il affiche maintenant les données qui seront publiées (photos sans doublons, ville corrigée), les doublons d'annonce en grisé « non publié ». Lien fiche lue ↔ fiche normalisée par adresse ou référence (avant : par position, décalé dès qu'une fiche était écartée).
+- Contrôle : L'Adresse Cannes 3 annonces en double retirées (89 → 86) ; Laugier 23 véhicules, 33 photos en moyenne après dédoublonnage.
+
+### 29/10/2026 — Claude — Robot v71 : Laugier Automobiles (Annonces-Automobile) sans ville
+- Signalé par Anthony : 23 véhicules lus, 0 prêt (« ville manquante ») alors que l'adresse du garage figure sur chaque fiche.
+- Cause : accueil du site sans photo → pas de « cdn-rivamedia » → site pas reconnu comme Annonces-Automobile → lecteur automatique (qui ne lit pas le bloc « Nos coordonnées »).
+- `isAaSiteHtml` : reconnu aussi par les images d'interface www.annonces-automobile.com/images/graphic/. `siteLocation` : ville en minuscules (« 75017 paris ») acceptée et remise en forme (« Paris »).
+- Contrôle : laugierautomobiles.com 23/23 complets, ville Paris, 33 photos en moyenne.
+
+### 29/10/2026 — Claude — Interrupteur « Offre Fondateurs » qui ne réagissait pas
+- Signalé par Anthony : clic sans effet. Cause : l'état ouvert/fermé n'était chargé qu'à l'ouverture du menu Admin par le bouton du bas (mobile) ou à la construction du menu (ordinateur, Supabase parfois pas encore prêt) ; état inconnu → le clic ne faisait rien.
+- admin-mobile-merge-20261028.js (v=3) et admin-account-layout-20261018.js (v=8) : si l'état n'est pas chargé, il est lu au clic puis la confirmation s'affiche. L'offre est restée ouverte (closed_at vide, vérifié).
+
+### 29/10/2026 — Claude — Prospection : moins de motos
+- Décision d'Anthony : les garages moto ont très peu d'annonces sur leur site. Mix d'envoi : moto 10 %, immobilier 45 %, auto 45 % (avant 32/34/34).
+- `prospect_precheck_claim` : tirage pondéré par ce mix (power(random(), 1/poids)) au lieu de « petits pros d'abord » (qui faisait tester surtout des motos). Essai : 10 tirages → 6 immo, 3 auto, 1 moto.
+
+### 29/10/2026 — Claude — Prospects qui vendent sur Leboncoin : mail « publiez vous-même »
+- Demande d'Anthony : un bouton pour les pros dont les annonces sont sur Leboncoin et pas sur leur site, et leur envoyer un mail pour qu'ils publient eux-mêmes.
+- Base (migration prospect_manual_listing_mail) : `site_check_status` accepte « manual » ; RPC `admin_mark_prospect_manual` ; `prospect_mailer_claim` envoie le 1er mail aux statuts ok ET manual ; modèles « manuel » et « relance_manuel » (gratuit, sans limite d'annonces, publier depuis le téléphone, contacts directs).
+- prospect-mailer (stub GitHub) : modèle « manuel » / « relance_manuel » quand `site_check_status='manual'` ; `{{vos_annonces}}` = vos véhicules / vos motos / vos biens ; test : `{action:'test', manual:true}`.
+- admin-test-import.html : bouton « Vend sur Leboncoin » dans « Sites à apprendre », compteur « vendent sur Leboncoin ».
+- Leboncoin n'est pas lu par le robot (protection anti-robots et conditions d'utilisation).
+
+### 29/10/2026 — Claude — Sites à apprendre : bouton « Supprimer »
+- Demande d'Anthony : retirer un prospect qui ne l'intéresse pas depuis la liste « Sites à apprendre ».
+- Contrainte `prospection_prospects_segment_check` élargie à « exclu_admin » (sinon erreur au clic, signalée par Anthony).
+- RPC `admin_drop_prospect` (admin) : la ligne n'est pas effacée (sinon le robot de recherche de prospects pourrait la rajouter) mais marquée `segment='exclu_admin'`, statut ready → paused, note datée : plus jamais mailé (le tirage et le test excluent déjà « exclu% »), retiré de la liste et du mail du soir (pro-stock-sync v70).
+- admin-test-import.html : bouton rouge « Supprimer » avec confirmation.
+
+### 29/10/2026 — Claude — Robot v69 : ville du bien, pas celle de l'agence
+- Signalé par Anthony : L'Adresse Cannes, biens au Cannet / à Juan-les-Pins affichés « Cannes » (adresse de l'agence prise sur la page).
+- smart-reader : ordre de choix de la ville : 1) segment « ville-cp » de l'adresse de la fiche (/le-cannet-06110/ ; si le segment contient d'autres mots, seule la fin confirmée par la page est gardée), 2) ville trouvée dans le titre, 3) fin du titre (« …, Le Cannet ») seulement si la page la confirme, 4) ancienne règle (données de la page, texte).
+- Contrôle : L'Adresse Cannes 89/89, code postal = celui de l'adresse de chaque fiche pour les 89 ; Nestenn Orléans 56/56 ; immochevreux 30/30 (la fin de titre « MANSARDE - CAVE - » n'est plus prise pour une ville).
+
+### 29/10/2026 — Claude — Prospection : test du site avant le mail + sites à apprendre + mention d'erreurs
+- Décisions d'Anthony : lien vers l'annonce d'origine caché ; mention « il peut y avoir des erreurs » sur les annonces reprises ; mail de prospection basé sur la lecture du site ; si un site n'est pas lisible, Anthony est prévenu et transmet à Claude, qui apprend au robot à le lire.
+- Base (migrations prospect_site_precheck, prospect_mailer_claim_requires_readable_site, prospect_precheck_cron) : colonnes `site_check_status` (checking/ok/unreadable), `site_check_count`, `site_check_platform`, `site_check_reason`, `site_checked_at` sur prospection_prospects ; RPC `prospect_precheck_claim` / `prospect_precheck_done` (service), `admin_unreadable_sites`, `admin_recheck_prospect_site` (admin). Test bloqué > 10 min → « illisible (site trop lourd ou trop lent) ».
+- `prospect_mailer_claim` : un 1er mail ne part qu'aux prospects `site_check_status='ok'` (relances inchangées).
+- pro-stock-sync v67 : action `prospect_precheck` (1 site par appel, lecture à blanc complète) ; action `unreadable_digest` (mail Resend aux admins : prospects illisibles + inscriptions en attente des dernières 24 h, idempotent par jour). Crons : `abracadeal-prospect-site-precheck` toutes les 4 min de 6 h à 17 h UTC ; `abracadeal-unreadable-sites-digest` à 17 h 10 UTC.
+- prospect-mailer v8 (stub GitHub) : `{{annonces}}` = « vos 52 biens peuvent être » / « votre véhicule peut être » (par catégorie) ; modèles A et B réécrits : « Nous avons testé le site de {{societe}} : {{annonces}} en ligne sur Abracadeal en quelques minutes… » ; relance : « Petit rappel : {{annonces}} en ligne… ».
+- Annonce publique (source feed:…) : mention sous la description (erreurs possibles, seules les infos confirmées par le pro font foi). index-main.js?v=20261029-mention-import.
+- Admin (admin-test-import.html) : section « Sites à apprendre » (compteurs, Tester, Revérifier).
+- Note : plusieurs tests lancés en même temps → 546 WORKER_RESOURCE_LIMIT ; le cron n'en lance qu'un à la fois.
+
+### 29/10/2026 — Claude — Robot v66 : réseau L'Adresse
+- Signalé par Anthony : L'Adresse Cannes illisible.
+- `readLadresseAgency` : adresse de page agence ladresse.com/agence/<nom>/<n°> → listes /acheter, /acheter/2… et /louer, fiches /annonce/(achat|location)/… lues par le lecteur automatique (220 max par passage). Adresse du site national ladresse.com : message « donnez l'adresse de la page de l'agence » (exemple fourni).
+- L'Adresse Cannes : 89 biens (82 ventes, 7 locations), 89 complets ; DPE 85 % (étiquettes en image « dpe-c.png » / classe « dpe dpe-c » : lues si une seule lettre), lots 58 %, charges 55 %, taxe 65 %, honoraires 99 %.
+- Corrigés au passage : bien « vendu loué » (« loyer : 450 € » dans la description) classé en location → reste une vente si prix ≥ 20 000 € ; locations : « Charges : 37 € », « 21 € de provision sur charges », « Meublé » (lettre accentuée en fin de mot) ; honoraires « 463.27 TTC » non coupés au point.
+
+### 29/10/2026 — Claude — Immo : informations essentielles (robot v63 + affichage)
+- Demande d'Anthony : un tableau des infos très souvent demandées / obligatoires pour une annonce immo, et plus de doublons dans la description.
+- Annonce publique (index-main.js?v=20261029-immo-essentiel, `detailSpecsFor`) : lignes toujours affichées, « Non communiqué » si absentes. Vente : surface habitable, pièces, dépenses d'énergie estimées, honoraires, copropriété, nombre de lots, charges de copropriété / an, procédure en cours (syndicat), taxe foncière. Location : charges / mois, dépôt de garantie, honoraires locataire, meublé. DPE/GES restent dans le bloc diagnostic.
+- Aperçu admin : bloc « Informations essentielles » en tête, valeurs absentes en rouge, puis « Autres détails » ; code postal = celui normalisé.
+- Robot : lignes « faits » de la fiche (`texte_page`, hors description) lues pour les rubriques à libellé uniquement : charges annuelles, taxe foncière, nombre de lots, bien en copropriété oui/non, procédure, dépôt de garantie, honoraires (% ou « à la charge du … »), n° de mandat (ex. 4981_B). Le DPE n'est jamais pris dans ces lignes (titres de biens similaires).
+- Orpi : condo → copropriété, condoBundleNumber → nombre de lots.
+- N° de mandat : plus de recopie de la référence quand le site n'en donne pas. Honoraires « honoraires » (mot du menu) ignorés. Code postal pris avec la ville choisie (Nestenn « 27390 » caché).
+- Description : `dedupeDescription` après le découpage en lignes : titre recopié en tête retiré (et ses restes déjà répétés plus bas), badges seuls (Nouveauté, Exclusivité…), lignes répétées.
+- Taux mesurés (lecture à blanc, champ `fill`) — Nestenn Orléans : charges 59 %, taxe 82 %, lots 59 %, copro 100 %, procédure 63 %, mandat 98 % ; C21 Daumesnil : charges 76 %, lots 74 %, honoraires 100 %.
+
+### 29/10/2026 — Claude — Robot v60 : locations et villes (lecteur automatique)
+- Location reconnue quand le prix est suivi de « CC/Mois », « /mois », « par mois », ou quand la description commence par « À louer » (Nestenn « Duplex hyper-centre 690 € CC/Mois » était en vente). Un prix ≥ 20 000 € reste une vente.
+- Ville : « 27390 » caché suivi de « Partager ce bien » donnait la ville « Partager ce bien ». Les candidats « CP Ville » sont filtrés (mots d'interface écartés), la ville présente dans le titre est préférée, la zone autour du titre est aussi lue.
+- Contrôle : Nestenn Orléans 56/56 (3 locations), villes justes (Orléans, Fleury-les-Aubrais…) ; immochevreux 29/29.
+
+### 29/10/2026 — Claude — Robot v57 : Nestenn (nombre de biens et prix)
+- Signalé par Anthony : Nestenn Orléans, 53 biens sur le site, 40 lus.
+- Pages « prix au m² » (/prix-m2-orleans/prix-rues/…) lues comme des biens : 2e filtre sur la forme de l'adresse (profondeur + fin numérique « -ref-39790233 ») quand la majorité des fiches ont la même.
+- Prix faux sur tout le lecteur automatique : un montant précédé d'un retour à la ligne (« Appartement à vendre\n145 350 € ») était rejeté, le robot prenait le premier montant suivant (charges 350 €). Corrigé dans `priceRe` (smart-reader.ts) + prix cherché d'abord autour du titre + chiffres séparés par des <span> d'espace recollés.
+- Type de bien : le type déclaré (JSON-LD Apartment/House) passe avant les mots du titre ; « copropriété » n'est plus une maison ; un bien avec pièces/chambres/m² n'est plus un parking parce que le titre dit « garage ».
+- Résultat : Nestenn Orléans 56 lus (53 ventes + 3 locations), 56 complets, prix justes (ex. 192 600 €, 145 350 €). Immochevreux 30/30.
+- Outils : lecture à blanc renvoie `crawl` (pages, fiches, ratés) et `urls` (adresse, titre, prix, type) ; action `debug_detail` (cron) pour une fiche.
+- Reste : table de debug private.debug_html à supprimer (la suppression demande une confirmation).
+
+### 29/10/2026 — Claude — Statistiques vendeur : vues, numéros affichés, clics « Appeler »
+- But (Anthony) : que le pro sache ce que lui apporte Abracadeal (le revenu viendra de là à la fin des 12 mois).
+- Base : `listing_events` + `track_listing_event` + `get_my_listing_stats` ; `get_listing_phone` compte le numéro affiché côté serveur (fiable). Une fois par visiteur, annonce et jour ; propriétaire et admin exclus ; 400 événements max par visiteur et par jour.
+- Site (index-main.js?v=20261029-stats-vendeur) : vue comptée à l'ouverture d'une annonce (identifiant visiteur anonyme `abraca_vid` en localStorage), clic sur le numéro compté ; sous le numéro : « Dites au vendeur que vous l'appelez de la part d'Abracadeal ».
+- Espace Pro : bloc « Ce que vos annonces vous ont apporté (30 derniers jours) » : vues, numéros affichés, clics Appeler, contacts par message, top 3 des annonces.
+- Reste à faire si validé : bilan mensuel par e-mail au pro ; tableau admin (stock par région, trafic, contacts) pour décider la fermeture de l'offre Fondateurs.
+
+### 29/10/2026 — Claude — Offre Fondateurs : plus de plafond de 100 annonces
+- Décision d'Anthony : on enlève la barrière des 100 annonces ; on garde les 500 places Fondateurs, mais on n'attendra pas d'en avoir 500 : une fois le site bien rempli, on ferme l'offre et le paiement s'applique aux nouveaux.
+- Base : `enforce_founder_50_listing_limit()` laisse passer toutes les annonces d'un Fondateur pendant ses 12 mois gratuits (migration founder_free_period_unlimited_listings ; trace dans supabase/2026-10-29-fondateurs-annonces-illimitees.sql). Après les 12 mois, le plafond de la formule choisie s'applique aux nouvelles annonces.
+- Textes : aide, CGV (avec la possibilité de clôturer l'offre avant 500, les inscrits gardent leurs 12 mois), accueil, inscription, pro-fondateur, mail de prospection admin, compteur de l'espace Pro (« x / illimité »).
+- Fermeture anticipée : interrupteur existant « Offre Fondateurs ouverte/fermée » de l'admin (RPC admin_set_founder_offer_closed) ; ferme les nouvelles inscriptions Fondateurs, sans toucher aux inscrits.
+
+### 29/10/2026 — Claude — Robot v50 : site d'agence illisible → page réseau trouvée toute seule
+- Demande d'Anthony : ne pas avoir à se souvenir qu'il faut mettre orpi.com/… quand le site perso d'une agence est illisible (ex. calleris.fr, Wix).
+- `findNetworkPage` : si aucun lecteur ne marche, le robot cherche un lien Orpi ou Century 21 sur le site, sinon essaie orpi.com/<nom du domaine>(immo|-immo|immobilier|orpi…) et ne garde la page que si son titre est celui d'une agence portant ce nom. Le type de site affiché le dit (« Orpi (page agence orpi.com/callerisimmo, le site www.calleris.fr n'est pas lisible) »).
+- Domaine : un site Orpi / Century 21 passe tout seul en Immobilier, même si « Auto / Moto » était choisi ; l'aperçu admin bascule les deux menus Domaine.
+
+### 29/10/2026 — Claude — Robot v49 : DPE recopié partout où il est écrit
+- Demande d'Anthony : si le DPE figure dans l'annonce d'origine (fiche ou description), il doit être dans la case DPE.
+- « DPE : vierge / non requis / non soumis / exempté » (texte) et « DPE non requis » sur Orpi → case DPE « Non soumis » (au lieu de vide).
+- Location reconnue dans le texte (« Loyer : … » + dépôt de garantie ou charges) même si le site range le bien en vente : immochevreux mettait ses locations en « vente-appartement ».
+- Lecture à blanc : nouvelle liste `no_dpe` (biens sans DPE + extraits du texte) pour contrôler.
+- Contrôle : Orpi Bartholdi 100 % DPE ; Century 21 Daumesnil, immochevreux, C21 Cap-d'Ail : les biens restants sans DPE n'en affichent aucun sur leur propre page (vérifié page par page : programmes neufs C21 Beausoleil/Eze/Cap-d'Ail, quelques biens immochevreux).
+
+### 29/10/2026 — Claude — Session mobile : plus de « Connectez-vous » après un passage en arrière-plan
+- Cause : au retour dans l'appli après un long moment, le jeton est expiré et son rafraîchissement échoue le temps que le réseau revienne ; `refreshAuth` vidait alors `currentUser` alors que la session restait enregistrée (l'onglet Compte la montrait toujours).
+- `index-main.js` : erreur réseau ≠ déconnexion (`isAuthRejection`), le compte reste affiché et une nouvelle tentative part 4 s après ; au retour après plus d'1 min en arrière-plan, le jeton est rafraîchi tout de suite ; avant chaque « Connectez-vous pour… » (publier, messages, favoris, alertes, numéro, signaler, mes annonces, import pro), `ensureSessionUser()` relit d'abord la session enregistrée.
+- Version : index-main.js?v=20261029-session.
+
+### 29/10/2026 — Claude — Robot v46 : Orpi grosses agences
+- v42 lisait jusqu'à 450 fiches, 6 en parallèle → erreur 546 « WORKER_RESOURCE_LIMIT ». Désormais 220 fiches par passage, 4 en parallèle.
+- Au-delà de 220 biens : fenêtre décalée chaque jour, les biens s'ajoutent synchro après synchro (pas d'archivage pendant une lecture partielle). L'activation auto n'est plus bloquée par cette limite volontaire.
+- Total du site renvoyé (`total_on_site`) et affiché dans l'aperçu admin.
+- DPE/GES qui ne sont pas une lettre (ex. une date) ignorés au lieu de bloquer l'annonce.
+- Types reconnus en plus : immeuble, propriété, ferme, longère, château, chalet, pavillon (maison) ; loft, duplex (appartement) ; stationnement (parking) ; entrepôt, hangar (bureaux-commerces).
+- Tests : immocannes 388 biens (220/220 lus OK), immodesvallois 432 biens (220/220 OK).
+
+### 29/10/2026 — Robot v42 : Orpi, stock complet de l'agence — Claude
+- **Signalé par Anthony :** une agence Orpi de Strasbourg : 31 biens lus, bien moins que ce qu'elle a.
+- **Cause :** le lecteur Orpi lisait `/<agence>/acheter`, qui ne montre qu'une sélection (≈ 9 biens). La liste complète est `/<agence>/acheter/biens-en-vente` (pages de 30, ex. 14 pages pour Orpi Action Immo Cannes).
+- **Corrigé (`pro-stock-sync` v42 = commit 00e09688) :** lecture de `/acheter/biens-en-vente` + `/louer/biens-en-location` (jusqu'à 40 pages chacune), `/acheter` en complément ; 6 fiches lues à la fois ; au-delà de 450 biens, lecture marquée partielle (aucun retrait pendant cette synchro).
+- Rappel : la page « Immobilier à Strasbourg » d'orpi.com (105 biens) regroupe toutes les agences Orpi de la ville, pas une seule agence.
+
+### 29/10/2026 — Robot v40-v41 : faux « GES manquant » = pages de rubrique — Claude
+- **Signalé par Anthony :** encore des « GES manquant » sur immochevreux.com.
+- **Diagnostic (v40, commit 315a03bc) :** le test à blanc (`auto_review_dry`) liste maintenant les annonces en erreur (titre, adresse, erreurs, DPE/GES lus, extrait autour du GES). Les 5 lignes en erreur n'étaient pas des biens : pages « Vous êtes acquéreur », « Appartements », « Nos biens loués », « Nos prestations » et l'accueil, prises pour des fiches par le lecteur automatique (le « DPE B » d'une autre annonce y était lu, sans GES). Les vrais biens avaient bien leur GES.
+- **Corrigé (v41, commit 55a8fb37) :** lecture automatique : quand la plupart des fiches ont la même forme d'adresse (ex. `/details-…`), les autres pages sont écartées. Pour toutes les sources : une annonce dont le titre commence par VENDU, LOUÉ, SOUS COMPROMIS, COMPROMIS SIGNÉ ou RÉSERVÉ n'est jamais importée (et sera retirée à la synchro complète).
+
+### 29/10/2026 — Robot v39 : descriptions mises en forme — Claude
+- **Demande d'Anthony :** descriptions importées parfois « en bloc », illisibles.
+- **Ajouté (`pro-stock-sync` v39 = commit 317079b2) :** `tidyDescription` appliquée à toutes les annonces importées (auto et immo) : listes écrites à la suite (« -Climatisation -Sièges… », « • », puces emoji 📍✅▶️…) remises une par ligne, rubriques (Équipements, Options, Garantie, Prix, Conditions tarifaires, Honoraires, Mandat, DPE, GES, Copropriété, Les informations sur les risques…) précédées d'une ligne vide, gros blocs coupés en paragraphes de 2-3 phrases. Le texte n'est jamais changé, seulement les retours à la ligne. Les annonces déjà importées seront remises en forme à leur prochaine synchro.
+- **Aperçu admin :** la description affichée est la version mise en forme (celle qui sera publiée).
+
+### 29/10/2026 — Robot v38 : lecture « large » des descriptions immo — Claude
+- **Signalé par Anthony :** « GES manquant » alors que la description dit noir sur blanc « DPE : C – 67 kWhEP/m².an / GES : C – 12 kgéqCO2/m².an » (immochevreux.com).
+- **Cause :** la lecture du DPE dans le texte (v34) acceptait une lettre minuscule : dans « DPE établi le… » elle prenait le « e » de « le » → DPE « E » trouvé, GES non → erreur.
+- **Corrigé (`pro-stock-sync` v38 = commit e2711752) :** nouvelle fonction `immoFillFromText` appelée pour toute annonce immo : lettre DPE / GES en majuscule seulement, sinon calcul par les valeurs (kWh / kg CO2, barème 2021) ; consommation, date du DPE, coûts « entre X et Y euros », charges de copropriété (par an, ou par mois ×12), taxe foncière, nombre de lots, n° de mandat, honoraires, chambres, pièces, surface (superficie / habitable / Carrez), salles de bain/d'eau, chauffage (« Collectif au gaz »…), étage, année de construction. Ne remplace jamais une valeur donnée par le site. Testé sur le texte d'Anthony : tous les champs lus.
+
+### 29/10/2026 — Robot v35 : lecteur dédié Spider VO — Claude
+- **Signalé par Anthony :** les sites de garages faits par Spider VO « bloquent ». En réalité le lecteur générique les lisait mal (ex. adn-automobiles.com : 19 véhicules sur 23, énergie « Électrique » pour des diesel ; a2-autos.fr : kilométrage « 100 », 1 photo sur 60 %).
+- **Ajouté (`pro-stock-sync` v35 = commit 5fc1d15f) :** `readSpiderVo` pour le modèle « svosite » (détecté par `svositec` / `spidervo.s3` + liens `…,svoc<n°>.html?vid=<id>`) : liste `/<n°>/vehicules/` (tout le stock sur une page), puis chaque fiche : titre (h1 marque + modèle, h2 version), prix (`montant`), tableau de caractéristiques (énergie, boîte, km, mise en circulation, couleurs, places, portes, puissance, CO2, catégorie, garantie, Crit'Air, genre VP/VU), description (données structurées), options, toutes les photos de la galerie (sans les vignettes), ville et CP du garage (pied de page). Véhicules « vendu / réservé » exclus. Type : moto / utilitaire (genre VU, fourgon…) / voiture.
+- Prestataire Spider VO hors modèle « svosite » (site du garage fait ailleurs mais photos Spider VO, ex. ajmotorscar.com) : reste lu par le lecteur générique.
+- **29/10/2026 — robot v36 (commit 009a09ee) :** Spider VO : liens des fiches sans « www » acceptés (a2-autos.fr ne lisait aucun véhicule).
+- **29/10/2026 — robot v37 (commit 3719d3f2) :** Spider VO limite les lectures rapprochées (fiches renvoyées sans photos) : 2 fiches à la fois, pause entre les fiches, fiche incomplète (sans photo ou sans prix) relue jusqu'à 2 fois.
+
+### 29/10/2026 — Robot v34 : immobilier plus complet (Century 21 « groupe », DPE, prestations) — Claude
+- **Signalé par Anthony :** sur Century 21 Daumesnil il manquait DPE, charges, ascenseur, chauffage… et les box / parking / balcon / cave cités dans les descriptions.
+- **Cause :** les sites d'agence au modèle « groupe » (ex. century21-daumesnil.com) n'ont pas de données structurées : le lecteur C21 ne trouvait aucun bien (37 lus, 0 complet, sans photo ni type).
+- **Corrigé (`pro-stock-sync` v34 = commit 0578192c) :** lecture du titre `<h1>` (type, pièces, surface, VILLE - CP) et de la réf. quand il n'y a pas de données structurées ; biens vendus / sous compromis exclus ; libellés ajoutés : « Charges / mois » (×12 en vente si pas de charges annuelles), « Année construction », « Ascenseur », chauffage dédoublonné ; DPE / GES calculés à partir des valeurs (kWh et kg CO2, barème 2021) quand l'étiquette ne se lit pas ; consommation énergétique reprise.
+- **Pour toutes les sources immo :** prestations repérées dans le titre et la description (ascenseur, balcon, terrasse, loggia, cave, box, parking, garage, jardin, piscine, gardien, digicode, interphone, climatisation, double vitrage, cheminée, dressing, parquet, meublé, cuisine équipée, belle vue, accès PMR ; « sans… / pas de… » ignorés) et ajoutées aux prestations ; DPE / GES écrits dans la description (« DPE : D ») repris si le site ne les donne pas ailleurs.
+- **Aperçu admin (`admin-test-import.html`) :** la fiche d'un bien affiche maintenant toutes les infos normalisées (DPE, GES, consommation, dépenses d'énergie, chauffage, étage, année, lots, charges, taxe foncière, dépôt, honoraires, mandat, prestations).
+
+### 29/10/2026 — Robot v31 : ville du garage sur les sites Annonces-Automobile — Claude
+- **Signalé par Anthony :** beaucoup d'erreurs « ville manquante » à l'aperçu des sites Annonces-Automobile (il va prospecter en priorité ces garages).
+- **Corrigé :** chaque fiche AA contient un bloc « Nos coordonnées » (NOM / ADRESSE / CP VILLE) : le code postal et la ville y sont lus pour chaque véhicule (puis corrigés par la base des communes comme avant). Pour un garage inscrit, la ville de son compte reste prioritaire.
+- Déployé : `pro-stock-sync` v31 = commit 7518722f (même mode d'import par commit que v30).
+- **29/10/2026 — robot v32 (commit 75c20ee2) :** photos en double sur certains sites AA (ex. svartandmotors.com) : la taille y est dans le nom du fichier (`215930456-ibig.jpg` / `-intermediate.jpg`) et non dans un dossier ; les variantes sont maintenant regroupées par numéro, la plus grande gardée (Aston Martin Vanquish : 25 photos uniques au lieu de 45 avec doublons).
+- **29/10/2026 — robot v33 (commit 8cc6422a) :** nouveau modèle de fiche Annonces-Automobile (ex. partenaireauto.com) : prix dans `price-amount`, caractéristiques en cartes `specs-label` / `specs-value`, description dans `description-content`, coordonnées dans `contact-info` — tous lus en plus de l'ancien modèle (tableau `legend`). **Règle :** un véhicule sans prix est en erreur « prix manquant » (plus compté prêt à publier, jamais créé).
+
+### 29/10/2026 — Robot de lecture v30 : photos Annonces-Automobile + photo obligatoire — Claude
+- **Signalé par Anthony :** deux sites Annonces-Automobile testés : véhicules lus et « prêts à publier », mais 0 photo.
+- **Corrigé :** les photos AA sont lues dans la galerie de la fiche (#sliderdetail, avant la description) quel que soit l'hôte ou le dossier (big / intermediate / small regroupées par numéro, la plus grande gardée ; liens sans « https: » acceptés) ; repli sur toutes les photos rivamedia de la page (hors similaires), puis og:image.
+- **Règle :** une annonce sans photo est en erreur « aucune photo » (véhicules et immobilier) : jamais créée, et plus comptée « prête à publier » dans l'aperçu.
+- **Déploiement v30 (nouveau mode) :** la fonction déployée `pro-stock-sync` ne contient qu'un import du code du dépôt figé par commit (`raw.githubusercontent.com/abracadeal/abracadeal/<commit>/supabase/functions/pro-stock-sync/index.ts`, qui charge `smart-reader.ts` à côté). Pour une nouvelle version : pousser le code, puis redéployer ce petit fichier avec le nouveau numéro de commit (commit actuel f7761a55).
+- **Vérifié après déploiement :** la fonction démarre (401 sans connexion) ; test sans écriture `auto_review_dry` sur lifecars.fr : 49/49 véhicules complets, 30,5 photos en moyenne, ville Mouans-Sartoux 06370.
+- 29/10/2026 : prix de l'aperçu « Imports sites » en dégradé violet-rose comme les boutons (au lieu de doré), demande d'Anthony.
+- 29/10/2026 : croix « × » dans les champs d'adresse de site (inscription d'un garage et « Tester une adresse ») pour les effacer d'un geste, demande d'Anthony.
+
+### 29/10/2026 — Pages Garage / Immo des pros pour Google + statut de synchro dans l'espace Pro — Claude
+- **Demande d'Anthony :** chaque pro inscrit (notamment via le bouton admin) doit avoir sa page « Garage » ou « Immo » référencée sur Google ; gestion du stock possible au cas où, mais rien à gérer si le stock vient de son site.
+- **Nouveau `scripts/build_pro_pages.py` (lancé par le workflow `share-pages.yml` toutes les ~10 min, après les pages annonces) :** pour chaque pro avec au moins une annonce en ligne, page statique `garage/<nom-ville>/` (majorité Véhicules), `immo/<nom-ville>/` (majorité Immobilier) ou `professionnel/<nom-ville>/` : nom, ville + code postal, badge vérifié, présentation du showroom, tout le stock (liens vers `annonce/<id>/`), données structurées AutoDealer / RealEstateAgent + liste d'annonces, fil d'Ariane. Visiteurs réels redirigés vers `pro.html?id=…` (showroom avec contact), robots = page statique. Annuaires `garage/`, `immo/`, `professionnel/` classés par ville. `sitemap-pros.xml` ajouté à `sitemap.xml`. Aucune coordonnée publiée.
+- **`pro-pages.json` :** adresse de chaque page, stable même si le nom change (une page sans annonce disparaît mais son adresse reste réservée).
+- **Espace Pro (`index.html`, `assets/index-main.js` v=20261029-page-pro) :** encadré « Stock synchronisé avec votre site » (adresse, dernière mise à jour, « rien à gérer ici ») ou « reprise en préparation » ; encadré « Votre page sur Google » avec le lien et « Copier le lien ». La gestion manuelle (Mes annonces, Importer mon stock) reste disponible au cas où.
+- Testé hors ligne avec des données d'exemple (garage + agence) : pages, annuaires, sitemap et registre générés, rendu vérifié à 390 px.
+- **Corrigé le jour même :** l'étape « Publier » du workflow échouait tant qu'aucun dossier garage/immo/professionnel n'existe (0 pro en ligne) ; ces dossiers ne sont ajoutés que s'ils existent. Workflow vérifié en succès.
+
+### 28/10/2026 — Bouton admin « Créer le compte et importer le stock » + retour Admin sur mobile — Claude
+- **Demande d'Anthony :** quand un garage dit oui, ne plus attendre qu'il s'inscrive lui-même : l'admin crée son compte et met son stock en ligne à sa place.
+- **Page « Imports sites » (`admin-test-import.html`) :** nouveau bloc « Inscrire un garage qui a dit oui » : SIRET (bouton Chercher = registre officiel), e-mail, téléphone affiché aux acheteurs, adresse du site, domaine, case « le pro m'a donné son accord ». Le bouton enchaîne et affiche chaque étape : compte créé → import activé → lecture du site (pro-stock-sync) → mail au garage. Si l'import échoue, le mail n'est pas envoyé (bouton « Envoyer quand même le mail »).
+- **Fonction déployée `admin-onboard-pro` v1 (admin seulement) :** `lookup` (registre), `create` (compte Pro avec e-mail confirmé et mot de passe temporaire jamais communiqué, puis mêmes contrôles que l'inscription normale avec la session du garage : `verify-professional` verify, `create-pro-subscription-order` pro_50 Fondateur sans carte ; puis `admin_create_site_import`), `welcome` (mail Resend depuis contact@abracadeal.fr avec lien « Choisir mon mot de passe » = lien de réinitialisation Supabase + nombre d'annonces importées). Le mail automatique d'activation Fondateur est décalé de 20 min pour arriver après. Compte déjà existant avec cet e-mail : seul l'import est ajouté, pas de mail. Refus : SIRET déjà pris par un autre compte, numéro déjà utilisé, sites d'annonces/réseaux sociaux.
+- **CGU :** le compte est créé avec `legal_pending: true` ; au premier mot de passe, la fenêtre devient « Activez votre espace Pro » avec case CGU obligatoire, enregistrée dans les métadonnées (`assets/index-main.js` v=20261028-onboard-admin, `index.html`).
+- **Corrigé (mobile) :** « Retour à Admin » depuis les pages admin ouvrait « Compte ». Les retours vont maintenant sur `index.html#admin` : menu Admin sur mobile, Mon compte sur ordinateur, connexion si déconnecté (`assets/index-app.js` v=20261028-retour-admin, `assets/app-shell-20261018.js` v=6 dans toutes les pages, `admin-pilotage.html`, `admin-test-import.html`).
+- **Pas encore testé en réel** (il faut une session admin) : le premier garage inscrit avec ce bouton sert de test ; chaque étape affiche son résultat ou son erreur.
+
+### 28/10/2026 — Connecteur « L'Agence Automobilière » (agenceauto.com) + lecteur générique plus complet — Claude
+- Anthony : sur agenceauto.com le robot lisait 74 véhicules mais 1 photo chacun, « ville manquante », description incomplète.
+- Cause : site Next.js d'un **réseau** (YESCAR, des dizaines d'agences). Les données complètes (toutes les photos, caractéristiques, description, agence) sont dans le bloc de données Next.js de chaque fiche ; le lecteur générique ne lisait que les données Google (1 photo). Rien à voir avec les cookies.
+- `pro-stock-sync` v27 :
+  - Connecteur `readAgenceAuto` : adresse de la page d'une agence (ex. /fr/fr/agences/epone) → stock de cette agence seulement (/fr/fr/vehicules?agencyId=…, toutes les pages), puis chaque fiche (objet « vehicle » : photos, prix, km, mise en circulation, carburant, boîte, couleur, puissances, Crit'Air, garantie, équipements, description, ville et CP de l'agence). Véhicules vendus / sous compromis / indisponibles exclus. Adresse nationale (agenceauto.com) => message : entrez la page de votre agence.
+  - Lecteur générique : quand les données structurées d'une fiche sont maigres (1 photo, description courte), on complète avec la galerie et le texte de la page.
+  - Ville : pour les véhicules, la ville du compte pro écrase celle de l'annonce (garage) ; sans compte pro (aperçu admin), la ville lue sur l'annonce est gardée et celle du site ne sert qu'à combler un manque.
+
+## 2026-10-28 — Robot de lecture : photos, année, caractéristiques WooCommerce (pro-stock-sync v29)
+- Photos : les variantes de taille d'une même photo (dossiers « 1200xauto », « gallery_625x470 », « large »…) sont regroupées ; on garde la galerie de l'annonce en grand format, sans les vignettes des « véhicules similaires ». Corrige les sites Dealer K et RCM qui ne donnaient qu'une photo.
+- Année : dates au format « 23-11-2020 » ou « 2020-11-23 » après « Mise en circulation », « MEC », « 1ère immatriculation ».
+- WooCommerce : lecture des attributs produit (marque, énergie, boîte, mise en circulation, kilométrage, couleur, puissance, portes, places).
+
+### 28/10/2026 — Activation automatique des sites + ville du garage sur les annonces véhicules — Claude
+- Demande d'Anthony : activer tout seuls les sites qui se lisent bien ; les annonces véhicules doivent porter la ville du garage.
+- `pro-stock-sync` v26 :
+  - Véhicules : ville + code postal du garage sur **toutes** les annonces (adresse du compte pro ; sinon adresse publiée sur le site, lue dans les données structurées ou le pied de page « 30100 ALES »). Immobilier inchangé (ville de chaque bien).
+  - « Tester une adresse » par l'admin : la ville vient du site testé, plus du compte admin.
+  - Nouvelle action `auto_review` (jeton cron) : lecture complète + ≥ 80 % d'annonces complètes (titre, prix, ville, photo) => flux activé et synchronisé ; sinon reste en attente avec « Validation manuelle nécessaire : <raison> ». `auto_review_dry` = même test sans rien écrire.
+  - Le cron traite aussi une demande en attente par passage (jamais essayée ou essai > 24 h).
+  - Starterre : titre sans répétition modèle/version (« C3 Aircross BlueHDi… » au lieu de « C3 Aircross Aircross… »).
+- Base : `private.kick_site_auto_review` appelée par `claim_signup_site_import` et `request_site_import` (fichier supabase/2026-10-28-import-site-activation-auto.sql).
+- Test sans écriture sur autoca.fr : Starterre, 31/31 véhicules complets, ville Alès 30100, 13 à 16 photos.
+
+### 28/10/2026 — Connecteur Starterre (Auto Cévennes, autoca.fr) — Claude
+- Problème : Anthony n'arrivait pas à importer autoca.fr (« site trop gros »). Le site est fait par **Starterre** : son catalogue (moteur Typesense de Starterre, clé publique de recherche dans la page) contient 2 747 véhicules, dont 2 716 du catalogue « Fournisseur » du réseau Starterre et seulement **31 du stock propre du garage**.
+- Changé : `pro-stock-sync` v24, nouveau lecteur `readStarterreSite` (détecté par `StarterreTypesense.key` + `resellerUniqueId` dans la page) : catalogue filtré `catalogue:!=Fournisseur`, champs (marque, modèle, version, prix, km, mise en circulation, carburant, boîte, couleur, puissance, places, carrosserie, équipements), puis chaque fiche du site pour toutes les photos grand format (stx.starterre.net/vehicules/xlarge). Prestataire « Starterre » ajouté à la détection.
+- Sécurité inchangée : aucune écriture en aperçu, erreur si aucun véhicule propre trouvé (rien n'est archivé).
+
+### 28/10/2026 — Retrait du lecteur parallèle (ChatGPT) — Claude
+- Vérifié à la demande d'Anthony : `site-reader-preview` démarrait bien (401 sans connexion admin), mais son connecteur ERA lisait une **recherche par ville** du site national ERA (biens de toutes les agences ERA de la ville, pas le stock d'une agence), sans photos ni description, en aperçu seulement. Le reste était une copie de pro-stock-sync v22.
+- Retiré : fonction désactivée (410, à supprimer depuis le tableau de bord) + fichiers admin-reader-parallel.html, docs/parallel-reader-deployment.md, scripts/parallel-preview.test.mjs, supabase/functions/site-reader-preview/.
+- Règle : un seul robot, `pro-stock-sync`. Toute amélioration des lecteurs se fait dedans (et dans ce journal).
+
+### 28/10/2026 — Lecteur « intelligent » des sites de pros — Claude
+- `pro-stock-sync` v23 (2 fichiers : index.ts + smart-reader.ts). Quand aucun connecteur dédié ne reconnaît le site, un lecteur générique :
+  repère les fiches (liens qui se répètent, sinon sitemap), lit titre, prix (en ignorant les mensualités), photos (galerie principale, plus grande taille, sans logos), surface/pièces/chambres/DPE/ville (immo) ou km/année/carburant/boîte (véhicules), description (hors mentions légales/RGPD).
+  Les données structurées (JSON-LD) restent prioritaires sur chaque fiche. Limites : 20 pages de liste, 400 pages, 50 s ; travail borné par page (limite CPU des fonctions).
+- Adresse d'agence dans un réseau (ex. laforet.com/agence-immobiliere/cannes) : la lecture reste sous ce chemin.
+- Nouveau : boutiques Shopify (/products.json). Sites protégés anti-robots (Cloudflare…) : message clair (flux ou import).
+- Testé : Laforêt Cannes (28 biens, 8-20 photos), La Boîte Immo (agencelacanopee.com 40 biens, reseau-expertimo.fr), Apimo/Mira (cannes-impact.com, 1 photo par bien seulement), garages WooCommerce/Annonces-Automobile (déjà couverts par leurs connecteurs).
+- Pas encore : Guy Hoquet (liste chargée en JavaScript), Stéphane Plaza (bloque les robots), Foncia (application), Spoticar (JavaScript).
+- Fonction de test `aa-site-preview-tmp` désactivée (410). Fonctions SQL de test private.tmp_probe / tmp_probe_res à supprimer (suppression refusée par l'outil ; non accessibles aux clients).
+
+### 28/10/2026 — Inscription pro : sites d'annonces refusés, message clair — Claude
+- Sous le champ « Adresse de votre site officiel » : leboncoin, La Centrale, AutoScout24, SeLoger, PAP… et réseaux sociaux ne fonctionnent pas ; dans ce cas laisser vide et, après l'inscription, importer un fichier (CSV/Excel) ou saisir ses annonces depuis l'espace Pro.
+- Même consigne dans le message d'erreur si le pro entre une de ces adresses. Liste élargie et ancrée sur le domaine (côté page et côté base : private.normalize_site_url).
+- Consigne complétée (demande d'Anthony) : flux ou API du logiciel du pro, en plus de l'import fichier et de la saisie.
+
+### 28/10/2026 — Mails de prospection ultra-courts — Claude
+- Variantes A et B remplacées par un message de 3 phrases : gratuit pendant le lancement + « inscrivez-vous avec l'adresse de votre site, en quelques minutes toutes vos annonces sont en ligne » + lien d'inscription. Relance raccourcie de même.
+- A et B ne diffèrent plus que par l'objet (test A/B des objets).
+- Corrigé : l'ancien texte annonçait « jusqu'à 50 annonces » alors que l'offre Fondateurs est à 100.
+- SQL : supabase/2026-10-28-prospection-mails-ultra-courts.sql (appliqué).
+
+### 28/10/2026 — Connecteur Century 21 (sites d'agence) — Claude
+- `pro-stock-sync` v22 : les sites d'agence Century 21 (ex. century21-gastaldy-cap-d-ail.com) sont lus : listes /annonces/achat/ et /annonces/location/ (pages /page-N/), puis chaque fiche (JSON-LD + page).
+- Champs : titre, prix, vente/location, type, ville/CP, surface, pièces, chambres, SDB, étage, chauffage, taxe foncière, lots/charges, dépôt, honoraires, DPE/GES (lus sur l'étiquette SVG), date et coûts DPE, équipements, description, photos grand format.
+- Référence = n° de fiche du site ; la réf. agence est gardée comme n° de mandat.
+- Une fiche agence century21.fr/trouver_agence/agence/<id>/ renvoie vers le site de l'agence.
+- Adresse nationale d'un réseau (century21.fr, orpi.com, laforet.com…) : message clair demandant l'adresse de l'agence.
+- Test : Century 21 Agence Gastaldy → 39 biens en ~2,4 s.
+- Page admin « Imports sites » : les anciens chiffres de l'aperçu restaient affichés après une erreur (attribut hidden écrasé par display:grid) — corrigé.
+
+### 28/10/2026 — Connecteur Orpi (pages agence) — Claude
+- `pro-stock-sync` v21 : les adresses `orpi.com/<agence>` sont lues directement (listes « acheter » + « louer », puis chaque fiche via l'attribut `data-estate`).
+- Champs repris : titre, prix, vente/location, type de bien, ville, CP, surface, pièces, chambres, SDB, étage, DPE/GES (si les deux sont présents), honoraires, charges, prestations, description, toutes les photos (45 max).
+- Test : Ag Immo Les Mimosas (orpi.com/agimmo) → 102 biens (90 ventes, 12 locations) en ~21 s.
+- Détection du prestataire étendue aux réseaux (Orpi, Century 21, Laforêt, Guy Hoquet, Stéphane Plaza, Nestenn, Foncia, SweepBright).
+- Fonction de test `aa-site-preview-tmp` désactivée (réponse 410), à supprimer depuis le tableau de bord.
+
 ### 24/10/2026 — Claude — Démo Life Cars : bannière = logo Life Cars
 - **Changé :** la bannière du showroom de démo affiche le logo « LIFE CARS » (`lifecars.fr/images/graphic/logo.png`) entier, centré sur fond sombre, à la place de la photo `societe3.jpg`.
 - **Pourquoi :** Anthony : la bannière doit être là où il y a écrit Life Cars.
@@ -710,263 +975,3 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Dessous :** Tableau de bord et Base de données en cartes homogènes (titres lisibles, bouton Actualiser en icône, encart « Gains… / tableau de bord financier » masqué dans ce menu car doublon de la tuile Finances).
 - **Corrigé :** titre « Tableau de bord Abracadeal » → « Tableau de bord » ; pastille « Sur devis (+200) » → « (+100) » dans le HTML (formule 200 supprimée).
 - Fichiers : `index.html` (menu), `assets/admin-mobile-merge-20261028.js/.css` v=2. Vérifié en capture d'écran mobile (390 px).
-
-## 28/10/2026 — Connecteur Orpi (pages agence) — Claude
-- `pro-stock-sync` v21 : les adresses `orpi.com/<agence>` sont lues directement (listes « acheter » + « louer », puis chaque fiche via l'attribut `data-estate`).
-- Champs repris : titre, prix, vente/location, type de bien, ville, CP, surface, pièces, chambres, SDB, étage, DPE/GES (si les deux sont présents), honoraires, charges, prestations, description, toutes les photos (45 max).
-- Test : Ag Immo Les Mimosas (orpi.com/agimmo) → 102 biens (90 ventes, 12 locations) en ~21 s.
-- Détection du prestataire étendue aux réseaux (Orpi, Century 21, Laforêt, Guy Hoquet, Stéphane Plaza, Nestenn, Foncia, SweepBright).
-- Fonction de test `aa-site-preview-tmp` désactivée (réponse 410), à supprimer depuis le tableau de bord.
-
-## 28/10/2026 — Connecteur Century 21 (sites d'agence) — Claude
-- `pro-stock-sync` v22 : les sites d'agence Century 21 (ex. century21-gastaldy-cap-d-ail.com) sont lus : listes /annonces/achat/ et /annonces/location/ (pages /page-N/), puis chaque fiche (JSON-LD + page).
-- Champs : titre, prix, vente/location, type, ville/CP, surface, pièces, chambres, SDB, étage, chauffage, taxe foncière, lots/charges, dépôt, honoraires, DPE/GES (lus sur l'étiquette SVG), date et coûts DPE, équipements, description, photos grand format.
-- Référence = n° de fiche du site ; la réf. agence est gardée comme n° de mandat.
-- Une fiche agence century21.fr/trouver_agence/agence/<id>/ renvoie vers le site de l'agence.
-- Adresse nationale d'un réseau (century21.fr, orpi.com, laforet.com…) : message clair demandant l'adresse de l'agence.
-- Test : Century 21 Agence Gastaldy → 39 biens en ~2,4 s.
-- Page admin « Imports sites » : les anciens chiffres de l'aperçu restaient affichés après une erreur (attribut hidden écrasé par display:grid) — corrigé.
-
-## 28/10/2026 — Mails de prospection ultra-courts — Claude
-- Variantes A et B remplacées par un message de 3 phrases : gratuit pendant le lancement + « inscrivez-vous avec l'adresse de votre site, en quelques minutes toutes vos annonces sont en ligne » + lien d'inscription. Relance raccourcie de même.
-- A et B ne diffèrent plus que par l'objet (test A/B des objets).
-- Corrigé : l'ancien texte annonçait « jusqu'à 50 annonces » alors que l'offre Fondateurs est à 100.
-- SQL : supabase/2026-10-28-prospection-mails-ultra-courts.sql (appliqué).
-
-## 28/10/2026 — Inscription pro : sites d'annonces refusés, message clair — Claude
-- Sous le champ « Adresse de votre site officiel » : leboncoin, La Centrale, AutoScout24, SeLoger, PAP… et réseaux sociaux ne fonctionnent pas ; dans ce cas laisser vide et, après l'inscription, importer un fichier (CSV/Excel) ou saisir ses annonces depuis l'espace Pro.
-- Même consigne dans le message d'erreur si le pro entre une de ces adresses. Liste élargie et ancrée sur le domaine (côté page et côté base : private.normalize_site_url).
-- Consigne complétée (demande d'Anthony) : flux ou API du logiciel du pro, en plus de l'import fichier et de la saisie.
-
-## 28/10/2026 — Lecteur « intelligent » des sites de pros — Claude
-- `pro-stock-sync` v23 (2 fichiers : index.ts + smart-reader.ts). Quand aucun connecteur dédié ne reconnaît le site, un lecteur générique :
-  repère les fiches (liens qui se répètent, sinon sitemap), lit titre, prix (en ignorant les mensualités), photos (galerie principale, plus grande taille, sans logos), surface/pièces/chambres/DPE/ville (immo) ou km/année/carburant/boîte (véhicules), description (hors mentions légales/RGPD).
-  Les données structurées (JSON-LD) restent prioritaires sur chaque fiche. Limites : 20 pages de liste, 400 pages, 50 s ; travail borné par page (limite CPU des fonctions).
-- Adresse d'agence dans un réseau (ex. laforet.com/agence-immobiliere/cannes) : la lecture reste sous ce chemin.
-- Nouveau : boutiques Shopify (/products.json). Sites protégés anti-robots (Cloudflare…) : message clair (flux ou import).
-- Testé : Laforêt Cannes (28 biens, 8-20 photos), La Boîte Immo (agencelacanopee.com 40 biens, reseau-expertimo.fr), Apimo/Mira (cannes-impact.com, 1 photo par bien seulement), garages WooCommerce/Annonces-Automobile (déjà couverts par leurs connecteurs).
-- Pas encore : Guy Hoquet (liste chargée en JavaScript), Stéphane Plaza (bloque les robots), Foncia (application), Spoticar (JavaScript).
-- Fonction de test `aa-site-preview-tmp` désactivée (410). Fonctions SQL de test private.tmp_probe / tmp_probe_res à supprimer (suppression refusée par l'outil ; non accessibles aux clients).
-
-## 28/10/2026 — Retrait du lecteur parallèle (ChatGPT) — Claude
-- Vérifié à la demande d'Anthony : `site-reader-preview` démarrait bien (401 sans connexion admin), mais son connecteur ERA lisait une **recherche par ville** du site national ERA (biens de toutes les agences ERA de la ville, pas le stock d'une agence), sans photos ni description, en aperçu seulement. Le reste était une copie de pro-stock-sync v22.
-- Retiré : fonction désactivée (410, à supprimer depuis le tableau de bord) + fichiers admin-reader-parallel.html, docs/parallel-reader-deployment.md, scripts/parallel-preview.test.mjs, supabase/functions/site-reader-preview/.
-- Règle : un seul robot, `pro-stock-sync`. Toute amélioration des lecteurs se fait dedans (et dans ce journal).
-
-## 28/10/2026 — Connecteur Starterre (Auto Cévennes, autoca.fr) — Claude
-- Problème : Anthony n'arrivait pas à importer autoca.fr (« site trop gros »). Le site est fait par **Starterre** : son catalogue (moteur Typesense de Starterre, clé publique de recherche dans la page) contient 2 747 véhicules, dont 2 716 du catalogue « Fournisseur » du réseau Starterre et seulement **31 du stock propre du garage**.
-- Changé : `pro-stock-sync` v24, nouveau lecteur `readStarterreSite` (détecté par `StarterreTypesense.key` + `resellerUniqueId` dans la page) : catalogue filtré `catalogue:!=Fournisseur`, champs (marque, modèle, version, prix, km, mise en circulation, carburant, boîte, couleur, puissance, places, carrosserie, équipements), puis chaque fiche du site pour toutes les photos grand format (stx.starterre.net/vehicules/xlarge). Prestataire « Starterre » ajouté à la détection.
-- Sécurité inchangée : aucune écriture en aperçu, erreur si aucun véhicule propre trouvé (rien n'est archivé).
-
-## 28/10/2026 — Activation automatique des sites + ville du garage sur les annonces véhicules — Claude
-- Demande d'Anthony : activer tout seuls les sites qui se lisent bien ; les annonces véhicules doivent porter la ville du garage.
-- `pro-stock-sync` v26 :
-  - Véhicules : ville + code postal du garage sur **toutes** les annonces (adresse du compte pro ; sinon adresse publiée sur le site, lue dans les données structurées ou le pied de page « 30100 ALES »). Immobilier inchangé (ville de chaque bien).
-  - « Tester une adresse » par l'admin : la ville vient du site testé, plus du compte admin.
-  - Nouvelle action `auto_review` (jeton cron) : lecture complète + ≥ 80 % d'annonces complètes (titre, prix, ville, photo) => flux activé et synchronisé ; sinon reste en attente avec « Validation manuelle nécessaire : <raison> ». `auto_review_dry` = même test sans rien écrire.
-  - Le cron traite aussi une demande en attente par passage (jamais essayée ou essai > 24 h).
-  - Starterre : titre sans répétition modèle/version (« C3 Aircross BlueHDi… » au lieu de « C3 Aircross Aircross… »).
-- Base : `private.kick_site_auto_review` appelée par `claim_signup_site_import` et `request_site_import` (fichier supabase/2026-10-28-import-site-activation-auto.sql).
-- Test sans écriture sur autoca.fr : Starterre, 31/31 véhicules complets, ville Alès 30100, 13 à 16 photos.
-
-## 28/10/2026 — Connecteur « L'Agence Automobilière » (agenceauto.com) + lecteur générique plus complet — Claude
-- Anthony : sur agenceauto.com le robot lisait 74 véhicules mais 1 photo chacun, « ville manquante », description incomplète.
-- Cause : site Next.js d'un **réseau** (YESCAR, des dizaines d'agences). Les données complètes (toutes les photos, caractéristiques, description, agence) sont dans le bloc de données Next.js de chaque fiche ; le lecteur générique ne lisait que les données Google (1 photo). Rien à voir avec les cookies.
-- `pro-stock-sync` v27 :
-  - Connecteur `readAgenceAuto` : adresse de la page d'une agence (ex. /fr/fr/agences/epone) → stock de cette agence seulement (/fr/fr/vehicules?agencyId=…, toutes les pages), puis chaque fiche (objet « vehicle » : photos, prix, km, mise en circulation, carburant, boîte, couleur, puissances, Crit'Air, garantie, équipements, description, ville et CP de l'agence). Véhicules vendus / sous compromis / indisponibles exclus. Adresse nationale (agenceauto.com) => message : entrez la page de votre agence.
-  - Lecteur générique : quand les données structurées d'une fiche sont maigres (1 photo, description courte), on complète avec la galerie et le texte de la page.
-  - Ville : pour les véhicules, la ville du compte pro écrase celle de l'annonce (garage) ; sans compte pro (aperçu admin), la ville lue sur l'annonce est gardée et celle du site ne sert qu'à combler un manque.
-
-## 2026-10-28 — Robot de lecture : photos, année, caractéristiques WooCommerce (pro-stock-sync v29)
-- Photos : les variantes de taille d'une même photo (dossiers « 1200xauto », « gallery_625x470 », « large »…) sont regroupées ; on garde la galerie de l'annonce en grand format, sans les vignettes des « véhicules similaires ». Corrige les sites Dealer K et RCM qui ne donnaient qu'une photo.
-- Année : dates au format « 23-11-2020 » ou « 2020-11-23 » après « Mise en circulation », « MEC », « 1ère immatriculation ».
-- WooCommerce : lecture des attributs produit (marque, énergie, boîte, mise en circulation, kilométrage, couleur, puissance, portes, places).
-
-## 28/10/2026 — Bouton admin « Créer le compte et importer le stock » + retour Admin sur mobile — Claude
-- **Demande d'Anthony :** quand un garage dit oui, ne plus attendre qu'il s'inscrive lui-même : l'admin crée son compte et met son stock en ligne à sa place.
-- **Page « Imports sites » (`admin-test-import.html`) :** nouveau bloc « Inscrire un garage qui a dit oui » : SIRET (bouton Chercher = registre officiel), e-mail, téléphone affiché aux acheteurs, adresse du site, domaine, case « le pro m'a donné son accord ». Le bouton enchaîne et affiche chaque étape : compte créé → import activé → lecture du site (pro-stock-sync) → mail au garage. Si l'import échoue, le mail n'est pas envoyé (bouton « Envoyer quand même le mail »).
-- **Fonction déployée `admin-onboard-pro` v1 (admin seulement) :** `lookup` (registre), `create` (compte Pro avec e-mail confirmé et mot de passe temporaire jamais communiqué, puis mêmes contrôles que l'inscription normale avec la session du garage : `verify-professional` verify, `create-pro-subscription-order` pro_50 Fondateur sans carte ; puis `admin_create_site_import`), `welcome` (mail Resend depuis contact@abracadeal.fr avec lien « Choisir mon mot de passe » = lien de réinitialisation Supabase + nombre d'annonces importées). Le mail automatique d'activation Fondateur est décalé de 20 min pour arriver après. Compte déjà existant avec cet e-mail : seul l'import est ajouté, pas de mail. Refus : SIRET déjà pris par un autre compte, numéro déjà utilisé, sites d'annonces/réseaux sociaux.
-- **CGU :** le compte est créé avec `legal_pending: true` ; au premier mot de passe, la fenêtre devient « Activez votre espace Pro » avec case CGU obligatoire, enregistrée dans les métadonnées (`assets/index-main.js` v=20261028-onboard-admin, `index.html`).
-- **Corrigé (mobile) :** « Retour à Admin » depuis les pages admin ouvrait « Compte ». Les retours vont maintenant sur `index.html#admin` : menu Admin sur mobile, Mon compte sur ordinateur, connexion si déconnecté (`assets/index-app.js` v=20261028-retour-admin, `assets/app-shell-20261018.js` v=6 dans toutes les pages, `admin-pilotage.html`, `admin-test-import.html`).
-- **Pas encore testé en réel** (il faut une session admin) : le premier garage inscrit avec ce bouton sert de test ; chaque étape affiche son résultat ou son erreur.
-
-## 29/10/2026 — Pages Garage / Immo des pros pour Google + statut de synchro dans l'espace Pro — Claude
-- **Demande d'Anthony :** chaque pro inscrit (notamment via le bouton admin) doit avoir sa page « Garage » ou « Immo » référencée sur Google ; gestion du stock possible au cas où, mais rien à gérer si le stock vient de son site.
-- **Nouveau `scripts/build_pro_pages.py` (lancé par le workflow `share-pages.yml` toutes les ~10 min, après les pages annonces) :** pour chaque pro avec au moins une annonce en ligne, page statique `garage/<nom-ville>/` (majorité Véhicules), `immo/<nom-ville>/` (majorité Immobilier) ou `professionnel/<nom-ville>/` : nom, ville + code postal, badge vérifié, présentation du showroom, tout le stock (liens vers `annonce/<id>/`), données structurées AutoDealer / RealEstateAgent + liste d'annonces, fil d'Ariane. Visiteurs réels redirigés vers `pro.html?id=…` (showroom avec contact), robots = page statique. Annuaires `garage/`, `immo/`, `professionnel/` classés par ville. `sitemap-pros.xml` ajouté à `sitemap.xml`. Aucune coordonnée publiée.
-- **`pro-pages.json` :** adresse de chaque page, stable même si le nom change (une page sans annonce disparaît mais son adresse reste réservée).
-- **Espace Pro (`index.html`, `assets/index-main.js` v=20261029-page-pro) :** encadré « Stock synchronisé avec votre site » (adresse, dernière mise à jour, « rien à gérer ici ») ou « reprise en préparation » ; encadré « Votre page sur Google » avec le lien et « Copier le lien ». La gestion manuelle (Mes annonces, Importer mon stock) reste disponible au cas où.
-- Testé hors ligne avec des données d'exemple (garage + agence) : pages, annuaires, sitemap et registre générés, rendu vérifié à 390 px.
-- **Corrigé le jour même :** l'étape « Publier » du workflow échouait tant qu'aucun dossier garage/immo/professionnel n'existe (0 pro en ligne) ; ces dossiers ne sont ajoutés que s'ils existent. Workflow vérifié en succès.
-
-## 29/10/2026 — Robot de lecture v30 : photos Annonces-Automobile + photo obligatoire — Claude
-- **Signalé par Anthony :** deux sites Annonces-Automobile testés : véhicules lus et « prêts à publier », mais 0 photo.
-- **Corrigé :** les photos AA sont lues dans la galerie de la fiche (#sliderdetail, avant la description) quel que soit l'hôte ou le dossier (big / intermediate / small regroupées par numéro, la plus grande gardée ; liens sans « https: » acceptés) ; repli sur toutes les photos rivamedia de la page (hors similaires), puis og:image.
-- **Règle :** une annonce sans photo est en erreur « aucune photo » (véhicules et immobilier) : jamais créée, et plus comptée « prête à publier » dans l'aperçu.
-- **Déploiement v30 (nouveau mode) :** la fonction déployée `pro-stock-sync` ne contient qu'un import du code du dépôt figé par commit (`raw.githubusercontent.com/abracadeal/abracadeal/<commit>/supabase/functions/pro-stock-sync/index.ts`, qui charge `smart-reader.ts` à côté). Pour une nouvelle version : pousser le code, puis redéployer ce petit fichier avec le nouveau numéro de commit (commit actuel f7761a55).
-- **Vérifié après déploiement :** la fonction démarre (401 sans connexion) ; test sans écriture `auto_review_dry` sur lifecars.fr : 49/49 véhicules complets, 30,5 photos en moyenne, ville Mouans-Sartoux 06370.
-- 29/10/2026 : prix de l'aperçu « Imports sites » en dégradé violet-rose comme les boutons (au lieu de doré), demande d'Anthony.
-- 29/10/2026 : croix « × » dans les champs d'adresse de site (inscription d'un garage et « Tester une adresse ») pour les effacer d'un geste, demande d'Anthony.
-
-## 29/10/2026 — Robot v31 : ville du garage sur les sites Annonces-Automobile — Claude
-- **Signalé par Anthony :** beaucoup d'erreurs « ville manquante » à l'aperçu des sites Annonces-Automobile (il va prospecter en priorité ces garages).
-- **Corrigé :** chaque fiche AA contient un bloc « Nos coordonnées » (NOM / ADRESSE / CP VILLE) : le code postal et la ville y sont lus pour chaque véhicule (puis corrigés par la base des communes comme avant). Pour un garage inscrit, la ville de son compte reste prioritaire.
-- Déployé : `pro-stock-sync` v31 = commit 7518722f (même mode d'import par commit que v30).
-- **29/10/2026 — robot v32 (commit 75c20ee2) :** photos en double sur certains sites AA (ex. svartandmotors.com) : la taille y est dans le nom du fichier (`215930456-ibig.jpg` / `-intermediate.jpg`) et non dans un dossier ; les variantes sont maintenant regroupées par numéro, la plus grande gardée (Aston Martin Vanquish : 25 photos uniques au lieu de 45 avec doublons).
-- **29/10/2026 — robot v33 (commit 8cc6422a) :** nouveau modèle de fiche Annonces-Automobile (ex. partenaireauto.com) : prix dans `price-amount`, caractéristiques en cartes `specs-label` / `specs-value`, description dans `description-content`, coordonnées dans `contact-info` — tous lus en plus de l'ancien modèle (tableau `legend`). **Règle :** un véhicule sans prix est en erreur « prix manquant » (plus compté prêt à publier, jamais créé).
-
-## 29/10/2026 — Robot v34 : immobilier plus complet (Century 21 « groupe », DPE, prestations) — Claude
-- **Signalé par Anthony :** sur Century 21 Daumesnil il manquait DPE, charges, ascenseur, chauffage… et les box / parking / balcon / cave cités dans les descriptions.
-- **Cause :** les sites d'agence au modèle « groupe » (ex. century21-daumesnil.com) n'ont pas de données structurées : le lecteur C21 ne trouvait aucun bien (37 lus, 0 complet, sans photo ni type).
-- **Corrigé (`pro-stock-sync` v34 = commit 0578192c) :** lecture du titre `<h1>` (type, pièces, surface, VILLE - CP) et de la réf. quand il n'y a pas de données structurées ; biens vendus / sous compromis exclus ; libellés ajoutés : « Charges / mois » (×12 en vente si pas de charges annuelles), « Année construction », « Ascenseur », chauffage dédoublonné ; DPE / GES calculés à partir des valeurs (kWh et kg CO2, barème 2021) quand l'étiquette ne se lit pas ; consommation énergétique reprise.
-- **Pour toutes les sources immo :** prestations repérées dans le titre et la description (ascenseur, balcon, terrasse, loggia, cave, box, parking, garage, jardin, piscine, gardien, digicode, interphone, climatisation, double vitrage, cheminée, dressing, parquet, meublé, cuisine équipée, belle vue, accès PMR ; « sans… / pas de… » ignorés) et ajoutées aux prestations ; DPE / GES écrits dans la description (« DPE : D ») repris si le site ne les donne pas ailleurs.
-- **Aperçu admin (`admin-test-import.html`) :** la fiche d'un bien affiche maintenant toutes les infos normalisées (DPE, GES, consommation, dépenses d'énergie, chauffage, étage, année, lots, charges, taxe foncière, dépôt, honoraires, mandat, prestations).
-
-## 29/10/2026 — Robot v35 : lecteur dédié Spider VO — Claude
-- **Signalé par Anthony :** les sites de garages faits par Spider VO « bloquent ». En réalité le lecteur générique les lisait mal (ex. adn-automobiles.com : 19 véhicules sur 23, énergie « Électrique » pour des diesel ; a2-autos.fr : kilométrage « 100 », 1 photo sur 60 %).
-- **Ajouté (`pro-stock-sync` v35 = commit 5fc1d15f) :** `readSpiderVo` pour le modèle « svosite » (détecté par `svositec` / `spidervo.s3` + liens `…,svoc<n°>.html?vid=<id>`) : liste `/<n°>/vehicules/` (tout le stock sur une page), puis chaque fiche : titre (h1 marque + modèle, h2 version), prix (`montant`), tableau de caractéristiques (énergie, boîte, km, mise en circulation, couleurs, places, portes, puissance, CO2, catégorie, garantie, Crit'Air, genre VP/VU), description (données structurées), options, toutes les photos de la galerie (sans les vignettes), ville et CP du garage (pied de page). Véhicules « vendu / réservé » exclus. Type : moto / utilitaire (genre VU, fourgon…) / voiture.
-- Prestataire Spider VO hors modèle « svosite » (site du garage fait ailleurs mais photos Spider VO, ex. ajmotorscar.com) : reste lu par le lecteur générique.
-- **29/10/2026 — robot v36 (commit 009a09ee) :** Spider VO : liens des fiches sans « www » acceptés (a2-autos.fr ne lisait aucun véhicule).
-- **29/10/2026 — robot v37 (commit 3719d3f2) :** Spider VO limite les lectures rapprochées (fiches renvoyées sans photos) : 2 fiches à la fois, pause entre les fiches, fiche incomplète (sans photo ou sans prix) relue jusqu'à 2 fois.
-
-## 29/10/2026 — Robot v38 : lecture « large » des descriptions immo — Claude
-- **Signalé par Anthony :** « GES manquant » alors que la description dit noir sur blanc « DPE : C – 67 kWhEP/m².an / GES : C – 12 kgéqCO2/m².an » (immochevreux.com).
-- **Cause :** la lecture du DPE dans le texte (v34) acceptait une lettre minuscule : dans « DPE établi le… » elle prenait le « e » de « le » → DPE « E » trouvé, GES non → erreur.
-- **Corrigé (`pro-stock-sync` v38 = commit e2711752) :** nouvelle fonction `immoFillFromText` appelée pour toute annonce immo : lettre DPE / GES en majuscule seulement, sinon calcul par les valeurs (kWh / kg CO2, barème 2021) ; consommation, date du DPE, coûts « entre X et Y euros », charges de copropriété (par an, ou par mois ×12), taxe foncière, nombre de lots, n° de mandat, honoraires, chambres, pièces, surface (superficie / habitable / Carrez), salles de bain/d'eau, chauffage (« Collectif au gaz »…), étage, année de construction. Ne remplace jamais une valeur donnée par le site. Testé sur le texte d'Anthony : tous les champs lus.
-
-## 29/10/2026 — Robot v39 : descriptions mises en forme — Claude
-- **Demande d'Anthony :** descriptions importées parfois « en bloc », illisibles.
-- **Ajouté (`pro-stock-sync` v39 = commit 317079b2) :** `tidyDescription` appliquée à toutes les annonces importées (auto et immo) : listes écrites à la suite (« -Climatisation -Sièges… », « • », puces emoji 📍✅▶️…) remises une par ligne, rubriques (Équipements, Options, Garantie, Prix, Conditions tarifaires, Honoraires, Mandat, DPE, GES, Copropriété, Les informations sur les risques…) précédées d'une ligne vide, gros blocs coupés en paragraphes de 2-3 phrases. Le texte n'est jamais changé, seulement les retours à la ligne. Les annonces déjà importées seront remises en forme à leur prochaine synchro.
-- **Aperçu admin :** la description affichée est la version mise en forme (celle qui sera publiée).
-
-## 29/10/2026 — Robot v40-v41 : faux « GES manquant » = pages de rubrique — Claude
-- **Signalé par Anthony :** encore des « GES manquant » sur immochevreux.com.
-- **Diagnostic (v40, commit 315a03bc) :** le test à blanc (`auto_review_dry`) liste maintenant les annonces en erreur (titre, adresse, erreurs, DPE/GES lus, extrait autour du GES). Les 5 lignes en erreur n'étaient pas des biens : pages « Vous êtes acquéreur », « Appartements », « Nos biens loués », « Nos prestations » et l'accueil, prises pour des fiches par le lecteur automatique (le « DPE B » d'une autre annonce y était lu, sans GES). Les vrais biens avaient bien leur GES.
-- **Corrigé (v41, commit 55a8fb37) :** lecture automatique : quand la plupart des fiches ont la même forme d'adresse (ex. `/details-…`), les autres pages sont écartées. Pour toutes les sources : une annonce dont le titre commence par VENDU, LOUÉ, SOUS COMPROMIS, COMPROMIS SIGNÉ ou RÉSERVÉ n'est jamais importée (et sera retirée à la synchro complète).
-
-## 29/10/2026 — Robot v42 : Orpi, stock complet de l'agence — Claude
-- **Signalé par Anthony :** une agence Orpi de Strasbourg : 31 biens lus, bien moins que ce qu'elle a.
-- **Cause :** le lecteur Orpi lisait `/<agence>/acheter`, qui ne montre qu'une sélection (≈ 9 biens). La liste complète est `/<agence>/acheter/biens-en-vente` (pages de 30, ex. 14 pages pour Orpi Action Immo Cannes).
-- **Corrigé (`pro-stock-sync` v42 = commit 00e09688) :** lecture de `/acheter/biens-en-vente` + `/louer/biens-en-location` (jusqu'à 40 pages chacune), `/acheter` en complément ; 6 fiches lues à la fois ; au-delà de 450 biens, lecture marquée partielle (aucun retrait pendant cette synchro).
-- Rappel : la page « Immobilier à Strasbourg » d'orpi.com (105 biens) regroupe toutes les agences Orpi de la ville, pas une seule agence.
-
-## 29/10/2026 — Robot v46 : Orpi grosses agences (Claude)
-- v42 lisait jusqu'à 450 fiches, 6 en parallèle → erreur 546 « WORKER_RESOURCE_LIMIT ». Désormais 220 fiches par passage, 4 en parallèle.
-- Au-delà de 220 biens : fenêtre décalée chaque jour, les biens s'ajoutent synchro après synchro (pas d'archivage pendant une lecture partielle). L'activation auto n'est plus bloquée par cette limite volontaire.
-- Total du site renvoyé (`total_on_site`) et affiché dans l'aperçu admin.
-- DPE/GES qui ne sont pas une lettre (ex. une date) ignorés au lieu de bloquer l'annonce.
-- Types reconnus en plus : immeuble, propriété, ferme, longère, château, chalet, pavillon (maison) ; loft, duplex (appartement) ; stationnement (parking) ; entrepôt, hangar (bureaux-commerces).
-- Tests : immocannes 388 biens (220/220 lus OK), immodesvallois 432 biens (220/220 OK).
-
-## 29/10/2026 — Session mobile : plus de « Connectez-vous » après un passage en arrière-plan (Claude)
-- Cause : au retour dans l'appli après un long moment, le jeton est expiré et son rafraîchissement échoue le temps que le réseau revienne ; `refreshAuth` vidait alors `currentUser` alors que la session restait enregistrée (l'onglet Compte la montrait toujours).
-- `index-main.js` : erreur réseau ≠ déconnexion (`isAuthRejection`), le compte reste affiché et une nouvelle tentative part 4 s après ; au retour après plus d'1 min en arrière-plan, le jeton est rafraîchi tout de suite ; avant chaque « Connectez-vous pour… » (publier, messages, favoris, alertes, numéro, signaler, mes annonces, import pro), `ensureSessionUser()` relit d'abord la session enregistrée.
-- Version : index-main.js?v=20261029-session.
-
-## 29/10/2026 — Robot v49 : DPE recopié partout où il est écrit (Claude)
-- Demande d'Anthony : si le DPE figure dans l'annonce d'origine (fiche ou description), il doit être dans la case DPE.
-- « DPE : vierge / non requis / non soumis / exempté » (texte) et « DPE non requis » sur Orpi → case DPE « Non soumis » (au lieu de vide).
-- Location reconnue dans le texte (« Loyer : … » + dépôt de garantie ou charges) même si le site range le bien en vente : immochevreux mettait ses locations en « vente-appartement ».
-- Lecture à blanc : nouvelle liste `no_dpe` (biens sans DPE + extraits du texte) pour contrôler.
-- Contrôle : Orpi Bartholdi 100 % DPE ; Century 21 Daumesnil, immochevreux, C21 Cap-d'Ail : les biens restants sans DPE n'en affichent aucun sur leur propre page (vérifié page par page : programmes neufs C21 Beausoleil/Eze/Cap-d'Ail, quelques biens immochevreux).
-
-## 29/10/2026 — Robot v50 : site d'agence illisible → page réseau trouvée toute seule (Claude)
-- Demande d'Anthony : ne pas avoir à se souvenir qu'il faut mettre orpi.com/… quand le site perso d'une agence est illisible (ex. calleris.fr, Wix).
-- `findNetworkPage` : si aucun lecteur ne marche, le robot cherche un lien Orpi ou Century 21 sur le site, sinon essaie orpi.com/<nom du domaine>(immo|-immo|immobilier|orpi…) et ne garde la page que si son titre est celui d'une agence portant ce nom. Le type de site affiché le dit (« Orpi (page agence orpi.com/callerisimmo, le site www.calleris.fr n'est pas lisible) »).
-- Domaine : un site Orpi / Century 21 passe tout seul en Immobilier, même si « Auto / Moto » était choisi ; l'aperçu admin bascule les deux menus Domaine.
-
-## 29/10/2026 — Offre Fondateurs : plus de plafond de 100 annonces (Claude)
-- Décision d'Anthony : on enlève la barrière des 100 annonces ; on garde les 500 places Fondateurs, mais on n'attendra pas d'en avoir 500 : une fois le site bien rempli, on ferme l'offre et le paiement s'applique aux nouveaux.
-- Base : `enforce_founder_50_listing_limit()` laisse passer toutes les annonces d'un Fondateur pendant ses 12 mois gratuits (migration founder_free_period_unlimited_listings ; trace dans supabase/2026-10-29-fondateurs-annonces-illimitees.sql). Après les 12 mois, le plafond de la formule choisie s'applique aux nouvelles annonces.
-- Textes : aide, CGV (avec la possibilité de clôturer l'offre avant 500, les inscrits gardent leurs 12 mois), accueil, inscription, pro-fondateur, mail de prospection admin, compteur de l'espace Pro (« x / illimité »).
-- Fermeture anticipée : interrupteur existant « Offre Fondateurs ouverte/fermée » de l'admin (RPC admin_set_founder_offer_closed) ; ferme les nouvelles inscriptions Fondateurs, sans toucher aux inscrits.
-
-## 29/10/2026 — Statistiques vendeur : vues, numéros affichés, clics « Appeler » (Claude)
-- But (Anthony) : que le pro sache ce que lui apporte Abracadeal (le revenu viendra de là à la fin des 12 mois).
-- Base : `listing_events` + `track_listing_event` + `get_my_listing_stats` ; `get_listing_phone` compte le numéro affiché côté serveur (fiable). Une fois par visiteur, annonce et jour ; propriétaire et admin exclus ; 400 événements max par visiteur et par jour.
-- Site (index-main.js?v=20261029-stats-vendeur) : vue comptée à l'ouverture d'une annonce (identifiant visiteur anonyme `abraca_vid` en localStorage), clic sur le numéro compté ; sous le numéro : « Dites au vendeur que vous l'appelez de la part d'Abracadeal ».
-- Espace Pro : bloc « Ce que vos annonces vous ont apporté (30 derniers jours) » : vues, numéros affichés, clics Appeler, contacts par message, top 3 des annonces.
-- Reste à faire si validé : bilan mensuel par e-mail au pro ; tableau admin (stock par région, trafic, contacts) pour décider la fermeture de l'offre Fondateurs.
-
-## 29/10/2026 — Robot v57 : Nestenn (nombre de biens et prix) (Claude)
-- Signalé par Anthony : Nestenn Orléans, 53 biens sur le site, 40 lus.
-- Pages « prix au m² » (/prix-m2-orleans/prix-rues/…) lues comme des biens : 2e filtre sur la forme de l'adresse (profondeur + fin numérique « -ref-39790233 ») quand la majorité des fiches ont la même.
-- Prix faux sur tout le lecteur automatique : un montant précédé d'un retour à la ligne (« Appartement à vendre\n145 350 € ») était rejeté, le robot prenait le premier montant suivant (charges 350 €). Corrigé dans `priceRe` (smart-reader.ts) + prix cherché d'abord autour du titre + chiffres séparés par des <span> d'espace recollés.
-- Type de bien : le type déclaré (JSON-LD Apartment/House) passe avant les mots du titre ; « copropriété » n'est plus une maison ; un bien avec pièces/chambres/m² n'est plus un parking parce que le titre dit « garage ».
-- Résultat : Nestenn Orléans 56 lus (53 ventes + 3 locations), 56 complets, prix justes (ex. 192 600 €, 145 350 €). Immochevreux 30/30.
-- Outils : lecture à blanc renvoie `crawl` (pages, fiches, ratés) et `urls` (adresse, titre, prix, type) ; action `debug_detail` (cron) pour une fiche.
-- Reste : table de debug private.debug_html à supprimer (la suppression demande une confirmation).
-
-## 29/10/2026 — Robot v60 : locations et villes (lecteur automatique) (Claude)
-- Location reconnue quand le prix est suivi de « CC/Mois », « /mois », « par mois », ou quand la description commence par « À louer » (Nestenn « Duplex hyper-centre 690 € CC/Mois » était en vente). Un prix ≥ 20 000 € reste une vente.
-- Ville : « 27390 » caché suivi de « Partager ce bien » donnait la ville « Partager ce bien ». Les candidats « CP Ville » sont filtrés (mots d'interface écartés), la ville présente dans le titre est préférée, la zone autour du titre est aussi lue.
-- Contrôle : Nestenn Orléans 56/56 (3 locations), villes justes (Orléans, Fleury-les-Aubrais…) ; immochevreux 29/29.
-
-## 29/10/2026 — Immo : informations essentielles (robot v63 + affichage) (Claude)
-- Demande d'Anthony : un tableau des infos très souvent demandées / obligatoires pour une annonce immo, et plus de doublons dans la description.
-- Annonce publique (index-main.js?v=20261029-immo-essentiel, `detailSpecsFor`) : lignes toujours affichées, « Non communiqué » si absentes. Vente : surface habitable, pièces, dépenses d'énergie estimées, honoraires, copropriété, nombre de lots, charges de copropriété / an, procédure en cours (syndicat), taxe foncière. Location : charges / mois, dépôt de garantie, honoraires locataire, meublé. DPE/GES restent dans le bloc diagnostic.
-- Aperçu admin : bloc « Informations essentielles » en tête, valeurs absentes en rouge, puis « Autres détails » ; code postal = celui normalisé.
-- Robot : lignes « faits » de la fiche (`texte_page`, hors description) lues pour les rubriques à libellé uniquement : charges annuelles, taxe foncière, nombre de lots, bien en copropriété oui/non, procédure, dépôt de garantie, honoraires (% ou « à la charge du … »), n° de mandat (ex. 4981_B). Le DPE n'est jamais pris dans ces lignes (titres de biens similaires).
-- Orpi : condo → copropriété, condoBundleNumber → nombre de lots.
-- N° de mandat : plus de recopie de la référence quand le site n'en donne pas. Honoraires « honoraires » (mot du menu) ignorés. Code postal pris avec la ville choisie (Nestenn « 27390 » caché).
-- Description : `dedupeDescription` après le découpage en lignes : titre recopié en tête retiré (et ses restes déjà répétés plus bas), badges seuls (Nouveauté, Exclusivité…), lignes répétées.
-- Taux mesurés (lecture à blanc, champ `fill`) — Nestenn Orléans : charges 59 %, taxe 82 %, lots 59 %, copro 100 %, procédure 63 %, mandat 98 % ; C21 Daumesnil : charges 76 %, lots 74 %, honoraires 100 %.
-
-## 29/10/2026 — Robot v66 : réseau L'Adresse (Claude)
-- Signalé par Anthony : L'Adresse Cannes illisible.
-- `readLadresseAgency` : adresse de page agence ladresse.com/agence/<nom>/<n°> → listes /acheter, /acheter/2… et /louer, fiches /annonce/(achat|location)/… lues par le lecteur automatique (220 max par passage). Adresse du site national ladresse.com : message « donnez l'adresse de la page de l'agence » (exemple fourni).
-- L'Adresse Cannes : 89 biens (82 ventes, 7 locations), 89 complets ; DPE 85 % (étiquettes en image « dpe-c.png » / classe « dpe dpe-c » : lues si une seule lettre), lots 58 %, charges 55 %, taxe 65 %, honoraires 99 %.
-- Corrigés au passage : bien « vendu loué » (« loyer : 450 € » dans la description) classé en location → reste une vente si prix ≥ 20 000 € ; locations : « Charges : 37 € », « 21 € de provision sur charges », « Meublé » (lettre accentuée en fin de mot) ; honoraires « 463.27 TTC » non coupés au point.
-
-## 29/10/2026 — Prospection : test du site avant le mail + sites à apprendre + mention d'erreurs (Claude)
-- Décisions d'Anthony : lien vers l'annonce d'origine caché ; mention « il peut y avoir des erreurs » sur les annonces reprises ; mail de prospection basé sur la lecture du site ; si un site n'est pas lisible, Anthony est prévenu et transmet à Claude, qui apprend au robot à le lire.
-- Base (migrations prospect_site_precheck, prospect_mailer_claim_requires_readable_site, prospect_precheck_cron) : colonnes `site_check_status` (checking/ok/unreadable), `site_check_count`, `site_check_platform`, `site_check_reason`, `site_checked_at` sur prospection_prospects ; RPC `prospect_precheck_claim` / `prospect_precheck_done` (service), `admin_unreadable_sites`, `admin_recheck_prospect_site` (admin). Test bloqué > 10 min → « illisible (site trop lourd ou trop lent) ».
-- `prospect_mailer_claim` : un 1er mail ne part qu'aux prospects `site_check_status='ok'` (relances inchangées).
-- pro-stock-sync v67 : action `prospect_precheck` (1 site par appel, lecture à blanc complète) ; action `unreadable_digest` (mail Resend aux admins : prospects illisibles + inscriptions en attente des dernières 24 h, idempotent par jour). Crons : `abracadeal-prospect-site-precheck` toutes les 4 min de 6 h à 17 h UTC ; `abracadeal-unreadable-sites-digest` à 17 h 10 UTC.
-- prospect-mailer v8 (stub GitHub) : `{{annonces}}` = « vos 52 biens peuvent être » / « votre véhicule peut être » (par catégorie) ; modèles A et B réécrits : « Nous avons testé le site de {{societe}} : {{annonces}} en ligne sur Abracadeal en quelques minutes… » ; relance : « Petit rappel : {{annonces}} en ligne… ».
-- Annonce publique (source feed:…) : mention sous la description (erreurs possibles, seules les infos confirmées par le pro font foi). index-main.js?v=20261029-mention-import.
-- Admin (admin-test-import.html) : section « Sites à apprendre » (compteurs, Tester, Revérifier).
-- Note : plusieurs tests lancés en même temps → 546 WORKER_RESOURCE_LIMIT ; le cron n'en lance qu'un à la fois.
-
-## 29/10/2026 — Robot v69 : ville du bien, pas celle de l'agence (Claude)
-- Signalé par Anthony : L'Adresse Cannes, biens au Cannet / à Juan-les-Pins affichés « Cannes » (adresse de l'agence prise sur la page).
-- smart-reader : ordre de choix de la ville : 1) segment « ville-cp » de l'adresse de la fiche (/le-cannet-06110/ ; si le segment contient d'autres mots, seule la fin confirmée par la page est gardée), 2) ville trouvée dans le titre, 3) fin du titre (« …, Le Cannet ») seulement si la page la confirme, 4) ancienne règle (données de la page, texte).
-- Contrôle : L'Adresse Cannes 89/89, code postal = celui de l'adresse de chaque fiche pour les 89 ; Nestenn Orléans 56/56 ; immochevreux 30/30 (la fin de titre « MANSARDE - CAVE - » n'est plus prise pour une ville).
-
-## 29/10/2026 — Sites à apprendre : bouton « Supprimer » (Claude)
-- Demande d'Anthony : retirer un prospect qui ne l'intéresse pas depuis la liste « Sites à apprendre ».
-- Contrainte `prospection_prospects_segment_check` élargie à « exclu_admin » (sinon erreur au clic, signalée par Anthony).
-- RPC `admin_drop_prospect` (admin) : la ligne n'est pas effacée (sinon le robot de recherche de prospects pourrait la rajouter) mais marquée `segment='exclu_admin'`, statut ready → paused, note datée : plus jamais mailé (le tirage et le test excluent déjà « exclu% »), retiré de la liste et du mail du soir (pro-stock-sync v70).
-- admin-test-import.html : bouton rouge « Supprimer » avec confirmation.
-
-## 29/10/2026 — Prospects qui vendent sur Leboncoin : mail « publiez vous-même » (Claude)
-- Demande d'Anthony : un bouton pour les pros dont les annonces sont sur Leboncoin et pas sur leur site, et leur envoyer un mail pour qu'ils publient eux-mêmes.
-- Base (migration prospect_manual_listing_mail) : `site_check_status` accepte « manual » ; RPC `admin_mark_prospect_manual` ; `prospect_mailer_claim` envoie le 1er mail aux statuts ok ET manual ; modèles « manuel » et « relance_manuel » (gratuit, sans limite d'annonces, publier depuis le téléphone, contacts directs).
-- prospect-mailer (stub GitHub) : modèle « manuel » / « relance_manuel » quand `site_check_status='manual'` ; `{{vos_annonces}}` = vos véhicules / vos motos / vos biens ; test : `{action:'test', manual:true}`.
-- admin-test-import.html : bouton « Vend sur Leboncoin » dans « Sites à apprendre », compteur « vendent sur Leboncoin ».
-- Leboncoin n'est pas lu par le robot (protection anti-robots et conditions d'utilisation).
-
-## 29/10/2026 — Prospection : moins de motos (Claude)
-- Décision d'Anthony : les garages moto ont très peu d'annonces sur leur site. Mix d'envoi : moto 10 %, immobilier 45 %, auto 45 % (avant 32/34/34).
-- `prospect_precheck_claim` : tirage pondéré par ce mix (power(random(), 1/poids)) au lieu de « petits pros d'abord » (qui faisait tester surtout des motos). Essai : 10 tirages → 6 immo, 3 auto, 1 moto.
-
-## 29/10/2026 — Interrupteur « Offre Fondateurs » qui ne réagissait pas (Claude)
-- Signalé par Anthony : clic sans effet. Cause : l'état ouvert/fermé n'était chargé qu'à l'ouverture du menu Admin par le bouton du bas (mobile) ou à la construction du menu (ordinateur, Supabase parfois pas encore prêt) ; état inconnu → le clic ne faisait rien.
-- admin-mobile-merge-20261028.js (v=3) et admin-account-layout-20261018.js (v=8) : si l'état n'est pas chargé, il est lu au clic puis la confirmation s'affiche. L'offre est restée ouverte (closed_at vide, vérifié).
-
-## 29/10/2026 — Robot v71 : Laugier Automobiles (Annonces-Automobile) sans ville (Claude)
-- Signalé par Anthony : 23 véhicules lus, 0 prêt (« ville manquante ») alors que l'adresse du garage figure sur chaque fiche.
-- Cause : accueil du site sans photo → pas de « cdn-rivamedia » → site pas reconnu comme Annonces-Automobile → lecteur automatique (qui ne lit pas le bloc « Nos coordonnées »).
-- `isAaSiteHtml` : reconnu aussi par les images d'interface www.annonces-automobile.com/images/graphic/. `siteLocation` : ville en minuscules (« 75017 paris ») acceptée et remise en forme (« Paris »).
-- Contrôle : laugierautomobiles.com 23/23 complets, ville Paris, 33 photos en moyenne.
-
-## 29/10/2026 — Doublons de photos et d'annonces, tous sites (Claude)
-- Demande d'Anthony : photos en double fréquentes (auto et immo) ; vérifier aussi les annonces en double.
-- pro-stock-sync v72 (`normalizeRows`) : `dedupePhotos` — même image reconnue malgré la taille (-300x200, -ibig/-intermediate, /thumbs/, ?w=400…), l'extension et les paramètres de taille ; la plus grande version est gardée (sans indication de taille = image d'origine). `listingKey` : même titre + prix + surface/km/année + ville dans un même site = une seule annonce (celle qui a le plus de photos). Lecture à blanc : `duplicates`, `photos_total`.
-- Aperçu admin : affichait les photos brutes de la page (ex. 45 pour la Lexus Laugier) et les villes avant correction ; il affiche maintenant les données qui seront publiées (photos sans doublons, ville corrigée), les doublons d'annonce en grisé « non publié ». Lien fiche lue ↔ fiche normalisée par adresse ou référence (avant : par position, décalé dès qu'une fiche était écartée).
-- Contrôle : L'Adresse Cannes 3 annonces en double retirées (89 → 86) ; Laugier 23 véhicules, 33 photos en moyenne après dédoublonnage.
-
-## 29/10/2026 — Aperçu admin : bouton « Modifier » une fiche (Claude)
-- Demande d'Anthony : corriger directement une erreur vue dans l'aperçu.
-- Base (migration pro_stock_overrides) : table `pro_stock_overrides` (clé = site sans www + référence de la fiche, `fields` jsonb, RLS sans accès direct) ; RPC admin `admin_set_stock_override(host, ref, fields)` ({} = supprimer la correction).
-- pro-stock-sync v73 (`normalizeRows`) : corrections chargées pour les sites lus et appliquées à la fiche brute avant la mise en forme (mêmes noms : titre, prix, ville, code_postal, surface, pieces, chambres, dpe, ges, honoraires, charges_annuelles, nombre_lots, taxe_fonciere, charges_mensuelles, depot_garantie, transaction, type_bien, marque, modele, annee, kilometrage, carburant, boite, description) ; `_exclure` = jamais publiée (retirée à la synchro suivante si déjà en ligne). Fiche marquée `corrected`.
-- admin-test-import.html : bouton « Modifier » dans la fiche (formulaire selon auto/immo, case « Ne pas publier », « Supprimer ma correction »), badge « Corrigée à la main ». Affichage mis à jour tout de suite ; annonces déjà en ligne corrigées à la synchro suivante (≈ 3 h).
