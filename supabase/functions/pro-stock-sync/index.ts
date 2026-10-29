@@ -1,5 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { readSmartSite, sDecode, smartDetail } from "./smart-reader.ts";
+import { readKermarrec } from "./kermarrec-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -902,6 +903,7 @@ async function readFeed(feed:any){
       rows=[estate];platform='Orpi (fiche annonce)';feed.sector='immobilier';
     }
     else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
+    else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml);platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
