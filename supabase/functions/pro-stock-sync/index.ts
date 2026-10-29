@@ -1043,7 +1043,7 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
    return json({ok:true,checked:1,company:job.company,readable:ok,count:n,platform:r?.platform||null});}
   if(body?.action==='unreadable_digest'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
    const since=new Date(Date.now()-24*3600e3).toISOString();
-   const{data:pros}=await admin.from('prospection_prospects').select('company,category,city,source_url,site_check_platform,site_check_reason').eq('site_check_status','unreadable').gte('site_checked_at',since).order('site_checked_at',{ascending:false}).limit(60);
+   const{data:pros}=await admin.from('prospection_prospects').select('company,category,city,source_url,site_check_platform,site_check_reason').eq('site_check_status','unreadable').or('segment.is.null,segment.not.like.exclu*').gte('site_checked_at',since).order('site_checked_at',{ascending:false}).limit(60);
    const{data:feeds}=await admin.from('pro_stock_feeds').select('feed_url,last_error,site_platform,updated_at').eq('source_kind','site').eq('review_status','pending').gte('updated_at',since).limit(30);
    const{count:okCount}=await admin.from('prospection_prospects').select('id',{count:'exact',head:true}).eq('site_check_status','ok').gte('site_checked_at',since);
    if(!(pros||[]).length&&!(feeds||[]).length)return json({ok:true,sent:false});

@@ -139,10 +139,11 @@ async function loadUnread(){
  if(error){E('unread').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
  const c=data?.counts||{};const list=data?.prospects||[];
  const head='<div class="empty" style="text-align:left">Sites lus : <b>'+(c.ok||0)+'</b> · illisibles : <b>'+(c.unreadable||0)+'</b> · encore à tester : <b>'+(c.to_check||0)+'</b></div>';
- E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Revérifier</button></div></div>').join('');
+ E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Revérifier</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button></div></div>').join('');
 }
 document.addEventListener('click',async e=>{
  const t=e.target.closest('#unread [data-u]');if(t){E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
+ const d=e.target.closest('#unread [data-d]');if(d){if(!confirm('Retirer « '+d.dataset.n+' » des prospects ? Il ne recevra jamais de mail.'))return;d.disabled=true;const{error}=await sb.rpc('admin_drop_prospect',{p_id:d.dataset.d});if(error){alert(error.message);d.disabled=false;return}d.closest('.req')?.remove();return}
  const r=e.target.closest('#unread [data-r]');if(r){r.disabled=true;const{error}=await sb.rpc('admin_recheck_prospect_site',{p_id:r.dataset.r});if(error)alert(error.message);loadUnread();}
 });
 async function loadReqs(){
