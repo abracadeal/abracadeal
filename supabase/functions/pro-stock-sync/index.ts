@@ -557,7 +557,7 @@ async function readAgenceAuto(url:URL,html:string){
 // Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
 // puis chaque fiche, dont toutes les données sont dans l'attribut data-estate (JSON).
 const ORPI_ENERGY=['','A','B','C','D','E','F','G'];
-function orpiAgencySlug(u:URL){if(!/(^|\.)orpi\.com$/i.test(u.hostname))return null;const s=u.pathname.split('/').filter(Boolean)[0]||'';return /^[a-z0-9-]{2,60}$/i.test(s)&&!/^(annonce|acheter|louer|vendre|estimer|agences?|recherche)/i.test(s)?s:null;}
+function orpiAgencySlug(u:URL){if(!/(^|\.)orpi\.com$/i.test(u.hostname))return null;const s=u.pathname.split('/').filter(Boolean)[0]||'';return /^[a-z0-9-]{2,60}$/i.test(s)&&!/^(?:annonce(?:-|$)|(?:acheter|louer|vendre|estimer|agences?|recherche)$)/i.test(s)?s:null;}
 function parseOrpiEstate(html:string,url:string){
  const raw=html.match(/data-estate="([^"]*)"/)?.[1];if(!raw)return null;
  let e:any;try{e=JSON.parse(decodeEntities(raw));}catch{return null;}
@@ -567,7 +567,7 @@ function parseOrpiEstate(html:string,url:string){
  o.transaction=/rent|location|louer/i.test(String(e.transaction||''))?'location':'vente';
  const t=String(e.type||'').toLowerCase();o.type_bien=/stationnement|parking|garage|box/.test(t)?'parking':/terrain/.test(t)?'terrain':/maison|villa/.test(t)?'maison':/local|bureau|commerce/.test(t)?'bureau':t||'appartement';
  if(e.city?.name)o.ville=decodeEntities(String(e.city.name));if(e.zipCode||e.zipcode)o.code_postal=String(e.zipCode||e.zipcode);
- if(e.surface)o.surface=String(e.surface);if(e.nbRooms)o.pieces=String(e.nbRooms);if(e.nbBedrooms)o.chambres=String(e.nbBedrooms);if(e.nbWashrooms)o.salles_de_bain=String(e.nbWashrooms);
+ if(e.surface)o.surface=String(e.surface);if(e.lotSurface)o.surface_terrain=String(e.lotSurface);if(e.nbRooms)o.pieces=String(e.nbRooms);if(e.nbBedrooms)o.chambres=String(e.nbBedrooms);if(e.nbWashrooms)o.salles_de_bain=String(e.nbWashrooms);
  if(e.story!=null&&e.story!=='')o.etage=String(e.story);
  if(e.dpeDisplay===false&&/DPE non requis|DPE non soumis/i.test(html))o.dpe='NON SOUMIS';if(e.dpeDisplay!==false){const c=ORPI_ENERGY[Number(e.consumptionIndex)||0],g=ORPI_ENERGY[Number(e.emissionIndex)||0];if(c&&g){o.dpe=c;o.ges=g;}else if(/DPE non requis|DPE non soumis|c-dpe--inactive/i.test(html))o.dpe='NON SOUMIS';if(e.consumptionValue)o.consommation_energie=String(e.consumptionValue);if(e.energyMin)o.cout_energie_min=String(e.energyMin);if(e.energyMax)o.cout_energie_max=String(e.energyMax);if(e.dpeDate)o.date_dpe=String(e.dpeDate).slice(0,10);}
  if(e.fees)o.honoraires=decodeEntities(String(e.fees));if(e.condoCharge&&o.transaction==='vente')o.charges_annuelles=String(e.condoCharge);if(e.condo===true)o.copropriete='Oui';else if(e.condo===false&&o.transaction==='vente')o.copropriete='Non';if(Number(e.condoBundleNumber)>0)o.nombre_lots=String(e.condoBundleNumber);
@@ -897,7 +897,11 @@ async function readFeed(feed:any){
     // Fiche agence sur century21.fr : on suit le lien vers le site de l'agence.
     const c21Link=/(^|\.)century21\.fr$/i.test(url.hostname)?text.match(/href="(https:\/\/www\.century21[a-z0-9-]*\.(?:com|fr))\/annonces\/achat\/"/i)?.[1]:null;
     const ladPath=ladresseAgencyPath(url);
-    if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
+    if(/(^|\.)orpi\.com$/i.test(url.hostname)&&/^\/annonce-/.test(url.pathname)){
+      const estate=parseOrpiEstate(text,url.toString());if(!estate)throw Error('Fiche Orpi indisponible ou données du bien absentes.');
+      rows=[estate];platform='Orpi (fiche annonce)';feed.sector='immobilier';
+    }
+    else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
