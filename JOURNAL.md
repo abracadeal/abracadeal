@@ -1144,3 +1144,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Demande d'Anthony :** vignettes un peu plus longues, comme Leboncoin.
 - **Modifié :** `assets/card-overlay-20261029.css` (v=3 dans `index.html`) : sur mobile et tablette (≤ 760 px), la photo des cartes « Les annonces » passe au format 6/7 (un peu plus haute que large) au lieu d'une bande fixe de 108 px. Sur un téléphone de 390 px : photo 175 × 204 px (avant 175 × 108), carte 296 px de haut (avant 200). La photo remplit toujours la vignette, centrée (thumb-fit). Ordinateur inchangé.
 - Pour annuler : retirer le dernier bloc `@media (max-width:760px)` de ce fichier.
+
+### 29/10/2026 — Claude — Véhicules des garages : plus de « Bon état » par défaut
+- **Demande d'Anthony :** pour les garages (voitures de luxe), « Bon état » n'est pas adapté → ne rien afficher.
+- **Cause :** les lecteurs de sites (Annonces-Automobile, WooCommerce, données structurées…) posent `etat:'occasion'`, que `normalizeCondition` traduisait en « Bon état ».
+- **Modifié :**
+  - `assets/index-main.js` (v=20261029-etat-pro) : la fiche n'affiche plus la ligne « État » pour un véhicule importé (`source` = `feed:…`) dont l'état est « Bon état » / « Occasion ». Import manuel : « occasion » / « used » ne donnent plus d'état.
+  - `scripts/build_share_pages.py` : même règle sur les pages annonces statiques (champ `source` ajouté à la lecture).
+  - `supabase/functions/pro-stock-sync/index.ts` : « occasion » / « used » → aucun état. **Pas encore déployé** (le site masque déjà l'affichage).
+- **Inchangé :** « Neuf », « Très bon état »… s'ils sont indiqués par le garage ; annonces de particuliers.
+- **Base :** déclencheur prévu (`clear_pro_feed_vehicle_condition`) non appliqué (validation annulée deux fois) ; aucune annonce de pro en ligne au 29/10, rien à corriger.

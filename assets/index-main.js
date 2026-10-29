@@ -978,8 +978,8 @@ function normalizeImmoSub(typeValue,transactionValue=''){
 }
 function normalizeCondition(v){
   const t=normalizeImportHeader(v);
-  const map={neuf:'Neuf',new:'Neuf',comme_neuf:'Comme neuf',tres_bon_etat:'Très bon état',bon_etat:'Bon état',used:'Bon état',occasion:'Bon état',etat_correct:'État correct',correct:'État correct',a_reparer:'À rénover / à réparer',a_renover_a_reparer:'À rénover / à réparer',pour_pieces:'Pour pièces'};
-  return map[t]||String(v||'').trim()||null;
+  const map={neuf:'Neuf',new:'Neuf',comme_neuf:'Comme neuf',tres_bon_etat:'Très bon état',bon_etat:'Bon état',used:null,occasion:null,etat_correct:'État correct',correct:'État correct',a_reparer:'À rénover / à réparer',a_renover_a_reparer:'À rénover / à réparer',pour_pieces:'Pour pièces'};
+  return t in map?map[t]:(String(v||'').trim()||null);
 }
 function normalizeFuel(v){
   const t=normalizeImportHeader(v);
@@ -4064,10 +4064,12 @@ if(paymentParams.get('payment')==='success'){
   },700);
 }
 
+function isProFeedDefaultCondition(a){return a?.category==='vehicules'&&String(a?.source||'').startsWith('feed:')&&/^(bon [ée]tat|occasion|used)$/i.test(String(a?.item_condition||'').trim());}
 function detailSpecsFor(a){
   const specs=[];
   const sub=vehicleSubcategoryOf(a);
-  if(a.item_condition) specs.push(['État',repairImportedText(a.item_condition)]);
+  // 29/10/2026 (Anthony) : véhicules importés des garages : pas de « Bon état » (leur site dit seulement « Occasion »).
+  if(a.item_condition&&!isProFeedDefaultCondition(a)) specs.push(['État',repairImportedText(a.item_condition)]);
   if(sub) specs.push(['Type',subcategoryLabel(a.category,sub)]);
   if(equipmentTypeOf(a)) specs.push(['Produit',equipmentTypeOf(a)]);
   if(a.category==='vehicules' && VEHICLE_DETAIL_TYPES.includes(sub)){

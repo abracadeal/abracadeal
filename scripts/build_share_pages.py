@@ -58,7 +58,7 @@ MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
 VERSION = "8"  # à incrémenter pour forcer la régénération de toutes les pages
-FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,item_condition,"
+FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
 MARKER = re.compile(r"^\[ABRACA_([A-Z_]+):([^\]]*)\]\s*", re.M)
@@ -279,7 +279,11 @@ def specs_of(listing, meta):
         add("GES", im.get("ges"))
         feats = im.get("features")
         add("Atouts", ", ".join(feats) if isinstance(feats, list) else feats)
-    add("État", listing.get("item_condition"))
+    cond = (listing.get("item_condition") or "").strip()
+    # 29/10/2026 (Anthony) : véhicules importés des garages : pas de « Bon état » (leur site dit seulement « Occasion »).
+    if not (listing.get("category") == "vehicules" and str(listing.get("source") or "").startswith("feed:")
+            and cond.lower() in ("bon état", "bon etat", "occasion", "used")):
+        add("État", cond)
     if meta["sub"] and listing.get("category") not in ("immobilier",):
         add("Rubrique", label(meta["sub"]))
     return rows
