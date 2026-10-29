@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Surface « 190 m² de surface habitable » (v78)
+- Signalement Anthony : autre annonce encore sans surface. Identifiée : CCI Fontenay-sur-Mer, référence 1137 (262 975 €), texte « ses 190m² de surface habitable ».
+- Règle générale immoFillFromText étendue à « m² de surface habitable » / « m2 de superficie habitable », sans prendre terrain, dépendances ou surfaces annexes. Modification ciblée dans index.ts, données explicites déjà présentes conservées.
+- Version pro-stock-sync v78, commit source 16742015aa3725e2315ea3e400c145097a62ca14.
+- Test réel fiche 1137 : surface normalisée 190 ; fiche précédente 1130 toujours 175 m² / 3 chambres / honoraires complets. Assertions variantes positives et exclusions terrain/dépendances/annexes OK ; esbuild OK.
+- Test à blanc CCI : 17/17, aucune erreur, surface renseignée 59 % (53 % en v77), photos 231, partial=false. Aucun import/publication lancé. Contrôles témoins v77 conservés ; seul ajout de formulation de surface dans v78.
+
 ### 29/10/2026 — ChatGPT — Description → champs immobiliers automatiques (v77)
 - Signalement Anthony : CCI Saint-Floxel (1130), 175 m² habitables et 3 grandes chambres présents dans la description mais absents des colonnes ; « 3 pièces de vie » pris pour le total.
 - Cause : normalizeImmo calculait surface et pièces AVANT immoFillFromText. Extraction déplacée au début, avant le calcul des champs ; les valeurs déjà renseignées restent prioritaires. Lecture de chambres avec adjectif (grandes/belles/spacieuses), surface habitable prioritaire sur annexes/dépendances/terrain, terrain explicite en m²/hectares, exclusion de « pièces de vie » du total ; honoraires T.T.C. non tronqués aux points. Même prudence sur le lecteur AdnPix.
