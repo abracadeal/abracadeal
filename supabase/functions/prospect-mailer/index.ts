@@ -81,7 +81,8 @@ function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B
 function stockPhrase(category: string, n: number | null | undefined) {
   const k = Math.max(0, Number(n || 0));
   const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
-  if (k <= 1) return `votre ${noun[0]} peut être`;
+  if (k === 0) return `vos ${noun[1]} peuvent être`;
+  if (k === 1) return `votre ${noun[0]} peut être`;
   return `vos ${k} ${noun[1]} peuvent être`;
 }
 // {{vos_annonces}} : « vos véhicules » / « vos motos » / « vos biens » (mail « publiez vous-même », pros qui vendent sur Leboncoin).
@@ -128,8 +129,8 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
     const t = await sign(prospectId);
     const page = `https://abracadeal.fr/desinscription.html?u=${prospectId}&t=${t}`;
     const oneClick = `${SUPABASE_URL}/functions/v1/prospect-mailer?u=${prospectId}&t=${t}`;
-    body += `\n\n--\nVous recevez ce message car ${company || "votre entreprise"} est référencée publiquement comme professionnel. ` +
-      `Pour ne plus recevoir nos e-mails : ${page}\nAbracadeal — iDream Lab SASU`;
+    body += `\n\n--\nVous recevez ce message car votre entreprise est référencée publiquement comme professionnel. ` +
+      `Pour ne plus recevoir nos e-mails : ${page}`;
     unsubHeader = `List-Unsubscribe: <${oneClick}>, <mailto:${from}?subject=STOP>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n`;
   }
   const thread = inReplyTo && /^<[^<>\s]+>$/.test(inReplyTo) ? `In-Reply-To: ${inReplyTo}\r\nReferences: ${inReplyTo}\r\n` : "";
@@ -229,7 +230,10 @@ Deno.serve(async (req) => {
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         const c = await creds(j.mailbox);
-        const tpl = await templates(j.category || "", followup, variant, row?.site_check_status === "manual" ? "manuel" : row?.site_check_status === "generic" ? "normal" : "");
+        // 29/10/2026 (Anthony) : le mail « nous avons testé votre site » (et sa relance) seulement si le site a vraiment été lu
+        // avec au moins une annonce ; sinon mail « normal » (jamais de nombre ni de « tout est prêt » inventés).
+        const tested = row?.site_check_status === "ok" && Number(row?.site_check_count || 0) > 0;
+        const tpl = await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
