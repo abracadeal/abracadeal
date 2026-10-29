@@ -944,3 +944,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - prospect-mailer (stub GitHub) : modèle « manuel » / « relance_manuel » quand `site_check_status='manual'` ; `{{vos_annonces}}` = vos véhicules / vos motos / vos biens ; test : `{action:'test', manual:true}`.
 - admin-test-import.html : bouton « Vend sur Leboncoin » dans « Sites à apprendre », compteur « vendent sur Leboncoin ».
 - Leboncoin n'est pas lu par le robot (protection anti-robots et conditions d'utilisation).
+
+## 29/10/2026 — Prospection : moins de motos (Claude)
+- Décision d'Anthony : les garages moto ont très peu d'annonces sur leur site. Mix d'envoi : moto 10 %, immobilier 45 %, auto 45 % (avant 32/34/34).
+- `prospect_precheck_claim` : tirage pondéré par ce mix (power(random(), 1/poids)) au lieu de « petits pros d'abord » (qui faisait tester surtout des motos). Essai : 10 tirages → 6 immo, 3 auto, 1 moto.
