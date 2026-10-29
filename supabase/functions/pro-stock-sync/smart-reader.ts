@@ -104,8 +104,8 @@ function adnpixDetail(html:string,url:string){
   const surface=description.match(/(?:surface(?: habitable)?(?: de)?|habitable[s]? de|maison de|appartement de|logement de|loi carrez(?: est de)?)\s*(\d+(?:[.,]\d+)?)\s*m[²2]/i)||title.match(/(\d+(?:[.,]\d+)?)\s*m[²2]/i);
   if(surface)o.surface=surface[1];
   const terrain=description.match(/(?:terrain|parcelle|jardin)[^.\n]{0,80}?(\d[\d ]*(?:[.,]\d+)?)\s*m[²2]/i);if(terrain)o.surface_terrain=terrain[1].replace(/ /g,'');
-  const rooms=(title+' '+description).match(/\b[TF](\d)\b|\b(\d+)\s*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1]||rooms[2];
-  const bedrooms=description.match(/\b(\d+)\s*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];
+  const rooms=(title+' '+description).match(/\b[TF](\d)\b|\b(\d+)\s*pi[eè]ces?\b(?!\s+de\s+vie)/i);if(rooms)o.pieces=rooms[1]||rooms[2];
+  const bedrooms=description.match(/\b(\d+)\s+(?:(?:grandes?|belles?|spacieuses?|vastes?)\s+)?chambres?\b/i);if(bedrooms)o.chambres=bedrooms[1];
   for(const [field,cls] of [['dpe','npe-conso-etiquettes'],['ges','npe-emissions-etiquettes']]){const match=html.match(new RegExp('class=["\'][^"\']*\\b'+cls+'\\b[^"\']*\\bndpe-([a-g])-selected\\b','i'));if(match)o[field]=match[1].toUpperCase();}
   const lots=description.match(/nombre de lots de copropri[ée]t[ée]\s*:\s*(\d+)/i);if(lots)o.nombre_lots=lots[1];
   return o;
