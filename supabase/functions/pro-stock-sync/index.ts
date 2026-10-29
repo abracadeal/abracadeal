@@ -119,7 +119,30 @@ async function ownerLocation(userId:string|null|undefined){if(!userId)return nul
 // Véhicules : tous au garage, donc ville et code postal du garage sur chaque annonce (adresse du compte pro,
 // sinon adresse publiée sur le site). Immobilier : la ville de chaque bien, celle du compte seulement si elle manque.
 // preferSite : aperçu d'une adresse testée par quelqu'un d'autre que le garage (ex. l'admin) => adresse du site d'abord.
-async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);out.push(r);}return out;}
+// 29/10/2026 : descriptions mises en forme (les sites donnent souvent tout « en bloc ») :
+// paragraphes et listes rétablis, pour qu'une annonce reste lisible. Le contenu n'est jamais modifié, seulement les retours à la ligne.
+const DESC_HEADS=['Équipements','Equipements','Options et équipements','OPTIONS ET EQUIPEMENTS','Options','Points forts','Caractéristiques','Informations complémentaires','Garantie','Prix','Conditions tarifaires','Honoraires','Mandat','DPE','GES','Diagnostic','Copropriété','Les informations sur les risques','Localisation','Financement','Reprise','Contact'];
+function tidyDescription(v:unknown){
+ let t=String(v??'').replace(/\r\n?/g,'\n').replace(/[  ]/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
+ if(!t)return t;
+ // Listes écrites à la suite : « … -Climatisation -Sièges chauffants », « • GPS • Radar », puces emoji.
+ t=t.replace(/\s+(?=(?:[-–•▪►▶✓✔✅☑➡→]|▶️|✔️)\s?\p{Lu})/gu,'\n')
+    .replace(/\s*((?:📍|📅|📌|⚙️|🔄|🚙|🌱|🎨|💺|💰|🔥|⭐|👤|📞|✨|🛠️|🔧|📝|🔑|🚗|✅)\s?)/gu,'\n$1');
+ // Titres de rubrique : à la ligne, précédés d'une ligne vide.
+ for(const h of DESC_HEADS){const re=new RegExp(`([^\\n])\\s+(${h.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})(\\s*(?::|-|–|n°|\\())`,'g');t=t.replace(re,'$1\n\n$2$3');}
+ // Gros bloc sans retour à la ligne : paragraphes de 2-3 phrases.
+ const lines=t.split('\n');
+ const out:string[]=[];
+ for(const line of lines){
+  if(line.length<=320){out.push(line);continue;}
+  const sentences=line.match(/[^.!?…]+(?:[.!?…]+(?=\s+\p{Lu}|\s*$)|$)/gu)||[line];
+  let cur='';
+  for(const sn of sentences.map(x=>x.trim()).filter(Boolean)){if(cur&&cur.length+sn.length>280){out.push(cur);out.push('');cur=sn;}else cur=cur?cur+' '+sn:sn;}
+  if(cur)out.push(cur);
+ }
+ return out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim();
+}
+async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description);out.push(r);}return out;}
 
 async function authUser(req:Request){const h=req.headers.get('Authorization')||'';if(!h)return null;const c=createClient(SUPABASE_URL,ANON_KEY,{global:{headers:{Authorization:h}},auth:{persistSession:false}});const{data}=await c.auth.getUser();return data?.user||null;}
 async function cronOk(req:Request){const tok=req.headers.get('x-cron-token')||'';if(!tok)return false;const hash=await sha256(tok);const{data}=await admin.from('pro_sync_secrets').select('value_hash').eq('name','cron_sync').maybeSingle();return!!data&&data.value_hash===hash;}
