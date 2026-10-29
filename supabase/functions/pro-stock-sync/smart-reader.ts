@@ -143,7 +143,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const pick=inHead||okC[0];
     let city=pick?.city||'',cp=pick?.cp||'';
     if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
-    if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
+    if(cp&&o.ville&&(!cityJ||/^\d+$/.test(cityJ)))o.code_postal=cp;else if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
     // Un prix de vente (≥ 20 000 €) l'emporte sur un « à louer » lu dans le texte (ex. immeuble de rapport avec local à louer).
     o.transaction=(rental&&!(prix>=20000))||/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
@@ -159,7 +159,9 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const dpe=(text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
     const ges=(text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
     if(dpe&&ges){o.dpe=dpe.toUpperCase();o.ges=ges.toUpperCase();}
-    const hon=text.match(/honoraires[^.\n]{0,120}/i);if(hon)o.honoraires=hon[0].trim();
+    const hon=text.match(/honoraires[^.\n]{0,120}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].trim();
+    // Lignes de faits (charges, taxe, lots, copropriété, procédure, dépôt, mandat…) gardées pour la lecture des champs, hors description.
+    o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);
     if(!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;
   }else{
     const all=head+' \n'+text.slice(0,6000);

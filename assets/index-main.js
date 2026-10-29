@@ -4087,28 +4087,46 @@ function detailSpecsFor(a){
   }
   if(a.category==='immobilier'){
     const m=realEstateMetaOf(a);
-    if(m.surface!==undefined) specs.push(['Surface',`${Number(m.surface).toLocaleString('fr-FR')} m²`]);
-    if(m.landSurface!==undefined) specs.push(['Terrain',`${Number(m.landSurface).toLocaleString('fr-FR')} m²`]);
-    if(m.rooms!==undefined) specs.push(['Pièces',String(m.rooms)]);
-    if(m.bedrooms!==undefined) specs.push(['Chambres',String(m.bedrooms)]);
-    if(m.bathrooms!==undefined) specs.push(['Salles de bain / eau',String(m.bathrooms)]);
-    if(m.floor!==undefined) specs.push(['Étage',String(m.floor)]);
-    if(m.totalFloors!==undefined) specs.push(['Étages immeuble',String(m.totalFloors)]);
-    if(m.furnished) specs.push(['Meublé',m.furnished]);
+    const immoSub=vehicleSubcategoryOf(a);
+    const isRental=['location','saisonniere'].includes(immoSub);
+    const NC='Non communiqué';
+    const has=v=>v!==undefined&&v!==null&&v!=='';
+    const eur=v=>has(v)?formatImmoMoney(v):NC;
+    // 29/10/2026 (Anthony) : informations essentielles / obligatoires toujours affichées, même absentes (« Non communiqué »).
+    if(immoSub!=='parking-garage'&&immoSub!=='vente-terrain'){
+      specs.push(['Surface habitable',has(m.surface)?`${Number(m.surface).toLocaleString('fr-FR')} m²`:NC]);
+      specs.push(['Pièces',has(m.rooms)?String(m.rooms):NC]);
+      if(has(m.bedrooms)) specs.push(['Chambres',String(m.bedrooms)]);
+      specs.push(['Dépenses d’énergie estimées / an',has(m.energyCostMin)?`${formatImmoMoney(m.energyCostMin)} à ${formatImmoMoney(m.energyCostMax||m.energyCostMin)}`:(m.dpe==='NON SOUMIS'?'Non soumis au DPE':NC)]);
+    }else if(has(m.surface)) specs.push(['Surface',`${Number(m.surface).toLocaleString('fr-FR')} m²`]);
+    if(isRental){
+      specs.push(['Charges / mois',eur(m.rentCharges)]);
+      specs.push(['Dépôt de garantie',eur(m.deposit)]);
+      specs.push(['Honoraires locataire',m.fees||NC]);
+      specs.push(['Meublé',m.furnished||NC]);
+    }else{
+      specs.push(['Honoraires',m.fees||NC]);
+      const copro=String(m.coownership||'');const noCopro=/^non$/i.test(copro);
+      if(immoSub!=='vente-terrain'){
+        specs.push(['Copropriété',copro||(has(m.lots)||has(m.annualCharges)?'Oui':NC)]);
+        if(!noCopro){
+          specs.push(['Nombre de lots',has(m.lots)?String(m.lots):NC]);
+          specs.push(['Charges de copropriété / an',eur(m.annualCharges)]);
+          specs.push(['Procédure en cours (syndicat)',m.procedure||NC]);
+        }
+      }
+      specs.push(['Taxe foncière / an',eur(m.propertyTax)]);
+    }
+    if(has(m.landSurface)) specs.push(['Terrain',`${Number(m.landSurface).toLocaleString('fr-FR')} m²`]);
+    if(has(m.bathrooms)) specs.push(['Salles de bain / eau',String(m.bathrooms)]);
+    if(has(m.floor)) specs.push(['Étage',Number(m.floor)===0?'Rez-de-chaussée':String(m.floor)]);
+    if(has(m.totalFloors)) specs.push(['Étages immeuble',String(m.totalFloors)]);
+    if(!isRental&&m.furnished) specs.push(['Meublé',m.furnished]);
     if(m.yearBuilt) specs.push(['Année de construction',String(m.yearBuilt)]);
     if(m.propertyCondition) specs.push(['État du bien',m.propertyCondition]);
     if(m.heating) specs.push(['Chauffage',m.heating]);
     if(m.orientation) specs.push(['Exposition',m.orientation]);
     if(m.neighborhood) specs.push(['Quartier / secteur',m.neighborhood]);
-    const immoSub=vehicleSubcategoryOf(a);
-    const isRental=['location','saisonniere'].includes(immoSub);
-    if(m.coownership) specs.push(['Copropriété',m.coownership]);
-    if(m.lots!==undefined) specs.push(['Nombre de lots',String(m.lots)]);
-    if(!isRental && m.annualCharges!==undefined) specs.push(['Charges annuelles',formatImmoMoney(m.annualCharges)]);
-    if(!isRental && m.propertyTax!==undefined) specs.push(['Taxe foncière',formatImmoMoney(m.propertyTax)]);
-    if(m.rentCharges!==undefined) specs.push(['Charges mensuelles',formatImmoMoney(m.rentCharges)]);
-    if(m.deposit!==undefined) specs.push(['Dépôt de garantie',formatImmoMoney(m.deposit)]);
-    if(m.fees) specs.push(['Honoraires',m.fees]);
     if(m.mandate) specs.push(['Référence / mandat',m.mandate]);
     if(m.availableDate) specs.push(['Disponible le',new Date(m.availableDate+'T12:00:00').toLocaleDateString('fr-FR')]);
   }
