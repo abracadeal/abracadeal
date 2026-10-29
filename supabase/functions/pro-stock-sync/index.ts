@@ -176,7 +176,33 @@ function tidyDescription(v:unknown,title=''){
  }
  return dedupeDescription(out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim(),title);
 }
-async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description,r.title);out.push(r);}return out;}
+// 29/10/2026 (Anthony) : doublons de photos (même image en plusieurs tailles / adresses) et doublons d'annonces, pour tous les sites.
+const SIZE_Q=/^(w|h|width|height|q|quality|fit|crop|resize|size|format|fm|auto|dpr|scale|mode|rs|ver|version|cache|itok|sw|sh)$/i;
+const SIZE_WORD='thumb|thumbs|thumbnail|thumbnails|small|medium|large|big|ibig|intermediate|mini|xl|xxl|hd|full|original|orig|sm|md|lg|xs|preview|zoom|max|min|resized|crop|cropped';
+function photoKey(u:string){
+ try{const x=new URL(u);const keep=[...x.searchParams.entries()].filter(([k])=>!SIZE_Q.test(k)).map(([k,v])=>k+'='+v).sort().join('&');
+  let p=decodeURIComponent(x.pathname).toLowerCase();
+  p=p.replace(new RegExp(`/(?:${SIZE_WORD}|\\d{2,4}x\\d{2,4}|[wh]_?\\d{2,4}|c_[a-z]+|q_\\d+|f_auto|q_auto)(?=/)`,'g'),'/')
+     .replace(/[-_]\d{2,4}x\d{2,4}(?=\.[a-z0-9]{3,4}$)/,'')
+     .replace(new RegExp(`[-_.](?:${SIZE_WORD})(?=\\.[a-z0-9]{3,4}$)`),'')
+     .replace(/@\dx(?=\.)/,'').replace(/\.(?:jpe?g|png|webp|avif|gif)$/,'.img').replace(/\/{2,}/g,'/');
+  return x.hostname.replace(/^www\./,'')+p+(keep?'?'+keep:'');}catch{return u;}
+}
+function photoRank(u:string){const s=u.toLowerCase();let r=0;
+ // aucune indication de taille = souvent l'image d'origine (WordPress : car.jpg plus grande que car-1024x683.jpg)
+ if(!/\d{2,4}x\d{2,4}|[?&](?:w|width|h|height)=|thumb|small|mini|preview|large|big|full|original|hd|xl|intermediate/.test(s))r+=2.5;if(/full|original|orig|large|big|ibig|hd|xxl|xl|max|zoom/.test(s))r+=3;if(/thumb|small|mini|preview|xs|\bsm\b|min/.test(s))r-=3;const m=s.match(/(\d{2,4})x(\d{2,4})/);if(m)r+=Math.min(3,Number(m[1])/600);const w=s.match(/[?&](?:w|width)=(\d+)/);if(w)r+=Math.min(3,Number(w[1])/600);return r;}
+function dedupePhotos(list:any){
+ if(!Array.isArray(list))return list;const order:string[]=[];const best=new Map<string,string>();
+ for(const u of list){const s=String(u||'');if(!s)continue;const k=photoKey(s);if(!best.has(k)){best.set(k,s);order.push(k);}else if(photoRank(s)>photoRank(best.get(k)!))best.set(k,s);}
+ return order.map(k=>best.get(k)!);
+}
+function listingKey(r:any){const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+ return [r.category,r.sub||'',t,Math.round(Number(r.price)||0),r.surface||'',r.mileage||'',r.year||'',r.city||''].join('|');}
+async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description,r.title);if(Array.isArray(r.photos))r.photos=dedupePhotos(r.photos);out.push(r);}
+ // Même annonce publiée deux fois sur le site (références différentes) : on garde celle qui a le plus de photos.
+ const seenL=new Map<string,number>();const res:any[]=[];let dup=0;
+ for(const r of out){const k=listingKey(r);const j=seenL.get(k);if(j===undefined){seenL.set(k,res.length);res.push(r);continue;}dup++;if((r.photos?.length||0)>(res[j].photos?.length||0))res[j]=r;}
+ (res as any).duplicates=dup;return res;}
 
 async function authUser(req:Request){const h=req.headers.get('Authorization')||'';if(!h)return null;const c=createClient(SUPABASE_URL,ANON_KEY,{global:{headers:{Authorization:h}},auth:{persistSession:false}});const{data}=await c.auth.getUser();return data?.user||null;}
 async function cronOk(req:Request){const tok=req.headers.get('x-cron-token')||'';if(!tok)return false;const hash=await sha256(tok);const{data}=await admin.from('pro_sync_secrets').select('value_hash').eq('name','cron_sync').maybeSingle();return!!data&&data.value_hash===hash;}
@@ -1026,7 +1052,7 @@ async function autoReviewSite(feed:any,dryRun=false){
  if(verdict&&!dryRun)return mark(verdict,platform);
  if(dryRun&&!norm.length)return mark(verdict,platform);
  if(dryRun){const n=norm.length,pc=(f:(r:any)=>any)=>Math.round(100*norm.filter(f).length/n);const errs:Record<string,number>={};for(const r of norm)for(const e of r.errors||[])errs[e]=(errs[e]||0)+1;
-  return{ok:!verdict,auto_review:verdict?'pending':'approved',reason:verdict||undefined,platform,read:n,complete:good,partial:!!(rows as any).partial,total_on_site:(rows as any).total||undefined,crawl:dryRun?(rows as any).stats||undefined:undefined,urls:dryRun?norm.slice(0,150).map((r:any)=>[r.externalUrl,r.title,r.price,r.sub,r.postal,r.annualCharges,r.propertyTax,r.lots,r.procedure,r.fees,r.mandate,String(r.description||'').slice(0,160)]):undefined,raw_count:rows.length,city:norm[0]?.city||null,postal:norm[0]?.postal||null,
+  return{ok:!verdict,auto_review:verdict?'pending':'approved',reason:verdict||undefined,platform,read:n,complete:good,partial:!!(rows as any).partial,total_on_site:(rows as any).total||undefined,crawl:dryRun?(rows as any).stats||undefined:undefined,duplicates:(norm as any).duplicates||0,photos_total:norm.reduce((a:number,r:any)=>a+(r.photos?.length||0),0),urls:dryRun?norm.slice(0,150).map((r:any)=>[r.externalUrl,r.title,r.price,r.sub,r.postal,r.annualCharges,r.propertyTax,r.lots,r.procedure,r.fees,r.mandate,String(r.description||'').slice(0,160)]):undefined,raw_count:rows.length,city:norm[0]?.city||null,postal:norm[0]?.postal||null,
    fill:{photos_moy:Math.round(10*norm.reduce((a:number,r:any)=>a+(r.photos?.length||0),0)/n)/10,photos_1:pc(r=>(r.photos?.length||0)<=1),prix:pc(r=>Number(r.price)>0),km:pc(r=>r.mileage!=null),annee:pc(r=>r.year!=null),carburant:pc(r=>!!r.fuel),boite:pc(r=>!!r.transmission),marque:pc(r=>!!r.make),description:pc(r=>String(r.description||'').length>=80),ville:pc(r=>!!r.city),surface:pc(r=>r.surface!=null),pieces:pc(r=>r.rooms!=null),dpe:pc(r=>!!r.dpe),energie_cout:pc(r=>r.energyCostMin!=null),honoraires:pc(r=>!!r.fees),charges_an:pc(r=>r.annualCharges!=null),lots:pc(r=>r.lots!=null),copro:pc(r=>!!r.coownership),procedure:pc(r=>!!r.procedure),taxe:pc(r=>r.propertyTax!=null),depot:pc(r=>r.deposit!=null),mandat:pc(r=>!!r.mandate)},errors:errs,
    sample:norm.slice(0,3).map((r:any)=>({title:r.title,price:r.price,city:r.city,photos:r.photos?.length,km:r.mileage,year:r.year,fuel:r.fuel,desc:String(r.description||'').slice(0,120),errors:r.errors})),
    no_dpe:norm.filter((r:any)=>!r.dpe&&!['parking-garage','vente-terrain'].includes(r.sub)).slice(0,15).map((r:any)=>{const d=String(r.description||'');const hits=[...d.matchAll(/(DPE|[ée]nerg|kWh|GES|climat|CO2|classe)/gi)].slice(0,4).map(m=>d.slice(Math.max(0,(m.index||0)-60),(m.index||0)+90));return{title:r.title,url:r.externalUrl,sub:r.sub,ctx:hits};}),
