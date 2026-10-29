@@ -1185,3 +1185,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 29/10/2026 — Claude — Mails de prospection : « pendant le lancement » retiré
 - Tous les modèles (site testé, manuel, normal, relances, modèle par défaut) : « gratuit pour les professionnels » sans « pendant le lancement ».
+
+### 29/10/2026 — Claude — Bilan mensuel envoyé aux pros + partages comptés
+- **But (Anthony) :** à la fin des 12 mois gratuits, l'argument pour rester sera les résultats ; le pro doit les voir chaque mois.
+- **Base (appliqué, `supabase/2026-10-29-bilan-mensuel-pro.sql`) :**
+  - `listing_events` accepte `share` ; `track_listing_event` compte les partages (une fois par visiteur, annonce et jour ; propriétaire et admin exclus).
+  - `private.queue_pro_monthly_reports(p_month)` : pour chaque compte pro (hors admin) ayant eu au moins 1 vue dans le mois écoulé, met un mail `custom_message` dans `pro_email_outbox` (clé `monthly-report:<user>:<AAAA-MM>`, un seul par mois) : vues, numéros affichés, appels, messages, favoris, partages (lignes à 0 masquées), 3 annonces les plus vues, nombre d'annonces en ligne. Envoyé par `process-pro-transactional-emails` (Resend), avec le bouton « Accéder à mon espace Pro ».
+  - Tâche planifiée `abracadeal-pro-monthly-report` : le 1er du mois à 7 h 37 UTC. Premier envoi : 1er novembre (bilan d'octobre).
+  - Testé dans une transaction annulée : « Votre bilan d’octobre », puces correctes, accords singulier/pluriel.
+- **Site (`index-main.js?v=20261029-partages`) :** chaque partage (WhatsApp, Facebook, SMS, copier le lien, partage du téléphone) est compté.

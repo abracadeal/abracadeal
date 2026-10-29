@@ -3170,7 +3170,10 @@ let lastShareActionKey='',lastShareActionAt=0;
 function shareActionOnce(key){
   const now=Date.now();
   if(key===lastShareActionKey && (now-lastShareActionAt)<1000) return false;
-  lastShareActionKey=key;lastShareActionAt=now;return true;
+  lastShareActionKey=key;lastShareActionAt=now;
+  // 29/10/2026 : partage compté pour le bilan mensuel du vendeur (le vendeur lui-même n'est pas compté).
+  const sharedId=String(key).split(':')[1];if(sharedId)trackListingEvent(sharedId,'share');
+  return true;
 }
 window.copyListingLink=async(id)=>{
   if(!shareActionOnce('copy:'+id))return;
