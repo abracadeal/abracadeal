@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Textes des cartes « Les annonces » réduits
+- Demande d'Anthony (capture mobile) : titres sur 4-5 lignes dans la grille. `assets/card-overlay-20261029.css` v=2 : titre limité à 2 lignes (points de suspension), et sur mobile titre 13 px, prix 16 px, caractéristiques / ville 10,5 px. Cartes du haut (récemment consultées, etc.) inchangées.
+
 ### 29/10/2026 — Claude — Filigrane et boutons des vignettes plus discrets
 - Demande d'Anthony : filigrane trop visible sur les vignettes, cœur / partager trop présents.
 - Nouveau `assets/card-overlay-20261029.css` (chargé en dernier dans `index.html`) : filigrane des photos importées plus petit et transparent (vignettes seulement, page annonce inchangée) ; Partager + cœur côte à côte en haut à droite, petits boutons verre fumé (fond sombre transparent, icônes blanches), cœur rose si favori. Remplace l'empilement vertical du 26/10 (`category-icons-20261026.css`). Le filigrane incrusté dans les photos déposées par les particuliers n'est pas concerné (il est dans l'image).

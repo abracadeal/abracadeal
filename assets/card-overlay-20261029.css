@@ -21,3 +21,15 @@ html body .card-photo-actions .card-action-btn .fav-count-inline{font-size:.66re
 @media (max-width:760px){
   html body .card-photo-actions .card-action-btn,html body #resultats .card-photo-actions .card-action-btn{height:26px!important;min-width:26px!important;padding:0 5px!important}
 }
+
+/* 29/10/2026 (Anthony) : textes des cartes « Les annonces » plus petits, comme les cartes du haut (Récemment consultées) :
+   titre sur 2 lignes maximum, prix et caractéristiques plus compacts. */
+html body #resultats .ad-card.ad-card .ad-title{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;line-clamp:2!important;overflow:hidden!important;
+  min-height:0!important;margin:0 0 4px!important}
+@media (max-width:760px){
+  html body #resultats .ad-card.ad-card .ad-title{font-size:13px!important;line-height:1.25!important;font-weight:800!important}
+  html body #resultats .ad-card.ad-card .ad-price{font-size:16px!important;line-height:1.15!important;margin-bottom:5px!important}
+  html body #resultats .ad-card.ad-card .ad-specs{font-size:10.5px!important;gap:2px 6px!important;margin-bottom:5px!important}
+  html body #resultats .ad-card.ad-card .ad-city,html body #resultats .ad-card.ad-card .ad-meta{font-size:10.5px!important}
+}
