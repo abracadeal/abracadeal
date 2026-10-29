@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Kermarrec Habitation Pornichet appris (v80)
+- Demande e3f26a6e-8f6e-4c6b-8d97-d0d6b8cba8d7, https://www.kermarrec-habitation.fr/nos-agences/agence-de-pornichet/ : site illisible, aucune fiche lue avant correction.
+- Cause : le lecteur automatique restait sous le chemin de la page agence (/nos-agences/…), alors que les fiches sont /achat/<type>/<ville-cp>/bien-<id>/. Développement d’un lecteur Kermarrec réutilisable par les autres agences du réseau (kermarrec-reader.ts), branché uniquement sur ce domaine ; autres lecteurs inchangés.
+- Pagination limitée à la liste de l’agence, 3 pages /achat/agence/agence-de-pornichet/ (le rel=next national du site pointe ailleurs : ne pas le suivre). 26 liens uniques, aucune annonce des autres agences via les biens similaires. Lecture partielle signalée si une page échoue ou si moins de fiches que le total annoncé.
+- Fiches : description narrative du bloc Descriptif, valeurs séparées surface/terrain, pièces/chambres, mandat, année/chauffage, équipements, honoraires, galerie du bien sans miniatures en double, DPE/GES par lettre effectivement sélectionnée (pas déduite), date et coûts énergie. Données absentes laissées vides.
+- Tests réels maison 54551745 : 60 m², terrain 4251 m² (valeur du tableau source), 2 chambres, Pornichet 44380, 9 photos, DPE G/GES C selon les lettres affichées, énergie 2060–2810 € ; appartement 59501127 : 91 m², La Baule-Escoublac, 14 photos, C/A. Assertions pagination/scope/normalisation, régressions Orpi et CCI 175/190, esbuild OK.
+- Version pro-stock-sync v80 déployée, source afdab18f3553a7889b26c8331a8c83c21a08218a. Test à blanc complet : 26/26, aucune erreur, total_on_site=26, partial=false, 320 photos, descriptions 100 %, villes/prix 100 %, surface 96 %, DPE 92 %, coût énergie 88 %.
+- Témoins après déploiement (séquentiels) : Nestenn 56/56 ; Chevreux 26/26 ; Orpi 54/52 (2 sans photo) ; C21 38/38 ; L’Adresse 88/88 ; Laugier 23/23 ; Spider VO 23/21 (2 sans photo) ; WooCommerce 78/76 (2 prix absents). Stocks susceptibles d’évoluer.
+- Demande marquée done avec résultat. Apprentissage uniquement : aucune modification du statut des prospects, aucun import/publication ni envoi de mail déclenché.
+
 ### 29/10/2026 — ChatGPT — Validation Orpi : apprentissage uniquement
 - Précision d’Anthony : « valide » signifie ici valider que le robot sait lire, sans valider la prospection ni publier/importer des annonces.
 - Demande robot_learning_requests da50c6d3-11e6-4da9-b310-103906397df4 marquée done, handled_by ChatGPT, résultat lecture uniquement (v79, 98 lues / 97 validées).
