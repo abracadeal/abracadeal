@@ -68,6 +68,7 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
 .fg .full{grid-column:1/-1}
 .fg input,.fg select{padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px;min-width:0;width:100%}
 .row2{display:flex;gap:8px}.row2 input{flex:1}
+.edf{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}.edf label{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted,#bba)}.edf input,.edf select,.edf textarea{padding:10px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px;width:100%;box-sizing:border-box}.edf .full{grid-column:1/-1}.edf textarea{min-height:140px}@media(max-width:560px){.edf{grid-template-columns:1fr}}.fixed{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:999px;background:#1f5a3a;color:#bff0d2;font-size:12px}
 .consent{display:flex!important;flex-direction:row!important;gap:10px;align-items:flex-start;color:#fff!important;line-height:1.45}
 .consent input{width:20px!important;height:20px;flex:none;margin-top:2px}
 .company{background:#1b1124;border-radius:10px;padding:10px 12px;font-size:14px;color:#e8dcef}
@@ -124,7 +125,7 @@ const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):nu
 const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
 const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
 const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
-let NN=[],ROWS=[],NORM=[],REQS=[],lastSync=null;
+let LASTDATA=null,NN=[],ROWS=[],NORM=[],REQS=[],lastSync=null;
 async function fnError(error){let msg=error?.message||String(error);try{const b=await error.context.json();msg=b.error||msg}catch{}return msg}
 async function init(){
  const{data:{user}}=await sb.auth.getUser();
@@ -209,7 +210,7 @@ async function load(ev){
   const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true}});
   if(error)throw Error(await fnError(error));
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
-  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];render(data,E('sector').value);
+  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];LASTDATA=data;render(data,E('sector').value);
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
@@ -231,6 +232,37 @@ function render(data,sector){
   return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
  }).join('');
 }
+// 29/10/2026 (Anthony) : corriger une fiche à la main. La correction est gardée (site + référence) et réappliquée à chaque mise à jour du stock.
+const EDIT_FIELDS={vehicules:[['titre','Titre','text',1],['prix','Prix (€)','number'],['ville','Ville','text'],['code_postal','Code postal','text'],['marque','Marque','text'],['modele','Modèle','text'],['annee','Année','number'],['kilometrage','Kilométrage','number'],['carburant','Énergie','text'],['boite','Boîte','text'],['description','Description','area',1]],
+ immobilier:[['titre','Titre','text',1],['prix','Prix ou loyer (€)','number'],['transaction','Vente ou location','sel:vente|location'],['type_bien','Type de bien','sel:appartement|maison|terrain|parking|bureau|immeuble'],['ville','Ville','text'],['code_postal','Code postal','text'],['surface','Surface (m²)','number'],['pieces','Pièces','number'],['chambres','Chambres','number'],['dpe','DPE','sel:|A|B|C|D|E|F|G|NON SOUMIS'],['ges','GES','sel:|A|B|C|D|E|F|G'],['honoraires','Honoraires','text'],['charges_annuelles','Charges de copropriété / an (€)','number'],['nombre_lots','Nombre de lots','number'],['taxe_fonciere','Taxe foncière / an (€)','number'],['charges_mensuelles','Charges / mois (location)','number'],['depot_garantie','Dépôt de garantie (€)','number'],['description','Description','area',1]]};
+function editCar(i){
+ const r=ROWS[i]||{},n=NN[i]||{};const immo=E('sector').value==='immobilier';const host=(()=>{try{return new URL(r.url).hostname.replace(/^www\./,'')}catch{return''}})();
+ if(!host||r.reference==null){alert('Fiche sans adresse ou sans référence : correction impossible.');return}
+ const cur={...r,ville:n.city||r.ville,code_postal:n.postal||r.code_postal,prix:n.price??r.prix,description:n.description||r.description,dpe:n.dpe||r.dpe,ges:n.ges||r.ges,honoraires:n.fees||r.honoraires,charges_annuelles:n.annualCharges??r.charges_annuelles,taxe_fonciere:n.propertyTax??r.taxe_fonciere,nombre_lots:n.lots??r.nombre_lots,surface:n.surface??r.surface,pieces:n.rooms??r.pieces,chambres:n.bedrooms??r.chambres,transaction:r.transaction};
+ const f=EDIT_FIELDS[immo?'immobilier':'vehicules'];
+ const inp=([k,l,t,full])=>{const v=cur[k]==null?'':String(cur[k]);const id='ed_'+k;let h;
+  if(t==='area')h='<textarea id="'+id+'">'+esc(v)+'</textarea>';
+  else if(t.startsWith('sel:'))h='<select id="'+id+'">'+t.slice(4).split('|').map(o=>'<option value="'+esc(o)+'"'+(String(v).toLowerCase()===o.toLowerCase()?' selected':'')+'>'+esc(o||'—')+'</option>').join('')+'</select>';
+  else h='<input id="'+id+'" type="'+(t==='number'?'text':'text')+'" inputmode="'+(t==='number'?'decimal':'text')+'" value="'+esc(v)+'">';
+  return '<label class="'+(full?'full':'')+'">'+esc(l)+h+'</label>';};
+ E('db').innerHTML='<h2 style="margin:0 0 6px;font-size:18px">Modifier la fiche</h2><p class="muted" style="margin:0">'+esc(host)+' · réf. '+esc(r.reference)+'<br>La correction est gardée et réappliquée à chaque mise à jour du stock du pro.</p><div class="edf">'+f.map(inp).join('')+'<label class="full" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="ed__exclure" style="width:22px;height:22px">Ne pas publier cette annonce</label></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="edSave">Enregistrer la correction</button><button class="sbtn" type="button" id="edCancel">Annuler</button><button class="sbtn no" type="button" id="edReset">Supprimer ma correction</button></div><p class="muted" id="edMsg"></p>';
+ E('edCancel').onclick=()=>openCar(i);
+ const send=async(fields)=>{E('edMsg').textContent='Enregistrement…';const{error}=await sb.rpc('admin_set_stock_override',{p_host:host,p_ref:String(r.reference),p_fields:fields});if(error){E('edMsg').textContent=error.message;return false}return true;};
+ E('edReset').onclick=async()=>{if(await send({})){E('edMsg').textContent='Correction supprimée. Relance « Lire le stock » pour revoir la fiche d\'origine.';}};
+ E('edSave').onclick=async()=>{
+  const fields={};for(const[k]of f){const el=E('ed_'+k);if(!el)continue;const v=el.value.trim();const before=cur[k]==null?'':String(cur[k]).trim();if(v!==before&&v!=='')fields[k]=v;}
+  if(E('ed__exclure').checked)fields._exclure=true;
+  if(!Object.keys(fields).length){E('edMsg').textContent='Aucun changement.';return}
+  if(!(await send(fields)))return;
+  // affichage immédiat
+  Object.assign(ROWS[i],Object.fromEntries(Object.entries(fields).filter(([k])=>!k.startsWith('_'))));
+  if(NN[i]){NN[i].corrected=true;if(fields.ville)NN[i].city=fields.ville;if(fields.code_postal)NN[i].postal=fields.code_postal;if(fields.prix)NN[i].price=Number(fields.prix.replace(/\s/g,'').replace(',','.'));if(fields.description)NN[i].description=fields.description;
+   const fixes={ville:'ville manquante',prix:'prix manquant',dpe:'GES manquant',ges:'GES manquant'};NN[i].errors=(NN[i].errors||[]).filter(e=>!Object.entries(fixes).some(([k,m])=>fields[k]&&e===m));}
+  if(fields._exclure){ROWS[i].titre='(retirée) '+(ROWS[i].titre||'');}
+  render({platform:LASTDATA?.platform,partial:LASTDATA?.partial,total_on_site:LASTDATA?.total_on_site},E('sector').value);
+  E('edMsg').textContent='Correction enregistrée : elle sera appliquée à chaque mise à jour.';setTimeout(()=>{if(!fields._exclure)openCar(i);else E('dlg').close();},700);
+ };
+}
 function openCar(i){
  const r=ROWS[i];if(!r||!r.titre)return;const n0=NN[i]||{};const ph=n0.photos?.length?n0.photos:(r.photos?String(r.photos).split('|'):[]);
  E('dt').textContent=euro(r.prix);
@@ -244,6 +276,7 @@ function openCar(i){
    :[['Prix',euro(n.price)],['Honoraires',v(n.fees)],['Surface habitable',v(n.surface?n.surface+' m²':'')],['Pièces',v(n.rooms)],['DPE / GES',v(n.dpe?(n.dpe+(n.ges?' / '+n.ges:'')):'')],['Dépenses d\'énergie / an',v(n.energyCostMin?eur(n.energyCostMin)+' à '+eur(n.energyCostMax):'')],['Copropriété',v(n.coownership||(n.lots||n.annualCharges?'Oui':''))],['Nombre de lots',v(n.lots)],['Charges de copropriété / an',v(eur(n.annualCharges))],['Procédure en cours',v(n.procedure)],['Taxe foncière / an',v(eur(n.propertyTax))]];
   essHtml='<h3 style="font-size:16px;margin:14px 0 6px">Informations essentielles</h3><table>'+ess.map(x=>'<tr><td>'+esc(x[0])+'</td><td'+(x[1]===NC?' style="color:var(--bad)"':'')+'>'+esc(x[1])+'</td></tr>').join('')+'</table><h3 style="font-size:16px;margin:14px 0 6px">Autres détails</h3>';}
  E('db').innerHTML='<h2 style="margin:0 0 10px;font-size:18px">'+esc(r.titre)+'</h2>'+(ph.length?'<div class="big"><img id="bigimg" src="'+esc(ph[0])+'" alt=""></div><div class="thumbs">'+ph.map((u,k)=>'<img loading="lazy" data-k="'+k+'" class="'+(k?'':'on')+'" src="'+esc(u)+'" alt="">').join('')+'</div><p class="muted" style="margin:0">'+ph.length+' photos</p>':'<p class="muted">Aucune photo trouvée</p>')+essHtml+'<table>'+rows.map(x=>'<tr><td>'+esc(x[0])+'</td><td>'+esc(x[1])+'</td></tr>').join('')+'</table>'+((n.description||r.description)?'<h3 style="font-size:16px">Description</h3><div class="desc">'+esc(n.description||r.description)+'</div>':'')+(r.url?'<p><a href="'+esc(r.url)+'" target="_blank" rel="noopener">Voir la fiche sur le site du pro</a></p>':'');
+  E('db').insertAdjacentHTML('afterbegin','<div style="display:flex;gap:8px;flex-wrap:wrap;margin:0 0 10px"><button class="sbtn ok" type="button" onclick="editCar('+i+')">Modifier</button>'+((NN[i]||{}).corrected?'<span class="fixed">Corrigée à la main</span>':'')+'</div>');
  E('dlg').showModal();E('dlg').scrollTop=0;
 }
 // 29/10/2026 : croix pour effacer vite une adresse de site.
