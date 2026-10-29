@@ -861,3 +861,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Cause : au retour dans l'appli après un long moment, le jeton est expiré et son rafraîchissement échoue le temps que le réseau revienne ; `refreshAuth` vidait alors `currentUser` alors que la session restait enregistrée (l'onglet Compte la montrait toujours).
 - `index-main.js` : erreur réseau ≠ déconnexion (`isAuthRejection`), le compte reste affiché et une nouvelle tentative part 4 s après ; au retour après plus d'1 min en arrière-plan, le jeton est rafraîchi tout de suite ; avant chaque « Connectez-vous pour… » (publier, messages, favoris, alertes, numéro, signaler, mes annonces, import pro), `ensureSessionUser()` relit d'abord la session enregistrée.
 - Version : index-main.js?v=20261029-session.
+
+## 29/10/2026 — Robot v49 : DPE recopié partout où il est écrit (Claude)
+- Demande d'Anthony : si le DPE figure dans l'annonce d'origine (fiche ou description), il doit être dans la case DPE.
+- « DPE : vierge / non requis / non soumis / exempté » (texte) et « DPE non requis » sur Orpi → case DPE « Non soumis » (au lieu de vide).
+- Location reconnue dans le texte (« Loyer : … » + dépôt de garantie ou charges) même si le site range le bien en vente : immochevreux mettait ses locations en « vente-appartement ».
+- Lecture à blanc : nouvelle liste `no_dpe` (biens sans DPE + extraits du texte) pour contrôler.
+- Contrôle : Orpi Bartholdi 100 % DPE ; Century 21 Daumesnil, immochevreux, C21 Cap-d'Ail : les biens restants sans DPE n'en affichent aucun sur leur propre page (vérifié page par page : programmes neufs C21 Beausoleil/Eze/Cap-d'Ail, quelques biens immochevreux).
