@@ -873,3 +873,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Demande d'Anthony : ne pas avoir à se souvenir qu'il faut mettre orpi.com/… quand le site perso d'une agence est illisible (ex. calleris.fr, Wix).
 - `findNetworkPage` : si aucun lecteur ne marche, le robot cherche un lien Orpi ou Century 21 sur le site, sinon essaie orpi.com/<nom du domaine>(immo|-immo|immobilier|orpi…) et ne garde la page que si son titre est celui d'une agence portant ce nom. Le type de site affiché le dit (« Orpi (page agence orpi.com/callerisimmo, le site www.calleris.fr n'est pas lisible) »).
 - Domaine : un site Orpi / Century 21 passe tout seul en Immobilier, même si « Auto / Moto » était choisi ; l'aperçu admin bascule les deux menus Domaine.
+
+## 29/10/2026 — Offre Fondateurs : plus de plafond de 100 annonces (Claude)
+- Décision d'Anthony : on enlève la barrière des 100 annonces ; on garde les 500 places Fondateurs, mais on n'attendra pas d'en avoir 500 : une fois le site bien rempli, on ferme l'offre et le paiement s'applique aux nouveaux.
+- Base : `enforce_founder_50_listing_limit()` laisse passer toutes les annonces d'un Fondateur pendant ses 12 mois gratuits (migration founder_free_period_unlimited_listings ; trace dans supabase/2026-10-29-fondateurs-annonces-illimitees.sql). Après les 12 mois, le plafond de la formule choisie s'applique aux nouvelles annonces.
+- Textes : aide, CGV (avec la possibilité de clôturer l'offre avant 500, les inscrits gardent leurs 12 mois), accueil, inscription, pro-fondateur, mail de prospection admin, compteur de l'espace Pro (« x / illimité »).
+- Fermeture anticipée : interrupteur existant « Offre Fondateurs ouverte/fermée » de l'admin (RPC admin_set_founder_offer_closed) ; ferme les nouvelles inscriptions Fondateurs, sans toucher aux inscrits.

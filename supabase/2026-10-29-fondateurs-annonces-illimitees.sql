@@ -1,0 +1,4 @@
+-- 29/10/2026 (appliqué : migration founder_free_period_unlimited_listings)
+-- public.enforce_founder_50_listing_limit() : un abonnement Fondateur en période gratuite (status 'trialing')
+-- n'a plus de plafond d'annonces (avant : greatest(listing_limit,100)). Après les 12 mois : plafond de la formule.
+-- Voir la définition complète dans la base.
