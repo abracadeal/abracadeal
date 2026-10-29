@@ -142,7 +142,7 @@ function tidyDescription(v:unknown){
  }
  return out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim();
 }
-async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description);out.push(r);}return out;}
+async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description);out.push(r);}return out;}
 
 async function authUser(req:Request){const h=req.headers.get('Authorization')||'';if(!h)return null;const c=createClient(SUPABASE_URL,ANON_KEY,{global:{headers:{Authorization:h}},auth:{persistSession:false}});const{data}=await c.auth.getUser();return data?.user||null;}
 async function cronOk(req:Request){const tok=req.headers.get('x-cron-token')||'';if(!tok)return false;const hash=await sha256(tok);const{data}=await admin.from('pro_sync_secrets').select('value_hash').eq('name','cron_sync').maybeSingle();return!!data&&data.value_hash===hash;}
@@ -785,6 +785,12 @@ async function readFeed(feed:any){
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
       try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';rows=await readSmartSite(origin,text,sector,fetchSiteHtml,[url.toString()],sector==='immobilier'?ldImmo:ldVehicle);
         if(!rows.length)throw Error(`Aucune fiche ${sector==='immobilier'?'de bien':'véhicule'} lisible automatiquement sur ce site : il faudra une préparation manuelle (rien n'a été modifié).`);
+        // 29/10/2026 : pages de rubrique (« Vous êtes acquéreur », « Nos biens loués », accueil…) prises pour des fiches :
+        // quand la plupart des fiches ont la même forme d'adresse (ex. /details-…), on écarte celles qui ne l'ont pas.
+        {const key=(u:string)=>{try{const p=new URL(u).pathname.replace(/^\/+/,'');return p.split(/[\/\-_+.,]/)[0].toLowerCase();}catch{return'';}};
+         const cnt=new Map<string,number>();for(const r of rows){const k=key(String(r.url||''));if(k)cnt.set(k,(cnt.get(k)||0)+1);}
+         const top=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0];
+         if(top&&top[1]>=5&&top[1]>=rows.length*0.6){const kept=rows.filter((r:any)=>key(String(r.url||''))===top[0]);rows.length=0;rows.push(...kept);}}
         platform+=' · lecture automatique';}
       catch(e){const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}
     (rows as any).platform=platform;(rows as any).siteLocation=siteLocation(text);return rows;
