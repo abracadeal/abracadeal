@@ -848,3 +848,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Cause :** le lecteur Orpi lisait `/<agence>/acheter`, qui ne montre qu'une sélection (≈ 9 biens). La liste complète est `/<agence>/acheter/biens-en-vente` (pages de 30, ex. 14 pages pour Orpi Action Immo Cannes).
 - **Corrigé (`pro-stock-sync` v42 = commit 00e09688) :** lecture de `/acheter/biens-en-vente` + `/louer/biens-en-location` (jusqu'à 40 pages chacune), `/acheter` en complément ; 6 fiches lues à la fois ; au-delà de 450 biens, lecture marquée partielle (aucun retrait pendant cette synchro).
 - Rappel : la page « Immobilier à Strasbourg » d'orpi.com (105 biens) regroupe toutes les agences Orpi de la ville, pas une seule agence.
+
+## 29/10/2026 — Robot v46 : Orpi grosses agences (Claude)
+- v42 lisait jusqu'à 450 fiches, 6 en parallèle → erreur 546 « WORKER_RESOURCE_LIMIT ». Désormais 220 fiches par passage, 4 en parallèle.
+- Au-delà de 220 biens : fenêtre décalée chaque jour, les biens s'ajoutent synchro après synchro (pas d'archivage pendant une lecture partielle). L'activation auto n'est plus bloquée par cette limite volontaire.
+- Total du site renvoyé (`total_on_site`) et affiché dans l'aperçu admin.
+- DPE/GES qui ne sont pas une lettre (ex. une date) ignorés au lieu de bloquer l'annonce.
+- Types reconnus en plus : immeuble, propriété, ferme, longère, château, chalet, pavillon (maison) ; loft, duplex (appartement) ; stationnement (parking) ; entrepôt, hangar (bureaux-commerces).
+- Tests : immocannes 388 biens (220/220 lus OK), immodesvallois 432 biens (220/220 OK).

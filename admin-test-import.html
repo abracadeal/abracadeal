@@ -200,7 +200,7 @@ function render(data,sector){
  const immo=sector==='immobilier';
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
  const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:0),0);
- E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">lecture partielle (site très grand)</span>':'');
+ E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">'+(data.total_on_site?esc(String(data.total_on_site))+' biens sur le site, 220 lus par passage : le reste arrive aux synchros suivantes':'lecture partielle (site très grand)')+'</span>':'');
  E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{

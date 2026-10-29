@@ -953,7 +953,7 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
   if(!isAdmin)return json({error:'Accès administrateur requis'},403);
   try{const rows=await readFeed(feed);const platform=(rows as any).platform||null;
    await admin.from('pro_stock_feeds').update({site_platform:platform,last_error:null,updated_at:new Date().toISOString()}).eq('id',feed.id);
-   return json({ok:true,platform,partial:!!(rows as any).partial,sector:feed.sector,raw:rows,rows:await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id)});}
+   return json({ok:true,platform,partial:!!(rows as any).partial,total_on_site:(rows as any).total||null,sector:feed.sector,raw:rows,rows:await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id)});}
   catch(e){const msg=e instanceof Error?e.message:String(e);const platform=(e as any)?.platform||null;
    await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);
    return json({ok:false,error:msg,platform});}
