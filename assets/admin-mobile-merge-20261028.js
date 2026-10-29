@@ -59,7 +59,12 @@
   document.addEventListener('click', function (e) {
     if (!e.target.closest('#mobileAdminFounderBtn')) return;
     e.preventDefault();
-    if (foOpen === null || typeof sb === 'undefined' || !sb) return;
+    if (typeof sb === 'undefined' || !sb) return;
+    // 29/10/2026 : menu Admin ouvert par un autre chemin (retour admin, lien #admin) : l'état n'était pas encore chargé et le clic ne faisait rien.
+    if (foOpen === null) { sb.rpc('get_founder_offer_open').then(function (r) { if (!r.error) { foOpen = r.data !== false; foRender(); askFounder(); } else alert(r.error.message || 'État de l’offre indisponible'); }); return; }
+    askFounder();
+  });
+  function askFounder() {
     var msg = foOpen
       ? 'Fermer l’offre Fondateurs aux nouveaux inscrits ?\n\nLe bandeau, le compteur et l’encart Fondateurs disparaissent du site. Les nouveaux pros verront directement les formules payantes.\nLes Fondateurs déjà inscrits gardent leurs 12 mois gratuits.'
       : 'Rouvrir l’offre Fondateurs aux nouveaux inscrits ?';
@@ -69,7 +74,7 @@
       foOpen = !!(r.data && r.data.open); foRender();
       var desk = document.querySelector('.aal-founder-state'); if (desk) desk.textContent = foOpen ? 'Ouverte' : 'Fermée';
     });
-  });
+  }
   // Le menu Admin s'ouvre : on y range les blocs, puis on rafraîchit les chiffres.
   document.addEventListener('click', function (e) {
     if (e.target.closest('#mobileFavoritesAdminBtn')) {

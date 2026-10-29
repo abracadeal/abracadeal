@@ -948,3 +948,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ## 29/10/2026 — Prospection : moins de motos (Claude)
 - Décision d'Anthony : les garages moto ont très peu d'annonces sur leur site. Mix d'envoi : moto 10 %, immobilier 45 %, auto 45 % (avant 32/34/34).
 - `prospect_precheck_claim` : tirage pondéré par ce mix (power(random(), 1/poids)) au lieu de « petits pros d'abord » (qui faisait tester surtout des motos). Essai : 10 tirages → 6 immo, 3 auto, 1 moto.
+
+## 29/10/2026 — Interrupteur « Offre Fondateurs » qui ne réagissait pas (Claude)
+- Signalé par Anthony : clic sans effet. Cause : l'état ouvert/fermé n'était chargé qu'à l'ouverture du menu Admin par le bouton du bas (mobile) ou à la construction du menu (ordinateur, Supabase parfois pas encore prêt) ; état inconnu → le clic ne faisait rien.
+- admin-mobile-merge-20261028.js (v=3) et admin-account-layout-20261018.js (v=8) : si l'état n'est pas chargé, il est lu au clic puis la confirmation s'affiche. L'offre est restée ouverte (closed_at vide, vérifié).

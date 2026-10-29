@@ -108,7 +108,12 @@
     function foRender() { foState.textContent = foOpen === null ? '…' : (foOpen ? 'Ouverte' : 'Fermée'); fo.classList.toggle('is-closed', foOpen === false); }
     function foLoad() { if (typeof sb === 'undefined' || !sb) return; sb.rpc('get_founder_offer_open').then(function (r) { if (!r.error) { foOpen = r.data !== false; foRender(); } }); }
     fo.addEventListener('click', function () {
-      if (foOpen === null || typeof sb === 'undefined' || !sb) return;
+      if (typeof sb === 'undefined' || !sb) return;
+      // 29/10/2026 : état pas encore chargé (Supabase prêt après la construction du menu) : on le charge puis on demande.
+      if (foOpen === null) { sb.rpc('get_founder_offer_open').then(function (r) { if (!r.error) { foOpen = r.data !== false; foRender(); askFo(); } else alert(r.error.message || 'État de l’offre indisponible'); }); return; }
+      askFo();
+    });
+    function askFo() {
       var msg = foOpen
         ? 'Fermer l’offre Fondateurs aux nouveaux inscrits ?\n\nLe bandeau, le compteur et l’encart Fondateurs disparaissent du site. Les nouveaux pros verront directement les formules payantes.\nLes Fondateurs déjà inscrits gardent leurs 12 mois gratuits.'
         : 'Rouvrir l’offre Fondateurs aux nouveaux inscrits ?';
@@ -118,7 +123,7 @@
         foOpen = !!(r.data && r.data.open); foRender();
         alert(foOpen ? 'Offre Fondateurs rouverte.' : 'Offre Fondateurs fermée aux nouveaux inscrits.');
       });
-    });
+    }
     grid.appendChild(fo); foLoad();
     admin.appendChild(grid);
     dash.insertBefore(admin, dash.firstChild);
