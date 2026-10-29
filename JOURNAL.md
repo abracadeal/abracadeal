@@ -827,3 +827,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Prestataire Spider VO hors modèle « svosite » (site du garage fait ailleurs mais photos Spider VO, ex. ajmotorscar.com) : reste lu par le lecteur générique.
 - **29/10/2026 — robot v36 (commit 009a09ee) :** Spider VO : liens des fiches sans « www » acceptés (a2-autos.fr ne lisait aucun véhicule).
 - **29/10/2026 — robot v37 (commit 3719d3f2) :** Spider VO limite les lectures rapprochées (fiches renvoyées sans photos) : 2 fiches à la fois, pause entre les fiches, fiche incomplète (sans photo ou sans prix) relue jusqu'à 2 fois.
+
+## 29/10/2026 — Robot v38 : lecture « large » des descriptions immo — Claude
+- **Signalé par Anthony :** « GES manquant » alors que la description dit noir sur blanc « DPE : C – 67 kWhEP/m².an / GES : C – 12 kgéqCO2/m².an » (immochevreux.com).
+- **Cause :** la lecture du DPE dans le texte (v34) acceptait une lettre minuscule : dans « DPE établi le… » elle prenait le « e » de « le » → DPE « E » trouvé, GES non → erreur.
+- **Corrigé (`pro-stock-sync` v38 = commit e2711752) :** nouvelle fonction `immoFillFromText` appelée pour toute annonce immo : lettre DPE / GES en majuscule seulement, sinon calcul par les valeurs (kWh / kg CO2, barème 2021) ; consommation, date du DPE, coûts « entre X et Y euros », charges de copropriété (par an, ou par mois ×12), taxe foncière, nombre de lots, n° de mandat, honoraires, chambres, pièces, surface (superficie / habitable / Carrez), salles de bain/d'eau, chauffage (« Collectif au gaz »…), étage, année de construction. Ne remplace jamais une valeur donnée par le site. Testé sur le texte d'Anthony : tous les champs lus.
