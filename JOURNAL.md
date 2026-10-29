@@ -18,6 +18,18 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Conseiller et téléphone propres à chaque bien (v87)
+- Demande d’Anthony après Infinity : conserver nom/prénom et numéro du vendeur/conseiller associé à chaque annonce, les numéros pouvant différer entre les biens.
+- apimo-reader.ts : module-user de la fiche uniquement ; nom lié à /equipe/ ou /team/ et lien tel de la même carte. Ne pas prendre l’équipe de l’accueil, le pied de page, ni le numéro d’un autre conseiller. Premier conseiller désigné si plusieurs cartes ; pas de mélange de noms/numéros.
+- Circuit immobilier commun : alias contact_nom/contact_telephone, contact_name/contact_phone, agent/advisor/conseiller/negociateur ; validation simple du téléphone. Champs XML ajoutés pour contact/agent/advisor ; CSV/JSON passent par les mêmes alias. Ligne « Contact pour ce bien : Nom — numéro » ajoutée à la description et visible dans l’aperçu ; contactName conservé dans IMETA. Respect afficher_numero=false pour le numéro ajouté.
+- Lors d’un futur import autorisé, listing_contacts.phone utilise le numéro propre au bien ; sinon téléphone du compte comme auparavant. Le bouton d’appel existant utilise get_listing_phone. Email/messagerie restent ceux du compte professionnel. Aucune migration ni modification des permissions. Téléphone non ajouté aux métadonnées publiques IMETA.
+- Portée extraction web : modules utilisateur Apimo compatibles. Les autres lecteurs restent inchangés ; ne pas promettre une détection universelle des contacts sur tous les prestataires.
+- Tests locaux sur deux vraies fiches Infinity : Melodie ROSINI/location 86909548 et Thibault BEREDER/vente 87538337, numéros distincts correctement associés ; normalisation, description mise en forme, contact d’appel mocké, repli compte, masquage, téléphone invalide et absence de module testés ; esbuild OK.
+- pro-stock-sync v87, source f975a3228144172b0cb962328fdc071ac13440fe, base v86. Test à blanc complet Infinity : 174/172, 1678 photos, partial=false ; noms récupérés 173/174, téléphones 165/174, 30 numéros distincts. Pour les 9 sans téléphone récupéré, ne pas attribuer celui d’un autre bien ; repli compte lors d’un import. Compteurs contacts ajoutés au diagnostic dry.
+- Témoins séquentiels : IFG 30/28, Nestenn 57/57, Chevreux 27/27, Orpi 54/52, C21 39/39, L’Adresse 88/88, Laugier 23/23, Spider VO 20/18, WooCommerce 79/77 ; défauts photos/prix/GES connus, stocks évolutifs.
+- Résultat de la demande Infinity enrichi. Aucun prospect modifié, aucun mail, aucun import/publication déclenché.
+
+
 ### 29/10/2026 — ChatGPT — Infinity Group Immobilier / variante Apimo réparée (v86)
 - Demande 8e76e13e-cab9-43b0-b6bb-e0d91997584b, https://infinitygroup-immo.com/fr/. Avant : le lecteur ne trouvait que 4 locations, aucune complète, 3 faux doublons après normalisation des fiches vides.
 - Causes : route /fr/vente au singulier exclue ; entête property-info-template-12 inconnu ; le sélecteur du module description trouvait une ancre de menu data-anchor avant le vrai module 4.
