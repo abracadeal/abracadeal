@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Orpi gmirleau.immo réparé : adresses avec point (v82)
+- Demande 69a0e95b-9898-4379-944b-c95c625fdabb, https://www.orpi.com/gmirleau.immo/, « Illisible ». Avant : orpiAgencySlug refusait les points, donc lecteur générique au lieu du lecteur Orpi ; test avant correction HTTP 503.
+- Correction limitée au nom de l’agence : lettres/chiffres/tirets/points internes acceptés, 2–60 caractères, pas de point initial/final ni doubles points ; routes nationales toujours exclues. Sert aussi à orpi.rostrenen, portovecchio.extremesud, etc. Lecteur des fiches et autres réseaux inchangés.
+- pro-stock-sync v82 déployé, source 7d8cf4960cdb2621fd2327a86ef006fb35db2cf4.
+- Test production : 41 annonces / 40 sans erreur bloquante, total=41, partial=false, 453 photos, descriptions/villes 100 %, DPE 95 %. Seule erreur : programme-neuf Soufflenheim b1252873-9ff1-488d-855f-849ead434367, laissé en l’état selon la consigne d’Anthony sur le neuf.
+- Contrôle Pottier avant modification : 98/97 (déjà fonctionnel). Assertions locales sur agences avec points, agences classiques, routes nationales et adresses mal formées ; vraie fiche Beaufour-Druval inchangée. esbuild OK.
+- Témoins séquentiels après déploiement : Nestenn 56/56 ; Chevreux 29/29 ; Orpi Strasbourg 54/52 (2 sans photo) ; C21 39/39 ; L’Adresse 88/88 ; Laugier 23/23 ; Spider VO 22/20 (2 sans photo) ; WooCommerce 78/76 (2 prix absents).
+- Demande marquée done. Réparation uniquement : aucun statut de prospect modifié, aucun import/publication/envoi déclenché.
+
 ### 29/10/2026 — Claude — Tâche du soir annulée
 - Décision d'Anthony : ChatGPT se débrouille bien pour les réparations ; la tâche planifiée « Abracadeal : apprendre les sites au robot » (18 h 47) est supprimée. Les demandes « Réparer » restent dans `robot_learning_requests` et sont traitées par ChatGPT ou Claude sur demande d'Anthony. Textes de l'admin et guide mis à jour.
 
