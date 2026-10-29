@@ -163,6 +163,56 @@ function parseAaDetail(html:string,url:string,id:string){
  if(!o.photos)delete o.photos;
  return o;
 }
+// 29/10/2026 : sites de garages faits par Spider VO (modèle « svosite ») : liste /<n°>/vehicules/ (tout le stock sur une page),
+// fiches « …,svoc<n°>.html?vid=<id> » avec tableau de caractéristiques, galerie spidervo.s3 et options.
+const isSpiderVoSite=(t:string)=>/svositec|spidervo\.s3/i.test(t)&&/,svoc\d+\.html|\/\d+\/vehicules\//i.test(t);
+function svoCap(v:string){return v.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(m:string,a:string,b:string)=>a+b.toUpperCase());}
+function parseSpiderVoDetail(html:string,url:string,vid:string){
+ const o:any={reference:vid,url,etat:'occasion'};
+ if(/class="ribbon"[\s\S]{0,200}?>\s*(?:VENDU|R[ÉE]SERV[ÉE])\s*</i.test(html))o._svo_sold='1';
+ const ld=ldBlocks(html).find(x=>ldTypes(x).includes('product'))||{};
+ const h1=aaClean(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
+ const h2=aaClean(html.match(/<\/h1>\s*(?:<span>)?\s*<h2\b[^>]*>([\s\S]*?)<\/h2>/i)?.[1]||'');
+ o.titre=[h1,h2].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()||decodeEntities(String(ld.name||'')).replace(/\s+/g,' ').trim();
+ if(ld.brand?.name)o.marque=String(ld.brand.name);
+ const pr=html.match(/class="montant"[^>]*>\s*([\d\s .]+)\s*(?:&euro;|€)/i)?.[1]||String(ld.offers?.price||'');if(pr&&/\d/.test(pr))o.prix=pr.replace(/[^\d]/g,'');
+ const box=html.match(/caracteristiques_techniques"\s*>([\s\S]*?)<div id="svositec_contenu_onglet_2"/i)?.[1]||html.match(/class="contenu_onglet[^"]*caracteristiques_techniques"[^>]*>([\s\S]{0,8000})/i)?.[1]||'';
+ const kv:Record<string,string>={};
+ for(const m of box.matchAll(/<div>\s*<span>([\s\S]*?)<\/span>\s*<span>([\s\S]*?)<\/span>\s*<\/div>/gi)){const k=aaClean(m[1]).toLowerCase(),v=aaClean(m[2]);if(k&&v&&!/^\{.*\}$/.test(v))kv[k]=v;}
+ const g=(...ks:string[])=>{for(const k of ks){const v=kv[k.toLowerCase()];if(v)return v;}return'';};
+ const map:[string[],string][]=[[['Energie','Énergie','Carburant'],'carburant'],[['Boîte','Boite'],'boite'],[['Kilométrage'],'kilometrage'],[['Date de mise en circulation','Mise en circulation'],'mise_en_circulation'],[['Couleur extérieure'],'couleur'],[['Couleur intérieure'],'sellerie'],[['Nombre de places'],'places'],[['Nombre de portes'],'portes'],[['Puissance'],'puissance_din'],[['Puissance fiscale'],'puissance_fiscale'],[['Emission CO2','Émission CO2'],'co2'],[['Catégorie de véhicule','Carrosserie'],'carrosserie'],[['Garantie'],'garantie'],[["Crit'air","Crit’air"],'crit_air'],[['Marque'],'marque'],[['Modèle'],'modele'],[['Version'],'version']];
+ for(const[ks,key]of map){const v=g(...ks);if(v&&!o[key])o[key]=v;}
+ if(o.kilometrage)o.kilometrage=o.kilometrage.replace(/[^\d]/g,'');
+ if(o.puissance_din)o.puissance_din=o.puissance_din.replace(/[^\d]/g,'');
+ if(o.crit_air)o.crit_air=o.crit_air.replace(/^crit.air\s*/i,'');
+ const mec=String(o.mise_en_circulation||'').match(/((?:19|20)\d{2})/);if(mec)o.annee=mec[1];
+ if(!o.modele&&h1&&o.marque){const rest=h1.replace(new RegExp('^'+o.marque.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'\\s*','i'),'').trim();if(rest)o.modele=svoCap(rest);}
+ if(o.marque)o.marque=svoCap(o.marque);
+ if(h2&&!o.version)o.finition=h2;
+ const genre=g('Genre');const cat=norm(o.carrosserie||'');
+ o.type=/moto|scooter|quad|\bmtl\b/i.test(genre+' '+cat)?'moto':/\(vu\)|utilitaire|fourgon|camion|plateau|benne/i.test(genre+' '+(o.carrosserie||''))?'utilitaire':/camping/i.test(cat)?'camping-car':'voiture';
+ if(o.carrosserie)o.carrosserie=svoCap(o.carrosserie);
+ const desc=String(ld.description||'')||aaClean(html.match(/id="profile-description"[\s\S]*?class="text[^"]*"[^>]*>([\s\S]*?)<\/div>/i)?.[1]||'');if(desc)o.description=decodeEntities(desc).replace(/\r/g,'').replace(/\n{3,}/g,'\n\n').trim().slice(0,6000);
+ const opts:string[]=[];for(const m of html.matchAll(/<span class="clearfix">\s*([\s\S]*?)<\/span>/gi)){const x=aaClean(m[1]).replace(/\.\.\.$/,'').trim();if(x&&x.length<120&&!opts.includes(x))opts.push(x);}if(opts.length)o.equipements=opts.slice(0,150).join('|');
+ const photos:string[]=[];const gal=html.match(/id="imageGallery"[\s\S]*?<\/ul>/i)?.[0]||html;
+ for(const m of gal.matchAll(/data-src="(https?:\/\/[^"]*spidervo[^"]*\/image_\d+_\d+\.(?:jpe?g|png|webp))"/gi)){if(!photos.includes(m[1]))photos.push(m[1]);}
+ if(!photos.length&&ld.image)photos.push(...(Array.isArray(ld.image)?ld.image:[ld.image]).map(String));
+ if(photos.length)o.photos=photos.slice(0,45).join('|');
+ const addr=html.match(/class="informations"[\s\S]{0,1500}?(\d{5})\s*-\s*([^<]{2,60})</i);if(addr){o.code_postal=addr[1];o.ville=svoCap(decodeEntities(addr[2]).trim());}
+ return o;
+}
+async function readSpiderVo(start:URL,html:string){
+ const siteId=html.match(/href="(?:https?:\/\/[^"\/]+)?\/(\d+)\/vehicules\/?"/i)?.[1]||html.match(/,svoc(\d+)\.html/i)?.[1];
+ if(!siteId)throw Error('Site Spider VO reconnu, mais la page des véhicules est introuvable.');
+ const listUrl=new URL(`/${siteId}/vehicules/`,start);
+ const{text:list,url:lu}=await fetchSiteHtml(listUrl).catch(e=>{throw Error(`Liste des véhicules illisible : ${e instanceof Error?e.message:String(e)}`);});
+ const links=new Map<string,string>();
+ for(const m of list.matchAll(/href="([^"]*,svoc\d+\.html\?vid=(\d+))"/gi)){if(links.has(m[2]))continue;try{const u=new URL(decodeEntities(m[1]),lu);if(u.hostname===lu.hostname)links.set(m[2],u.toString());}catch{}}
+ if(!links.size)throw Error('Aucun véhicule trouvé sur le site Spider VO : synchronisation annulée par sécurité.');
+ const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[vid,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseSpiderVoDetail(text,url,vid);if(!o._svo_sold)rows.push(o.titre?o:{reference:vid,url});}catch{rows.push({reference:vid,url});}}}));
+ return rows;
+}
 async function readAaSite(origin:URL){
  const links=new Map<string,string>();
  let page=new URL('/annonces',origin);
@@ -665,6 +715,7 @@ async function readFeed(feed:any){
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
     else if(isStarterreSite(text)){rows=await readStarterreSite(origin,text);platform='Starterre';}
+    else if(isSpiderVoSite(text)){rows=await readSpiderVo(url,text);platform='Spider VO';}
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
