@@ -111,6 +111,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const metaDesc=(metaAll(headHtml,'description')[0]||'')+' \n'+(metaAll(headHtml,'og:description')[0]||'');
   if(!(prix>0))prix=firstAmount(head+' \n'+metaDesc,priceRe);
   if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
+  // 29/10/2026 (Nestenn) : prix affiché à côté du titre mais dans un <header> (retiré du texte) : on regarde autour du titre d'abord.
+  if(!(prix>0)){const hp=html.search(/<h1[\s>]/i);if(hp>=0)prix=firstAmount(clean(html.slice(Math.max(0,hp-4000),hp+4000)),priceRe);}
   if(!(prix>0))prix=firstAmount(text,new RegExp('(?:prix|loyer|tarif)[^0-9€]{0,40}'+priceRe.source,'iu'));
   if(!(prix>0))prix=firstAmount(text,priceRe);
   if(!(prix>=50&&prix<100000000))return null;
@@ -133,7 +135,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
     o.transaction=/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
     const kind=head+' '+base.pathname;
-    const isHouse=/maison|villa|\bmas\b|propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
+    const isHouse=/maison|villa|\bmas\b|(?<!co)propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
     o.type_bien=isHouse.test(head)?'maison':isFlat.test(head)?'appartement':isHouse.test(kind)?'maison':isFlat.test(kind)||/\b[TF]\d\b/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
     const sm=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);if(sm)o.surface=sm[1];
     const pm2=all.match(/(\d{1,2})\s*pi[eè]ces?/i)||all.match(/\b[TF](\d)\b/);if(pm2)o.pieces=pm2[1];else if(/studio/i.test(head))o.pieces='1';
