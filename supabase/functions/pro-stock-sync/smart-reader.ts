@@ -101,7 +101,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]*?<\/\1>/gi,' ')).slice(0,40000);
   const head=h1+' \n'+ogTitle+' \n'+docTitle;
   // Prix : données de prix déclarées, titre, données de la page, libellé « Prix », premier montant.
-  const priceRe=/(?<![\p{L}\d][\s\u00a0\u202f.]?)(\d{1,3}(?:[\s\u00a0\u202f.]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
+  // 29/10/2026 : un retour à la ligne sépare (« Appartement à vendre\n145 350 € » était refusé et le robot prenait les charges).
+  const priceRe=/(?<![\p{L}\d][ \t\u00a0\u202f.]?)(\d{1,3}(?:[\s\u00a0\u202f.]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
   let prix=NaN;
   // Montants mensuels (crédit, LOA, « dès … / mois ») ignorés, sauf pour une location immobilière.
   const rental=immo&&/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname);
