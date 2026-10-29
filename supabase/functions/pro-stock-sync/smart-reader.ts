@@ -130,9 +130,18 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   if(immo){
     const cityJ=jsonVal(region,['itemCity','addressLocality','city','ville','commune']);const cpJ=jsonVal(region,['itemZipcode','postalCode','zipcode','zipCode','codePostal','code_postal']);
     const zone=head+' \n'+text.slice(0,4000);
-    const cpM=zone.match(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{2,40}?)\s*\((\d{5})\)/)||zone.match(/\b(\d{5})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{2,30}(?:[ -][A-ZÀ-Ýa-zà-ÿ'-]{2,20}){0,3})/);
     const bad=/kilom|prix|surface|ann[ée]e|t[ée]l|r[ée]f/i;
-    let city='',cp='';if(cpM){if(/^\d/.test(cpM[1])){cp=cpM[1];city=cpM[2];}else{city=cpM[1];cp=cpM[2];}}
+    // 29/10/2026 (Nestenn) : « 27390 » caché suivi de « Partager ce bien » pris pour une ville : on écarte les mots d'interface
+    // et on préfère la ville qui figure aussi dans le titre.
+    const ui=/partager|imprimer|envoyer|contact|favori|alerte|annonce|\bce bien\b|voir|rappel|visite|appeler|message|estimer|connexion|compte|menu|fermer|retour|suivant|pr[ée]c[ée]dent/i;
+    const cands:{city:string,cp:string}[]=[];
+    for(const m of zone.matchAll(/\b([A-ZÀ-Ý][A-Za-zÀ-ÿ' -]{2,40}?)\s*\((\d{5})\)/g))cands.push({city:m[1].trim(),cp:m[2]});
+    for(const m of zone.matchAll(/\b(\d{5})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{2,30}(?:[ -][A-ZÀ-Ýa-zà-ÿ'-]{2,20}){0,3})/g))cands.push({city:m[2].split('\n')[0].trim(),cp:m[1]});
+    const okC=cands.filter(c=>!ui.test(c.city)&&!bad.test(c.city));
+    const nh=(x:string)=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]+/g,' ').trim();
+    const inHead=okC.find(c=>nh(c.city).length>=3&&nh(head).includes(nh(c.city)));
+    const pick=inHead||okC[0];
+    let city=pick?.city||'',cp=pick?.cp||'';
     if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
     if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
