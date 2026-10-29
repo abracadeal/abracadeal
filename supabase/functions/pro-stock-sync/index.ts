@@ -210,7 +210,11 @@ async function readSpiderVo(start:URL,html:string){
  for(const m of list.matchAll(/href="([^"]*,svoc\d+\.html\?vid=(\d+))"/gi)){if(links.has(m[2]))continue;try{const u=new URL(decodeEntities(m[1]),lu);if(u.hostname.replace(/^www\./,'')===lu.hostname.replace(/^www\./,''))links.set(m[2],u.toString());}catch{}}
  if(!links.size)throw Error('Aucun véhicule trouvé sur le site Spider VO : synchronisation annulée par sécurité.');
  const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
- await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[vid,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseSpiderVoDetail(text,url,vid);if(!o._svo_sold)rows.push(o.titre?o:{reference:vid,url});}catch{rows.push({reference:vid,url});}}}));
+ // Les sites Spider VO limitent les lectures rapprochées : 2 fiches à la fois, et une fiche incomplète est relue après une pause.
+ const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
+ await Promise.all(Array.from({length:2},async()=>{while(i<entries.length){const[vid,url]=entries[i++];let o:any=null;
+  for(let attempt=0;attempt<3;attempt++){try{if(attempt)await sleep(1200*attempt);const{text}=await fetchSiteHtml(new URL(url));o=parseSpiderVoDetail(text,url,vid);if(o.titre&&o.photos&&o.prix)break;}catch{o=o||null;}}
+  if(o?._svo_sold)continue;rows.push(o?.titre?o:{reference:vid,url});await sleep(250);}}));
  return rows;
 }
 async function readAaSite(origin:URL){
