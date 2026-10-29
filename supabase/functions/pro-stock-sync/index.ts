@@ -559,7 +559,7 @@ async function readAgenceAuto(url:URL,html:string){
 // Agences Orpi (pages agence sur orpi.com, ex. orpi.com/agimmo) : liste « acheter » et « louer » de l'agence,
 // puis chaque fiche, dont toutes les données sont dans l'attribut data-estate (JSON).
 const ORPI_ENERGY=['','A','B','C','D','E','F','G'];
-function orpiAgencySlug(u:URL){if(!/(^|\.)orpi\.com$/i.test(u.hostname))return null;const s=u.pathname.split('/').filter(Boolean)[0]||'';return /^[a-z0-9-]{2,60}$/i.test(s)&&!/^(?:annonce(?:-|$)|(?:acheter|louer|vendre|estimer|agences?|recherche)$)/i.test(s)?s:null;}
+function orpiAgencySlug(u:URL){if(!/(^|\.)orpi\.com$/i.test(u.hostname))return null;const s=u.pathname.split('/').filter(Boolean)[0]||'';return /^[a-z0-9][a-z0-9.-]{0,58}[a-z0-9]$/i.test(s)&&!s.includes('..')&&!/^(?:annonce(?:-|$)|(?:acheter|louer|vendre|estimer|agences?|recherche)$)/i.test(s)?s:null;}
 function parseOrpiEstate(html:string,url:string){
  const raw=html.match(/data-estate="([^"]*)"/)?.[1];if(!raw)return null;
  let e:any;try{e=JSON.parse(decodeEntities(raw));}catch{return null;}
