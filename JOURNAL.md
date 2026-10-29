@@ -18,6 +18,17 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — IFG Provence / modules Apimo appris (v81)
+- Demande 1a95f7d2-57d0-425b-8abb-5f22923b88e5 : https://ifgprovence.fr. Avant : lecteur automatique 116 annonces (y compris biens vendus), aucun DPE. Site Apimo à modules HTML.
+- Nouveau apimo-reader.ts : lecture uniquement des listes actives /fr/ventes (19 biens, 2 pages) et /fr/locations (11 biens, 1 page). Ne parcourt ni /fr/biens-vendus ni sitemap ni biens similaires. Détection limitée aux sites Apimo avec ces routes et modules, sinon lecteur précédent conservé.
+- Fiches : titre réel et description p.comment, prix/ville/type dans l’en-tête, surface du sommaire (142.44 m² conservés plutôt que 142 arrondis de la description), pièces/chambres, surfaces terrain séparées, galerie pleine taille data-image-url sans miniatures doublonnées, prestations et mentions légales, charges locatives/dépôt, état/chauffage/étage/exposition.
+- Diagnostics en SVG base64 : décodage XML et lecture de la couleur de la ligne effectivement agrandie/encadrée dans la palette Apimo connue (lettres tracées, pas de texte). Énergie/climat distingués par le titre du SVG ; pas de déduction des classes depuis des seuils kWh. Valeurs numériques de consommation extraites des textes XML. Modèle inconnu = lettre laissée vide.
+- Tests locaux : maison 87336657, 142.44 m² / 5 chambres / terrain 336 / C-A / 13 photos ; location 87407804, 61.32 m² / charges 90 / dépôt 1160 / étage 1 / B-A ; terrain 86823696, terrain 808 m² et aucune surface habitable ni DPE inventé. Pagination mock sur pages réelles : 30 fiches, aucune page vendus. Assertions SVG, séparation surfaces et normalisation ; tests locaux Kermarrec/Orpi/CCI conservés et esbuild OK.
+- pro-stock-sync v81 déployé, source c86ed93412f86a6177bd56c94e1165f1cbe4d001. Test production à blanc : 30 lues/28 validées, partial=false, 328 photos, aucun doublon, descriptions/villes/prix 100 %, surfaces/pièces 93 %, DPE 67 % (contre 0 % avant).
+- Les 2 erreurs « GES manquant » sont confirmées à la source : 87226256 (DPE E) et 85579310 (DPE A) : un seul SVG énergie, champs émissions et unité vides, aucune étiquette climat. Ne pas inventer le GES. Les terrains/commerces sans diagnostic restent sans valeur.
+- Témoins séquentiels après déploiement : Kermarrec 26/26, Nestenn 56/56, Chevreux 31/31, Orpi 54/52 (2 photos absentes), C21 39/39, L’Adresse 88/88, Laugier 23/23, Spider VO 22/20 (2 photos absentes), WooCommerce 78/76 (2 prix absents). Stocks évolutifs.
+- Demande marquée done. Apprentissage uniquement : aucun statut de prospection modifié, aucun import/publication ni envoi déclenché.
+
 ### 29/10/2026 — Claude — Réparer ≠ prospection
 - Précision d'Anthony : « Valider c'est pour valider, Tester pour tester. » Donc : **Réparer** (tâche du soir de Claude ou ChatGPT) = apprendre au robot à lire, sans jamais toucher à la prospection ; c'est Anthony qui appuie ensuite sur **Tester** puis **Valider** (prospect remis en test → mail s'il est lisible).
 - Tâche planifiée « Abracadeal : apprendre les sites au robot » mise à jour : ne modifie plus les prospects, ne prend jamais une demande déjà « in_progress » (ChatGPT), git pull --rebase avant chaque push. Guide `docs/APPRENDRE-AU-ROBOT.md` mis à jour.
