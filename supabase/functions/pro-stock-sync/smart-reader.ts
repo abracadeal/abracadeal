@@ -26,7 +26,7 @@ export function smartLinks(html:string,page:URL,host:string){
     u.hash='';const full=u.toString();
     if(SKIP_PATH.test(u.pathname))continue;
     if(isDetailish(u)&&!(/[?&]pcsd=/.test(u.search)&&/\.php$/i.test(u.pathname))){const p=pathPattern(u)+(u.search?'?'+[...u.searchParams.keys()].sort().join('&'):'');if(!groups.has(p))groups.set(p,new Set());groups.get(p)!.add(full);}
-    else if(LIST_PATH.test(u.pathname+u.search)||/[?&](page|p|pg|start|offset)=\d+|\/page[-/]?\d+/i.test(u.pathname+u.search))lists.add(full);
+    else if(LIST_PATH.test(u.pathname+u.search)||/\/(?:maisons|appartements|terrains)[^/]*\.php$/i.test(u.pathname)||/[?&](page|p|pg|start|offset)=\d+|\/page[-/]?\d+/i.test(u.pathname+u.search))lists.add(full);
   }
   const details:string[]=[];
   for(const [,set] of [...groups.entries()].sort((a,b)=>b[1].size-a[1].size)){if(set.size>=2)details.push(...set);}
