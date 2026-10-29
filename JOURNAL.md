@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Orpi : description et mauvaise détection des agences (v79)
+- Signalement Anthony : description générique « Qu’est-ce qu’un bien Avant-Première ? » et champs erronés sur e91e0f02-ac11-4c0e-a982-ea707f14aeb6, agencepottier. Anthony précise que plusieurs annonces sont concernées.
+- Cause commune : orpiAgencySlug excluait tous les chemins commençant par « agence », donc agencepottier / agence-contesso passaient par la lecture automatique. Filtre corrigé pour exclure les seules routes nationales ; ajout lecture dédiée d’une fiche Orpi /annonce-… fournie directement. Données data-estate prioritaires : longAd, ville/CP, référence, prix, photos ; ajout lotSurface dans surface_terrain.
+- Version pro-stock-sync v79, source 03bea56c882070c3b8e51d48c9402255dbf298db.
+- Fiche réelle : ville Beaufour-Druval, CP 14340, prix 162000, 3 pièces, 2 chambres, terrain 15190, 3 photos, vraie description « Maison À Vendre. Dans notre jolie campagne… ». Surface habitable absente sur le site : reste vide (190 précédent était faux), Clichy supprimé. Test direct en production 1/1 sans erreur, plateforme Orpi (fiche annonce).
+- Test agence complet en production : agencepottier 98 lues, 97 validées, plateforme Orpi (page agence), partial=false ; 1 type de bien non reconnu reste à traiter séparément. La correction concerne toutes les agences Orpi dont le slug commence par agence et les fiches directes, pas uniquement ce bien.
+- Assertions Orpi (détection routes, description, ville/CP, séparation surface/terrain), tests CCI 175/190 précédents et syntaxe/esbuild OK. Aucun import/publication lancé.
+
 ### 29/10/2026 — ChatGPT — Surface « 190 m² de surface habitable » (v78)
 - Signalement Anthony : autre annonce encore sans surface. Identifiée : CCI Fontenay-sur-Mer, référence 1137 (262 975 €), texte « ses 190m² de surface habitable ».
 - Règle générale immoFillFromText étendue à « m² de surface habitable » / « m2 de superficie habitable », sans prendre terrain, dépendances ou surfaces annexes. Modification ciblée dans index.ts, données explicites déjà présentes conservées.
