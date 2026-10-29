@@ -142,8 +142,30 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const inHead=okC.find(c=>nh(c.city).length>=3&&nh(head).includes(nh(c.city)));
     const pick=inHead||okC[0];
     let city=pick?.city||'',cp=pick?.cp||'';
-    if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
-    if(cp&&o.ville&&(!cityJ||/^\d+$/.test(cityJ)))o.code_postal=cp;else if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
+    // 29/10/2026 (Anthony) : la ville du BIEN, pas celle de l'agence. Ordre : adresse de la fiche (« /le-cannet-06110/ »),
+    // ville trouvée dans le titre, fin du titre (« …, Le Cannet »), données de la page, puis texte.
+    const cap=(x:string)=>x.split(/([ -])/).map(w=>/^(de|du|des|la|le|les|sur|sous|en|aux?|lès|lez)$/i.test(w)&&x.indexOf(w)>0?w.toLowerCase():w.charAt(0).toUpperCase()+w.slice(1).toLowerCase()).join('');
+    const nzc=(x:string)=>x.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z]+/g,'');
+    // segment « ville-cp » de l'adresse ; s'il contient d'autres mots (« vente-maison-cannes-06400 »), on garde la fin qui est une ville connue de la page.
+    const slug=(()=>{const m=decodeURIComponent(base.pathname).match(/\/([a-z][a-z'-]{1,80})-(\d{5})(?=\/|$|-[0-9a-f]{6,}|-ref)/i);if(!m)return null;
+      const words=m[1].toLowerCase().split('-');const BADW=/^(annonce|annonces|vente|achat|location|louer|vendre|appartement|maison|villa|terrain|studio|duplex|loft|t\d|f\d|\d+|pieces?|chambres?|bien|immobilier|parking|local|bureau|commerce|programme|neuf)$/;
+      if(!words.some(w=>BADW.test(w)))return[m[0],m[1],m[2]];
+      const ref=nzc(titre+' '+okC.map(c=>c.city).join(' ')+' '+String(cityJ||''));
+      for(let k=Math.min(5,words.length-1);k>=1;k--){const suf=words.slice(-k);if(suf.some(w=>BADW.test(w)))continue;const j=suf.join('');if(j.length>=3&&ref.includes(j))return[m[0],suf.join('-'),m[2]];}
+      return null;})();
+    const tail=(titre.split(/\s*[,–—|]\s*/).pop()||'').trim();
+    const tailOk=/^[A-ZÀ-Ýa-zà-ÿ][A-Za-zÀ-ÿ' -]{1,40}$/.test(tail)&&!/\d|pi[eè]ce|chambre|vendre|louer|vente|location|appartement|maison|terrain|m²|t\d/i.test(tail)&&tail!==titre;
+    let vCity='',vCp='';
+    if(slug&&!/^(annonce|vente|location|achat|bien|detail|fiche|ref)$/i.test(slug[1])){vCity=cap(slug[1].replace(/-/g,' ')).replace(/ /g,'-');vCp=slug[2];
+      // libellé exact s'il figure dans le titre (« Le Cannet », « Juan-les-Pins »)
+      if(tailOk&&nzc(tail)===nzc(vCity))vCity=tail;else{const inT=okC.find(c=>nzc(c.city)===nzc(vCity));if(inT)vCity=inT.city;}}
+    else if(inHead){vCity=inHead.city;vCp=inHead.cp;}
+    else if(tailOk&&!(cityJ&&nzc(cityJ)===nzc(tail))){vCity=tail;const m=okC.find(c=>nzc(c.city)===nzc(tail));vCp=m?.cp||'';}
+    if(vCity){o.ville=vCity;if(vCp)o.code_postal=vCp;}
+    else{
+      if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
+      if(cp&&o.ville&&(!cityJ||/^\d+$/.test(cityJ)))o.code_postal=cp;else if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
+    }
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
     // Un prix de vente (≥ 20 000 €) l'emporte sur un « à louer » lu dans le texte (ex. immeuble de rapport avec local à louer).
     o.transaction=(rental&&!(prix>=20000))||/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
