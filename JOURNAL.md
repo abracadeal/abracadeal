@@ -886,3 +886,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Site (index-main.js?v=20261029-stats-vendeur) : vue comptée à l'ouverture d'une annonce (identifiant visiteur anonyme `abraca_vid` en localStorage), clic sur le numéro compté ; sous le numéro : « Dites au vendeur que vous l'appelez de la part d'Abracadeal ».
 - Espace Pro : bloc « Ce que vos annonces vous ont apporté (30 derniers jours) » : vues, numéros affichés, clics Appeler, contacts par message, top 3 des annonces.
 - Reste à faire si validé : bilan mensuel par e-mail au pro ; tableau admin (stock par région, trafic, contacts) pour décider la fermeture de l'offre Fondateurs.
+
+## 29/10/2026 — Robot v57 : Nestenn (nombre de biens et prix) (Claude)
+- Signalé par Anthony : Nestenn Orléans, 53 biens sur le site, 40 lus.
+- Pages « prix au m² » (/prix-m2-orleans/prix-rues/…) lues comme des biens : 2e filtre sur la forme de l'adresse (profondeur + fin numérique « -ref-39790233 ») quand la majorité des fiches ont la même.
+- Prix faux sur tout le lecteur automatique : un montant précédé d'un retour à la ligne (« Appartement à vendre\n145 350 € ») était rejeté, le robot prenait le premier montant suivant (charges 350 €). Corrigé dans `priceRe` (smart-reader.ts) + prix cherché d'abord autour du titre + chiffres séparés par des <span> d'espace recollés.
+- Type de bien : le type déclaré (JSON-LD Apartment/House) passe avant les mots du titre ; « copropriété » n'est plus une maison ; un bien avec pièces/chambres/m² n'est plus un parking parce que le titre dit « garage ».
+- Résultat : Nestenn Orléans 56 lus (53 ventes + 3 locations), 56 complets, prix justes (ex. 192 600 €, 145 350 €). Immochevreux 30/30.
+- Outils : lecture à blanc renvoie `crawl` (pages, fiches, ratés) et `urls` (adresse, titre, prix, type) ; action `debug_detail` (cron) pour une fiche.
+- Reste : table de debug private.debug_html à supprimer (la suppression demande une confirmation).
