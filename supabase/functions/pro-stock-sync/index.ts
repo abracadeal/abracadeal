@@ -143,8 +143,8 @@ function listingAdvisor(raw:any){
 function attachListingAdvisor(r:any,raw:any){
  const c=listingAdvisor(raw);if(!c.name&&!c.phone)return;
  r.contactName=c.name;r.contactPhone=c.phone;
- const lines=[];if(c.name)lines.push(c.name);if(c.phone&&r.showPhone)lines.push(c.phone);
- if(lines.length){const label='Contact pour ce bien : '+lines.join(' — ');if(!String(r.description||'').includes(label))r.description=[r.description,label].filter(Boolean).join('\n\n');}
+ // 29/10/2026 (Anthony) : ni le nom ni le numéro dans la description. Le nom s'affiche à côté des boutons de contact (IMETA contactName),
+ // le numéro reste derrière « Voir le numéro » (membres connectés, listing_contacts.phone).
 }
 function normalizeImmo(raw:any){const o=normalizeRaw(raw);immoFillFromText(o);const ref=first(o,['reference','ref','reference_mandat','mandat','mandate','property_id','bien_id','id','identifiant']);const transaction=(()=>{const tx=decodeEntities(String([first(o,['titre','title']),first(o,['description','desc','details','texte_annonce'])].filter(Boolean).join(' ')));
  // Un prix de vente (≥ 20 000 €) : bien vendu loué (« loyer : 450 € ») — reste une vente.
@@ -173,8 +173,19 @@ function dedupeDescription(t:string,title:string){
  for(const l of ls){const n=nz(l);if(BADGE.test(l.trim()))continue;if(n.length>=20&&seen.has(n))continue;if(n.length>=20)seen.add(n);keep.push(l);}
  return keep.join('\n').replace(/\n{3,}/g,'\n\n').trim();
 }
+// 29/10/2026 (Anthony) : un numéro de téléphone ne doit jamais apparaître en clair dans une annonce importée
+// (il est réservé aux membres connectés via « Voir le numéro »). Ligne courte de contact : supprimée ; sinon seul le numéro est retiré.
+const PHONE_RE=/(?:(?:\+|00)\s?33\s?(?:\(0\)\s?)?|\b0)[1-9](?:[\s.\-\u00a0]?\d{2}){4}\b/g;
+function stripContactLines(t:string){
+ return t.split('\n').filter(l=>!/^\s*contact pour ce bien\s*:/i.test(l)).map(l=>{
+  if(!PHONE_RE.test(l)){PHONE_RE.lastIndex=0;return l;}PHONE_RE.lastIndex=0;
+  const rest=l.replace(PHONE_RE,'').replace(/\b(?:t[ée]l(?:[ée]phone)?|portable|mobile|fixe|contact(?:ez)?(?:[- ]nous)?|appelez(?:[- ]nous)?|au|ou|joignable|n°)\b\.?\s*:?/gi,'').replace(/[\s:;,.\-–—\/|()]+/g,' ').trim();
+  if(rest.length<25||(l.length<=180&&/contact|appel|joindre|t[ée]l|renseignement|visite|conseill|n[ée]gociat|agent|mandataire/i.test(l)))return null;
+  return l.replace(PHONE_RE,'').replace(/\s*(?:t[ée]l(?:[ée]phone)?|portable|mobile)\s*\.?\s*:?\s*(?=[\s.,;)]|$)/gi,' ').replace(/\(\s*\)/g,'').replace(/[ \t]{2,}/g,' ').trim();
+ }).filter((l):l is string=>l!==null).join('\n');
+}
 function tidyDescription(v:unknown,title=''){
- let t=String(v??'').replace(/\r\n?/g,'\n').replace(/[  ]/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
+ let t=stripContactLines(String(v??'')).replace(/\r\n?/g,'\n').replace(/[  ]/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
  if(!t)return t;
 
  // Listes écrites à la suite : « … -Climatisation -Sièges chauffants », « • GPS • Radar », puces emoji.

@@ -27,17 +27,12 @@
     if(!bw||!bh)return;
     const ir=img.naturalWidth/img.naturalHeight,br=bw/bh;
     const crop=1-Math.min(ir,br)/Math.max(ir,br);
-    if(crop<=MAX_CROP){
-      img.style.setProperty('object-fit','cover','important');
-      img.style.setProperty('object-position','right bottom','important');
-      box.classList.remove('thumb-fit-contain');
-      box.style.removeProperty('--thumb-bg');
-    }else{
-      img.style.setProperty('object-fit','contain','important');
-      img.style.setProperty('object-position','center','important');
-      box.style.setProperty('--thumb-bg','url("'+String(img.currentSrc||img.src).replace(/"/g,'%22')+'")');
-      box.classList.add('thumb-fit-contain');
-    }
+    // 29/10/2026 (Anthony) : la photo remplit toujours toute la vignette (plus de bandes ni de fond flou).
+    // Recadrage léger : ancrée en bas à droite (filigrane incrusté) ; recadrage fort (portrait…) : centrée.
+    img.style.setProperty('object-fit','cover','important');
+    img.style.setProperty('object-position',crop<=MAX_CROP?'right bottom':'center','important');
+    box.classList.remove('thumb-fit-contain');
+    box.style.removeProperty('--thumb-bg');
   }
 
   function sweep(root){

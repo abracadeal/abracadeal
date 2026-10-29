@@ -4522,6 +4522,7 @@ window.openAd=id=>{
 
               <div class="seller-contact">
                 <aside class="buyer-safety-note" aria-label="Conseil de sécurité">Abracadeal ne gère aucun paiement. Méfiez-vous des mandats, coupons PCS ou liens de paiement : privilégiez la remise en main propre.</aside>
+                ${(()=>{const n=a.category==='immobilier'?String(realEstateMetaOf(a).contactName||'').trim():'';return n?`<div class="listing-advisor">Votre contact pour ce bien : <strong>${esc(n)}</strong></div>`:'';})()}
                 ${!isOwner?`<button class="btn primary" type="button" onclick="startMessageForListing('${a.id}')">Envoyer un message</button>`:''}
                 <div class="phone-share-row">
                   ${a.show_phone
