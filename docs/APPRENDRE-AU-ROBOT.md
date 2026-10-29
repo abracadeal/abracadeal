@@ -62,6 +62,8 @@ import "https://raw.githubusercontent.com/abracadeal/abracadeal/<SHA DU COMMIT>/
 
 ## 5. Répartition Claude / ChatGPT
 
+- Les demandes d'Anthony arrivent dans `public.robot_learning_requests` (bouton « Apprendre à lire ce site » de l'admin). Claude les traite chaque soir à 18 h 47 (tâche planifiée). Pour en prendre une : `update public.robot_learning_requests set status='in_progress', handled_by='ChatGPT' where id=...` ; à la fin `status='done'` (ou `'failed'`), `result` = une phrase simple pour Anthony, `done_at=now()` ; si `prospect_id` est renseigné, remettre ce prospect dans la file de test (`site_check_status=null`).
+
 - Avant de commencer : lire le haut de `JOURNAL.md` et `git pull` ; ne pas travailler en même temps sur le même fichier du robot.
 - Prendre un site de la liste « Sites à apprendre » (ou du mail du soir), noter dans le journal « en cours : <site> » si le travail est long.
 - Une entrée de journal par site appris : site, cause, règle ajoutée, résultat du test (lus / complets) et version déployée (vNN + commit).

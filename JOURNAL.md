@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Bouton « Apprendre à lire ce site » + tâche du soir
+- Demande d'Anthony : un bouton qui envoie le site à apprendre à Claude ou à ChatGPT.
+- Base (migration robot_learning_requests) : table `robot_learning_requests` (url, sector, company, prospect_id, note, status pending/in_progress/done/failed/cancelled, result, handled_by) ; RPC admin `admin_request_robot_learning`, `admin_list_robot_learning`.
+- admin-test-import.html : bouton « Apprendre à lire ce site » sous le test d'adresse et « Apprendre à lire » sur chaque carte de « Sites à apprendre » (remarque facultative) ; nouvelle rubrique « Apprentissage du robot » (statut et résultat de chaque demande).
+- Tâche planifiée Claude « Abracadeal : apprendre les sites au robot » (trig_01GeC164yCy8SPNYFbCJBMX7), chaque jour à 18 h 47 (Paris), approbation automatique, notification sur téléphone : prend jusqu'à 5 demandes en attente, suit docs/APPRENDRE-AU-ROBOT.md, déploie, reteste les sites témoins (annule si régression), met la demande à done/failed avec une phrase de résultat, remet le prospect dans la file de test, écrit le journal. Ne fait rien si la file est vide ou si ChatGPT travaille sur le robot.
+- **ChatGPT** : pour prendre une demande, la passer en `in_progress` avec `handled_by='ChatGPT'`, puis même méthode et même fin (done/failed + result).
+
 ### 29/10/2026 — Claude — Guide « Apprendre un nouveau site au robot » pour ChatGPT
 - Demande d'Anthony : que ChatGPT puisse aussi apprendre de nouveaux sites au robot, en alternance avec Claude.
 - Nouveau fichier `docs/APPRENDRE-AU-ROBOT.md` : fonctionnement du robot, test à blanc (SQL), diagnostic d'une fiche, mise en ligne par commit, sites témoins à retester, prospects à remettre dans la file, répartition.
