@@ -4477,6 +4477,7 @@ window.openAd=id=>{
           <section class="detail-section">
             <h3>Description</h3>
             <div class="detail-description">${esc(cleanDescription(a))}</div>
+            ${/^feed:/.test(String(a.source||''))?`<p class="note" style="margin:10px 0 0;font-size:12.5px">Annonce reprise automatiquement du site du professionnel. Malgré notre vigilance, des erreurs ou des oublis peuvent s’y glisser : seules les informations confirmées par le professionnel font foi. Vérifiez-les avec lui avant tout engagement.</p>`:''}
           </section>
 
           <section class="detail-section">

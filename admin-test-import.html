@@ -102,6 +102,9 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
  </form>
  <h2 class="sec">Demandes</h2>
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
+ <h2 class="sec">Sites à apprendre</h2>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils ne reçoivent pas le mail. Envoie ceux qui t'intéressent à Claude ; une fois le robot corrigé, « Revérifier » le remet dans la file.</p>
+ <div class="reqs" id="unread"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Tester une adresse</h2>
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
  <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
@@ -128,8 +131,20 @@ async function init(){
  if(!user){E('gate').innerHTML='Connectez-vous d\'abord sur <a href="index.html">Abracadeal</a> avec le compte administrateur.';return}
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
- E('gate').hidden=true;E('app').hidden=false;loadReqs();
+ E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();
 }
+// 29/10/2026 : prospects au site illisible (test avant le 1er mail).
+async function loadUnread(){
+ const{data,error}=await sb.rpc('admin_unreadable_sites',{p_limit:60});
+ if(error){E('unread').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
+ const c=data?.counts||{};const list=data?.prospects||[];
+ const head='<div class="empty" style="text-align:left">Sites lus : <b>'+(c.ok||0)+'</b> · illisibles : <b>'+(c.unreadable||0)+'</b> · encore à tester : <b>'+(c.to_check||0)+'</b></div>';
+ E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Revérifier</button></div></div>').join('');
+}
+document.addEventListener('click',async e=>{
+ const t=e.target.closest('#unread [data-u]');if(t){E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
+ const r=e.target.closest('#unread [data-r]');if(r){r.disabled=true;const{error}=await sb.rpc('admin_recheck_prospect_site',{p_id:r.dataset.r});if(error)alert(error.message);loadUnread();}
+});
 async function loadReqs(){
  const{data,error}=await sb.rpc('admin_list_site_imports');
  if(error){E('reqs').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
