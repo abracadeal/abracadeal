@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Sites à apprendre : boutons renommés
+- Demande d'Anthony : « vérifier / revérifier » pas logique. Boutons dans l'ordre : **Tester** (aperçu), **Réparer** (= demande d'apprentissage, traitée par la tâche du soir), **Valider** (= remettre dans la file de test → mail si lisible ; ancien « Revérifier »), **Supprimer**, **Vend sur Leboncoin**. « Apprendre à lire ce site » → « Réparer ce site » ; rubrique « Apprentissage du robot » → « Sites en réparation » (statut « Réparé »). Explication des boutons affichée au-dessus de la liste.
+
 ### 29/10/2026 — ChatGPT — Kermarrec Habitation Pornichet appris (v80)
 - Demande e3f26a6e-8f6e-4c6b-8d97-d0d6b8cba8d7, https://www.kermarrec-habitation.fr/nos-agences/agence-de-pornichet/ : site illisible, aucune fiche lue avant correction.
 - Cause : le lecteur automatique restait sous le chemin de la page agence (/nos-agences/…), alors que les fiches sont /achat/<type>/<ville-cp>/bien-<id>/. Développement d’un lecteur Kermarrec réutilisable par les autres agences du réseau (kermarrec-reader.ts), branché uniquement sur ce domaine ; autres lecteurs inchangés.

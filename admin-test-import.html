@@ -103,16 +103,16 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
  </form>
  <h2 class="sec">Demandes</h2>
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
- <h2 class="sec">Apprentissage du robot</h2>
- <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Apprendre à lire ». Claude les traite chaque soir (tâche planifiée) ; ChatGPT peut aussi les prendre (guide docs/APPRENDRE-AU-ROBOT.md).</p>
+ <h2 class="sec">Sites en réparation</h2>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Claude les traite chaque soir à 18 h 47 ; ChatGPT peut aussi les prendre (guide docs/APPRENDRE-AU-ROBOT.md).</p>
  <div class="reqs" id="learnq"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Sites à apprendre</h2>
- <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils ne reçoivent pas le mail. « Vend sur Leboncoin » : il recevra le mail « publiez vous-même vos annonces ». Envoie ceux qui t'intéressent à Claude ; une fois le robot corrigé, « Revérifier » le remet dans la file.</p>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils ne reçoivent pas le mail. <b>Tester</b> : voir ce que lit le robot. <b>Réparer</b> : Claude apprend au robot à lire ce site (le soir). <b>Valider</b> : le site se lit bien maintenant → il est retesté et le pro reçoit son mail. <b>Supprimer</b> : ne m'intéresse pas, jamais de mail. <b>Vend sur Leboncoin</b> : mail « publiez vous-même vos annonces ».</p>
  <div class="reqs" id="unread"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Tester une adresse</h2>
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
  <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
- <div style="margin:10px 0 0"><button class="sbtn" type="button" id="learnCur">Apprendre à lire ce site</button></div>
+ <div style="margin:10px 0 0"><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
  <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
  <p id="status" class="muted"></p>
  <div class="stats" id="stats" hidden></div>
@@ -144,7 +144,7 @@ async function init(){
 async function loadLearn(){
  const{data,error}=await sb.rpc('admin_list_robot_learning',{p_limit:30});
  if(error){E('learnq').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
- const L={pending:['pending','En attente'],in_progress:['pending','En cours'],done:['on','Appris'],failed:['rej','Pas possible'],cancelled:['off','Annulé']};
+ const L={pending:['pending','En attente'],in_progress:['pending','En cours'],done:['on','Réparé'],failed:['rej','Pas possible'],cancelled:['off','Annulé']};
  E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<div class="req"><div class="req-top"><h3>'+esc(r.company||r.url)+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div></div>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
 }
 async function askLearn(url,sector,company,prospect){
@@ -152,21 +152,21 @@ async function askLearn(url,sector,company,prospect){
  if(note===null)return;
  const{data,error}=await sb.rpc('admin_request_robot_learning',{p_url:url,p_sector:sector,p_company:company||null,p_prospect_id:prospect||null,p_note:note||null});
  if(error){alert(error.message);return}
- alert(data?.already?'Ce site est déjà dans la file d\'apprentissage.':'Envoyé : le robot apprendra à lire ce site (traitement chaque soir).');loadLearn();
+ alert(data?.already?'Ce site est déjà en réparation.':'Envoyé en réparation : Claude s\'en occupe ce soir à 18 h 47.');loadLearn();
 }
 async function loadUnread(){
  const{data,error}=await sb.rpc('admin_unreadable_sites',{p_limit:60});
  if(error){E('unread').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
  const c=data?.counts||{};const list=data?.prospects||[];
  const head='<div class="empty" style="text-align:left">Sites lus : <b>'+(c.ok||0)+'</b> · vendent sur Leboncoin : <b>'+(c.manual||0)+'</b> · illisibles : <b>'+(c.unreadable||0)+'</b> · encore à tester : <b>'+(c.to_check||0)+'</b></div>';
- E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Revérifier</button><button class="sbtn ok" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Apprendre à lire</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button></div></div>').join('');
+ E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Réparer</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Valider</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button></div></div>').join('');
 }
 document.addEventListener('click',async e=>{
  const t=e.target.closest('#unread [data-u]');if(t){E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
  const lb=e.target.closest('#unread [data-l]');if(lb){askLearn(lb.dataset.l,lb.dataset.ls,lb.dataset.lc,lb.dataset.lp);return}
  const mm=e.target.closest('#unread [data-m]');if(mm){mm.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_manual',{p_id:mm.dataset.m});if(error){alert(error.message);mm.disabled=false;return}mm.closest('.req')?.remove();return}
  const d=e.target.closest('#unread [data-d]');if(d){if(!confirm('Retirer « '+d.dataset.n+' » des prospects ? Il ne recevra jamais de mail.'))return;d.disabled=true;const{error}=await sb.rpc('admin_drop_prospect',{p_id:d.dataset.d});if(error){alert(error.message);d.disabled=false;return}d.closest('.req')?.remove();return}
- const r=e.target.closest('#unread [data-r]');if(r){r.disabled=true;const{error}=await sb.rpc('admin_recheck_prospect_site',{p_id:r.dataset.r});if(error)alert(error.message);loadUnread();}
+ const r=e.target.closest('#unread [data-r]');if(r){r.disabled=true;r.textContent='Validé : retest en cours…';const{error}=await sb.rpc('admin_recheck_prospect_site',{p_id:r.dataset.r});if(error)alert(error.message);loadUnread();}
 });
 async function loadReqs(){
  const{data,error}=await sb.rpc('admin_list_site_imports');
