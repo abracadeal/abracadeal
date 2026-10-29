@@ -18,6 +18,17 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Infinity Group Immobilier / variante Apimo réparée (v86)
+- Demande 8e76e13e-cab9-43b0-b6bb-e0d91997584b, https://infinitygroup-immo.com/fr/. Avant : le lecteur ne trouvait que 4 locations, aucune complète, 3 faux doublons après normalisation des fiches vides.
+- Causes : route /fr/vente au singulier exclue ; entête property-info-template-12 inconnu ; le sélecteur du module description trouvait une ancre de menu data-anchor avant le vrai module 4.
+- apimo-reader.ts : ventes?/locations? dans les routes actives et la détection ; sélection des classes des modules, support de l’entête 12 ; type dans la route et ville/CP dans le RealEstateListing.about correspondant à l’identifiant du bien (jamais adresse d’agence). Pièces du sommaire, chambres structurées en secours, surface exacte, photos/description/diagnostics/prestations conservés. Regex pièces limitée aux espaces horizontaux pour éviter de prendre la référence précédente.
+- Prix sur demande : fiche conservée sans montant inventé (restaurant 87250867, 9 photos), pas de perte de description/photos. GES 85190000 absent confirmé : SVG « En cours », énergie C/116 ; ne pas inventer A depuis la phrase ambiguë de la description.
+- Tests locaux Infinity location 86909548 : 65,38 m², 3 pièces/2 chambres, Antibes 06600, loyer affiché 1500 € charges comprises et charges 200 €, 12 photos D/D ; vente 87538337 : Nice 06000, 195000 €, 24,78 m², 8 photos C/A. Régression complète IFG locale (30 fiches, maison/location/terrain/SVG/pagination) et esbuild OK.
+- v85 intermédiaire puis pro-stock-sync v86, source 6f4fc0ea276ee4f617385e6d5aefbf900a025b92. Base v84 et tri prospection Claude conservés. Test production final : 174/172, 18 pages (17 vente + 1 location), partial=false, 1678 photos, aucun doublon ; villes 100 %, descriptions 99 %, surfaces 95 %, pièces 97 %, DPE 67 %. Deux réserves source : prix sur demande et GES en cours ; les autres diagnostics absents restent vides.
+- Témoins séquentiels : IFG 30/28 ; Junot 19/19, partial=true conservé ; Nestenn 56/56 ; Chevreux délai téléchargement au premier essai, puis 25/25 ; Orpi 54/52 ; C21 39/39 ; L’Adresse 88/88 ; Laugier 23/23 ; Spider VO 20/18 ; WooCommerce 79/77. Stocks évolutifs et défauts photos/prix connus.
+- Demande done. Aucun prospect modifié, aucun mail, import ou publication.
+
+
 ### 29/10/2026 — ChatGPT — Villaret : blocage anti-robot confirmé
 - Demande 7f6e1f1e-6833-46dd-bdb8-7896e8ac4dfe, https://www.villaret-immobilier.com. Accueil interrogé depuis le serveur du robot : HTTP 202, corps vide, x-amzn-waf-action=challenge (requête 182667). Test auto_review_dry 182668 : ok=false, aucune fiche lisible. Essai domaine sans www : délai TLS dépassé (182669).
 - Les pages mises en cache par les moteurs ne prouvent pas que le robot lit directement le site. Aucun contournement ni changement de parseur ne corrige l’accès refusé constaté ; pas de nouveau déploiement (v84 conservée).
