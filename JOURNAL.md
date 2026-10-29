@@ -1139,3 +1139,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Dessous :** Tableau de bord et Base de données en cartes homogènes (titres lisibles, bouton Actualiser en icône, encart « Gains… / tableau de bord financier » masqué dans ce menu car doublon de la tuile Finances).
 - **Corrigé :** titre « Tableau de bord Abracadeal » → « Tableau de bord » ; pastille « Sur devis (+200) » → « (+100) » dans le HTML (formule 200 supprimée).
 - Fichiers : `index.html` (menu), `assets/admin-mobile-merge-20261028.js/.css` v=2. Vérifié en capture d'écran mobile (390 px).
+
+### 29/10/2026 — Claude — Vignettes d'annonces plus longues sur mobile (comme Leboncoin)
+- **Demande d'Anthony :** vignettes un peu plus longues, comme Leboncoin.
+- **Modifié :** `assets/card-overlay-20261029.css` (v=3 dans `index.html`) : sur mobile et tablette (≤ 760 px), la photo des cartes « Les annonces » passe au format 6/7 (un peu plus haute que large) au lieu d'une bande fixe de 108 px. Sur un téléphone de 390 px : photo 175 × 204 px (avant 175 × 108), carte 296 px de haut (avant 200). La photo remplit toujours la vignette, centrée (thumb-fit). Ordinateur inchangé.
+- Pour annuler : retirer le dernier bloc `@media (max-width:760px)` de ce fichier.
