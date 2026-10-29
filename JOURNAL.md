@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Validation Orpi : apprentissage uniquement
+- Précision d’Anthony : « valide » signifie ici valider que le robot sait lire, sans valider la prospection ni publier/importer des annonces.
+- Demande robot_learning_requests da50c6d3-11e6-4da9-b310-103906397df4 marquée done, handled_by ChatGPT, résultat lecture uniquement (v79, 98 lues / 97 validées).
+- La première action avait passé le précontrôle du prospect Pottier à ok avant l’interruption ; statut remis à unreadable et motif précédent rétabli. Prospect toujours ready, aucune date d’envoi renseignée. Aucun import/publication déclenché.
+- Pour les prochaines validations d’apprentissage demandées ici : ne pas modifier le statut de prospection sans demande explicite d’Anthony.
+
 ### 29/10/2026 — ChatGPT — Orpi : description et mauvaise détection des agences (v79)
 - Signalement Anthony : description générique « Qu’est-ce qu’un bien Avant-Première ? » et champs erronés sur e91e0f02-ac11-4c0e-a982-ea707f14aeb6, agencepottier. Anthony précise que plusieurs annonces sont concernées.
 - Cause commune : orpiAgencySlug excluait tous les chemins commençant par « agence », donc agencepottier / agence-contesso passaient par la lecture automatique. Filtre corrigé pour exclure les seules routes nationales ; ajout lecture dédiée d’une fiche Orpi /annonce-… fournie directement. Données data-estate prioritaires : longAd, ville/CP, référence, prix, photos ; ajout lotSurface dans surface_terrain.
