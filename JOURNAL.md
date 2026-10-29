@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — CCI Immobilier / AdnPix appris au robot (v76)
+- Demande robot_learning_requests 65ccd298-1156-4f91-9d1c-223330d99310 : https://www.cci-immo.fr/ ; prise en charge ChatGPT.
+- Avant : 21 annonces retenues / 11 complètes, villes « Type de bien », références prises pour codes postaux, DPE/GES non lus, descriptions tronquées et catalogues PHP pris pour des fiches.
+- smart-reader.ts : lecture des champs AdnPix (annonce-detail-titre, ville du h1 hors prix, description complète, galerie lightbox en taille originale avec base href, classes ndpe sélectionnées, surface Carrez et lots). Absence de valeur = champ vide ; terrain jamais pris comme surface habitable. Biens vendus/loués/sous compromis/offre acceptée écartés. Catalogues maisons/appartements/terrains PHP et pagination pcsd parcourus comme listes ; liens relatifs respectent base href.
+- Déploiements intermédiaires v74/v75 ; version finale pro-stock-sync v76, source figée au commit 6fe4c36a86875d1503a798b0be27b96861a94de3. Import map enregistrée dans supabase/functions/pro-stock-sync/import_map.json (même supabase-js 2.57.4 en bundle, après délais esm.sh au déploiement).
+- Test à blanc final : 17 retenues / 17 complètes, aucune erreur, partial=false, villes 100 %, prix 100 %, DPE 94 %, 231 photos (13,6/annonce). « Complète » = critères de validation du robot, pas tous les champs renseignés ; surface 35 %, pièces 41 % : seules valeurs explicites retenues. Aucune annonce publiée par ces tests.
+- Contrôles séquentiels : Nestenn 56/56 ; Chevreux 29/29 ; Orpi 52 lues/50 complètes (2 parkings sans photo) ; C21 38/38 ; L’Adresse 86/86 (3 doublons écartés) ; Laugier 23/23 ; Spider VO ADN 23/21 (2 sans photo) ; WooCommerce Centurion 79/77 (2 prix absents). Aucun changement des lecteurs dédiés. Anomalie préexistante observée côté WooCommerce : ville « Km » / CP 61655 à revoir séparément ; ne pas considérer ce témoin comme contrôle de localisation réussi.
+- Vérifications locales : esbuild bundle OK ; assertions ville, surface Carrez, DPE/GES, galerie originale, exclusion vendu, pagination OK.
+- Fin : demande marquée done avec résultat lisible et prospect remis dans la file de pré-test ; aucun lot de prospection déclenché manuellement.
+
 ### 29/10/2026 — Claude — Bouton « Apprendre à lire ce site » + tâche du soir
 - Demande d'Anthony : un bouton qui envoie le site à apprendre à Claude ou à ChatGPT.
 - Base (migration robot_learning_requests) : table `robot_learning_requests` (url, sector, company, prospect_id, note, status pending/in_progress/done/failed/cancelled, result, handled_by) ; RPC admin `admin_request_robot_learning`, `admin_list_robot_learning`.
