@@ -38,6 +38,14 @@ export function parseApimoDetail(raw:string,url:string){
   const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
   if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
   if(variant12&&property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
+  // Le module utilisateur de la fiche désigne son conseiller ; ne pas lire l'équipe du pied de page.
+  const advisorModule=module('module-user');
+  // Nom et numéro proviennent de la même carte, même si plusieurs conseillers sont affichés.
+  const advisor=[...advisorModule.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>m[1]).find(c=>/<h[1-6]\b[^>]*>\s*<a\b[^>]*href="[^\"]*\/(?:equipe|team)\//i.test(c))||'';
+  const advisorName=advisor.match(/<h[1-6]\b[^>]*>\s*<a\b[^>]*href="[^\"]*\/(?:equipe|team)\/[^\"]+"[^>]*>([\s\S]*?)<\/a>/i)?.[1];
+  const advisorPhone=advisor.match(/href="tel:([^\"]+)"/i)?.[1];
+  if(advisorName)o.contact_nom=text(advisorName).replace(/\s+/g,' ').trim();
+  if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
   const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
   const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if(variant12&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
