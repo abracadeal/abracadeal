@@ -194,7 +194,8 @@ async function publicFeedUrl(url:URL){
 // Sites vitrines de garages réalisés par « Annonces Automobile » (ex. lifecars.fr) : pas de flux public,
 // on lit la page /annonces (toutes les pages) puis chaque fiche pour récupérer champs + toutes les photos.
 // Fail closed : si la liste ne peut pas être lue entièrement, on lève une erreur (aucun archivage).
-const isAaSiteHtml=(t:string)=>/cdn-rivamedia\.com/i.test(t)&&/annonces-automobile\.com/i.test(t);
+// 29/10/2026 : accueil sans photo (Laugier Automobiles) : pas de cdn-rivamedia, mais les images de l'interface viennent d'annonces-automobile.com.
+const isAaSiteHtml=(t:string)=>/annonces-automobile\.com/i.test(t)&&(/cdn-rivamedia\.com/i.test(t)||/www\.annonces-automobile\.com\/images\/graphic\//i.test(t));
 async function fetchSiteHtml(start:URL){
  let url=new URL(start.toString());
  for(let redirects=0;;redirects++){
@@ -783,7 +784,9 @@ function siteLocation(html:string){
  for(const x of ldBlocks(html)){const a=x?.address;const ad=Array.isArray(a)?a[0]:a;if(ad&&typeof ad==='object'){const city=ldText(ad.addressLocality);const cp=normalizePostal(ldText(ad.postalCode));if(city&&!/^\d+$/.test(city))return{city,postal:/^\d{5}$/.test(cp)?cp:''};}}
  const text=decodeEntities(html.replace(/<(script|style|svg)\b[\s\S]*?<\/\1>/gi,' ').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'\n'));
  const counts=new Map<string,number>();
- for(const m of text.matchAll(/(?:^|[\s,.;(-])((?:0[1-9]|[1-8]\d|9[0-5]|97)\d{3})\s+([A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{1,30}(?:[ -](?:sur|sous|en|le|la|les|de|du|des|lès|l[eè]s|[A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{1,25})){0,4})(?=\s*(?:$|[\n,.;)|\-–]|France|\d))/gm)){const k=m[1]+'|'+m[2].trim();counts.set(k,(counts.get(k)||0)+1);}
+ // ville parfois en minuscules (« 75017 paris ») : remise en forme (« Paris »).
+ const capC=(x:string)=>x.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(_:string,a:string,b:string)=>a+b.toUpperCase()).replace(/(?<=[\s-])(Sur|Sous|En|Le|La|Les|De|Du|Des|Lès)(?=[\s-])/g,(w:string)=>w.toLowerCase());
+ for(const m of text.matchAll(/(?:^|[\s,.;(-])((?:0[1-9]|[1-8]\d|9[0-5]|97)\d{3})\s+([A-ZÀ-Ýa-zà-ÿ][A-Za-zÀ-ÿ'-]{1,30}(?:[ -](?:sur|sous|en|le|la|les|de|du|des|lès|l[eè]s|[A-ZÀ-Ý][A-Za-zÀ-ÿ'-]{1,25})){0,4})(?=\s*(?:$|[\n,.;)|\-–]|France|\d))/gm)){const c=/^\p{Ll}/u.test(m[2])||m[2]===m[2].toUpperCase()?capC(m[2].trim()):m[2].trim();const k=m[1]+'|'+c;counts.set(k,(counts.get(k)||0)+1);}
  const best=[...counts.entries()].sort((a,b)=>b[1]-a[1])[0];if(!best)return null;
  const[postal,city]=best[0].split('|');return{city,postal};
 }
