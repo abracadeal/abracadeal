@@ -681,7 +681,11 @@ function ldImmo(html:string,url:string){
  const addr=v.address||v.location?.address||{};const city=ldText(addr.addressLocality);if(city)o.ville=city;const cp=ldText(addr.postalCode);if(cp)o.code_postal=cp;
  const surf=ldText(v.floorSize);if(surf)o.surface=surf;const rooms=ldText(v.numberOfRooms);if(rooms)o.pieces=rooms;const bed=ldText(v.numberOfBedrooms);if(bed)o.chambres=bed;const bath=ldText(v.numberOfBathroomsTotal);if(bath)o.salles_de_bain=bath;
  const t=ldTypes(v).join(' ')+' '+o.titre+' '+url;
- o.type_bien=/terrain|land/i.test(t)?'terrain':/maison|villa|house|residence/i.test(t)?'maison':/parking|garage|box/i.test(t)?'parking':/bureau|local|commerce/i.test(t)?'bureau':'appartement';
+ // 29/10/2026 : le type déclaré (Apartment, House…) passe avant les mots du titre (« T2 avec garage » n'est pas un parking).
+ const lt=ldTypes(v).join(' ').toLowerCase();const tt=(o.titre+' '+url).toLowerCase();
+ o.type_bien=/apartment|flat|condo/.test(lt)?'appartement':/house|villa|singlefamily/.test(lt)?'maison':/landform|\bland\b|lot\b/.test(lt)?'terrain'
+  :/\bmaison|villa|pavillon|long[eè]re|propri[eé]t[eé]|ferme|chalet/.test(tt)?'maison':/appartement|\bappt|studio|duplex|loft|\b[tf]\d\b|\b[tf]-\d\b/.test(tt)?'appartement'
+  :/terrain/.test(tt)?'terrain':/bureau|local commercial|commerce|entrep[oô]t/.test(tt)?'bureau':/parking|garage|\bbox\b|stationnement/.test(tt)?'parking':/immeuble/.test(tt)?'maison':'appartement';
  o.transaction=/(louer|location|rent|lease)/i.test(t+' '+ldText(offer?.businessFunction))?'location':'vente';
  const desc=aaClean(String(v.description||'').replace(/<\/p>/gi,'\n'));if(desc)o.description=desc.slice(0,6000);
  const photos:string[]=[];const addImg=(x:any)=>{if(!x)return;if(Array.isArray(x)){x.forEach(addImg);return;}const u=typeof x==='string'?x:(x.contentUrl||x.url||'');try{const abs=new URL(decodeEntities(String(u)),url).toString();if(/^https?:/i.test(abs)&&!photos.includes(abs))photos.push(abs);}catch{}};addImg(v.image||v.photo);
@@ -820,6 +824,12 @@ async function readFeed(feed:any){
          const cnt=new Map<string,number>();for(const r of rows){const k=key(String(r.url||''));if(k)cnt.set(k,(cnt.get(k)||0)+1);}
          const top=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0];
          if(top&&top[1]>=5&&top[1]>=rows.length*0.6){const kept=rows.filter((r:any)=>key(String(r.url||''))===top[0]);rows.length=0;rows.push(...kept);}}
+        // Même idée avec la « forme » de l'adresse (profondeur + fin numérique), ex. Nestenn : fiches /…-ref-39790233
+        // contre pages /prix-m2-orleans/prix-rues/… (prix au m² lus comme des biens).
+        {const shape=(u:string)=>{try{const segs=new URL(u).pathname.replace(/\/+$/,'').split('/').filter(Boolean);const last=segs[segs.length-1]||'';return segs.length+'|'+(/(?:^|[-_])(ref|id|annonce|bien|lot)[-_]?\d{3,}$/i.test(last)?'ref':/\d{4,}$/.test(last)?'num':'txt');}catch{return'';}};
+         const cnt=new Map<string,number>();for(const r of rows){const k=shape(String(r.url||''));if(k)cnt.set(k,(cnt.get(k)||0)+1);}
+         const top=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0];
+         if(top&&!top[0].endsWith('txt')&&top[1]>=5&&top[1]>=rows.length*0.6){const kept=rows.filter((r:any)=>shape(String(r.url||''))===top[0]);rows.length=0;rows.push(...kept);}}
         platform+=' · lecture automatique';}
       catch(e){
         const net=await findNetworkPage(url,text).catch(()=>null);

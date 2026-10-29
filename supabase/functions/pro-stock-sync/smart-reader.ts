@@ -89,7 +89,9 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const h1At=rawHtml.search(/<h1[\s>]/i);
   const from=h1At>0?Math.max(headEnd>0?headEnd:0,h1At-30000):(headEnd>0?headEnd:0);
   const region=rawHtml.slice(from,from+220000);
-  const html=region.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<(style|svg|noscript)\b[\s\S]*?<\/\1>/gi,' ');
+  const html=region.replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi,' ').replace(/<(style|svg|noscript)\b[\s\S]*?<\/\1>/gi,' ')
+  // 29/10/2026 (Nestenn) : « 145<span class="nbsp"> </span>350 € » : chiffres séparés par une balise d'espace → « 145 350 € ».
+   .replace(/(\d)\s*<span\b[^>]*>(?:\s|&nbsp;|&#160;|&#x202f;|\u00a0|\u202f)*<\/span>\s*(?=\d{3}(?!\d))/gi,'$1 ');
   const ogTitle=metaAll(headHtml,'og:title')[0]||'';
   const h1=clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
   const docTitle=clean(headHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
