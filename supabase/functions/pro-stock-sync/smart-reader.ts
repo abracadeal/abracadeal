@@ -160,7 +160,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
       // libellé exact s'il figure dans le titre (« Le Cannet », « Juan-les-Pins »)
       if(tailOk&&nzc(tail)===nzc(vCity))vCity=tail;else{const inT=okC.find(c=>nzc(c.city)===nzc(vCity));if(inT)vCity=inT.city;}}
     else if(inHead){vCity=inHead.city;vCp=inHead.cp;}
-    else if(tailOk&&!(cityJ&&nzc(cityJ)===nzc(tail))){vCity=tail;const m=okC.find(c=>nzc(c.city)===nzc(tail));vCp=m?.cp||'';}
+    else if(tailOk){const m=okC.find(c=>nzc(c.city)===nzc(tail));if(m){vCity=tail;vCp=m.cp;}}
     if(vCity){o.ville=vCity;if(vCp)o.code_postal=vCp;}
     else{
       if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
