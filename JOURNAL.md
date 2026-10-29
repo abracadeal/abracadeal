@@ -879,3 +879,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Base : `enforce_founder_50_listing_limit()` laisse passer toutes les annonces d'un Fondateur pendant ses 12 mois gratuits (migration founder_free_period_unlimited_listings ; trace dans supabase/2026-10-29-fondateurs-annonces-illimitees.sql). Après les 12 mois, le plafond de la formule choisie s'applique aux nouvelles annonces.
 - Textes : aide, CGV (avec la possibilité de clôturer l'offre avant 500, les inscrits gardent leurs 12 mois), accueil, inscription, pro-fondateur, mail de prospection admin, compteur de l'espace Pro (« x / illimité »).
 - Fermeture anticipée : interrupteur existant « Offre Fondateurs ouverte/fermée » de l'admin (RPC admin_set_founder_offer_closed) ; ferme les nouvelles inscriptions Fondateurs, sans toucher aux inscrits.
+
+## 29/10/2026 — Statistiques vendeur : vues, numéros affichés, clics « Appeler » (Claude)
+- But (Anthony) : que le pro sache ce que lui apporte Abracadeal (le revenu viendra de là à la fin des 12 mois).
+- Base : `listing_events` + `track_listing_event` + `get_my_listing_stats` ; `get_listing_phone` compte le numéro affiché côté serveur (fiable). Une fois par visiteur, annonce et jour ; propriétaire et admin exclus ; 400 événements max par visiteur et par jour.
+- Site (index-main.js?v=20261029-stats-vendeur) : vue comptée à l'ouverture d'une annonce (identifiant visiteur anonyme `abraca_vid` en localStorage), clic sur le numéro compté ; sous le numéro : « Dites au vendeur que vous l'appelez de la part d'Abracadeal ».
+- Espace Pro : bloc « Ce que vos annonces vous ont apporté (30 derniers jours) » : vues, numéros affichés, clics Appeler, contacts par message, top 3 des annonces.
+- Reste à faire si validé : bilan mensuel par e-mail au pro ; tableau admin (stock par région, trafic, contacts) pour décider la fermeture de l'offre Fondateurs.

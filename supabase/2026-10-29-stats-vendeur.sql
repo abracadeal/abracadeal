@@ -1,0 +1,5 @@
+-- 29/10/2026 (appliqué : migration listing_events_tracking)
+-- Table public.listing_events (RLS, aucun accès direct) : vue / numéro affiché / clic « Appeler »,
+-- une ligne max par annonce, type, visiteur et jour. Le propriétaire et l'admin ne sont pas comptés.
+-- RPC : track_listing_event(listing, kind, visitor) [anon+auth], get_my_listing_stats(days) [auth],
+-- get_listing_phone enregistre lui-même le « numéro affiché ». Voir les définitions complètes dans la base.

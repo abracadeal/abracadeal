@@ -4313,6 +4313,10 @@ function dmInitials(name){
   return (parts.length>1?parts[0][0]+parts[1][0]:(parts[0]||'A').slice(0,2)).toUpperCase();
 }
 
+// 29/10/2026 : statistiques vendeur (vues, numéros affichés, clics Appeler) — une fois par visiteur, annonce et jour.
+function abracaVisitorId(){try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}return v;}catch(_){return'';}}
+function trackListingEvent(id,kind){try{if(!sb||!id)return;sb.rpc('track_listing_event',{p_listing_id:id,p_kind:kind,p_visitor:abracaVisitorId()||null}).then(()=>{},()=>{});}catch(_){}}
+window.trackListingEvent=trackListingEvent;
 window.openAd=id=>{
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);if(!a)return;
   if(a.category==='vacances'){
@@ -4321,6 +4325,7 @@ window.openAd=id=>{
     return;
   }
   rememberViewed(id);
+  if(!(currentUser&&a.owner_id===currentUser.id))trackListingEvent(id,'view');
   if(!onlyMine&&!favoritesMode&&!moderationMode)renderRecentViewed();
   const photos=visiblePhotosFor(a);
   window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
@@ -5018,9 +5023,9 @@ window.viewListingPhone=async(listingId)=>{
     toast('Aucun numéro affiché par le vendeur');
     return;
   }
-  if(host) host.innerHTML=`<a class="btn ghost" href="tel:${esc(data)}">📞 ${esc(data)}</a><div class="contact-login-note">Numéro visible car vous êtes connecté.</div>`;
+  if(host) host.innerHTML=`<a class="btn ghost" href="tel:${esc(data)}" onclick="trackListingEvent('${esc(listingId)}','call')">📞 ${esc(data)}</a><div class="contact-login-note">Dites au vendeur que vous l’appelez de la part d’<strong>Abracadeal</strong>.</div>`;
   const barBtn=document.getElementById(`dmPhoneBtn-${listingId}`);
-  if(barBtn) barBtn.outerHTML=`<a class="dm-action dm-action-ghost" id="dmPhoneBtn-${esc(listingId)}" href="tel:${esc(data)}">${esc(data)}</a>`;
+  if(barBtn) barBtn.outerHTML=`<a class="dm-action dm-action-ghost" id="dmPhoneBtn-${esc(listingId)}" href="tel:${esc(data)}" onclick="trackListingEvent('${esc(listingId)}','call')">${esc(data)}</a>`;
 };
 
 const messageInputEl=document.getElementById('messageInput');
@@ -5902,11 +5907,25 @@ window.addEventListener('pageshow',e=>{
 });
 
 
+function refreshProDashStats(){
+  const box=document.getElementById('proDashStats');if(!box||!sb||!currentUser)return;
+  sb.rpc('get_my_listing_stats',{p_days:30}).then(({data,error})=>{
+    if(error||!data){box.classList.add('hidden');return;}
+    const n=v=>Number(v||0).toLocaleString('fr-FR');
+    const top=(data.top||[]).filter(t=>t.views>0).slice(0,3).map(t=>`<li>${esc(t.title||'Annonce')} : ${n(t.views)} vue${t.views>1?'s':''}${t.phones?`, ${n(t.phones)} numéro${t.phones>1?'s':''} affiché${t.phones>1?'s':''}`:''}</li>`).join('');
+    box.innerHTML=`<strong style="display:block;color:#451657">Ce que vos annonces vous ont apporté (30 derniers jours)</strong>
+      <div class="pro-stats-row"><span><b>${n(data.views)}</b> vues</span><span><b>${n(data.phones)}</b> numéros affichés</span><span><b>${n(data.calls)}</b> clics « Appeler »</span><span><b>${n(data.conversations)}</b> contacts par message</span></div>
+      ${top?`<ul class="pro-stats-top">${top}</ul>`:''}
+      <p class="note" style="margin:6px 0 0">Les acheteurs sont invités à dire qu’ils appellent de la part d’Abracadeal.</p>`;
+    box.classList.remove('hidden');
+  },()=>box.classList.add('hidden'));
+}
 function refreshProDashboard(){
   const panel=document.getElementById('proDashboardPanel');
   const isPro=!!currentUser&&currentProfile?.account_type==='professionnel';
   panel?.classList.toggle('hidden',!isPro);
   if(!isPro)return;
+  refreshProDashStats();
   const mine=(allAds||[]).filter(a=>a.owner_id===currentUser.id);
   const active=mine.filter(a=>['active','published','approved'].includes(String(a.status||'').toLowerCase())).length;
   const pending=mine.filter(a=>String(a.status||'').toLowerCase()==='pending').length;
