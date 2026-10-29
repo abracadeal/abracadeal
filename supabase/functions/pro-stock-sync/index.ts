@@ -108,9 +108,10 @@ function immoFillFromText(o:any){
  const chLab=tAll.match(/charges?\s*(?:annuelles|de\s*copropri[ée]t[ée]\s*annuelles|courantes\s*annuelles)\s*(?:\([^)]*\))?\s*:\s*(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(chLab&&Number(numFr(chLab[1]))>0)set('charges_annuelles',numFr(chLab[1]).replace(/\.0+$/,''));
  const lotLab=tAll.match(/(?:nombre|nb)\s*de\s*lots?\s*(?:principaux)?\s*:?\s*(\d{1,5})/i);if(lotLab)set('nombre_lots',lotLab[1]);
  const cop=tAll.match(/bien\s*(?:situ[ée]\s*)?en\s*copropri[ée]t[ée]\s*:?\s*(oui|non)/i);if(cop)set('copropriete',/oui/i.test(cop[1])?'Oui':'Non');else if(/\bcopropri[ée]t[ée]\s+de\s+\d+\s*lots/i.test(tAll))set('copropriete','Oui');
- const proc=tAll.match(/proc[ée]dure[^:\n]{0,40}:\s*([^\n]{3,80})/i);if(proc)set('procedure',/pas de|aucune|non/i.test(proc[1])?'Aucune procédure en cours':proc[1].trim());else if(/aucune proc[ée]dure|pas de proc[ée]dure/i.test(tAll))set('procedure','Aucune procédure en cours');
+ if(/(\d{1,5})\s*lots/i.test(tAll)||/(?:nombre|nb)\s*de\s*lots/i.test(tAll))set('copropriete','Oui');
+ const proc0=tAll.match(/proc[ée]dure[^:\n]{0,40}:[ \t]*([^\n]{3,80})/i);const proc=proc0&&!/:/.test(proc0[1])&&/proc|aucune|pas|non|oui|en cours|syndic|sauvegarde|administrat/i.test(proc0[1])?proc0:null;if(proc)set('procedure',/pas de|aucune|non/i.test(proc[1])?'Aucune procédure en cours':proc[1].trim());else if(/aucune proc[ée]dure|pas de proc[ée]dure/i.test(tAll))set('procedure','Aucune procédure en cours');
  const dg=tAll.match(/d[ée]p[ôo]t\s*de\s*garantie\s*:?\s*(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(dg)set('depot_garantie',numFr(dg[1]).replace(/\.0+$/,''));
- const honP=tAll.match(/honoraires[^.\n]{0,60}?(\d{1,2}(?:[.,]\d+)?\s*%[^.\n]{0,60})/i)||tAll.match(/honoraires?\s*(?:d['’]agence)?\s*(?:sont\s*)?(?:à\s*la\s*)?charge\s*(?:du|de\s*l['’])\s*(vendeur|acqu[ée]reur|locataire|bailleur|propri[ée]taire)/i);
+ const honP=tAll.match(/honoraires[^.\n]{0,60}?(\d{1,2}(?:[.,]\d+)?\s*%[^.\n]{0,60})/i)||tAll.match(/honoraires[^.\n]{0,60}?charge\s*(?:exclusive\s*)?(?:du|de\s*l['’]|des?)\s*(vendeur|acqu[ée]reur|locataire|bailleur|propri[ée]taire)/i);
  if(honP)set('honoraires',/^\d/.test(honP[1])?honP[1].replace(/\s+/g,' ').trim():'À la charge du '+honP[1].toLowerCase());
  const tf=tAll.match(/taxe\s*fonci[èe]re\s*(?:\([^)]*\))?\s*[:=]?\s*(?:de\s*)?(?:environ\s*)?(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(tf)set('taxe_fonciere',numFr(tf[1]));
  const lots=t.match(/(\d{1,4})\s*lots/i);if(lots)set('nombre_lots',lots[1]);
@@ -135,17 +136,23 @@ async function ownerLocation(userId:string|null|undefined){if(!userId)return nul
 // 29/10/2026 : descriptions mises en forme (les sites donnent souvent tout « en bloc ») :
 // paragraphes et listes rétablis, pour qu'une annonce reste lisible. Le contenu n'est jamais modifié, seulement les retours à la ligne.
 const DESC_HEADS=['Équipements','Equipements','Options et équipements','OPTIONS ET EQUIPEMENTS','Options','Points forts','Caractéristiques','Informations complémentaires','Garantie','Prix','Conditions tarifaires','Honoraires','Mandat','DPE','GES','Diagnostic','Copropriété','Les informations sur les risques','Localisation','Financement','Reprise','Contact'];
+// 29/10/2026 : doublons de description — titre recopié en tête (souvent découpé en lignes) et ses restes déjà répétés plus bas,
+// badges seuls (« Nouveauté »), lignes répétées.
+function dedupeDescription(t:string,title:string){
+ const nz=(x:string)=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+ const nt=nz(String(title||''));let ls=t.split('\n');
+ if(nt.length>=12){let acc='';let k=0;while(k<ls.length){const n=nz(ls[k]);if(!n){k++;continue;}if(nt.startsWith(acc+n)){acc+=n;k++;if(acc.length>=nt.length*0.9)break;}else break;}
+  if(acc.length>=Math.min(nt.length*0.6,40)){ls=ls.slice(k);
+   while(ls.length>1){const n=nz(ls[0]);if(!n){ls.shift();continue;}if(ls[0].length<=90&&n.length>=8&&nz(ls.slice(1).join(' ')).includes(n))ls.shift();else break;}}}
+ const BADGE=/^(?:nouveaut[ée]|exclusivit[ée]|exclu|coup de c(?:oe|œ)ur|baisse de prix|nouveau prix|prix en baisse|sous offre|sous compromis|exclusif|à saisir|a saisir|top)\s*!*$/i;
+ const seen=new Set<string>();const keep:string[]=[];
+ for(const l of ls){const n=nz(l);if(BADGE.test(l.trim()))continue;if(n.length>=20&&seen.has(n))continue;if(n.length>=20)seen.add(n);keep.push(l);}
+ return keep.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
 function tidyDescription(v:unknown,title=''){
  let t=String(v??'').replace(/\r\n?/g,'\n').replace(/[  ]/g,' ').replace(/[ \t]+/g,' ').replace(/ *\n */g,'\n').trim();
  if(!t)return t;
- // 29/10/2026 : doublons — titre recopié en tête (souvent découpé en lignes), badges seuls (« Nouveauté »), lignes répétées.
- {const nz=(x:string)=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
-  const nt=nz(String(title||''));let ls=t.split('\n');
-  if(nt.length>=12){let acc='';let k=0;while(k<ls.length){const n=nz(ls[k]);if(!n){k++;continue;}if(nt.startsWith(acc+n)){acc+=n;k++;if(acc.length>=nt.length*0.9)break;}else break;}if(acc.length>=Math.min(nt.length*0.6,40))ls=ls.slice(k);}
-  const BADGE=/^(?:nouveaut[ée]|exclusivit[ée]|exclu|coup de c(?:oe|œ)ur|baisse de prix|nouveau prix|prix en baisse|sous offre|sous compromis|exclusif|à saisir|a saisir|top)\s*!*$/i;
-  const seen=new Set<string>();const keep:string[]=[];
-  for(const l of ls){const n=nz(l);if(BADGE.test(l.trim()))continue;if(n.length>=20&&seen.has(n))continue;if(n.length>=20)seen.add(n);keep.push(l);}
-  t=keep.join('\n').replace(/\n{3,}/g,'\n\n').trim();}
+
  // Listes écrites à la suite : « … -Climatisation -Sièges chauffants », « • GPS • Radar », puces emoji.
  t=t.replace(/\s+(?=(?:[-–•▪►▶✓✔✅☑➡→]|▶️|✔️)\s?\p{Lu})/gu,'\n')
     .replace(/\s*((?:📍|📅|📌|⚙️|🔄|🚙|🌱|🎨|💺|💰|🔥|⭐|👤|📞|✨|🛠️|🔧|📝|🔑|🚗|✅)\s?)/gu,'\n$1');
@@ -161,7 +168,7 @@ function tidyDescription(v:unknown,title=''){
   for(const sn of sentences.map(x=>x.trim()).filter(Boolean)){if(cur&&cur.length+sn.length>280){out.push(cur);out.push('');cur=sn;}else cur=cur?cur+' '+sn:sn;}
   if(cur)out.push(cur);
  }
- return out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim();
+ return dedupeDescription(out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim(),title);
 }
 async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw of rows.slice(0,5000)){const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}await correctCityPostal(r);if(r.description)r.description=tidyDescription(r.description,r.title);out.push(r);}return out;}
 
@@ -520,7 +527,7 @@ function parseOrpiEstate(html:string,url:string){
  if(e.surface)o.surface=String(e.surface);if(e.nbRooms)o.pieces=String(e.nbRooms);if(e.nbBedrooms)o.chambres=String(e.nbBedrooms);if(e.nbWashrooms)o.salles_de_bain=String(e.nbWashrooms);
  if(e.story!=null&&e.story!=='')o.etage=String(e.story);
  if(e.dpeDisplay===false&&/DPE non requis|DPE non soumis/i.test(html))o.dpe='NON SOUMIS';if(e.dpeDisplay!==false){const c=ORPI_ENERGY[Number(e.consumptionIndex)||0],g=ORPI_ENERGY[Number(e.emissionIndex)||0];if(c&&g){o.dpe=c;o.ges=g;}else if(/DPE non requis|DPE non soumis|c-dpe--inactive/i.test(html))o.dpe='NON SOUMIS';if(e.consumptionValue)o.consommation_energie=String(e.consumptionValue);if(e.energyMin)o.cout_energie_min=String(e.energyMin);if(e.energyMax)o.cout_energie_max=String(e.energyMax);if(e.dpeDate)o.date_dpe=String(e.dpeDate).slice(0,10);}
- if(e.fees)o.honoraires=decodeEntities(String(e.fees));if(e.condoCharge&&o.transaction==='vente')o.charges_annuelles=String(e.condoCharge);
+ if(e.fees)o.honoraires=decodeEntities(String(e.fees));if(e.condoCharge&&o.transaction==='vente')o.charges_annuelles=String(e.condoCharge);if(e.condo===true)o.copropriete='Oui';else if(e.condo===false&&o.transaction==='vente')o.copropriete='Non';if(Number(e.condoBundleNumber)>0)o.nombre_lots=String(e.condoBundleNumber);
  const feats=[e.elevator&&'Ascenseur',e.garage&&'Garage',e.nbParkingSpaces&&'Parking',e.cellar&&'Cave',e.terrace&&'Terrasse',e.balcony&&'Balcon',e.garden&&'Jardin',e.swimmingPool&&'Piscine',e.disabledAccess&&'Accès handicapé'].filter(Boolean);if(feats.length)o.prestations=feats.join('|');
  if(e.longAd)o.description=decodeEntities(String(e.longAd)).replace(/\r/g,'').slice(0,6000);
  const photos:string[]=[];for(const u of [...(e.imagesFull||[]),...(e.images||[])]){const x=decodeEntities(String(u||''));if(/^https?:\/\//i.test(x)){const id=x.split('?')[0];if(!photos.some(p=>p.split('?')[0]===id))photos.push(x);}}

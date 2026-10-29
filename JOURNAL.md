@@ -900,3 +900,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Location reconnue quand le prix est suivi de « CC/Mois », « /mois », « par mois », ou quand la description commence par « À louer » (Nestenn « Duplex hyper-centre 690 € CC/Mois » était en vente). Un prix ≥ 20 000 € reste une vente.
 - Ville : « 27390 » caché suivi de « Partager ce bien » donnait la ville « Partager ce bien ». Les candidats « CP Ville » sont filtrés (mots d'interface écartés), la ville présente dans le titre est préférée, la zone autour du titre est aussi lue.
 - Contrôle : Nestenn Orléans 56/56 (3 locations), villes justes (Orléans, Fleury-les-Aubrais…) ; immochevreux 29/29.
+
+## 29/10/2026 — Immo : informations essentielles (robot v63 + affichage) (Claude)
+- Demande d'Anthony : un tableau des infos très souvent demandées / obligatoires pour une annonce immo, et plus de doublons dans la description.
+- Annonce publique (index-main.js?v=20261029-immo-essentiel, `detailSpecsFor`) : lignes toujours affichées, « Non communiqué » si absentes. Vente : surface habitable, pièces, dépenses d'énergie estimées, honoraires, copropriété, nombre de lots, charges de copropriété / an, procédure en cours (syndicat), taxe foncière. Location : charges / mois, dépôt de garantie, honoraires locataire, meublé. DPE/GES restent dans le bloc diagnostic.
+- Aperçu admin : bloc « Informations essentielles » en tête, valeurs absentes en rouge, puis « Autres détails » ; code postal = celui normalisé.
+- Robot : lignes « faits » de la fiche (`texte_page`, hors description) lues pour les rubriques à libellé uniquement : charges annuelles, taxe foncière, nombre de lots, bien en copropriété oui/non, procédure, dépôt de garantie, honoraires (% ou « à la charge du … »), n° de mandat (ex. 4981_B). Le DPE n'est jamais pris dans ces lignes (titres de biens similaires).
+- Orpi : condo → copropriété, condoBundleNumber → nombre de lots.
+- N° de mandat : plus de recopie de la référence quand le site n'en donne pas. Honoraires « honoraires » (mot du menu) ignorés. Code postal pris avec la ville choisie (Nestenn « 27390 » caché).
+- Description : `dedupeDescription` après le découpage en lignes : titre recopié en tête retiré (et ses restes déjà répétés plus bas), badges seuls (Nouveauté, Exclusivité…), lignes répétées.
+- Taux mesurés (lecture à blanc, champ `fill`) — Nestenn Orléans : charges 59 %, taxe 82 %, lots 59 %, copro 100 %, procédure 63 %, mandat 98 % ; C21 Daumesnil : charges 76 %, lots 74 %, honoraires 100 %.
