@@ -105,7 +105,9 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const priceRe=/(?<![\p{L}\d][ \t\u00a0\u202f.]?)(\d{1,3}(?:[\s\u00a0\u202f.]\d{3})+|\d{3,9})(?:[.,]\d{1,2})?\s*(?:€|eur\b|euros?)/iu;
   let prix=NaN;
   // Montants mensuels (crédit, LOA, « dès … / mois ») ignorés, sauf pour une location immobilière.
-  const rental=immo&&/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname);
+  const hpos=html.search(/<h1[\s>]/i);const nearTitle=hpos>=0?clean(html.slice(Math.max(0,hpos-4000),hpos+4000)):'';
+  // 29/10/2026 (Nestenn) : « 690 € CC/Mois » à côté du titre, « À louer » en tête de description = location.
+  const rental=immo&&(/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname)||/\d\s*€\s*(?:cc|hc|charges comprises|hors charges)?\s*(?:\/|par)\s*mois/i.test(nearTitle)||/(?:^|\n|\.\s)\s*(?:à|a) louer\b/i.test(text.slice(0,6000)));
   const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;const v=num(m[1]);if(v>0)return v;}return NaN;};
   const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
   if(declared)prix=num(declared.replace(/[.,]\d{2}$/,''));
@@ -113,7 +115,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   if(!(prix>0))prix=firstAmount(head+' \n'+metaDesc,priceRe);
   if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
   // 29/10/2026 (Nestenn) : prix affiché à côté du titre mais dans un <header> (retiré du texte) : on regarde autour du titre d'abord.
-  if(!(prix>0)){const hp=html.search(/<h1[\s>]/i);if(hp>=0)prix=firstAmount(clean(html.slice(Math.max(0,hp-4000),hp+4000)),priceRe);}
+  if(!(prix>0)&&nearTitle)prix=firstAmount(nearTitle,priceRe);
   if(!(prix>0))prix=firstAmount(text,new RegExp('(?:prix|loyer|tarif)[^0-9€]{0,40}'+priceRe.source,'iu'));
   if(!(prix>0))prix=firstAmount(text,priceRe);
   if(!(prix>=50&&prix<100000000))return null;
@@ -134,7 +136,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
     if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
-    o.transaction=/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
+    o.transaction=rental||/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
     const kind=head+' '+base.pathname;
     const isHouse=/maison|villa|\bmas\b|(?<!co)propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
     o.type_bien=isHouse.test(head)?'maison':isFlat.test(head)?'appartement':isHouse.test(kind)?'maison':isFlat.test(kind)||/\b[TF]\d\b/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/\b[TF]-?\d\b|chambres?\b|pi[eè]ces?\b|\d\s*m(?:²|2)\b/i.test(head)&&!/^\s*(parking|garage|box)/i.test(head)?(/jardin|terrain|plain[- ]pied/i.test(head)?'maison':'appartement'):/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
