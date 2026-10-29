@@ -104,11 +104,13 @@ async function withTracking(body: string, prospectId: string) {
   } catch { return body; }
 }
 type Tpl = { subject: string; body: string };
-async function templates(category: string, followup: boolean, variant: string, manual = false): Promise<Tpl> {
+// kind : "" (site lu), "manuel" (vend sur Leboncoin), "normal" (site qui bloque les robots).
+async function templates(category: string, followup: boolean, variant: string, kind: boolean | string = ""): Promise<Tpl> {
   CURRENT_CATEGORY = category || "";
-  const { data: first } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: manual ? "manuel" : (category || ""), p_variant: variant });
+  const k = kind === true ? "manuel" : (kind || "");
+  const { data: first } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: k || (category || ""), p_variant: variant });
   if (!followup) return first as Tpl;
-  const { data: rel } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: manual ? "relance_manuel" : "relance", p_variant: variant });
+  const { data: rel } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: k ? "relance_" + k : "relance", p_variant: variant });
   // la relance part dans le même fil que le 1er mail : même objet précédé de « Re: »
   return { subject: "Re: " + (first as Tpl).subject, body: (rel as Tpl).body };
 }
@@ -200,7 +202,7 @@ Deno.serve(async (req) => {
         await admin.rpc("prospect_mailer_verified", { p_email: c.email, p_ok: true, p_error: null });
         return json({ ok: true, message: "Connexion réussie : identifiant et mot de passe acceptés par OVH. Aucun e-mail envoyé." });
       }
-      const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A", !!body.manual);
+      const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A", body.manual ? "manuel" : (body.normal ? "normal" : ""));
       const to = String(user.email || "");
       const cat = String(body.category || "Garage / concession auto");
       const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null, stockPhrase(cat, 24));
@@ -227,7 +229,7 @@ Deno.serve(async (req) => {
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         const c = await creds(j.mailbox);
-        const tpl = await templates(j.category || "", followup, variant, row?.site_check_status === "manual");
+        const tpl = await templates(j.category || "", followup, variant, row?.site_check_status === "manual" ? "manuel" : row?.site_check_status === "generic" ? "normal" : "");
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });

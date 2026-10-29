@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Bouton « Mail normal » (site qui bloque les robots)
+- Demande d'Anthony : Opti Immo bloque les robots, quel bouton pour lui envoyer un mail normal ?
+- Base (migration prospect_generic_mail) : `site_check_status` accepte « generic » ; RPC `admin_mark_prospect_generic` ; `prospect_mailer_claim` envoie aussi aux « generic » ; modèles « normal » et « relance_normal » (gratuit ; publier soi-même depuis le téléphone ou envoyer le flux / export du logiciel, « répondez à ce mail » ; aucune promesse de lecture du site).
+- prospect-mailer v10 : `templates(…, kind)` = "" / "manuel" / "normal" ; test `{action:'test', normal:true}`.
+- admin-test-import.html : bouton « Mail normal » après « Vend sur Leboncoin », compteur « mail normal ».
+
 ### 29/10/2026 — ChatGPT — Opt’Immo : diagnostic de blocage anti-robot
 - Demande 143b5884-5a99-4591-bdb7-715a6db55a8c, https://www.agence-optimmo-pau.fr/. Test auto_review_dry : ok=false, aucune fiche lisible.
 - Accueil, domaine sans www, robots.txt et pages réelles de vente/location : HTTP 202 avec x-amzn-waf-action=challenge. La protection AWS WAF empêche le serveur du robot de recevoir les annonces ; ce n’est pas un défaut démontré du parseur. Les résultats en cache des moteurs ne valident pas une lecture directe.
