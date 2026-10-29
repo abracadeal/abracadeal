@@ -16,6 +16,8 @@ function isDetailish(u:URL){const last=u.pathname.replace(/\/+$/,'').split('/').
 
 // Liens de la page : fiches probables (formes répétées) et pages de liste à suivre.
 export function smartLinks(html:string,page:URL,host:string){
+  // Le <base href> est utilisé aussi pour les liens relatifs des fiches AdnPix.
+  try{const b=html.match(/<base\b[^>]*href=["']([^"']+)["']/i);if(b){const u=new URL(sDecode(b[1]),page);if(u.hostname.replace(/^www\./,'')===host)page=u;}}catch{}
   const groups=new Map<string,Set<string>>();const lists=new Set<string>();
   for(const m of html.matchAll(/href=["']([^"'#]+)["']/gi)){
     let u:URL;try{u=new URL(sDecode(m[1]),page);}catch{continue;}
@@ -23,7 +25,7 @@ export function smartLinks(html:string,page:URL,host:string){
     if(/\.(css|js|png|jpe?g|gif|svg|webp|ico|pdf|xml|zip|woff2?|mp4)(\?|$)/i.test(u.pathname))continue;
     u.hash='';const full=u.toString();
     if(SKIP_PATH.test(u.pathname))continue;
-    if(isDetailish(u)){const p=pathPattern(u)+(u.search?'?'+[...u.searchParams.keys()].sort().join('&'):'');if(!groups.has(p))groups.set(p,new Set());groups.get(p)!.add(full);}
+    if(isDetailish(u)&&!(/[?&]pcsd=/.test(u.search)&&/\.php$/i.test(u.pathname))){const p=pathPattern(u)+(u.search?'?'+[...u.searchParams.keys()].sort().join('&'):'');if(!groups.has(p))groups.set(p,new Set());groups.get(p)!.add(full);}
     else if(LIST_PATH.test(u.pathname+u.search)||/[?&](page|p|pg|start|offset)=\d+|\/page[-/]?\d+/i.test(u.pathname+u.search))lists.add(full);
   }
   const details:string[]=[];
@@ -82,7 +84,34 @@ function longestText(html:string){
 
 const FUEL:[RegExp,string][]=[[/hybride rechargeable|plug-?in/i,'hybride rechargeable'],[/hybride/i,'hybride'],[/[ée]lectrique/i,'électrique'],[/diesel|gazole|hdi|tdi|dci|crdi|bluehdi/i,'diesel'],[/essence|tsi|tfsi|puretech|vti/i,'essence'],[/gpl/i,'gpl']];
 
+// AdnPix : champs propres à la fiche, sans les filtres de recherche ni l'adresse de l'agence.
+function adnpixDetail(html:string,url:string){
+  const h=html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'';
+  const title=clean(h.match(/<span\b[^>]*class=["']annonce-detail-titre["'][^>]*>([\s\S]*?)<\/span>/i)?.[1]||'');
+  if(!title)return null;
+  if(/class=["'][^"']*\bbadge-detail\b[^"']*["'][^>]*>\s*(?:Vendu[e]?|Lou[ée]e?|Sous Compromis|Offre accept[ée]e|R[ée]serv[ée]e?)\s*</i.test(html))return {_sold:1,reference:new URL(url).pathname.split('/').pop(),url};
+  const price=clean(h.match(/class=["']annonce-detail-prix["'][^>]*>([\s\S]*?)<\/span>/i)?.[1]||'').replace(/[^\d]/g,'');
+  const city=clean(h.replace(/<span\b[^>]*>[\s\S]*?<\/span>/gi,''));
+  const body=html.split(/class=["']annonce-detail-premiere-image["']/i)[1]?.split(/<\/a>\s*<\/div>/i)[1]?.split(/<div\b[^>]*class=["']wrapper-contactannonce["']/i)[0]||'';
+  const description=clean(body);
+  let base=new URL(url);try{base=new URL(sDecode(html.match(/<base\b[^>]*href=["']([^"']+)["']/i)?.[1]||url),url);}catch{}
+  const photos:string[]=[];
+  for(const m of html.matchAll(/<a\b[^>]*href=["']([^"']+)["'][^>]*data-fancybox-group=["']lightbox-\d+["']/gi)){try{const u=new URL(sDecode(m[1]),base);if(/^https?:$/.test(u.protocol)&&!photos.includes(u.toString()))photos.push(u.toString());}catch{}}
+  if(!price||!city||!photos.length)return null;
+  const kind=clean(html.match(/class=["']annonce-detail-typebien[^"']*["'][^>]*>([\s\S]*?)<\/span>/i)?.[1]||'');
+  const o:any={reference:new URL(url).pathname.split('/').filter(Boolean).pop(),url,titre:title,prix:price,ville:city,description,photos:photos.join('|'),transaction:'vente',type_bien:/appartement/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/maison/i.test(kind)?'maison':/parking|garage/i.test(title)?'parking':'bureau',texte_page:description};
+  const surface=description.match(/(?:surface(?: habitable)?(?: de)?|habitable[s]? de|maison de|appartement de|logement de|loi carrez(?: est de)?)\s*(\d+(?:[.,]\d+)?)\s*m[²2]/i)||title.match(/(\d+(?:[.,]\d+)?)\s*m[²2]/i);
+  if(surface)o.surface=surface[1];
+  const terrain=description.match(/(?:terrain|parcelle|jardin)[^.\n]{0,80}?(\d[\d ]*(?:[.,]\d+)?)\s*m[²2]/i);if(terrain)o.surface_terrain=terrain[1].replace(/ /g,'');
+  const rooms=(title+' '+description).match(/\b[TF](\d)\b|\b(\d+)\s*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1]||rooms[2];
+  const bedrooms=description.match(/\b(\d+)\s*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];
+  for(const [field,cls] of [['dpe','npe-conso-etiquettes'],['ges','npe-emissions-etiquettes']]){const match=html.match(new RegExp('class=["\'][^"\']*\\b'+cls+'\\b[^"\']*\\bndpe-([a-g])-selected\\b','i'));if(match)o[field]=match[1].toUpperCase();}
+  const lots=description.match(/nombre de lots de copropri[ée]t[ée]\s*:\s*(\d+)/i);if(lots)o.nombre_lots=lots[1];
+  return o;
+}
+
 export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
+  if(sector==='immobilier'&&/class=["']annonce-detail-titre["']/i.test(rawHtml))return adnpixDetail(rawHtml,pageUrl);
   const base=new URL(pageUrl);const immo=sector==='immobilier';
   // Économie de calcul (limite CPU des fonctions) : on ne travaille que sur l'en-tête et la zone autour du titre principal.
   const headEnd=rawHtml.search(/<\/head>/i);const headHtml=rawHtml.slice(0,headEnd>0?Math.min(headEnd,200000):60000);
@@ -241,6 +270,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
         // Données structurées souvent incomplètes (1 photo, pas de description) : on complète avec la lecture de la page.
         else{const sd=smartDetail(text,url.toString(),sector);if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(sd.photos)>n(o.photos))o.photos=sd.photos;for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
+        if(o?._sold)continue;
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).
         if(detailQ.length<40&&text.length<400000)take(text,url);
