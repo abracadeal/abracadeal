@@ -136,7 +136,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     if(cityJ&&!/^\d+$/.test(cityJ))o.ville=cityJ;else if(city&&!bad.test(city))o.ville=city.trim();
     if(/^\d{5}$/.test(cpJ))o.code_postal=cpJ;else if(cp&&o.ville)o.code_postal=cp;
     const all=head+' '+base.pathname+' '+text.slice(0,4000);
-    o.transaction=rental||/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
+    // Un prix de vente (≥ 20 000 €) l'emporte sur un « à louer » lu dans le texte (ex. immeuble de rapport avec local à louer).
+    o.transaction=(rental&&!(prix>=20000))||/\b(louer|location|loyer|à louer|a-louer|par mois|\/mois|charges comprises)/i.test(head+' '+base.pathname)?'location':'vente';
     const kind=head+' '+base.pathname;
     const isHouse=/maison|villa|\bmas\b|(?<!co)propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
     o.type_bien=isHouse.test(head)?'maison':isFlat.test(head)?'appartement':isHouse.test(kind)?'maison':isFlat.test(kind)||/\b[TF]\d\b/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/\b[TF]-?\d\b|chambres?\b|pi[eè]ces?\b|\d\s*m(?:²|2)\b/i.test(head)&&!/^\s*(parking|garage|box)/i.test(head)?(/jardin|terrain|plain[- ]pied/i.test(head)?'maison':'appartement'):/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
