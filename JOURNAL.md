@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — ChatGPT — Description → champs immobiliers automatiques (v77)
+- Signalement Anthony : CCI Saint-Floxel (1130), 175 m² habitables et 3 grandes chambres présents dans la description mais absents des colonnes ; « 3 pièces de vie » pris pour le total.
+- Cause : normalizeImmo calculait surface et pièces AVANT immoFillFromText. Extraction déplacée au début, avant le calcul des champs ; les valeurs déjà renseignées restent prioritaires. Lecture de chambres avec adjectif (grandes/belles/spacieuses), surface habitable prioritaire sur annexes/dépendances/terrain, terrain explicite en m²/hectares, exclusion de « pièces de vie » du total ; honoraires T.T.C. non tronqués aux points. Même prudence sur le lecteur AdnPix.
+- admin-test-import.html : Surface/Pièces/Chambres des autres détails utilisent les champs normalisés ; ils correspondent aux valeurs enregistrées par l’import (métadonnées immo existantes).
+- pro-stock-sync v77 déployé, source 79ccd522f0cdf7126ab4b3f8139ff55c6272ed9c ; page admin commit 6e3ff856e0bf3349097fc0f69fcfd27e8be6a844. Aucun import/publication lancé.
+- Test réel fiche 1130 + assertions : surface=175, bedrooms=3, rooms=null (pas de total explicite), honoraires « 4.98 % T.T.C. en sus du prix net vendeur. », DPE C/GES A, 18 photos. Tests supplémentaires : valeurs explicites conservées ; dépendances/terrain non pris en habitable ; charges/taxe/lots/coût énergie extraits. esbuild OK.
+- CCI test à blanc : 17/17, zéro erreur, surface renseignée 53 % (contre 35 %). Sites témoins séquentiels : Nestenn 56/56, Chevreux 29/29, Orpi 52/50 (2 photos absentes), C21 38/38, L’Adresse 88/88 (stock actuel 91 moins 3 doublons), Laugier 23/23, Spider VO 23/21 (2 photos absentes), WooCommerce 79/77 (2 prix absents ; défaut localisation « Km » préexistant inchangé, voir entrée précédente).
+
 ### 29/10/2026 — ChatGPT — CCI Immobilier / AdnPix appris au robot (v76)
 - Demande robot_learning_requests 65ccd298-1156-4f91-9d1c-223330d99310 : https://www.cci-immo.fr/ ; prise en charge ChatGPT.
 - Avant : 21 annonces retenues / 11 complètes, villes « Type de bien », références prises pour codes postaux, DPE/GES non lus, descriptions tronquées et catalogues PHP pris pour des fiches.
