@@ -159,6 +159,11 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const dpe=(text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
     const ges=(text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
     if(dpe&&ges){o.dpe=dpe.toUpperCase();o.ges=ges.toUpperCase();}
+    // 29/10/2026 (L'Adresse…) : étiquette en image ou en classe CSS (« dpe dpe-c », /img/ges-c.png) ; retenue seulement si une seule lettre (pas une légende A→G).
+    if(!o.dpe){const one=(re:RegExp)=>{const set=new Set([...html.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
+      const d2=one(/(?:class=["'][^"']*\b|\/)(?:dpe|etiquette[-_]?dpe|energie|dpe[-_]energie)[-_]([a-g])(?![a-z0-9])/gi),g2=one(/(?:class=["'][^"']*\b|\/)(?:ges|etiquette[-_]?ges|climat|dpe[-_]ges)[-_]([a-g])(?![a-z0-9])/gi);
+      if(d2&&g2){o.dpe=d2;o.ges=g2;}
+      const dd=text.match(/diagnostic\s*r[ée]alis[ée]\s*le\s*:?\s*(\d{2})\/(\d{2})\/(\d{4})/i);if(dd&&!o.date_dpe)o.date_dpe=`${dd[3]}-${dd[2]}-${dd[1]}`;}
     const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
     // Lignes de faits (charges, taxe, lots, copropriété, procédure, dépôt, mandat…) gardées pour la lecture des champs, hors description.
     o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);

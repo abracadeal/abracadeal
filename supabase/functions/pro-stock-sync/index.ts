@@ -117,7 +117,7 @@ function immoFillFromText(o:any){
  if(rentT){const cm=tAll.match(/(?:^|\n|\|)\s*charges\s*(?:locatives|mensuelles)?\s*:\s*(\d[\d\s]*(?:[.,]\d+)?)\s*(?:€|euros?)/i)||tAll.match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(?:€|euros?)\s*de\s*provisions?\s*sur\s*charges/i);if(cm)set('charges_mensuelles',numFr(cm[1]).trim());
   if(/\bnon[- ]meubl|\blocation vide\b|\blogement vide\b/i.test(tAll))set('meuble','Non');else if(/\bmeubl(?:[ée]e?s?|e)(?![a-zà-ÿ])/i.test(tAll))set('meuble','Oui');}
  const tf=tAll.match(/taxe\s*fonci[èe]re\s*(?:\([^)]*\))?\s*[:=]?\s*(?:de\s*)?(?:environ\s*)?(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(tf)set('taxe_fonciere',numFr(tf[1]));
- const lots=t.match(/(\d{1,4})\s*lots/i);if(lots)set('nombre_lots',lots[1]);
+ const lots=tAll.match(/(\d{1,4})\s*lots/i);if(lots)set('nombre_lots',lots[1]);
  const man=tAll.match(/(?:n[°o]\.?\s*(?:de\s*)?)?\bmandat\s*(?:n[°o]\.?|num[ée]ro)?\s*:?\s*([A-Z0-9][A-Z0-9_\/-]{1,20})(?![A-Za-z0-9_])/i);if(man&&/\d/.test(man[1]))set('mandat',man[1]);
  const hon=t.match(/(\d{1,2}(?:[.,]\d+)?\s*%\s*(?:TTC)?\s*d['’]honoraires[^.\n]{0,80}|honoraires[^.\n]{0,20}?(?:à la charge|charge)[^.\n]{0,60})/i);if(hon)set('honoraires',hon[1].replace(/\s+/g,' ').trim());
  const ch=t.match(/(\d{1,2})\s*chambres?\b/i);if(ch)set('chambres',ch[1]);
