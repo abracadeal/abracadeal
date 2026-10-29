@@ -34,8 +34,9 @@ export function parseApimoDetail(raw:string,url:string){
   let property:any=null;for(const m of raw.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1]);const nodes=Array.isArray(j)?j:j['@graph']||[j];const listing=nodes.find((x:any)=>x['@type']==='RealEstateListing'&&String(x.about?.identifier)===id);if(listing)property=listing.about;}catch{}}
   const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
   const ville=variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||'');
-  if(!titre||!description||!price||!ville)return null;
-  const o:any={reference:id,url,titre,description,prix:num(price[1]),ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  if(!titre||!description||!ville)return null;
+  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
   if(variant12&&property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
   const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if(variant12&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
