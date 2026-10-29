@@ -952,3 +952,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ## 29/10/2026 — Interrupteur « Offre Fondateurs » qui ne réagissait pas (Claude)
 - Signalé par Anthony : clic sans effet. Cause : l'état ouvert/fermé n'était chargé qu'à l'ouverture du menu Admin par le bouton du bas (mobile) ou à la construction du menu (ordinateur, Supabase parfois pas encore prêt) ; état inconnu → le clic ne faisait rien.
 - admin-mobile-merge-20261028.js (v=3) et admin-account-layout-20261018.js (v=8) : si l'état n'est pas chargé, il est lu au clic puis la confirmation s'affiche. L'offre est restée ouverte (closed_at vide, vérifié).
+
+## 29/10/2026 — Robot v71 : Laugier Automobiles (Annonces-Automobile) sans ville (Claude)
+- Signalé par Anthony : 23 véhicules lus, 0 prêt (« ville manquante ») alors que l'adresse du garage figure sur chaque fiche.
+- Cause : accueil du site sans photo → pas de « cdn-rivamedia » → site pas reconnu comme Annonces-Automobile → lecteur automatique (qui ne lit pas le bloc « Nos coordonnées »).
+- `isAaSiteHtml` : reconnu aussi par les images d'interface www.annonces-automobile.com/images/graphic/. `siteLocation` : ville en minuscules (« 75017 paris ») acceptée et remise en forme (« Paris »).
+- Contrôle : laugierautomobiles.com 23/23 complets, ville Paris, 33 photos en moyenne.
