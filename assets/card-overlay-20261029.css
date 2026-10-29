@@ -1,0 +1,23 @@
+/* 29/10/2026 (Anthony) : vignettes plus discrètes.
+   - Filigrane « Abracadeal » des photos importées : plus petit et transparent sur les vignettes (la page annonce garde le sien).
+   - Cœur et Partager : petits boutons « verre fumé » côte à côte en haut à droite, au lieu de deux pastilles blanches empilées. */
+html body :is(.ad-photo,.personalized-photo,.home-featured-photo,.detail-related-photo,.b2b-listing-photo) .photo-watermark.photo-watermark--overlay{
+  opacity:.42!important;font-size:.6rem!important;right:7px!important;bottom:5px!important;
+  -webkit-text-stroke:0!important;text-shadow:0 1px 3px rgba(0,0,0,.45)!important;letter-spacing:.03em!important}
+html body .card-photo-actions,html body .ad-card .card-photo-actions,html body .immo-card .card-photo-actions,
+html body #resultats .card-photo-actions,html body .ad-photo .card-photo-actions{
+  flex-direction:row!important;align-items:center!important;gap:5px!important;top:7px!important;right:7px!important}
+html body .card-photo-actions .share-action{order:-1!important}
+html body .card-photo-actions .favorite-action{order:0!important}
+html body .card-photo-actions .card-action-btn,html body #resultats .card-photo-actions .card-action-btn,
+html body :is(#homeFeaturedSection,#recentSearchSection,#recentViewedSection,#nearbySection) .card-photo-actions .card-action-btn{
+  height:28px!important;min-width:28px!important;width:auto!important;padding:0 6px!important;
+  background:rgba(20,8,30,.30)!important;border:1px solid rgba(255,255,255,.18)!important;color:#fff!important;
+  box-shadow:none!important;-webkit-backdrop-filter:blur(6px)!important;backdrop-filter:blur(6px)!important;font-size:.9rem!important}
+html body .card-photo-actions .card-action-btn:hover{background:rgba(20,8,30,.48)!important}
+html body .card-photo-actions .card-action-btn .share-node-icon{width:13px!important;height:13px!important;stroke:#fff!important}
+html body .card-photo-actions .favorite-action.active{color:#ff62b8!important;background:rgba(20,8,30,.40)!important}
+html body .card-photo-actions .card-action-btn .fav-count-inline{font-size:.66rem!important;color:#fff!important}
+@media (max-width:760px){
+  html body .card-photo-actions .card-action-btn,html body #resultats .card-photo-actions .card-action-btn{height:26px!important;min-width:26px!important;padding:0 5px!important}
+}

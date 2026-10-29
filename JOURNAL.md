@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Filigrane et boutons des vignettes plus discrets
+- Demande d'Anthony : filigrane trop visible sur les vignettes, cœur / partager trop présents.
+- Nouveau `assets/card-overlay-20261029.css` (chargé en dernier dans `index.html`) : filigrane des photos importées plus petit et transparent (vignettes seulement, page annonce inchangée) ; Partager + cœur côte à côte en haut à droite, petits boutons verre fumé (fond sombre transparent, icônes blanches), cœur rose si favori. Remplace l'empilement vertical du 26/10 (`category-icons-20261026.css`). Le filigrane incrusté dans les photos déposées par les particuliers n'est pas concerné (il est dans l'image).
+
 ### 29/10/2026 — Claude — Vignettes épurées
 - Demande d'Anthony : sur téléphone, les petits ronds (nombre de photos) et le badge « Nouveau » masquaient / chargeaient la vignette. Supprimés dans `assets/index-main.js` (carte annonce) ; les flèches photo, le cœur et le partage restent. Version `v=20261029-vignette-epuree`.
 
