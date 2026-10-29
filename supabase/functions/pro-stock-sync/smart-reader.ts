@@ -159,7 +159,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const dpe=(text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
     const ges=(text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
     if(dpe&&ges){o.dpe=dpe.toUpperCase();o.ges=ges.toUpperCase();}
-    const hon=text.match(/honoraires[^.\n]{0,120}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].trim();
+    const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
     // Lignes de faits (charges, taxe, lots, copropriété, procédure, dépôt, mandat…) gardées pour la lecture des champs, hors description.
     o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);
     if(!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;

@@ -113,6 +113,9 @@ function immoFillFromText(o:any){
  const dg=tAll.match(/d[ée]p[ôo]t\s*de\s*garantie\s*:?\s*(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(dg)set('depot_garantie',numFr(dg[1]).replace(/\.0+$/,''));
  const honP=tAll.match(/honoraires[^.\n]{0,60}?(\d{1,2}(?:[.,]\d+)?\s*%[^.\n]{0,60})/i)||tAll.match(/honoraires[^.\n]{0,60}?charge\s*(?:exclusive\s*)?(?:du|de\s*l['’]|des?)\s*(vendeur|acqu[ée]reur|locataire|bailleur|propri[ée]taire)/i);
  if(honP)set('honoraires',/^\d/.test(honP[1])?honP[1].replace(/\s+/g,' ').trim():'À la charge du '+honP[1].toLowerCase());
+ const rentT=/location|louer|loyer/i.test(String(first(o,['transaction','type_transaction'])||''));
+ if(rentT){const cm=tAll.match(/(?:^|\n|\|)\s*charges\s*(?:locatives|mensuelles)?\s*:\s*(\d[\d\s]*(?:[.,]\d+)?)\s*(?:€|euros?)/i)||tAll.match(/(\d[\d\s]*(?:[.,]\d+)?)\s*(?:€|euros?)\s*de\s*provisions?\s*sur\s*charges/i);if(cm)set('charges_mensuelles',numFr(cm[1]).trim());
+  if(/\bnon[- ]meubl|\blocation vide\b|\blogement vide\b/i.test(tAll))set('meuble','Non');else if(/\bmeubl(?:[ée]e?s?|e)(?![a-zà-ÿ])/i.test(tAll))set('meuble','Oui');}
  const tf=tAll.match(/taxe\s*fonci[èe]re\s*(?:\([^)]*\))?\s*[:=]?\s*(?:de\s*)?(?:environ\s*)?(\d[\d\s.]*(?:,\d+)?)\s*(?:€|euros?)/i);if(tf)set('taxe_fonciere',numFr(tf[1]));
  const lots=t.match(/(\d{1,4})\s*lots/i);if(lots)set('nombre_lots',lots[1]);
  const man=tAll.match(/(?:n[°o]\.?\s*(?:de\s*)?)?\bmandat\s*(?:n[°o]\.?|num[ée]ro)?\s*:?\s*([A-Z0-9][A-Z0-9_\/-]{1,20})(?![A-Za-z0-9_])/i);if(man&&/\d/.test(man[1]))set('mandat',man[1]);
@@ -650,10 +653,31 @@ async function readC21Agency(origin:URL){
  await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,{url,tr}]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseC21Detail(text,url,tr);if(o)rows.push(o);else if(!/schema\.org\/(?:OutOfStock|SoldOut)/i.test(text))rows.push({reference:id,url});}catch{rows.push({reference:id,url});}}}));
  return rows;
 }
+// 29/10/2026 : réseau L'Adresse (ladresse.com) : page agence /agence/<nom>/<n°>, listes /acheter[/2…] et /louer[/2…],
+// fiches /annonce/(achat|location)/<type>/<ville-cp>/<id> lues par le lecteur automatique.
+function ladresseAgencyPath(u:URL){if(!/(^|\.)ladresse\.com$/i.test(u.hostname))return null;const m=u.pathname.match(/^\/agence\/([a-z0-9-]+)\/(\d+)/i);return m?`/agence/${m[1]}/${m[2]}`:null;}
+async function readLadresseAgency(origin:URL,base:string){
+ const links=new Map<string,string>();
+ for(const kind of ['acheter','louer']){
+  for(let page=1;page<=15;page++){
+   const u=new URL(`${base}/${kind}${page>1?'/'+page:''}`,origin);
+   let text='';try{({text}=await fetchSiteHtml(u));}catch{break;}
+   const before=links.size;
+   for(const m of text.matchAll(/href=["'](\/annonce\/(?:achat|location)\/[a-z0-9-]+\/[a-z0-9-]+\/(\d+))["']/gi))if(!links.has(m[2]))links.set(m[2],new URL(m[1],origin).toString());
+   if(links.size===before||!new RegExp(`${base}/${kind}/${page+1}['"]`).test(text))break;
+  }
+ }
+ if(!links.size)throw Error('Aucun bien trouvé sur la page de l\'agence L\'Adresse : synchronisation annulée par sécurité.');
+ const MAX=220;const entries=[...links.entries()].slice(0,MAX);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=smartDetail(text,url,'immobilier');if(o){o.reference=id;if(/\/annonce\/location\//.test(url))o.transaction='location';rows.push(o);}else rows.push({reference:id,url});}catch{rows.push({reference:id,url});}}}));
+ if(links.size>MAX){(rows as any).partial=true;(rows as any).capped=true;}
+ (rows as any).total=links.size;
+ return rows;
+}
 // Sites nationaux des réseaux : il faut l'adresse de l'agence, pas celle du réseau.
 function networkHomeError(u:URL){
  const h=u.hostname.replace(/^www\./,'').toLowerCase();const path=u.pathname.replace(/\/+$/,'');
- const nets:Record<string,string>={'century21.fr':'Century 21 (ex. https://www.century21-nom-agence-ville.com)','orpi.com':'Orpi (ex. https://www.orpi.com/nom-agence)','laforet.com':'Laforêt','guy-hoquet.com':'Guy Hoquet','stephaneplazaimmobilier.com':'Stéphane Plaza','nestenn.com':'Nestenn','foncia.com':'Foncia'};
+ const nets:Record<string,string>={'century21.fr':'Century 21 (ex. https://www.century21-nom-agence-ville.com)','orpi.com':'Orpi (ex. https://www.orpi.com/nom-agence)','laforet.com':'Laforêt','guy-hoquet.com':'Guy Hoquet','stephaneplazaimmobilier.com':'Stéphane Plaza','nestenn.com':'Nestenn','foncia.com':'Foncia','ladresse.com':'L\'Adresse (ex. https://www.ladresse.com/agence/l-adresse-cannes/326)'};
  if(nets[h]&&(!path||(h==='century21.fr'&&!/^\/trouver_agence\/agence\//.test(path))))return`C'est l'adresse du réseau ${nets[h].split(' (')[0]}, pas celle d'une agence : entrez l'adresse du site ou de la page de l'agence${nets[h].includes('(')?' '+nets[h].slice(nets[h].indexOf('(')):''}.`;
  return null;
 }
@@ -830,7 +854,9 @@ async function readFeed(feed:any){
     const orpiSlug=orpiAgencySlug(url)||orpiAgencySlug(new URL(String(feed.feed_url)));
     // Fiche agence sur century21.fr : on suit le lien vers le site de l'agence.
     const c21Link=/(^|\.)century21\.fr$/i.test(url.hostname)?text.match(/href="(https:\/\/www\.century21[a-z0-9-]*\.(?:com|fr))\/annonces\/achat\/"/i)?.[1]:null;
+    const ladPath=ladresseAgencyPath(url);
     if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
+    else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
