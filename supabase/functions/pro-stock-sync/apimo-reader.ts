@@ -3,7 +3,7 @@ import { sDecode } from './smart-reader.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const text=(s:string)=>sDecode(s.replace(/<br\s*\/?>|<\/(?:p|li|div|h[1-6])>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').split('\n').map(x=>x.trim()).filter(Boolean).join('\n');
 const num=(s:string)=>s.replace(/[\s\u00a0\u202f]/g,'').replace(',','.');
-export const isApimoModules=(html:string)=>/apimo\.net\/[^"']*site-internet/i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes|locations)\/?"/i.test(html);
+export const isApimoModules=(html:string)=>/apimo\.net\/[^"']*site-internet/i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes?|locations?)\/?"/i.test(html);
 // Les lettres sont dessinées en tracés SVG. Lire la couleur de la ligne agrandie et encadrée,
 // pas une classe déduite de seuils numériques ni la légende complète A→G.
 export function apimoDiagnostic(svg:string){
@@ -19,27 +19,33 @@ export function parseApimoDetail(raw:string,url:string){
   const html=raw.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,'');
   const id=new URL(url).pathname.match(/\+(\d+)\/?$/)?.[1];if(!id)return null;
   const modules=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi);
-  const info=modules.find(x=>/property-info-template-2\b/.test(x))||'';
-  const main=modules.find(x=>/property-info-template-4\b/.test(x))||'';
+  const module=(name:string)=>modules.find(x=>new RegExp('class="[^"]*\\b'+name+'\\b').test(x))||'';
+  const info=module('property-info-template-2')||module('property-info-template-12');
+  const variant12=/class="[^"]*\bproperty-info-template-12\b/.test(info);
+  const main=module('property-info-template-4');
   const summary=modules.find(x=>/\bsummary details\b/.test(x))||'';
-  const surfaceBlock=modules.find(x=>/property-info-template-5\b/.test(x))||'';
-  const legal=modules.find(x=>/property-info-template-7\b/.test(x))||'';
+  const surfaceBlock=module('property-info-template-5');
+  const legal=module('property-info-template-7');
   const p=text(info.match(/class="title property-title[^"']*"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').split('\n');
   const titre=text(main.match(/<h1\b[^>]*class="title[^"']*"[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
   const description=text(main.match(/<p\b[^>]*class="comment"[^>]*>([\s\S]*?)<\/p>/i)?.[1]||'');
   const infoText=text(info);const price=infoText.match(/(\d[\d\s.,]*)\s*€/);
-  const ville=p[p.length-1]||'';
+  // Les données structurées doivent appartenir au bien, jamais à l'adresse de l'agence.
+  let property:any=null;for(const m of raw.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1]);const nodes=Array.isArray(j)?j:j['@graph']||[j];const listing=nodes.find((x:any)=>x['@type']==='RealEstateListing'&&String(x.about?.identifier)===id);if(listing)property=listing.about;}catch{}}
+  const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
+  const ville=variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||'');
   if(!titre||!description||!price||!ville)return null;
-  const o:any={reference:id,url,titre,description,prix:num(price[1]),ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:p[1]||'',texte_page:text(summary+' '+legal)};
+  const o:any={reference:id,url,titre,description,prix:num(price[1]),ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  if(variant12&&property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
-  const rooms=infoText.match(/(\d+)\s*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=infoText.match(/(\d+)\s*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];
+  const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if(variant12&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
   for(const m of surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)){const t=text(m[1]);const land=t.match(/^\d+\s*(?:Terrain|Jardin)\s+(\d+(?:[.,]\d+)?)\s*m²/i);if(land&&!o.surface_terrain)o.surface_terrain=num(land[1]);const bath=t.match(/^(\d+)\s+Salle de (?:bains?|douche)/i);if(bath)baths+=Number(bath[1]);}
   if(baths)o.salles_de_bain=String(baths);
   const factKeys:Record<string,string>={'exposition':'exposition','état':'etat_bien','étage':'etage','année de construction':'annee_construction','énergie de chauffage':'chauffage'};
   for(const m of summary.matchAll(/<li\b[^>]*>([^<]+)<span[^>]*>([\s\S]*?)<\/span>/gi)){const key=text(m[1]).toLowerCase(),v=text(m[2]);if(v&&factKeys[key])o[factKeys[key]]=key==='étage'?v.match(/^\d+/)?.[0]||v:v;}
   const charge=text(legal).match(/(?:Provision sur charges r[ée]cup[ée]rables|Charges r[ée]cup[ée]rables)\s*([\d\s.,]+)\s*€\s*\/\s*Mois/i);if(charge)o.charges_mensuelles=num(charge[1]);
-  const features=modules.find(x=>/property-info-template-6\b/.test(x))||'';o.prestations=[...features.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1])).join('|');
+  const features=module('property-info-template-6');o.prestations=[...features.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1])).join('|');
   o.honoraires=[...legal.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1])).filter(x=>/honoraires|charge.*(?:vendeur|acqu[ée]reur|locataire)/i.test(x)).join(' | ');
   const gallery=modules.find(x=>/\bmodule-slider\b/.test(x))||'';o.photos=[...new Set([...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>sDecode(m[1])).filter(x=>/^https?:\/\//.test(x)))].join('|');
   const diag=modules.find(x=>/energy-diagnostics/.test(x))||'';
@@ -50,7 +56,7 @@ export function parseApimoDetail(raw:string,url:string){
 export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher){
   if(/\/propriete\/[^/]+\+\d+\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
   const root=new URL(start.origin);const links=[...home.matchAll(/href="([^"]+)"/gi)].map(m=>{try{return new URL(sDecode(m[1]),start);}catch{return null;}}).filter((u):u is URL=>!!u&&u.hostname===start.hostname);
-  const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes|locations)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
+  const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes?|locations?)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
   if(!bases.length)throw Error('Listes actives de vente/location Apimo introuvables.');
   const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0;
   while(queue.length&&pages<40){const next=queue.shift()!;if(seen.has(next))continue;seen.add(next);let html='';try{html=(await fetchHtml(new URL(next))).text;}catch{partial=true;continue;}pages++;
