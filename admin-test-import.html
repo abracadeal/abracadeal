@@ -124,7 +124,7 @@ const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):nu
 const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
 const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
 const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
-let ROWS=[],NORM=[],REQS=[],lastSync=null;
+let NN=[],ROWS=[],NORM=[],REQS=[],lastSync=null;
 async function fnError(error){let msg=error?.message||String(error);try{const b=await error.context.json();msg=b.error||msg}catch{}return msg}
 async function init(){
  const{data:{user}}=await sb.auth.getUser();
@@ -215,25 +215,28 @@ async function load(ev){
 }
 function render(data,sector){
  const immo=sector==='immobilier';
- const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=ROWS.length-ready;
- const photos=ROWS.reduce((n,r)=>n+(r.photos?String(r.photos).split('|').length:0),0);
+ // 29/10/2026 : chaque fiche lue est reliée à sa version normalisée (photos sans doublons, ville corrigée) ; doublons d'annonce signalés.
+ NN=ROWS.map(r=>NORM.find(n=>(n.externalUrl&&r.url&&n.externalUrl===r.url)||(n.ref&&r.reference!=null&&String(n.ref)===String(r.reference)))||null);
+ const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=NORM.length-ready;
+ const photos=NORM.reduce((n,r)=>n+((r.photos||[]).length),0);
  E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">'+(data.total_on_site?esc(String(data.total_on_site))+' biens sur le site, 220 lus par passage : le reste arrive aux synchros suivantes':'lecture partielle (site très grand)')+'</span>':'');
- E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos trouvées',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos (sans doublons)',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
-  const errs=(NORM[i]?.errors||[]);
+  const n=NN[i];const errs=(n?.errors||[]);
   if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
-  const ph=r.photos?String(r.photos).split('|'):[];
-  const chips=(immo?[r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
+  if(r.titre&&!n)return '<div class="car" style="opacity:.6"><div class="body"><div class="ttl">'+esc(r.titre)+'</div><span class="muted">Doublon d\'une autre annonce du site : non publié.</span></div></div>';
+  const ph=n?.photos?.length?n.photos:(r.photos?String(r.photos).split('|'):[]);
+  const chips=(immo?[n?.city||r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
   return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
  }).join('');
 }
 function openCar(i){
- const r=ROWS[i];if(!r||!r.titre)return;const ph=r.photos?String(r.photos).split('|'):[];
+ const r=ROWS[i];if(!r||!r.titre)return;const n0=NN[i]||{};const ph=n0.photos?.length?n0.photos:(r.photos?String(r.photos).split('|'):[]);
  E('dt').textContent=euro(r.prix);
- const rows=[['Marque',r.marque],['Modèle',r.modele],['Finition',r.finition],['Catégorie',r.carrosserie],['Mise en circulation',r.mise_en_circulation],['Kilométrage',km(r.kilometrage)],['Énergie',r.carburant],['Boîte',r.boite],['Puissance',r.puissance_din],['Puissance fiscale',r.puissance_fiscale],['CO2',r.co2],['Portes',r.portes],['Couleur',r.couleur],['Garantie',r.garantie],['Type de bien',r.type_bien],['Transaction',r.transaction],['Ville',r.ville],['Code postal',(NORM[i]||{}).postal||r.code_postal],['Surface',r.surface],['Pièces',r.pieces],['Chambres',r.chambres],['Référence',r.reference]].filter(x=>x[1]);
+ const rows=[['Marque',r.marque],['Modèle',r.modele],['Finition',r.finition],['Catégorie',r.carrosserie],['Mise en circulation',r.mise_en_circulation],['Kilométrage',km(r.kilometrage)],['Énergie',r.carburant],['Boîte',r.boite],['Puissance',r.puissance_din],['Puissance fiscale',r.puissance_fiscale],['CO2',r.co2],['Portes',r.portes],['Couleur',r.couleur],['Garantie',r.garantie],['Type de bien',r.type_bien],['Transaction',r.transaction],['Ville',(NN[i]||{}).city||r.ville],['Code postal',(NN[i]||{}).postal||r.code_postal],['Surface',r.surface],['Pièces',r.pieces],['Chambres',r.chambres],['Référence',r.reference]].filter(x=>x[1]);
  // 29/10/2026 : immobilier : toutes les infos normalisées (mêmes noms quel que soit le site).
- const n=NORM[i]||{};const eur=v=>v==null||v===''?'':Number(v).toLocaleString('fr-FR')+' €';let essHtml='';
+ const n=NN[i]||{};const eur=v=>v==null||v===''?'':Number(v).toLocaleString('fr-FR')+' €';let essHtml='';
  if(n.category==='immobilier'){rows.push(...[['Surface terrain',n.landSurface?n.landSurface+' m²':''],['Salles de bain / d\'eau',n.bathrooms],['Étage',n.floor!=null?(n.floor===0?'Rez-de-chaussée':n.floor):''],['Année de construction',n.yearBuilt],['Chauffage',n.heating],['DPE (énergie)',n.dpe],['GES (climat)',n.ges],['Consommation',n.energyConsumption?n.energyConsumption+' kWh/m²/an':''],['Date du DPE',n.dpeDate],['Dépenses d\'énergie / an',n.energyCostMin?eur(n.energyCostMin)+' à '+eur(n.energyCostMax):''],['Prestations',(n.features||[]).join(', ')],['N° de mandat',n.mandate]].filter(x=>x[1]!==''&&x[1]!=null));
   // 29/10/2026 : informations essentielles / obligatoires, toujours affichées (« Non communiqué » si absentes) : on voit d'un coup d'œil ce que le site ne donne pas.
   const NC='— Non communiqué';const v=x=>x==null||x===''?NC:x;const rent=n.sub==='location'||n.sub==='saisonniere';

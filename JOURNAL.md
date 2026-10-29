@@ -958,3 +958,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Cause : accueil du site sans photo → pas de « cdn-rivamedia » → site pas reconnu comme Annonces-Automobile → lecteur automatique (qui ne lit pas le bloc « Nos coordonnées »).
 - `isAaSiteHtml` : reconnu aussi par les images d'interface www.annonces-automobile.com/images/graphic/. `siteLocation` : ville en minuscules (« 75017 paris ») acceptée et remise en forme (« Paris »).
 - Contrôle : laugierautomobiles.com 23/23 complets, ville Paris, 33 photos en moyenne.
+
+## 29/10/2026 — Doublons de photos et d'annonces, tous sites (Claude)
+- Demande d'Anthony : photos en double fréquentes (auto et immo) ; vérifier aussi les annonces en double.
+- pro-stock-sync v72 (`normalizeRows`) : `dedupePhotos` — même image reconnue malgré la taille (-300x200, -ibig/-intermediate, /thumbs/, ?w=400…), l'extension et les paramètres de taille ; la plus grande version est gardée (sans indication de taille = image d'origine). `listingKey` : même titre + prix + surface/km/année + ville dans un même site = une seule annonce (celle qui a le plus de photos). Lecture à blanc : `duplicates`, `photos_total`.
+- Aperçu admin : affichait les photos brutes de la page (ex. 45 pour la Lexus Laugier) et les villes avant correction ; il affiche maintenant les données qui seront publiées (photos sans doublons, ville corrigée), les doublons d'annonce en grisé « non publié ». Lien fiche lue ↔ fiche normalisée par adresse ou référence (avant : par position, décalé dès qu'une fiche était écartée).
+- Contrôle : L'Adresse Cannes 3 annonces en double retirées (89 → 86) ; Laugier 23 véhicules, 33 photos en moyenne après dédoublonnage.
