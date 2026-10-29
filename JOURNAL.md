@@ -23,6 +23,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `assets/thumb-fit-20261009.js` (v=2) : la photo remplit toujours la vignette (`cover`) ; plus de mode « contain + fond flou ». Ancrage bas-droite si recadrage léger, centré sinon. La page annonce garde la photo entière.
 - Robot : `attachListingAdvisor` n'ajoute plus « Contact pour ce bien : … » à la description (contactName reste dans IMETA, contactPhone va dans listing_contacts.phone). Nouveau `stripContactLines` au début de `tidyDescription` : toute ligne « Contact pour ce bien », ligne courte de contact avec numéro supprimée, numéro retiré d'une ligne longue. Règle : jamais de numéro en clair dans une annonce importée (réservé aux membres connectés).
 - Site (`index-main.js` v=20261029-contact-bien) : « Votre contact pour ce bien : <nom> » au-dessus des boutons Message / Voir le numéro (immo, IMETA contactName). Admin : contactName transmis à l'aperçu.
+- pro-stock-sync v88, source 9b8e4577. Test à blanc Infinity : 174 lus / 172 complets, noms 173, téléphones 165 (30 distincts) gardés à part, 0 numéro dans les descriptions.
 
 ### 29/10/2026 — Claude — Aperçu « Voir comme sur le site »
 - `admin-test-import.html` : après « Lire le stock », bouton « Voir comme sur le site » ; les fiches mises en forme (sans erreur, 220 max) sont stockées dans le navigateur (`abraca_import_preview`) et `index.html?apercu=import` les affiche avec les vraies vignettes et la vraie page annonce. Rien n'est publié ni enregistré en base.
