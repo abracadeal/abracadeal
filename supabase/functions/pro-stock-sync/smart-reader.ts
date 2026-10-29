@@ -129,7 +129,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const long=longestText(html);o.description=(long.length>ogDesc.replace(/(\.{3}|…)$/,'').length?long:ogDesc).slice(0,6000);
   if(immo){
     const cityJ=jsonVal(region,['itemCity','addressLocality','city','ville','commune']);const cpJ=jsonVal(region,['itemZipcode','postalCode','zipcode','zipCode','codePostal','code_postal']);
-    const zone=head+' \n'+text.slice(0,4000);
+    const zone=head+' \n'+nearTitle+' \n'+text.slice(0,4000);
     const bad=/kilom|prix|surface|ann[ée]e|t[ée]l|r[ée]f/i;
     // 29/10/2026 (Nestenn) : « 27390 » caché suivi de « Partager ce bien » pris pour une ville : on écarte les mots d'interface
     // et on préfère la ville qui figure aussi dans le titre.
