@@ -931,3 +931,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Signalé par Anthony : L'Adresse Cannes, biens au Cannet / à Juan-les-Pins affichés « Cannes » (adresse de l'agence prise sur la page).
 - smart-reader : ordre de choix de la ville : 1) segment « ville-cp » de l'adresse de la fiche (/le-cannet-06110/ ; si le segment contient d'autres mots, seule la fin confirmée par la page est gardée), 2) ville trouvée dans le titre, 3) fin du titre (« …, Le Cannet ») seulement si la page la confirme, 4) ancienne règle (données de la page, texte).
 - Contrôle : L'Adresse Cannes 89/89, code postal = celui de l'adresse de chaque fiche pour les 89 ; Nestenn Orléans 56/56 ; immochevreux 30/30 (la fin de titre « MANSARDE - CAVE - » n'est plus prise pour une ville).
+
+## 29/10/2026 — Sites à apprendre : bouton « Supprimer » (Claude)
+- Demande d'Anthony : retirer un prospect qui ne l'intéresse pas depuis la liste « Sites à apprendre ».
+- RPC `admin_drop_prospect` (admin) : la ligne n'est pas effacée (sinon le robot de recherche de prospects pourrait la rajouter) mais marquée `segment='exclu_admin'`, statut ready → paused, note datée : plus jamais mailé (le tirage et le test excluent déjà « exclu% »), retiré de la liste et du mail du soir (pro-stock-sync v70).
+- admin-test-import.html : bouton rouge « Supprimer » avec confirmation.
