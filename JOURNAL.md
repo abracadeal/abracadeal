@@ -926,3 +926,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Annonce publique (source feed:…) : mention sous la description (erreurs possibles, seules les infos confirmées par le pro font foi). index-main.js?v=20261029-mention-import.
 - Admin (admin-test-import.html) : section « Sites à apprendre » (compteurs, Tester, Revérifier).
 - Note : plusieurs tests lancés en même temps → 546 WORKER_RESOURCE_LIMIT ; le cron n'en lance qu'un à la fois.
+
+## 29/10/2026 — Robot v69 : ville du bien, pas celle de l'agence (Claude)
+- Signalé par Anthony : L'Adresse Cannes, biens au Cannet / à Juan-les-Pins affichés « Cannes » (adresse de l'agence prise sur la page).
+- smart-reader : ordre de choix de la ville : 1) segment « ville-cp » de l'adresse de la fiche (/le-cannet-06110/ ; si le segment contient d'autres mots, seule la fin confirmée par la page est gardée), 2) ville trouvée dans le titre, 3) fin du titre (« …, Le Cannet ») seulement si la page la confirme, 4) ancienne règle (données de la page, texte).
+- Contrôle : L'Adresse Cannes 89/89, code postal = celui de l'adresse de chaque fiche pour les 89 ; Nestenn Orléans 56/56 ; immochevreux 30/30 (la fin de titre « MANSARDE - CAVE - » n'est plus prise pour une ville).
