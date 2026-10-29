@@ -3964,7 +3964,7 @@ function renderAds(){
   window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
     const img=photoUrls.length?`<img class="ad-photo-img" ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
-    const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button><div class="carousel-dots">${photoUrls.map((_,i)=>`<span class="carousel-dot${i===0?' active':''}"></span>`).join('')}</div>`:'';
+    const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button>`:'';
     const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
     const canUseProBoost=!!(
@@ -4007,7 +4007,7 @@ function renderAds(){
           ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
           ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
         </div>`:''}
-        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}${listingIsNew(a)?`<span class="ad-new">Nouveau</span>`:''}</div>
+        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}

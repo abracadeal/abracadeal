@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Vignettes épurées
+- Demande d'Anthony : sur téléphone, les petits ronds (nombre de photos) et le badge « Nouveau » masquaient / chargeaient la vignette. Supprimés dans `assets/index-main.js` (carte annonce) ; les flèches photo, le cœur et le partage restent. Version `v=20261029-vignette-epuree`.
+
 ### 29/10/2026 — Claude — Vignettes pleines + contact du bien hors description (robot v88)
 - Retour d'Anthony sur l'aperçu : (1) les photos ne remplissaient pas toute la vignette ; (2) le nom et le numéro du conseiller apparaissaient dans la description.
 - `assets/thumb-fit-20261009.js` (v=2) : la photo remplit toujours la vignette (`cover`) ; plus de mode « contain + fond flou ». Ancrage bas-droite si recadrage léger, centré sinon. La page annonce garde la photo entière.
