@@ -84,8 +84,13 @@ function stockPhrase(category: string, n: number | null | undefined) {
   if (k <= 1) return `votre ${noun[0]} peut être`;
   return `vos ${k} ${noun[1]} peuvent être`;
 }
+// {{vos_annonces}} : « vos véhicules » / « vos motos » / « vos biens » (mail « publiez vous-même », pros qui vendent sur Leboncoin).
+function vosAnnonces(category: string) {
+  return category === "Agence immobilière" ? "vos biens" : category === "Concession moto" ? "vos motos" : "vos véhicules";
+}
+let CURRENT_CATEGORY = "";
 function fill(t: string, company: string, from: string, annonces = "vos annonces peuvent être") {
-  return t.replaceAll("{{societe}}", company || "votre entreprise").replaceAll("{{expediteur}}", from).replaceAll("{{annonces}}", annonces);
+  return t.replaceAll("{{societe}}", company || "votre entreprise").replaceAll("{{expediteur}}", from).replaceAll("{{annonces}}", annonces).replaceAll("{{vos_annonces}}", vosAnnonces(CURRENT_CATEGORY));
 }
 // Ajoute le code de suivi personnel au lien de l'offre Fondateurs. En cas d'échec, le mail part avec le lien normal.
 const FOUNDER_LINK = /https:\/\/abracadeal\.fr\/pro-fondateur\.html(?![?#\w-]|\.\w)/g;
@@ -99,10 +104,11 @@ async function withTracking(body: string, prospectId: string) {
   } catch { return body; }
 }
 type Tpl = { subject: string; body: string };
-async function templates(category: string, followup: boolean, variant: string): Promise<Tpl> {
-  const { data: first } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: category || "", p_variant: variant });
+async function templates(category: string, followup: boolean, variant: string, manual = false): Promise<Tpl> {
+  CURRENT_CATEGORY = category || "";
+  const { data: first } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: manual ? "manuel" : (category || ""), p_variant: variant });
   if (!followup) return first as Tpl;
-  const { data: rel } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: "relance", p_variant: variant });
+  const { data: rel } = await admin.rpc("prospect_mailer_template_for_variant", { p_category: manual ? "relance_manuel" : "relance", p_variant: variant });
   // la relance part dans le même fil que le 1er mail : même objet précédé de « Re: »
   return { subject: "Re: " + (first as Tpl).subject, body: (rel as Tpl).body };
 }
@@ -194,7 +200,7 @@ Deno.serve(async (req) => {
         await admin.rpc("prospect_mailer_verified", { p_email: c.email, p_ok: true, p_error: null });
         return json({ ok: true, message: "Connexion réussie : identifiant et mot de passe acceptés par OVH. Aucun e-mail envoyé." });
       }
-      const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A");
+      const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A", !!body.manual);
       const to = String(user.email || "");
       const cat = String(body.category || "Garage / concession auto");
       const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null, stockPhrase(cat, 24));
@@ -217,11 +223,11 @@ Deno.serve(async (req) => {
     for (const j of list) {
       const followup = j.kind === "followup";
       try {
-        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count").eq("id", j.id).single();
+        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         const c = await creds(j.mailbox);
-        const tpl = await templates(j.category || "", followup, variant);
+        const tpl = await templates(j.category || "", followup, variant, row?.site_check_status === "manual");
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });

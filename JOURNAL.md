@@ -937,3 +937,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Contrainte `prospection_prospects_segment_check` élargie à « exclu_admin » (sinon erreur au clic, signalée par Anthony).
 - RPC `admin_drop_prospect` (admin) : la ligne n'est pas effacée (sinon le robot de recherche de prospects pourrait la rajouter) mais marquée `segment='exclu_admin'`, statut ready → paused, note datée : plus jamais mailé (le tirage et le test excluent déjà « exclu% »), retiré de la liste et du mail du soir (pro-stock-sync v70).
 - admin-test-import.html : bouton rouge « Supprimer » avec confirmation.
+
+## 29/10/2026 — Prospects qui vendent sur Leboncoin : mail « publiez vous-même » (Claude)
+- Demande d'Anthony : un bouton pour les pros dont les annonces sont sur Leboncoin et pas sur leur site, et leur envoyer un mail pour qu'ils publient eux-mêmes.
+- Base (migration prospect_manual_listing_mail) : `site_check_status` accepte « manual » ; RPC `admin_mark_prospect_manual` ; `prospect_mailer_claim` envoie le 1er mail aux statuts ok ET manual ; modèles « manuel » et « relance_manuel » (gratuit, sans limite d'annonces, publier depuis le téléphone, contacts directs).
+- prospect-mailer (stub GitHub) : modèle « manuel » / « relance_manuel » quand `site_check_status='manual'` ; `{{vos_annonces}}` = vos véhicules / vos motos / vos biens ; test : `{action:'test', manual:true}`.
+- admin-test-import.html : bouton « Vend sur Leboncoin » dans « Sites à apprendre », compteur « vendent sur Leboncoin ».
+- Leboncoin n'est pas lu par le robot (protection anti-robots et conditions d'utilisation).
