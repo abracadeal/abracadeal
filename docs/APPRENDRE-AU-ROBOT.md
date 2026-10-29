@@ -62,7 +62,7 @@ import "https://raw.githubusercontent.com/abracadeal/abracadeal/<SHA DU COMMIT>/
 
 ## 5. Répartition Claude / ChatGPT
 
-- Les demandes d'Anthony arrivent dans `public.robot_learning_requests` (bouton « Réparer » de l'admin). Claude les traite chaque soir à 18 h 47 (tâche planifiée). Pour en prendre une : `update public.robot_learning_requests set status='in_progress', handled_by='ChatGPT' where id=...` ; à la fin `status='done'` (ou `'failed'`), `result` = une phrase simple pour Anthony, `done_at=now()`.
+- Les demandes d'Anthony arrivent dans `public.robot_learning_requests` (bouton « Réparer » de l'admin). Plus de tâche planifiée (annulée par Anthony le 29/10) : ChatGPT ou Claude les traitent quand Anthony le demande. Pour en prendre une : `update public.robot_learning_requests set status='in_progress', handled_by='ChatGPT' where id=...` ; à la fin `status='done'` (ou `'failed'`), `result` = une phrase simple pour Anthony, `done_at=now()`.
 - **Réparer = apprendre au robot à lire, rien d'autre** (précision d'Anthony) : ne jamais toucher à `prospection_prospects`, aucun mail, aucun import ni publication. Ensuite Anthony décide avec ses boutons : **Tester** (aperçu), **Valider** (le site est bon : le prospect est remis en test puis reçoit son mail), **Supprimer**, **Vend sur Leboncoin**.
 
 - Avant de commencer : lire le haut de `JOURNAL.md` et `git pull` ; ne pas travailler en même temps sur le même fichier du robot.

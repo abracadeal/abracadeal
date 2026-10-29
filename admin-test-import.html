@@ -104,10 +104,10 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
  <h2 class="sec">Demandes</h2>
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Sites en réparation</h2>
- <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Claude les traite chaque soir à 18 h 47 ; ChatGPT peut aussi les prendre (guide docs/APPRENDRE-AU-ROBOT.md).</p>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Demande à ChatGPT (ou à Claude) de les traiter : guide docs/APPRENDRE-AU-ROBOT.md.</p>
  <div class="reqs" id="learnq"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Sites à apprendre</h2>
- <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils ne reçoivent pas le mail. <b>Tester</b> : voir ce que lit le robot. <b>Réparer</b> : Claude apprend au robot à lire ce site (le soir). <b>Valider</b> : le site se lit bien maintenant → il est retesté et le pro reçoit son mail. <b>Supprimer</b> : ne m'intéresse pas, jamais de mail. <b>Vend sur Leboncoin</b> : mail « publiez vous-même vos annonces ».</p>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils ne reçoivent pas le mail. <b>Tester</b> : voir ce que lit le robot. <b>Réparer</b> : le site part dans « Sites en réparation » pour que ChatGPT ou Claude apprenne au robot à le lire. <b>Valider</b> : le site se lit bien maintenant → il est retesté et le pro reçoit son mail. <b>Supprimer</b> : ne m'intéresse pas, jamais de mail. <b>Vend sur Leboncoin</b> : mail « publiez vous-même vos annonces ».</p>
  <div class="reqs" id="unread"><div class="empty">Chargement…</div></div>
  <h2 class="sec">Tester une adresse</h2>
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
@@ -152,7 +152,7 @@ async function askLearn(url,sector,company,prospect){
  if(note===null)return;
  const{data,error}=await sb.rpc('admin_request_robot_learning',{p_url:url,p_sector:sector,p_company:company||null,p_prospect_id:prospect||null,p_note:note||null});
  if(error){alert(error.message);return}
- alert(data?.already?'Ce site est déjà en réparation.':'Envoyé en réparation : Claude s\'en occupe ce soir à 18 h 47.');loadLearn();
+ alert(data?.already?'Ce site est déjà en réparation.':'Envoyé dans « Sites en réparation ». Demande à ChatGPT ou à Claude de s\'en occuper.');loadLearn();
 }
 async function loadUnread(){
  const{data,error}=await sb.rpc('admin_unreadable_sites',{p_limit:60});

@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 29/10/2026 — Claude — Tâche du soir annulée
+- Décision d'Anthony : ChatGPT se débrouille bien pour les réparations ; la tâche planifiée « Abracadeal : apprendre les sites au robot » (18 h 47) est supprimée. Les demandes « Réparer » restent dans `robot_learning_requests` et sont traitées par ChatGPT ou Claude sur demande d'Anthony. Textes de l'admin et guide mis à jour.
+
 ### 29/10/2026 — ChatGPT — IFG Provence / modules Apimo appris (v81)
 - Demande 1a95f7d2-57d0-425b-8abb-5f22923b88e5 : https://ifgprovence.fr. Avant : lecteur automatique 116 annonces (y compris biens vendus), aucun DPE. Site Apimo à modules HTML.
 - Nouveau apimo-reader.ts : lecture uniquement des listes actives /fr/ventes (19 biens, 2 pages) et /fr/locations (11 biens, 1 page). Ne parcourt ni /fr/biens-vendus ni sitemap ni biens similaires. Détection limitée aux sites Apimo avec ces routes et modules, sinon lecteur précédent conservé.
