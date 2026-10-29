@@ -207,7 +207,7 @@ async function readSpiderVo(start:URL,html:string){
  const listUrl=new URL(`/${siteId}/vehicules/`,start);
  const{text:list,url:lu}=await fetchSiteHtml(listUrl).catch(e=>{throw Error(`Liste des véhicules illisible : ${e instanceof Error?e.message:String(e)}`);});
  const links=new Map<string,string>();
- for(const m of list.matchAll(/href="([^"]*,svoc\d+\.html\?vid=(\d+))"/gi)){if(links.has(m[2]))continue;try{const u=new URL(decodeEntities(m[1]),lu);if(u.hostname===lu.hostname)links.set(m[2],u.toString());}catch{}}
+ for(const m of list.matchAll(/href="([^"]*,svoc\d+\.html\?vid=(\d+))"/gi)){if(links.has(m[2]))continue;try{const u=new URL(decodeEntities(m[1]),lu);if(u.hostname.replace(/^www\./,'')===lu.hostname.replace(/^www\./,''))links.set(m[2],u.toString());}catch{}}
  if(!links.size)throw Error('Aucun véhicule trouvé sur le site Spider VO : synchronisation annulée par sécurité.');
  const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
  await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[vid,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseSpiderVoDetail(text,url,vid);if(!o._svo_sold)rows.push(o.titre?o:{reference:vid,url});}catch{rows.push({reference:vid,url});}}}));
@@ -715,7 +715,7 @@ async function readFeed(feed:any){
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
     else if(isStarterreSite(text)){rows=await readStarterreSite(origin,text);platform='Starterre';}
-    else if(isSpiderVoSite(text)){rows=await readSpiderVo(url,text);platform='Spider VO';}
+    else if(isSpiderVoSite(text)&&/\/\d+\/vehicules\/|,svoc\d+\.html/i.test(text)){rows=await readSpiderVo(url,text);platform='Spider VO';}
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
