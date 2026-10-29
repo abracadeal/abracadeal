@@ -738,6 +738,27 @@ function detectSitePlatform(html:string){
  const m=html.match(/(?:r[ée]alis[ée]|con[cç]u|cr[ée]ation|d[ée]velopp[ée])[^<]{0,20}(?:par|by)\s*(?:<[^>]*>\s*){0,3}([^<]{2,40})/i);
  return m?('Site réalisé par '+decodeEntities(m[1]).trim()):'Inconnu';
 }
+// 29/10/2026 : agence au site illisible (Wix…) mais présente sur un réseau lisible : on cherche sa page réseau
+// (lien Orpi / Century 21 sur son site, sinon page Orpi au nom du domaine, ex. calleris.fr → orpi.com/callerisimmo).
+async function findNetworkPage(siteUrl:URL,html:string){
+ const orpi=html.match(/https?:\/\/(?:www\.)?orpi\.com\/([a-z0-9-]{2,60})\/?["'?#]/i)?.[1];
+ if(orpi&&orpiAgencySlug(new URL(`https://www.orpi.com/${orpi}/`)))return{kind:'orpi',slug:orpi.toLowerCase()};
+ const c21=html.match(/https?:\/\/(www\.century21-[a-z0-9-]+\.(?:com|fr))/i)?.[1];
+ if(c21)return{kind:'c21',url:`https://${c21}/`};
+ const label=siteUrl.hostname.replace(/^www\./,'').split('.')[0].toLowerCase().replace(/[^a-z0-9-]/g,'');
+ if(label.length<3)return null;
+ const base=label.replace(/-?(immobilier|immo)$/,'');
+ const cands=[...new Set([label,base,base+'immo',base+'-immo',base+'immobilier','orpi'+base,'orpi-'+base])].filter(x=>x.length>=3);
+ const want=base.replace(/-/g,'');
+ for(const slug of cands){
+  try{const r=await fetch(`https://www.orpi.com/${slug}/`,{headers:{'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36','Accept-Language':'fr-FR'},redirect:'follow',signal:AbortSignal.timeout(12000)});
+   if(!r.ok){await r.body?.cancel();continue;}
+   const t=await r.text();const title=decodeEntities(t.match(/<title>([^<]{0,200})/i)?.[1]||'').toLowerCase().replace(/[^a-z0-9]/g,'');
+   if(/agenceimmobili/.test(title)&&title.includes(want))return{kind:'orpi',slug};
+  }catch{}
+ }
+ return null;
+}
 async function readFeed(feed:any){
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
@@ -780,9 +801,9 @@ async function readFeed(feed:any){
     const orpiSlug=orpiAgencySlug(url)||orpiAgencySlug(new URL(String(feed.feed_url)));
     // Fiche agence sur century21.fr : on suit le lien vers le site de l'agence.
     const c21Link=/(^|\.)century21\.fr$/i.test(url.hostname)?text.match(/href="(https:\/\/www\.century21[a-z0-9-]*\.(?:com|fr))\/annonces\/achat\/"/i)?.[1]:null;
-    if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';}
-    else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';}
-    else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';}
+    if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
+    else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
+    else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
@@ -800,8 +821,12 @@ async function readFeed(feed:any){
          const top=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0];
          if(top&&top[1]>=5&&top[1]>=rows.length*0.6){const kept=rows.filter((r:any)=>key(String(r.url||''))===top[0]);rows.length=0;rows.push(...kept);}}
         platform+=' · lecture automatique';}
-      catch(e){const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}
-    (rows as any).platform=platform;(rows as any).siteLocation=siteLocation(text);return rows;
+      catch(e){
+        const net=await findNetworkPage(url,text).catch(()=>null);
+        if(net?.kind==='orpi'){rows=await readOrpiAgency(new URL('https://www.orpi.com'),net.slug);platform=`Orpi (page agence orpi.com/${net.slug}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
+        else if(net?.kind==='c21'){rows=await readC21Agency(new URL(net.url));platform=`Century 21 (${new URL(net.url).hostname}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
+        else{const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}}
+    (rows as any).platform=platform;(rows as any).siteLocation=siteLocation(text);if(feed.sector)(rows as any).sector=feed.sector;return rows;
   }
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
@@ -944,7 +969,7 @@ async function autoReviewSite(feed:any,dryRun=false){
  return{...(await sync(upd,rows)),auto_review:'approved'};
 }
 
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,sector,body?.action==='preview_url'&&profile?.is_admin?null:user.id,body?.action==='preview_url')});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);return json(await autoReviewSite({id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null},true));}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector:(rows as any).sector||sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,total_on_site:(rows as any).total||null,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,(rows as any).sector||sector,body?.action==='preview_url'&&profile?.is_admin?null:user.id,body?.action==='preview_url')});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);return json(await autoReviewSite({id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null},true));}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
  // Une demande d'import « en attente » par passage : jamais essayée, ou dernier essai il y a plus de 24 h.
  const autoResults:any[]=[];const tAll=Date.now();{const{data:pend}=await admin.from('pro_stock_feeds').select('*').eq('source_kind','site').eq('review_status','pending').not('feed_url','is',null).or(`last_run_at.is.null,last_run_at.lt.${new Date(Date.now()-24*3600e3).toISOString()}`).order('created_at',{ascending:true}).limit(1);for(const f of pend||[]){try{autoResults.push(await autoReviewSite(f));}catch(e){autoResults.push({ok:false,feed_id:f.id,error:e instanceof Error?e.message:String(e)});}}}const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const results=[];const start=tAll;for(const f of feeds||[]){
  // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.

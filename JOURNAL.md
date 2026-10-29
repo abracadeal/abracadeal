@@ -868,3 +868,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Location reconnue dans le texte (« Loyer : … » + dépôt de garantie ou charges) même si le site range le bien en vente : immochevreux mettait ses locations en « vente-appartement ».
 - Lecture à blanc : nouvelle liste `no_dpe` (biens sans DPE + extraits du texte) pour contrôler.
 - Contrôle : Orpi Bartholdi 100 % DPE ; Century 21 Daumesnil, immochevreux, C21 Cap-d'Ail : les biens restants sans DPE n'en affichent aucun sur leur propre page (vérifié page par page : programmes neufs C21 Beausoleil/Eze/Cap-d'Ail, quelques biens immochevreux).
+
+## 29/10/2026 — Robot v50 : site d'agence illisible → page réseau trouvée toute seule (Claude)
+- Demande d'Anthony : ne pas avoir à se souvenir qu'il faut mettre orpi.com/… quand le site perso d'une agence est illisible (ex. calleris.fr, Wix).
+- `findNetworkPage` : si aucun lecteur ne marche, le robot cherche un lien Orpi ou Century 21 sur le site, sinon essaie orpi.com/<nom du domaine>(immo|-immo|immobilier|orpi…) et ne garde la page que si son titre est celui d'une agence portant ce nom. Le type de site affiché le dit (« Orpi (page agence orpi.com/callerisimmo, le site www.calleris.fr n'est pas lisible) »).
+- Domaine : un site Orpi / Century 21 passe tout seul en Immobilier, même si « Auto / Moto » était choisi ; l'aperçu admin bascule les deux menus Domaine.

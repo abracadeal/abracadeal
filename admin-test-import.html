@@ -192,7 +192,7 @@ async function load(ev){
   const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true}});
   if(error)throw Error(await fnError(error));
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
-  ROWS=data.raw||[];NORM=data.rows||[];render(data,E('sector').value);
+  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];render(data,E('sector').value);
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
