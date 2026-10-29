@@ -508,8 +508,9 @@ function parseOrpiEstate(html:string,url:string){
 }
 async function readOrpiAgency(origin:URL,slug:string){
  const links=new Map<string,string>();
- for(const listPath of [`/${slug}/acheter`,`/${slug}/louer/biens-en-location`]){
-  for(let page=1;page<=20;page++){
+ // 29/10/2026 : « /acheter » ne montre qu'une sélection (≈ 9 biens) ; la liste complète est « /acheter/biens-en-vente » (pages de 30).
+ for(const listPath of [`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`,`/${slug}/acheter`]){
+  for(let page=1;page<=40;page++){
    const u=new URL(listPath,origin);if(page>1)u.searchParams.set('page',String(page));
    const{text}=await fetchSiteHtml(u).catch(e=>{throw Error(`Liste des biens illisible (${listPath}, page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
    const before=links.size;
@@ -518,8 +519,10 @@ async function readOrpiAgency(origin:URL,slug:string){
   }
  }
  if(!links.size)throw Error('Aucun bien trouvé sur la page de l\'agence Orpi : synchronisation annulée par sécurité.');
- const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
- await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
+ const MAX=450;const entries=[...links.entries()].slice(0,MAX);const rows:any[]=[];let i=0;
+ await Promise.all(Array.from({length:6},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
+ // Stock plus grand que la limite : lecture partielle (aucun bien n'est retiré pour cette synchro).
+ if(links.size>MAX)(rows as any).partial=true;
  return rows;
 }
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
