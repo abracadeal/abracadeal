@@ -185,9 +185,9 @@
       </div>`:''}
       <label for="socialName">Nom public / pseudo</label>
       <input class="input" id="socialName" required maxlength="80" autocomplete="nickname">
-      ${needPhone?`<label for="socialPhone">Téléphone</label>
+      ${needPhone?`<label for="socialPhone" id="socialPhoneLabel">Téléphone</label>
       <input class="input" id="socialPhone" type="tel" autocomplete="tel" placeholder="06 12 34 56 78" maxlength="24" required>
-      <div class="note">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div>`:''}
+      <div class="note" id="socialPhoneNote">Obligatoire · un numéro ne peut être associé qu’à un seul compte.</div>`:''}
       ${needLegal&&!legalDone?`<p style="margin:14px 0 6px">Consultez les <a href="cgu.html" target="_blank" rel="noopener">CGU</a>, les <a href="cgv.html" target="_blank" rel="noopener">conditions de vente</a> et la <a href="confidentialite.html" target="_blank" rel="noopener">politique de confidentialité</a>.</p>
       <label class="check"><input type="checkbox" id="socialLegal" required>Je confirme avoir au moins 18 ans et accepter les CGU.</label>
       <p class="note">Cette acceptation ne vaut pas accord pour recevoir de la publicité.</p>`:''}
@@ -203,6 +203,9 @@
       const sir=d.querySelector('#socialSiret');if(sir)sir.required=pro;
       const sec=d.querySelector('#socialSector');if(sec)sec.required=pro;
       const t=d.querySelector('#social-complete-title');if(t)t.textContent=pro?'Finalisez votre compte professionnel':'Finalisez votre compte';
+      // 30/10/2026 : pour un pro, le téléphone est celui où les acheteurs le joignent depuis ses annonces.
+      const pl=d.querySelector('#socialPhoneLabel');if(pl)pl.textContent=pro?'Téléphone de l’entreprise':'Téléphone';
+      const pn=d.querySelector('#socialPhoneNote');if(pn)pn.textContent=pro?'Obligatoire · numéro sur lequel les acheteurs vous joignent depuis vos annonces.':'Obligatoire · un numéro ne peut être associé qu’à un seul compte.';
     }));
     const nameInput=d.querySelector('#socialName');
     nameInput.value=(currentProfile?.display_name||'').trim()||suggestedName(currentUser);
