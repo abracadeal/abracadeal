@@ -78,7 +78,7 @@ function longestText(html:string){
   let best='';
   for(const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)){
     if(chunk.length<120)continue;const t=clean(chunk);
-    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200))&&!/object\(|=>|string\(\d|donn[ée]es personnelles|informations recueillies|\bRGPD\b|sous-traitant|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit/i.test(t))best=t;
+    if(t.length>best.length&&t.split(/\s+/).length>25&&!/[{};]\s*[a-z-]+\s*:/.test(t.slice(0,200))&&!/object\(|=>|string\(\d|donn[ée]es personnelles|informations recueillies|\bRGPD\b|sous-traitant|capital social|\bRCS\b|siret|responsabilit[ée] civile|cookies|carte professionnelle|tous droits r[ée]serv|mentions l[ée]gales|politique de confidentialit|stockage ou l.acc[eè]s technique|assignation [àa] compara[iî]tre|fournisseur d.acc[eè]s [àa] internet|finalit[ée]s? statistiques|consentement|traceurs/i.test(t))best=t;
   }
   return best.slice(0,6000);
 }
@@ -225,8 +225,18 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const km=all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})/i)||all.match(/(?<![\p{L}\d][\s\u00a0.]?)(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})\s*km\b/iu);
     if(km)o.kilometrage=km[1].replace(/[\s.\u00a0]/g,'');
     const y=all.match(/(?:ann[ée]e|mise en (?:circulation|service)|\bMEC\b|1[èe]re immatriculation|immatricul[ée]e? le|date d'immatriculation|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}[\/.\-]){0,2}((?:19[5-9]|20[0-3])\d)\b/i)||all.match(/(?:mise en circulation|immatricul\w*|\bMEC\b)[^0-9]{0,30}((?:19[5-9]|20[0-3])\d)-\d{2}-\d{2}/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
-    for(const [re,v] of FUEL)if(re.test(all)){o.carburant=v;break;}
-    if(/bo[iî]te\s*(?:de vitesses?\s*)?:?\s*auto|automatique|\bBVA\b|\bDSG\b|\bEAT\d/i.test(all))o.boite='automatique';else if(/manuelle|\bBVM\b|m[ée]canique/i.test(all))o.boite='manuelle';
+    // 30/10/2026 : énergie et boîte lues d'abord sur leur libellé (« Carburant : Essence », « Boîte : Manuelle »), puis dans le titre.
+    // Plus de recherche à l'aveugle dans toute la page : « rétroviseurs électriques » donnait « électrique »,
+    // « climatisation automatique » donnait « automatique » (ex. Ford Fiesta essence manuelle).
+    const fuelLab=all.match(/(?:carburant|[ée]nergie|motorisation|type de moteur)\s*:?\s*(hybride rechargeable|plug-?in|hybride|[ée]lectrique|diesel|gazole|essence|gpl|[ée]thanol|e85)/i)?.[1]||'';
+    const fuelSrc=fuelLab||head;
+    for(const [re,v] of FUEL)if(re.test(fuelSrc)){o.carburant=v;break;}
+    if(!o.carburant){const safe=all.replace(/[^.\n]{0,40}[ée]lectriques?\b/gi,m=>/100\s*%\s*[ée]lectrique|(?:voiture|v[ée]hicule|moteur|motorisation|citadine|berline|suv)\s+[ée]lectrique/i.test(m)?m:' ');for(const [re,v] of FUEL)if(re.test(safe)){o.carburant=v;break;}}
+    const gearLab=all.match(/(?:bo[iî]te(?:\s+de\s+vitesses?)?|transmission)\s*:?\s*(automatique|auto\b|manuelle|m[ée]canique|robotis[ée]e|s[ée]quentielle)/i)?.[1]||'';
+    const gearHead=/automatique|\bBVA\d?\b|\bDSG\d?\b|\bEAT\d\b|\bEDC\b|\bS[- ]?tronic\b|\bPDK\b/i.test(head)?'automatique':/manuelle|\bBVM\d?\b/i.test(head)?'manuelle':'';
+    if(gearLab)o.boite=/manuelle|m[ée]canique/i.test(gearLab)?'manuelle':'automatique';else if(gearHead)o.boite=gearHead;
+    else{const safe=all.replace(/(?:climatisation|clim|allumage|essuie[- ]?glaces?|feux|phares|projecteurs|frein(?:\s+de\s+stationnement)?|fermeture|verrouillage|d[ée]tection|r[ée]troviseurs?|vitres?|r[ée]gulat\w*|hayon|coffre|stationnement|parking|bi[- ]?zone|r[ée]glage|capote)[^.\n]{0,30}?automatiques?/gi,' ');
+      if(/bo[iî]te\s*(?:de vitesses?\s*)?auto|\bboite automatique\b|\bBVA\b|\bDSG\b|\bEAT\d/i.test(safe))o.boite='automatique';else if(/bo[iî]te\s*(?:de vitesses?\s*)?manuelle|\bBVM\b|\bboite m[ée]canique/i.test(safe))o.boite='manuelle';}
     const ch=all.match(/(\d{2,4})\s*(?:ch|cv din)\b/i);if(ch)o.puissance_din=ch[1];
     const make=head.trim().split(/\s+/)[0];if(make&&/^[A-Za-zÀ-ÿ-]{2,}$/.test(make)&&!/^(vente|achat|occasion|voiture|v[ée]hicule|annonce)$/i.test(make))o.marque=make;
     o.etat=/\bneuf\b|\b0\s*km\b/i.test(head)?'neuf':'occasion';
