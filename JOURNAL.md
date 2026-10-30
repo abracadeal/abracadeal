@@ -1243,3 +1243,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Fonction `verify-professional` (action `upgrade`) :** SIREN accepté (siège retenu) ; passe le compte en Pro avec la clé de service seulement si l'entreprise est active, pas déjà liée à un autre compte Pro, et si le compte n'a aucune annonce de particulier ; enregistre `pro_verifications` et l'entreprise dans le compte.
 - **Base (`supabase/2026-10-30-account-type-guard.sql`) :** un utilisateur ne peut plus changer lui-même son type de compte (avant, rien ne l'empêchait techniquement) ; seuls la fonction ci-dessus et un admin le peuvent.
 - **Bye Buy Car Limoges :** seul compte Google existant (particulier, sans téléphone) : la fenêtre lui demandera le choix à sa prochaine connexion.
+- **Déployé :** `verify-professional` v10 ACTIVE (import épinglé sur `afa8d6da`) ; contrôle réel : recherche registre OK, `upgrade` sans connexion refusé (401).
+- **Pas appliqué :** la protection en base (`2026-10-30-account-type-guard.sql`) — demande de confirmation annulée côté client. À appliquer avec l'accord d'Anthony.
