@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — en cours : Select Azur et tri des accès bloqués
+- Demande Anthony de poursuivre les réparations. Base main 20d257e, version déployée vérifiée v127 / 2b91aba. Aucune modification de la validation visuelle ou de la fermeture manuelle des demandes ajoutée par Claude.
+- Select Azur : le lecteur Apimo repérait 60 références mais ne reconnaissait pas les templates 41 (faits numériques) / 42 (titre, ville, prix et description), ce qui ne retournait que des lignes vides et 59 faux doublons. Nouveaux templates pris en charge, conseiller user-template-5, financier template 38 ; galerie et diagnostics existants conservés. Un détail non reconnu rend désormais le parcours partial=true.
+- Témoin 85564762 : Nice 06000, 280000 €, appartement 88 m², 3 pièces, 2 chambres, 1 salle de bain, 5 photos, Andrea BELMESSIERI. Graphique DPE D / GES D / 233 ; la description source dit encore DPE E. Ce conflit n'est pas réécrit : le graphique affiché fait foi pour le champ et le texte est conservé.
+- Tests réels Select ajoutés et régressions Intuition/Cannisimmo/Raccosta/batch4/batch5/batch6/photos vérifiées ; contrôle production après déploiement à terminer avant Réparé.
+- Horizon Immo, Aixty, Thisse : requêtes serveur 186806/186807/186808 confirmées HTTP 202 + x-amzn-waf-action=challenge + réponse vide. Demandes pending annotées ; accès autorisé au robot ou flux fourni par le professionnel nécessaire, pas de contournement.
+- Boschi : session publique viewport initialisée comme son JavaScript (pas d'évaluation du JavaScript reçu), page agence Vaison accessible, mais elle ne publie que deux « nouveautés ». Périmètre du catalogue complet encore à établir ; aucune lecture nationale ni chiffre de stock complet revendiqué.
+- Le Cœur : contrôle v127 (186921) révèle que le lecteur générique confond des pages de catégories avec des fiches, et prend « Titre de la diapositive » pour une ville ; prix tronqués dans certains textes. Diagnostic conservé pour un lecteur dédié, pas de statut Réparé à ce stade.
+- Aucun prospect, import/publication, flux activé ou mail de notre part.
+
 ### 31/10/2026 — Claude — « Valider ce site » refusé (Slycar)
 - **Constaté (Anthony) :** « Valider ce site » ne passait pas pour Slycar. Le prospect était bien marqué « site testé », mais `admin_confirm_robot_learning_visual` levait « La demande ne correspond pas au site réparé » : la demande ouverte depuis « Sites en réparation » était encore `pending` (Slycar renvoyé en réparation), et la version de ChatGPT n'acceptait que `done` — elle avait aussi retiré la fermeture des demandes en attente ajoutée le 30/10 pour Anthony.
 - **Fait (appliqué en base, `supabase/2026-10-31-robot-learning-visual-validate.sql`) :** fusion des deux versions — contrôle de ChatGPT gardé (même site, statut done / pending / in_progress), validation à la main = demandes en attente / en cours du site fermées (`done`, « Validé à la main après test du site ») puis archivées. Adresses comparées sans http(s), www et / final. Testé en transaction annulée sur Slycar : les 2 demandes passent `done` + archivées.
