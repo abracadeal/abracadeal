@@ -5,6 +5,8 @@ import { readKermarrec } from "./kermarrec-reader.ts";
 import { isApimoModules, readApimoModules } from "./apimo-reader.ts";
 import { readJunot } from "./junot-reader.ts";
 import { readByeBuyCar } from "./byebuy-reader.ts";
+import { readLyonImmo } from "./lyonimmo-reader.ts";
+import { readNeyt } from "./neyt-reader.ts";
 import { readVehicleCatalogue } from "./vehicle-catalogues.ts";
 import { readNetworkAgency, readProgressia } from "./estate-catalogues.ts";
 import { readRobynsCar } from "./robyns-reader.ts";
@@ -132,14 +134,15 @@ function immoFillFromText(o:any){
  const lots=tAll.match(/(\d{1,4})\s*lots/i);if(lots)set('nombre_lots',lots[1]);
  const man=tAll.match(/(?:n[°o]\.?\s*(?:de\s*)?)?\bmandat\s*(?:n[°o]\.?|num[ée]ro)?\s*:?\s*([A-Z0-9][A-Z0-9_\/-]{1,20})(?![A-Za-z0-9_])/i);if(man&&/\d/.test(man[1]))set('mandat',man[1]);
  const hon=t.match(/(\d{1,2}(?:[.,]\d+)?\s*%\s*(?:TTC)?\s*d['’]honoraires[^.\n]{0,80}|honoraires[^.\n]{0,20}?(?:à la charge|charge)[^.\n]{0,60})/i);if(hon)set('honoraires',hon[1].replace(/\s+/g,' ').trim());
- const ch=t.match(/\b(\d{1,2})\s+(?:(?:grandes?|belles?|spacieuses?|vastes?)\s+)?chambres?\b/i);if(ch)set('chambres',ch[1]);
+ const cardinals:Record<string,number>={un:1,une:1,deux:2,trois:3,quatre:4,cinq:5,six:6,sept:7,huit:8,neuf:9,dix:10};
+ const ch=t.match(/\b(\d{1,2}|une?|deux|trois|quatre|cinq|six|sept|huit|neuf|dix)\s+(?:(?:grandes?|belles?|spacieuses?|vastes?)\s+)?chambres?\b/i);if(ch)set('chambres',cardinals[ch[1].toLowerCase()]??ch[1]);
  const pc=t.match(/\b(\d{1,2})\s*pi[èe]ces\b(?!\s+de\s+vie)/i);if(pc)set('pieces',pc[1]);
  // Priorité à la surface habitable explicite, sans additionner annexes/dépendances/terrain.
  const sf=t.match(/\b(\d{1,4}(?:[.,]\d+)?)\s*m(?:²|2)\s*(?:(?:de|d[e’\x27])\s+(?:surface|superficie)\s+)?(?:habitables?|carrez|loi carrez)/i)||t.match(/(?:surface|superficie)\s*(?:habitable|loi carrez|carrez)?\s*(?:est de|de|:|d['’]environ)?\s*(\d{1,4}(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);if(sf)set('surface',numFr(sf[1]));
  const land=t.match(/(?:terrain|parcelle)\s*(?:clos[e]?\s*)?(?:de|d['’]environ|:)?\s*(\d[\d ]*(?:[.,]\d+)?)\s*(m²|m2|hectares?|ha)(?![a-z0-9])/i);if(land)set('surface_terrain',Number(numFr(land[1]).replace(/ /g,''))*(/^h/i.test(land[2])?10000:1));
  const sdb=(t.match(/salles? (?:de bains?|d['’]eau)/gi)||[]).length;if(sdb)set('salles_de_bain',sdb);
  const heat=t.match(/chauffage\s+(?:et (?:d['’])?eau chaude\s+)?(?:sanitaire\s+)?((?:individuel|collectif|central|au sol|par le sol|électrique|gaz|fioul|pompe à chaleur|urbain)[^.,;\n]{0,40})/i)||t.match(/(?:production de )?chauffage[^.,;\n]{0,30}?((?:individuel|collectif|collective)s?[^.,;\n]{0,30})/i);if(heat)set('chauffage',heat[1].trim().replace(/^collecti(?:f|ve)s?\b/i,'Collectif').replace(/^individuel(?:le)?s?\b/i,'Individuel').replace(/^\p{Ll}/u,(c:string)=>c.toUpperCase()));
- const fl=t.match(/(\d{1,2})\s*(?:e|er|ème|eme|°)\s*[ée]tage/i);if(fl)set('etage',fl[1]);else if(/rez[- ]de[- ]chauss[ée]e/i.test(t))set('etage','0');
+ const fl=t.match(/(\d{1,2})\s*(?:e|er|ème|eme|°|ᵉʳ|ᵉ)\s*[ée]tage/i);const fw=t.match(/\b(premier|deuxième|deuxieme|troisième|troisieme|quatrième|quatrieme|cinquième|cinquieme)\s+étage/i);if(fl)set('etage',fl[1]);else if(fw)set('etage',({premier:1,deuxieme:2,troisieme:3,quatrieme:4,cinquieme:5} as Record<string,number>)[norm(fw[1])]);else if(/rez[- ]de[- ]chauss[ée]e/i.test(t))set('etage','0');
  const yb=t.match(/(?:construit|construction|b[âa]ti)\s*(?:en|de|:)?\s*((?:18|19|20)\d{2})/i);if(yb)set('annee_construction',yb[1]);
 }
 // Coordonnées explicitement rattachées au bien (pas une recherche de téléphone dans toute la page).
@@ -933,6 +936,8 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?citya\.com$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'citya',fetchSiteHtml);platform='Citya (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?bnyscar\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'bnys',fetchSiteHtml);platform="BNY’S Car (stock actif)";feed.sector='vehicules';}
     else if(/^(?:www\.)?decrosautomobiles\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'decros',fetchSiteHtml);platform='Decros (Regicom)';feed.sector='vehicules';}
+    else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}

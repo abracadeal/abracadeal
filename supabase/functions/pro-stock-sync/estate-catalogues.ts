@@ -35,6 +35,19 @@ export function parseNetworkEstate(html:string,url:string,kind:'human'|'citya'){
   const gallery=html.match(/id=["']carousel-[^"']+["'][\s\S]*?aria-label=["']Photos [^"']+["']>([\s\S]*?)(?=<\/section>|<\/figure>|<\/picture>|<script)/i)?.[1]||html;
   for(const m of gallery.matchAll(/<img\b[^>]*alt=["']Photo \d+[^"']*["'][^>]*>|<img\b[^>]*(?:src|data-src)=["'][^"']+["'][^>]*alt=["']Photo \d+[^"']*["'][^>]*>/gi)){const src=m[0].match(/(?:\s|^)(?:data-src|src)=["']([^"']+)/i)?.[1];if(src)photos.push(new URL(sDecode(src),url).toString());}
   o.texte_page=clean(html.split('property-characteristics-categories')[1]?.split('advert-detail-layout__description')[0]||'');
+  const feats:string[]=[];
+  const facts=html.split('property-characteristics-categories')[1]?.split('advert-detail-layout__description')[0]||'';
+  for(const m of facts.matchAll(/<li\b[^>]*class=["'][^"']*property-characteristics__item[^"']*["'][^>]*>([\s\S]*?)<\/li>/gi)){
+   const text=clean(m[1]).replace(/\s+/g,' ');let v;
+   if(v=text.match(/^[ÉE]tage\s*:?\s*(\d+)$/i))o.etage=v[1];
+   if(/^(?:Rez[- ]de[- ]chaussée|RDC)$/i.test(text))o.etage='0';
+   if(v=text.match(/^Im(?:meuble)? de (\d+) étages?$/i))o.nombre_etages=v[1];
+   if(v=text.match(/^(\d+) salles? (?:de bains?|d['’]eau)$/i))o.salles_de_bain=v[1];
+   if(v=text.match(/^Construction\s*:?\s*((?:18|19|20)\d{2})$/i))o.annee_construction=v[1];
+   if(v=text.match(/^Chauffage\s*:\s*(.+)$/i))o.chauffage=v[1];
+   for(const [re,label] of [[/^(?:\d+ )?parkings?$/i,'Parking'],[/^(?:\d+ )?garages?$/i,'Garage'],[/^(?:\d+ )?caves?$/i,'Cave'],[/^(?:\d+ )?balcons?$/i,'Balcon'],[/^(?:\d+ )?terrasses?$/i,'Terrasse'],[/^ascenseur$/i,'Ascenseur']] as [RegExp,string][])if(re.test(text))feats.push(label);
+  }
+  if(feats.length)o.prestations=[...new Set(feats)].join('|');
   const energy=html.match(/Diagnostic de performance énergétique, classe ([A-G]), consommation ([\d.,]+)/i);if(energy){o.dpe=energy[1];o.consommation_energie=energy[2];}
   const ges=html.match(/gaz à effet de serre, classe ([A-G]), émission ([\d.,]+)/i);if(ges){o.ges=ges[1];o.emission_ges=ges[2];}
   const zone=html.slice(html.indexOf('Agence référente'),html.indexOf('Nos biens similaires'));o.contact_nom=clean(zone.match(/>\s*(Citya[^<]+)</i)?.[1]||'');o.contact_telephone=zone.match(/href=["']tel:([^"']+)/i)?.[1]||'';
