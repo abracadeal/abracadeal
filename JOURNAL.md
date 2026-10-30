@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Slycar : photos en double
+- **Constaté (Anthony) :** photos en double sur les voitures Slycar (ex. Porsche 911 GTS).
+- **Cause :** chaque photo est envoyée deux fois sur le site Simplébo, avec deux identifiants différents mais le même nom de fichier (Porsche : 100 identifiants pour 50 fichiers). Le dédoublonnage se faisait par identifiant.
+- **Fait (`simplebo-reader.ts` `sectionPhotos`) :** clé de dédoublonnage = nom du fichier (on garde la plus grande taille, dans l'ordre du site).
+
 ### 31/10/2026 — Claude — Robot : caractéristiques lues dans la description
 - **Demande d'Anthony :** le robot ne remplit pas les cases (ex. « 37 CV ») quand le garage ne les écrit que dans la description.
 - **Fait (`pro-stock-sync` `fillVehicleFromText`, appelée dans `normalizeVehicle`) :** pour tout site, les cases VIDES sont complétées depuis titre + version + description quand c'est écrit : puissance fiscale (« 37 CV », « Puissance fiscale : 8 »), puissance DIN (« 482 CH »), énergie (mot écrit, ou désignation moteur sans ambiguïté : TDI, HDi, dCi, CDI, 220 d… = Diesel ; TSI, TFSI, VTi, PureTech, TCe… = Essence ; « électrique » seulement si « 100 % électrique », « énergie : électrique »… et jamais à cause de « sièges électriques »), boîte (BVA, DSG, EAT8, S tronic, PDK, 9G-Tronic… / BVM, manuelle), année et mise en circulation, kilométrage (pas celui des lignes de contrôle technique), portes, places, Crit'Air, CO2, couleur, garantie, sellerie. Une valeur fournie par le site n'est jamais écrasée.

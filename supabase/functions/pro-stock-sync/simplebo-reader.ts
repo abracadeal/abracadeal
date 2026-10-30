@@ -13,8 +13,9 @@ export const isSimpleboSite=(html:string)=>/sbcdnsb\.com/i.test(html)&&/href="\/
 // Toutes les tailles d'une même image partagent son identifiant : on garde la plus grande.
 function sectionPhotos(sec:string){
   const best=new Map<string,{u:string,w:number,o:number}>();let o=0;
-  for(const m of sec.matchAll(/(https:\/\/files\.sbcdnsb\.com\/images\/[^\/\s"]+\/content\/\d+\/(\d+)\/(\d+)\/[^\s",]+)/g)){
-    const id=m[2],w=Number(m[3]),cur=best.get(id);
+  // 31/10/2026 (Anthony) : un même fichier peut être envoyé deux fois (deux identifiants, même nom, ex. img_8765.jpeg) : clé = nom du fichier.
+  for(const m of sec.matchAll(/(https:\/\/files\.sbcdnsb\.com\/images\/[^\/\s"]+\/content\/\d+\/(\d+)\/(\d+)\/([^\s",\/]+))/g)){
+    const id=m[4].toLowerCase(),w=Number(m[3]),cur=best.get(id);
     if(!cur)best.set(id,{u:m[1],w,o:o++});else if(w>cur.w)best.set(id,{...cur,u:m[1],w});
   }
   return [...best.values()].sort((a,b)=>a.o-b.o).map(x=>x.u);
