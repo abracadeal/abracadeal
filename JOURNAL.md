@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Robot : caractéristiques lues dans la description
+- **Demande d'Anthony :** le robot ne remplit pas les cases (ex. « 37 CV ») quand le garage ne les écrit que dans la description.
+- **Fait (`pro-stock-sync` `fillVehicleFromText`, appelée dans `normalizeVehicle`) :** pour tout site, les cases VIDES sont complétées depuis titre + version + description quand c'est écrit : puissance fiscale (« 37 CV », « Puissance fiscale : 8 »), puissance DIN (« 482 CH »), énergie (mot écrit, ou désignation moteur sans ambiguïté : TDI, HDi, dCi, CDI, 220 d… = Diesel ; TSI, TFSI, VTi, PureTech, TCe… = Essence ; « électrique » seulement si « 100 % électrique », « énergie : électrique »… et jamais à cause de « sièges électriques »), boîte (BVA, DSG, EAT8, S tronic, PDK, 9G-Tronic… / BVM, manuelle), année et mise en circulation, kilométrage (pas celui des lignes de contrôle technique), portes, places, Crit'Air, CO2, couleur, garantie, sellerie. Une valeur fournie par le site n'est jamais écrasée.
+- Tests : Slycar énergie 23 % → 38 %, boîte 77 % → 85 % ; Excellium énergie 0 % → 33 % puis Mercedes « C 220 D » reconnue (espace avant le d).
+
 ### 30/10/2026 — Claude — 4 sites auto réparés (JB Sport Auto, Excellium Cars, Slycar, Motorwine)
 - Demandes « Réparer » prises par Claude (`handled_by='Claude'`), réparation de lecture uniquement : aucun prospect, mail, import ni publication. ChatGPT garde les siennes.
 - **JB Sport Auto** (jbsportauto.fr) — nouveau `supabase-app-reader.ts` : sites React / Lovable dont le stock est dans leur propre base Supabase (page HTML vide). Le robot lit la table avec la clé publique du site (refus si la clé n'est pas « anon »/publishable), photos d'un espace privé signées comme le fait le site (10 ans). Ville du garage lue dans la description du site (« à Aumur (39410) »). Résultat 1/1 complet, 12 photos.

@@ -106,7 +106,7 @@ function fillVehicleFromText(r:any){
   const elec=T.match(/\b(100\s*%\s*[ée]lectrique|v[ée]hicule\s+[ée]lectrique|voiture\s+[ée]lectrique|citadine\s+[ée]lectrique|SUV\s+[ée]lectrique)\b/i);
   const w=lab||T.match(/\b(hybride\s+rechargeable|plug[- ]?in|hybride|hybrid|diesel|gazole|essence|gpl|e85|bio[ée]thanol)\b/i)||elec;
   if(w)r.fuel=/rechargeable|plug/i.test(w[1])?'Hybride rechargeable':/hybrid/i.test(w[1])?'Hybride':/diesel|gazole/i.test(w[1])?'Diesel':/essence/i.test(w[1])?'Essence':/lectrique/i.test(w[1])?'Électrique':/gpl/i.test(w[1])?'GPL':'Bioéthanol';
-  else if(/\b(?:\d\.\d\s*)?(?:TDI|TDCI|HDI|BLUEHDI|DCI|CDI|JTDM?|MULTIJET|D-?4D|CRDI|SDV6|TDV6|BLUEMOTION TDI|\d{3}d)\b/i.test(String(r.title||'')+' '+String(r.version||'')))r.fuel='Diesel';
+  else if(/\b(?:\d\.\d\s*)?(?:TDI|TDCI|HDI|BLUEHDI|DCI|CDI|JTDM?|MULTIJET|D-?4D|CRDI|SDV6|TDV6|BLUEMOTION TDI|\d{3}\s?d|\d\.\d\s?d)\b/i.test(String(r.title||'')+' '+String(r.version||'')))r.fuel='Diesel';
   else if(/\b(?:TSI|TFSI|VTI|THP|PURETECH|TCE|ECOBOOST|GTI|T-?JET|FIRE|VVT-?I|SKYACTIV-?G)\b/i.test(String(r.title||'')+' '+String(r.version||'')))r.fuel='Essence';
  }
  if(!r.transmission||!/^(Automatique|Manuelle)$/.test(r.transmission)){
