@@ -205,7 +205,7 @@
       const t=d.querySelector('#social-complete-title');if(t)t.textContent=pro?'Finalisez votre compte professionnel':'Finalisez votre compte';
       // 30/10/2026 : pour un pro, le téléphone est celui où les acheteurs le joignent depuis ses annonces.
       const pl=d.querySelector('#socialPhoneLabel');if(pl)pl.textContent=pro?'Téléphone de l’entreprise':'Téléphone';
-      const pn=d.querySelector('#socialPhoneNote');if(pn)pn.textContent=pro?'Obligatoire · numéro sur lequel les acheteurs vous joignent depuis vos annonces.':'Obligatoire · un numéro ne peut être associé qu’à un seul compte.';
+      const pn=d.querySelector('#socialPhoneNote');if(pn)pn.textContent=pro?'Obligatoire · numéro proposé par défaut sur vos annonces, modifiable annonce par annonce.':'Obligatoire · un numéro ne peut être associé qu’à un seul compte.';
     }));
     const nameInput=d.querySelector('#socialName');
     nameInput.value=(currentProfile?.display_name||'').trim()||suggestedName(currentUser);
