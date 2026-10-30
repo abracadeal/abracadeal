@@ -17,6 +17,7 @@ import { readRobynsCar } from "./robyns-reader.ts";
 import { isSupabaseAppShell, readSupabaseApp } from "./supabase-app-reader.ts";
 import { isRoselmacSite, readRoselmacSite } from "./roselmac-reader.ts";
 import { isSimpleboSite, readSimpleboStock } from "./simplebo-reader.ts";
+import { isVehicaSite, readVehicaSite } from "./vehica-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -955,6 +956,7 @@ async function readFeed(feed:any){
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(isRoselmacSite(text)){rows=await readRoselmacSite(origin,fetchSiteHtml);platform='Roselmac (catalogue garage)';feed.sector='vehicules';}
     else if(feed.sector!=='immobilier'&&isSimpleboSite(text)){rows=await readSimpleboStock(origin,fetchSiteHtml);platform='Simplébo (page véhicules en vente)';feed.sector='vehicules';}
+    else if(isVehicaSite(text)){rows=await readVehicaSite(origin);platform='WordPress Vehica (stock disponible, vendus exclus)';feed.sector='vehicules';}
     // 30/10/2026 (Claude) : application React / Lovable dont le stock est dans sa propre base Supabase (ex. jbsportauto.fr).
     else if(isSupabaseAppShell(text)&&(sbRows=await readSupabaseApp(origin,text,feed.sector==='immobilier'?'immobilier':'vehicules',fetchSiteHtml).catch(()=>[])).length){rows=sbRows;platform=(sbRows as any).platform||'Application Supabase';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
