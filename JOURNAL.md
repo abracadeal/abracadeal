@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Protection du type de compte appliquée en production
+- Accord explicite d’Anthony : fichier `supabase/2026-10-30-account-type-guard.sql` de `main` appliqué tel quel au projet Supabase `jplzvxmpbpjssyinozap` (migration `account_type_guard`, succès).
+- Vérification SQL après application : déclencheur `aab_guard_profile_account_type` présent et activé (`tgenabled = O`) sur `public.profiles`, BEFORE UPDATE FOR EACH ROW, appelant `private.guard_profile_account_type()` ; définition de la fonction conforme au fichier (changement refusé sauf service_role ou public.is_admin()).
+- Aucun profil modifié. La protection en base précédemment indiquée « Pas appliqué » est désormais active.
+
 ### 29/10/2026 — Claude — Textes des cartes « Les annonces » réduits
 - Demande d'Anthony (capture mobile) : titres sur 4-5 lignes dans la grille. `assets/card-overlay-20261029.css` v=2 : titre limité à 2 lignes (points de suspension), et sur mobile titre 13 px, prix 16 px, caractéristiques / ville 10,5 px. Cartes du haut (récemment consultées, etc.) inchangées.
 
