@@ -179,6 +179,9 @@
         <div class="note">Obligatoire pour un compte professionnel · contrôlé dans le registre officiel des entreprises.</div>
         <label for="socialSector">Domaine professionnel</label>
         <select class="input" id="socialSector"><option value="">Choisir mon domaine</option><option value="vehicules">Véhicules — Auto & Moto</option><option value="immobilier">Immobilier</option><option value="hightech">High-tech</option><option value="maison">Maison & Déco</option><option value="mode">Mode</option><option value="emploi">Emploi</option><option value="services">Services & Artisans</option></select>
+        <label for="socialSiteUrl">Adresse de votre site <span style="font-weight:400;opacity:.75">(facultatif)</span></label>
+        <input class="input" id="socialSiteUrl" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" maxlength="300" placeholder="www.mon-garage.fr">
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="socialSiteConsent">J’autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour (prix, photos, ventes).</label>
       </div>`:''}
       <label for="socialName">Nom public / pseudo</label>
       <input class="input" id="socialName" required maxlength="80" autocomplete="nickname">
@@ -236,6 +239,13 @@
         if(!/^\d{9}$|^\d{14}$/.test(siretRaw)){status.textContent='Indiquez votre SIRET (14 chiffres) ou votre SIREN (9 chiffres).';d.querySelector('#socialSiret')?.focus();return;}
         if(!sector){status.textContent='Choisissez votre domaine professionnel.';d.querySelector('#socialSector')?.focus();return;}
       }
+      // 30/10/2026 : comme l'inscription Pro classique, reprise des annonces du site du pro (case à cocher).
+      const siteUrl=type==='professionnel'&&needType?String(d.querySelector('#socialSiteUrl')?.value||'').trim():'';
+      const siteConsent=!!d.querySelector('#socialSiteConsent')?.checked;
+      if(siteUrl&&!/^(https?:\/\/)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/\S*)?$/i.test(siteUrl)){status.textContent='L’adresse du site ne semble pas valide (exemple : www.mon-garage.fr).';d.querySelector('#socialSiteUrl')?.focus();return;}
+      if(siteUrl&&/^(https?:\/\/)?([^\/]*\.)?(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|logic-immo|pap|ouestfrance-(?:auto|immo)|largus|vinted|facebook|instagram|tiktok)\./i.test(siteUrl)){status.textContent='Indiquez l’adresse de votre propre site, pas celle d’un site d’annonces ou d’un réseau social.';d.querySelector('#socialSiteUrl')?.focus();return;}
+      if(siteUrl&&!siteConsent){status.textContent='Cochez la case d’autorisation pour que nous reprenions les annonces de votre site (ou laissez l’adresse vide).';return;}
+      const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
       btn.disabled=true;btn.textContent='Enregistrement…';
       try{
         const payload={display_name};
@@ -266,7 +276,7 @@
         if(pErr)throw pErr;
         let prospect_ref=null;
         try{const ref=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');if(ref&&/^[a-z0-9]{8}$/.test(ref.code)&&Date.now()-Number(ref.at||0)<90*864e5)prospect_ref=ref.code;}catch(_){}
-        const {error:uErr}=await sb.auth.updateUser({data:{...(legal&&needLegal?legal:{}),display_name,account_type:type,account_type_chosen_at:new Date().toISOString(),...(type==='professionnel'&&prospect_ref?{prospect_ref}:{}),...(payload.phone?{phone:payload.phone}:{}),signup_method:'social'}});
+        const {error:uErr}=await sb.auth.updateUser({data:{...(legal&&needLegal?legal:{}),display_name,account_type:type,account_type_chosen_at:new Date().toISOString(),...(type==='professionnel'&&prospect_ref?{prospect_ref}:{}),...(stock_site?{stock_site}:{}),...(payload.phone?{phone:payload.phone}:{}),signup_method:'social'}});
         if(uErr)throw uErr;
         clearPending();
         close();
@@ -274,6 +284,7 @@
         closeModal('accountModal');
         if(type==='professionnel'&&needType){
           toast(company?.company_name?'Compte professionnel créé pour '+company.company_name+'.':'Compte professionnel créé.');
+          if(stock_site){try{await sb.rpc('claim_signup_site_import');toast('Merci ! Nous préparons la mise en ligne des annonces de votre site.');}catch(e){console.warn(e);}}
           if(typeof window.ensureProPlanSelection==='function'){try{await window.ensureProPlanSelection({force:true});}catch(e){console.error(e);}}
         }else toast('Compte prêt, bienvenue sur Abracadeal !');
       }catch(err){

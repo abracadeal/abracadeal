@@ -1260,3 +1260,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Barre de recherche
 - **Demande d'Anthony :** retirer les exemples « Clio, T2 Cannes » : le texte de la barre de recherche de l'accueil devient « ✦ Recherche IA » (`index.html`).
 - **Bannière :** tous les mails de cette fonction (bienvenue, abonnements Pro, Fondateurs) affichent maintenant la bannière Abracadeal (lampe, logo, slogan, servie par `email-banner`) à la place du bandeau texte.
+
+### 30/10/2026 — Claude — Inscription Google en Pro : case « reprise de mon site »
+- **Demande d'Anthony :** le pro ne reviendra peut-être pas répondre « OK » : il doit pouvoir autoriser la reprise de ses annonces en cochant une case à l'inscription.
+- **Fait (`social-login-20261018.js?v=6`) :** dans « Finalisez votre compte » (Google/Facebook), si Professionnel : adresse du site (facultatif) + case « J'autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour ». Mêmes contrôles que l'inscription Pro par e-mail (adresse valide, pas un site d'annonces ni un réseau social, case obligatoire si une adresse est donnée) ; l'accord est enregistré dans le compte (`stock_site`) puis `claim_signup_site_import` crée la demande d'import (lecture automatique, activée seule si le site se lit sans erreur, règle du 28/10). L'inscription Pro par e-mail avait déjà cette case.
+- Testé (fenêtre avec serveur simulé) : case manquante refusée ; avec la case : passage Pro, accord enregistré, demande d'import créée.
