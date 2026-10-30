@@ -30,7 +30,8 @@ export function parseSimpleboSection(sec:string,pageUrl:string,index:number){
   const title=h2||descTitle.trim();if(!title)return null;
   const priceBlock=sec.match(/PRIX[\s\S]{0,400}?([\d][\d\s.]{2,})\s*€/i)?.[1]||it.match(/([\d][\d\s.]{2,})\s*€/)?.[1]||'';
   const yearM=it.match(/Ann[ée]e\s*:?\s*(?:\d{2}\/)?(\d{4})/i)||it.match(/\b(?:0[1-9]|1[0-2])\/((?:19|20)\d{2})\b/);
-  const kmM=it.match(/([\d][\d\s.]*)\s*(?:KMS?|kms?|Km)\b/);
+  // Kilométrage : laissé à la lecture commune de la description (index.ts fillVehicleFromText), qui écarte km/h et « garantie … kms ».
+  const kmM:RegExpMatchArray|null=null;
   const fuel=(it.match(/\b(Essence|Diesel|Hybride(?: rechargeable)?|[EÉ]lectrique|GPL|E85)\b/i)||[])[1]||'';
   const box=(it.match(/\b(Bo[iî]te (?:automatique|manuelle)|Automatique|Manuelle)\b/i)||[])[1]||'';
   const words=title.split(/\s+/);

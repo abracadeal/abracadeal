@@ -128,8 +128,18 @@ function fillVehicleFromText(r:any){
  }
  if(!r.firstRegistration){const m=T.match(/(?:mise\s+en\s+circulation|MEC)\s*:?\s*(\d{1,2}\/(?:19|20)\d{2})/i);if(m)r.firstRegistration=m[1];}
  if(r.mileage==null){
-  const m=T.match(/kilom[ée]trage\s*:?\s*(\d[\d\s.]{0,9})\s*(?:km)?/i)||T.match(/\b(\d{1,3}(?:[\s.]\d{3})+|\d{1,7})\s*(?:kms?|kilom[èe]tres)\b(?![^\n]{0,25}(?:favorable|d[ée]favorable|contr[ôo]le))/i);
-  if(m&&n(m[1])>=0&&n(m[1])<2000000)r.mileage=n(m[1]);
+  // 31/10/2026 (Anthony, Audi RS6 Slycar) : pas de « 305 km/h » (vitesse) ni de « garantie … 80 000 kms » / autonomie / courroie /
+  // lignes de contrôle technique : on prend le premier nombre de km qui n'est dans aucun de ces contextes.
+  const lab=T.match(/kilom[ée]trage\s*:?\s*(\d[\d\s.]{0,9})(?!\s*km\s*\/\s*h)/i);
+  let km:number|null=lab?n(lab[1]):null;
+  if(km==null)for(const m of T.matchAll(/\b(\d{1,3}(?:[\s.]\d{3})+|\d{1,7})\s*(?:kms?|kilom[èe]tres|klm)\b(?!\s*\/\s*h)/gi)){
+   // contexte = le morceau de phrase juste avant le nombre (depuis le dernier retour à la ligne, virgule ou point-virgule)
+   const raw=T.slice(Math.max(0,(m.index||0)-60),m.index||0),before=raw.split(/[\n,;]/).pop()||'',after=T.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+30);
+   if(/(?:garantie|garanti|jusqu|autonomie|courroie|distribution|vidange|r[ée]vision|entretien\s+(?:tous|à)|tous\s+les|limit|contr[ôo]le|\bct\b|favorable|\bou\s*$|\bà\s*$|\bde\s*$)/i.test(before))continue;
+   if(/^\s*[:–-]?\s*(?:favorable|d[ée]favorable)/i.test(after)||/^\s*\)?\s*(?:d'autonomie|autonomie)/i.test(after))continue;
+   km=n(m[1]);break;
+  }
+  if(km!=null&&km>=0&&km<2000000)r.mileage=km;
  }
  if(r.doors==null){const m=T.match(/\b([2-5])\s*portes\b/i);if(m)r.doors=n(m[1]);}
  if(r.seats==null){const m=T.match(/\b([2-9])\s*places\b/i);if(m)r.seats=n(m[1]);}

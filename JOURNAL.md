@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Kilométrage confondu avec une vitesse ou une garantie
+- **Constaté (Anthony, Audi RS6 Slycar) :** kilométrage lu = 305 (« Vitesse relevée à 305 km/h ») au lieu de 41 500 ; la même annonce cite aussi « garantie … ou 80 000 KMS ».
+- **Fait (`fillVehicleFromText`) :** « km/h » ignoré ; nombre de km ignoré quand le bout de phrase qui le précède parle de garantie, jusqu'à, autonomie, courroie, vidange, révision, contrôle technique / « favorable » ; on prend le premier restant. `simplebo-reader.ts` ne lit plus le km lui-même (lecture commune). Tests : RS6 41 500, C3 125 900 (pas la ligne de CT), Zoé 12 500 (pas l'autonomie), « Kilométrage : 88 000 ».
+
 ### 31/10/2026 — Claude — Slycar : photos en double
 - **Constaté (Anthony) :** photos en double sur les voitures Slycar (ex. Porsche 911 GTS).
 - **Cause :** chaque photo est envoyée deux fois sur le site Simplébo, avec deux identifiants différents mais le même nom de fichier (Porsche : 100 identifiants pour 50 fichiers). Le dédoublonnage se faisait par identifiant.
