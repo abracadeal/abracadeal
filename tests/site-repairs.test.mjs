@@ -14,6 +14,9 @@ const d=fixture('progressia-catalogue.json'),p=parseProgressia('window.PROGRESSI
 // Scope + pagination + stale sold listing: a sold source record does not mean a missed page.
 const root=new URL('https://www.human-immobilier.fr/immobilier-agence-la-flotte-en-re');const seen=[];const list='"offerCount":"2" <a href="'+hu+'">1</a><a href="?page=1">2</a><a href="/acheter/annonces-immobilieres-achat">nationwide</a>';
 const rows=await readNetworkAgency(root,list,'human',async u=>{seen.push(u.toString());return{url:u,text:u.search?'<a href="'+hu.replace('485-533','485-532')+'">2</a>':u.pathname.endsWith('485-532')?h.replaceAll('InStock','SoldOut'):h};});assert.equal(rows.length,1);assert.equal(rows.partial,false);assert.equal(rows.stats.sold,1);assert.ok(!seen.some(u=>u.includes('/acheter/')));
+// Shared agency catalogue: distinct mandate prefixes remain inside the explicit catalogue.
+const shared=await readNetworkAgency(root,'"offerCount":"2" <a href="'+hu+'">1</a><a href="'+hu.replace('485-533','239-3080')+'">2</a>','human',async u=>({url:u,text:h}));
+assert.equal(shared.length,2);assert.equal(shared.partial,false);
 const failure=await readNetworkAgency(root,list,'human',async()=>{throw Error('network failure');});assert.equal(failure.partial,true);assert.equal(failure.length,0);
 const vc=await readVehicleCatalogue(new URL('https://www.decrosautomobiles.fr/'),'<div id="elemPager"><input id="carUrl-372267" value="renault-kangoo-blue-dci-80-trend"><a href="https://outside.test/">outside</a></div>','decros',async u=>({url:u,text:fixture('decros-detail.html')}));assert.equal(vc.length,1);assert.equal(vc.partial,false);assert.ok(vc[0].url.includes('/fr/renault-'));
 console.log('Site repairs: real Human/Citya/parking/BNY/Decros fields and galleries, Progressia mapping, pagination, sold and failed pages, agency scope OK');

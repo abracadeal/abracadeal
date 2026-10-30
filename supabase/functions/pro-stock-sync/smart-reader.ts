@@ -140,6 +140,20 @@ function adnpixDetail(html:string,url:string){
   return o;
 }
 
+// Public diagnostic graphics: select only the highlighted row, never the A–G legend.
+export function activeEnergyDiagnostics(html:string){
+ const out:Record<string,string>={};
+ for(const kind of ['dpe','ges']){
+  const block=html.match(new RegExp('<div\\b[^>]*class=["\'][^"\']*\\bdiag-'+kind+'\\b[^"\']*["\'][^>]*>([\\s\\S]*?)</ul>','i'))?.[1]||'';
+  const rows=[...block.matchAll(/<li\b[^>]*class=["'][^"']*\bactive\b[^"']*["'][^>]*>([\s\S]*?)<\/li>/gi)];
+  if(rows.length!==1)continue;
+  const letter=rows[0][1].match(/class=["']note["'][^>]*>\s*<strong>\s*([A-G])\s*<\/strong>/i)?.[1];
+  if(letter)out[kind]=letter.toUpperCase();
+  const value=rows[0][1].match(/class=["']value(?:-left)?["'][^>]*>\s*(?:<span[^>]*>\s*)?<strong>\s*(\d+(?:[.,]\d+)?)/i)?.[1];
+  if(kind==='dpe'&&letter&&value)out.consommation_energie=value.replace(',','.');
+ }
+ return out;
+}
 export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   if(sector==='immobilier'&&/class=["']annonce-detail-titre["']/i.test(rawHtml))return adnpixDetail(rawHtml,pageUrl);
   const base=new URL(pageUrl);const immo=sector==='immobilier';
@@ -240,6 +254,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const dpe=(text.match(/(?:DPE|classe\s+[ée]nerg[ée]?t?i?(?:que|e)|consommation\s+(?:d['’])?[ée]nergie)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:dpe|energy|energie)[a-z-]*=["']([A-G])["']/i))?.[1];
     const ges=(text.match(/(?:\bGES\b|[ée]missions?\s+de\s+gaz[^A-Z]{0,20}|classe\s+climat)[^A-Za-z0-9]{0,25}(?:classe\s*:?\s*)?([A-G])\b/i)||html.match(/data-(?:ges|climat|emission)[a-z-]*=["']([A-G])["']/i))?.[1];
     if(dpe&&ges){o.dpe=dpe.toUpperCase();o.ges=ges.toUpperCase();}
+    Object.assign(o,activeEnergyDiagnostics(html));
     // 29/10/2026 (L'Adresse…) : étiquette en image ou en classe CSS (« dpe dpe-c », /img/ges-c.png) ; retenue seulement si une seule lettre (pas une légende A→G).
     if(!o.dpe){const one=(re:RegExp)=>{const set=new Set([...html.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
       const d2=one(/(?:class=["'][^"']*\b|\/)(?:dpe|etiquette[-_]?dpe|energie|dpe[-_]energie)[-_]([a-g])(?![a-z0-9])/gi),g2=one(/(?:class=["'][^"']*\b|\/)(?:ges|etiquette[-_]?ges|climat|dpe[-_]ges)[-_]([a-g])(?![a-z0-9])/gi);

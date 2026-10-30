@@ -66,20 +66,21 @@ export async function readNetworkAgency(start:URL,html:string,kind:'human'|'city
   const id=start.pathname.match(/\/agences-immobilieres\/[^/]+\/(\d+)/)?.[1]||start.pathname.match(/\/annonces\/agence\/(\d+)/)?.[1];if(!id)throw Error('Adresse agence Citya requise.');
   roots=['vente','location'].map(tr=>new URL(`/annonces/agence/${id}/${tr}`,start));
  }
- const entries=new Map<string,URL>();let partial=false,pages=0,total=0;const scopeIds=new Set<string>();
+ const entries=new Map<string,URL>();let partial=false,pages=0,total=0;
  for(const root of roots){const queue=[root],seen=new Set<string>();let rootTotal:number|undefined;
   while(queue.length&&seen.size<40){const u=queue.shift()!;if(seen.has(u.toString()))continue;seen.add(u.toString());let page:string;
    try{page=u.toString()===start.toString()?html:(await fetchHtml(u)).text;pages++;}catch{partial=true;continue;}
    if(rootTotal===undefined){const m=kind==='human'?page.match(/"offerCount"\s*:\s*"?(\d+)/):clean(page.replace(/<script\b[\s\S]*?<\/script>/gi,'')).match(/(\d+)\s+résultats?/);if(m){rootTotal=Number(m[1]);total+=rootTotal;}}
    for(const link of hrefs(page,root)){if(link.origin!==root.origin)continue;
     const isDetail=kind==='human'?/^\/annonce-(achat|location)-[^/]+_\d+-\d+$/.test(link.pathname):/^\/annonces\/(vente|location)\/[^/]+\/[^/]+\/[^/]+$/.test(link.pathname);
-    if(isDetail){link.search='';link.hash='';entries.set(link.toString(),link);if(kind==='human')scopeIds.add(link.pathname.match(/_(\d+)-\d+$/)![1]);}
+    if(isDetail){link.search='';link.hash='';entries.set(link.toString(),link);}
     else if(link.pathname===root.pathname&&/^\?page=\d+$/.test(link.search)&&!seen.has(link.toString()))queue.push(link);
    }
   }if(queue.length)partial=true;if(rootTotal===undefined)partial=true;
  }
- // Human agency pages must not drift to other agencies or to all-France search pages.
- if(kind==='human'&&scopeIds.size!==1)throw Error('Périmètre Human ambigu : lecture annulée.');
+ // Scope comes from the agency's explicit catalogue and same-path pagination.
+ // A shared agency catalogue may legitimately contain several reference prefixes.
+ if(kind==='human'&&!entries.size&&total>0)throw Error('Catalogue Human vide malgré le stock annoncé.');
  if(entries.size!==total)partial=true;
  const urls=[...entries.values()],rows:any[]=[];let next=0,misses=0,sold=0;const failures:any[]=[];
  await Promise.all(Array.from({length:4},async()=>{while(next<urls.length){const u=urls[next++];try{const o=parseNetworkEstate((await fetchHtml(u)).text,u.toString(),kind);if(o)rows.push(o);else sold++;}catch(e){partial=true;misses++;failures.push({url:u.toString(),error:String(e)});}}}));

@@ -36,7 +36,7 @@ export function parseApimoDetail(raw:string,url:string){
   const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
   const ville=property?.address?.addressLocality|| (variant19?(property?.address?.addressLocality||text(info.match(/<h1\b[^>]*>[\s\S]*?<span\b[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'')):variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||''));
   if(!titre||!description||!ville)return null;
-  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:variant12||variant19||/droit.*bail/i.test(p[1]||'')?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:!p[1]||variant12||variant19||/droit.*bail/i.test(p[1]||'')?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
   if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
   if(property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   // Le module utilisateur de la fiche désigne son conseiller ; ne pas lire l'équipe du pied de page.
@@ -48,7 +48,7 @@ export function parseApimoDetail(raw:string,url:string){
   if(advisorName)o.contact_nom=text(advisorName).replace(/\s+/g,' ').trim();
   if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
   const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
-  const rooms=(infoText+'\n'+all).match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=(infoText+'\n'+all).match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if((variant12||variant19)&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
+  const rooms=infoText.match(/(\d+)\s*pi[eè]ces?/i)||all.match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=infoText.match(/(\d+)\s*chambres?/i)||all.match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if((variant12||variant19)&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
   for(const m of surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)){const t=text(m[1]);const land=t.match(/^\d+\s*(?:Terrain|Jardin)\s+(\d+(?:[.,]\d+)?)\s*m²/i);if(land&&!o.surface_terrain)o.surface_terrain=num(land[1]);const bath=t.match(/^(\d+)\s+Salle de (?:bains?|douche)/i);if(bath)baths+=Number(bath[1]);}
   if(baths)o.salles_de_bain=String(baths);
@@ -57,7 +57,7 @@ export function parseApimoDetail(raw:string,url:string){
   const charge=text(legal).match(/(?:Provision sur charges r[ée]cup[ée]rables|Charges r[ée]cup[ée]rables)\s*([\d\s.,]+)\s*€\s*\/\s*Mois/i);if(charge)o.charges_mensuelles=num(charge[1]);
   const features=module('property-info-template-6');o.prestations=[...features.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1])).join('|');
   o.honoraires=[...legal.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1])).filter(x=>/honoraires|charge.*(?:vendeur|acqu[ée]reur|locataire)/i.test(x)).join(' | ');
-  const gallery=modules.find(x=>/\bmodule-slider\b/.test(x))||'';o.photos=[...new Set([...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>sDecode(m[1])).filter(x=>/^https?:\/\//.test(x)))].join('|');
+  const gallery=modules.find(x=>/\bmodule-slider\b/.test(x))||'';const galleryAnchors=[...gallery.matchAll(/<a\b([^>]+)>/gi)].filter(m=>/class="[^"]*\bclick-fullscreen\b/.test(m[1])).map(m=>m[1].match(/href="([^"]+)"/i)?.[1]).filter((x):x is string=>!!x);o.photos=[...new Set(([...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>m[1]).length?[...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>m[1]):galleryAnchors).map(x=>sDecode(x)).filter(x=>/^https?:\/\//.test(x)))].join('|');
   const diag=modules.find(x=>/energy-diagnostics/.test(x))||'';
   for(const m of diag.matchAll(/data:image\/svg\+xml;base64,([^"']+)/gi)){try{const svg=new TextDecoder().decode(Uint8Array.from(atob(m[1]),c=>c.charCodeAt(0)));const d=apimoDiagnostic(svg);if(d.kind&&d.letter)o[d.kind]=d.letter;if(d.kind==='dpe'&&d.values[0])o.consommation_energie=d.values[0];}catch{}}
   // Mentions textuelles utiles (charges, copropriété, coûts…) ; pas de lecture des biens similaires.

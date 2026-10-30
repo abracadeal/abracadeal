@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — lecteurs Human, Raccosta et diagnostics LF immo
+
+- Human : le périmètre reste le catalogue explicite de l'agence et sa pagination ; plusieurs préfixes de mandat publiés dans ce même catalogue sont acceptés (La Châtre 139/239).
+- Apimo/Raccosta : type issu de la route lorsque le titre du template est absent, galerie originale `click-fullscreen`, pièces/chambres sur plusieurs lignes. Les diagnostics « En cours » restent sans lettre inventée.
+- LF immo/La Fourmi : lecture de la seule ligne active des graphiques HTML DPE/GES et de la consommation, sans déduire une classe depuis les seuils.
+- Tests réels Raccosta et LF immo ajoutés ; régressions Intuition, Cannisimmo, Human/Citya, périmètre et pagination vérifiées. Déploiement et lectures de contrôle en cours ; seuls les résultats confirmés seront marqués réparés.
+- Imozoum, Accès Conseil, Cabinet Girondin, Placyr et Comeback : requêtes serveur HTTP 202 avec `x-amzn-waf-action=challenge`, blocage noté dans chaque demande ; aucune importation.
+
+
 ### 30/10/2026 — ChatGPT — Decros : prix d’aperçu, Citya : caractéristiques, Lyon Immo et Neyt (en cours)
 - Demande Anthony de poursuivre les réparations, y compris ses nouveaux retours Decros et Citya. Base réellement déployée v102, source 872f131f ; lecteurs identiques à main 1b3f922 avant modification. Aucun changement de la validation visuelle ou des boutons d’administration récents.
 - Decros : lecture des prix déjà correcte en production ; défaut dans le formateur euro d’admin-test-import.html qui supprimait virgules/points (16400.00 → 1640000, 79.3 → 793). Nouveau priceNumber conserve décimales et interprète les séparateurs français. Tests sur 16400, 16400.00, 16.400,00 €, 1.150.000, 79,30 €, zéro et absence.
