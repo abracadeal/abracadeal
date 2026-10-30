@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Réparés conservés pour validation visuelle
+- Demande Anthony : remettre les sites réparés dans la liste avec la mention Réparé. `admin-test-import.html` conserve désormais les demandes done dans « Sites en réparation » (badge Réparé déjà existant), en plus des demandes pending/in_progress. Les statuts techniques et les résultats de lecture sont préservés.
+- Bouton Tester sur chaque ligne : renseigne le site et le secteur dans le formulaire d’aperçu, ouvre le panneau et lance la lecture. Aucun import, publication, statut de prospect ou envoi déclenché. Contrôle de syntaxe JavaScript OK. Source main 45eeba2b.
+
 ### 30/10/2026 — ChatGPT — Réparation des sites déjà signalés (en cours)
 - Accord Anthony : traiter les demandes présentes et noter précisément les impossibilités. Base réellement déployée v99 (9db3d85), lecteurs identiques à main a581352 avant modification.
 - Lecteurs dédiés limités aux domaines : Progressia fichier public JSON (sans exécuter de JS), Human catalogue d’agence et JSON-LD au type encodé `ld&#x2B;json`, Citya vente/location de la seule agence demandée et données imbriquées Offer/itemOffered. Pagination, totaux et statut partial conservés ; descriptions et contacts propres aux fiches.
