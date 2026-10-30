@@ -35,13 +35,19 @@ export async function readEwigoAgency(origin:URL,homeHtml:string,fetchHtml:Fetch
       try{const{text}=await fetchHtml(u);const p=pageData(text)?.props?.ad;if(p){if(sold(p))return;d=p;}else failed++;}catch{failed++;}
       const eq=d.equipments&&typeof d.equipments==='object'?Object.values<any>(d.equipments).flat().filter((x:any)=>typeof x==='string'):[];
       const photos:string[]=(Array.isArray(d.photos)&&d.photos.length?d.photos:Array.isArray(d.gallery)&&d.gallery.length?d.gallery:[d.first_photo_thumb]).filter((x:any)=>typeof x==='string'&&/^https?:\/\//.test(x));
+      // Version : les agences y collent des accroches (« TCE 115 / DISPONIBLE / GARANTIE … ») → titre coupé au premier « / »,
+      // les accroches passent en tête de description.
+      const vParts=String(d.version||'').replace(/\s+/g,' ').trim().split(/\s*\/\s+|\s+\/\s*/);
+      const version=vParts[0]||'',extras=vParts.slice(1).map(x=>x.trim()).filter(Boolean);
+      const energy=String(d.energy||'');
+      const fuel=/hybride.*rechargeable|plug/i.test(energy)?'Hybride rechargeable':/hybride|hybrid/i.test(energy)?'Hybride':/lectrique/i.test(energy)?'Électrique':/gpl/i.test(energy)?'GPL':/e85|thanol/i.test(energy)?'Bioéthanol':cap(energy.replace(/\s*\(.*$/,''));
       const warranty=d.warranty_1&&d.warranty_1_duration?`${d.warranty_1_duration} mois (${d.warranty_1})`:'';
-      const descr=[d.description,d.condition?`État : ${d.condition}`:'',d.hands_count?`${d.hands_count} propriétaire${Number(d.hands_count)>1?'s':''} précédent${Number(d.hands_count)>1?'s':''}`:'',
+      const descr=[extras.length?extras.join(' · '):'',d.description,d.condition?`État : ${d.condition}`:'',d.hands_count?`${d.hands_count} propriétaire${Number(d.hands_count)>1?'s':''} précédent${Number(d.hands_count)>1?'s':''}`:'',
         warranty?`Garantie : ${warranty}`:'',eq.length?'Équipements :\n- '+eq.join('\n- '):''].filter(Boolean).join('\n\n');
-      rows.push({reference:String(d.id),url:d.full_url||u.toString(),titre:[d.make,d.model,d.version].filter(Boolean).join(' ').replace(/\s+/g,' ').trim(),
-        marque:d.make||'',modele:d.model||'',version:String(d.version||'').replace(/\s+/g,' ').trim(),prix:d.price??'',annee:d.year??'',
+      rows.push({reference:String(d.id),url:d.full_url||u.toString(),titre:[d.make,d.model,version].filter(Boolean).join(' ').replace(/\s+/g,' ').trim(),
+        marque:d.make||'',modele:d.model||'',version,prix:d.price??'',annee:d.year??'',
         mise_en_circulation:d.market_release_date?String(d.market_release_date).slice(0,10).split('-').reverse().slice(1).join('/'):'',
-        kilometrage:d.kms??'',carburant:cap(d.energy),boite:cap(d.gear),puissance_din:d.horse_power??'',puissance_fiscale:d.horse_power_tax??'',
+        kilometrage:d.kms??'',carburant:fuel,boite:cap(d.gear),puissance_din:d.horse_power??'',puissance_fiscale:d.horse_power_tax??'',
         portes:d.doors_count??'',places:d.seats_count??'',co2:d.co2??'',couleur:d.color_exterior_details||d.color_exterior||'',carrosserie:cap(d.category),
         garantie:warranty,equipements:eq.join('|'),type:/utilitaire|fourgon|^vu$/i.test(String(d.category||''))?'utilitaire':'voiture',etat:'occasion',
         ville:agency?.city?cityCase(agency.city):'',code_postal:agency?.postcode||'',description:descr,photos:photos.join('|')});
