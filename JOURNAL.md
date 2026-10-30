@@ -1369,3 +1369,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Fait (`admin-test-import.html`) :** la liste n'affiche plus que les demandes « En attente » / « En cours » (le compteur suit). Les « Réparé » restent en base comme historique.
 - **Reste à appliquer en base (confirmations Supabase annulées automatiquement depuis l'appli mobile) :** `admin_list_robot_learning` filtré sur pending/in_progress + trigger qui supprime une demande passée en `failed`/`cancelled` + suppression des 2 « Pas possible » (Opt'immo, Villaret Immobilier). En attendant, elles sont simplement masquées.
 - **Suite (Anthony) :** un site envoyé avec « Réparer » restait aussi dans « Sites à apprendre ». Corrigé : la liste « Sites à apprendre » masque les sites en réparation (en attente / en cours, même adresse de site), et se recharge juste après un clic sur « Réparer ».
+
+### 30/10/2026 — Claude — Compteur de photos sous le filigrane
+- **Constaté (Anthony) :** sur la page annonce, le filigrane « Abracadeal » (bas droite) chevauchait le compteur « 1 / N ».
+- **Fait (`card-overlay-20261029.css?v=6`) :** compteur de photos déplacé en bas à gauche (ordinateur et téléphone). Le filigrane reste en bas à droite (il est aussi incrusté dans les photos des particuliers, donc impossible à déplacer).

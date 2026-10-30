@@ -61,3 +61,8 @@ html body .flow-error-card .flow-error-head .small{color:#6f5a78!important;font-
 html body .flow-error-card .flow-error-pill{font-size:.75rem!important;font-weight:900!important;padding:5px 10px!important;white-space:nowrap}
 html body .flow-error-card.warning .flow-error-pill{background:#f5c46b!important;color:#5a3a00!important}
 html body .flow-error-card.error .flow-error-pill{background:#e5484d!important;color:#fff!important}
+
+/* 30/10/2026 (Anthony) : le filigrane « Abracadeal » (en bas à droite de la photo) passait sur le compteur « 1 / N ».
+   Le compteur de photos de la page annonce passe en bas à gauche. */
+html body .detail-photo-count,html body #detailModal .detail-photo-count{right:auto!important;left:12px!important;bottom:12px!important}
+@media (max-width:760px){html body #detailModal .detail-photo-count,html body .detail-photo-count{left:10px!important;bottom:10px!important}}
