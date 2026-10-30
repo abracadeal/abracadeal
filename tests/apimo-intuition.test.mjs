@@ -1,0 +1,16 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {parseApimoDetail,isApimoModules,readApimoModules} from '../supabase/functions/pro-stock-sync/apimo-reader.ts';
+const url='https://intuition.immo/fr/propriete/vente+appartement+cannes+87285412';
+const html=fs.readFileSync(new URL('./fixtures/intuition-property-87285412.html',import.meta.url),'utf8');
+const home='<a href="https://apimo.net/fr/site-internet/">Apimo</a><div data-model-namespace="x"><a href="/fr/acheter">Acheter</a><a href="/fr/louer">Louer</a><a href="/fr/biens-vendus">Vendus</a></div>';
+assert.ok(isApimoModules(home));assert.ok(!isApimoModules(home.replace('https://apimo.net/fr/site-internet/','other')));
+const r=parseApimoDetail(html,url);
+assert.equal(r.prix,'435000');assert.equal(r.ville,'Cannes');assert.equal(r.code_postal,'06400');assert.equal(r.type_bien,'Appartement');assert.equal(r.surface,'70.63');assert.equal(r.dpe,'B');assert.equal(r.ges,'A');
+assert.equal(r.contact_nom,'Lisa PICOT');assert.equal(r.contact_telephone,'+33788311004');
+const photos=r.photos.split('|');assert.equal(photos.length,22);assert.equal(new Set(photos).size,22);assert.ok(photos[0].endsWith('/b83959868d551f6f70ac68dfdadc6861.jpg'));
+const lows=[...html.matchAll(/data-low-src="([^"]+)"/g)].map(m=>m[1]);assert.ok(photos.every(p=>!lows.includes(p)));assert.ok(!photos.some(p=>p.includes('1c0906490681f06baa613b8fad98d4a8')));
+const visited=[];
+const rows=await readApimoModules(new URL('https://intuition.immo/fr/'),home,async u=>{visited.push(u.href);return {url:u,text:u.pathname.includes('/propriete/')?html:`<div data-module-id="1" class="module-listing"><a href="${new URL(url).pathname}">Bien</a>${u.search?'':`<a href="${u.pathname}?page=2">Suite</a>`}</div>`};});
+assert.equal(rows.length,1);assert.equal(rows.partial,false);assert.equal(rows.stats.pages,4);assert.ok(!visited.some(u=>u.includes('vendus')));
+console.log('Intuition: active aliases, pagination, original gallery/order, no low-res duplicates, listing advisor and diagnostics OK');
