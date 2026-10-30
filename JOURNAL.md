@@ -1315,3 +1315,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Page « Imports depuis les sites des pros » : sections repliables
 - **Demande d'Anthony :** trop de défilement pour arriver à « Tester une adresse » ; ranger « Sites en réparation » et « Sites à apprendre » dans des sections.
 - **Fait (`admin-test-import.html`) :** « Tester une adresse » en premier (ouverte, avec son aperçu), puis « Demandes » (ouverte), puis « Inscrire un garage qui a dit oui », « Sites en réparation » et « Sites à apprendre » repliées. Chaque section s'ouvre / se ferme d'un appui, avec le nombre d'éléments affiché sur le titre. Identifiants et fonctions inchangés.
+
+### 30/10/2026 — Claude — Bouton « Valider ce site » (test manuel d'une adresse)
+- **Demande d'Anthony :** quand il teste lui-même un site et qu'il se lit, il faut une touche « Valider ».
+- **Fait (`admin-test-import.html`) :** après « Lire le stock », si au moins une annonce est complète, bouton vert « Valider ce site ». Il passe la fiche du prospect en « site testé » (`site_check_status = ok`, nombre d'annonces, plateforme, date) → ses prochains mails sont ceux du « répondez OK ». Le prospect est retrouvé par l'adresse du site ; s'il n'en a pas (liste manuelle, ex. Bye Buy Car), le bouton demande l'e-mail du garage et relie le site à sa fiche. Rien n'est publié par ce bouton.

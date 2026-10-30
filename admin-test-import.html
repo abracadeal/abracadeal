@@ -100,7 +100,7 @@ details.fold[open]{padding-bottom:14px}
 
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
  <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
- <div style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="sbtn ok" type="button" id="sitePreview" hidden>Voir comme sur le site</button><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
+ <div style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="sbtn ok" type="button" id="sitePreview" hidden>Voir comme sur le site</button><button class="sbtn ok" type="button" id="siteValidate" hidden>Valider ce site</button><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
  <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
  <p id="status" class="muted"></p>
  <div class="stats" id="stats" hidden></div>
@@ -253,7 +253,9 @@ async function load(ev){
   if(error)throw Error(await fnError(error));
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
   if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];LASTDATA=data;render(data,E('sector').value);E('sitePreview').hidden=!NORM.length;
- }catch(e){E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
+  // 30/10/2026 : site lu avec au moins une annonce complète → bouton « Valider ce site ».
+  E('siteValidate').hidden=!NORM.some(n=>!(n.errors||[]).length);E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
+ }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
 function render(data,sector){
@@ -350,6 +352,35 @@ document.querySelectorAll('input.clearable').forEach(inp=>{
  b.addEventListener('click',()=>{inp.value='';sync();inp.focus()});
 });
 E('form').addEventListener('submit',load);
+// 30/10/2026 (Anthony) : quand je teste moi-même un site et qu'il se lit bien, je le valide :
+// la fiche du prospect qui a ce site passe en « site testé » (nombre d'annonces, plateforme),
+// ses prochains mails sont donc ceux du « répondez OK ».
+async function validateSite(){
+ const b=E('siteValidate');b.disabled=true;b.textContent='Validation…';
+ try{
+  let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
+  const host=new URL(url).hostname.replace(/^www\./i,'').toLowerCase();
+  const n=Number(LASTDATA?.total_on_site||0)||NORM.filter(x=>!(x.errors||[]).length).length;
+  const{data:pros,error}=await sb.from('prospection_prospects').select('id,company,source_url,email').ilike('source_url','%'+host+'%').limit(20);
+  if(error)throw error;
+  const match=(pros||[]).filter(p=>{try{return new URL(/^https?:/i.test(p.source_url)?p.source_url:'https://'+p.source_url).hostname.replace(/^www\./i,'').toLowerCase()===host}catch{return false}});
+  if(!match.length){
+   // Prospect de la liste manuelle sans adresse de site : on le retrouve par son e-mail.
+   const mail=(prompt('Aucun prospect de ta liste n\'a ce site ('+host+').\nE-mail du garage pour le relier (laisser vide pour annuler) :')||'').trim().toLowerCase();
+   if(!mail){E('status').innerHTML='Site lu correctement. Rien n\'a été modifié (aucun prospect relié).';b.disabled=false;b.textContent='Valider ce site';return}
+   const{data:byMail,error:me}=await sb.from('prospection_prospects').select('id,company,source_url,email').ilike('email',mail).limit(5);
+   if(me)throw me;
+   if(!(byMail||[]).length){E('status').innerHTML='Aucun prospect avec l\'e-mail <b>'+esc(mail)+'</b>. Rien n\'a été modifié.';b.disabled=false;b.textContent='Valider ce site';return}
+   match.push(...byMail);
+  }
+  const{error:ue}=await sb.from('prospection_prospects').update({source_url:url,site_check_status:'ok',site_check_count:n||null,site_check_platform:(LASTDATA?.platform||null),site_check_reason:null,site_checked_at:new Date().toISOString(),updated_at:new Date().toISOString()}).in('id',match.map(p=>p.id));
+  if(ue)throw ue;
+  E('status').innerHTML='Validé : '+match.map(p=>'<b>'+esc(p.company||p.email||'prospect')+'</b>').join(', ')+' → site testé ('+n+' annonce'+(n>1?'s':'')+'). Ses prochains mails seront ceux du « répondez OK ».';
+  b.textContent='Validé ✓';loadUnread();
+ }catch(e){E('status').innerHTML='<span style="color:var(--bad)">Validation impossible : '+esc(e.message||e)+'</span>';b.disabled=false;b.textContent='Valider ce site'}
+}
+E('siteValidate').onclick=validateSite;
+
 E('reqs').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b)act(b.dataset.a,Number(b.dataset.i),b)});
 E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');if(c)openCar(Number(c.dataset.i))});
 E('db').addEventListener('click',e=>{const t=e.target.closest('.thumbs img');if(!t)return;E('bigimg').src=t.src;E('db').querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t))});
