@@ -1,3 +1,4 @@
+import { isPlaceholderPhoto, dedupePhotos } from './photo-utils.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 import { readSmartSite, sDecode, smartDetail } from "./smart-reader.ts";
 import { readKermarrec } from "./kermarrec-reader.ts";
@@ -69,7 +70,7 @@ function parseRss(text:string){
 }
 const isRss=(text:string)=>/<rss[\s>]/i.test(text.slice(0,2000))||(/<channel[\s>]/i.test(text)&&/<item[\s>]/i.test(text));
 function parseJson(v:any){const arr=Array.isArray(v)?v:(v?.vehicles||v?.vehicules||v?.properties||v?.biens||v?.listings||v?.annonces||v?.items||v?.stock||v?.data||v?.results||[]);return(Array.isArray(arr)?arr:[]).map((x:any)=>flatten(x));}
-function photosOf(o:any){const photos:string[]=[];const add=(v:any)=>{if(Array.isArray(v)){v.forEach(add);return;}if(v&&typeof v==='object'){Object.values(v).forEach(add);return;}String(v??'').split(/[\n|;\s]+/).forEach(p=>{const x=p.trim();if(/^https?:\/\//i.test(x)&&!photos.includes(x)&&photos.length<45)photos.push(x);});};for(const [k,v]of Object.entries(o)){if(/(^|_)(photo|photos|image|images|picture|pictures)(_|$)/.test(k))add(v);}for(let i=1;i<=45;i++)add(first(o,[`photo_${i}`,`photo${i}`,`image_${i}`,`image${i}`,`picture_${i}`,`picture${i}`]));return photos.slice(0,45);}
+function photosOf(o:any){const photos:string[]=[];const add=(v:any)=>{if(Array.isArray(v)){v.forEach(add);return;}if(v&&typeof v==='object'){Object.values(v).forEach(add);return;}String(v??'').split(/[\n|;\s]+/).forEach(p=>{const x=p.trim();if(/^https?:\/\//i.test(x)&&!isPlaceholderPhoto(x)&&!photos.includes(x)&&photos.length<45)photos.push(x);});};for(const [k,v]of Object.entries(o)){if(/(^|_)(photo|photos|image|images|picture|pictures)(_|$)/.test(k))add(v);}for(let i=1;i<=45;i++)add(first(o,[`photo_${i}`,`photo${i}`,`image_${i}`,`image${i}`,`picture_${i}`,`picture${i}`]));return photos.slice(0,45);}
 function normalizeVehicleSub(v:unknown){const t=norm(v);if(!t)return'voitures';if(['voiture','voitures','auto','autos','automobile','automobiles','car','cars','vp','vehicle','vehicule'].includes(t))return'voitures';if(['moto','motos','motorcycle','motorcycles','scooter','scooters','2_roues','deux_roues'].includes(t))return'motos';if(['utilitaire','utilitaires','vu','fourgon','fourgonette','fourgonnette','van_utilitaire','commercial'].includes(t))return'utilitaires';if(['caravaning','camping_car','campingcar','caravane','motorhome'].includes(t))return'caravaning';return'';}
 function normalizeImmoSub(typeValue:unknown,transactionValue:unknown=''){const t=norm(typeValue),tr=norm(transactionValue);const renting=['location','louer','rent','rental','lease','a_louer'].includes(tr)||t.includes('location')||t.includes('rent');if(t.includes('saison')||t.includes('vacance'))return'saisonniere';if(t.includes('terrain')||t.includes('land'))return'vente-terrain';if(t.includes('parking')||t.includes('garage')||t.includes('box')||t.includes('stationnement'))return'parking-garage';if(t.includes('bureau')||t.includes('commerce')||t.includes('local')||t.includes('office')||t.includes('shop')||t.includes('entrepot')||t.includes('hangar'))return'bureaux-commerces';if(/loft|duplex|triplex|penthouse/.test(t))return renting?'location':'vente-appartement';if(/maison|villa|house|immeuble|propriete|ferme|longere|chateau|bastide|chalet|^mas$|demeure|manoir|pavillon/.test(t))return renting?'location':'vente-maison';if(t.includes('appartement')||t.includes('studio')||t.includes('apartment')||t.includes('flat'))return renting?'location':'vente-appartement';if(renting)return'location';if(['vente_appartement','appartement_a_vendre'].includes(t))return'vente-appartement';if(['vente_maison','maison_a_vendre'].includes(t))return'vente-maison';return'';}
 function normalizeCondition(v:unknown){const t=norm(v);const map:any={neuf:'Neuf',new:'Neuf',comme_neuf:'Comme neuf',tres_bon_etat:'Très bon état',bon_etat:'Bon état',used:null,occasion:null,etat_correct:'État correct',correct:'État correct',a_reparer:'À rénover / à réparer',a_renover_a_reparer:'À rénover / à réparer',pour_pieces:'Pour pièces'};return t in map?map[t]:(String(v||'').trim()||null);}
@@ -211,25 +212,6 @@ function tidyDescription(v:unknown,title=''){
  return dedupeDescription(out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim(),title);
 }
 // 29/10/2026 (Anthony) : doublons de photos (même image en plusieurs tailles / adresses) et doublons d'annonces, pour tous les sites.
-const SIZE_Q=/^(w|h|width|height|q|quality|fit|crop|resize|size|format|fm|auto|dpr|scale|mode|rs|ver|version|cache|itok|sw|sh)$/i;
-const SIZE_WORD='thumb|thumbs|thumbnail|thumbnails|small|medium|large|big|ibig|intermediate|mini|xl|xxl|hd|full|original|orig|sm|md|lg|xs|preview|zoom|max|min|resized|crop|cropped';
-function photoKey(u:string){
- try{const x=new URL(u);const keep=[...x.searchParams.entries()].filter(([k])=>!SIZE_Q.test(k)).map(([k,v])=>k+'='+v).sort().join('&');
-  let p=decodeURIComponent(x.pathname).toLowerCase();
-  p=p.replace(new RegExp(`/(?:${SIZE_WORD}|\\d{2,4}x\\d{2,4}|[wh]_?\\d{2,4}|c_[a-z]+|q_\\d+|f_auto|q_auto)(?=/)`,'g'),'/')
-     .replace(/[-_]\d{2,4}x\d{2,4}(?=\.[a-z0-9]{3,4}$)/,'')
-     .replace(new RegExp(`[-_.](?:${SIZE_WORD})(?=\\.[a-z0-9]{3,4}$)`),'')
-     .replace(/@\dx(?=\.)/,'').replace(/\.(?:jpe?g|png|webp|avif|gif)$/,'.img').replace(/\/{2,}/g,'/');
-  return x.hostname.replace(/^www\./,'')+p+(keep?'?'+keep:'');}catch{return u;}
-}
-function photoRank(u:string){const s=u.toLowerCase();let r=0;
- // aucune indication de taille = souvent l'image d'origine (WordPress : car.jpg plus grande que car-1024x683.jpg)
- if(!/\d{2,4}x\d{2,4}|[?&](?:w|width|h|height)=|thumb|small|mini|preview|large|big|full|original|hd|xl|intermediate/.test(s))r+=2.5;if(/full|original|orig|large|big|ibig|hd|xxl|xl|max|zoom/.test(s))r+=3;if(/thumb|small|mini|preview|xs|\bsm\b|min/.test(s))r-=3;const m=s.match(/(\d{2,4})x(\d{2,4})/);if(m)r+=Math.min(3,Number(m[1])/600);const w=s.match(/[?&](?:w|width)=(\d+)/);if(w)r+=Math.min(3,Number(w[1])/600);return r;}
-function dedupePhotos(list:any){
- if(!Array.isArray(list))return list;const order:string[]=[];const best=new Map<string,string>();
- for(const u of list){const s=String(u||'');if(!s)continue;const k=photoKey(s);if(!best.has(k)){best.set(k,s);order.push(k);}else if(photoRank(s)>photoRank(best.get(k)!))best.set(k,s);}
- return order.map(k=>best.get(k)!);
-}
 function listingKey(r:any){const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
  return [r.category,r.sub||'',t,Math.round(Number(r.price)||0),r.surface||'',r.mileage||'',r.year||'',r.city||''].join('|');}
 // Corrections faites par l'admin sur une fiche (table pro_stock_overrides, clé = site + référence), appliquées avant la mise en forme.

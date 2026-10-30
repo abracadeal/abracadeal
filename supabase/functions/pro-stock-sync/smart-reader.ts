@@ -1,3 +1,4 @@
+import { isPlaceholderPhoto, photoKey, photoRank } from './photo-utils.ts';
 // Lecteur « intelligent » des sites de pros (28/10/2026) : utilisé quand aucun connecteur dédié ne reconnaît le site.
 // 1) repère les fiches d'annonces en regroupant les liens qui se répètent (même forme d'adresse, avec un numéro ou un long slug) ;
 // 2) lit chaque fiche par règles générales : titre, prix, photos, surface/pièces/DPE (immobilier) ou km/année (véhicules).
@@ -38,23 +39,51 @@ const num=(s:string)=>{const t=String(s||'').replace(/[\s\u00a0\u202f.']/g,'').r
 function metaAll(html:string,prop:string){return [...html.matchAll(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]*content=["']([^"']*)["']|<meta[^>]+content=["']([^"']*)["'][^>]*(?:property|name)=["']${prop}["']`,'gi'))].map(m=>sDecode(m[1]??m[2]??'').trim()).filter(Boolean);}
 function jsonVal(html:string,keys:string[]){const h=html.replace(/&quot;/g,'"');for(const k of keys){const m=h.match(new RegExp(`"${k}"\\s*:\\s*"?([^",}\\]]{1,80})`,'i'));if(m&&m[1].trim()&&m[1]!=='null')return sDecode(m[1].trim());}return'';}
 
+// Une galerie explicitement identifiée appartient à la fiche ; les logos, conseillers
+// et suggestions autour ne doivent pas devenir la photo principale.
+function photoGallery(html:string):string{
+  for(const m of html.matchAll(/<(div|section|ul|figure)\b[^>]*>/gi)){
+    const labels=[...m[0].matchAll(/\s(?:class|id)\s*=\s*(["'])([\s\S]*?)\1/gi)].map(x=>x[2]).join(' ');
+    if(!/(?:^|[\s_-])(?:gallery|galerie|fotorama)(?:$|[\s_-])|\bmodule-slider\b|\b(?:property|product|vehicle|listing)[-_]slider\b/i.test(labels)||/thumb|miniature|related|similar|suggest|recommend|testimonial/i.test(labels))continue;
+    const tags=new RegExp('<\\/?'+m[1]+'\\b[^>]*>','gi');tags.lastIndex=(m.index||0)+m[0].length;let depth=1,end=html.length;
+    for(let t;(t=tags.exec(html));){depth+=/^<\//.test(t[0])?-1:1;if(!depth){end=tags.lastIndex;break;}}
+    const block=html.slice(m.index,end);if(/<img\b|data-image-url=/i.test(block))return block;
+  }
+  return '';
+}
+
 function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
-  const all:string[]=[];const add=(raw:string)=>{if(!raw)return;let u:string;try{u=new URL(sDecode(raw.trim()),base).toString();}catch{return;}if(!/^https?:/i.test(u)||!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(u)&&!/\/(image|photo|img|media|picture)s?\//i.test(u))return;if(IMG_BAD.test(u.split('?')[0]))return;all.push(u);};
+  const all:string[]=[];const add=(raw:string)=>{if(!raw)return;let u:string;try{u=new URL(sDecode(raw.trim()),base).toString();}catch{return;}if(!/^https?:/i.test(u)||!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(u)&&!/\/(image|photo|img|media|picture)s?\//i.test(u))return;if(IMG_BAD.test(u.split('?')[0])||isPlaceholderPhoto(u))return;all.push(u);};
+  const gallery=photoGallery(html);if(gallery){html=gallery;ogs=[];}
   ogs.forEach(add);
-  for(const m of html.matchAll(/(?:src|data-src|data-lazy|data-original|data-full|data-zoom-image|data-image|data-big|data-large|href|content)=["']([^"']+\.(?:jpe?g|png|webp|avif)(?:\?[^"']*)?)["']/gi))add(m[1]);
-  for(const m of html.matchAll(/srcset=["']([^"']+)["']/gi)){const parts=m[1].split(',').map(x=>x.trim().split(/\s+/)[0]);add(parts[parts.length-1]);}
+  // Un élément lazy-load désigne une seule photo. Ne pas récupérer son src d’attente
+  // ni data-low-src en plus du data-src/data-original pleine taille.
+  for(const m of html.matchAll(/<(?:img|source|a|div|li|meta)\b[^>]*>/gi)){
+    const tag=m[0],attrs=new Map<string,string>();
+    for(const a of tag.matchAll(/(?:^|\s)([\w:-]+)\s*=\s*(["'])([\s\S]*?)\2/g))attrs.set(a[1].toLowerCase(),sDecode(a[3]));
+    const valid=(v:string|undefined)=>{try{return !!v&&/^https?:$/.test(new URL(v,base).protocol)&&!isPlaceholderPhoto(new URL(v,base).href);}catch{return false;}};
+    const full=['data-image-url','data-full','data-zoom-image','data-original','data-large','data-big'].map(k=>attrs.get(k)).find(valid);
+    if(full){add(full);continue;}
+    const srcset=attrs.get('data-srcset')||attrs.get('srcset');
+    if(srcset){const candidates=srcset.split(',').map(v=>v.trim().split(/\s+/)).filter(v=>valid(v[0]));candidates.sort((a,b)=>(parseFloat(b[1])||1)-(parseFloat(a[1])||1));if(candidates[0]){add(candidates[0][0]);continue;}}
+    const lazy=['data-src','data-lazy-src','data-lazy','data-image'].map(k=>attrs.get(k)).find(valid);
+    if(lazy){add(lazy);continue;}
+    if(/^<img\b/i.test(tag)){add(attrs.get('src')||'');continue;}
+    if(/^<a\b/i.test(tag))add(attrs.get('href')||'');
+    if(/^<meta\b/i.test(tag)&&/^(?:og:image(?::url)?|image)$/i.test(attrs.get('property')||attrs.get('itemprop')||''))add(attrs.get('content')||'');
+  }
   if(!all.length)return[];
   // Les variantes de taille comptent comme la même photo : dossiers « 1200xauto », « 800x0 », « gallery_625x470 », « large »,
   // ou suffixes « -300x200 » dans le nom du fichier.
   const SIZE_SEG=/\/(?:[a-z]+_)?\d{1,4}x(?:\d{1,4}|auto)(?=\/)|\/(?:thumbs?|small|medium|large|big|mini|xs|sm|md|lg|xl|xlarge|full|original|zoom)(?=\/)/gi;
   const sizeless=(u:string)=>u.split('?')[0].replace(SIZE_SEG,'');
-  const key=(u:string)=>{const b=sizeless(u).split('/').pop()||'';return b.replace(/\.\w+$/,'').length>=8?b.replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,''):sizeless(u).replace(/[-_](\d{2,4}x\d{2,4}|small|medium|thumb|mini|min|sm|xs)(?=\.\w+$)/i,'');};
+  const key=photoKey;
   const rawDir=(u:string)=>u.split('?')[0].replace(/\/[^/]*$/,'');
   const dir=(u:string)=>sizeless(u).replace(/\/[^/]*$/,'');
   const sizeOf=(u:string)=>{const p=u.split('?')[0];const m=p.match(/(\d{1,4})x(\d{1,4}|auto)(?=[\/._-])/i);if(m)return Math.max(Number(m[1])||0,m[2]==='auto'?Number(m[1])||0:Number(m[2])||0)||1;if(/\/(original|full|zoom|xlarge|xl|big|large)\//i.test(p))return 2000;if(/thumb|small|mini|list_/i.test(p))return 1;return 1500;};
   // Famille principale : celle de l'image de partage, sinon la plus fournie (ou les fichiers portant la référence).
   const fam=new Map<string,number>();for(const u of all)fam.set(dir(u),(fam.get(dir(u))||0)+1);
-  const ogDir=ogs.length?dir(new URL(ogs[0],base).toString()):'';
+  const ogDir=(()=>{try{return ogs.length?dir(new URL(ogs[0],base).toString()):'';}catch{return '';}})();
   const mainDir=ogDir&&(fam.get(ogDir)||0)>=2?ogDir:[...fam.entries()].sort((a,b)=>b[1]-a[1])[0][0];
   const inFam=all.filter(u=>dir(u)===mainDir);
   // Dans la famille, le dossier de la plus grande taille qui contient plusieurs photos (la galerie de l'annonce,
@@ -67,7 +96,7 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
   const chosen=all.filter(u=>(dir(u)===mainDir&&(!keep||keep.has(key(u))))||(refOk&&u.split('?')[0].includes(ref)));
   const out:string[]=[];const seen=new Set<string>();
   const pos=new Map<string,number>();
-  for(const u of chosen){const k=key(u);if(seen.has(k)){const i=pos.get(k)!;if(sizeOf(u)>sizeOf(out[i])||(out[i].includes('?')&&!u.includes('?')))out[i]=u;continue;}seen.add(k);pos.set(k,out.length);out.push(u);}
+  for(const u of chosen){const k=key(u);if(seen.has(k)){const i=pos.get(k)!;if(photoRank(u)>photoRank(out[i]))out[i]=u;continue;}seen.add(k);pos.set(k,out.length);out.push(u);}
   // Préfère la version sans paramètres de redimensionnement quand elle existe.
   return out.map(u=>/[?&](w|h|width|height|fit|size|resize)=/i.test(u)&&chosen.some(c=>c===u.split('?')[0])?u.split('?')[0]:u).slice(0,45);
 }
@@ -153,7 +182,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
   const photos=pickPhotos(region,base,ogs,refM?.[1]||'');
-  if(!photos.length)return null;
+  // Fiche conservée pour afficher « aucune photo » dans les erreurs de l’aperçu.
   const o:any={reference,url:pageUrl,titre:titre.slice(0,160),prix:String(Math.round(prix)),photos:photos.join('|')};
   const ogDesc=metaAll(headHtml,'og:description')[0]||metaAll(headHtml,'description')[0]||'';
   const long=longestText(html);o.description=(long.length>ogDesc.replace(/(\.{3}|…)$/,'').length?long:ogDesc).slice(0,6000);
