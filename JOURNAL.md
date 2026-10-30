@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — en cours : BIAS Bernay et Immobilier Pierrefeu
+- Travail poursuivi sur deux anciennes demandes encore pending ; aucun prospect, mail, import/publication, flux activé ou validation visuelle. Base réellement déployée vérifiée v120 / e742a3c, après conservation des lecteurs récents de Claude (Supabase, Roselmac et Simplebo).
+- BIAS Bernay : catalogue public filtré ref-agence=298, sans élargissement aux agences voisines. Type et ville de la fiche (deux titres distincts), prix propre, description intégrale, champs de surface/terrain/chambres, galerie originale et seules classes actives DPE/GES. Contact personnel seulement lorsqu'il est publié dans cette description. L'identifiant idBien dans la query est conservé.
+- Test local actuel : 58 fiches BIAS lues, partial=false, aucune ville/type/photo manquants. Témoin 10649 : Bernay, Maison, 295000 €, 178 m², terrain 2291 m², 4 chambres, 2 salles d'eau, DPE C/GES A, 19 photos, Sandrine CHESNEL / 0602552295.
+- Pierrefeu : ancien HTML ISO-8859-1 / Windows-1252 ; décodage selon en-tête ou déclaration meta ajouté aux téléchargements HTML. Les textes UTF-8 restent décodés en UTF-8. Le lecteur visite les catalogues ventes et locations et leurs alias de pagination, uniquement les cartes id=biens-immobiliers, pas le bien suggéré en tête (dont le lien /location/ d'un bien à vendre).
+- Pierrefeu : ville et CP dans le titre/adresse de la fiche, surfaces dans leurs rubriques explicites hors commentaires HTML (ne pas prendre « 5 000 m² de terrain non attenant » pour la surface habitable), prix/loyer propre et galerie rel=gallery[référence]. Coordonnées d'agence clairement identifiées, sans attribuer le téléphone de l'agence à un négociateur cité dans la description.
+- Accès : requête Node locale HTTP en timeout, HTTPS invalide ; contrôle serveur net HTTP 200 (186235), HTTPS certificat non valide (186236). L'adresse HTTP officielle est conservée, sans désactiver la vérification TLS. Test complet local par le client HTTP fonctionnel et contrôles production à terminer avant Réparé.
+- Tests batch6 sur vrais HTML : encodages, ville/surfaces, diagnostics, galerie, contacts, compteur/pagination, séparation vente/location et rejet des suggestions ; aucune lettre ni ville inventée.
+
 ### 30/10/2026 — ChatGPT — AJP Nantes Ouest / La Roche-sur-Yon et 4S Concept
 - Base main cde2fa8 ; robot réellement déployé v111, source baa1329. Réparations de lecture uniquement, sans prospect/mail/import/publication ni validation visuelle.
 - AJP : nouveau lecteur des liens achat/location publiés par la page de l'agence, identifiant propre vérifié (Nantes Ouest 173162, La Roche 173106). Les fiches viennent du tableau JSON public `var properties`, pas d'une recherche dans toute la ville. Pagination à chemin et agence constants, compteurs vérifiés. Données propres au bien, galerie, DPE/GES affichés et téléphone de la fiche.

@@ -1,3 +1,5 @@
+import { decodeLegacyHtml } from "./legacy-html.ts";
+import { readBiasAgency, readPierrefeu } from "./regional-estate-readers.ts";
 import { readAjpAgency } from "./ajp-reader.ts";
 import { readFourS } from "./fours-reader.ts";
 import { readSalanie } from "./salanie-reader.ts";
@@ -270,7 +272,7 @@ async function fetchSiteHtml(start:URL){
   const r=await fetch(url.toString(),{headers:{Accept:'text/html,*/*;q=0.5','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},redirect:'manual',signal:AbortSignal.timeout(20000)});
   if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc||redirects>=4)throw Error('Redirection invalide');url=new URL(loc,url);continue;}
   if(!r.ok)throw Error(`HTTP ${r.status}`);
-  const text=await r.text();if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>5_000_000)throw Error('Page trop volumineuse');
+  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>5_000_000)throw Error('Page trop volumineuse');
   return{text,url};
  }
 }
@@ -917,7 +919,7 @@ async function readFeed(feed:any){
   }
   const len=Number(r.headers.get('content-length')||0);
   if(len>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
-  const text=await r.text();
+  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');
   if(text.length>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text)){const err:any=new Error('Protection anti-robots : challenge AWS WAF / UUSEC. Un accès autorisé au robot ou un flux fourni par le professionnel est nécessaire.');err.platform='Protection anti-robots';throw err;}
   const ct=(r.headers.get('content-type')||'').toLowerCase();
@@ -940,6 +942,8 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?salanie-immobilier\.fr$/i.test(url.hostname)){rows=await readSalanie(url,text,fetchSiteHtml);platform='Salanié (catalogues actifs et villes publiées)';feed.sector='immobilier';}
     else if(/^(?:www\.)?ajp-immobilier\.com$/i.test(url.hostname)){rows=await readAjpAgency(url,text,fetchSiteHtml);platform='AJP (catalogues agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?4sconcept\.com$/i.test(url.hostname)){rows=await readFourS(url,text,fetchSiteHtml);platform='4S Concept (stock et galerie Motors)';feed.sector='vehicules';}
+    else if(/^(?:www\.)?biasimmobilier\.fr$/i.test(url.hostname)){rows=await readBiasAgency(url,text,fetchSiteHtml);platform='BIAS (catalogue agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?immobilier-pierrefeu\.com$/i.test(url.hostname)){rows=await readPierrefeu(url,text,fetchSiteHtml);platform='Immobilier Pierrefeu (catalogues paginés)';feed.sector='immobilier';}
     else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml);platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
