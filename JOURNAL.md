@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Tri des sites illisibles + concessions de marque retirées de la prospection
+- **Tri (échecs connus + ~500 sites non testés, empreinte du fabricant) :** agences : La Boîte Immo ≈ 1 agence sur 4, déjà lue (erlea.fr 30/30), Netty lu (5/5), Orpi / Apimo / C21 lus ; ≈ 5 % derrière un pare-feu AWS WAF (illisibles, mail normal). Garages : ≈ 3 sur 10 sont des pages de concession de marque (stock VO sur les plateformes des marques) ; grosse famille illisible = **Autobiz** (tout le réseau Ewigo : 128 garages dans la liste) → lecteur à écrire ; le reste = sites faits main.
+- **Fait (demande d'Anthony : « les grosses concessions qui font quasi que du neuf on supprime ») :** 486 prospects passés en `segment='exclu_admin'` (statut `paused` s'ils n'avaient pas reçu de mail), note « concession de marque, surtout du neuf » — même effet que le bouton « Supprimer » : plus jamais de mail, réversible. Pages de concession des marques (Volkswagen, Toyota, Lexus, Porsche, BMW / BMW Motorrad, Mini, Mercedes, Skoda, Hyundai, MG, Honda, Mazda, Suzuki, Renault, Seat, Kia, Audi, Maserati, Harley…) + Peugeot / Citroën sauf les petits agents (nom « Garage… », « Agent… », « Ets… », « … Automobiles », sans « Groupe ») : 105 agents gardés.
+- **Reste :** grosses concessions sur leur propre domaine (ex. honda-nantes.com, astonmartinparis.com, groupepeyrot.com/concessions/…) non traitées ; lecteur Autobiz à faire.
+
 ### 31/10/2026 — ChatGPT — en cours : Select Azur et tri des accès bloqués
 - Demande Anthony de poursuivre les réparations. Base main 20d257e, version déployée vérifiée v127 / 2b91aba. Aucune modification de la validation visuelle ou de la fermeture manuelle des demandes ajoutée par Claude.
 - Select Azur : le lecteur Apimo repérait 60 références mais ne reconnaissait pas les templates 41 (faits numériques) / 42 (titre, ville, prix et description), ce qui ne retournait que des lignes vides et 59 faux doublons. Nouveaux templates pris en charge, conseiller user-template-5, financier template 38 ; galerie et diagnostics existants conservés. Un détail non reconnu rend désormais le parcours partial=true.
