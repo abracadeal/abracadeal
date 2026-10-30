@@ -61,7 +61,7 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
   for(const m of html.matchAll(/<(?:img|source|a|div|li|meta)\b[^>]*>/gi)){
     const tag=m[0],attrs=new Map<string,string>();
     for(const a of tag.matchAll(/(?:^|\s)([\w:-]+)\s*=\s*(["'])([\s\S]*?)\2/g))attrs.set(a[1].toLowerCase(),sDecode(a[3]));
-    const valid=(v:string|undefined)=>{try{return !!v&&/^https?:$/.test(new URL(v,base).protocol)&&!isPlaceholderPhoto(new URL(v,base).href);}catch{return false;}};
+    const valid=(v:string|undefined)=>{try{if(!v)return false;const u=new URL(v,base);return /^https?:$/.test(u.protocol)&&(/\.(jpe?g|png|webp|avif)(\?|$)/i.test(u.href)||/\/(image|photo|img|media|picture)s?\//i.test(u.href))&&!IMG_BAD.test(u.pathname)&&!isPlaceholderPhoto(u.href);}catch{return false;}};
     const full=['data-image-url','data-full','data-zoom-image','data-original','data-large','data-big'].map(k=>attrs.get(k)).find(valid);
     if(full){add(full);continue;}
     const srcset=attrs.get('data-srcset')||attrs.get('srcset');

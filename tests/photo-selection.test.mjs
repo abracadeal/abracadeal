@@ -36,3 +36,5 @@ for(const [file,url] of [['intuition-property-87285412.html','https://intuition.
  const html=fs.readFileSync(new URL('./fixtures/'+file,import.meta.url),'utf8');
  assert.deepEqual(smartDetail(html,url,'immobilier').photos.split('|'),parseApimoDetail(html,url).photos.split('|'));
 }
+
+assert.equal(row('<img data-image="123" src="/photos/front.jpg">').photos,'https://garage.example/photos/front.jpg');
