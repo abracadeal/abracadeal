@@ -232,7 +232,7 @@
       let legal=pending?.legal||null;
       if(needLegal&&!legal){
         if(!d.querySelector('#socialLegal')?.checked){status.textContent='Merci d’accepter les CGU.';return;}
-        legal={legal_terms_version:'2026-10-15',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true};
+        legal={legal_terms_version:'2026-10-30',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true};
       }
       const type=needType?(d.querySelector('input[name=socialType]:checked')?.value||''):(currentProfile?.account_type||'particulier');
       if(!type){status.textContent='Indiquez si vous êtes particulier ou professionnel.';return;}

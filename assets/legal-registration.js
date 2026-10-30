@@ -7,7 +7,7 @@ window.confirmLegalRegistration=()=>new Promise(resolve=>{
  let done=false;
  function finish(value){if(done)return;done=true;dialog.remove();resolve(value);}
  dialog.querySelector('input').onchange=e=>{dialog.querySelector('[type=submit]').disabled=!e.target.checked;};
- dialog.querySelector('form').onsubmit=e=>{e.preventDefault();if(!dialog.querySelector('input').checked)return;finish({legal_terms_version:'2026-10-15',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true});};
+ dialog.querySelector('form').onsubmit=e=>{e.preventDefault();if(!dialog.querySelector('input').checked)return;finish({legal_terms_version:'2026-10-30',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true});};
  dialog.querySelector('[data-cancel]').onclick=()=>finish(null);
  dialog.oncancel=e=>{e.preventDefault();finish(null);};
  document.body.append(dialog);dialog.showModal();

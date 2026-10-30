@@ -1267,3 +1267,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Testé (fenêtre avec serveur simulé) : case manquante refusée ; avec la case : passage Pro, accord enregistré, demande d'import créée.
 - **Précision (30/10) :** pour un Pro, le téléphone (déjà obligatoire) s'intitule « Téléphone de l'entreprise » : numéro sur lequel les acheteurs le joignent depuis ses annonces (`v=7`).
 - **Correction (30/10) :** la note du téléphone Pro dit « numéro proposé par défaut sur vos annonces, modifiable annonce par annonce » (le numéro d'une annonce se change dans l'annonce ; pour un import, le numéro du vendeur indiqué sur le site du pro passe avant) (`v=8`).
+
+### 30/10/2026 — Claude — Pages légales mises à jour (version du 30 octobre 2026)
+- **Demande d'Anthony :** être en règle après les changements du jour.
+- **Confidentialité** (`confidentialite.html` + copies dans `index.html` et `vacances.html`) : connexion Google / Facebook (nom, e-mail, photo de profil transmis avec accord, pas de mot de passe) ; reprise des annonces du site d'un pro qui l'a autorisée (textes, photos, prix, conseiller indiqué) ; e-mails liés au compte (bienvenue, sécurité, abonnement) dans l'exécution du contrat ; prestataires ajoutés : Resend (e-mails), Google et Meta (connexion) ; vérification des entreprises via le registre officiel (recherche-entreprises.api.gouv.fr) à partir du SIRET ou du SIREN.
+- **CGU** (`cgu.html` + copie dans `index.html`) : § 2 choix Particulier / Professionnel à l'inscription (Google/Facebook compris), SIRET ou SIREN vérifié et téléphone obligatoires pour un Pro, type de compte non modifiable par l'utilisateur ; § 3 nouveau paragraphe « Reprise des annonces depuis le site d'un professionnel » (autorisation expresse, droits sur les contenus, mise à jour automatique, retrait de l'autorisation à contact@abracadeal.fr).
+- Version affichée : 30 octobre 2026 (CGU et confidentialité ; CGV, cookies et mentions légales inchangées). Version d'acceptation enregistrée à l'inscription : `2026-10-30` (`legal-registration.js`, `index-main.js`, `social-login-20261018.js`, test).
+- Tests `legal-pages` : mêmes résultats qu'avant (2 échecs déjà présents avant ces changements).
+- **Mentions légales :** rien à changer (éditeur, directeur de la publication, hébergeur, contact présents).

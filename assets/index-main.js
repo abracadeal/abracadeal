@@ -5776,7 +5776,7 @@ const passwordRecovery = (()=>{
       // 28/10/2026 : compte créé par l'admin pour un garage (legal_pending) : CGU acceptées au premier mot de passe.
       const legalPending=data.session?.user?.user_metadata?.legal_pending===true;
       if(legalPending&&!$('#recoveryLegal')?.checked){status('recoveryPasswordStatus','Cochez la case d’acceptation des CGU pour activer votre compte.');return}
-      const {error}=await sb.auth.updateUser(legalPending?{password,data:{legal_terms_version:'2026-10-15',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true,legal_pending:false}}:{password});
+      const {error}=await sb.auth.updateUser(legalPending?{password,data:{legal_terms_version:'2026-10-30',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true,legal_pending:false}}:{password});
       if(error)throw error;
       recoveryUserId=null;writeMarker(null);$('#resetPasswordForm').reset();
       closeModal('resetPasswordModal');

@@ -37,7 +37,7 @@ test('accord à l’inscription décoché, annulation sans création et date con
  const ui=boot();ui.form.onsubmit({preventDefault(){}});assert.equal(ui.dialog.removed,undefined);
  ui.checkbox.checked=true;ui.checkbox.onchange({target:ui.checkbox});assert.equal(ui.submit.disabled,false);
  ui.form.onsubmit({preventDefault(){}});const result=await ui.promise;
- assert.equal(result.legal_terms_version,'2026-10-15');assert.equal(result.legal_majority_confirmed,true);assert.ok(Number.isFinite(Date.parse(result.legal_terms_accepted_at)));
+ assert.equal(result.legal_terms_version,'2026-10-30');assert.equal(result.legal_majority_confirmed,true);assert.ok(Number.isFinite(Date.parse(result.legal_terms_accepted_at)));
 });
 test('brouillon hôte conservé 30 jours puis effacé, ancien format migré sans perdre les données',()=>{
  const source=read('assets/espace-hote.js').split('function getHostDraft(){')[1].split('function saveHostDraft(){')[0];
