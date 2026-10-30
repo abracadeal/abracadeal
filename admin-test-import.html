@@ -163,8 +163,10 @@ async function init(){
 // 29/10/2026 : prospects au site illisible (test avant le 1er mail).
 // 29/10/2026 : file « Apprendre à lire ce site ».
 async function loadLearn(){
- const{data,error}=await sb.rpc('admin_list_robot_learning',{p_limit:30});
+ let{data,error}=await sb.rpc('admin_list_robot_learning',{p_limit:200});
  if(error){E('learnq').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
+ // 30/10/2026 (Anthony) : seuls les sites encore à réparer restent dans la liste (réparé → sort, impossible/annulé → retiré).
+ data=(data||[]).filter(r=>r.status==='pending'||r.status==='in_progress');
  const L={pending:['pending','En attente'],in_progress:['pending','En cours'],done:['on','Réparé'],failed:['rej','Pas possible'],cancelled:['off','Annulé']};
  E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<div class="req"><div class="req-top"><h3>'+esc(r.company||r.url)+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div></div>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
 }

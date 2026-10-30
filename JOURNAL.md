@@ -1347,3 +1347,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - SQL : `supabase/2026-10-30-prospect-bounces.sql` (`prospect_mailer_mailbox_list`, service_role uniquement). Cron `abracadeal-prospect-bounces` toutes les heures (à h07) de 6 h à 18 h, heure de Paris. 1er passage réel (30 jours) : 9 adresses mortes de plus trouvées et passées en `error`.
 - **Mise à jour (Anthony) :** ChatGPT (GPTBot, ChatGPT-User, OAI-SearchBot) et Claude (ClaudeBot, Claude-User…) autorisés : retirés de la liste de blocage.
 - **Mise à jour 2 (Anthony) :** toutes les IA autorisées (ChatGPT, Claude, Gemini, Perplexity, Meta, Amazon, Apple, Common Crawl…) pour qu'elles puissent recommander Abracadeal. Restent refusés : revendeurs/aspirateurs de données (Diffbot, Omgili, ImageSift, Scrapy, HTTrack, wget) et outils SEO concurrents (Ahrefs, Semrush, Majestic, DotBot, BLEXBot, DataForSEO, Serpstat).
+
+### 30/10/2026 — Claude — « Sites en réparation » : seulement ce qui reste à faire
+- **Demande d'Anthony :** un site réparé doit sortir de la liste, et ceux impossibles à réparer doivent être supprimés.
+- **Fait (`admin-test-import.html`) :** la liste n'affiche plus que les demandes « En attente » / « En cours » (le compteur suit). Les « Réparé » restent en base comme historique.
+- **Reste à appliquer en base (confirmations Supabase annulées automatiquement depuis l'appli mobile) :** `admin_list_robot_learning` filtré sur pending/in_progress + trigger qui supprime une demande passée en `failed`/`cancelled` + suppression des 2 « Pas possible » (Opt'immo, Villaret Immobilier). En attendant, elles sont simplement masquées.
