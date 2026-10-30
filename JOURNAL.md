@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Lecteur Simplici Car (≈ 100 agences franchisées)
+- Un seul site national PrestaShop (simplicicar.com) ; chaque agence = une catégorie, ex. `/9-occasions-cannes-06` (liste : `/content/9-agences`). **Adresse à donner au robot = la page catalogue de l'agence.**
+- **Fait (`simplicicar-reader.ts`) :** liste paginée (?page=N) puis fiche de chaque voiture : bloc `data-product` (JSON PrestaShop) → marque, modèle, version, énergie, km, année, mise en circulation, couleur, portes, places, puissance, Crit'Air, CO2, ville de l'agence, équipements (« Oui »), photos `large_default`, prix. Seules les voitures dont `id_category_default` = l'agence ; quantité 0 / non commandable exclues.
+- **Piège trouvé :** l'en-tête du robot `Accept: application/json…` fait répondre PrestaShop en JSON → la page n'arrivait jamais au choix du lecteur de site. `readFeed` envoie maintenant directement les pages agence Simplici Car au lecteur.
+- **Test :** Cannes 150/150 complets, 2 633 photos. Déployé v133 (commit 6001e60).
+- **Reste :** le site ne publie aucun e-mail d'agence (formulaires + téléphones) ; aucune agence Simplici Car dans la liste de prospection.
+
 ### 31/10/2026 — ChatGPT — lecteur Boschi Vaison-la-Romaine
 - La page d'agence ne montre que deux nouveautés. Périmètre complet trouvé dans le formulaire public /acheter, champ agences[] avec valeur vaison-la-romaine. Filtre contrôlé sur chaque page ; le catalogue annonce 98 biens, pas les 796 du réseau entier.
 - Session anonyme publique : GET d'entrée puis appel officiel update_viewport_session, formulaire de recherche envoyé au même endpoint et dans le format AJAX de son JavaScript public. Aucun JavaScript téléchargé évalué, aucun contact envoyé, aucune authentification ou protection anti-robots contournée. Cookies éphémères gardés en mémoire pour cette lecture, redirections hors domaine refusées.
