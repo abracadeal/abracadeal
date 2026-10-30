@@ -1255,3 +1255,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Demande d'Anthony :** aucun mail n'arrive après une inscription (cas Bye Buy Car) ; mettre en place un mail de bienvenue.
 - **Fait (`process-pro-transactional-emails`) :** à chaque passage (toutes les 2 min), les comptes **particuliers** créés depuis le 30/10/2026 13 h, finalisés (téléphone renseigné, e-mail confirmé), reçoivent une seule fois « Bienvenue sur Abracadeal ! » (clé `welcome:<compte>`, type `custom_message`, aucun changement de base) : invitation à déposer une première annonce, bouton « Déposer une annonce » (`/?deposer=1`), signé « L'équipe Abracadeal », depuis contact@abracadeal.fr. Pas d'envoi rétroactif. Les pros gardent leurs mails d'abonnement / Fondateur.
 - **Au passage :** mail `founder_onboarding` : titre « Marre de payer trop cher ? » retiré (accroche abandonnée le 23/10) → « Bienvenue sur Abracadeal » ; ligne obsolète « formule 50 gratuite » retirée.
+- **Déployé :** `process-pro-transactional-emails` v7 ACTIVE. Exemplaire de test « [TEST] Bienvenue sur Abracadeal » mis en file pour abracadeal@gmail.com.
+
+### 30/10/2026 — Claude — Barre de recherche
+- **Demande d'Anthony :** retirer les exemples « Clio, T2 Cannes » : le texte de la barre de recherche de l'accueil devient « ✦ Recherche IA » (`index.html`).
