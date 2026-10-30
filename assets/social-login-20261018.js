@@ -37,6 +37,12 @@
   .social-complete-close:hover{background:#e6dcec}
   .social-complete-cancel{min-height:44px;padding:0 16px;border:1px solid #cbbcd6;border-radius:12px;background:#fff;color:#24152d;font:inherit;font-weight:700;cursor:pointer}
   .social-complete-cancel:hover{background:#f7f2fa}
+  .social-type{border:0;padding:0;margin:14px 0 0;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+  .social-type legend{font-weight:700;margin-bottom:6px;padding:0}
+  .social-type-opt{display:flex!important;align-items:center;gap:8px;margin:0!important;padding:11px 12px;border:1px solid #e2d8e8;border-radius:12px;cursor:pointer;font-weight:700}
+  .social-type-opt:has(input:checked){border-color:#7b27a0;background:#f6eefa}
+  .social-type-opt input{width:18px;height:18px;margin:0}
+  .social-pro-fields[hidden]{display:none}
   .social-complete-status{color:#b3261e;font-weight:700;min-height:1.2em;margin-top:10px}`;
   document.head.append(css);
 
@@ -147,11 +153,13 @@
     const meta=currentUser.user_metadata||{};
     const needPhone=!currentProfile?.phone;
     const needLegal=!meta.legal_terms_accepted_at;
-    if(!needPhone&&!needLegal){clearPending();return;}
-    openCompletion({needPhone,needLegal,meta});
+    // 30/10/2026 : le type de compte (Particulier / Professionnel) doit être choisi explicitement.
+    const needType=currentProfile?.account_type!=='professionnel'&&!meta.account_type_chosen_at;
+    if(!needPhone&&!needLegal&&!needType){clearPending();return;}
+    openCompletion({needPhone,needLegal,needType,meta});
   }
 
-  function openCompletion({needPhone,needLegal}){
+  function openCompletion({needPhone,needLegal,needType}){
     dialogOpen=true;
     const pending=readPending();
     const legalDone=!!pending?.legal;
@@ -161,6 +169,17 @@
     d.innerHTML=`<button type="button" class="social-complete-close" data-cancel aria-label="Annuler et se déconnecter">×</button><form>
       <h2 id="social-complete-title">Finalisez votre compte</h2>
       <p class="note" style="margin:0">Il ne manque que quelques informations pour utiliser Abracadeal.</p>
+      ${needType?`<fieldset class="social-type"><legend>Vous êtes</legend>
+        <label class="social-type-opt"><input type="radio" name="socialType" value="particulier" required><span>Particulier</span></label>
+        <label class="social-type-opt"><input type="radio" name="socialType" value="professionnel" required><span>Professionnel</span></label>
+      </fieldset>
+      <div class="social-pro-fields" hidden>
+        <label for="socialSiret">SIRET ou SIREN de l’entreprise</label>
+        <input class="input" id="socialSiret" inputmode="numeric" maxlength="20" placeholder="123 456 789 00012" autocomplete="off">
+        <div class="note">Obligatoire pour un compte professionnel · contrôlé dans le registre officiel des entreprises.</div>
+        <label for="socialSector">Domaine professionnel</label>
+        <select class="input" id="socialSector"><option value="">Choisir mon domaine</option><option value="vehicules">Véhicules — Auto & Moto</option><option value="immobilier">Immobilier</option><option value="hightech">High-tech</option><option value="maison">Maison & Déco</option><option value="mode">Mode</option><option value="emploi">Emploi</option><option value="services">Services & Artisans</option></select>
+      </div>`:''}
       <label for="socialName">Nom public / pseudo</label>
       <input class="input" id="socialName" required maxlength="80" autocomplete="nickname">
       ${needPhone?`<label for="socialPhone">Téléphone</label>
@@ -175,6 +194,13 @@
         <button class="btn primary" type="submit">Valider</button>
       </div></form>`;
     document.body.append(d);
+    d.querySelectorAll('input[name=socialType]').forEach(r=>r.addEventListener('change',()=>{
+      const pro=d.querySelector('input[name=socialType]:checked')?.value==='professionnel';
+      const box=d.querySelector('.social-pro-fields');if(box)box.hidden=!pro;
+      const sir=d.querySelector('#socialSiret');if(sir)sir.required=pro;
+      const sec=d.querySelector('#socialSector');if(sec)sec.required=pro;
+      const t=d.querySelector('#social-complete-title');if(t)t.textContent=pro?'Finalisez votre compte professionnel':'Finalisez votre compte';
+    }));
     const nameInput=d.querySelector('#socialName');
     nameInput.value=(currentProfile?.display_name||'').trim()||suggestedName(currentUser);
     const status=d.querySelector('.social-complete-status');
@@ -202,11 +228,35 @@
         if(!d.querySelector('#socialLegal')?.checked){status.textContent='Merci d’accepter les CGU.';return;}
         legal={legal_terms_version:'2026-10-15',legal_terms_accepted_at:new Date().toISOString(),legal_majority_confirmed:true};
       }
+      const type=needType?(d.querySelector('input[name=socialType]:checked')?.value||''):(currentProfile?.account_type||'particulier');
+      if(!type){status.textContent='Indiquez si vous êtes particulier ou professionnel.';return;}
+      const siretRaw=type==='professionnel'&&needType?String(d.querySelector('#socialSiret')?.value||'').replace(/\D/g,''):'';
+      const sector=type==='professionnel'&&needType?String(d.querySelector('#socialSector')?.value||''):'';
+      if(type==='professionnel'&&needType){
+        if(!/^\d{9}$|^\d{14}$/.test(siretRaw)){status.textContent='Indiquez votre SIRET (14 chiffres) ou votre SIREN (9 chiffres).';d.querySelector('#socialSiret')?.focus();return;}
+        if(!sector){status.textContent='Choisissez votre domaine professionnel.';d.querySelector('#socialSector')?.focus();return;}
+      }
       btn.disabled=true;btn.textContent='Enregistrement…';
       try{
         const payload={display_name};
+        let phoneChecked=null;
         if(needPhone){
-          const check=await abracaPhoneAvailable(d.querySelector('#socialPhone').value.trim(),'particulier');
+          phoneChecked=await abracaPhoneAvailable(d.querySelector('#socialPhone').value.trim(),type);
+          if(!phoneChecked.ok)throw new Error(/déjà utilisé/i.test(phoneChecked.message)
+            ?'Ce numéro est déjà associé à un autre compte Abracadeal. Annulez, puis connectez-vous avec ce compte (e-mail et mot de passe).'
+            :phoneChecked.message);
+        }
+        let company=null;
+        if(type==='professionnel'&&needType){
+          status.textContent='Contrôle de l’entreprise dans le registre…';
+          const {data,error}=await sb.functions.invoke('verify-professional',{body:{action:'upgrade',siret:siretRaw,pro_sector:sector}});
+          let detail=null;if(error){try{detail=await error.context?.json();}catch(_){}}
+          if(error||!data?.ok)throw new Error(detail?.error||data?.error||'Le contrôle de l’entreprise n’a pas abouti. Réessayez.');
+          company=data.company||null;
+          status.textContent='';
+        }
+        if(needPhone){
+          const check=phoneChecked;
           if(!check.ok)throw new Error(/déjà utilisé/i.test(check.message)
             ?'Ce numéro est déjà associé à un autre compte Abracadeal. Annulez, puis connectez-vous avec ce compte (e-mail et mot de passe).'
             :check.message);
@@ -214,13 +264,18 @@
         }
         const {error:pErr}=await sb.from('profiles').update(payload).eq('id',currentUser.id);
         if(pErr)throw pErr;
-        const {error:uErr}=await sb.auth.updateUser({data:{...(legal&&needLegal?legal:{}),display_name,account_type:'particulier',...(payload.phone?{phone:payload.phone}:{}),signup_method:'social'}});
+        let prospect_ref=null;
+        try{const ref=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');if(ref&&/^[a-z0-9]{8}$/.test(ref.code)&&Date.now()-Number(ref.at||0)<90*864e5)prospect_ref=ref.code;}catch(_){}
+        const {error:uErr}=await sb.auth.updateUser({data:{...(legal&&needLegal?legal:{}),display_name,account_type:type,account_type_chosen_at:new Date().toISOString(),...(type==='professionnel'&&prospect_ref?{prospect_ref}:{}),...(payload.phone?{phone:payload.phone}:{}),signup_method:'social'}});
         if(uErr)throw uErr;
         clearPending();
         close();
         await refreshAuth({preserveEditing:false});
         closeModal('accountModal');
-        toast('Compte prêt, bienvenue sur Abracadeal !');
+        if(type==='professionnel'&&needType){
+          toast(company?.company_name?'Compte professionnel créé pour '+company.company_name+'.':'Compte professionnel créé.');
+          if(typeof window.ensureProPlanSelection==='function'){try{await window.ensureProPlanSelection({force:true});}catch(e){console.error(e);}}
+        }else toast('Compte prêt, bienvenue sur Abracadeal !');
       }catch(err){
         console.error(err);
         status.textContent=err.message||'Enregistrement impossible.';
