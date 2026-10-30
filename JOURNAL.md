@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — en cours : AJP Nantes Ouest / La Roche-sur-Yon et 4S Concept
+- Base main cde2fa8 ; robot réellement déployé v111, source baa1329. Réparations de lecture uniquement, sans prospect/mail/import/publication ni validation visuelle.
+- AJP : nouveau lecteur des liens achat/location publiés par la page de l'agence, identifiant propre vérifié (Nantes Ouest 173162, La Roche 173106). Les fiches viennent du tableau JSON public `var properties`, pas d'une recherche dans toute la ville. Pagination à chemin et agence constants, compteurs vérifiés. Données propres au bien, galerie, DPE/GES affichés et téléphone de la fiche.
+- Contrôles locaux réels : Nantes Ouest 23/23, La Roche-sur-Yon 38/38, partial=false ; aucune ville/type/photo manquants. Source structurée, chambres zéro conservées et diagnostics graphiques D/C/228 vérifiés sur 61632488.
+- 4S Concept : lecteur du stock /vehicules-disponibles et pagination (4 pages), galerie originale rel=stm-car-gallery dans l'ordre publié, description avec toutes les options, références postid, prix propre et coordonnées du garage publiées. Le texte source « 76OOO Rouen » est interprété 76000, sans inventer de commune. Les formulaires et calculateurs ne fournissent aucun champ véhicule.
+- 40 références repérées localement ; 2 vendues et 1 exemple de recherche personnalisée explicitement exclus et comptabilisés. Témoin Golf 9239 : 20990 €, 75000 km, 2022, BVM6, 29 photos, garantie 6 mois, Arnold Buffet / 0617635165.
+- Tests réels batch5 ajoutés : périmètre agence, pagination, JSON propre à la fiche, diagnostics hors légende CSS, photos, contact, vendu/recherche personnalisée ; régressions et contrôles production à terminer avant statut Réparé.
+
 ### 30/10/2026 — ChatGPT — suite des réparations : Croisette, Salanié, catalogue LF immo
 - Base main 801d12d, version réellement déployée pro-stock-sync v108, source 3cb1229 ; aucune modification des boutons de validation de Claude.
 - Croisette Properties : le template Apimo met Cannes dans la deuxième ligne, prise à tort pour le type sur 100/100 fiches. Ne conserver cette ligne que si elle est un type explicite ; sinon lire le type déclaré dans la route du bien. Régressions Intuition/Cannisimmo/Raccosta conservées.

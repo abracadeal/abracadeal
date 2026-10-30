@@ -1,3 +1,5 @@
+import { readAjpAgency } from "./ajp-reader.ts";
+import { readFourS } from "./fours-reader.ts";
 import { readSalanie } from "./salanie-reader.ts";
 import { readLFimmo } from "./lfimmo-reader.ts";
 import { isPlaceholderPhoto, dedupePhotos } from './photo-utils.ts';
@@ -932,6 +934,8 @@ async function readFeed(feed:any){
     else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml);platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
     else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 48 fiches maximum)';feed.sector='immobilier';}
     else if(/^(?:www\.)?salanie-immobilier\.fr$/i.test(url.hostname)){rows=await readSalanie(url,text,fetchSiteHtml);platform='Salanié (catalogues actifs et villes publiées)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?ajp-immobilier\.com$/i.test(url.hostname)){rows=await readAjpAgency(url,text,fetchSiteHtml);platform='AJP (catalogues agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?4sconcept\.com$/i.test(url.hostname)){rows=await readFourS(url,text,fetchSiteHtml);platform='4S Concept (stock et galerie Motors)';feed.sector='vehicules';}
     else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml);platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
