@@ -17,7 +17,10 @@ const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 const dateFr = (v: unknown) => v ? new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" }).format(new Date(String(v))) : "";
 const euros = (cents: unknown) => (Number(cents || 0) / 100).toLocaleString("fr-FR", { minimumFractionDigits: Number(cents) % 100 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
 
-function layout(title: string, paragraphs: string[], bullets: string[] = []) {
+const PUBLISH = "https://abracadeal.fr/?deposer=1"; // ouvre directement le dépôt d'annonce
+// 30/10/2026 : mails aux particuliers (bienvenue) : bouton « Déposer une annonce » et pied de page adapté.
+function layout(title: string, paragraphs: string[], bullets: string[] = [], audience = "pro") {
+  const part = audience === "particulier";
   const p = paragraphs.map((x) => `<p style="margin:0 0 14px 0;line-height:1.55;color:#21132d;">${x}</p>`).join("");
   const ul = bullets.length ? `<ul style="margin:0 0 16px 0;padding-left:20px;color:#21132d;line-height:1.6;">${bullets.map((b) => `<li>${b}</li>`).join("")}</ul>` : "";
   return `<!doctype html><html lang="fr"><body style="margin:0;background:#f8f4fa;font-family:Arial,Helvetica,sans-serif;">
@@ -26,13 +29,13 @@ function layout(title: string, paragraphs: string[], bullets: string[] = []) {
 <tr><td style="background:#1c0b2b;padding:20px 28px;color:#ffffff;font-size:20px;font-weight:bold;">Abracadeal</td></tr>
 <tr><td style="padding:28px;">
 <h1 style="margin:0 0 18px 0;font-size:21px;color:#4a1766;">${title}</h1>${p}${ul}
-<p style="margin:22px 0 0 0;"><a href="${PRO_SPACE}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;">Accéder à mon espace Pro</a></p>
+<p style="margin:22px 0 0 0;"><a href="${part ? PUBLISH : PRO_SPACE}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;">${part ? "Déposer une annonce" : "Accéder à mon espace Pro"}</a></p>
 </td></tr>
-<tr><td style="padding:16px 28px;background:#f3ecf6;color:#77677f;font-size:12px;line-height:1.5;">Le Service Pros Abracadeal · <a href="mailto:contact@abracadeal.fr" style="color:#6f218c;">contact@abracadeal.fr</a> · abracadeal.fr<br>Vous recevez ce message car vous avez un compte professionnel Abracadeal.</td></tr>
+<tr><td style="padding:16px 28px;background:#f3ecf6;color:#77677f;font-size:12px;line-height:1.5;">${part ? "L’équipe Abracadeal" : "Le Service Pros Abracadeal"} · <a href="mailto:contact@abracadeal.fr" style="color:#6f218c;">contact@abracadeal.fr</a> · abracadeal.fr<br>${part ? "Vous recevez ce message car vous venez de créer votre compte Abracadeal." : "Vous recevez ce message car vous avez un compte professionnel Abracadeal."}</td></tr>
 </table></td></tr></table></body></html>`;
 }
-const toText = (title: string, paragraphs: string[], bullets: string[] = []) =>
-  [title, "", ...paragraphs.map((x) => x.replace(/<[^>]+>/g, "")), ...(bullets.length ? ["", ...bullets.map((b) => "- " + b.replace(/<[^>]+>/g, ""))] : []), "", "Accéder à mon espace Pro : " + PRO_SPACE, "", "Le Service Pros Abracadeal — contact@abracadeal.fr"].join("\n");
+const toText = (title: string, paragraphs: string[], bullets: string[] = [], audience = "pro") =>
+  [title, "", ...paragraphs.map((x) => x.replace(/<[^>]+>/g, "")), ...(bullets.length ? ["", ...bullets.map((b) => "- " + b.replace(/<[^>]+>/g, ""))] : []), "", audience === "particulier" ? "Déposer une annonce : " + PUBLISH : "Accéder à mon espace Pro : " + PRO_SPACE, "", (audience === "particulier" ? "L’équipe Abracadeal" : "Le Service Pros Abracadeal") + " — contact@abracadeal.fr"].join("\n");
 
 function build(type: string, p: any) {
   const formule = `${esc(p.listing_limit)} annonces`;
@@ -42,7 +45,7 @@ function build(type: string, p: any) {
   if (type === "custom_message") {
     const paras = Array.isArray(p.paras) ? p.paras.map((x: unknown) => String(x)) : [];
     const bullets = Array.isArray(p.bullets) ? p.bullets.map((x: unknown) => String(x)) : [];
-    return { subject: String(p.subject || "Abracadeal"), title: String(p.title || ""), paras, bullets };
+    return { subject: String(p.subject || "Abracadeal"), title: String(p.title || ""), paras, bullets, audience: p.audience === "particulier" ? "particulier" : "pro" };
   }
   // 18/10/2026 : mails de l'offre Fondateurs sans carte (inactivité, fin des 12 mois sans moyen de paiement).
   if (type === "founder_inactivity_warning") {
@@ -56,7 +59,7 @@ function build(type: string, p: any) {
   }
   // 19/10/2026 : mail d'aide à la mise en ligne du stock (argument « site toutes catégories »).
   if (type === "founder_onboarding") {
-    const title = "Marre de payer trop cher ? Faites d’Abracadeal votre partenaire officiel";
+    const title = "Bienvenue sur Abracadeal";
     const paras = [
       `Merci pour votre inscription${p.founder_number != null ? ` : vous êtes <strong>Fondateur n°${esc(p.founder_number)}</strong>` : ""} !`,
       `Abracadeal est un site de petites annonces <strong>toutes catégories</strong>. Contrairement aux sites spécialisés, il attire aussi ceux qui cherchent un logement, un téléphone ou un meuble : vos annonces profitent de <strong>tout le trafic du site</strong>.`,
@@ -66,7 +69,6 @@ function build(type: string, p: any) {
       "<strong>Rien à ressaisir</strong> : importez votre fichier (CSV, Excel, XML) ou collez une fois le lien du flux de votre logiciel, vos annonces se mettent à jour toutes seules.",
       "<strong>Visible sur Google</strong> : chaque annonce a sa propre page, conçue pour être trouvée par les moteurs de recherche.",
       "<strong>Partage en un clic</strong> sur WhatsApp, Facebook ou par SMS, pour toucher vos clients dès le premier jour.",
-      "Plus de 20 véhicules ? La formule 50 annonces est elle aussi <strong>gratuite pendant 12 mois</strong>.",
     ];
     return { subject: "Bienvenue sur Abracadeal — mettez votre stock en vitrine", title, paras, bullets };
   }
@@ -138,6 +140,40 @@ async function sendEmail(to: string, subject: string, text: string, html: string
   return body?.id || null;
 }
 
+// 30/10/2026 (Anthony) : mail de bienvenue aux nouveaux particuliers, une seule fois (clé welcome:<compte>).
+// Envoyé une fois le compte finalisé (téléphone renseigné, e-mail confirmé), pour les comptes créés à partir du
+// 30/10/2026 13 h (aucun envoi rétroactif). Les pros ont déjà leurs mails d'abonnement / Fondateur.
+const WELCOME_FROM = "2026-10-30T12:00:00Z";
+const WELCOME = {
+  subject: "Bienvenue sur Abracadeal",
+  title: "Bienvenue sur Abracadeal !",
+  paras: [
+    "Merci pour votre inscription. Votre compte est prêt.",
+    "Vous avez quelque chose à vendre ? <strong>Déposez votre première annonce gratuitement</strong> : elle est en ligne en quelques minutes, visible partout en France et sur Google.",
+  ],
+  bullets: [
+    "Annonces gratuites pour les particuliers",
+    "Partage en un clic sur WhatsApp, Facebook ou par SMS",
+    "Les acheteurs vous contactent directement",
+  ],
+  audience: "particulier",
+};
+async function queueWelcomeEmails() {
+  try {
+    const { data: profs } = await supabase.from("profiles").select("id,account_type,phone,is_admin,created_at")
+      .eq("account_type", "particulier").not("phone", "is", null).gte("created_at", WELCOME_FROM).limit(200);
+    for (const p of profs || []) {
+      if (p.is_admin) continue;
+      const key = "welcome:" + p.id;
+      const { data: done } = await supabase.from("pro_email_outbox").select("id").eq("event_key", key).maybeSingle();
+      if (done) continue;
+      const { data: u } = await supabase.auth.admin.getUserById(p.id);
+      if (!u?.user?.email || !u.user.email_confirmed_at) continue;
+      await supabase.from("pro_email_outbox").insert({ event_key: key, user_id: p.id, email_type: "custom_message", payload: WELCOME, status: "pending" });
+    }
+  } catch (e) { console.error("welcome", e); }
+}
+
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   try {
@@ -147,6 +183,7 @@ Deno.serve(async (req) => {
     if (!provided || provided !== secret.secret_value) return json({ error: "Unauthorized" }, 401);
     if (!RESEND_API_KEY) return json({ error: "RESEND_API_KEY missing" }, 500);
 
+    await queueWelcomeEmails();
     const { data: rows, error } = await supabase.from("pro_email_outbox")
       .select("id,event_key,user_id,email_type,payload,status,attempt_count")
       .in("status", ["pending", "failed"]).lte("available_at", new Date().toISOString()).lt("attempt_count", 5)
@@ -164,7 +201,8 @@ Deno.serve(async (req) => {
         const email = u?.user?.email || "";
         if (!email) throw new Error("Adresse e-mail introuvable");
         const m = build(row.email_type, row.payload || {});
-        const id = await sendEmail(email, m.subject, toText(m.title, m.paras, m.bullets), layout(m.title, m.paras, m.bullets), "pro-" + row.event_key);
+        const aud = (m as any).audience || "pro";
+        const id = await sendEmail(email, m.subject, toText(m.title, m.paras, m.bullets, aud), layout(m.title, m.paras, m.bullets, aud), "pro-" + row.event_key);
         await supabase.from("pro_email_outbox").update({ status: "sent", sent_at: new Date().toISOString(), resend_email_id: id, last_error: null, updated_at: new Date().toISOString() }).eq("id", row.id);
         sent++;
       } catch (e) {

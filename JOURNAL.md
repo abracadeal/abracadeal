@@ -1250,3 +1250,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Bye Buy Car Limoges :** seul compte Google existant (particulier, sans téléphone) : la fenêtre lui demandera le choix à sa prochaine connexion.
 - **Déployé :** `verify-professional` v10 ACTIVE (import épinglé sur `afa8d6da`) ; contrôle réel : recherche registre OK, `upgrade` sans connexion refusé (401).
 - **Appliqué par ChatGPT le 30/10/2026** (voir son entrée en tête du journal) ; vérifié par Claude : déclencheur `aab_guard_profile_account_type` présent et actif sur `public.profiles`.
+
+### 30/10/2026 — Claude — Mail de bienvenue aux nouveaux particuliers
+- **Demande d'Anthony :** aucun mail n'arrive après une inscription (cas Bye Buy Car) ; mettre en place un mail de bienvenue.
+- **Fait (`process-pro-transactional-emails`) :** à chaque passage (toutes les 2 min), les comptes **particuliers** créés depuis le 30/10/2026 13 h, finalisés (téléphone renseigné, e-mail confirmé), reçoivent une seule fois « Bienvenue sur Abracadeal ! » (clé `welcome:<compte>`, type `custom_message`, aucun changement de base) : invitation à déposer une première annonce, bouton « Déposer une annonce » (`/?deposer=1`), signé « L'équipe Abracadeal », depuis contact@abracadeal.fr. Pas d'envoi rétroactif. Les pros gardent leurs mails d'abonnement / Fondateur.
+- **Au passage :** mail `founder_onboarding` : titre « Marre de payer trop cher ? » retiré (accroche abandonnée le 23/10) → « Bienvenue sur Abracadeal » ; ligne obsolète « formule 50 gratuite » retirée.
