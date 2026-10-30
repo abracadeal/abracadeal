@@ -22,7 +22,8 @@ export function parseRoselmacVehicle(html:string,url:string){
   const ref=new URL(url).searchParams.get('voiture_reference');if(!ref)return null;
   // Annonce vendue / réservée : pas publiée.
   if(!/V[eé]hicule disponible/i.test(html)&&/\b(?:Vendu|R[eé]serv[eé])\b/i.test(html))return null;
-  const head=html.match(/<div class="bloc-7col"[^>]*>([\s\S]*?)<\/div>/i)?.[1]||'';
+  // Titre : le bloc en grand (« font-size:3em ») ; le premier bloc-7col de la page est le menu.
+  const head=html.match(/<div class="bloc-7col"[^>]*font-size:\s*3em[^>]*>([\s\S]*?)<\/div>/i)?.[1]||'';
   const main=txt(head.split(/<br\s*\/?>/i)[0]||''),version=txt(head.match(/<span[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'');
   if(!main)return null;
   const up=main.toUpperCase();
