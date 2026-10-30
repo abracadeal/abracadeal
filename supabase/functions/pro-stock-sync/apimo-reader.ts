@@ -36,7 +36,7 @@ export function parseApimoDetail(raw:string,url:string){
   const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
   const ville=property?.address?.addressLocality|| (variant19?(property?.address?.addressLocality||text(info.match(/<h1\b[^>]*>[\s\S]*?<span\b[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'')):variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||''));
   if(!titre||!description||!ville)return null;
-  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:!p[1]||variant12||variant19||/droit.*bail/i.test(p[1]||'')?(route?decodeURIComponent(route[1]):''):p[1]||'',texte_page:text(summary+' '+legal)};
+  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:p[1]&&/^(?:appartement|maison|villa|terrain|immeuble|parking|garage|bureau|local|commerce|studio|loft|château|propriété|hôtel)\b/i.test(p[1])?p[1]:route?decodeURIComponent(route[1]):'',texte_page:text(summary+' '+legal)};
   if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
   if(property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   // Le module utilisateur de la fiche désigne son conseiller ; ne pas lire l'équipe du pied de page.

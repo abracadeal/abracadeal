@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';import fs from 'node:fs';
+import {parseApimoDetail} from '../supabase/functions/pro-stock-sync/apimo-reader.ts';
+import {parseSalanie,readSalanie} from '../supabase/functions/pro-stock-sync/salanie-reader.ts';
+import {readLFimmo} from '../supabase/functions/pro-stock-sync/lfimmo-reader.ts';
+const fixture=n=>fs.readFileSync(new URL('./fixtures/'+n,import.meta.url),'utf8');
+const cp='https://www.croisette-properties.com/fr/propriete/vente+appartement+cannes+cannes-villa-toit-proche-de-la-croisette+86794990';
+const cro=parseApimoDetail(fixture('croisette-property-86794990.html'),cp);assert.equal(cro.type_bien,'appartement');assert.equal(cro.ville,'Cannes');assert.equal(cro.photos.split('|').length,5);
+const sh=fixture('salanie-property-19580.html'),su='https://salanie-immobilier.fr/property/t4-79m%c2%b2-chemin-des-justices-vieilles-nimes-110000e-honoraires-inclus/';
+const sal=parseSalanie(sh,su);assert.equal(sal.reference,'19580');assert.equal(sal.ville,undefined);assert.equal(sal.prix,'110000');assert.equal(sal.surface,'80');assert.equal(sal.transaction,'vente');assert.equal(sal.chambres,'2');assert.equal(sal.photos.split('|')[0],'https://salanie-immobilier.fr/wp-content/uploads/2026/09/1-2.jpg');
+const seen=[];const sr=await readSalanie(new URL('https://salanie-immobilier.fr/'),'<select name="location"><option value="nimes">Nîmes</option><option value="any">Tous</option></select>',async u=>{seen.push(u.toString());return{url:u,text:u.pathname.startsWith('/property/')?sh:`<a href="${su}">Bien</a>`};});assert.equal(sr.length,1);assert.equal(sr[0].ville,'Nîmes');assert.equal(sr.partial,false);assert.ok(seen.some(x=>x.includes('location=nimes')));
+const lu='https://www.lfimmo.fr/annonces/90526-vente-maison-4pieces-le-barp-33114';const lseen=[];
+const lr=await readLFimmo(new URL('https://www.lfimmo.fr/'),'',async u=>{lseen.push(u.toString());return{url:u,text:u.pathname.startsWith('/annonces/')?fixture('lfimmo-property-90526.html'):`<a href="${lu}">fiche</a><a href="${lu}.pdf">PDF</a>${u.search?'':`<a href="${u.pathname}?page=2&amp;q%5Bwith_condition%5D=available">suite</a>`}<a href="https://outside.test/achat?page=3">hors site</a>`};});assert.equal(lr.length,1);assert.equal(lr.partial,false);assert.equal(lr[0].ville,'Le Barp');assert.equal(lr[0].dpe,'D');assert.ok(lseen.some(x=>x.includes('page=2')&&x.includes('available')));assert.ok(!lseen.some(x=>x.includes('.pdf')||x.includes('outside.test')));
+console.log('Batch 4: Croisette route type, Salanié explicit city filter/fields/gallery, LF pagination/filters/scope/PDF exclusion OK');

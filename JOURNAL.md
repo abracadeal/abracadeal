@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — suite des réparations : Croisette, Salanié, catalogue LF immo
+- Base main 801d12d, version réellement déployée pro-stock-sync v108, source 3cb1229 ; aucune modification des boutons de validation de Claude.
+- Croisette Properties : le template Apimo met Cannes dans la deuxième ligne, prise à tort pour le type sur 100/100 fiches. Ne conserver cette ligne que si elle est un type explicite ; sinon lire le type déclaré dans la route du bien. Régressions Intuition/Cannisimmo/Raccosta conservées.
+- Salanié : lecteur des deux catalogues actifs a-vendre/a-louer et de leur pagination ; ville issue uniquement des résultats du filtre public location, jamais de l'adresse de l'agence. Référence stable postid, transaction et prix de la fiche, surfaces/chambres des métadonnées propres, galerie swipebox originale dans l'ordre source. Contrôle local réel : 16/16, aucune ville manquante, partial=false ; la source a parfois des contradictions titre/métadonnées (79 m² contre 80 m²), métadonnée conservée sans inventer.
+- LF immo/La Fourmi : nouveau parcours des catalogues publics achat/location, liens de pagination conservant les filtres, PDF et hors domaine exclus. Maximum 120 fiches par lecture ; si la pagination continue, partial/capped=true et total national inconnu, jamais présenté comme tout le stock. Les corrections DPE, ville et galerie de v108 restent utilisées.
+- Tests batch4-readers, LF diagnostics, Apimo et régressions Human/Citya/Lyon/Neyt/prix/photos : en cours de validation finale, puis déploiement. Aucun prospect, import, publication ou mail autorisé par cette réparation.
+
 ### 30/10/2026 — ChatGPT — lecteurs Human, Raccosta et diagnostics LF immo
 
 - Human : le périmètre reste le catalogue explicite de l'agence et sa pagination ; plusieurs préfixes de mandat publiés dans ce même catalogue sont acceptés (La Châtre 139/239).
