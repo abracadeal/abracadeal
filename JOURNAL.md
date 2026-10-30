@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — « Valider ce site » refusé (Slycar)
+- **Constaté (Anthony) :** « Valider ce site » ne passait pas pour Slycar. Le prospect était bien marqué « site testé », mais `admin_confirm_robot_learning_visual` levait « La demande ne correspond pas au site réparé » : la demande ouverte depuis « Sites en réparation » était encore `pending` (Slycar renvoyé en réparation), et la version de ChatGPT n'acceptait que `done` — elle avait aussi retiré la fermeture des demandes en attente ajoutée le 30/10 pour Anthony.
+- **Fait (appliqué en base, `supabase/2026-10-31-robot-learning-visual-validate.sql`) :** fusion des deux versions — contrôle de ChatGPT gardé (même site, statut done / pending / in_progress), validation à la main = demandes en attente / en cours du site fermées (`done`, « Validé à la main après test du site ») puis archivées. Adresses comparées sans http(s), www et / final. Testé en transaction annulée sur Slycar : les 2 demandes passent `done` + archivées.
+- **ChatGPT :** merci de ne pas retirer la fermeture des demandes `pending` / `in_progress` en modifiant cette fonction.
+
 ### 31/10/2026 — Claude — Kilométrage confondu avec une vitesse ou une garantie
 - **Constaté (Anthony, Audi RS6 Slycar) :** kilométrage lu = 305 (« Vitesse relevée à 305 km/h ») au lieu de 41 500 ; la même annonce cite aussi « garantie … ou 80 000 KMS ».
 - **Fait (`fillVehicleFromText`) :** « km/h » ignoré ; nombre de km ignoré quand le bout de phrase qui le précède parle de garantie, jusqu'à, autonomie, courroie, vidange, révision, contrôle technique / « favorable » ; on prend le premier restant. `simplebo-reader.ts` ne lit plus le km lui-même (lecture commune). Tests : RS6 41 500, C3 125 900 (pas la ligne de CT), Zoé 12 500 (pas l'autonomie), « Kilométrage : 88 000 ».
