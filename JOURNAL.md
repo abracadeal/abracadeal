@@ -1199,3 +1199,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Demande d'Anthony :** vignettes trop grosses sur tablette, au moins 6 par ligne.
 - **Fait (`assets/tablet-grid-20261030.css`, chargé en fin de `<head>` de `index.html`) :** tablette horizontale = 6 vignettes par ligne (avant 3) ; tablette verticale = 4 (avant 2), même taille de vignette qu'en horizontal (6 en vertical = ~90 px, titres illisibles). Textes, prix et boutons cœur/partager resserrés. Ancienne règle 3 colonnes retirée de `index.html`. Téléphone et ordinateur inchangés.
 - Vérifié en émulation iPad (vertical 4 × 136 px, horizontal 6 × 137 px).
+
+### 30/10/2026 — Claude — Tablette bloquée en vertical : corrigé
+- **Demande d'Anthony :** la version tablette ne passe pas en horizontal.
+- **Causes :** 1) `manifest.json` imposait `"orientation": "portrait"` → l'appli installée (PWA) restait bloquée en vertical ; 2) sur petites tablettes Android en paysage (hauteur utile < 600 px, ex. 1280×800 avec barres du navigateur = 576 px), l'écran « tournez votre téléphone » (`.portrait-only-overlay`) s'affichait, car la règle d'exception tablette (`min-width:900px`) est neutralisée par tablet-as-mobile (largeur évaluée à 720 px).
+- **Fait :** manifest en `"orientation": "any"` (lien `manifest.json?v=5` sur index et vacances) ; `tablet-grid-20261030.css?v=2` : écran de rotation jamais affiché sur tablette, page visible et défilable en paysage. Téléphones : écran de rotation conservé.
+- Vérifié en émulation tablette Android 1280×800 paysage : écran de rotation masqué, page visible, 6 vignettes.
+- **Appli déjà installée :** Android peut mettre du temps à relire le manifest ; si ça reste bloqué, désinstaller puis réinstaller l'appli.

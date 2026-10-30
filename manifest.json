@@ -8,7 +8,7 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
+  "orientation": "any",
   "background_color": "#1e0d37",
   "theme_color": "#1b0d2d",
   "categories": ["shopping", "lifestyle"],

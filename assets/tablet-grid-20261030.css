@@ -24,3 +24,12 @@ html.abraca-tablet-as-mobile body main#top #resultats .ad-card.ad-card .ad-price
 html.abraca-tablet-as-mobile body main#top #resultats .ad-card.ad-card :is(.ad-specs,.ad-city,.ad-meta){font-size:9.5px!important}
 html.abraca-tablet-as-mobile body main#top #resultats .card-photo-actions{top:5px!important;right:5px!important;gap:4px!important}
 html.abraca-tablet-as-mobile body main#top #resultats .card-photo-actions .card-action-btn{height:24px!important;min-width:24px!important;padding:0 4px!important}
+
+/* 30/10/2026 (Anthony) : la tablette doit pouvoir passer en horizontal.
+   L'écran « tournez votre téléphone » est réservé aux téléphones : jamais sur tablette,
+   quelle que soit la hauteur de l'écran en paysage (petites tablettes Android incluses). */
+html.abraca-tablet-as-mobile .portrait-only-overlay{display:none!important}
+@media (orientation:landscape){
+  html.abraca-tablet-as-mobile body > :not(.portrait-only-overlay){visibility:visible!important;pointer-events:auto!important}
+  html.abraca-tablet-as-mobile,html.abraca-tablet-as-mobile body{height:auto!important;min-height:100%!important;overflow-x:hidden!important;overflow-y:auto!important}
+}
