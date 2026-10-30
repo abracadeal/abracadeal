@@ -215,7 +215,7 @@ function tidyDescription(v:unknown,title=''){
  return dedupeDescription(out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim(),title);
 }
 // 29/10/2026 (Anthony) : doublons de photos (même image en plusieurs tailles / adresses) et doublons d'annonces, pour tous les sites.
-function listingKey(r:any){const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+function listingKey(r:any){if(r.category==='vehicules'&&/^https?:\/\/(?:www\.)?decrosautomobiles\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'decros|'+r.ref;const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
  return [r.category,r.sub||'',t,Math.round(Number(r.price)||0),r.surface||'',r.mileage||'',r.year||'',r.city||''].join('|');}
 // Corrections faites par l'admin sur une fiche (table pro_stock_overrides, clé = site + référence), appliquées avant la mise en forme.
 // « _exclure » : la fiche n'est jamais publiée.

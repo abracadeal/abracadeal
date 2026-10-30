@@ -11,8 +11,8 @@ export function parseVehicleCatalogueDetail(html:string,url:string,kind:'bnys'|'
  else for(const m of html.matchAll(/<li\b[^>]*>\s*<strong[^>]*>([\s\S]*?)<\/strong>([\s\S]*?)<\/li>/gi))fields.set(clean(m[1]).replace(/\s*:\s*$/,''),clean(m[2]));
  if(kind==='decros')for(const m of block(html,'detailOptionsFix').matchAll(/<li[^>]*>([^<:]+):([\s\S]*?)<\/li>/gi))fields.set(clean(m[1]),clean(m[2]));
  const titre=clean(kind==='bnys'?html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]:block(html,'spanHeaderCar'));
- if(!titre)throw Error('Titre véhicule absent.');const priceText=kind==='bnys'?clean(block(html,'single-price')||block(html,'single-price-sold')):clean(block(html,'detailPriceCar'));
- if(/\bvendu[e]?\b/i.test(priceText))return null;
+ if(!titre)throw Error('Titre véhicule absent.');const priceText=kind==='bnys'?clean(block(html,html.match(/id=["'](single-price[^"']*)["']/i)?.[1]||'single-price')):clean(block(html,'detailPriceCar'));
+ if(/\bvendu[e]?\b|réservé|en préparation/i.test(priceText))return null;
  const gallery=block(html,kind==='bnys'?'car-images-carousel':'car_slider');const photos=[];
  for(const m of gallery.matchAll(/href=["']([^"']+)["']/gi))try{const u=new URL(sDecode(m[1]),url);if(/^https?:$/.test(u.protocol))photos.push(u.toString());}catch{}
  const date=fields.get(kind==='bnys'?'Mise en circulation':'Année immatriculation')||'';
@@ -39,5 +39,5 @@ export async function readVehicleCatalogue(start:URL,html:string,kind:'bnys'|'de
  }if(queue.length)partial=true;if(!entries.size)throw Error('Aucune fiche du catalogue trouvée.');
  const urls=[...entries],rows:any[]=[];let next=0,misses=0,sold=0;const failures:any[]=[];
  await Promise.all(Array.from({length:3},async()=>{while(next<urls.length){const u=urls[next++];try{const o=parseVehicleCatalogueDetail((await fetchHtml(new URL(u))).text,u,kind);if(o)rows.push(o);else sold++;}catch(e){partial=true;misses++;failures.push({url:u,error:String(e)});}}}));
- (rows as any).partial=partial;(rows as any).total=entries.size;(rows as any).stats={pages,details:entries.size,read:rows.length,misses,sold,failures};return rows;
+ (rows as any).partial=partial;(rows as any).total=entries.size;(rows as any).stats={pages,details:entries.size,read:rows.length,misses,unavailable:sold,failures};return rows;
 }
