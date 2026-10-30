@@ -74,6 +74,9 @@
   }
   document.getElementById('signupType')?.addEventListener('change',syncProVisibility);
 
+  // 30/10/2026 : un pro arrivé par un mail de prospection (lien ?r=…) ne doit pas créer
+  // un compte particulier par « Continuer avec Google » : boutons masqués pour lui.
+  function isProspectPro(){try{const r=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');return !!(r&&/^[a-z0-9]{8}$/.test(r.code)&&Date.now()-Number(r.at||0)<90*864e5);}catch(_){return false}}
   let enabled=new Set();
   function refreshVisibility(){
     for(const box of blocks){
@@ -83,7 +86,7 @@
         btn.style.display=on?'':'none';
         any=any||on;
       });
-      box.classList.toggle('hidden',!any||box.dataset.pro==='1');
+      box.classList.toggle('hidden',!any||box.dataset.pro==='1'||isProspectPro());
     }
   }
   fetch(SUPABASE_URL+'/auth/v1/settings',{headers:{apikey:SUPABASE_KEY}})

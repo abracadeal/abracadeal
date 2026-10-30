@@ -1212,3 +1212,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Constaté (rendu des vraies annonces) :** caractéristiques véhicule en 4 cases avec émojis (📅 🛣️ ⛽ ⚙️) qui se cassaient dans les vignettes étroites (« km » ou « Automatique » seuls à la ligne) ; ville avec 📍 sur 2 lignes.
 - **Fait :** `index-main.js?v=20261030-vignettes` (cartes « Les annonces » et « À la une ») : caractéristiques en une ligne de texte « 2019 · 84 500 km · Diesel · Manuelle » (2 lignes max), sans émojis ; ville avec un petit pictogramme dessiné à la place de 📍. `card-overlay-20261029.css?v=4` : ville sur une seule ligne (coupée avec « … » si trop longue). Page annonce inchangée.
 - Vérifié sur téléphone, tablette verticale et horizontale avec de vraies annonces.
+
+### 30/10/2026 — Claude — Un pro prospecté inscrit en particulier : corrigé
+- **Constaté :** compte créé le 30/10 à 9 h 19 via Google (bbc.lim.nord@gmail.com, « Bye Buy Car Limoges », prospect « AMD AUTO » de la liste manuelle du 19/10) en **particulier** : relance reçue à 9 h 05, clic sur le lien à 9 h 19 min 26 s, compte créé 23 s plus tard.
+- **Cause :** les boutons « Créer mon compte Pro gratuitement » / « Je réserve ma place Fondateur » / « Activer mon compte Pro » de `pro-fondateur.html` pointaient vers `index.html#accountModal`, qui ouvre la **connexion** ; « Continuer avec Google » y crée un compte particulier.
+- **Fait :** liens Fondateurs → `index.html#signupPro` (ouvre l'inscription avec « Professionnel » présélectionné, `index-app.js?v=20261030-signup-pro`) ; `social-login-20261018.js?v=4` : Google/Facebook masqués pour un visiteur venu d'un mail de prospection (lien `?r=` mémorisé 90 jours). Vérifié en local.
+- **Reste :** le compte de Bye Buy Car Limoges est toujours particulier, à passer en Pro avec l'accord d'Anthony.

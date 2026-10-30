@@ -268,6 +268,12 @@ document.getElementById('b2bDiscoveryLink').addEventListener('click',event=>{
 if(location.hash==='#accountModal'){
  setTimeout(()=>{window.setAuthTab('login');openModal('accountModal');},0);
 }
+// 30/10/2026 : les liens « Créer mon compte Pro » (page Fondateurs, mails de prospection) ouvrent
+// directement l'inscription en Professionnel, et plus la connexion (où « Continuer avec Google »
+// créait un compte particulier).
+if(location.hash==='#signupPro'){
+ setTimeout(()=>{openProfessionalSignup();document.getElementById('signupType')?.dispatchEvent(new Event('change',{bubbles:true}));try{history.replaceState(null,'',location.pathname+location.search)}catch(_){}},0);
+}
 
 loadFounderOfferCounter();
 
