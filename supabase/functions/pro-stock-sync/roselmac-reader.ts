@@ -8,7 +8,9 @@ type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const txt=(s:string)=>sDecode(String(s||'').replace(/<br\s*\/?>/gi,'\n').replace(/<(script|style)\b[\s\S]*?<\/\1>/gi,' ').replace(/<!--[\s\S]*?-->/g,' ').replace(/<[^>]+>/g,' ')).replace(/[ \t\r]+/g,' ').replace(/ *\n */g,'\n').replace(/\n{3,}/g,'\n\n').trim();
 const TWO_WORD_BRANDS=['ALFA ROMEO','LAND ROVER','ASTON MARTIN','MERCEDES BENZ','ROLLS ROYCE','DS AUTOMOBILES'];
 
-export const isRoselmacSite=(html:string)=>/roselmac\.com/i.test(html)&&/(?:catalogue-new|voiture-new2|index-v2-black)\.php/i.test(html);
+// L'accueil (page d'entrée) ne cite pas toujours Roselmac : on reconnaît aussi ses pages typiques.
+export const isRoselmacSite=(html:string)=>(/roselmac\.com/i.test(html)&&/(?:catalogue-new|voiture-new2|index-v2-black)\.php/i.test(html))
+  ||(/href=["']catalogue-new\.php["']/i.test(html)&&/(?:index-v2-black|voiture-new2|archives-new2)\.php/i.test(html));
 
 function field(t:string,label:string){
   const labels='Mise en circulation|Kilom[eé]trage|Type de boite|Bo[iî]te|Garantie|Puissance fiscale|Puissance DIN|Couleur ext[eé]rieure|Couleur int[eé]rieure|Finition|[EÉ]nergie|Carburant|Nombre de portes|Places|Pr[eé]sentation|[EÉ]quipements|Galerie';
