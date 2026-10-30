@@ -927,7 +927,7 @@ async function readFeed(feed:any){
     else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
     else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml);platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
     else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml);platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
-    else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 120 fiches maximum)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 48 fiches maximum)';feed.sector='immobilier';}
     else if(/^(?:www\.)?salanie-immobilier\.fr$/i.test(url.hostname)){rows=await readSalanie(url,text,fetchSiteHtml);platform='Salanié (catalogues actifs et villes publiées)';feed.sector='immobilier';}
     else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml);platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
