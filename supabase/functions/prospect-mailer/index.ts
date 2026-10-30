@@ -7,6 +7,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 //   POST {action:"verify", mailbox}         admin connecté : teste l'identifiant SMTP sans rien envoyer
 //   POST {action:"test", mailbox, category, followup?, variant?} admin connecté : envoie UN message de test à l'adresse de l'admin
 //   POST {action:"run"}                     cron (clé interne) : envoie seulement si le « feu vert » est donné
+//   POST {action:"bounces", dry?, days?}    cron ou admin : lit les rebonds (IMAP) et passe les adresses mortes en « error » (v12, 30/10/2026)
 //   POST {action:"unsubscribe", u, t}       page abracadeal.fr/desinscription.html
 //   POST ?u=..&t=.. (List-Unsubscribe-Post) désinscription en un clic depuis la messagerie
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -157,6 +158,108 @@ async function domainReceivesMail(email: string) {
   }
   return notFound < 2;
 }
+// v12 30/10/2026 : lecture des retours d'erreur (rebonds) dans les boîtes OVH par IMAP.
+// Un rebond définitif (« Action: failed ») passe la fiche du prospect en « error » : plus de relance ni de nouvel envoi.
+const IMAP_HOSTS = ["imap.mail.ovh.net", "ssl0.ovh.net"];
+type Bounce = { email: string; status: string; diag: string; date: string };
+async function imapBounces(c: Creds, sinceDays: number): Promise<{ host: string; bounces: Bounce[]; scanned: number }> {
+  if (!c.password) throw new Error("Mot de passe non enregistré");
+  let lastErr: unknown = null;
+  for (const host of IMAP_HOSTS) {
+    let conn: Deno.TlsConn;
+    try { conn = await Deno.connectTls({ hostname: host, port: 993 }); } catch (e) { lastErr = e; continue; }
+    const timer = setTimeout(() => { try { conn.close(); } catch { /* déjà fermé */ } }, 50000);
+    let raw = new Uint8Array(0);
+    let n = 0;
+    const more = async () => {
+      const chunk = new Uint8Array(65536); const k = await conn.read(chunk);
+      if (k === null) throw new Error("Connexion IMAP fermée par le serveur");
+      const t = new Uint8Array(raw.length + k); t.set(raw); t.set(chunk.subarray(0, k), raw.length); raw = t;
+    };
+    // renvoie tout le texte jusqu'à la ligne « tag OK/NO/BAD »
+    const cmd = async (line: string) => {
+      const tag = "a" + (++n);
+      const d = enc.encode(`${tag} ${line}\r\n`); let o = 0; while (o < d.length) o += await conn.write(d.subarray(o));
+      while (true) {
+        const txt = dec.decode(raw);
+        const m = new RegExp(`(^|\\r\\n)${tag} (OK|NO|BAD)[^\\r\\n]*\\r\\n`).exec(txt);
+        if (m) {
+          raw = enc.encode(txt.slice(m.index + m[0].length));
+          if (m[2] !== "OK") throw new Error(`IMAP ${m[0].trim()}`.slice(0, 300));
+          return txt.slice(0, m.index + m[0].length);
+        }
+        await more();
+      }
+    };
+    try {
+      while (!/\r\n/.test(dec.decode(raw))) await more(); raw = new Uint8Array(0); // salutation
+      const q = (s: string) => `"${s.replace(/["\\]/g, "\\$&")}"`;
+      await cmd(`LOGIN ${q(c.email)} ${q(c.password)}`);
+      await cmd("EXAMINE INBOX"); // lecture seule : rien n'est modifié dans la boîte
+      const since = new Date(Date.now() - sinceDays * 86400000);
+      const mon = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][since.getUTCMonth()];
+      const s = await cmd(`UID SEARCH SINCE ${since.getUTCDate()}-${mon}-${since.getUTCFullYear()} OR FROM "mailer-daemon" FROM "postmaster"`);
+      const uids = (/\* SEARCH([\d ]*)/i.exec(s)?.[1] || "").trim().split(/\s+/).filter(Boolean).slice(-200);
+      const bounces: Bounce[] = [];
+      for (const uid of uids) {
+        const body = await cmd(`UID FETCH ${uid} (BODY.PEEK[HEADER.FIELDS (DATE)] BODY.PEEK[TEXT]<0.30000>)`);
+        bounces.push(...parseBounce(body));
+      }
+      await cmd("LOGOUT").catch(() => {});
+      return { host, bounces, scanned: uids.length };
+    } catch (e) { lastErr = e; if (/LOGIN|AUTHENTICATIONFAILED|credentials/i.test(String(e))) break; }
+    finally { clearTimeout(timer); try { conn.close(); } catch { /* déjà fermé */ } }
+  }
+  throw new Error("Lecture IMAP impossible : " + String((lastErr as Error)?.message || lastErr).slice(0, 200));
+}
+// Rapports de non-remise (RFC 3464) : un bloc par destinataire avec Final-Recipient / Action / Status / Diagnostic-Code.
+function parseBounce(raw: string): Bounce[] {
+  const txt = raw.replace(/\r\n[ \t]+/g, " ");
+  const date = /^Date:\s*(.+)$/mi.exec(txt)?.[1]?.trim() || "";
+  const out: Bounce[] = [];
+  const re = /Final-Recipient:\s*rfc822;\s*<?([^\s<>;]+@[^\s<>;]+)>?([\s\S]*?)(?=Final-Recipient:|$)/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(txt))) {
+    const block = m[2];
+    const action = /Action:\s*(\w+)/i.exec(block)?.[1]?.toLowerCase() || "";
+    if (action !== "failed") continue; // « delayed » = nouvel essai en cours, pas un échec définitif
+    out.push({
+      email: m[1].toLowerCase(),
+      status: /Status:\s*([\d.]+)/i.exec(block)?.[1] || "",
+      diag: (/Diagnostic-Code:\s*(?:smtp|x-postfix);?\s*([^\r\n]+)/i.exec(block)?.[1] || "").trim().slice(0, 160),
+      date,
+    });
+  }
+  return out;
+}
+async function processBounces(dry: boolean, sinceDays: number) {
+  const { data: boxes } = await admin.rpc("prospect_mailer_mailbox_list");
+  const report: Record<string, unknown> = {};
+  const marked: string[] = [];
+  for (const email of ((boxes || []) as string[])) {
+    try {
+      const c = await creds(email);
+      const r = await imapBounces(c, sinceDays);
+      const seen = new Map<string, Bounce>();
+      for (const b of r.bounces) seen.set(b.email, b);
+      const done: string[] = [];
+      for (const b of seen.values()) {
+        const { data: rows } = await admin.from("prospection_prospects").select("id,company,status").ilike("email", b.email);
+        for (const p of (rows || []) as { id: string; company: string; status: string }[]) {
+          if (p.status === "error" || p.status === "opted_out") continue;
+          done.push(`${p.company} <${b.email}>`);
+          if (dry) continue;
+          const err = `Rebond ${b.date ? new Date(b.date).toLocaleDateString("fr-FR", { timeZone: "Europe/Paris" }) : ""} : ${b.status} ${b.diag}`.replace(/\s+/g, " ").trim() + " — ne plus écrire";
+          await admin.from("prospection_prospects").update({ status: "error", last_error: err.slice(0, 300), updated_at: new Date().toISOString() }).eq("id", p.id);
+          await admin.from("prospection_logs").insert({ prospect_id: p.id, action: "bounce", detail: `Rebond détecté automatiquement (${email}) : ${b.status}` });
+        }
+      }
+      marked.push(...done);
+      report[email] = { host: r.host, scanned: r.scanned, rebonds: seen.size, marques: done };
+    } catch (e) { report[email] = { erreur: String((e as Error).message || e).slice(0, 200) }; }
+  }
+  return { ok: true, dry, report, marked: marked.length };
+}
 async function creds(mailbox: string): Promise<Creds> {
   const { data, error } = await admin.rpc("prospect_mailer_creds", { p_email: mailbox });
   if (error || !data) throw new Error("Adresse d'envoi inconnue");
@@ -214,6 +317,14 @@ Deno.serve(async (req) => {
       if (action === "verify") await admin.rpc("prospect_mailer_verified", { p_email: mailbox, p_ok: false, p_error: msg });
       return json({ ok: false, error: msg }, 200);
     }
+  }
+
+  // v12 : rebonds. Cron (clé interne) ou admin connecté ; {dry:true} = rapport sans rien modifier.
+  if (action === "bounces") {
+    const cron = !!req.headers.get("x-internal-key") && req.headers.get("x-internal-key") === await secret("prospect_crawler_internal");
+    if (!cron && !(await requireAdmin(req))) return json({ error: "Non autorisé" }, 401);
+    const days = Math.min(30, Math.max(1, Number(body.days || 10)));
+    return json(await processBounces(!!body.dry, days));
   }
 
   if (action === "run") {
