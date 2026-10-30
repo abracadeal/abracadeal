@@ -980,7 +980,7 @@ async function readFeed(feed:any){
         if(net?.kind==='orpi'){rows=await readOrpiAgency(new URL('https://www.orpi.com'),net.slug);platform=`Orpi (page agence orpi.com/${net.slug}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
         else if(net?.kind==='c21'){rows=await readC21Agency(new URL(net.url));platform=`Century 21 (${new URL(net.url).hostname}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
         else{const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}}
-    (rows as any).platform=platform;(rows as any).siteLocation=siteLocation(text);if(feed.sector)(rows as any).sector=feed.sector;return rows;
+    (rows as any).platform=platform;(rows as any).siteLocation=(rows as any).siteLocation||siteLocation(text);if(feed.sector)(rows as any).sector=feed.sector;return rows;
   }
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
