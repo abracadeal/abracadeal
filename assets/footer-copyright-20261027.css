@@ -9,3 +9,13 @@
 @media(max-width:760px){
   html body #vacTravelerFooter .footer-copyright{order:99;width:100%;text-align:center;font-size:10px;opacity:.7}
 }
+
+/* 30/10/2026 (Anthony) : pied de page mobile / tablette plus petit et resserré :
+   « © 2026 Abracadeal » discret, liens plus petits et serrés, moins de vide au-dessus de la barre du bas. */
+@media(max-width:760px){
+  html body footer{padding-top:10px!important;padding-bottom:20px!important} /* la page garde déjà la place de la barre du bas */
+  html body footer .footer-row{gap:6px!important;row-gap:6px!important}
+  html body footer .footer-copyright{font-size:10px!important;line-height:1.2!important;margin:0!important;padding:0!important;opacity:.6!important}
+  html body footer .footer-links{font-size:9.5px!important;gap:2px 10px!important;margin:0!important;line-height:1.35!important}
+  html body footer .footer-links a{font-size:9.5px!important;line-height:1.35!important;padding:0!important}
+}
