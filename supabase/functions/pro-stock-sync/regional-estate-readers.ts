@@ -23,7 +23,10 @@ export function parseBiasDetail(raw:string,url:string){
  for(const [field,css] of [['dpe','energie'],['ges','gas']]){delete row[field];const m=html.match(new RegExp('class="[^"<>]*\\b'+css+'_([a-g])\\b[^"<>]*\\bactiveEnergie\\b','i'));if(m)row[field]=m[1].toUpperCase();}
  if(/non soumis au DPE/i.test(description))row.dpe='NON SOUMIS';
  const adviser=description.match(/Votre conseiller[^\n:]*:\s*([^\n]+)/i)?.[1];if(adviser)row.contact_nom=adviser.trim();
- const phone=description.match(/(?:tél(?:éphone)?|tel)\s*[.:]?\s*(0\d(?:[ .-]*\d){8})/i)?.[1];if(phone&&adviser)row.contact_telephone=phone.replace(/\D/g,'');
+ const signature=description.match(/Cette annonce vous est proposée par ([^\n]+)/i)?.[1]||'';
+ const norm=(x:string)=>x.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/[^a-z]/g,'');
+ const sameAdviser=!!adviser&&norm(signature).includes(norm(adviser));
+ const phone=(sameAdviser?signature.match(/(0\d(?:[ .-]*\d){8})/):description.match(/(?:tél(?:éphone)?|tel)\s*[.: ]*\s*(0\d(?:[ .-]*\d){8})/i))?.[1];if(phone&&adviser)row.contact_telephone=phone.replace(/\D/g,'');
  row.texte_page=description;return row;
 }
 export async function readBiasAgency(start:URL,home:string,fetchHtml:Fetcher){
@@ -53,6 +56,7 @@ export function parsePierrefeuDetail(raw:string,url:string){
  const rooms=clean(html).match(/(\d+)\s*pièces?/i)?.[1],beds=clean(html).match(/(\d+)\s*chambre\(s\)|(?:-|\n)\s*(\d+)\s*chambres?/i);if(rooms)row.pieces=rooms;if(beds)row.chambres=beds[1]||beds[2];
  const originals=[...html.matchAll(/<a\b[^>]*href="([^"<>]+)"[^>]*rel="gallery\[(\d+)\]"/gi)].filter(m=>m[2]===id).map(m=>sDecode(m[1]));row.photos=dedupePhotos(originals).join('|');
  const phone=html.match(/iconeTELEPHONE\.jpg[^>]*>\s*:\s*([^<]+)/i)?.[1];if(phone){const digits=phone.replace(/\D/g,'');row.contact_telephone=digits.startsWith('330')?'0'+digits.slice(3):digits;row.contact_nom='Agence Immobilière Pierrefeu';}
+ const adviser=description.match(/(?:^|\n)([A-ZÀ-Ÿ][A-Za-zÀ-ÿ' -]{2,60}?)\s*[–—-]\s*EI\s*[–—-]\s*RSAC[^\n]*\n\s*(0[67](?:[ .-]*\d){8})/);if(adviser){row.contact_nom=adviser[1].trim();row.contact_telephone=adviser[2].replace(/\D/g,'');}
  row.texte_page=clean(html.slice(html.indexOf('class="details-immobilier"'))).slice(0,12000);return row;
 }
 export async function readPierrefeu(start:URL,home:string,fetchHtml:Fetcher){
@@ -60,11 +64,11 @@ export async function readPierrefeu(start:URL,home:string,fetchHtml:Fetcher){
  const roots=[{path:'/fr/acheter-biens-immobiliers.htm',kind:'vente-achat',pagination:/^\/fr\/(?:achat-vente|acheter)-biens-immobiliers\.htm$/},{path:'/fr/locations-biens-immobiliers.htm',kind:'location',pagination:/^\/fr\/locations-(?:biens-)?immobiliers(?:-pierrefeu)?\.htm$/}];
  const entries=new Map<string,URL>();let partial=false,pages=0,total=0;
  for(const root of roots){const queue=[new URL(root.path,origin)],seen=new Set<string>();let declared:number|undefined;
-  while(queue.length&&seen.size<40){const u=queue.shift()!;if(seen.has(u.toString()))continue;seen.add(u.toString());let html:string;try{html=(await fetchHtml(u)).text;pages++;}catch{partial=true;continue;}
+  while(queue.length&&seen.size<40){const u=queue.shift()!;const pageKey=u.searchParams.getAll('page').at(-1)||'0';if(seen.has(pageKey))continue;seen.add(pageKey);let html:string;try{html=(await fetchHtml(u)).text;pages++;}catch{partial=true;continue;}
    if(declared===undefined){const m=html.match(/id="resultat"[^>]*>\s*(\d+)\s+annonces?/i);if(m){declared=Number(m[1]);total+=declared;}else partial=true;}
    const blocks=html.split(/(?=<div\b[^>]*id="biens-immobiliers")/i).filter(x=>/^<div\b[^>]*id="biens-immobiliers"/i.test(x));
    for(const block of blocks){const own=links(block,origin).find(u=>new RegExp('^/'+root.kind+'/[^/]+/\\d+\\.htm$').test(u.pathname));if(own){own.search='';entries.set(own.toString(),own);}}
-   for(const link of links(html,origin))if(root.pagination.test(link.pathname)&&/^\d+$/.test(link.searchParams.get('page')||'')&&!seen.has(link.toString()))queue.push(link);
+   for(const link of links(html,origin))if(root.pagination.test(link.pathname)){const page=link.searchParams.getAll('page').at(-1)||'';if(!/^\d+$/.test(page)||seen.has(page)||queue.some(x=>(x.searchParams.getAll('page').at(-1)||'0')===page))continue;link.searchParams.delete('page');link.searchParams.set('page',page);queue.push(link);}
   }if(queue.length)partial=true;
  }if(entries.size!==total)partial=true;
  const rows:any[]=[];let next=0;const failures:string[]=[];const details=[...entries.values()];
