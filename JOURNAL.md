@@ -1383,3 +1383,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — « Valider ce site » : le site disparaît
 - **Demande d'Anthony :** quand il teste un site et valide, il doit disparaître.
 - **Fait :** `admin_confirm_robot_learning_visual` (appliqué en base) clôt aussi la demande « en attente / en cours » du même site (status `done`, « Validé à la main après test du site ») → il sort de « Sites en réparation ». Il sortait déjà de « Sites à apprendre » (`site_check_status = ok`). `admin-test-import.html` : après validation, l'aperçu, les boutons et l'adresse testée sont effacés ; seul le message « Validé : … » reste.
+
+### 30/10/2026 — Claude — Chaque bouton envoie le site au bon endroit
+- **Demande d'Anthony :** après chaque touche, le site doit disparaître de là où il est et aller là où il doit aller.
+- **Fait (`admin-test-import.html`) :**
+  - « Tester une adresse » → **Réparer ce site** : part dans « Sites en réparation », l'aperçu et l'adresse s'effacent (même chose que « Valider », via `clearTest()`). Si le test venait de « Sites en réparation », la demande garde le prospect relié.
+  - « Sites à apprendre » → **Mail normal / Vend sur Leboncoin / Supprimer** : la carte part et la liste se recharge (compteurs « mail normal », « vendent sur Leboncoin », « illisibles » à jour). **Réparer** : sort de la liste, entre dans « Sites en réparation ».
+  - « Demandes » → **Refuser** : la demande sort de la liste (les activées et en pause restent, elles ont encore Synchroniser / Mettre en pause).

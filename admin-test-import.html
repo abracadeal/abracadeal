@@ -158,7 +158,7 @@ async function init(){
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
  E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();
  E('sitePreview').onclick=previewSite;
- E('learnCur').onclick=()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;askLearn(u,E('sector').value,'',null);};
+ E('learnCur').onclick=async()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;if(await askLearn(u,E('sector').value,LEARN_CONTEXT?.company||'',LEARN_CONTEXT?.url===u?LEARN_CONTEXT.prospectId||null:null)){clearTest();E('status').innerHTML='Envoyé dans « Sites en réparation » : <b>'+esc(u)+'</b>';}};
 }
 // 29/10/2026 : prospects au site illisible (test avant le 1er mail).
 // 29/10/2026 : file « Apprendre à lire ce site ».
@@ -172,10 +172,10 @@ async function loadLearn(){
 }
 async function askLearn(url,sector,company,prospect){
  const note=prompt('Qu\'est-ce qui ne va pas sur ce site ? (facultatif : prix faux, ville manquante, photos en double…)','');
- if(note===null)return;
+ if(note===null)return false;
  const{data,error}=await sb.rpc('admin_request_robot_learning',{p_url:url,p_sector:sector,p_company:company||null,p_prospect_id:prospect||null,p_note:note||null});
- if(error){alert(error.message);return}
- alert(data?.already?'Ce site est déjà en réparation.':'Envoyé dans « Sites en réparation ». Demande à ChatGPT ou à Claude de s\'en occuper.');loadLearn();loadUnread();
+ if(error){alert(error.message);return false}
+ alert(data?.already?'Ce site est déjà en réparation.':'Envoyé dans « Sites en réparation ». Demande à ChatGPT ou à Claude de s\'en occuper.');loadLearn();loadUnread();return true;
 }
 async function loadUnread(){
  const{data,error}=await sb.rpc('admin_unreadable_sites',{p_limit:60});
@@ -192,15 +192,16 @@ document.addEventListener('click',async e=>{
  const lt=e.target.closest('#learnq [data-learn-test]');if(lt){LEARN_CONTEXT={url:lt.dataset.learnTest,prospectId:lt.dataset.prospectId,requestId:lt.dataset.requestId};E('url').value=lt.dataset.learnTest;E('sector').value=lt.dataset.sector;const fold=E('form').closest('details');if(fold)fold.open=true;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
  const t=e.target.closest('#unread [data-u]');if(t){LEARN_CONTEXT=null;E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
  const lb=e.target.closest('#unread [data-l]');if(lb){askLearn(lb.dataset.l,lb.dataset.ls,lb.dataset.lc,lb.dataset.lp);return}
- const gg=e.target.closest('#unread [data-g]');if(gg){gg.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_generic',{p_id:gg.dataset.g});if(error){alert(error.message);gg.disabled=false;return}gg.closest('.req')?.remove();return}
- const mm=e.target.closest('#unread [data-m]');if(mm){mm.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_manual',{p_id:mm.dataset.m});if(error){alert(error.message);mm.disabled=false;return}mm.closest('.req')?.remove();return}
- const d=e.target.closest('#unread [data-d]');if(d){if(!confirm('Retirer « '+d.dataset.n+' » des prospects ? Il ne recevra jamais de mail.'))return;d.disabled=true;const{error}=await sb.rpc('admin_drop_prospect',{p_id:d.dataset.d});if(error){alert(error.message);d.disabled=false;return}d.closest('.req')?.remove();return}
+ const gg=e.target.closest('#unread [data-g]');if(gg){gg.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_generic',{p_id:gg.dataset.g});if(error){alert(error.message);gg.disabled=false;return}gg.closest('.req')?.remove();loadUnread();return}
+ const mm=e.target.closest('#unread [data-m]');if(mm){mm.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_manual',{p_id:mm.dataset.m});if(error){alert(error.message);mm.disabled=false;return}mm.closest('.req')?.remove();loadUnread();return}
+ const d=e.target.closest('#unread [data-d]');if(d){if(!confirm('Retirer « '+d.dataset.n+' » des prospects ? Il ne recevra jamais de mail.'))return;d.disabled=true;const{error}=await sb.rpc('admin_drop_prospect',{p_id:d.dataset.d});if(error){alert(error.message);d.disabled=false;return}d.closest('.req')?.remove();loadUnread();return}
  const r=e.target.closest('#unread [data-r]');if(r){r.disabled=true;r.textContent='Validé : retest en cours…';const{error}=await sb.rpc('admin_recheck_prospect_site',{p_id:r.dataset.r});if(error)alert(error.message);loadUnread();}
 });
 async function loadReqs(){
  const{data,error}=await sb.rpc('admin_list_site_imports');
  if(error){E('reqs').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
- REQS=data||[];
+ // 30/10/2026 (Anthony) : une demande refusée sort de la liste.
+ REQS=(data||[]).filter(r=>r.review_status!=='rejected');
  if(!REQS.length){E('reqs').innerHTML='<div class="empty">Aucune demande pour l\'instant. Elles arriveront ici quand un pro donnera l\'adresse de son site à l\'inscription.</div>';return}
  E('reqs').innerHTML=REQS.map((r,i)=>{
   const st=r.review_status==='pending'?['pending','En attente']:r.review_status==='rejected'?['rej','Refusé']:r.active?['on','Actif']:['off','En pause'];
@@ -362,6 +363,12 @@ E('form').addEventListener('submit',load);
 // 30/10/2026 (Anthony) : quand je teste moi-même un site et qu'il se lit bien, je le valide :
 // la fiche du prospect qui a ce site passe en « site testé » (nombre d'annonces, plateforme),
 // ses prochains mails sont donc ceux du « répondez OK ».
+// 30/10/2026 (Anthony) : après une action sur le site testé (Valider, Réparer), il disparaît de l'écran
+// (aperçu, boutons, adresse) ; seul le message de confirmation reste.
+function clearTest(){
+ E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=true;E('sitePreview').hidden=true;E('siteValidate').hidden=true;E('url').value='';
+ LASTDATA=null;NORM=[];ROWS=[];LEARN_CONTEXT=null;
+}
 async function validateSite(){
  const b=E('siteValidate');b.disabled=true;b.textContent='Validation…';
  try{
@@ -388,9 +395,7 @@ async function validateSite(){
   await loadLearn();
   E('status').innerHTML='Validé : '+match.map(p=>'<b>'+esc(p.company||p.email||'prospect')+'</b>').join(', ')+' → site testé ('+n+' annonce'+(n>1?'s':'')+'). Ses prochains mails seront ceux du « répondez OK ».';
   b.textContent='Validé ✓';loadUnread();
-  // 30/10/2026 (Anthony) : une fois validé, le site testé disparaît de l'écran (aperçu, boutons, adresse) ; seul le message de confirmation reste.
-  E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=true;E('sitePreview').hidden=true;b.hidden=true;E('url').value='';
-  LASTDATA=null;NORM=[];LEARN_CONTEXT=null;
+  clearTest();
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">Validation impossible : '+esc(e.message||e)+'</span>';b.disabled=false;b.textContent='Valider ce site'}
 }
 E('siteValidate').onclick=validateSite;
