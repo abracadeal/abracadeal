@@ -1409,3 +1409,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Nouveau type de bien « Bâtiment / Grange »
 - **Constaté (Anthony, aperçu d'une agence de l'Orne) :** « BATMENT A VENDRE, A RESTAURER » refusé avec « type de bien non reconnu » (et les hangars partaient en Bureaux / Commerces).
 - **Fait :** sous-catégorie `vente-batiment` (« Bâtiment / Grange à vendre ») : bâtiment, grange, hangar, écurie, étable, bergerie, porcherie, dépendance, bâtiment agricole (à louer → Location longue durée). Robot (`pro-stock-sync` `normalizeImmoSub`) et import manuel (`index-main.js?v=20261030-batiment`) ; menu Immobilier (ordinateur), filtres « Type de bien », titre automatique « Bâtiment ». Page annonce : « Surface » (pas « Surface habitable » ni pièces / dépenses d'énergie), pas de bloc copropriété. Les entrepôts restent en Bureaux / Commerces.
+
+### 30/10/2026 — Claude — Locations : vérification
+- **Question d'Anthony :** la location fonctionne-t-elle bien avec les annonces ? (aucune annonce immo en ligne pour l'instant, vérifié dans le code)
+- **OK :** location de logement → sous-catégorie `location`, prix « / mois » + charges, fiche avec charges / dépôt de garantie / honoraires locataire / meublé, menu « Location longue durée ».
+- **Corrigé (`pro-stock-sync` `immoMeta`) :** le robot lisait vente / location et le type de bien mais ne les enregistrait pas dans l'annonce ; une location de parking ou de bureau était devinée d'après le texte, et un local / parking à vendre dont la description parle de « loyer » (investissement locatif) pouvait s'afficher « / mois ». `transaction` et `propertyType` sont maintenant enregistrés (l'import manuel le faisait déjà).
+- **Corrigé (`index-main.js?v=20261030-batiment2`) :** un bâtiment / une grange compte bien comme « à vendre » dans le filtre vente / location.

@@ -2901,7 +2901,7 @@ function realEstateTransactionOf(a){
   if(/vente|vendre|sale/.test(raw))return 'vente';
   const sub=vehicleSubcategoryOf(a);
   if(['location','saisonniere'].includes(sub))return 'location';
-  if(['vente-appartement','vente-maison','vente-terrain'].includes(sub))return 'vente';
+  if(['vente-appartement','vente-maison','vente-terrain','vente-batiment'].includes(sub))return 'vente';
   const hay=normalizeImmoSearchValue(`${a?.title||''} ${cleanDescription(a)}`);
   if(/a louer|location|loyer/.test(hay))return 'location';
   if(/a vendre|vente/.test(hay))return 'vente';
