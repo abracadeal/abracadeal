@@ -63,7 +63,8 @@ export async function readSupabaseApp(origin:URL,html:string,sector:string,fetch
   const listPage=route?route.replace(/\/\$\w+$/,''):'';
   // 4) Ville du garage : description du site « … à Aumur (39410) » ou « 39410 Aumur ».
   const meta=(html.match(/<meta\s+name=["']description["']\s+content=["']([^"']+)/i)||[])[1]||'';
-  const loc=meta.match(/\bà\s+([A-ZÉÈÀÂÎ][\wÀ-ÿ' -]{1,40}?)\s*\((\d{5})\)/)||null;
+  // (« \b » ne marche pas devant « à », lettre accentuée : on cherche un espace ou le début.)
+  const loc=meta.match(/(?:^|\s)à\s+([A-ZÉÈÀÂÎ][\wÀ-ÿ' -]{1,40}?)\s*\((\d{5})\)/)||null;
   const ville=loc?loc[1].trim():'',cp=loc?loc[2]:'';
   // 5) Photos privées : liens signés en une seule demande par fiche.
   const out:any[]=[];
