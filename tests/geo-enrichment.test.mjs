@@ -1,0 +1,9 @@
+import fs from 'node:fs';import assert from 'node:assert/strict';import {stripTypeScriptTypes} from 'node:module';
+import {isPlaceholderPhoto,dedupePhotos} from '../supabase/functions/pro-stock-sync/photo-utils.ts';
+let source=fs.readFileSync(new URL('../supabase/functions/pro-stock-sync/index.ts',import.meta.url),'utf8').replace(/^import .*;\n/gm,'');source=source.slice(0,source.indexOf('Deno.serve('));
+let active=0,maxActive=0;const calls=[];
+const fakeFetch=async(url,options)=>{const city=new URL(url).searchParams.get('nom');calls.push(city);assert.ok(options.signal);active++;maxActive=Math.max(active,maxActive);
+ try{await new Promise((resolve,reject)=>{const timer=setTimeout(resolve,city==='Blocage'?10000:30);options.signal.addEventListener('abort',()=>{clearTimeout(timer);reject(new Error('timeout'));},{once:true});});return{ok:true,json:async()=>[{nom:city,codesPostaux:['30000']}]};}finally{active--;}};
+const normalize=new Function('Deno','createClient','isPlaceholderPhoto','dedupePhotos','fetch',stripTypeScriptTypes(source)+';ownerLocation=async()=>null;loadOverrides=async()=>new Map();return normalizeRows;')({env:{get:()=>''}},()=>({}),isPlaceholderPhoto,dedupePhotos,fakeFetch);
+const cities=['Nîmes','Cannes','Menton','Blocage','Privas','Nîmes'];const input=cities.map((ville,i)=>({reference:String(i),titre:'Bien '+i,ville,code_postal:'12345',prix:100000+i,surface:50,type_bien:'maison'}));
+const start=Date.now();const result=await normalize(input,'immobilier');assert.deepEqual(result.map(x=>x.ref),['0','1','2','3','4','5']);assert.equal(result[3].city,'Blocage');assert.equal(result[3].postal,'12345');assert.equal(calls.filter(x=>x==='Nîmes').length,1);assert.ok(maxActive>1&&maxActive<=4);assert.ok(Date.now()-start<5000);console.log('Geo: bounded stalled lookup, original location preserved, shared-city cache, stable row order and limited concurrency OK');
