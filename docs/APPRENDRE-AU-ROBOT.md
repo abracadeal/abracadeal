@@ -19,6 +19,8 @@ Lecteurs génériques ajoutés le 30/10/2026 (Claude), à réutiliser avant d'é
 - `roselmac-reader.ts` : garages Roselmac (`catalogue-new.php`, `voiture-new2.php?voiture_reference=`).
 - `simplebo-reader.ts` : garages Simplébo (`sbcdnsb.com`) avec une page `/vehicules-en-vente` en texte libre.
 - `vehica-reader.ts` : WordPress thème Vehica → `/wp-json/wp/v2/cars` (champs reconnus par leur nom via `/taxonomies`, Statut « Vendu » exclu).
+- `ewigo-reader.ts` : agences Ewigo (Laravel / Inertia, JSON dans `data-page`) → `/acheter` = stock de l'agence, `/vehicule/{id}` = fiche ; ne jamais lire `/achat` (stock national).
+- Astuce : un site Laravel / Inertia (`data-page="{…}"`) contient toutes ses données en JSON dans la page.
 - Astuce générale : avant de lire les pages HTML d'un WordPress, regarder `/wp-json/wp/v2/types` : beaucoup de thèmes de garage / d'agence publient leur stock en JSON.
 
 ## 2. Méthode pour un site qui ne se lit pas (ou mal)
