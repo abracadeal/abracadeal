@@ -1,26 +1,14 @@
-# 30/10/2026 — Robots d'aspiration et d'IA refusés partout, SAUF ChatGPT (OpenAI) et Claude (Anthropic), autorisés à la demande d'Anthony.
-# Google, Bing, etc. restent autorisés plus bas.
-# Ne bloque que les robots honnêtes ; les vrais aspirateurs sont freinés côté base de données.
-User-agent: CCBot
-User-agent: Google-Extended
-User-agent: Applebot-Extended
-User-agent: PerplexityBot
-User-agent: Bytespider
-User-agent: Amazonbot
-User-agent: meta-externalagent
-User-agent: FacebookBot
+# 30/10/2026 — Seuls les aspirateurs et revendeurs de données sont refusés (Anthony : les IA doivent pouvoir parler d'Abracadeal à leurs utilisateurs).
+# Google, Bing et toutes les IA (ChatGPT, Claude, Gemini, Perplexity, Meta…) sont autorisés.
 User-agent: Diffbot
 User-agent: Omgilibot
-User-agent: Timpibot
 User-agent: ImagesiftBot
-User-agent: cohere-ai
 User-agent: AhrefsBot
 User-agent: SemrushBot
 User-agent: MJ12bot
 User-agent: DotBot
 User-agent: BLEXBot
 User-agent: DataForSeoBot
-User-agent: PetalBot
 User-agent: serpstatbot
 User-agent: Scrapy
 User-agent: HTTrack
