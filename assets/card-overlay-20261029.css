@@ -54,3 +54,10 @@ html body .ad-specs.ad-specs-line .ad-spec{display:inline!important;white-space:
 html body .ad-specs.ad-specs-line .ad-spec-sep{opacity:.6}
 html body :is(.ad-city,.home-featured-city),html body main#top #resultats .ad-card.ad-card .ad-city{display:block!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
 html body .ad-city-pin{display:inline-block;vertical-align:-1px;margin-right:4px;width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
+
+/* 30/10/2026 (Anthony) : fenêtre « Erreurs de flux » de l'admin : pastille « À surveiller / À traiter » bien visible,
+   et nom du flux lisible (il était blanc sur fond clair). */
+html body .flow-error-card .flow-error-head .small{color:#6f5a78!important;font-size:.8rem}
+html body .flow-error-card .flow-error-pill{font-size:.75rem!important;font-weight:900!important;padding:5px 10px!important;white-space:nowrap}
+html body .flow-error-card.warning .flow-error-pill{background:#f5c46b!important;color:#5a3a00!important}
+html body .flow-error-card.error .flow-error-pill{background:#e5484d!important;color:#fff!important}

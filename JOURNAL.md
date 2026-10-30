@@ -1293,3 +1293,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Pied de page mobile / tablette resserré
 - **Demande d'Anthony :** recoller le bas de page, en plus petit.
 - **Fait (`footer-copyright-20261027.css?v=6`, ≤ 760 px, donc aussi tablette) :** « © 2026 Abracadeal » 10 px discret (au lieu de 16 px), liens 9,5 px serrés (3 lignes au lieu de 4), espacements réduits ; le grand vide violet sous les liens supprimé (le pied de page ajoutait 104 px alors que la page garde déjà la place de la barre du bas). Hauteur du pied de page : 250 → ~110 px. Ordinateur inchangé.
+
+### 30/10/2026 — Claude — Retours d'Anthony sur les notifications admin
+- **Constaté (captures) :** la notification d'exemple « nouveau pro » apparaissait aussi dans la fenêtre Admin « Erreurs de flux » (pastille 1 sur Admin) ; pastille « À surveiller » quasi invisible et nom du flux blanc sur fond clair ; pastille « 1 » de Messages loin de l'icône sur téléphone.
+- **Fait :** `index-main.js?v=20261030-notifs2` : « Erreurs de flux » (liste + compteur Admin) ignore les notifications `new_pro` / `site_review` (elles restent dans Messages) ; `card-overlay-20261029.css?v=5` : pastille « À surveiller » orange (texte brun foncé), « À traiter » rouge (texte blanc), nom du flux en gris violet lisible ; `nav-compact-20261020.css?v=2` : pastille Messages identique à celle d'Admin, collée en haut à droite de l'icône (téléphone ; la tablette l'avait déjà).

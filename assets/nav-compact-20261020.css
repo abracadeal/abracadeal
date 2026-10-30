@@ -10,3 +10,13 @@
 @media (min-width:1024px) and (max-width:1249px) and (pointer:fine){
   header .desktop-category-nav>.desktop-nav-item:not(.desktop-propro-nav-item){flex:0 0 auto!important;width:auto!important}
 }
+
+/* 30/10/2026 (Anthony) : la pastille « 1 » de Messages flottait loin de l'icône sur téléphone.
+   Même pastille et même position que celle d'Admin : collée en haut à droite de l'icône. */
+@media(max-width:760px){
+  html body #mobileBottomUnread.mobile-nav-badge{
+    position:absolute!important;top:5px!important;left:calc(50% + 2px)!important;right:auto!important;transform:none!important;
+    min-width:18px!important;height:18px!important;padding:0 5px!important;border-radius:999px!important;
+    align-items:center!important;justify-content:center!important;background:#ed338f!important;color:#fff!important;
+    border:2px solid #180a26!important;font-size:9px!important;font-weight:900!important;line-height:1!important;z-index:3!important}
+}

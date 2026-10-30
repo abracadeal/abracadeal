@@ -4801,7 +4801,8 @@ async function refreshFlowErrorsCount(){
   if(!sb||!currentProfile?.is_admin){badge.classList.add('hidden');btn.classList.remove('has-errors');return 0;}
   const {data,error}=await sb.rpc('get_admin_pro_sync_errors');
   if(error){console.error('Compteur erreurs de flux indisponible',error);return 0;}
-  const rows=data||[];
+  // 30/10/2026 : les notifications « nouveau pro » / « site à vérifier » vont dans Messages, pas dans les erreurs de flux.
+  const rows=(data||[]).filter(x=>!['new_pro','site_review'].includes(x.severity));
   const n=rows.length;
   const critical=rows.filter(x=>Number(x.consecutive_failures||0)>=3).length;
   const warnings=rows.filter(x=>Number(x.consecutive_failures||0)>0&&Number(x.consecutive_failures||0)<3).length;
@@ -4819,8 +4820,9 @@ async function loadAdminFlowErrors(){
   box.innerHTML='<div class="flow-error-empty">Chargement…</div>';
   const {data,error}=await sb.rpc('get_admin_pro_sync_errors');
   if(error){box.innerHTML='<div class="flow-error-empty">Impossible de charger les erreurs de flux.</div>';console.error(error);return;}
-  if(!data?.length){box.innerHTML='<div class="flow-error-empty">Aucune erreur de flux active. Tout fonctionne normalement.</div>';return;}
-  box.innerHTML=data.map(n=>{const fails=Number(n.consecutive_failures||0);const critical=fails>=3;return `<article class="flow-error-card ${critical?'error':'warning'}">
+  const rows=(data||[]).filter(x=>!['new_pro','site_review'].includes(x.severity));
+  if(!rows.length){box.innerHTML='<div class="flow-error-empty">Aucune erreur de flux active. Tout fonctionne normalement.</div>';return;}
+  box.innerHTML=rows.map(n=>{const fails=Number(n.consecutive_failures||0);const critical=fails>=3;return `<article class="flow-error-card ${critical?'error':'warning'}">
     <div class="flow-error-head"><div><b>${esc(n.company_name||'Professionnel')}</b><div class="small">${esc(n.feed_name||'Flux professionnel')}</div></div><span class="flow-error-pill">${critical?'À traiter':'À surveiller'}</span></div>
     <div class="flow-error-meta"><span>${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</span><span>${fails} échec${fails>1?'s':''} consécutif${fails>1?'s':''}</span>${n.last_run_at?`<span>Dernier essai : ${esc(formatMessageTime(n.last_run_at))}</span>`:''}${n.last_success_at?`<span>Dernier succès : ${esc(formatMessageTime(n.last_success_at))}</span>`:''}</div>
     <p class="flow-error-message">${esc(n.message||'Erreur de synchronisation')}</p>
