@@ -1275,3 +1275,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Version affichée : 30 octobre 2026 (CGU et confidentialité ; CGV, cookies et mentions légales inchangées). Version d'acceptation enregistrée à l'inscription : `2026-10-30` (`legal-registration.js`, `index-main.js`, `social-login-20261018.js`, test).
 - Tests `legal-pages` : mêmes résultats qu'avant (2 échecs déjà présents avant ces changements).
 - **Mentions légales :** rien à changer (éditeur, directeur de la publication, hébergeur, contact présents).
+
+### 30/10/2026 — Claude — Mail à l'admin quand le site d'un pro est repris
+- **Demande d'Anthony :** il ne veut pas découvrir des annonces d'un pro sur le site sans être prévenu.
+- **Fait (`pro-stock-sync`, `notifyAdminsSite`) :** mail immédiat aux admins (abracadeal@gmail.com) depuis contact@abracadeal.fr :
+  - « Nouveau pro en ligne : <entreprise> (N annonce(s)) » quand un site autorisé est lu sans erreur et activé automatiquement (entreprise, SIRET, e-mail, site, domaine, nombre d'annonces créées, lien page pro + admin imports) ;
+  - « Site d'un pro à vérifier : <entreprise> » quand le site ne peut pas être activé seul (raison) — au premier essai seulement, le récapitulatif quotidien continue.
+- Un seul mail par site et par cas (clé `site-approved|pending-<feed>`).
