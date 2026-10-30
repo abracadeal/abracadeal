@@ -388,6 +388,9 @@ async function validateSite(){
   await loadLearn();
   E('status').innerHTML='Validé : '+match.map(p=>'<b>'+esc(p.company||p.email||'prospect')+'</b>').join(', ')+' → site testé ('+n+' annonce'+(n>1?'s':'')+'). Ses prochains mails seront ceux du « répondez OK ».';
   b.textContent='Validé ✓';loadUnread();
+  // 30/10/2026 (Anthony) : une fois validé, le site testé disparaît de l'écran (aperçu, boutons, adresse) ; seul le message de confirmation reste.
+  E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=true;E('sitePreview').hidden=true;b.hidden=true;E('url').value='';
+  LASTDATA=null;NORM=[];LEARN_CONTEXT=null;
  }catch(e){E('status').innerHTML='<span style="color:var(--bad)">Validation impossible : '+esc(e.message||e)+'</span>';b.disabled=false;b.textContent='Valider ce site'}
 }
 E('siteValidate').onclick=validateSite;

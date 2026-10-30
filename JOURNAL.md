@@ -1379,3 +1379,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Compteur de photos sous le filigrane
 - **Constaté (Anthony) :** sur la page annonce, le filigrane « Abracadeal » (bas droite) chevauchait le compteur « 1 / N ».
 - **Fait (`card-overlay-20261029.css?v=6`) :** compteur de photos déplacé en bas à gauche (ordinateur et téléphone). Le filigrane reste en bas à droite (il est aussi incrusté dans les photos des particuliers, donc impossible à déplacer).
+
+### 30/10/2026 — Claude — « Valider ce site » : le site disparaît
+- **Demande d'Anthony :** quand il teste un site et valide, il doit disparaître.
+- **Fait :** `admin_confirm_robot_learning_visual` (appliqué en base) clôt aussi la demande « en attente / en cours » du même site (status `done`, « Validé à la main après test du site ») → il sort de « Sites en réparation ». Il sortait déjà de « Sites à apprendre » (`site_check_status = ok`). `admin-test-import.html` : après validation, l'aperçu, les boutons et l'adresse testée sont effacés ; seul le message « Validé : … » reste.
