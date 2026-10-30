@@ -1206,3 +1206,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Fait :** manifest en `"orientation": "any"` (lien `manifest.json?v=5` sur index et vacances) ; `tablet-grid-20261030.css?v=2` : écran de rotation jamais affiché sur tablette, page visible et défilable en paysage. Téléphones : écran de rotation conservé.
 - Vérifié en émulation tablette Android 1280×800 paysage : écran de rotation masqué, page visible, 6 vignettes.
 - **Appli déjà installée :** Android peut mettre du temps à relire le manifest ; si ça reste bloqué, désinstaller puis réinstaller l'appli.
+
+### 30/10/2026 — Claude — Textes des vignettes corrigés
+- **Demande d'Anthony :** « la description dans les vignettes c'est pas bon ».
+- **Constaté (rendu des vraies annonces) :** caractéristiques véhicule en 4 cases avec émojis (📅 🛣️ ⛽ ⚙️) qui se cassaient dans les vignettes étroites (« km » ou « Automatique » seuls à la ligne) ; ville avec 📍 sur 2 lignes.
+- **Fait :** `index-main.js?v=20261030-vignettes` (cartes « Les annonces » et « À la une ») : caractéristiques en une ligne de texte « 2019 · 84 500 km · Diesel · Manuelle » (2 lignes max), sans émojis ; ville avec un petit pictogramme dessiné à la place de 📍. `card-overlay-20261029.css?v=4` : ville sur une seule ligne (coupée avec « … » si trop longue). Page annonce inchangée.
+- Vérifié sur téléphone, tablette verticale et horizontale avec de vraies annonces.

@@ -3851,13 +3851,8 @@ function renderHomeFeatured(){
         <div class="home-featured-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
-        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs">
-          ${a.vehicle_year?`<span class="ad-spec">📅 ${esc(a.vehicle_year)}</span>`:''}
-          ${(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?`<span class="ad-spec">🛣️ ${Number(a.mileage).toLocaleString('fr-FR')} km</span>`:''}
-          ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
-          ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
-        </div>`:''}
-        <div class="home-featured-city">📍 ${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
+        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(a.fuel):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
+        <div class="home-featured-city"><svg class="ad-city-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
   }).join('');
@@ -4004,13 +3999,8 @@ function renderAds(){
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
-        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs">
-          ${a.vehicle_year?`<span class="ad-spec">📅 ${esc(a.vehicle_year)}</span>`:''}
-          ${(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?`<span class="ad-spec">🛣️ ${Number(a.mileage).toLocaleString('fr-FR')} km</span>`:''}
-          ${a.fuel?`<span class="ad-spec">⛽ ${esc(a.fuel)}</span>`:''}
-          ${a.transmission?`<span class="ad-spec">⚙️ ${esc(a.transmission)}</span>`:''}
-        </div>`:''}
-        <div class="ad-city">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
+        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(a.fuel):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
+        <div class="ad-city"><svg class="ad-city-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}

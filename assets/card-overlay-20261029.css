@@ -43,3 +43,14 @@ html body #resultats .ad-card.ad-card .ad-title{
     flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:6/7!important}
   html body main#top #resultats .ad-card .ad-photo img{width:100%!important;height:100%!important;object-fit:cover!important}
 }
+
+/* 30/10/2026 (Anthony) : textes des vignettes. Caractéristiques véhicule sur une seule ligne de texte
+   (« 2019 · 84 500 km · Diesel · Manuelle », 2 lignes max), sans émojis, et ville sur une ligne
+   avec un petit pictogramme dessiné. Plus de mots coupés (« km » ou « Automatique » seuls à la ligne). */
+html body .ad-specs.ad-specs-line{
+  display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;line-clamp:2!important;
+  overflow:hidden!important;grid-template-columns:none!important;gap:0!important;line-height:1.35!important;white-space:normal!important}
+html body .ad-specs.ad-specs-line .ad-spec{display:inline!important;white-space:nowrap!important;padding:0!important;background:none!important;border:0!important}
+html body .ad-specs.ad-specs-line .ad-spec-sep{opacity:.6}
+html body :is(.ad-city,.home-featured-city),html body main#top #resultats .ad-card.ad-card .ad-city{display:block!important;min-width:0!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+html body .ad-city-pin{display:inline-block;vertical-align:-1px;margin-right:4px;width:11px;height:11px;fill:none;stroke:currentColor;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;opacity:.85}
