@@ -1,14 +1,20 @@
 // Scoped public catalogues: Progressia data file, Human agency and Citya agency.
-import {sDecode,smartDetail} from './smart-reader.ts';
+import {sDecode} from './smart-reader.ts';
 import {dedupePhotos} from './photo-utils.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const clean=(v:any)=>sDecode(String(v??'').replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,' ')).replace(/[ \t]+/g,' ').replace(/\n\s*\n+/g,'\n').trim();
 export function estateJson(html:string){const a:any[]=[];for(const m of html.matchAll(/<script\b[^>]*type=["']([^"']+)["'][^>]*>([\s\S]*?)<\/script>/gi)){if(sDecode(m[1])!=='application/ld+json')continue;try{const walk=(x:any)=>{if(Array.isArray(x))x.forEach(walk);else if(x&&typeof x==='object'){a.push(x);if(x['@graph'])walk(x['@graph']);}};walk(JSON.parse(m[2]));}catch{}}return a;}
 export function parseNetworkEstate(html:string,url:string,kind:'human'|'citya'){
- const all=estateJson(html),listing=all.find(x=>x['@type']==='RealEstateListing');if(!listing)throw Error('Données structurées du bien absentes.');
+ const all=estateJson(html);let listing=all.find(x=>x['@type']==='RealEstateListing');
+ if(!listing&&kind==='citya'){
+  const title=clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');if(!title)throw Error('Fiche Citya absente.');
+  const amount=clean(html.match(/<p class=["']prix["'][^>]*>([\s\S]*?)<\/p>/i)?.[1]||'').match(/([\d\s]+(?:,\d{1,2})?)\s*€/);const city=title.match(/(.+?)\s*\((\d{5})\)/);
+  const desc=html.split('advert-detail-layout__description')[1]?.split('Agence référente')[0]||'';
+  const ps=[...desc.matchAll(/<p\b[^>]*>([\s\S]*?)<\/p>/gi)].map(m=>clean(m[1])).filter(Boolean);
+  listing={name:title,offers:{price:amount?Number(amount[1].replace(/\s/g,'').replace(',','.')):'',itemOffered:{name:title,description:ps.join('\n'),address:{addressLocality:city?.[1]?.replace(/^Parking à louer\s*/i,''),postalCode:city?.[2]}}}};
+ }if(!listing)throw Error('Données structurées du bien absentes.');
  const offer=listing.offers||listing.mainEntity||{},v=offer.itemOffered||listing.about||{};
  if(/SoldOut|OutOfStock|Discontinued/i.test(offer.availability||''))return null;
- const fallback=smartDetail(html,url,'immobilier')||{};
  // Only the listing's own text; never the descriptions, town taxes or contacts of recommendations.
  const o:any={reference:new URL(url).pathname.split('/').pop(),url,titre:clean(v.name||listing.name),prix:offer.price??'',ville:clean(v.address?.addressLocality),code_postal:v.address?.postalCode||'',surface:v.floorSize?.value,pieces:v.numberOfRooms,chambres:v.numberOfBedrooms,surface_terrain:v.lotSize?.value,transaction:/\/location\//.test(url)?'location':'vente',type_bien:/maison|house/i.test(String(v['@type'])+' '+url)?'maison':/terrain|land/i.test(String(v['@type'])+' '+url)?'terrain':/parking|garage/i.test(url)?'garage':/bureau|commerce|professionnel/i.test(url)?'commerce':'appartement'};
  const props=v.additionalProperty||[];for(const p of props){if(p.name==='DPE')o.dpe=p.value;if(p.name==='GES')o.ges=p.value;if(p.name==='Consommation énergie')o.consommation_energie=String(p.value).match(/[\d.]+/)?.[0];}
@@ -28,10 +34,10 @@ export function parseNetworkEstate(html:string,url:string,kind:'human'|'citya'){
   o.description=clean(v.description||listing.description||'');
   const gallery=html.match(/id=["']carousel-[^"']+["'][\s\S]*?aria-label=["']Photos [^"']+["']>([\s\S]*?)(?=<\/section>|<\/figure>|<\/picture>|<script)/i)?.[1]||html;
   for(const m of gallery.matchAll(/<img\b[^>]*alt=["']Photo \d+[^"']*["'][^>]*>|<img\b[^>]*(?:src|data-src)=["'][^"']+["'][^>]*alt=["']Photo \d+[^"']*["'][^>]*>/gi)){const src=m[0].match(/(?:\s|^)(?:data-src|src)=["']([^"']+)/i)?.[1];if(src)photos.push(new URL(sDecode(src),url).toString());}
+  o.texte_page=clean(html.split('property-characteristics-categories')[1]?.split('advert-detail-layout__description')[0]||'');
   const energy=html.match(/Diagnostic de performance énergétique, classe ([A-G]), consommation ([\d.,]+)/i);if(energy){o.dpe=energy[1];o.consommation_energie=energy[2];}
   const ges=html.match(/gaz à effet de serre, classe ([A-G]), émission ([\d.,]+)/i);if(ges){o.ges=ges[1];o.emission_ges=ges[2];}
   const zone=html.slice(html.indexOf('Agence référente'),html.indexOf('Nos biens similaires'));o.contact_nom=clean(zone.match(/>\s*(Citya[^<]+)</i)?.[1]||'');o.contact_telephone=zone.match(/href=["']tel:([^"']+)/i)?.[1]||'';
-  for(const k of ['chambres','salles_de_bain','parking','garage','balcon','terrasse','etage','ascenseur'])if(fallback[k])o[k]=fallback[k];
  }
  o.photos=dedupePhotos(photos.length?photos:Array.isArray(listing.image)?listing.image:[listing.image].filter(Boolean)).join('|');return o;
 }
@@ -62,9 +68,9 @@ export async function readNetworkAgency(start:URL,html:string,kind:'human'|'city
  // Human agency pages must not drift to other agencies or to all-France search pages.
  if(kind==='human'&&scopeIds.size!==1)throw Error('Périmètre Human ambigu : lecture annulée.');
  if(entries.size!==total)partial=true;
- const urls=[...entries.values()],rows:any[]=[];let next=0,misses=0;
- await Promise.all(Array.from({length:4},async()=>{while(next<urls.length){const u=urls[next++];try{const o=parseNetworkEstate((await fetchHtml(u)).text,u.toString(),kind);if(o)rows.push(o);else misses++;}catch{partial=true;misses++;}}}));
- if(rows.length!==total)partial=true;(rows as any).partial=partial;(rows as any).total=total;(rows as any).stats={pages,details:entries.size,read:rows.length,misses};return rows;
+ const urls=[...entries.values()],rows:any[]=[];let next=0,misses=0,sold=0;const failures:any[]=[];
+ await Promise.all(Array.from({length:4},async()=>{while(next<urls.length){const u=urls[next++];try{const o=parseNetworkEstate((await fetchHtml(u)).text,u.toString(),kind);if(o)rows.push(o);else sold++;}catch(e){partial=true;misses++;failures.push({url:u.toString(),error:String(e)});}}}));
+ if(rows.length+sold!==total)partial=true;(rows as any).partial=partial;(rows as any).total=total;(rows as any).stats={pages,details:entries.size,read:rows.length,misses,sold,failures};return rows;
 }
 export function parseProgressia(text:string,start:URL){
  const match=text.match(/^\s*window\.PROGRESSIA_LISTINGS\s*=\s*([\s\S]*?)\s*;?\s*$/);if(!match)throw Error('Catalogue Progressia non reconnu.');const d=JSON.parse(match[1]);
@@ -73,7 +79,7 @@ export function parseProgressia(text:string,start:URL){
  const source=flux==='pro'?d.proCatalogueItems:flux==='viager'?d.viagerCatalogueItems:[...d.catalogueItems,...d.proCatalogueItems];
  if(!Array.isArray(source))throw Error('Catalogue Progressia absent.');const unique=new Map<string,any>();
  for(const v of source){if(!/^\d+$/.test(v.affId))throw Error('Référence Progressia invalide.');if(/vendu|loué|retiré/i.test(v.statut))continue;unique.set(v.flux+'-'+v.affId,v);}
- const rows:any[]=[...unique.values()].map(v=>({reference:v.flux+'-'+v.affId,url:new URL('/bien/bien-'+v.affId+'/',start).toString(),titre:v.title,prix:v.priceNum,ville:v.ville,code_postal:v.postalCode,type_bien:v.propertyType,transaction:'vente',description:v.description,photos:dedupePhotos(v.images||[v.img]).join('|'),surface:v.surfaceNum,pieces:v.piecesNum,chambres:v.chambresNum,dpe:v.dpe,ges:v.ges,consommation_energie:v.energySpend,date_dpe:v.dateDpe,cout_energie_min:v.chargeEnergieMin,cout_energie_max:v.chargeEnergieMax,surface_terrain:v.surfaceTerrain,etage:v.etage,ascenseur:v.ascenseur==='1'?'Oui':v.ascenseur==='0'?'Non':'',jardin:v.jardin==='1'?'Oui':v.jardin==='0'?'Non':'',chauffage:[v.chauffage,v.modeChauffage].filter(Boolean).join(' / '),taxe_fonciere:v.taxeFonciere,charges_mensuelles:v.chargesMensuelles,honoraires:v.chargeHonoraires,contact_nom:v.agent?.name,contact_telephone:v.agent?.tel}));
+ const rows:any[]=[...unique.values()].map(v=>({reference:v.flux+'-'+v.affId,url:new URL('/bien/bien-'+v.affId+'/',start).toString(),titre:v.title,prix:v.priceNum>0?v.priceNum:'',ville:v.ville,code_postal:v.postalCode,type_bien:v.propertyType,transaction:/\b(?:à louer|a louer|location|loyer)\b/i.test(v.title+' '+v.description)?'location':'vente',description:v.description,photos:dedupePhotos(v.images||[v.img]).join('|'),surface:v.surfaceNum,pieces:v.piecesNum,chambres:v.chambresNum,dpe:v.dpe,ges:v.ges,consommation_energie:v.energySpend,date_dpe:v.dateDpe,cout_energie_min:v.chargeEnergieMin,cout_energie_max:v.chargeEnergieMax,surface_terrain:v.surfaceTerrain,etage:v.etage,ascenseur:v.ascenseur==='1'?'Oui':v.ascenseur==='0'?'Non':'',jardin:v.jardin==='1'?'Oui':v.jardin==='0'?'Non':'',chauffage:[v.chauffage,v.modeChauffage].filter(Boolean).join(' / '),taxe_fonciere:v.taxeFonciere,charges_mensuelles:v.chargesMensuelles,honoraires:v.chargeHonoraires,contact_nom:v.agent?.name,contact_telephone:v.agent?.tel}));
  (rows as any).partial=false;(rows as any).total=source.length;(rows as any).stats={pages:1,details:rows.length,read:rows.length};return rows;
 }
 export async function readProgressia(start:URL,fetchHtml:Fetcher){return parseProgressia((await fetchHtml(new URL('/progressia-listings-data.js',start))).text,start);}

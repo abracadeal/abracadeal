@@ -5,6 +5,7 @@ import { readKermarrec } from "./kermarrec-reader.ts";
 import { isApimoModules, readApimoModules } from "./apimo-reader.ts";
 import { readJunot } from "./junot-reader.ts";
 import { readByeBuyCar } from "./byebuy-reader.ts";
+import { readVehicleCatalogue } from "./vehicle-catalogues.ts";
 import { readNetworkAgency, readProgressia } from "./estate-catalogues.ts";
 import { readRobynsCar } from "./robyns-reader.ts";
 
@@ -255,7 +256,7 @@ async function fetchSiteHtml(start:URL){
   const r=await fetch(url.toString(),{headers:{Accept:'text/html,*/*;q=0.5','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},redirect:'manual',signal:AbortSignal.timeout(20000)});
   if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc||redirects>=4)throw Error('Redirection invalide');url=new URL(loc,url);continue;}
   if(!r.ok)throw Error(`HTTP ${r.status}`);
-  const text=await r.text();if(text.length>5_000_000)throw Error('Page trop volumineuse');
+  const text=await r.text();if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>5_000_000)throw Error('Page trop volumineuse');
   return{text,url};
  }
 }
@@ -904,6 +905,7 @@ async function readFeed(feed:any){
   if(len>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   const text=await r.text();
   if(text.length>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
+  if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text)){const err:any=new Error('Protection anti-robots : challenge AWS WAF / UUSEC. Un accès autorisé au robot ou un flux fourni par le professionnel est nécessaire.');err.platform='Protection anti-robots';throw err;}
   const ct=(r.headers.get('content-type')||'').toLowerCase();
   if(ct.includes('html')||/^\s*<(?:!doctype html|html)/i.test(text)){
     // Adresse d'un site de garage (pas d'un flux) : on choisit le lecteur selon le type de site.
@@ -929,6 +931,8 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?progressia-immobilier\.fr$/i.test(url.hostname)){rows=await readProgressia(url,fetchSiteHtml);platform='Progressia (catalogue public)';feed.sector='immobilier';}
     else if(/^(?:www\.)?human-immobilier\.fr$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'human',fetchSiteHtml);platform='Human (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?citya\.com$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'citya',fetchSiteHtml);platform='Citya (catalogue agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?bnyscar\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'bnys',fetchSiteHtml);platform="BNY’S Car (stock actif)";feed.sector='vehicules';}
+    else if(/^(?:www\.)?decrosautomobiles\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'decros',fetchSiteHtml);platform='Decros (Regicom)';feed.sector='vehicules';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
