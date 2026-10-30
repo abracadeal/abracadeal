@@ -1419,3 +1419,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 30/10/2026 — Claude — Case « Avec erreur » cliquable (Tester une adresse)
 - **Demande d'Anthony :** la case « Avec erreur » doit mener directement aux erreurs.
 - **Fait (`admin-test-import.html`) :** quand il y a des erreurs, la case devient un bouton (bord rouge, « voir ») : un appui n'affiche plus que les fiches en erreur et descend à la première ; un 2e appui (« tout voir ») réaffiche toutes les fiches. Au passage, « batiment » ajouté au choix « Type de bien » de la correction à la main.
+
+### 30/10/2026 — Claude — Case « Doublons / vendus » (Tester une adresse)
+- **Question d'Anthony :** pourquoi « Biens lus » (135) ≠ « Prêts à publier » (119) + « Avec erreur » (2) sur Cannisimmo ?
+- **Réponse :** les 14 autres fiches ne seraient pas publiées : même bien présent deux fois sur le site (doublon), ou fiche vendue / illisible. Elles n'étaient pas comptées à part.
+- **Fait (`admin-test-import.html`) :** nouvelle case « Doublons / vendus » (= biens lus − fiches normalisées), cliquable comme « Avec erreur » (un appui : seulement ces fiches ; 2e appui : tout voir). Les fiches vendues / illisibles ne sont plus marquées en rouge comme les erreurs.

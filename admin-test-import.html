@@ -91,6 +91,9 @@ details.fold>summary>span:first-child{flex:1}
 .fold-n{font-size:13px;font-weight:900;background:#3b2946;color:#fff;border-radius:999px;padding:3px 9px}
 .fold-n:empty{display:none}
 #grid.only-err .car:not(.err){display:none}
+#grid.only-skip .car:not(.skip){display:none}
+.stat-skip{border-color:rgba(255,255,255,.25)!important}.stat-skip b{color:inherit}
+.stat-skip[aria-pressed=true]{background:rgba(255,255,255,.08)!important}
 .stat-err{font:inherit;text-align:left;cursor:pointer;color:inherit;border:1px solid rgba(255,107,129,.55)!important}
 .stat-err b{color:#ff6b81}
 .stat-err[aria-pressed=true]{background:rgba(255,107,129,.14)!important}
@@ -285,17 +288,22 @@ function render(data,sector){
  // 29/10/2026 : chaque fiche lue est reliée à sa version normalisée (photos sans doublons, ville corrigée) ; doublons d'annonce signalés.
  NN=ROWS.map(r=>NORM.find(n=>(n.externalUrl&&r.url&&n.externalUrl===r.url)||(n.ref&&r.reference!=null&&String(n.ref)===String(r.reference)))||null);
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=NORM.length-ready;
+ // 30/10/2026 (Anthony) : « Biens lus » − « Prêts » − « Avec erreur » = fiches non publiées (doublon d'une autre annonce du site, ou fiche vendue / illisible).
+ const skipped=Math.max(0,ROWS.length-NORM.length);
  const photos=NORM.reduce((n,r)=>n+((r.photos||[]).length),0);
  E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">'+(data.total_on_site?esc(String(data.total_on_site))+' biens sur le site, 220 lus par passage : le reste arrive aux synchros suivantes':'lecture partielle (site très grand)')+'</span>':'');
  // 30/10/2026 (Anthony) : la case « Avec erreur » mène directement aux fiches en erreur (2e appui : tout réafficher).
  E('grid').classList.remove('only-err');
- E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos (sans doublons)',photos]].map(([l,v])=>l==='Avec erreur'&&v>0?'<button type="button" class="stat stat-err" id="statErr" aria-pressed="false"><span class="muted">'+l+' · voir</span><b>'+v+'</b></button>':'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
- const se=E('statErr');if(se)se.onclick=()=>{const on=E('grid').classList.toggle('only-err');se.setAttribute('aria-pressed',on?'true':'false');se.querySelector('.muted').textContent=on?'Avec erreur · tout voir':'Avec erreur · voir';if(on)(E('grid').querySelector('.car.err')||E('grid')).scrollIntoView({behavior:'smooth',block:'start'});};
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],...(skipped?[['Doublons / vendus',skipped]]:[]),['Photos (sans doublons)',photos]].map(([l,v])=>(l==='Avec erreur'||l==='Doublons / vendus')&&v>0?'<button type="button" class="stat stat-err'+(l==='Avec erreur'?'':' stat-skip')+'" data-only="'+(l==='Avec erreur'?'err':'skip')+'" data-l="'+l+'" aria-pressed="false"><span class="muted">'+l+' · voir</span><b>'+v+'</b></button>':'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ E('grid').classList.remove('only-skip');
+ E('stats').querySelectorAll('[data-only]').forEach(se=>se.onclick=()=>{const k=se.dataset.only,g=E('grid');const on=!g.classList.contains('only-'+k);g.classList.remove('only-err','only-skip');if(on)g.classList.add('only-'+k);
+  E('stats').querySelectorAll('[data-only]').forEach(x=>{const act=on&&x===se;x.setAttribute('aria-pressed',act?'true':'false');x.querySelector('.muted').textContent=x.dataset.l+(act?' · tout voir':' · voir');});
+  if(on)(g.querySelector('.car.'+k)||g).scrollIntoView({behavior:'smooth',block:'start'});});
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
   const n=NN[i];const errs=(n?.errors||[]);
-  if(!r.titre)return '<div class="car err"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
-  if(r.titre&&!n)return '<div class="car" style="opacity:.6"><div class="body"><div class="ttl">'+esc(r.titre)+'</div><span class="muted">Doublon d\'une autre annonce du site : non publié.</span></div></div>';
+  if(!r.titre)return '<div class="car skip"><div class="body"><div class="ttl">Fiche '+esc(r.reference||'')+' illisible ou vendue</div><span class="muted">Elle ne serait ni créée ni supprimée lors de cette synchro.</span></div></div>';
+  if(r.titre&&!n)return '<div class="car skip" style="opacity:.6"><div class="body"><div class="ttl">'+esc(r.titre)+'</div><span class="muted">Doublon d\'une autre annonce du site : non publié.</span></div></div>';
   const ph=n?.photos?.length?n.photos:(r.photos?String(r.photos).split('|'):[]);
   const chips=(immo?[n?.city||r.ville,r.surface?String(r.surface).replace(/\s*m.*$/,'')+' m²':'',r.pieces?r.pieces+' pièces':'',r.transaction]:[r.annee,km(r.kilometrage),r.carburant,r.boite]).filter(Boolean).map(c=>'<span class="chip">'+esc(c)+'</span>').join('');
   return '<div class="car'+(errs.length?' err':'')+'" data-i="'+i+'"><div class="ph">'+(ph[0]?'<img loading="lazy" src="'+esc(ph[0])+'" alt="">':'')+'<span class="kind">'+esc(immo?(r.type_bien||''):(r.type||''))+'</span><span class="cnt">'+ph.length+' photos</span></div><div class="body"><div class="ttl">'+esc(r.titre)+'</div><div class="price">'+euro(r.prix)+'</div><div class="chips">'+chips+'</div>'+(errs.length?'<div class="errline">'+esc(errs.join(', '))+'</div>':'')+'</div></div>';
