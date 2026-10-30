@@ -1282,3 +1282,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - « Nouveau pro en ligne : <entreprise> (N annonce(s)) » quand un site autorisé est lu sans erreur et activé automatiquement (entreprise, SIRET, e-mail, site, domaine, nombre d'annonces créées, lien page pro + admin imports) ;
   - « Site d'un pro à vérifier : <entreprise> » quand le site ne peut pas être activé seul (raison) — au premier essai seulement, le récapitulatif quotidien continue.
 - Un seul mail par site et par cas (clé `site-approved|pending-<feed>`).
+- **Déployé :** `pro-stock-sync` v93 ACTIVE, import épinglé sur `08c5b19d` (inclut les corrections Bye Buy Car de ChatGPT, v92) ; démarrage vérifié (réponse 403 attendue sans jeton cron).
