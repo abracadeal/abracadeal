@@ -101,3 +101,6 @@
 /* 27/10/2026 : pastille « Fondateurs » pleine largeur au-dessus des formules ; tuile « Offre Fondateurs » pleine largeur */
 .admin-plan-grid .admin-plan-founders{grid-column:1/-1;background:linear-gradient(120deg,#f4e6fa,#fbe9f3)!important;border-color:#e4c7ef!important}
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-founder-switch{grid-column:1/-1;flex-direction:row!important;min-height:58px!important;gap:10px!important}
+
+/* 30/10/2026 (Anthony) : intertitre « Abonnements Pro » du tableau de bord Admin invisible (blanc sur fond clair). */
+html body .admin-stats .aal-subtitle,html body #adminStatsPanel .aal-subtitle,html body .aal-subtitle{margin:14px 0 8px 2px!important;font-size:.72rem!important;font-weight:900!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:#7a6a83!important}

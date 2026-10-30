@@ -452,6 +452,37 @@ document.addEventListener('DOMContentLoaded',()=>{
     put('statPlan250',stats.plan_counts?.pro_250);
     const mrr=document.getElementById('statMrr');
     if(mrr)mrr.textContent=moneyFromCents(stats.theoretical_mrr_cents||0);
+    refineTheoreticalMrr(stats.theoretical_mrr_cents||0);
+  }
+  // 30/10/2026 (Anthony) : MRR théorique selon le nombre d'annonces en ligne de chaque pro (et plus seulement la
+  // formule choisie à l'inscription) : chaque pro est compté au palier de sa famille de formules qui couvre ses
+  // annonces actives (ex. 35 annonces en Auto/Immo → formule 50). Au-delà du plus grand palier : prix du plus grand
+  // (« sur devis » en réalité). Une formule à 0 € (compte interne) reste à 0 €.
+  async function refineTheoreticalMrr(baseCents){
+    const el=document.getElementById('statMrr');if(!el)return;
+    try{
+      const [{data:subs,error:e1},{data:plans,error:e2}]=await Promise.all([
+        sb.from('pro_subscriptions').select('user_id,plan_code,status,current_period_end').in('status',['trialing','active']),
+        sb.from('pro_subscription_plans').select('code,amount_cents,listing_limit')]);
+      if(e1||e2||!subs||!plans)return;
+      const byCode=new Map(plans.map(p=>[p.code,p]));
+      const fam=c=>String(c||'').replace(/_\d+$/,'');
+      let total=0,above=0;
+      for(const sub of subs){
+        if(sub.current_period_end&&new Date(sub.current_period_end)<=new Date())continue;
+        const plan=byCode.get(sub.plan_code);if(!plan||!Number(plan.amount_cents))continue;
+        const {count}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',sub.user_id).eq('status','active').is('revision_of',null);
+        const n=Number(count||0);
+        const tiers=plans.filter(p=>p.code!=='pro_200'&&fam(p.code)===fam(sub.plan_code)&&Number(p.amount_cents)>0&&Number(p.listing_limit)>0).sort((a,b)=>a.listing_limit-b.listing_limit);
+        let pick=tiers.find(t=>n<=Number(t.listing_limit));
+        if(!pick){pick=tiers[tiers.length-1]||plan;above++;}
+        total+=Number(pick.amount_cents||0);
+      }
+      el.textContent=moneyFromCents(total);
+      el.title=`Selon les annonces en ligne de chaque pro (formule choisie : ${moneyFromCents(baseCents)})`+(above?` · ${above} pro(s) au-delà du plus grand palier (sur devis)`:'');
+      const label=el.parentElement?.querySelector('.admin-stat-label');
+      if(label)label.textContent='MRR théorique après gratuités (selon annonces en ligne)'+(above?' · '+above+' sur devis':'');
+    }catch(err){console.warn('MRR selon annonces',err);}
   }
   window.loadAdminDashboardStats=loadAdminDashboardStats;
   document.getElementById('refreshAdminStatsBtn')?.addEventListener('click',loadAdminDashboardStats);
