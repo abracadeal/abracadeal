@@ -183,7 +183,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const rental=immo&&(/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname)||/\d\s*€\s*(?:cc|hc|charges comprises|hors charges)?\s*(?:\/|par)\s*mois/i.test(nearTitle)||/(?:^|\n|\.\s)\s*(?:à|a) louer\b/i.test(text.slice(0,6000)));
   const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;const v=num(m[1]);if(v>0)return v;}return NaN;};
   const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
-  if(declared)prix=num(declared.replace(/[.,]\d{2}$/,''));
+  if(declared){const canonical=declared.replace(/\s/g,'');prix=/^\d+(?:[.,]\d+)?$/.test(canonical)?Number(canonical.replace(',','.')):num(declared);}
   const metaDesc=(metaAll(headHtml,'description')[0]||'')+' \n'+(metaAll(headHtml,'og:description')[0]||'');
   if(!(prix>0))prix=firstAmount(head+' \n'+metaDesc,priceRe);
   if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
@@ -286,6 +286,18 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     o.etat=/\bneuf\b|\b0\s*km\b/i.test(head)?'neuf':'occasion';
     o.type=/\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head+' '+base.pathname)?'moto':/\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head)?'camping-car':/\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit)\b/i.test(head)?'utilitaire':'voiture';
     if(!(o.kilometrage||o.annee))return null;
+  }
+  if(immo&&/^(?:www\.)?lfimmo\.fr$/.test(base.hostname)&&/^\/annonces\/\d+-/.test(base.pathname)){
+    o.reference=base.pathname.match(/^\/annonces\/(\d+)-/)![1];
+    const ownDescription=rawHtml.match(/<p\b[^>]*data-read-more-target="content"[^>]*>([\s\S]*?)<\/p>/i)?.[1];if(ownDescription)o.description=clean(ownDescription).slice(0,6000);
+    const location=rawHtml.slice(Math.max(0,h1At-1800),h1At).match(/data-bs-title="Toutes nos annonces à ([^"<>]+),\s*(\d{5})"/i);
+    delete o.ville;delete o.code_postal;
+    if(location){o.ville=sDecode(location[1]);o.code_postal=location[2];}
+    const gallery=[...rawHtml.matchAll(/<a\b([^>]+)>/gi)].filter(m=>/data-gallery="diaporama"/.test(m[1])).map(m=>m[1].match(/href="([^"<>]+)"/)?.[1]).filter((x):x is string=>!!x&&/^https?:/.test(x));
+    o.photos=[...new Set(gallery.map(sDecode))].join('|');
+    const advisor=metaAll(headHtml,'product:retailer_title')[0];if(advisor)o.contact_nom=advisor;
+    const ownContact=rawHtml.match(/<form\b[^>]*id="[^"<>]*public_contact[^"<>]*"[^>]*>([\s\S]*?)<\/form>/i)?.[1]||'';
+    const phone=ownContact.match(/href="tel:([^"<>]+)"/i)?.[1];if(phone&&advisor)o.contact_telephone=phone;
   }
   return o;
 }
