@@ -28,14 +28,19 @@ export function parseFourS(raw:string,url:string,contact:any={}){
 }
 export async function readFourS(start:URL,home:string,fetchHtml:Fetcher){
  const contact=foursContact(home);if(/^\/listings\/[^/]+\/$/.test(start.pathname)){const row=parseFourS(home,start.toString(),contact);return row?[row]:[];}
- const origin=new URL(start.origin),queue=[new URL('/vehicules-disponibles/',origin)],seen=new Set<string>(),details=new Map<string,URL>();let partial=false,pages=0;
+ const origin=new URL(start.origin),queue=[new URL('/vehicules-disponibles/',origin)],seen=new Set<string>(),details=new Map<string,{url:URL,reason:string}>();let partial=false,pages=0;
  while(queue.length&&seen.size<30){const u=queue.shift()!;if(seen.has(u.toString()))continue;seen.add(u.toString());let html:string;try{html=(await fetchHtml(u)).text;pages++;}catch{partial=true;continue;}
+  const cards=html.split(/(?=<div\b[^>]*class=["'][^"']*\blisting-list-loop\b)/gi).filter(x=>/^<div\b[^>]*class=["'][^"']*\blisting-list-loop\b/i.test(x));
+  if(!cards.length&&!/aucun v[ée]hicule|aucune voiture/i.test(clean(html)))partial=true;
+  for(const card of cards){const href=card.match(/href=["']([^"'<>]*\/listings\/[^/"'<>]+\/)["']/i)?.[1];if(!href)continue;let link:URL;try{link=new URL(sDecode(href),u);}catch{continue;}if(link.origin!==origin.origin)continue;
+   const badge=clean(card.match(/class=["'][^"']*\bspecial-label\b[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)?.[1]||'');const reason=/^vendu[e]?$/i.test(badge)?'vendu':/^r[ée]serv[ée]e?$/i.test(badge)?'réservé':'';
+   const previous=details.get(link.toString());details.set(link.toString(),{url:link,reason:previous?.reason||reason});
+  }
   for(const m of html.matchAll(/href=["']([^"'<>]+)["']/gi)){let link:URL;try{link=new URL(sDecode(m[1]),u);}catch{continue;}if(link.origin!==origin.origin)continue;link.hash='';link.search='';
-   if(/^\/listings\/[^/]+\/$/.test(link.pathname))details.set(link.toString(),link);
-   else if(/^\/vehicules-disponibles\/page\/\d+\/$/.test(link.pathname)&&!seen.has(link.toString()))queue.push(link);
+   if(/^\/vehicules-disponibles\/page\/\d+\/$/.test(link.pathname)&&!seen.has(link.toString()))queue.push(link);
   }
  }if(queue.length)partial=true;
  const rows:any[]=[];const failures:string[]=[];let next=0,sold=0,examples=0;const excluded:any[]=[];const urls=[...details.values()];
- await Promise.all(Array.from({length:3},async()=>{while(next<urls.length){const url=urls[next++];try{const html=(await fetchHtml(url)).text;const row=parseFourS(html,url.toString(),contact);if(row)rows.push(row);else if(foursUnavailable(html)){const reason=foursUnavailable(html);if(reason==='vendu')sold++;else examples++;excluded.push({url:url.toString(),reason});}else{rows.push({reference:url.pathname,url:url.toString()});failures.push(url.toString());partial=true;}}catch{rows.push({reference:url.pathname,url:url.toString()});failures.push(url.toString());partial=true;}}}));
+ await Promise.all(Array.from({length:3},async()=>{while(next<urls.length){const entry=urls[next++];const url=entry.url;if(entry.reason){sold++;excluded.push({url:url.toString(),reason:entry.reason});continue;}try{const html=(await fetchHtml(url)).text;const row=parseFourS(html,url.toString(),contact);if(row)rows.push(row);else if(foursUnavailable(html)){const reason=foursUnavailable(html);if(reason==='vendu')sold++;else examples++;excluded.push({url:url.toString(),reason});}else{rows.push({reference:url.pathname,url:url.toString()});failures.push(url.toString());partial=true;}}catch{rows.push({reference:url.pathname,url:url.toString()});failures.push(url.toString());partial=true;}}}));
  (rows as any).partial=partial;(rows as any).total=details.size;(rows as any).stats={pages,details:details.size,read:rows.length,sold,examples,excluded,failures};return rows;
 }
