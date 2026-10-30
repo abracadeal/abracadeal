@@ -1097,7 +1097,6 @@ async function notifyAdminsSite(feed:any,kind:'approved'|'pending',info:any){
  try{const key=Deno.env.get('RESEND_API_KEY')||'';if(!key||!feed?.id||!feed?.owner_id)return;
   const{data:adm}=await admin.from('profiles').select('id').eq('is_admin',true).limit(3);const tos:string[]=[];
   for(const a of adm||[]){const{data:u}=await admin.auth.admin.getUserById(a.id);if(u?.user?.email)tos.push(u.user.email);}
-  if(!tos.length)return;
   const[{data:pv},{data:pr},{data:ou}]=await Promise.all([admin.from('pro_verifications').select('company_name,siret').eq('user_id',feed.owner_id).maybeSingle(),admin.from('profiles').select('display_name').eq('id',feed.owner_id).maybeSingle(),admin.auth.admin.getUserById(feed.owner_id)]);
   const esc=(x:any)=>String(x??'').replace(/[&<>"]/g,(c:string)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'} as any)[c]);
   const name=pv?.company_name||pr?.display_name||'Professionnel';const email=ou?.user?.email||'';
@@ -1106,6 +1105,16 @@ async function notifyAdminsSite(feed:any,kind:'approved'|'pending',info:any){
    ?`<p>Le pro a autorisé la reprise de son site et le robot l'a lu sans erreur : <strong>${Number(info?.created||0)} annonce(s) créée(s)</strong>${info?.updated?', '+Number(info.updated)+' mise(s) à jour':''}. Elles passent par la modération automatique avant d'apparaître.</p><p><a href="https://abracadeal.fr/pro.html?id=${esc(feed.owner_id)}">Voir sa page pro</a> · <a href="https://abracadeal.fr/admin-test-import.html">Imports depuis les sites des pros</a></p>`
    :`<p>Le pro a autorisé la reprise de son site, mais le robot n'a pas pu l'activer seul : ${esc(info?.reason||'à vérifier')}. Rien n'est publié tant que tu ne l'as pas validé.</p><p><a href="https://abracadeal.fr/admin-test-import.html">Imports depuis les sites des pros</a></p>`;
   const subject=kind==='approved'?`Nouveau pro en ligne : ${name} (${Number(info?.created||0)} annonce(s))`:`Site d'un pro à vérifier : ${name}`;
+  // 30/10/2026 (Anthony) : notification sur le site (Messages de l'admin, pastille) à chaque fois ;
+  // le mail seulement pour les 5 premières sur 24 h, pour ne pas être noyé quand les inscriptions se multiplient.
+  const note=kind==='approved'?`${Number(info?.created||0)} annonce(s) reprise(s) depuis ${feed.feed_url}${pv?.siret?' · SIRET '+pv.siret:''}${email?' · '+email:''}. Elles passent par la modération automatique.`:`Site ${feed.feed_url} : activation automatique impossible (${info?.reason||'à vérifier'}). Rien n'est publié avant ta validation dans « Imports depuis les sites des pros ».`;
+  let mailedToday=0;
+  for(const a of adm||[]){
+   const{count}=await admin.from('pro_sync_notices').select('id',{count:'exact',head:true}).eq('recipient_id',a.id).in('severity',['new_pro','site_review']).gte('updated_at',new Date(Date.now()-24*3600e3).toISOString());
+   mailedToday=Math.max(mailedToday,Number(count||0));
+   await admin.from('pro_sync_notices').upsert({recipient_id:a.id,feed_id:feed.id,feed_name:name,sector:feed.sector||'vehicules',severity:kind==='approved'?'new_pro':'site_review',message:note,read_at:null,resolved_at:null,consecutive_failures:0,updated_at:new Date().toISOString()},{onConflict:'recipient_id,feed_id'});
+  }
+  if(!tos.length||mailedToday>=5)return;
   await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`site-${kind}-${feed.id}`},body:JSON.stringify({from:'Abracadeal <contact@abracadeal.fr>',to:tos,subject,html:`<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;line-height:1.5"><p>Bonjour Anthony,</p>${head}${body}<p>Abracadeal</p></div>`})});
  }catch(e){console.error('notifyAdminsSite',e);}
 }

@@ -4890,7 +4890,7 @@ async function loadProSyncNotices(){
   if(!box)return;
   if(error){box.classList.remove('hidden');box.textContent='Les alertes de synchronisation sont momentanément indisponibles.';return;}
   box.classList.toggle('hidden',!data?.length);
-  box.innerHTML=(data||[]).map(n=>`<article class="moderation-notice"><b>Abracadeal · ${n.severity==='error'?'Erreur':'Alerte'} de synchronisation</b><p><strong>${esc(n.feed_name)}</strong> · ${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</p><p>${esc(n.message)}</p><small>${esc(formatMessageTime(n.created_at))}</small>${!n.read_at?` <button type="button" class="btn" onclick="markProSyncNoticeRead('${n.id}')">Marquer comme lu</button>`:''}</article>`).join('');
+  box.innerHTML=(data||[]).map(n=>`<article class="moderation-notice"><b>Abracadeal · ${n.severity==='new_pro'?'Nouveau pro en ligne':n.severity==='site_review'?'Site d’un pro à vérifier':(n.severity==='error'?'Erreur':'Alerte')+' de synchronisation'}</b><p><strong>${esc(n.feed_name)}</strong> · ${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</p><p>${esc(n.message)}</p><small>${esc(formatMessageTime(n.created_at))}</small>${!n.read_at?` <button type="button" class="btn" onclick="markProSyncNoticeRead('${n.id}')">Marquer comme lu</button>`:''}</article>`).join('');
 }
 window.markProSyncNoticeRead=async id=>{
   if(!currentUser)return;
@@ -4978,12 +4978,14 @@ window.openMessages=async(preferredId=null)=>{
   }
   openModal('messagesModal');
   await loadRejectionNotices();
+  await loadProSyncNotices();
   await loadConversationList(preferredId);
   stopMessagePolling();
   messagePollTimer=setInterval(async()=>{
     if(!document.getElementById('messagesModal')?.classList.contains('open')){stopMessagePolling();return;}
     if(currentConversationId) await loadConversationMessages(false);
     await loadRejectionNotices();
+    await loadProSyncNotices();
     await loadConversationList(currentConversationId);
   },5000);
 };

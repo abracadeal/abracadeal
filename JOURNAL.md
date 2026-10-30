@@ -1283,3 +1283,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - « Site d'un pro à vérifier : <entreprise> » quand le site ne peut pas être activé seul (raison) — au premier essai seulement, le récapitulatif quotidien continue.
 - Un seul mail par site et par cas (clé `site-approved|pending-<feed>`).
 - **Déployé :** `pro-stock-sync` v93 ACTIVE, import épinglé sur `08c5b19d` (inclut les corrections Bye Buy Car de ChatGPT, v92) ; démarrage vérifié (réponse 403 attendue sans jeton cron).
+
+### 30/10/2026 — Claude — Notification sur le site pour l'admin (nouveaux pros)
+- **Demande d'Anthony :** un mail à chaque fois, c'est bien au début mais pénible s'il y a beaucoup d'inscriptions → notification sur le site.
+- **Fait :** `notifyAdminsSite` (`pro-stock-sync`) crée aussi, pour chaque admin, une notification dans `pro_sync_notices` (gravité `new_pro` = « Nouveau pro en ligne », `site_review` = « Site d'un pro à vérifier ») : pastille rouge sur Messages / Compte et carte en haut de Messages, avec bouton « Marquer comme lu ». Une seule par site (mise à jour si le statut change). Le mail n'est plus envoyé qu'aux **5 premières notifications sur 24 h** ; au-delà, seulement la notification sur le site.
+- **Bug corrigé au passage (`index-main.js?v=20261030-notifs`) :** les alertes `pro_sync_notices` (y compris les alertes de synchro des pros) étaient comptées dans la pastille mais jamais affichées dans Messages : elles se chargent maintenant à l'ouverture et toutes les 5 s.
