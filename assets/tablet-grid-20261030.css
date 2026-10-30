@@ -1,0 +1,26 @@
+/* 30/10/2026 (Anthony) : vignettes trop grosses sur tablette.
+   Tablette (classe posee par tablet-as-mobile-20261007.js) :
+   - horizontal : 6 vignettes par ligne (au lieu de 3)
+   - vertical   : 4 vignettes par ligne (au lieu de 2) ; meme taille de vignette qu'en horizontal,
+     6 rendrait titres et prix illisibles sur la largeur portrait.
+   Textes un peu resserres pour tenir dans les vignettes. Telephone et ordinateur : inchanges. */
+html.abraca-tablet-as-mobile body main#top #resultats .ads-grid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:10px!important;
+  overflow:visible!important;
+}
+@media (orientation:landscape){
+  html.abraca-tablet-as-mobile body main#top #resultats .ads-grid{
+    grid-template-columns:repeat(6,minmax(0,1fr))!important;
+  }
+}
+html.abraca-tablet-as-mobile body main#top #resultats .ad-card{
+  width:100%!important;min-width:0!important;max-width:none!important;border-radius:12px!important;
+}
+html.abraca-tablet-as-mobile body main#top #resultats .ad-card .ad-body{padding:7px 8px 9px!important}
+html.abraca-tablet-as-mobile body main#top #resultats .ad-card.ad-card .ad-title{font-size:11.5px!important;line-height:1.22!important;margin-bottom:3px!important}
+html.abraca-tablet-as-mobile body main#top #resultats .ad-card.ad-card .ad-price{font-size:14px!important;margin-bottom:3px!important}
+html.abraca-tablet-as-mobile body main#top #resultats .ad-card.ad-card :is(.ad-specs,.ad-city,.ad-meta){font-size:9.5px!important}
+html.abraca-tablet-as-mobile body main#top #resultats .card-photo-actions{top:5px!important;right:5px!important;gap:4px!important}
+html.abraca-tablet-as-mobile body main#top #resultats .card-photo-actions .card-action-btn{height:24px!important;min-width:24px!important;padding:0 4px!important}

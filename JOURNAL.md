@@ -1194,3 +1194,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - Tâche planifiée `abracadeal-pro-monthly-report` : le 1er du mois à 7 h 37 UTC. Premier envoi : 1er novembre (bilan d'octobre).
   - Testé dans une transaction annulée : « Votre bilan d’octobre », puces correctes, accords singulier/pluriel.
 - **Site (`index-main.js?v=20261029-partages`) :** chaque partage (WhatsApp, Facebook, SMS, copier le lien, partage du téléphone) est compté.
+
+### 30/10/2026 — Claude — Vignettes tablette plus petites
+- **Demande d'Anthony :** vignettes trop grosses sur tablette, au moins 6 par ligne.
+- **Fait (`assets/tablet-grid-20261030.css`, chargé en fin de `<head>` de `index.html`) :** tablette horizontale = 6 vignettes par ligne (avant 3) ; tablette verticale = 4 (avant 2), même taille de vignette qu'en horizontal (6 en vertical = ~90 px, titres illisibles). Textes, prix et boutons cœur/partager resserrés. Ancienne règle 3 colonnes retirée de `index.html`. Téléphone et ordinateur inchangés.
+- Vérifié en émulation iPad (vertical 4 × 136 px, horizontal 6 × 137 px).

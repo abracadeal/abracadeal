@@ -152,7 +152,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <style id="abraca-tablet-as-mobile-landscape-20261007">
 /* iPad / tablette en paysage (classe posee par assets/tablet-as-mobile-20261007.js) :
-   version mobile, centree sur une colonne de 900px, annonces sur 3 colonnes. */
+   version mobile, centree sur une colonne de 900px (colonnes d annonces : tablet-grid-20261030.css). */
 @media (orientation:landscape){
   html.abraca-tablet-as-mobile main#top>*{
     width:100%!important;
@@ -161,7 +161,6 @@ window.addEventListener('load', abracadealForceTopOnReload);
     margin-right:auto!important;
     box-sizing:border-box!important;
   }
-  html.abraca-tablet-as-mobile #resultats .ads-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
   html.abraca-tablet-as-mobile .hero .banner-frame{max-width:680px!important;margin-left:auto!important;margin-right:auto!important}
 }
 
@@ -182,6 +181,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <link rel="stylesheet" href="assets/founder-strip-20261027.css?v=4">
 <link rel="stylesheet" href="assets/footer-copyright-20261027.css?v=4">
 <link rel="stylesheet" href="assets/card-overlay-20261029.css?v=3">
+<link rel="stylesheet" href="assets/tablet-grid-20261030.css?v=1">
 <style id="signup-founder-list-20261027">.signup-founder-list{list-style:none;margin:14px 0 10px;padding:0;display:grid;gap:9px}.signup-founder-list li{display:flex;align-items:center;gap:10px;font-size:.95rem;color:#34143f;line-height:1.3}.signup-founder-list svg{width:20px;height:20px;flex:0 0 20px;padding:3px;border-radius:999px;background:#f3e6f9;fill:none;stroke:#7b27a0;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;box-sizing:border-box}.signup-founder-note{margin:0 0 4px;font-size:.8rem;color:#7a6a80}.signup-founder-mark{color:#7b27a0}</style>
 <script src="assets/founder-offer-state-20261027.js?v=1"></script>
 </head>
