@@ -967,6 +967,7 @@ function normalizeImmoSub(typeValue,transactionValue=''){
   const renting=['location','louer','rent','rental','lease','a_louer'].includes(tr)||t.includes('location')||t.includes('rent');
   if(t.includes('saison')||t.includes('vacance')) return 'saisonniere';
   if(t.includes('terrain')||t.includes('land')) return 'vente-terrain';
+  if(/batiment|grange|hangar|ecurie|etable|bergerie|porcherie|dependance/.test(t)) return renting?'location':'vente-batiment';
   if(t.includes('parking')||t.includes('garage')||t.includes('box')) return 'parking-garage';
   if(t.includes('bureau')||t.includes('commerce')||t.includes('local')||t.includes('office')||t.includes('shop')) return 'bureaux-commerces';
   if(t.includes('maison')||t.includes('villa')||t.includes('house')) return renting?'location':'vente-maison';
@@ -1175,7 +1176,7 @@ function prepareRealEstateImportRow(raw,index,existingMap,newRefs){
   const showPhone=importBool(importCell(r,['afficher_numero','telephone_visible','show_phone']),true);
   const photos=collectImportPhotos(r);
   if(!title){
-    const kind=sub==='vente-maison'?'Maison':sub==='vente-terrain'?'Terrain':sub==='location'?'Location':sub==='parking-garage'?'Parking / Garage':sub==='bureaux-commerces'?'Local / Bureau':'Appartement';
+    const kind=sub==='vente-maison'?'Maison':sub==='vente-terrain'?'Terrain':sub==='vente-batiment'?'Bâtiment':sub==='location'?'Location':sub==='parking-garage'?'Parking / Garage':sub==='bureaux-commerces'?'Local / Bureau':'Appartement';
     title=[kind,rooms?`${Math.round(rooms)} pièce${rooms>1?'s':''}`:'',surface?`${surface} m²`:'',city].filter(Boolean).join(' · ');
   }
   const errors=[];
@@ -1698,6 +1699,7 @@ const SUBCATEGORIES = {
     ['vente-appartement','Appartement à vendre'],
     ['vente-maison','Maison à vendre'],
     ['vente-terrain','Terrain à vendre'],
+    ['vente-batiment','Bâtiment / Grange à vendre'],
     ['location','Location longue durée'],
     ['saisonniere','Location saisonnière'],
     ['parking-garage','Parking / Garage'],
@@ -2010,7 +2012,7 @@ function updatePublishFields(){
   const housingSubs=['vente-appartement','vente-maison','location','saisonniere'];
   const apartmentSubs=['vente-appartement','location','saisonniere'];
   const buildingSubs=['vente-appartement','vente-maison','location','saisonniere','bureaux-commerces'];
-  const saleSubs=['vente-appartement','vente-maison','vente-terrain'];
+  const saleSubs=['vente-appartement','vente-maison','vente-terrain','vente-batiment'];
   const rentSubs=['location','saisonniere'];
   const coproSubs=['vente-appartement','location','saisonniere','bureaux-commerces'];
   const showHousing=isRealEstate&&housingSubs.includes(sub);
@@ -2911,6 +2913,7 @@ function realEstatePropertyTypeOf(a){
     if(/appartement|studio|apartment|flat/.test(v))return 'appartement';
     if(/maison|villa|house/.test(v))return 'maison';
     if(/terrain|land/.test(v))return 'terrain';
+    if(/batiment|grange|hangar|ecurie|etable|bergerie/.test(v))return 'batiment';
     if(/parking|garage|box/.test(v))return 'parking-garage';
     if(/bureau|commerce|local|office|shop/.test(v))return 'bureaux-commerces';
     return '';
@@ -2920,6 +2923,7 @@ function realEstatePropertyTypeOf(a){
   if(sub==='vente-appartement')return 'appartement';
   if(sub==='vente-maison')return 'maison';
   if(sub==='vente-terrain')return 'terrain';
+  if(sub==='vente-batiment')return 'batiment';
   if(sub==='parking-garage')return 'parking-garage';
   if(sub==='bureaux-commerces')return 'bureaux-commerces';
   const inferred=classify(normalizeImmoSearchValue(`${a?.title||''} ${cleanDescription(a)}`));
@@ -4099,7 +4103,8 @@ function detailSpecsFor(a){
     const has=v=>v!==undefined&&v!==null&&v!=='';
     const eur=v=>has(v)?formatImmoMoney(v):NC;
     // 29/10/2026 (Anthony) : informations essentielles / obligatoires toujours affichées, même absentes (« Non communiqué »).
-    if(immoSub!=='parking-garage'&&immoSub!=='vente-terrain'){
+    // 30/10/2026 : un bâtiment / une grange n'a ni « surface habitable » ni pièces → simple « Surface ».
+    if(immoSub!=='parking-garage'&&immoSub!=='vente-terrain'&&immoSub!=='vente-batiment'){
       specs.push(['Surface habitable',has(m.surface)?`${Number(m.surface).toLocaleString('fr-FR')} m²`:NC]);
       specs.push(['Pièces',has(m.rooms)?String(m.rooms):NC]);
       if(has(m.bedrooms)) specs.push(['Chambres',String(m.bedrooms)]);
@@ -4113,7 +4118,7 @@ function detailSpecsFor(a){
     }else{
       specs.push(['Honoraires',m.fees||NC]);
       const copro=String(m.coownership||'');const noCopro=/^non$/i.test(copro);
-      if(immoSub!=='vente-terrain'){
+      if(immoSub!=='vente-terrain'&&immoSub!=='vente-batiment'){
         specs.push(['Copropriété',copro||(has(m.lots)||has(m.annualCharges)?'Oui':NC)]);
         if(!noCopro){
           specs.push(['Nombre de lots',has(m.lots)?String(m.lots):NC]);

@@ -230,6 +230,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="appartement">Appartement à vendre</a>
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="maison">Maison à vendre</a>
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="terrain">Terrain à vendre</a>
+          <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="vente" data-immo-property="batiment">Bâtiment / Grange à vendre</a>
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="location" data-immo-property="">Location longue durée</a>
           <a class="desktop-subcategory-link" href="vacances.html">Location saisonnière</a>
           <a class="desktop-subcategory-link immo-menu-filter" href="#resultats" data-immo-transaction="" data-immo-property="parking-garage">Parking / Garage</a>
@@ -544,6 +545,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
               <option value="appartement">Appartement / Studio</option>
               <option value="maison">Maison / Villa</option>
               <option value="terrain">Terrain</option>
+              <option value="batiment">Bâtiment / Grange</option>
               <option value="parking-garage">Parking / Garage</option>
               <option value="bureaux-commerces">Bureaux / Commerces</option>
               <option value="autre">Autre</option>
@@ -623,7 +625,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           </div>
           <div class="realestate-filter-fields hidden" id="realEstateFilterFields">
             <div class="filter-field"><label>Transaction</label><select id="filterImmoTransaction"><option value="">Vente et location</option><option value="vente">Vente</option><option value="location">Location</option></select></div>
-            <div class="filter-field"><label>Type de bien</label><select id="filterImmoPropertyType"><option value="">Tous les biens</option><option value="appartement">Appartement / Studio</option><option value="maison">Maison / Villa</option><option value="terrain">Terrain</option><option value="parking-garage">Parking / Garage</option><option value="bureaux-commerces">Bureaux / Commerces</option><option value="autre">Autre</option></select></div>
+            <div class="filter-field"><label>Type de bien</label><select id="filterImmoPropertyType"><option value="">Tous les biens</option><option value="appartement">Appartement / Studio</option><option value="maison">Maison / Villa</option><option value="terrain">Terrain</option><option value="batiment">Bâtiment / Grange</option><option value="parking-garage">Parking / Garage</option><option value="bureaux-commerces">Bureaux / Commerces</option><option value="autre">Autre</option></select></div>
             <div class="filter-field"><label>Surface minimum</label><input id="filterImmoSurfaceMin" type="number" min="0" placeholder="40 m²"></div>
             <div class="filter-field"><label>Surface maximum</label><input id="filterImmoSurfaceMax" type="number" min="0" placeholder="Sans maximum"></div>
             <div class="filter-field"><label>Pièces minimum</label><input id="filterImmoRoomsMin" type="number" min="0" placeholder="2"></div>
@@ -1796,7 +1798,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <!-- 18/10/2026 : Supabase chargé ici (et non plus dans <head>) pour que la page s’affiche sans l’attendre ; il est téléchargé en avance grâce au preload. -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
-<script src="assets/index-main.js?v=20261030-notifs2"></script>
+<script src="assets/index-main.js?v=20261030-batiment"></script>
 <script src="assets/social-login-20261018.js?v=8"></script>
 <script src="assets/description-helper-20261013.js?v=2" defer></script>
 <script src="assets/publish-more-details-20261026.js?v=3" defer></script>

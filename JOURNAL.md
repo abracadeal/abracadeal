@@ -1405,3 +1405,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - « Tester une adresse » → **Réparer ce site** : part dans « Sites en réparation », l'aperçu et l'adresse s'effacent (même chose que « Valider », via `clearTest()`). Si le test venait de « Sites en réparation », la demande garde le prospect relié.
   - « Sites à apprendre » → **Mail normal / Vend sur Leboncoin / Supprimer** : la carte part et la liste se recharge (compteurs « mail normal », « vendent sur Leboncoin », « illisibles » à jour). **Réparer** : sort de la liste, entre dans « Sites en réparation ».
   - « Demandes » → **Refuser** : la demande sort de la liste (les activées et en pause restent, elles ont encore Synchroniser / Mettre en pause).
+
+### 30/10/2026 — Claude — Nouveau type de bien « Bâtiment / Grange »
+- **Constaté (Anthony, aperçu d'une agence de l'Orne) :** « BATMENT A VENDRE, A RESTAURER » refusé avec « type de bien non reconnu » (et les hangars partaient en Bureaux / Commerces).
+- **Fait :** sous-catégorie `vente-batiment` (« Bâtiment / Grange à vendre ») : bâtiment, grange, hangar, écurie, étable, bergerie, porcherie, dépendance, bâtiment agricole (à louer → Location longue durée). Robot (`pro-stock-sync` `normalizeImmoSub`) et import manuel (`index-main.js?v=20261030-batiment`) ; menu Immobilier (ordinateur), filtres « Type de bien », titre automatique « Bâtiment ». Page annonce : « Surface » (pas « Surface habitable » ni pièces / dépenses d'énergie), pas de bloc copropriété. Les entrepôts restent en Bureaux / Commerces.
