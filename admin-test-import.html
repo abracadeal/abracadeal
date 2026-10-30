@@ -175,12 +175,16 @@ async function askLearn(url,sector,company,prospect){
  if(note===null)return;
  const{data,error}=await sb.rpc('admin_request_robot_learning',{p_url:url,p_sector:sector,p_company:company||null,p_prospect_id:prospect||null,p_note:note||null});
  if(error){alert(error.message);return}
- alert(data?.already?'Ce site est déjà en réparation.':'Envoyé dans « Sites en réparation ». Demande à ChatGPT ou à Claude de s\'en occuper.');loadLearn();
+ alert(data?.already?'Ce site est déjà en réparation.':'Envoyé dans « Sites en réparation ». Demande à ChatGPT ou à Claude de s\'en occuper.');loadLearn();loadUnread();
 }
 async function loadUnread(){
  const{data,error}=await sb.rpc('admin_unreadable_sites',{p_limit:60});
  if(error){E('unread').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
- const c=data?.counts||{};const list=data?.prospects||[];
+ // 30/10/2026 (Anthony) : un site envoyé en réparation (en attente / en cours) sort de « Sites à apprendre ».
+ const normU=u=>String(u||'').toLowerCase().replace(/^https?:\/\//,'').replace(/^www\./,'').replace(/[?#].*$/,'').replace(/\/+$/,'');
+ const lq=await sb.rpc('admin_list_robot_learning',{p_limit:200});
+ const inRepair=new Set((lq.data||[]).filter(r=>r.status==='pending'||r.status==='in_progress').map(r=>normU(r.url)));
+ const c=data?.counts||{};const list=(data?.prospects||[]).filter(p=>!inRepair.has(normU(p.url)));
  const head='<div class="empty" style="text-align:left">Sites lus : <b>'+(c.ok||0)+'</b> · vendent sur Leboncoin : <b>'+(c.manual||0)+'</b> · mail normal : <b>'+(c.generic||0)+'</b> · illisibles : <b>'+(c.unreadable||0)+'</b> · encore à tester : <b>'+(c.to_check||0)+'</b></div>';
  E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Réparer</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Valider</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button><button class="sbtn" data-g="'+esc(p.id)+'">Mail normal</button></div></div>').join('');
 }
