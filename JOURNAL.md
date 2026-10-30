@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Robyns Car : lecteur du catalogue public
+- Demande `1ad9d101-2405-4112-a7f5-06e5d3c10540`, https://robynscar.com, signalée Illisible. Production v98 à blanc (185526) : aucune fiche. Cause : identifiants courts `/vehicules/18` non reconnus par le lecteur générique.
+- Ajout de `robyns-reader.ts`, exclusivement pour robynscar.com : pagination du catalogue public, références courtes, JSON-LD de chaque véhicule, galerie propre sans miniatures/recommandations/logo, champs dt/dd (première mise en circulation), coordonnées publiées. Aucun élargissement des heuristiques des autres lecteurs. Filtres inconnus refusés, échec de page/fiche ou écart au total = partial pour empêcher une synchronisation complète trompeuse.
+- Version réellement déployée v98 examinée : wrapper épinglé c0e38156, sources identiques à main avant modification. Lecture locale réelle : 50/50 véhicules, 475 photos ; 4 prix « Nous consulter » et 7 fiches sans photos à la source conservés comme manquants, aucune valeur inventée. Aucune description longue présente sur les fiches lues.
+- Tests : robyns-reader (fiche réelle, galerie, contact, absence de prix, pagination, périmètre, panne partielle), vehicle-field-index et byebuy-reader : OK. Déploiement et contrôle production à blanc à suivre.
+- Aucun import, publication, activation de flux ou mail demandé.
+
 ### 30/10/2026 — ChatGPT — Cannisimmo : contrôle de l’adresse signalée et clôture de la réparation
 - Demande `d0545264-d110-40c4-af8a-547a813ac9d9` du 29/10, `https://cannisimmo.com/fr/?utm_source=gmb`, encore pending/« Illisible » malgré les correctifs précédents. Relance explicite d’Anthony : contrôle de cette adresse exacte, pas seulement du domaine sans paramètres.
 - Production `pro-stock-sync` v98, `auto_review_dry` 185094 : HTTP 200, ok=true, Apimo listes actives, 12 pages, 135 fiches brutes, 121 après 14 doublons, 119 sans erreur, partial=false, 1469 photos ; prix/ville/description 100 %. Témoin 87522659 : 349000 €, Cannes 06400, 8 photos. Deux GES manquants déjà signalés (3915710 et 86879982), conservés sans invention. Stock source évolutif.

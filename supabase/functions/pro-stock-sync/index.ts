@@ -5,6 +5,7 @@ import { readKermarrec } from "./kermarrec-reader.ts";
 import { isApimoModules, readApimoModules } from "./apimo-reader.ts";
 import { readJunot } from "./junot-reader.ts";
 import { readByeBuyCar } from "./byebuy-reader.ts";
+import { readRobynsCar } from "./robyns-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -923,6 +924,7 @@ async function readFeed(feed:any){
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?bye-buy-car\.com$/i.test(url.hostname)){rows=await readByeBuyCar(url,text);platform='Bye Buy Car (catalogue et agences)';feed.sector='vehicules';}
+    else if(/^(?:www\.)?robynscar\.com$/i.test(url.hostname)){rows=await readRobynsCar(url,text,fetchSiteHtml);platform='Robyns Car (catalogue paginé)';feed.sector='vehicules';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
