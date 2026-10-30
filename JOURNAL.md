@@ -1415,3 +1415,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **OK :** location de logement → sous-catégorie `location`, prix « / mois » + charges, fiche avec charges / dépôt de garantie / honoraires locataire / meublé, menu « Location longue durée ».
 - **Corrigé (`pro-stock-sync` `immoMeta`) :** le robot lisait vente / location et le type de bien mais ne les enregistrait pas dans l'annonce ; une location de parking ou de bureau était devinée d'après le texte, et un local / parking à vendre dont la description parle de « loyer » (investissement locatif) pouvait s'afficher « / mois ». `transaction` et `propertyType` sont maintenant enregistrés (l'import manuel le faisait déjà).
 - **Corrigé (`index-main.js?v=20261030-batiment2`) :** un bâtiment / une grange compte bien comme « à vendre » dans le filtre vente / location.
+
+### 30/10/2026 — Claude — Case « Avec erreur » cliquable (Tester une adresse)
+- **Demande d'Anthony :** la case « Avec erreur » doit mener directement aux erreurs.
+- **Fait (`admin-test-import.html`) :** quand il y a des erreurs, la case devient un bouton (bord rouge, « voir ») : un appui n'affiche plus que les fiches en erreur et descend à la première ; un 2e appui (« tout voir ») réaffiche toutes les fiches. Au passage, « batiment » ajouté au choix « Type de bien » de la correction à la main.

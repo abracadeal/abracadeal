@@ -90,6 +90,10 @@ details.fold[open]>summary::after{transform:rotate(-135deg)}
 details.fold>summary>span:first-child{flex:1}
 .fold-n{font-size:13px;font-weight:900;background:#3b2946;color:#fff;border-radius:999px;padding:3px 9px}
 .fold-n:empty{display:none}
+#grid.only-err .car:not(.err){display:none}
+.stat-err{font:inherit;text-align:left;cursor:pointer;color:inherit;border:1px solid rgba(255,107,129,.55)!important}
+.stat-err b{color:#ff6b81}
+.stat-err[aria-pressed=true]{background:rgba(255,107,129,.14)!important}
 details.fold[open]{padding-bottom:14px}
 </style></head><body><main>
 <a class="back" href="index.html#admin">← Retour à Admin</a>
@@ -283,7 +287,10 @@ function render(data,sector){
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=NORM.length-ready;
  const photos=NORM.reduce((n,r)=>n+((r.photos||[]).length),0);
  E('status').innerHTML='Type de site : <b>'+esc(data.platform||'flux de fichier')+'</b>'+(data.partial?' · <span style="color:var(--gold)">'+(data.total_on_site?esc(String(data.total_on_site))+' biens sur le site, 220 lus par passage : le reste arrive aux synchros suivantes':'lecture partielle (site très grand)')+'</span>':'');
- E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos (sans doublons)',photos]].map(([l,v])=>'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ // 30/10/2026 (Anthony) : la case « Avec erreur » mène directement aux fiches en erreur (2e appui : tout réafficher).
+ E('grid').classList.remove('only-err');
+ E('stats').innerHTML=[[immo?'Biens lus':'Véhicules lus',ROWS.length],['Prêts à publier',ready],['Avec erreur',bad],['Photos (sans doublons)',photos]].map(([l,v])=>l==='Avec erreur'&&v>0?'<button type="button" class="stat stat-err" id="statErr" aria-pressed="false"><span class="muted">'+l+' · voir</span><b>'+v+'</b></button>':'<div class="stat"><span class="muted">'+l+'</span><b>'+v+'</b></div>').join('');
+ const se=E('statErr');if(se)se.onclick=()=>{const on=E('grid').classList.toggle('only-err');se.setAttribute('aria-pressed',on?'true':'false');se.querySelector('.muted').textContent=on?'Avec erreur · tout voir':'Avec erreur · voir';if(on)(E('grid').querySelector('.car.err')||E('grid')).scrollIntoView({behavior:'smooth',block:'start'});};
  E('stats').hidden=false;
  E('grid').innerHTML=ROWS.map((r,i)=>{
   const n=NN[i];const errs=(n?.errors||[]);
@@ -296,7 +303,7 @@ function render(data,sector){
 }
 // 29/10/2026 (Anthony) : corriger une fiche à la main. La correction est gardée (site + référence) et réappliquée à chaque mise à jour du stock.
 const EDIT_FIELDS={vehicules:[['titre','Titre','text',1],['prix','Prix (€)','number'],['ville','Ville','text'],['code_postal','Code postal','text'],['marque','Marque','text'],['modele','Modèle','text'],['annee','Année','number'],['kilometrage','Kilométrage','number'],['carburant','Énergie','text'],['boite','Boîte','text'],['description','Description','area',1]],
- immobilier:[['titre','Titre','text',1],['prix','Prix ou loyer (€)','number'],['transaction','Vente ou location','sel:vente|location'],['type_bien','Type de bien','sel:appartement|maison|terrain|parking|bureau|immeuble'],['ville','Ville','text'],['code_postal','Code postal','text'],['surface','Surface (m²)','number'],['pieces','Pièces','number'],['chambres','Chambres','number'],['dpe','DPE','sel:|A|B|C|D|E|F|G|NON SOUMIS'],['ges','GES','sel:|A|B|C|D|E|F|G'],['honoraires','Honoraires','text'],['charges_annuelles','Charges de copropriété / an (€)','number'],['nombre_lots','Nombre de lots','number'],['taxe_fonciere','Taxe foncière / an (€)','number'],['charges_mensuelles','Charges / mois (location)','number'],['depot_garantie','Dépôt de garantie (€)','number'],['description','Description','area',1]]};
+ immobilier:[['titre','Titre','text',1],['prix','Prix ou loyer (€)','number'],['transaction','Vente ou location','sel:vente|location'],['type_bien','Type de bien','sel:appartement|maison|terrain|batiment|parking|bureau|immeuble'],['ville','Ville','text'],['code_postal','Code postal','text'],['surface','Surface (m²)','number'],['pieces','Pièces','number'],['chambres','Chambres','number'],['dpe','DPE','sel:|A|B|C|D|E|F|G|NON SOUMIS'],['ges','GES','sel:|A|B|C|D|E|F|G'],['honoraires','Honoraires','text'],['charges_annuelles','Charges de copropriété / an (€)','number'],['nombre_lots','Nombre de lots','number'],['taxe_fonciere','Taxe foncière / an (€)','number'],['charges_mensuelles','Charges / mois (location)','number'],['depot_garantie','Dépôt de garantie (€)','number'],['description','Description','area',1]]};
 // 29/10/2026 (Anthony) : voir les annonces lues exactement comme sur Abracadeal (vraies vignettes et vraie fiche).
 // Même mise en forme que la synchro (pro-stock-sync : description [ABRACA_SUB]/[ABRACA_IMETA]/[ABRACA_VMETA], photos dans l'ordre).
 const IMETA_KEYS=['contactName','surface','landSurface','rooms','bedrooms','bathrooms','floor','totalFloors','furnished','yearBuilt','propertyCondition','heating','orientation','neighborhood','dpe','ges','energyConsumption','dpeDate','energyCostMin','energyCostMax','coownership','lots','annualCharges','propertyTax','fees','rentCharges','deposit','mandate','procedure','availableDate','features'];
