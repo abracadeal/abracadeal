@@ -1,3 +1,4 @@
+import { readBoschiAgency } from "./boschi-reader.ts";
 import { decodeLegacyHtml } from "./legacy-html.ts";
 import { readBiasAgency, readPierrefeu } from "./regional-estate-readers.ts";
 import { readAjpAgency } from "./ajp-reader.ts";
@@ -1000,6 +1001,7 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?4sconcept\.com$/i.test(url.hostname)){rows=await readFourS(url,text,fetchSiteHtml);platform='4S Concept (stock et galerie Motors)';feed.sector='vehicules';}
     else if(/^(?:www\.)?biasimmobilier\.fr$/i.test(url.hostname)){rows=await readBiasAgency(url,text,fetchSiteHtml);platform='BIAS (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?immobilier-pierrefeu\.com$/i.test(url.hostname)){rows=await readPierrefeu(url,text,fetchSiteHtml);platform='Immobilier Pierrefeu (catalogues paginés)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?boschi-immobilier\.com$/i.test(url.hostname)){rows=await readBoschiAgency(url);platform='Boschi (catalogue public filtré par agence)';feed.sector='immobilier';}
     else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml);platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
