@@ -20,6 +20,7 @@ import { isSupabaseAppShell, readSupabaseApp } from "./supabase-app-reader.ts";
 import { isRoselmacSite, readRoselmacSite } from "./roselmac-reader.ts";
 import { isSimpleboSite, readSimpleboStock } from "./simplebo-reader.ts";
 import { isVehicaSite, readVehicaSite } from "./vehica-reader.ts";
+import { isEwigoSite, readEwigoAgency } from "./ewigo-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -1013,6 +1014,7 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    else if(isEwigoSite(text,url)){rows=await readEwigoAgency(origin,text,fetchSiteHtml);platform='Ewigo (stock de l\'agence)';feed.sector='vehicules';}
     else if(isRoselmacSite(text)){rows=await readRoselmacSite(origin,fetchSiteHtml);platform='Roselmac (catalogue garage)';feed.sector='vehicules';}
     else if(feed.sector!=='immobilier'&&isSimpleboSite(text)){rows=await readSimpleboStock(origin,fetchSiteHtml);platform='Simplébo (page véhicules en vente)';feed.sector='vehicules';}
     else if(isVehicaSite(text)){rows=await readVehicaSite(origin);platform='WordPress Vehica (stock disponible, vendus exclus)';feed.sector='vehicules';}
