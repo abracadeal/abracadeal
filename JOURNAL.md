@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Intuition : photos et lecture Apimo réparées (v96)
+- Demande `83283c83-de19-4446-b099-39963fd14ca3`, https://intuition.immo/fr/ : photo principale par défaut et doublons. Les routes `/fr/acheter` et `/fr/louer` ne déclenchaient pas le lecteur Apimo à modules ; le lecteur générique mélangeait les variantes d’images. Ajout des deux routes aux listes actives et à la détection ; galerie `data-image-url` uniquement, ordre de la source, sans miniatures ni portrait du conseiller. Ville/CP issus du JSON-LD correspondant au bien, sans quartier ajouté à la ville.
+- Conseiller de la fiche : lien `/agence/` reconnu dans le module utilisateur, téléphone mobile prioritaire dans cette même carte. Vérifié : Lisa PICOT et Adrien GROSJEAN avec leurs numéros distincts. Aucun téléphone ajouté à la description publique.
+- Contrôle intermédiaire : prix du garage absorbait sa référence (regex autorisant un saut de ligne), corrigé par les espaces horizontaux ; droit au bail classé commerce depuis sa route. Le commerce 87230572 affiche 100000 € dans son en-tête contre 150000 € dans sa description source : le prix affiché est conservé.
+- Source enregistrée sur main : `72e552cc` puis `640dc7ed65db4af4b0fc5ffb449d8bd14af32416`. Fonction réellement déployée v94 prise comme base ; déploiement final `pro-stock-sync` v96 ACTIVE, import épinglé sur `640dc7ed`, configuration JWT conservée.
+- Vérification production à blanc (requête 185007) : HTTP 200, 35/35 biens sans erreur, 4 pages, `partial=false`, 592 photos contre 1128 avec le lecteur générique ; contacts sur 35/35, 5 numéros distincts. Garage à 30000 € confirmé. Fiche 87285412 : 22 originaux uniques, première photo visualisée, DPE B/GES A, ville Cannes 06400, 435000 €. Tests `apimo-intuition.test.mjs` (galerie, miniatures exclues, ordre, conseiller, prix, pagination) et régression Cannisimmo : OK.
+- Demande marquée done. Aucun import, publication, flux ou envoi de mail déclenché.
+
 ### 30/10/2026 — ChatGPT — Protection du type de compte appliquée en production
 - Accord explicite d’Anthony : fichier `supabase/2026-10-30-account-type-guard.sql` de `main` appliqué tel quel au projet Supabase `jplzvxmpbpjssyinozap` (migration `account_type_guard`, succès).
 - Vérification SQL après application : déclencheur `aab_guard_profile_account_type` présent et activé (`tgenabled = O`) sur `public.profiles`, BEFORE UPDATE FOR EACH ROW, appelant `private.guard_profile_account_type()` ; définition de la fonction conforme au fichier (changement refusé sauf service_role ou public.is_admin()).
