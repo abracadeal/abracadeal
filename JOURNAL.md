@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Cannisimmo : contrôle de l’adresse signalée et clôture de la réparation
+- Demande `d0545264-d110-40c4-af8a-547a813ac9d9` du 29/10, `https://cannisimmo.com/fr/?utm_source=gmb`, encore pending/« Illisible » malgré les correctifs précédents. Relance explicite d’Anthony : contrôle de cette adresse exacte, pas seulement du domaine sans paramètres.
+- Production `pro-stock-sync` v98, `auto_review_dry` 185094 : HTTP 200, ok=true, Apimo listes actives, 12 pages, 135 fiches brutes, 121 après 14 doublons, 119 sans erreur, partial=false, 1469 photos ; prix/ville/description 100 %. Témoin 87522659 : 349000 €, Cannes 06400, 8 photos. Deux GES manquants déjà signalés (3915710 et 86879982), conservés sans invention. Stock source évolutif.
+- Demande marquée done avec le résultat réel. Aucun nouveau code/déploiement nécessaire ; aucun import, publication, activation de flux ou mail déclenché. Aucun statut de prospect modifié.
+
 ### 30/10/2026 — ChatGPT — Protection commune contre les images par défaut et miniatures (v98)
 - Accord d’Anthony après Intuition : renforcer la sélection commune des photos. `smart-reader.ts` : priorité à une galerie HTML explicitement identifiée (module-slider, gallery/galerie/fotorama, slider de produit/véhicule/bien) ; exclusion des galeries de miniatures/suggestions identifiées. Dans chaque élément, un seul lien retenu : plein format, plus grande source srcset, lien lazy, puis src. `data-low-src` n’est plus ramassé par la regex suffixe src. Les logos et portraits opaques hors galerie ne deviennent plus la première photo quand une galerie est identifiée. Aucune URL de taille inventée.
 - `photo-utils.ts` : fonctions de dédoublonnage existantes déplacées dans un module partagé ; filtre explicite des noms placeholder/default/no_photo/sans-photo/image-indisponible, y compris URL encapsulée. `photosOf` applique ce filtre avant la limite de 45 et avant validation : une fiche sans photo exploitable garde l’erreur « aucune photo » ; le lecteur générique ne la fait plus disparaître silencieusement. Pas de reconnaissance visuelle ni de garantie pour les images d’attente au nom opaque quand aucun contexte ne les distingue.
