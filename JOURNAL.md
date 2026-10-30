@@ -23,7 +23,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Human : le périmètre reste le catalogue explicite de l'agence et sa pagination ; plusieurs préfixes de mandat publiés dans ce même catalogue sont acceptés (La Châtre 139/239).
 - Apimo/Raccosta : type issu de la route lorsque le titre du template est absent, galerie originale `click-fullscreen`, pièces/chambres sur plusieurs lignes. Les diagnostics « En cours » restent sans lettre inventée.
 - LF immo/La Fourmi : lecture de la seule ligne active des graphiques HTML DPE/GES et de la consommation, sans déduire une classe depuis les seuils.
-- Tests réels Raccosta et LF immo ajoutés ; régressions Intuition, Cannisimmo, Human/Citya, périmètre et pagination vérifiées. Déploiement et lectures de contrôle en cours ; seuls les résultats confirmés seront marqués réparés.
+- Tests réels Raccosta et LF immo ajoutés ; régressions Intuition, Cannisimmo, Human/Citya, périmètre, pagination, prix et photos vérifiées. Code enregistré sur main (6faaefe puis 3cb1229), fonction pro-stock-sync déployée v108.
+- Contrôles production sans import : Human 61 références / 47 fiches complètes / 391 photos, 10 vendus exclus et 4 HTTP 403 signalés ; Raccosta 254/254 fiches / 3348 photos / 246 sans erreur et 8 GES manquants conservés en anomalie (sur 87302200, émission vide et pas de graphique climat publié).
+- LF immo fiche 90526 : prix canonique 345000.0 correctement lu 345000 €, ville Le Barp 33114, référence propre 90526, 8 photos originales, description propre, conseiller Michaël Larant et téléphone, DPE D / GES B / consommation 188. Contrôle serveur confirmé ; exhaustivité nationale non revendiquée.
+- Demandes Human La Châtre, Raccosta et La Fourmi/DPE passées done (« Réparé »), visual_validated_at vide pour validation manuelle par Toni. Aucun prospect/annonce importé, aucun flux activé ni courriel envoyé.
+- La Française Immobilière Montauban : catalogue officiel HTTP 500 (wia-filter/in_array null côté serveur), URL filtrée refusée SecuPress 403 depuis le client public ; blocage noté, demande pending.
+- À poursuivre : BIAS Bernay (catalogue agence 298 accessible, 61 idBien), AJP Nantes Ouest (catalogues agence 173162), Pierrefeu (catalogue 34 annonces, encodage Windows-1252), Boschi Vaison (session publique viewport à initialiser via l'interface officielle ; prototype de session testé, pas encore intégré). Ces quatre demandes restent pending, aucune réparation revendiquée.
 - Imozoum, Accès Conseil, Cabinet Girondin, Placyr et Comeback : requêtes serveur HTTP 202 avec `x-amzn-waf-action=challenge`, blocage noté dans chaque demande ; aucune importation.
 
 
