@@ -1259,3 +1259,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 30/10/2026 — Claude — Barre de recherche
 - **Demande d'Anthony :** retirer les exemples « Clio, T2 Cannes » : le texte de la barre de recherche de l'accueil devient « ✦ Recherche IA » (`index.html`).
+- **Bannière :** tous les mails de cette fonction (bienvenue, abonnements Pro, Fondateurs) affichent maintenant la bannière Abracadeal (lampe, logo, slogan, servie par `email-banner`) à la place du bandeau texte.

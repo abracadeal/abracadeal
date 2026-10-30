@@ -17,6 +17,8 @@ const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 const dateFr = (v: unknown) => v ? new Intl.DateTimeFormat("fr-FR", { timeZone: "Europe/Paris", day: "numeric", month: "long", year: "numeric" }).format(new Date(String(v))) : "";
 const euros = (cents: unknown) => (Number(cents || 0) / 100).toLocaleString("fr-FR", { minimumFractionDigits: Number(cents) % 100 ? 2 : 0, maximumFractionDigits: 2 }) + " €";
 
+// 30/10/2026 : bannière Abracadeal (lampe, logo, slogan) en tête de tous les mails, au lieu du simple bandeau texte.
+const BANNER = "https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/email-banner?k=abracadeal-banner-20260920";
 const PUBLISH = "https://abracadeal.fr/?deposer=1"; // ouvre directement le dépôt d'annonce
 // 30/10/2026 : mails aux particuliers (bienvenue) : bouton « Déposer une annonce » et pied de page adapté.
 function layout(title: string, paragraphs: string[], bullets: string[] = [], audience = "pro") {
@@ -26,7 +28,7 @@ function layout(title: string, paragraphs: string[], bullets: string[] = [], aud
   return `<!doctype html><html lang="fr"><body style="margin:0;background:#f8f4fa;font-family:Arial,Helvetica,sans-serif;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f4fa;padding:24px 0;"><tr><td align="center">
 <table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">
-<tr><td style="background:#1c0b2b;padding:20px 28px;color:#ffffff;font-size:20px;font-weight:bold;">Abracadeal</td></tr>
+<tr><td style="background:#1c0b2b;padding:0;line-height:0;"><a href="${SITE}"><img src="${BANNER}" width="600" alt="Abracadeal – De bonnes affaires près de chez vous et partout ailleurs !" style="display:block;width:100%;max-width:600px;height:auto;border:0;"></a></td></tr>
 <tr><td style="padding:28px;">
 <h1 style="margin:0 0 18px 0;font-size:21px;color:#4a1766;">${title}</h1>${p}${ul}
 <p style="margin:22px 0 0 0;"><a href="${part ? PUBLISH : PRO_SPACE}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:12px 22px;border-radius:10px;">${part ? "Déposer une annonce" : "Accéder à mon espace Pro"}</a></p>
