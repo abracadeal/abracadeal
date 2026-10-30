@@ -1,12 +1,7 @@
-# 30/10/2026 — Robots d'aspiration et d'IA refusés partout (Google, Bing, etc. restent autorisés plus bas).
+# 30/10/2026 — Robots d'aspiration et d'IA refusés partout, SAUF ChatGPT (OpenAI) et Claude (Anthropic), autorisés à la demande d'Anthony.
+# Google, Bing, etc. restent autorisés plus bas.
 # Ne bloque que les robots honnêtes ; les vrais aspirateurs sont freinés côté base de données.
-User-agent: GPTBot
-User-agent: ChatGPT-User
-User-agent: OAI-SearchBot
 User-agent: CCBot
-User-agent: ClaudeBot
-User-agent: anthropic-ai
-User-agent: Claude-Web
 User-agent: Google-Extended
 User-agent: Applebot-Extended
 User-agent: PerplexityBot
