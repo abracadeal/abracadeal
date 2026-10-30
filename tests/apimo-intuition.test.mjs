@@ -8,6 +8,7 @@ assert.ok(isApimoModules(home));assert.ok(!isApimoModules(home.replace('https://
 const r=parseApimoDetail(html,url);
 assert.equal(r.prix,'435000');assert.equal(r.ville,'Cannes');assert.equal(r.code_postal,'06400');assert.equal(r.type_bien,'Appartement');assert.equal(r.surface,'70.63');assert.equal(r.dpe,'B');assert.equal(r.ges,'A');
 assert.equal(r.contact_nom,'Lisa PICOT');assert.equal(r.contact_telephone,'+33788311004');
+assert.equal(parseApimoDetail(html.replace('3 pièces</p><p>2 chambres</p><p>70.63 m²</p><p>435 000 €','540</p><p>30 000 €'),url).prix,'30000');
 const photos=r.photos.split('|');assert.equal(photos.length,22);assert.equal(new Set(photos).size,22);assert.ok(photos[0].endsWith('/b83959868d551f6f70ac68dfdadc6861.jpg'));
 const lows=[...html.matchAll(/data-low-src="([^"]+)"/g)].map(m=>m[1]);assert.ok(photos.every(p=>!lows.includes(p)));assert.ok(!photos.some(p=>p.includes('1c0906490681f06baa613b8fad98d4a8')));
 const visited=[];
