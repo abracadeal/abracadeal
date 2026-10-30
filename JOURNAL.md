@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Retrait des sites après validation visuelle
+- Demande Anthony : une fois validé visuellement, le site disparaît de la liste. La réparation technique reste status=done et son historique est conservé ; nouvelle date visual_validated_at distincte, initialement NULL. Aucune validation rétroactive des sites déjà réparés.
+- Migration robot_learning_visual_validation appliquée, SQL enregistré dans supabase/2026-10-30-robot-visual-validation.sql. admin_list_robot_learning retourne aussi prospect_id (absent de l’ancienne réponse), et masque les validations visuelles archivées. RPC admin_confirm_robot_learning_visual réservée aux admins, search_path fixé, EXECUTE refusé à PUBLIC/anon, accordé à authenticated avec contrôle is_admin ; URL et identifiant de demande concordants requis.
+- admin-test-import.html : après mise à jour réussie du prospect par « Valider ce site », enregistrement de la validation visuelle puis rechargement de la liste. Le bouton Tester transmet aussi request_id. Aucun import, publication ni envoi de mail déclenché par ce changement.
+- Vérification SQL transactionnelle entièrement annulée : refus non-admin, réparé visible avant validation, mauvaise URL refusée, retrait après validation, historique conservé, deuxième clic idempotent OK. JavaScript syntaxe OK ; contrôle advisors effectué. Aucun vrai site ni prospect validé à la place d’Anthony. Source UI 0b3815a3, SQL dd37a573.
+
 ### 30/10/2026 — ChatGPT — Réparés conservés pour validation visuelle
 - Demande Anthony : remettre les sites réparés dans la liste avec la mention Réparé. `admin-test-import.html` conserve désormais les demandes done dans « Sites en réparation » (badge Réparé déjà existant), en plus des demandes pending/in_progress. Les statuts techniques et les résultats de lecture sont préservés.
 - Validation visuelle : après Tester, le bouton existant « Valider ce site » met le prospect en site_check_status=ok (aucun envoi immédiat). Le lien prospect_id de la demande est désormais conservé lors du test pour viser précisément ce prospect, notamment pour une agence appartenant à un réseau. Code enregistré main 9f3f2542 ; syntaxe JavaScript OK. Aucun prospect réellement validé par ChatGPT pendant ce changement : clic laissé à Anthony.
