@@ -19,7 +19,7 @@ export function parseLyonImmo(h:string,url:string){
  }
  const energy=h.match(/id=["']collapseEnergie["'][^>]*>([\s\S]*?)(?=<\/section>)/i)?.[1]||'';const pointers=[...energy.matchAll(/class=["']pointer pointer-([a-g])["'][^>]*>\s*<span[^>]*>([\d.,]+)/gi)];
  if(pointers[0]){o.dpe=pointers[0][1].toUpperCase();o.consommation_energie=pointers[0][2];}if(pointers[1]){o.ges=pointers[1][1].toUpperCase();o.emission_ges=pointers[1][2];}
- const contact=section(h,'contact');o.contact_nom=clean(contact.match(/class=["']avatar-info__text[^"']*["'][^>]*>([\s\S]*?)<\/div>/i)?.[1]||'').replace(/\s+/g,' ');o.contact_telephone=contact.match(/href=["']tel:([^"']+)/i)?.[1]||'';
+ const contact=section(h,'contact');o.contact_nom=clean(contact.match(/class=["']avatar-info__text[^"']*["'][^>]*>([\s\S]*?)<\/a>/i)?.[1]||'').replace(/\s+/g,' ');o.contact_telephone=contact.match(/href=["']tel:([^"']+)/i)?.[1]||'';
  const heat=clean(section(h,'bien')).match(/Chauffage\s+([^\n]+)/i);if(heat)o.chauffage=heat[1];
  return o;
 }
