@@ -950,6 +950,9 @@ async function readFeed(feed:any){
   let url:URL;
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
+  // 31/10/2026 (Claude) : page agence Simplici Car — PrestaShop répond en JSON à l'en-tête « Accept: application/json » du flux,
+  // la page n'arrivait donc jamais au choix du lecteur de site : on lit directement l'agence.
+  if(simpliciAgencyId(url)){const rows=await readSimpliciAgency(url,fetchSiteHtml);(rows as any).platform='Simplici Car (stock de l\'agence)';(rows as any).siteLocation=(rows as any).siteLocation||null;(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   const headers:Record<string,string>={
     Accept:'application/json, application/xml, text/xml, text/csv, application/csv, text/plain;q=0.8, */*;q=0.5',
     'User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'
