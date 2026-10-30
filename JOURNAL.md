@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — ChatGPT — Réparation des sites déjà signalés (en cours)
+- Accord Anthony : traiter les demandes présentes et noter précisément les impossibilités. Base réellement déployée v99 (9db3d85), lecteurs identiques à main a581352 avant modification.
+- Lecteurs dédiés limités aux domaines : Progressia fichier public JSON (sans exécuter de JS), Human catalogue d’agence et JSON-LD au type encodé `ld&#x2B;json`, Citya vente/location de la seule agence demandée et données imbriquées Offer/itemOffered. Pagination, totaux et statut partial conservés ; descriptions et contacts propres aux fiches.
+- Diagnostic interne existant `debug_detail` : option include_html protégée par la même authentification cron pour examiner les réponses effectivement reçues depuis la production (différentes des réponses locales sur plusieurs domaines). Aucun accès public supplémentaire.
+- Tests et validation production en cours ; demandes non clôturées avant vérification. Aucun import, publication, activation de flux ou mail.
+
 ### 30/10/2026 — ChatGPT — Robyns Car : lecteur du catalogue public
 - Demande `1ad9d101-2405-4112-a7f5-06e5d3c10540`, https://robynscar.com, signalée Illisible. Production v98 à blanc (185526) : aucune fiche. Cause : identifiants courts `/vehicules/18` non reconnus par le lecteur générique.
 - Ajout de `robyns-reader.ts`, exclusivement pour robynscar.com : pagination du catalogue public, références courtes, JSON-LD de chaque véhicule, galerie propre sans miniatures/recommandations/logo, champs dt/dd (première mise en circulation), coordonnées publiées. Aucun élargissement des heuristiques des autres lecteurs. Filtres inconnus refusés, échec de page/fiche ou écart au total = partial pour empêcher une synchronisation complète trompeuse.
