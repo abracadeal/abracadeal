@@ -81,12 +81,37 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
 .clr input{width:100%;padding-right:46px!important;flex:none!important}
 .clr .x-clear{position:absolute;right:7px;top:50%;transform:translateY(-50%);width:32px;height:32px;border-radius:50%;border:0;background:#3b2946;color:#fff;font-size:20px;line-height:1;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
 .clr .x-clear[hidden]{display:none!important}
+/* 30/10/2026 (Anthony) : trop de défilement → sections repliables, « Tester une adresse » en premier. */
+details.fold{background:transparent;border-top:1px solid var(--line);margin:0}
+details.fold>summary{list-style:none;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;padding:16px 2px;font-size:18px;font-weight:800;color:var(--violet)}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:'';width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg);margin-right:6px;transition:transform .15s}
+details.fold[open]>summary::after{transform:rotate(-135deg)}
+details.fold>summary>span:first-child{flex:1}
+.fold-n{font-size:13px;font-weight:900;background:#3b2946;color:#fff;border-radius:999px;padding:3px 9px}
+.fold-n:empty{display:none}
+details.fold[open]{padding-bottom:14px}
 </style></head><body><main>
 <a class="back" href="index.html#admin">← Retour à Admin</a>
 <h1>Imports depuis les sites des pros</h1>
 <p class="muted">Les pros qui donnent l'adresse de leur site à l'inscription (et cochent l'autorisation) apparaissent ici. Rien n'est publié tant que vous n'avez pas cliqué sur « Activer ».</p>
 <div id="app" hidden>
- <h2 class="sec">Inscrire un garage qui a dit oui</h2>
+ <details class="fold" id="fold-test" open><summary><span>Tester une adresse</span></summary>
+
+ <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
+ <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
+ <div style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="sbtn ok" type="button" id="sitePreview" hidden>Voir comme sur le site</button><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
+ <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
+ <p id="status" class="muted"></p>
+ <div class="stats" id="stats" hidden></div>
+ <div class="grid" id="grid"></div>
+ </details>
+ <details class="fold" id="fold-reqs" open><summary><span>Demandes</span> <span class="fold-n" data-count="reqs"></span></summary>
+
+ <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
+ </details>
+ <details class="fold" id="fold-onb"><summary><span>Inscrire un garage qui a dit oui</span></summary>
+
  <form class="onb" id="onbForm" autocomplete="off">
   <p class="lead">Le pro a donné son accord ? Créez son compte et mettez son stock en ligne à sa place. Il reçoit ensuite un mail pour choisir son mot de passe, ses annonces sont déjà là.</p>
   <div class="fg">
@@ -101,22 +126,17 @@ select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);backgrou
   <div class="acts"><button class="btn" id="oGo">Créer le compte et importer le stock</button></div>
   <ul class="steps" id="oSteps" hidden></ul>
  </form>
- <h2 class="sec">Demandes</h2>
- <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
- <h2 class="sec">Sites en réparation</h2>
+ </details>
+ <details class="fold" id="fold-learn"><summary><span>Sites en réparation</span> <span class="fold-n" data-count="learnq"></span></summary>
+
  <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Demande à ChatGPT (ou à Claude) de les traiter : guide docs/APPRENDRE-AU-ROBOT.md.</p>
  <div class="reqs" id="learnq"><div class="empty">Chargement…</div></div>
- <h2 class="sec">Sites à apprendre</h2>
+ </details>
+ <details class="fold" id="fold-unread"><summary><span>Sites à apprendre</span> <span class="fold-n" data-count="unread"></span></summary>
+
  <p class="muted" style="font-size:14px;margin:0 2px 8px">Prospects dont le robot n'a pas su lire le site : ils reçoivent d'office le « mail normal », après ceux dont le site est lu. Tu n'as rien à faire, sauf pour un gros pro qui vaut une réparation. <b>Tester</b> : voir ce que lit le robot. <b>Réparer</b> : le site part dans « Sites en réparation » pour que ChatGPT ou Claude apprenne au robot à le lire. <b>Valider</b> : le site se lit bien maintenant → il est retesté et le pro reçoit son mail. <b>Supprimer</b> : ne m'intéresse pas, jamais de mail. <b>Vend sur Leboncoin</b> : mail « publiez vous-même vos annonces ». <b>Mail normal</b> : site qui bloque le robot → mail « publiez vous-même ou envoyez-nous le flux de votre logiciel ».</p>
  <div class="reqs" id="unread"><div class="empty">Chargement…</div></div>
- <h2 class="sec">Tester une adresse</h2>
- <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
- <p class="muted" style="font-size:14px;margin:8px 2px 0">Aperçu uniquement : rien n'est enregistré.</p>
- <div style="margin:10px 0 0;display:flex;gap:8px;flex-wrap:wrap"><button class="sbtn ok" type="button" id="sitePreview" hidden>Voir comme sur le site</button><button class="sbtn" type="button" id="learnCur">Réparer ce site</button></div>
- <h2 class="sec" id="resTitle" hidden>Aperçu</h2>
- <p id="status" class="muted"></p>
- <div class="stats" id="stats" hidden></div>
- <div class="grid" id="grid"></div>
+ </details>
 </div>
 <p id="gate" class="muted">Vérification des droits…</p>
 </main>
@@ -382,5 +402,9 @@ E('onbForm').addEventListener('submit',async ev=>{
  finally{go.disabled=false}
 });
 init();
+</script>
+<script>
+// 30/10/2026 : nombre d'éléments affiché sur chaque section repliée.
+(function(){document.querySelectorAll('.fold-n[data-count]').forEach(n=>{const box=document.getElementById(n.dataset.count);if(!box)return;const upd=()=>{const c=box.querySelectorAll('.req').length;n.textContent=c?String(c):'';};new MutationObserver(upd).observe(box,{childList:true});upd();});})();
 </script>
 </body></html>
