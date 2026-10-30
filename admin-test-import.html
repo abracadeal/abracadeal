@@ -149,7 +149,7 @@ const toNum=s=>{const d=String(s??'').replace(/[^\d]/g,'');return d?Number(d):nu
 const euro=s=>{const n=toNum(s);return n==null?'Prix non lu':n.toLocaleString('fr-FR')+' €'};
 const km=s=>{const n=toNum(s);return n==null?'':n.toLocaleString('fr-FR')+' km'};
 const dt=s=>s?new Date(s).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—';
-let LASTDATA=null,NN=[],ROWS=[],NORM=[],REQS=[],lastSync=null;
+let LASTDATA=null,NN=[],ROWS=[],NORM=[],REQS=[],lastSync=null,LEARN_CONTEXT=null;
 async function fnError(error){let msg=error?.message||String(error);try{const b=await error.context.json();msg=b.error||msg}catch{}return msg}
 async function init(){
  const{data:{user}}=await sb.auth.getUser();
@@ -168,7 +168,7 @@ async function loadLearn(){
  // 30/10/2026 (Anthony) : conserver les sites réparés pour sa validation visuelle.
  data=(data||[]).filter(r=>r.status==='pending'||r.status==='in_progress'||r.status==='done');
  const L={pending:['pending','En attente'],in_progress:['pending','En cours'],done:['on','Réparé'],failed:['rej','Pas possible'],cancelled:['off','Annulé']};
- E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<div class="req"><div class="req-top"><h3>'+esc(r.company||r.url)+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div><div class="acts"><button class="sbtn" type="button" data-learn-test="'+esc(r.url)+'" data-sector="'+esc(r.sector)+'">Tester</button></div></div>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
+ E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<div class="req"><div class="req-top"><h3>'+esc(r.company||r.url)+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div><div class="acts"><button class="sbtn" type="button" data-learn-test="'+esc(r.url)+'" data-sector="'+esc(r.sector)+'" data-prospect-id="'+esc(r.prospect_id||'')+'">Tester</button></div></div>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
 }
 async function askLearn(url,sector,company,prospect){
  const note=prompt('Qu\'est-ce qui ne va pas sur ce site ? (facultatif : prix faux, ville manquante, photos en double…)','');
@@ -189,8 +189,8 @@ async function loadUnread(){
  E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Réparer</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Valider</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button><button class="sbtn" data-g="'+esc(p.id)+'">Mail normal</button></div></div>').join('');
 }
 document.addEventListener('click',async e=>{
- const lt=e.target.closest('#learnq [data-learn-test]');if(lt){E('url').value=lt.dataset.learnTest;E('sector').value=lt.dataset.sector;const fold=E('form').closest('details');if(fold)fold.open=true;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
- const t=e.target.closest('#unread [data-u]');if(t){E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
+ const lt=e.target.closest('#learnq [data-learn-test]');if(lt){LEARN_CONTEXT={url:lt.dataset.learnTest,prospectId:lt.dataset.prospectId};E('url').value=lt.dataset.learnTest;E('sector').value=lt.dataset.sector;const fold=E('form').closest('details');if(fold)fold.open=true;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
+ const t=e.target.closest('#unread [data-u]');if(t){LEARN_CONTEXT=null;E('url').value=t.dataset.u;E('sector').value=t.dataset.s;E('form').requestSubmit();E('form').scrollIntoView({behavior:'smooth'});return}
  const lb=e.target.closest('#unread [data-l]');if(lb){askLearn(lb.dataset.l,lb.dataset.ls,lb.dataset.lc,lb.dataset.lp);return}
  const gg=e.target.closest('#unread [data-g]');if(gg){gg.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_generic',{p_id:gg.dataset.g});if(error){alert(error.message);gg.disabled=false;return}gg.closest('.req')?.remove();return}
  const mm=e.target.closest('#unread [data-m]');if(mm){mm.disabled=true;const{error}=await sb.rpc('admin_mark_prospect_manual',{p_id:mm.dataset.m});if(error){alert(error.message);mm.disabled=false;return}mm.closest('.req')?.remove();return}
@@ -368,7 +368,8 @@ async function validateSite(){
   let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
   const host=new URL(url).hostname.replace(/^www\./i,'').toLowerCase();
   const n=Number(LASTDATA?.total_on_site||0)||NORM.filter(x=>!(x.errors||[]).length).length;
-  const{data:pros,error}=await sb.from('prospection_prospects').select('id,company,source_url,email').ilike('source_url','%'+host+'%').limit(20);
+  const query=sb.from('prospection_prospects').select('id,company,source_url,email');
+  const{data:pros,error}=LEARN_CONTEXT?.url===url&&LEARN_CONTEXT?.prospectId?await query.eq('id',LEARN_CONTEXT.prospectId).limit(1):await query.ilike('source_url','%'+host+'%').limit(20);
   if(error)throw error;
   const match=(pros||[]).filter(p=>{try{return new URL(/^https?:/i.test(p.source_url)?p.source_url:'https://'+p.source_url).hostname.replace(/^www\./i,'').toLowerCase()===host}catch{return false}});
   if(!match.length){
