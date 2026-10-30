@@ -14,6 +14,13 @@ Guide écrit le 29/10/2026 par Claude pour qu'un autre assistant (ChatGPT) puiss
 Dans l'ordre : Orpi (`readOrpiAgency`), L'Adresse (`readLadresseAgency`), Century 21 (`readC21Agency`), Annonces-Automobile (`readAaSite`, détecté par `isAaSiteHtml`), WooCommerce, L'Agence Automobilière, Starterre, Spider VO, Shopify, sinon lecture automatique (`readSmartSite` + `smartDetail` + données JSON-LD `ldImmo` / `ldVehicle`).
 Si rien n'est lisible : `findNetworkPage` cherche une page Orpi / Century 21 de l'agence.
 
+Lecteurs génériques ajoutés le 30/10/2026 (Claude), à réutiliser avant d'écrire un lecteur pour un seul site :
+- `supabase-app-reader.ts` : site « application » (React / Vite / Lovable, page HTML vide) dont le stock est dans sa propre base Supabase → lecture de la table avec la clé publique du site ; photos d'espace privé signées.
+- `roselmac-reader.ts` : garages Roselmac (`catalogue-new.php`, `voiture-new2.php?voiture_reference=`).
+- `simplebo-reader.ts` : garages Simplébo (`sbcdnsb.com`) avec une page `/vehicules-en-vente` en texte libre.
+- `vehica-reader.ts` : WordPress thème Vehica → `/wp-json/wp/v2/cars` (champs reconnus par leur nom via `/taxonomies`, Statut « Vendu » exclu).
+- Astuce générale : avant de lire les pages HTML d'un WordPress, regarder `/wp-json/wp/v2/types` : beaucoup de thèmes de garage / d'agence publient leur stock en JSON.
+
 ## 2. Méthode pour un site qui ne se lit pas (ou mal)
 
 1. **Tester sans rien enregistrer** (« lecture à blanc ») : depuis SQL Supabase

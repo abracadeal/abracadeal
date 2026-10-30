@@ -18,6 +18,179 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 30/10/2026 — Claude — 4 sites auto réparés (JB Sport Auto, Excellium Cars, Slycar, Motorwine)
+- Demandes « Réparer » prises par Claude (`handled_by='Claude'`), réparation de lecture uniquement : aucun prospect, mail, import ni publication. ChatGPT garde les siennes.
+- **JB Sport Auto** (jbsportauto.fr) — nouveau `supabase-app-reader.ts` : sites React / Lovable dont le stock est dans leur propre base Supabase (page HTML vide). Le robot lit la table avec la clé publique du site (refus si la clé n'est pas « anon »/publishable), photos d'un espace privé signées comme le fait le site (10 ans). Ville du garage lue dans la description du site (« à Aumur (39410) »). Résultat 1/1 complet, 12 photos.
+  - `index.ts` : la signature de changement d'une annonce ignore le jeton des liens signés (`…/object/sign/…?token=`), sinon réécriture + remodération toutes les 3 h ; la ville fournie par un lecteur dédié (`rows.siteLocation`) n'est plus écrasée par `siteLocation(text)` (sinon « Saint-Aubin » lu dans le menu au lieu d'Aumur).
+- **Excellium Cars** (excelliumcars.fr) — nouveau `roselmac-reader.ts` : sites de garage Roselmac (catalogue-new.php → voiture-new2.php?voiture_reference=N ; vendus sur archives-new2.php, jamais lus). 12/12 complets, ~42 photos chacun, ville Benfeld. Énergie non affichée par le site : laissée vide.
+- **Slycar** (slycar.fr) — nouveau `simplebo-reader.ts` : sites Simplébo où chaque voiture est une section en texte libre de /vehicules-en-vente (titre h2, galerie, « Informations générales », bloc PRIX). 13/13 complets ; année / km lus quand ils sont écrits (92 % / 85 %), énergie seulement si écrite (23 %). Référence = id de section Simplébo.
+- **Motorwine** (motorwine.fr) — nouveau `vehica-reader.ts` : WordPress thème Vehica via `/wp-json/wp/v2/cars` ; champs reconnus par leur nom (`/taxonomies` : Marque, Modèle, Énergie, Boîte, Statut…) ou leur forme (prix `vehica_currency_*`, galerie, année) ; Statut « Vendu / Réservée » exclu dès la requête. 89 disponibles (572 vendus ignorés), 88 complets, 1 sans prix sur le site, ~32 photos chacun.
+- Déploiements `pro-stock-sync` v114 → v121 (dernier commit 641c0f2). Témoins retestés après coup : Laugier (Annonces-Automobile) 23/23, Immo Chevreux 31/31.
+- Les 4 demandes passées en `done` avec un résultat pour Anthony.
+
+### 30/10/2026 — Claude — « Valider ce site » pour un pro absent de la liste
+- **Constaté (Anthony, Infinity Group Immo) :** la fenêtre demandait « l'e-mail du garage » pour une agence, puis rien ne bougeait : Infinity n'est pas dans la liste de prospection, le message « aucun prospect » s'écrivait hors de l'écran.
+- **Fait (`admin-test-import.html`) :** « garage » ou « agence » selon le secteur ; e-mail vérifié ; si l'e-mail n'est pas dans la liste, proposition d'ajouter le pro (nom proposé d'après le site, catégorie selon le secteur, source « validation manuelle (test du site) ») puis validation normale ; refus si l'adresse s'est désinscrite ; le message de résultat (validé, erreur, annulé) est ramené à l'écran.
+
+### 30/10/2026 — Claude — Case « Doublons / vendus » (Tester une adresse)
+- **Question d'Anthony :** pourquoi « Biens lus » (135) ≠ « Prêts à publier » (119) + « Avec erreur » (2) sur Cannisimmo ?
+- **Réponse :** les 14 autres fiches ne seraient pas publiées : même bien présent deux fois sur le site (doublon), ou fiche vendue / illisible. Elles n'étaient pas comptées à part.
+- **Fait (`admin-test-import.html`) :** nouvelle case « Doublons / vendus » (= biens lus − fiches normalisées), cliquable comme « Avec erreur » (un appui : seulement ces fiches ; 2e appui : tout voir). Les fiches vendues / illisibles ne sont plus marquées en rouge comme les erreurs.
+
+### 30/10/2026 — Claude — Case « Avec erreur » cliquable (Tester une adresse)
+- **Demande d'Anthony :** la case « Avec erreur » doit mener directement aux erreurs.
+- **Fait (`admin-test-import.html`) :** quand il y a des erreurs, la case devient un bouton (bord rouge, « voir ») : un appui n'affiche plus que les fiches en erreur et descend à la première ; un 2e appui (« tout voir ») réaffiche toutes les fiches. Au passage, « batiment » ajouté au choix « Type de bien » de la correction à la main.
+
+### 30/10/2026 — Claude — Locations : vérification
+- **Question d'Anthony :** la location fonctionne-t-elle bien avec les annonces ? (aucune annonce immo en ligne pour l'instant, vérifié dans le code)
+- **OK :** location de logement → sous-catégorie `location`, prix « / mois » + charges, fiche avec charges / dépôt de garantie / honoraires locataire / meublé, menu « Location longue durée ».
+- **Corrigé (`pro-stock-sync` `immoMeta`) :** le robot lisait vente / location et le type de bien mais ne les enregistrait pas dans l'annonce ; une location de parking ou de bureau était devinée d'après le texte, et un local / parking à vendre dont la description parle de « loyer » (investissement locatif) pouvait s'afficher « / mois ». `transaction` et `propertyType` sont maintenant enregistrés (l'import manuel le faisait déjà).
+- **Corrigé (`index-main.js?v=20261030-batiment2`) :** un bâtiment / une grange compte bien comme « à vendre » dans le filtre vente / location.
+
+### 30/10/2026 — Claude — Nouveau type de bien « Bâtiment / Grange »
+- **Constaté (Anthony, aperçu d'une agence de l'Orne) :** « BATMENT A VENDRE, A RESTAURER » refusé avec « type de bien non reconnu » (et les hangars partaient en Bureaux / Commerces).
+- **Fait :** sous-catégorie `vente-batiment` (« Bâtiment / Grange à vendre ») : bâtiment, grange, hangar, écurie, étable, bergerie, porcherie, dépendance, bâtiment agricole (à louer → Location longue durée). Robot (`pro-stock-sync` `normalizeImmoSub`) et import manuel (`index-main.js?v=20261030-batiment`) ; menu Immobilier (ordinateur), filtres « Type de bien », titre automatique « Bâtiment ». Page annonce : « Surface » (pas « Surface habitable » ni pièces / dépenses d'énergie), pas de bloc copropriété. Les entrepôts restent en Bureaux / Commerces.
+
+### 30/10/2026 — Claude — Chaque bouton envoie le site au bon endroit
+- **Demande d'Anthony :** après chaque touche, le site doit disparaître de là où il est et aller là où il doit aller.
+- **Fait (`admin-test-import.html`) :**
+  - « Tester une adresse » → **Réparer ce site** : part dans « Sites en réparation », l'aperçu et l'adresse s'effacent (même chose que « Valider », via `clearTest()`). Si le test venait de « Sites en réparation », la demande garde le prospect relié.
+  - « Sites à apprendre » → **Mail normal / Vend sur Leboncoin / Supprimer** : la carte part et la liste se recharge (compteurs « mail normal », « vendent sur Leboncoin », « illisibles » à jour). **Réparer** : sort de la liste, entre dans « Sites en réparation ».
+  - « Demandes » → **Refuser** : la demande sort de la liste (les activées et en pause restent, elles ont encore Synchroniser / Mettre en pause).
+
+### 30/10/2026 — Claude — « Valider ce site » : le site disparaît
+- **Demande d'Anthony :** quand il teste un site et valide, il doit disparaître.
+- **Fait :** `admin_confirm_robot_learning_visual` (appliqué en base) clôt aussi la demande « en attente / en cours » du même site (status `done`, « Validé à la main après test du site ») → il sort de « Sites en réparation ». Il sortait déjà de « Sites à apprendre » (`site_check_status = ok`). `admin-test-import.html` : après validation, l'aperçu, les boutons et l'adresse testée sont effacés ; seul le message « Validé : … » reste.
+
+### 30/10/2026 — Claude — Compteur de photos sous le filigrane
+- **Constaté (Anthony) :** sur la page annonce, le filigrane « Abracadeal » (bas droite) chevauchait le compteur « 1 / N ».
+- **Fait (`card-overlay-20261029.css?v=6`) :** compteur de photos déplacé en bas à gauche (ordinateur et téléphone). Le filigrane reste en bas à droite (il est aussi incrusté dans les photos des particuliers, donc impossible à déplacer).
+
+### 30/10/2026 — Claude — « Sites en réparation » : seulement ce qui reste à faire
+- **Demande d'Anthony :** un site réparé doit sortir de la liste, et ceux impossibles à réparer doivent être supprimés.
+- **Fait (`admin-test-import.html`) :** la liste n'affiche plus que les demandes « En attente » / « En cours » (le compteur suit). Les « Réparé » restent en base comme historique.
+- **Reste à appliquer en base (confirmations Supabase annulées automatiquement depuis l'appli mobile) :** `admin_list_robot_learning` filtré sur pending/in_progress + trigger qui supprime une demande passée en `failed`/`cancelled` + suppression des 2 « Pas possible » (Opt'immo, Villaret Immobilier). En attendant, elles sont simplement masquées.
+- **Suite (Anthony) :** un site envoyé avec « Réparer » restait aussi dans « Sites à apprendre ». Corrigé : la liste « Sites à apprendre » masque les sites en réparation (en attente / en cours, même adresse de site), et se recharge juste après un clic sur « Réparer ».
+
+### 30/10/2026 — Claude — Rebonds de prospection lus automatiquement
+- **Constaté (tri de la boîte abracadeal@gmail.com) :** 6 garages dont le 1er mail avait échoué (adresse inexistante, boîte pleine…) ont quand même reçu la relance : rien ne repassait les rebonds dans le CRM. Nettoyage manuel fait : 10 adresses mortes passées en `error`, Desbrosses et LCB Immo mis à jour avec leur nouvelle adresse, retours d'erreur + rapports DMARC mis à la corbeille Gmail.
+- **Fait (`prospect-mailer` v12) :** action `bounces` : lit en IMAP (lecture seule, rien n'est marqué ni supprimé) les rapports de non-remise des boîtes d'envoi OVH sur les 10 derniers jours ; chaque rebond définitif (« Action: failed ») passe la fiche du prospect en `error` avec la raison (plus de relance ni d'envoi) + ligne dans `prospection_logs`. Les rebonds « delayed » (nouvel essai en cours) sont ignorés. `{dry:true}` = rapport sans modification.
+- SQL : `supabase/2026-10-30-prospect-bounces.sql` (`prospect_mailer_mailbox_list`, service_role uniquement). Cron `abracadeal-prospect-bounces` toutes les heures (à h07) de 6 h à 18 h, heure de Paris. 1er passage réel (30 jours) : 9 adresses mortes de plus trouvées et passées en `error`.
+- **Mise à jour (Anthony) :** ChatGPT (GPTBot, ChatGPT-User, OAI-SearchBot) et Claude (ClaudeBot, Claude-User…) autorisés : retirés de la liste de blocage.
+- **Mise à jour 2 (Anthony) :** toutes les IA autorisées (ChatGPT, Claude, Gemini, Perplexity, Meta, Amazon, Apple, Common Crawl…) pour qu'elles puissent recommander Abracadeal. Restent refusés : revendeurs/aspirateurs de données (Diffbot, Omgili, ImageSift, Scrapy, HTTrack, wget) et outils SEO concurrents (Ahrefs, Semrush, Majestic, DotBot, BLEXBot, DataForSEO, Serpstat).
+
+### 30/10/2026 — Claude — Bouton « Valider ce site » (test manuel d'une adresse)
+- **Demande d'Anthony :** quand il teste lui-même un site et qu'il se lit, il faut une touche « Valider ».
+- **Fait (`admin-test-import.html`) :** après « Lire le stock », si au moins une annonce est complète, bouton vert « Valider ce site ». Il passe la fiche du prospect en « site testé » (`site_check_status = ok`, nombre d'annonces, plateforme, date) → ses prochains mails sont ceux du « répondez OK ». Le prospect est retrouvé par l'adresse du site ; s'il n'en a pas (liste manuelle, ex. Bye Buy Car), le bouton demande l'e-mail du garage et relie le site à sa fiche. Rien n'est publié par ce bouton.
+
+### 30/10/2026 — Claude — Page « Imports depuis les sites des pros » : sections repliables
+- **Demande d'Anthony :** trop de défilement pour arriver à « Tester une adresse » ; ranger « Sites en réparation » et « Sites à apprendre » dans des sections.
+- **Fait (`admin-test-import.html`) :** « Tester une adresse » en premier (ouverte, avec son aperçu), puis « Demandes » (ouverte), puis « Inscrire un garage qui a dit oui », « Sites en réparation » et « Sites à apprendre » repliées. Chaque section s'ouvre / se ferme d'un appui, avec le nombre d'éléments affiché sur le titre. Identifiants et fonctions inchangés.
+
+### 30/10/2026 — Claude — MRR théorique selon les annonces des pros
+- **Demande d'Anthony :** régler le « MRR théorique après gratuités » en fonction des pros et de leur nombre d'annonces.
+- **Fait (`index-app.js?v=20261030-mrr`) :** après le chiffre du serveur (somme des formules choisies), le tableau de bord recalcule : pour chaque abonnement Pro actif ou en période gratuite, nombre d'annonces en ligne → plus petit palier de la même famille qui les couvre (Auto/Immo : 20 = 149,99 €, 50 = 299,99 €, 100 = 499,99 € ; même logique pour High-tech, Maison, Mode, Emploi, Vacances). Au-delà de 100 : compté au palier 100 et signalé « sur devis ». Formule à 0 € (compte interne) = 0 €. L'ancienne formule 200 (retirée) n'est plus utilisée comme palier. Libellé : « MRR théorique après gratuités (selon annonces en ligne) », détail au survol.
+- **Au passage :** intertitre « Abonnements Pro » du tableau de bord, invisible (blanc sur fond clair), passé en gris violet (`admin-account-layout-20261018.css?v=7`).
+- Calcul fait côté navigateur admin (la modification de la fonction serveur `get_admin_dashboard_stats` n'est pas applicable depuis l'appli mobile) ; à basculer dans la fonction serveur à l'occasion.
+
+### 30/10/2026 — Claude — Retours d'Anthony sur les notifications admin
+- **Constaté (captures) :** la notification d'exemple « nouveau pro » apparaissait aussi dans la fenêtre Admin « Erreurs de flux » (pastille 1 sur Admin) ; pastille « À surveiller » quasi invisible et nom du flux blanc sur fond clair ; pastille « 1 » de Messages loin de l'icône sur téléphone.
+- **Fait :** `index-main.js?v=20261030-notifs2` : « Erreurs de flux » (liste + compteur Admin) ignore les notifications `new_pro` / `site_review` (elles restent dans Messages) ; `card-overlay-20261029.css?v=5` : pastille « À surveiller » orange (texte brun foncé), « À traiter » rouge (texte blanc), nom du flux en gris violet lisible ; `nav-compact-20261020.css?v=2` : pastille Messages identique à celle d'Admin, collée en haut à droite de l'icône (téléphone ; la tablette l'avait déjà).
+
+### 30/10/2026 — Claude — Pied de page mobile / tablette resserré
+- **Demande d'Anthony :** recoller le bas de page, en plus petit.
+- **Fait (`footer-copyright-20261027.css?v=6`, ≤ 760 px, donc aussi tablette) :** « © 2026 Abracadeal » 10 px discret (au lieu de 16 px), liens 9,5 px serrés (3 lignes au lieu de 4), espacements réduits ; le grand vide violet sous les liens supprimé (le pied de page ajoutait 104 px alors que la page garde déjà la place de la barre du bas). Hauteur du pied de page : 250 → ~110 px. Ordinateur inchangé.
+
+### 30/10/2026 — Claude — Notification sur le site pour l'admin (nouveaux pros)
+- **Demande d'Anthony :** un mail à chaque fois, c'est bien au début mais pénible s'il y a beaucoup d'inscriptions → notification sur le site.
+- **Fait :** `notifyAdminsSite` (`pro-stock-sync`) crée aussi, pour chaque admin, une notification dans `pro_sync_notices` (gravité `new_pro` = « Nouveau pro en ligne », `site_review` = « Site d'un pro à vérifier ») : pastille rouge sur Messages / Compte et carte en haut de Messages, avec bouton « Marquer comme lu ». Une seule par site (mise à jour si le statut change). Le mail n'est plus envoyé qu'aux **5 premières notifications sur 24 h** ; au-delà, seulement la notification sur le site.
+- **Bug corrigé au passage (`index-main.js?v=20261030-notifs`) :** les alertes `pro_sync_notices` (y compris les alertes de synchro des pros) étaient comptées dans la pastille mais jamais affichées dans Messages : elles se chargent maintenant à l'ouverture et toutes les 5 s.
+- **Déployé :** `pro-stock-sync` v94 ACTIVE (épinglé sur `ff3474c2`), démarrage vérifié. Notification d'exemple « [TEST] Exemple de nouveau pro » créée pour l'admin (à marquer comme lue).
+
+### 30/10/2026 — Claude — Mail à l'admin quand le site d'un pro est repris
+- **Demande d'Anthony :** il ne veut pas découvrir des annonces d'un pro sur le site sans être prévenu.
+- **Fait (`pro-stock-sync`, `notifyAdminsSite`) :** mail immédiat aux admins (abracadeal@gmail.com) depuis contact@abracadeal.fr :
+  - « Nouveau pro en ligne : <entreprise> (N annonce(s)) » quand un site autorisé est lu sans erreur et activé automatiquement (entreprise, SIRET, e-mail, site, domaine, nombre d'annonces créées, lien page pro + admin imports) ;
+  - « Site d'un pro à vérifier : <entreprise> » quand le site ne peut pas être activé seul (raison) — au premier essai seulement, le récapitulatif quotidien continue.
+- Un seul mail par site et par cas (clé `site-approved|pending-<feed>`).
+- **Déployé :** `pro-stock-sync` v93 ACTIVE, import épinglé sur `08c5b19d` (inclut les corrections Bye Buy Car de ChatGPT, v92) ; démarrage vérifié (réponse 403 attendue sans jeton cron).
+
+### 30/10/2026 — Claude — Pages légales mises à jour (version du 30 octobre 2026)
+- **Demande d'Anthony :** être en règle après les changements du jour.
+- **Confidentialité** (`confidentialite.html` + copies dans `index.html` et `vacances.html`) : connexion Google / Facebook (nom, e-mail, photo de profil transmis avec accord, pas de mot de passe) ; reprise des annonces du site d'un pro qui l'a autorisée (textes, photos, prix, conseiller indiqué) ; e-mails liés au compte (bienvenue, sécurité, abonnement) dans l'exécution du contrat ; prestataires ajoutés : Resend (e-mails), Google et Meta (connexion) ; vérification des entreprises via le registre officiel (recherche-entreprises.api.gouv.fr) à partir du SIRET ou du SIREN.
+- **CGU** (`cgu.html` + copie dans `index.html`) : § 2 choix Particulier / Professionnel à l'inscription (Google/Facebook compris), SIRET ou SIREN vérifié et téléphone obligatoires pour un Pro, type de compte non modifiable par l'utilisateur ; § 3 nouveau paragraphe « Reprise des annonces depuis le site d'un professionnel » (autorisation expresse, droits sur les contenus, mise à jour automatique, retrait de l'autorisation à contact@abracadeal.fr).
+- Version affichée : 30 octobre 2026 (CGU et confidentialité ; CGV, cookies et mentions légales inchangées). Version d'acceptation enregistrée à l'inscription : `2026-10-30` (`legal-registration.js`, `index-main.js`, `social-login-20261018.js`, test).
+- Tests `legal-pages` : mêmes résultats qu'avant (2 échecs déjà présents avant ces changements).
+- **Mentions légales :** rien à changer (éditeur, directeur de la publication, hébergeur, contact présents).
+
+### 30/10/2026 — Claude — Inscription Google en Pro : case « reprise de mon site »
+- **Demande d'Anthony :** le pro ne reviendra peut-être pas répondre « OK » : il doit pouvoir autoriser la reprise de ses annonces en cochant une case à l'inscription.
+- **Fait (`social-login-20261018.js?v=6`) :** dans « Finalisez votre compte » (Google/Facebook), si Professionnel : adresse du site (facultatif) + case « J'autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour ». Mêmes contrôles que l'inscription Pro par e-mail (adresse valide, pas un site d'annonces ni un réseau social, case obligatoire si une adresse est donnée) ; l'accord est enregistré dans le compte (`stock_site`) puis `claim_signup_site_import` crée la demande d'import (lecture automatique, activée seule si le site se lit sans erreur, règle du 28/10). L'inscription Pro par e-mail avait déjà cette case.
+- Testé (fenêtre avec serveur simulé) : case manquante refusée ; avec la case : passage Pro, accord enregistré, demande d'import créée.
+- **Précision (30/10) :** pour un Pro, le téléphone (déjà obligatoire) s'intitule « Téléphone de l'entreprise » : numéro sur lequel les acheteurs le joignent depuis ses annonces (`v=7`).
+- **Correction (30/10) :** la note du téléphone Pro dit « numéro proposé par défaut sur vos annonces, modifiable annonce par annonce » (le numéro d'une annonce se change dans l'annonce ; pour un import, le numéro du vendeur indiqué sur le site du pro passe avant) (`v=8`).
+
+### 30/10/2026 — Claude — Barre de recherche
+- **Demande d'Anthony :** retirer les exemples « Clio, T2 Cannes » : le texte de la barre de recherche de l'accueil devient « ✦ Recherche IA » (`index.html`).
+- **Bannière :** tous les mails de cette fonction (bienvenue, abonnements Pro, Fondateurs) affichent maintenant la bannière Abracadeal (lampe, logo, slogan, servie par `email-banner`) à la place du bandeau texte.
+
+### 30/10/2026 — Claude — Mail de bienvenue aux nouveaux particuliers
+- **Demande d'Anthony :** aucun mail n'arrive après une inscription (cas Bye Buy Car) ; mettre en place un mail de bienvenue.
+- **Fait (`process-pro-transactional-emails`) :** à chaque passage (toutes les 2 min), les comptes **particuliers** créés depuis le 30/10/2026 13 h, finalisés (téléphone renseigné, e-mail confirmé), reçoivent une seule fois « Bienvenue sur Abracadeal ! » (clé `welcome:<compte>`, type `custom_message`, aucun changement de base) : invitation à déposer une première annonce, bouton « Déposer une annonce » (`/?deposer=1`), signé « L'équipe Abracadeal », depuis contact@abracadeal.fr. Pas d'envoi rétroactif. Les pros gardent leurs mails d'abonnement / Fondateur.
+- **Au passage :** mail `founder_onboarding` : titre « Marre de payer trop cher ? » retiré (accroche abandonnée le 23/10) → « Bienvenue sur Abracadeal » ; ligne obsolète « formule 50 gratuite » retirée.
+- **Déployé :** `process-pro-transactional-emails` v7 ACTIVE. Exemplaire de test « [TEST] Bienvenue sur Abracadeal » mis en file pour abracadeal@gmail.com.
+
+### 30/10/2026 — Claude — Inscription Google/Facebook : choix Particulier / Professionnel obligatoire
+- **Demande d'Anthony :** « un pro est un pro, un particulier est un particulier, même avec une inscription Google » : case Pro / Particulier, et un Pro donne au minimum son SIRET ou SIREN.
+- **Site (`social-login-20261018.js?v=5`) :** la fenêtre « Finalisez votre compte » après Google/Facebook demande « Vous êtes : Particulier / Professionnel » (aucun choix par défaut). Professionnel → SIRET (14) ou SIREN (9) + domaine pro obligatoires, contrôlés dans le registre officiel avant création ; ensuite choix de la formule Pro comme une inscription Pro classique. Le lien `?r=` d'un mail de prospection est rattaché au compte.
+- **Fonction `verify-professional` (action `upgrade`) :** SIREN accepté (siège retenu) ; passe le compte en Pro avec la clé de service seulement si l'entreprise est active, pas déjà liée à un autre compte Pro, et si le compte n'a aucune annonce de particulier ; enregistre `pro_verifications` et l'entreprise dans le compte.
+- **Base (`supabase/2026-10-30-account-type-guard.sql`) :** un utilisateur ne peut plus changer lui-même son type de compte (avant, rien ne l'empêchait techniquement) ; seuls la fonction ci-dessus et un admin le peuvent.
+- **Bye Buy Car Limoges :** seul compte Google existant (particulier, sans téléphone) : la fenêtre lui demandera le choix à sa prochaine connexion.
+- **Déployé :** `verify-professional` v10 ACTIVE (import épinglé sur `afa8d6da`) ; contrôle réel : recherche registre OK, `upgrade` sans connexion refusé (401).
+- **Appliqué par ChatGPT le 30/10/2026** (voir son entrée en tête du journal) ; vérifié par Claude : déclencheur `aab_guard_profile_account_type` présent et actif sur `public.profiles`.
+
+### 30/10/2026 — ChatGPT — Réparation lecture Bye Buy Car
+- Cause : lecteur générique limité aux 20 fiches HTML initiales ; ville absente et descriptions manquantes. Le catalogue utilise son API publique `api.bye-buy-car.com/api/get-vehicules`, appelée par les filtres du site.
+- Connecteur dédié `byebuy-reader.ts` : pagination de 100 véhicules, 3 requêtes simultanées, dédoublonnage par référence ; les pages agence `/agence/CP`, le filtre `?cp=CP` et les fiches véhicules conservent leur périmètre. Les filtres non reconnus sont refusés pour ne pas importer le réseau entier par erreur. Échec/répétition/page manquante → lecture partielle, donc pas d'archivage complet.
+- Champs : titre complet/version, prix, ville/CP, km, année, énergie, boîte, carrosserie, portes/places, puissances, CO2, couleur, première mise en circulation `datemes` (pas la date de carte grise `dateCG`), description + équipements, photos uniques, nom/téléphone de l'agence propre au véhicule. Immatriculation et VIN non repris.
+- `normalizeVehicle` conserve le contact explicite via le même validateur que l'immobilier ; téléphone stocké dans les contacts de l'annonce lors d'un futur import autorisé, nom dans les métadonnées véhicule. Aucun import ni activation de flux déclenché par les tests.
+- Tests : champs sur deux fiches réelles, agences distinctes, filtre agence, fiche unique, pagination, panne réseau et page répétée ; 20 fiches réelles normalisées sans erreur ; régression Cannisimmo : OK.
+- Catalogue national vérifié en lecture seule : 17 pages / 1 696 références distinctes, lecture complète ; 1 673 fiches normalisées sans erreur, 23 sans photo dans la source ; 39 214 photos, ville sur toutes les fiches et téléphone fourni sur 1 349 fiches. Prise en charge des deux formats de références (Spider VO avec tiret et VO3000 numérique).
+- Mise en service v91 : contrôle réel agence Figeac HTTP 200, 38/38 fiches sans erreur, 877 photos et téléphone d'agence sur toutes les fiches. Le catalogue national dépassait le budget d'exécution pendant la normalisation ; index des champs véhicule ajouté, en conservant l'ordre de priorité des alias. Mesure locale sur tout le stock : normalisation passée de ~2,93 s à ~0,82 s, mêmes 1 394 annonces après dédoublonnage global, 1 390 sans erreur. Test des valeurs zéro/vides et priorité des champs exacts/imbriqués ajouté.
+
+- Validation finale production v92 (`d164ba3f25bf3ac181df2a545d110c8ce1d0cfbd`, PR #12 et #13 fusionnées) : HTTP 200, `ok:true`, `partial:false`, 17 pages, 1 696 références lues ; 1 394 annonces après le dédoublonnage global existant (302 doublons), 1 390 sans erreur, 4 sans photo après dédoublonnage. 33 946 photos retenues, ville/prix/km/année/énergie/boîte renseignés sur toutes les annonces ; 1 047 téléphones propres aux fiches, 25 numéros distincts. Contrôle lecture seule, aucun stock publié et aucun flux activé.
+
+### 30/10/2026 — Claude — Lecture des sites pros : bandeau cookies, énergie et boîte
+- **Constaté par Anthony (aperçu d'import, Ford Fiesta réf. 0001398, 6 750 €) :** description = texte du bandeau cookies (Complianz : « Le stockage ou l'accès technique… », « assignation à comparaître… ») ; énergie « électrique » et boîte « automatique » fausses.
+- **Causes (`smart-reader.ts`, lecteur générique) :** le bandeau cookies passait le filtre du « plus long texte » (pas le mot « cookies ») ; énergie/boîte cherchées dans toute la page : « rétroviseurs électriques » → électrique, « climatisation automatique » → automatique.
+- **Fait :** textes de consentement exclus de la description ; énergie et boîte lues d'abord sur leur libellé (« Carburant : », « Énergie », « Boîte de vitesses : »…), puis dans le titre (BVA, DSG, EAT, EDC…), sinon dans la page en ignorant équipements électriques/automatiques. Rien plutôt qu'une valeur fausse.
+- **Testé :** page reproduisant le cas → avant : électrique / automatique / texte cookies ; après : essence / manuelle / vraie description ; sans libellé : énergie et boîte vides. Tests existants : mêmes résultats qu'avant (les 6 en échec l'étaient déjà).
+- **Déployé :** `pro-stock-sync` v90 ACTIVE, import épinglé sur `261ed036aef82eab7fe37e874bb43b8811db94ef` (aucun autre changement de la fonction depuis v89), vérif. JWT inchangée (désactivée, auth interne). Démarrage OK dans les journaux. Aucune annonce pro véhicule déjà en ligne à corriger.
+
+### 30/10/2026 — Claude — Un pro prospecté inscrit en particulier : corrigé
+- **Constaté :** compte créé le 30/10 à 9 h 19 via Google (bbc.lim.nord@gmail.com, « Bye Buy Car Limoges », prospect « AMD AUTO » de la liste manuelle du 19/10) en **particulier** : relance reçue à 9 h 05, clic sur le lien à 9 h 19 min 26 s, compte créé 23 s plus tard.
+- **Cause :** les boutons « Créer mon compte Pro gratuitement » / « Je réserve ma place Fondateur » / « Activer mon compte Pro » de `pro-fondateur.html` pointaient vers `index.html#accountModal`, qui ouvre la **connexion** ; « Continuer avec Google » y crée un compte particulier.
+- **Fait :** liens Fondateurs → `index.html#signupPro` (ouvre l'inscription avec « Professionnel » présélectionné, `index-app.js?v=20261030-signup-pro`) ; `social-login-20261018.js?v=4` : Google/Facebook masqués pour un visiteur venu d'un mail de prospection (lien `?r=` mémorisé 90 jours). Vérifié en local.
+- **Reste :** le compte de Bye Buy Car Limoges est toujours particulier, à passer en Pro avec l'accord d'Anthony.
+
+### 30/10/2026 — Claude — Textes des vignettes corrigés
+- **Demande d'Anthony :** « la description dans les vignettes c'est pas bon ».
+- **Constaté (rendu des vraies annonces) :** caractéristiques véhicule en 4 cases avec émojis (📅 🛣️ ⛽ ⚙️) qui se cassaient dans les vignettes étroites (« km » ou « Automatique » seuls à la ligne) ; ville avec 📍 sur 2 lignes.
+- **Fait :** `index-main.js?v=20261030-vignettes` (cartes « Les annonces » et « À la une ») : caractéristiques en une ligne de texte « 2019 · 84 500 km · Diesel · Manuelle » (2 lignes max), sans émojis ; ville avec un petit pictogramme dessiné à la place de 📍. `card-overlay-20261029.css?v=4` : ville sur une seule ligne (coupée avec « … » si trop longue). Page annonce inchangée.
+- Vérifié sur téléphone, tablette verticale et horizontale avec de vraies annonces.
+
+### 30/10/2026 — Claude — Tablette bloquée en vertical : corrigé
+- **Demande d'Anthony :** la version tablette ne passe pas en horizontal.
+- **Causes :** 1) `manifest.json` imposait `"orientation": "portrait"` → l'appli installée (PWA) restait bloquée en vertical ; 2) sur petites tablettes Android en paysage (hauteur utile < 600 px, ex. 1280×800 avec barres du navigateur = 576 px), l'écran « tournez votre téléphone » (`.portrait-only-overlay`) s'affichait, car la règle d'exception tablette (`min-width:900px`) est neutralisée par tablet-as-mobile (largeur évaluée à 720 px).
+- **Fait :** manifest en `"orientation": "any"` (lien `manifest.json?v=5` sur index et vacances) ; `tablet-grid-20261030.css?v=2` : écran de rotation jamais affiché sur tablette, page visible et défilable en paysage. Téléphones : écran de rotation conservé.
+- Vérifié en émulation tablette Android 1280×800 paysage : écran de rotation masqué, page visible, 6 vignettes.
+- **Appli déjà installée :** Android peut mettre du temps à relire le manifest ; si ça reste bloqué, désinstaller puis réinstaller l'appli.
+
+### 30/10/2026 — Claude — Vignettes tablette plus petites
+- **Demande d'Anthony :** vignettes trop grosses sur tablette, au moins 6 par ligne.
+- **Fait (`assets/tablet-grid-20261030.css`, chargé en fin de `<head>` de `index.html`) :** tablette horizontale = 6 vignettes par ligne (avant 3) ; tablette verticale = 4 (avant 2), même taille de vignette qu'en horizontal (6 en vertical = ~90 px, titres illisibles). Textes, prix et boutons cœur/partager resserrés. Ancienne règle 3 colonnes retirée de `index.html`. Téléphone et ordinateur inchangés.
+- Vérifié en émulation iPad (vertical 4 × 136 px, horizontal 6 × 137 px).
+
 ### 30/10/2026 — ChatGPT — en cours : BIAS Bernay et Immobilier Pierrefeu
 - Travail poursuivi sur deux anciennes demandes encore pending ; aucun prospect, mail, import/publication, flux activé ou validation visuelle. Base réellement déployée vérifiée v120 / e742a3c, après conservation des lecteurs récents de Claude (Supabase, Roselmac et Simplebo).
 - BIAS Bernay : catalogue public filtré ref-agence=298, sans élargissement aux agences voisines. Type et ville de la fiche (deux titres distincts), prix propre, description intégrale, champs de surface/terrain/chambres, galerie originale et seules classes actives DPE/GES. Contact personnel seulement lorsqu'il est publié dans cette description. L'identifiant idBien dans la query est conservé.
@@ -1314,166 +1487,3 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - Tâche planifiée `abracadeal-pro-monthly-report` : le 1er du mois à 7 h 37 UTC. Premier envoi : 1er novembre (bilan d'octobre).
   - Testé dans une transaction annulée : « Votre bilan d’octobre », puces correctes, accords singulier/pluriel.
 - **Site (`index-main.js?v=20261029-partages`) :** chaque partage (WhatsApp, Facebook, SMS, copier le lien, partage du téléphone) est compté.
-
-### 30/10/2026 — Claude — Vignettes tablette plus petites
-- **Demande d'Anthony :** vignettes trop grosses sur tablette, au moins 6 par ligne.
-- **Fait (`assets/tablet-grid-20261030.css`, chargé en fin de `<head>` de `index.html`) :** tablette horizontale = 6 vignettes par ligne (avant 3) ; tablette verticale = 4 (avant 2), même taille de vignette qu'en horizontal (6 en vertical = ~90 px, titres illisibles). Textes, prix et boutons cœur/partager resserrés. Ancienne règle 3 colonnes retirée de `index.html`. Téléphone et ordinateur inchangés.
-- Vérifié en émulation iPad (vertical 4 × 136 px, horizontal 6 × 137 px).
-
-### 30/10/2026 — Claude — Tablette bloquée en vertical : corrigé
-- **Demande d'Anthony :** la version tablette ne passe pas en horizontal.
-- **Causes :** 1) `manifest.json` imposait `"orientation": "portrait"` → l'appli installée (PWA) restait bloquée en vertical ; 2) sur petites tablettes Android en paysage (hauteur utile < 600 px, ex. 1280×800 avec barres du navigateur = 576 px), l'écran « tournez votre téléphone » (`.portrait-only-overlay`) s'affichait, car la règle d'exception tablette (`min-width:900px`) est neutralisée par tablet-as-mobile (largeur évaluée à 720 px).
-- **Fait :** manifest en `"orientation": "any"` (lien `manifest.json?v=5` sur index et vacances) ; `tablet-grid-20261030.css?v=2` : écran de rotation jamais affiché sur tablette, page visible et défilable en paysage. Téléphones : écran de rotation conservé.
-- Vérifié en émulation tablette Android 1280×800 paysage : écran de rotation masqué, page visible, 6 vignettes.
-- **Appli déjà installée :** Android peut mettre du temps à relire le manifest ; si ça reste bloqué, désinstaller puis réinstaller l'appli.
-
-### 30/10/2026 — Claude — Textes des vignettes corrigés
-- **Demande d'Anthony :** « la description dans les vignettes c'est pas bon ».
-- **Constaté (rendu des vraies annonces) :** caractéristiques véhicule en 4 cases avec émojis (📅 🛣️ ⛽ ⚙️) qui se cassaient dans les vignettes étroites (« km » ou « Automatique » seuls à la ligne) ; ville avec 📍 sur 2 lignes.
-- **Fait :** `index-main.js?v=20261030-vignettes` (cartes « Les annonces » et « À la une ») : caractéristiques en une ligne de texte « 2019 · 84 500 km · Diesel · Manuelle » (2 lignes max), sans émojis ; ville avec un petit pictogramme dessiné à la place de 📍. `card-overlay-20261029.css?v=4` : ville sur une seule ligne (coupée avec « … » si trop longue). Page annonce inchangée.
-- Vérifié sur téléphone, tablette verticale et horizontale avec de vraies annonces.
-
-### 30/10/2026 — Claude — Un pro prospecté inscrit en particulier : corrigé
-- **Constaté :** compte créé le 30/10 à 9 h 19 via Google (bbc.lim.nord@gmail.com, « Bye Buy Car Limoges », prospect « AMD AUTO » de la liste manuelle du 19/10) en **particulier** : relance reçue à 9 h 05, clic sur le lien à 9 h 19 min 26 s, compte créé 23 s plus tard.
-- **Cause :** les boutons « Créer mon compte Pro gratuitement » / « Je réserve ma place Fondateur » / « Activer mon compte Pro » de `pro-fondateur.html` pointaient vers `index.html#accountModal`, qui ouvre la **connexion** ; « Continuer avec Google » y crée un compte particulier.
-- **Fait :** liens Fondateurs → `index.html#signupPro` (ouvre l'inscription avec « Professionnel » présélectionné, `index-app.js?v=20261030-signup-pro`) ; `social-login-20261018.js?v=4` : Google/Facebook masqués pour un visiteur venu d'un mail de prospection (lien `?r=` mémorisé 90 jours). Vérifié en local.
-- **Reste :** le compte de Bye Buy Car Limoges est toujours particulier, à passer en Pro avec l'accord d'Anthony.
-
-### 30/10/2026 — Claude — Lecture des sites pros : bandeau cookies, énergie et boîte
-- **Constaté par Anthony (aperçu d'import, Ford Fiesta réf. 0001398, 6 750 €) :** description = texte du bandeau cookies (Complianz : « Le stockage ou l'accès technique… », « assignation à comparaître… ») ; énergie « électrique » et boîte « automatique » fausses.
-- **Causes (`smart-reader.ts`, lecteur générique) :** le bandeau cookies passait le filtre du « plus long texte » (pas le mot « cookies ») ; énergie/boîte cherchées dans toute la page : « rétroviseurs électriques » → électrique, « climatisation automatique » → automatique.
-- **Fait :** textes de consentement exclus de la description ; énergie et boîte lues d'abord sur leur libellé (« Carburant : », « Énergie », « Boîte de vitesses : »…), puis dans le titre (BVA, DSG, EAT, EDC…), sinon dans la page en ignorant équipements électriques/automatiques. Rien plutôt qu'une valeur fausse.
-- **Testé :** page reproduisant le cas → avant : électrique / automatique / texte cookies ; après : essence / manuelle / vraie description ; sans libellé : énergie et boîte vides. Tests existants : mêmes résultats qu'avant (les 6 en échec l'étaient déjà).
-- **Déployé :** `pro-stock-sync` v90 ACTIVE, import épinglé sur `261ed036aef82eab7fe37e874bb43b8811db94ef` (aucun autre changement de la fonction depuis v89), vérif. JWT inchangée (désactivée, auth interne). Démarrage OK dans les journaux. Aucune annonce pro véhicule déjà en ligne à corriger.
-
-### 30/10/2026 — ChatGPT — Réparation lecture Bye Buy Car
-- Cause : lecteur générique limité aux 20 fiches HTML initiales ; ville absente et descriptions manquantes. Le catalogue utilise son API publique `api.bye-buy-car.com/api/get-vehicules`, appelée par les filtres du site.
-- Connecteur dédié `byebuy-reader.ts` : pagination de 100 véhicules, 3 requêtes simultanées, dédoublonnage par référence ; les pages agence `/agence/CP`, le filtre `?cp=CP` et les fiches véhicules conservent leur périmètre. Les filtres non reconnus sont refusés pour ne pas importer le réseau entier par erreur. Échec/répétition/page manquante → lecture partielle, donc pas d'archivage complet.
-- Champs : titre complet/version, prix, ville/CP, km, année, énergie, boîte, carrosserie, portes/places, puissances, CO2, couleur, première mise en circulation `datemes` (pas la date de carte grise `dateCG`), description + équipements, photos uniques, nom/téléphone de l'agence propre au véhicule. Immatriculation et VIN non repris.
-- `normalizeVehicle` conserve le contact explicite via le même validateur que l'immobilier ; téléphone stocké dans les contacts de l'annonce lors d'un futur import autorisé, nom dans les métadonnées véhicule. Aucun import ni activation de flux déclenché par les tests.
-- Tests : champs sur deux fiches réelles, agences distinctes, filtre agence, fiche unique, pagination, panne réseau et page répétée ; 20 fiches réelles normalisées sans erreur ; régression Cannisimmo : OK.
-- Catalogue national vérifié en lecture seule : 17 pages / 1 696 références distinctes, lecture complète ; 1 673 fiches normalisées sans erreur, 23 sans photo dans la source ; 39 214 photos, ville sur toutes les fiches et téléphone fourni sur 1 349 fiches. Prise en charge des deux formats de références (Spider VO avec tiret et VO3000 numérique).
-- Mise en service v91 : contrôle réel agence Figeac HTTP 200, 38/38 fiches sans erreur, 877 photos et téléphone d'agence sur toutes les fiches. Le catalogue national dépassait le budget d'exécution pendant la normalisation ; index des champs véhicule ajouté, en conservant l'ordre de priorité des alias. Mesure locale sur tout le stock : normalisation passée de ~2,93 s à ~0,82 s, mêmes 1 394 annonces après dédoublonnage global, 1 390 sans erreur. Test des valeurs zéro/vides et priorité des champs exacts/imbriqués ajouté.
-
-- Validation finale production v92 (`d164ba3f25bf3ac181df2a545d110c8ce1d0cfbd`, PR #12 et #13 fusionnées) : HTTP 200, `ok:true`, `partial:false`, 17 pages, 1 696 références lues ; 1 394 annonces après le dédoublonnage global existant (302 doublons), 1 390 sans erreur, 4 sans photo après dédoublonnage. 33 946 photos retenues, ville/prix/km/année/énergie/boîte renseignés sur toutes les annonces ; 1 047 téléphones propres aux fiches, 25 numéros distincts. Contrôle lecture seule, aucun stock publié et aucun flux activé.
-
-### 30/10/2026 — Claude — Inscription Google/Facebook : choix Particulier / Professionnel obligatoire
-- **Demande d'Anthony :** « un pro est un pro, un particulier est un particulier, même avec une inscription Google » : case Pro / Particulier, et un Pro donne au minimum son SIRET ou SIREN.
-- **Site (`social-login-20261018.js?v=5`) :** la fenêtre « Finalisez votre compte » après Google/Facebook demande « Vous êtes : Particulier / Professionnel » (aucun choix par défaut). Professionnel → SIRET (14) ou SIREN (9) + domaine pro obligatoires, contrôlés dans le registre officiel avant création ; ensuite choix de la formule Pro comme une inscription Pro classique. Le lien `?r=` d'un mail de prospection est rattaché au compte.
-- **Fonction `verify-professional` (action `upgrade`) :** SIREN accepté (siège retenu) ; passe le compte en Pro avec la clé de service seulement si l'entreprise est active, pas déjà liée à un autre compte Pro, et si le compte n'a aucune annonce de particulier ; enregistre `pro_verifications` et l'entreprise dans le compte.
-- **Base (`supabase/2026-10-30-account-type-guard.sql`) :** un utilisateur ne peut plus changer lui-même son type de compte (avant, rien ne l'empêchait techniquement) ; seuls la fonction ci-dessus et un admin le peuvent.
-- **Bye Buy Car Limoges :** seul compte Google existant (particulier, sans téléphone) : la fenêtre lui demandera le choix à sa prochaine connexion.
-- **Déployé :** `verify-professional` v10 ACTIVE (import épinglé sur `afa8d6da`) ; contrôle réel : recherche registre OK, `upgrade` sans connexion refusé (401).
-- **Appliqué par ChatGPT le 30/10/2026** (voir son entrée en tête du journal) ; vérifié par Claude : déclencheur `aab_guard_profile_account_type` présent et actif sur `public.profiles`.
-
-### 30/10/2026 — Claude — Mail de bienvenue aux nouveaux particuliers
-- **Demande d'Anthony :** aucun mail n'arrive après une inscription (cas Bye Buy Car) ; mettre en place un mail de bienvenue.
-- **Fait (`process-pro-transactional-emails`) :** à chaque passage (toutes les 2 min), les comptes **particuliers** créés depuis le 30/10/2026 13 h, finalisés (téléphone renseigné, e-mail confirmé), reçoivent une seule fois « Bienvenue sur Abracadeal ! » (clé `welcome:<compte>`, type `custom_message`, aucun changement de base) : invitation à déposer une première annonce, bouton « Déposer une annonce » (`/?deposer=1`), signé « L'équipe Abracadeal », depuis contact@abracadeal.fr. Pas d'envoi rétroactif. Les pros gardent leurs mails d'abonnement / Fondateur.
-- **Au passage :** mail `founder_onboarding` : titre « Marre de payer trop cher ? » retiré (accroche abandonnée le 23/10) → « Bienvenue sur Abracadeal » ; ligne obsolète « formule 50 gratuite » retirée.
-- **Déployé :** `process-pro-transactional-emails` v7 ACTIVE. Exemplaire de test « [TEST] Bienvenue sur Abracadeal » mis en file pour abracadeal@gmail.com.
-
-### 30/10/2026 — Claude — Barre de recherche
-- **Demande d'Anthony :** retirer les exemples « Clio, T2 Cannes » : le texte de la barre de recherche de l'accueil devient « ✦ Recherche IA » (`index.html`).
-- **Bannière :** tous les mails de cette fonction (bienvenue, abonnements Pro, Fondateurs) affichent maintenant la bannière Abracadeal (lampe, logo, slogan, servie par `email-banner`) à la place du bandeau texte.
-
-### 30/10/2026 — Claude — Inscription Google en Pro : case « reprise de mon site »
-- **Demande d'Anthony :** le pro ne reviendra peut-être pas répondre « OK » : il doit pouvoir autoriser la reprise de ses annonces en cochant une case à l'inscription.
-- **Fait (`social-login-20261018.js?v=6`) :** dans « Finalisez votre compte » (Google/Facebook), si Professionnel : adresse du site (facultatif) + case « J'autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour ». Mêmes contrôles que l'inscription Pro par e-mail (adresse valide, pas un site d'annonces ni un réseau social, case obligatoire si une adresse est donnée) ; l'accord est enregistré dans le compte (`stock_site`) puis `claim_signup_site_import` crée la demande d'import (lecture automatique, activée seule si le site se lit sans erreur, règle du 28/10). L'inscription Pro par e-mail avait déjà cette case.
-- Testé (fenêtre avec serveur simulé) : case manquante refusée ; avec la case : passage Pro, accord enregistré, demande d'import créée.
-- **Précision (30/10) :** pour un Pro, le téléphone (déjà obligatoire) s'intitule « Téléphone de l'entreprise » : numéro sur lequel les acheteurs le joignent depuis ses annonces (`v=7`).
-- **Correction (30/10) :** la note du téléphone Pro dit « numéro proposé par défaut sur vos annonces, modifiable annonce par annonce » (le numéro d'une annonce se change dans l'annonce ; pour un import, le numéro du vendeur indiqué sur le site du pro passe avant) (`v=8`).
-
-### 30/10/2026 — Claude — Pages légales mises à jour (version du 30 octobre 2026)
-- **Demande d'Anthony :** être en règle après les changements du jour.
-- **Confidentialité** (`confidentialite.html` + copies dans `index.html` et `vacances.html`) : connexion Google / Facebook (nom, e-mail, photo de profil transmis avec accord, pas de mot de passe) ; reprise des annonces du site d'un pro qui l'a autorisée (textes, photos, prix, conseiller indiqué) ; e-mails liés au compte (bienvenue, sécurité, abonnement) dans l'exécution du contrat ; prestataires ajoutés : Resend (e-mails), Google et Meta (connexion) ; vérification des entreprises via le registre officiel (recherche-entreprises.api.gouv.fr) à partir du SIRET ou du SIREN.
-- **CGU** (`cgu.html` + copie dans `index.html`) : § 2 choix Particulier / Professionnel à l'inscription (Google/Facebook compris), SIRET ou SIREN vérifié et téléphone obligatoires pour un Pro, type de compte non modifiable par l'utilisateur ; § 3 nouveau paragraphe « Reprise des annonces depuis le site d'un professionnel » (autorisation expresse, droits sur les contenus, mise à jour automatique, retrait de l'autorisation à contact@abracadeal.fr).
-- Version affichée : 30 octobre 2026 (CGU et confidentialité ; CGV, cookies et mentions légales inchangées). Version d'acceptation enregistrée à l'inscription : `2026-10-30` (`legal-registration.js`, `index-main.js`, `social-login-20261018.js`, test).
-- Tests `legal-pages` : mêmes résultats qu'avant (2 échecs déjà présents avant ces changements).
-- **Mentions légales :** rien à changer (éditeur, directeur de la publication, hébergeur, contact présents).
-
-### 30/10/2026 — Claude — Mail à l'admin quand le site d'un pro est repris
-- **Demande d'Anthony :** il ne veut pas découvrir des annonces d'un pro sur le site sans être prévenu.
-- **Fait (`pro-stock-sync`, `notifyAdminsSite`) :** mail immédiat aux admins (abracadeal@gmail.com) depuis contact@abracadeal.fr :
-  - « Nouveau pro en ligne : <entreprise> (N annonce(s)) » quand un site autorisé est lu sans erreur et activé automatiquement (entreprise, SIRET, e-mail, site, domaine, nombre d'annonces créées, lien page pro + admin imports) ;
-  - « Site d'un pro à vérifier : <entreprise> » quand le site ne peut pas être activé seul (raison) — au premier essai seulement, le récapitulatif quotidien continue.
-- Un seul mail par site et par cas (clé `site-approved|pending-<feed>`).
-- **Déployé :** `pro-stock-sync` v93 ACTIVE, import épinglé sur `08c5b19d` (inclut les corrections Bye Buy Car de ChatGPT, v92) ; démarrage vérifié (réponse 403 attendue sans jeton cron).
-
-### 30/10/2026 — Claude — Notification sur le site pour l'admin (nouveaux pros)
-- **Demande d'Anthony :** un mail à chaque fois, c'est bien au début mais pénible s'il y a beaucoup d'inscriptions → notification sur le site.
-- **Fait :** `notifyAdminsSite` (`pro-stock-sync`) crée aussi, pour chaque admin, une notification dans `pro_sync_notices` (gravité `new_pro` = « Nouveau pro en ligne », `site_review` = « Site d'un pro à vérifier ») : pastille rouge sur Messages / Compte et carte en haut de Messages, avec bouton « Marquer comme lu ». Une seule par site (mise à jour si le statut change). Le mail n'est plus envoyé qu'aux **5 premières notifications sur 24 h** ; au-delà, seulement la notification sur le site.
-- **Bug corrigé au passage (`index-main.js?v=20261030-notifs`) :** les alertes `pro_sync_notices` (y compris les alertes de synchro des pros) étaient comptées dans la pastille mais jamais affichées dans Messages : elles se chargent maintenant à l'ouverture et toutes les 5 s.
-- **Déployé :** `pro-stock-sync` v94 ACTIVE (épinglé sur `ff3474c2`), démarrage vérifié. Notification d'exemple « [TEST] Exemple de nouveau pro » créée pour l'admin (à marquer comme lue).
-
-### 30/10/2026 — Claude — Pied de page mobile / tablette resserré
-- **Demande d'Anthony :** recoller le bas de page, en plus petit.
-- **Fait (`footer-copyright-20261027.css?v=6`, ≤ 760 px, donc aussi tablette) :** « © 2026 Abracadeal » 10 px discret (au lieu de 16 px), liens 9,5 px serrés (3 lignes au lieu de 4), espacements réduits ; le grand vide violet sous les liens supprimé (le pied de page ajoutait 104 px alors que la page garde déjà la place de la barre du bas). Hauteur du pied de page : 250 → ~110 px. Ordinateur inchangé.
-
-### 30/10/2026 — Claude — Retours d'Anthony sur les notifications admin
-- **Constaté (captures) :** la notification d'exemple « nouveau pro » apparaissait aussi dans la fenêtre Admin « Erreurs de flux » (pastille 1 sur Admin) ; pastille « À surveiller » quasi invisible et nom du flux blanc sur fond clair ; pastille « 1 » de Messages loin de l'icône sur téléphone.
-- **Fait :** `index-main.js?v=20261030-notifs2` : « Erreurs de flux » (liste + compteur Admin) ignore les notifications `new_pro` / `site_review` (elles restent dans Messages) ; `card-overlay-20261029.css?v=5` : pastille « À surveiller » orange (texte brun foncé), « À traiter » rouge (texte blanc), nom du flux en gris violet lisible ; `nav-compact-20261020.css?v=2` : pastille Messages identique à celle d'Admin, collée en haut à droite de l'icône (téléphone ; la tablette l'avait déjà).
-
-### 30/10/2026 — Claude — MRR théorique selon les annonces des pros
-- **Demande d'Anthony :** régler le « MRR théorique après gratuités » en fonction des pros et de leur nombre d'annonces.
-- **Fait (`index-app.js?v=20261030-mrr`) :** après le chiffre du serveur (somme des formules choisies), le tableau de bord recalcule : pour chaque abonnement Pro actif ou en période gratuite, nombre d'annonces en ligne → plus petit palier de la même famille qui les couvre (Auto/Immo : 20 = 149,99 €, 50 = 299,99 €, 100 = 499,99 € ; même logique pour High-tech, Maison, Mode, Emploi, Vacances). Au-delà de 100 : compté au palier 100 et signalé « sur devis ». Formule à 0 € (compte interne) = 0 €. L'ancienne formule 200 (retirée) n'est plus utilisée comme palier. Libellé : « MRR théorique après gratuités (selon annonces en ligne) », détail au survol.
-- **Au passage :** intertitre « Abonnements Pro » du tableau de bord, invisible (blanc sur fond clair), passé en gris violet (`admin-account-layout-20261018.css?v=7`).
-- Calcul fait côté navigateur admin (la modification de la fonction serveur `get_admin_dashboard_stats` n'est pas applicable depuis l'appli mobile) ; à basculer dans la fonction serveur à l'occasion.
-
-### 30/10/2026 — Claude — Page « Imports depuis les sites des pros » : sections repliables
-- **Demande d'Anthony :** trop de défilement pour arriver à « Tester une adresse » ; ranger « Sites en réparation » et « Sites à apprendre » dans des sections.
-- **Fait (`admin-test-import.html`) :** « Tester une adresse » en premier (ouverte, avec son aperçu), puis « Demandes » (ouverte), puis « Inscrire un garage qui a dit oui », « Sites en réparation » et « Sites à apprendre » repliées. Chaque section s'ouvre / se ferme d'un appui, avec le nombre d'éléments affiché sur le titre. Identifiants et fonctions inchangés.
-
-### 30/10/2026 — Claude — Bouton « Valider ce site » (test manuel d'une adresse)
-- **Demande d'Anthony :** quand il teste lui-même un site et qu'il se lit, il faut une touche « Valider ».
-- **Fait (`admin-test-import.html`) :** après « Lire le stock », si au moins une annonce est complète, bouton vert « Valider ce site ». Il passe la fiche du prospect en « site testé » (`site_check_status = ok`, nombre d'annonces, plateforme, date) → ses prochains mails sont ceux du « répondez OK ». Le prospect est retrouvé par l'adresse du site ; s'il n'en a pas (liste manuelle, ex. Bye Buy Car), le bouton demande l'e-mail du garage et relie le site à sa fiche. Rien n'est publié par ce bouton.
-
-### 30/10/2026 — Claude — Rebonds de prospection lus automatiquement
-- **Constaté (tri de la boîte abracadeal@gmail.com) :** 6 garages dont le 1er mail avait échoué (adresse inexistante, boîte pleine…) ont quand même reçu la relance : rien ne repassait les rebonds dans le CRM. Nettoyage manuel fait : 10 adresses mortes passées en `error`, Desbrosses et LCB Immo mis à jour avec leur nouvelle adresse, retours d'erreur + rapports DMARC mis à la corbeille Gmail.
-- **Fait (`prospect-mailer` v12) :** action `bounces` : lit en IMAP (lecture seule, rien n'est marqué ni supprimé) les rapports de non-remise des boîtes d'envoi OVH sur les 10 derniers jours ; chaque rebond définitif (« Action: failed ») passe la fiche du prospect en `error` avec la raison (plus de relance ni d'envoi) + ligne dans `prospection_logs`. Les rebonds « delayed » (nouvel essai en cours) sont ignorés. `{dry:true}` = rapport sans modification.
-- SQL : `supabase/2026-10-30-prospect-bounces.sql` (`prospect_mailer_mailbox_list`, service_role uniquement). Cron `abracadeal-prospect-bounces` toutes les heures (à h07) de 6 h à 18 h, heure de Paris. 1er passage réel (30 jours) : 9 adresses mortes de plus trouvées et passées en `error`.
-- **Mise à jour (Anthony) :** ChatGPT (GPTBot, ChatGPT-User, OAI-SearchBot) et Claude (ClaudeBot, Claude-User…) autorisés : retirés de la liste de blocage.
-- **Mise à jour 2 (Anthony) :** toutes les IA autorisées (ChatGPT, Claude, Gemini, Perplexity, Meta, Amazon, Apple, Common Crawl…) pour qu'elles puissent recommander Abracadeal. Restent refusés : revendeurs/aspirateurs de données (Diffbot, Omgili, ImageSift, Scrapy, HTTrack, wget) et outils SEO concurrents (Ahrefs, Semrush, Majestic, DotBot, BLEXBot, DataForSEO, Serpstat).
-
-### 30/10/2026 — Claude — « Sites en réparation » : seulement ce qui reste à faire
-- **Demande d'Anthony :** un site réparé doit sortir de la liste, et ceux impossibles à réparer doivent être supprimés.
-- **Fait (`admin-test-import.html`) :** la liste n'affiche plus que les demandes « En attente » / « En cours » (le compteur suit). Les « Réparé » restent en base comme historique.
-- **Reste à appliquer en base (confirmations Supabase annulées automatiquement depuis l'appli mobile) :** `admin_list_robot_learning` filtré sur pending/in_progress + trigger qui supprime une demande passée en `failed`/`cancelled` + suppression des 2 « Pas possible » (Opt'immo, Villaret Immobilier). En attendant, elles sont simplement masquées.
-- **Suite (Anthony) :** un site envoyé avec « Réparer » restait aussi dans « Sites à apprendre ». Corrigé : la liste « Sites à apprendre » masque les sites en réparation (en attente / en cours, même adresse de site), et se recharge juste après un clic sur « Réparer ».
-
-### 30/10/2026 — Claude — Compteur de photos sous le filigrane
-- **Constaté (Anthony) :** sur la page annonce, le filigrane « Abracadeal » (bas droite) chevauchait le compteur « 1 / N ».
-- **Fait (`card-overlay-20261029.css?v=6`) :** compteur de photos déplacé en bas à gauche (ordinateur et téléphone). Le filigrane reste en bas à droite (il est aussi incrusté dans les photos des particuliers, donc impossible à déplacer).
-
-### 30/10/2026 — Claude — « Valider ce site » : le site disparaît
-- **Demande d'Anthony :** quand il teste un site et valide, il doit disparaître.
-- **Fait :** `admin_confirm_robot_learning_visual` (appliqué en base) clôt aussi la demande « en attente / en cours » du même site (status `done`, « Validé à la main après test du site ») → il sort de « Sites en réparation ». Il sortait déjà de « Sites à apprendre » (`site_check_status = ok`). `admin-test-import.html` : après validation, l'aperçu, les boutons et l'adresse testée sont effacés ; seul le message « Validé : … » reste.
-
-### 30/10/2026 — Claude — Chaque bouton envoie le site au bon endroit
-- **Demande d'Anthony :** après chaque touche, le site doit disparaître de là où il est et aller là où il doit aller.
-- **Fait (`admin-test-import.html`) :**
-  - « Tester une adresse » → **Réparer ce site** : part dans « Sites en réparation », l'aperçu et l'adresse s'effacent (même chose que « Valider », via `clearTest()`). Si le test venait de « Sites en réparation », la demande garde le prospect relié.
-  - « Sites à apprendre » → **Mail normal / Vend sur Leboncoin / Supprimer** : la carte part et la liste se recharge (compteurs « mail normal », « vendent sur Leboncoin », « illisibles » à jour). **Réparer** : sort de la liste, entre dans « Sites en réparation ».
-  - « Demandes » → **Refuser** : la demande sort de la liste (les activées et en pause restent, elles ont encore Synchroniser / Mettre en pause).
-
-### 30/10/2026 — Claude — Nouveau type de bien « Bâtiment / Grange »
-- **Constaté (Anthony, aperçu d'une agence de l'Orne) :** « BATMENT A VENDRE, A RESTAURER » refusé avec « type de bien non reconnu » (et les hangars partaient en Bureaux / Commerces).
-- **Fait :** sous-catégorie `vente-batiment` (« Bâtiment / Grange à vendre ») : bâtiment, grange, hangar, écurie, étable, bergerie, porcherie, dépendance, bâtiment agricole (à louer → Location longue durée). Robot (`pro-stock-sync` `normalizeImmoSub`) et import manuel (`index-main.js?v=20261030-batiment`) ; menu Immobilier (ordinateur), filtres « Type de bien », titre automatique « Bâtiment ». Page annonce : « Surface » (pas « Surface habitable » ni pièces / dépenses d'énergie), pas de bloc copropriété. Les entrepôts restent en Bureaux / Commerces.
-
-### 30/10/2026 — Claude — Locations : vérification
-- **Question d'Anthony :** la location fonctionne-t-elle bien avec les annonces ? (aucune annonce immo en ligne pour l'instant, vérifié dans le code)
-- **OK :** location de logement → sous-catégorie `location`, prix « / mois » + charges, fiche avec charges / dépôt de garantie / honoraires locataire / meublé, menu « Location longue durée ».
-- **Corrigé (`pro-stock-sync` `immoMeta`) :** le robot lisait vente / location et le type de bien mais ne les enregistrait pas dans l'annonce ; une location de parking ou de bureau était devinée d'après le texte, et un local / parking à vendre dont la description parle de « loyer » (investissement locatif) pouvait s'afficher « / mois ». `transaction` et `propertyType` sont maintenant enregistrés (l'import manuel le faisait déjà).
-- **Corrigé (`index-main.js?v=20261030-batiment2`) :** un bâtiment / une grange compte bien comme « à vendre » dans le filtre vente / location.
-
-### 30/10/2026 — Claude — Case « Avec erreur » cliquable (Tester une adresse)
-- **Demande d'Anthony :** la case « Avec erreur » doit mener directement aux erreurs.
-- **Fait (`admin-test-import.html`) :** quand il y a des erreurs, la case devient un bouton (bord rouge, « voir ») : un appui n'affiche plus que les fiches en erreur et descend à la première ; un 2e appui (« tout voir ») réaffiche toutes les fiches. Au passage, « batiment » ajouté au choix « Type de bien » de la correction à la main.
-
-### 30/10/2026 — Claude — Case « Doublons / vendus » (Tester une adresse)
-- **Question d'Anthony :** pourquoi « Biens lus » (135) ≠ « Prêts à publier » (119) + « Avec erreur » (2) sur Cannisimmo ?
-- **Réponse :** les 14 autres fiches ne seraient pas publiées : même bien présent deux fois sur le site (doublon), ou fiche vendue / illisible. Elles n'étaient pas comptées à part.
-- **Fait (`admin-test-import.html`) :** nouvelle case « Doublons / vendus » (= biens lus − fiches normalisées), cliquable comme « Avec erreur » (un appui : seulement ces fiches ; 2e appui : tout voir). Les fiches vendues / illisibles ne sont plus marquées en rouge comme les erreurs.
-
-### 30/10/2026 — Claude — « Valider ce site » pour un pro absent de la liste
-- **Constaté (Anthony, Infinity Group Immo) :** la fenêtre demandait « l'e-mail du garage » pour une agence, puis rien ne bougeait : Infinity n'est pas dans la liste de prospection, le message « aucun prospect » s'écrivait hors de l'écran.
-- **Fait (`admin-test-import.html`) :** « garage » ou « agence » selon le secteur ; e-mail vérifié ; si l'e-mail n'est pas dans la liste, proposition d'ajouter le pro (nom proposé d'après le site, catégorie selon le secteur, source « validation manuelle (test du site) ») puis validation normale ; refus si l'adresse s'est désinscrite ; le message de résultat (validé, erreur, annulé) est ramené à l'écran.
