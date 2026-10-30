@@ -20,6 +20,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 30/10/2026 — ChatGPT — Réparés conservés pour validation visuelle
 - Demande Anthony : remettre les sites réparés dans la liste avec la mention Réparé. `admin-test-import.html` conserve désormais les demandes done dans « Sites en réparation » (badge Réparé déjà existant), en plus des demandes pending/in_progress. Les statuts techniques et les résultats de lecture sont préservés.
+- Validation visuelle : après Tester, le bouton existant « Valider ce site » met le prospect en site_check_status=ok (aucun envoi immédiat). Le lien prospect_id de la demande est désormais conservé lors du test pour viser précisément ce prospect, notamment pour une agence appartenant à un réseau. Code enregistré main 9f3f2542 ; syntaxe JavaScript OK. Aucun prospect réellement validé par ChatGPT pendant ce changement : clic laissé à Anthony.
 - Bouton Tester sur chaque ligne : renseigne le site et le secteur dans le formulaire d’aperçu, ouvre le panneau et lance la lecture. Aucun import, publication, statut de prospect ou envoi déclenché. Contrôle de syntaxe JavaScript OK. Source main 45eeba2b.
 
 ### 30/10/2026 — ChatGPT — Réparation des sites déjà signalés (en cours)
