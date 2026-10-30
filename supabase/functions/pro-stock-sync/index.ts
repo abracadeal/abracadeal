@@ -14,6 +14,7 @@ import { readNeyt } from "./neyt-reader.ts";
 import { readVehicleCatalogue } from "./vehicle-catalogues.ts";
 import { readNetworkAgency, readProgressia } from "./estate-catalogues.ts";
 import { readRobynsCar } from "./robyns-reader.ts";
+import { isSupabaseAppShell, readSupabaseApp } from "./supabase-app-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -919,7 +920,7 @@ async function readFeed(feed:any){
   const ct=(r.headers.get('content-type')||'').toLowerCase();
   if(ct.includes('html')||/^\s*<(?:!doctype html|html)/i.test(text)){
     // Adresse d'un site de garage (pas d'un flux) : on choisit le lecteur selon le type de site.
-    const origin=new URL(url.origin);let rows:any[];let platform:string;
+    const origin=new URL(url.origin);let rows:any[];let platform:string;let sbRows:any[]=[];
     const netErr=networkHomeError(url);if(netErr){const err:any=new Error(netErr);err.platform=detectSitePlatform(text);throw err;}
     const orpiSlug=orpiAgencySlug(url)||orpiAgencySlug(new URL(String(feed.feed_url)));
     // Fiche agence sur century21.fr : on suit le lien vers le site de l'agence.
@@ -950,6 +951,8 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    // 30/10/2026 (Claude) : application React / Lovable dont le stock est dans sa propre base Supabase (ex. jbsportauto.fr).
+    else if(isSupabaseAppShell(text)&&(sbRows=await readSupabaseApp(origin,text,feed.sector==='immobilier'?'immobilier':'vehicules',fetchSiteHtml).catch(()=>[])).length){rows=sbRows;platform=(sbRows as any).platform||'Application Supabase';}
     else if(/wp-content|wp-json/i.test(text)&&await isWooSite(origin)){rows=await readWooSite(origin);platform='WordPress / WooCommerce';}
     else if(isAgenceAutoSite(url)){rows=await readAgenceAuto(url,text);platform="L'Agence Automobilière";}
     else if(isStarterreSite(text)){rows=await readStarterreSite(origin,text);platform='Starterre';}
@@ -1025,7 +1028,9 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     }
     const {last_synced_at:ignoredTimestamp,...contentPayload}=payload;
     const includedPhotos=r.photos.slice(0,Math.max(1,Math.min(45,Number(existing?.photo_limit||15))));
-    const signature=await sha256(JSON.stringify({content:contentPayload,photos:includedPhotos}));
+    // 30/10/2026 : un lien photo signé (Supabase …/object/sign/…?token=) change à chaque lecture : on compare le chemin sans le jeton,
+    // sinon l'annonce serait réécrite et remodérée toutes les 3 h.
+    const signature=await sha256(JSON.stringify({content:contentPayload,photos:includedPhotos.map((u:string)=>String(u).replace(/(\/storage\/v1\/object\/sign\/[^?#]+)\?token=[^#]*/,'$1'))}));
     const prior=Array.isArray(existing?.listing_moderation)?existing.listing_moderation[0]:existing?.listing_moderation;
     const photoIds=(existing?.listing_photos||[]).map((p:any)=>p.id).sort();
     if(existing && prior?.stock_import_signature===signature
