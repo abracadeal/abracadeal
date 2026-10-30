@@ -1438,3 +1438,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Question d'Anthony :** pourquoi « Biens lus » (135) ≠ « Prêts à publier » (119) + « Avec erreur » (2) sur Cannisimmo ?
 - **Réponse :** les 14 autres fiches ne seraient pas publiées : même bien présent deux fois sur le site (doublon), ou fiche vendue / illisible. Elles n'étaient pas comptées à part.
 - **Fait (`admin-test-import.html`) :** nouvelle case « Doublons / vendus » (= biens lus − fiches normalisées), cliquable comme « Avec erreur » (un appui : seulement ces fiches ; 2e appui : tout voir). Les fiches vendues / illisibles ne sont plus marquées en rouge comme les erreurs.
+
+### 30/10/2026 — Claude — « Valider ce site » pour un pro absent de la liste
+- **Constaté (Anthony, Infinity Group Immo) :** la fenêtre demandait « l'e-mail du garage » pour une agence, puis rien ne bougeait : Infinity n'est pas dans la liste de prospection, le message « aucun prospect » s'écrivait hors de l'écran.
+- **Fait (`admin-test-import.html`) :** « garage » ou « agence » selon le secteur ; e-mail vérifié ; si l'e-mail n'est pas dans la liste, proposition d'ajouter le pro (nom proposé d'après le site, catégorie selon le secteur, source « validation manuelle (test du site) ») puis validation normale ; refus si l'adresse s'est désinscrite ; le message de résultat (validé, erreur, annulé) est ramené à l'écran.

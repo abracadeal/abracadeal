@@ -406,12 +406,25 @@ async function validateSite(){
   const match=(pros||[]).filter(p=>{try{return new URL(/^https?:/i.test(p.source_url)?p.source_url:'https://'+p.source_url).hostname.replace(/^www\./i,'').toLowerCase()===host}catch{return false}});
   if(!match.length){
    // Prospect de la liste manuelle sans adresse de site : on le retrouve par son e-mail.
-   const mail=(prompt('Aucun prospect de ta liste n\'a ce site ('+host+').\nE-mail du garage pour le relier (laisser vide pour annuler) :')||'').trim().toLowerCase();
-   if(!mail){E('status').innerHTML='Site lu correctement. Rien n\'a été modifié (aucun prospect relié).';b.disabled=false;b.textContent='Valider ce site';return}
+   // 30/10/2026 (Anthony) : « garage » ou « agence » selon le secteur ; si l'e-mail n'est pas dans la liste, on propose d'ajouter le pro.
+   const immo=E('sector').value==='immobilier',who=immo?'de l\'agence':'du garage';
+   const say=m=>{E('status').innerHTML=m;E('status').scrollIntoView({behavior:'smooth',block:'center'});b.disabled=false;b.textContent='Valider ce site';};
+   const mail=(prompt('Aucun pro de ta liste n\'a ce site ('+host+').\nE-mail '+who+' pour le relier (laisser vide pour annuler) :')||'').trim().toLowerCase();
+   if(!mail){say('Site lu correctement. Rien n\'a été modifié (aucun prospect relié).');return}
+   if(!/^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mail)){alert('Adresse e-mail invalide : '+mail);say('Adresse e-mail invalide. Rien n\'a été modifié.');return}
    const{data:byMail,error:me}=await sb.from('prospection_prospects').select('id,company,source_url,email').ilike('email',mail).limit(5);
    if(me)throw me;
-   if(!(byMail||[]).length){E('status').innerHTML='Aucun prospect avec l\'e-mail <b>'+esc(mail)+'</b>. Rien n\'a été modifié.';b.disabled=false;b.textContent='Valider ce site';return}
-   match.push(...byMail);
+   if((byMail||[]).length)match.push(...byMail);
+   else{
+    const{data:opt}=await sb.from('email_opt_outs').select('email').ilike('email',mail).limit(1);
+    if((opt||[]).length){alert(mail+' s\'est désinscrit : impossible de l\'ajouter à la prospection.');say('<b>'+esc(mail)+'</b> s\'est désinscrit de nos e-mails. Rien n\'a été modifié.');return}
+    const guess=host.split('.')[0].replace(/[-_]+/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+    const company=(prompt(mail+' n\'est pas encore dans ta liste de prospection.\nNom '+who+' pour l\'ajouter (laisser vide pour annuler) :',guess)||'').trim();
+    if(!company){say('Rien n\'a été modifié.');return}
+    const{data:added,error:ie}=await sb.from('prospection_prospects').insert({company,email:mail,source_url:url,category:immo?'Agence immobilière':'Garage / concession auto',source:'validation manuelle (test du site)',status:'ready'}).select('id,company,source_url,email');
+    if(ie)throw ie;
+    match.push(...(added||[]));
+   }
   }
   const{error:ue}=await sb.from('prospection_prospects').update({source_url:url,site_check_status:'ok',site_check_count:n||null,site_check_platform:(LASTDATA?.platform||null),site_check_reason:null,site_checked_at:new Date().toISOString(),updated_at:new Date().toISOString()}).in('id',match.map(p=>p.id));
   if(ue)throw ue;
@@ -420,8 +433,8 @@ async function validateSite(){
   await loadLearn();
   E('status').innerHTML='Validé : '+match.map(p=>'<b>'+esc(p.company||p.email||'prospect')+'</b>').join(', ')+' → site testé ('+n+' annonce'+(n>1?'s':'')+'). Ses prochains mails seront ceux du « répondez OK ».';
   b.textContent='Validé ✓';loadUnread();
-  clearTest();
- }catch(e){E('status').innerHTML='<span style="color:var(--bad)">Validation impossible : '+esc(e.message||e)+'</span>';b.disabled=false;b.textContent='Valider ce site'}
+  clearTest();E('status').scrollIntoView({behavior:'smooth',block:'center'});
+ }catch(e){E('status').innerHTML='<span style="color:var(--bad)">Validation impossible : '+esc(e.message||e)+'</span>';E('status').scrollIntoView({behavior:'smooth',block:'center'});b.disabled=false;b.textContent='Valider ce site'}
 }
 E('siteValidate').onclick=validateSite;
 
