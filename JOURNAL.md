@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — en cours : lecture en plusieurs fois
+- Travail sur le nouveau lecteur générique Next.js / Openflex et sa mémoire par flux : point de vente strict, occasion disponible, reprise de file et archivage uniquement en fin de tour. Le HTML du catalogue Peyrot contient déjà les données de tout le stock ; pas d’utilisation de clé du site ni d’accès GraphQL refusé.
+- Le cœur de sync sera adapté pour protéger les références temporairement en erreur et ne pas archiver pendant un tour incomplet. Aucun prospect ni flux réel activé/importé pour les tests.
+
 ### 31/10/2026 — ChatGPT — en cours : gros concessionnaires
 - Priorité Anthony : stock occasion disponible, uniquement le site/agence inscrit ; sources structurées et lecteurs génériques avant HTML. Guides APPRENDRE-AU-ROBOT.md et GROS-SITES.md lus. Aucun prospect, mail, import ou publication.
 - Accès rétablis via les connexions Abracadeal : déploiement vérifié v137 / dbd1755ef031ef34eac4773ef9de5f3340fbbb00. Précédent diagnostic d’accès corrigé : mauvais identifiant de connexion utilisé par ChatGPT.
