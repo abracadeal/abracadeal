@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — en cours : gros concessionnaires
+- Priorité Anthony : stock occasion disponible, uniquement le site/agence inscrit ; sources structurées et lecteurs génériques avant HTML. Guides APPRENDRE-AU-ROBOT.md et GROS-SITES.md lus. Aucun prospect, mail, import ou publication.
+- Accès rétablis via les connexions Abracadeal : déploiement vérifié v137 / dbd1755ef031ef34eac4773ef9de5f3340fbbb00. Précédent diagnostic d’accès corrigé : mauvais identifiant de connexion utilisé par ChatGPT.
+- Peyrot : stock structuré Next.js / urql (2 299 fiches de catalogue) et point de vente i_pve_id ; périmètre agence, disponibilité et pagination à contrôler avant activation. Reverdy.fr (nutrition équine) et autoeurope.fr (location) ne sont pas des concessionnaires. Honda Nantes : HTTP 503 à cet essai.
+
 ### 31/10/2026 — Claude — 36 agences Weecars ajoutées à la prospection
 - Liste des 42 agences = menu « Nos agences » de `weecars.fr/319/vehicules/?stock=…` ; e-mail lu sur chaque page `weecars.fr/319/agence/?agence_id=N` (générique `ville@weecars.fr` ou personnel de l'agent).
 - **Ajoutées (36) :** `Garage / concession auto`, `petit_pro`, `ready`, adresse `…/vehicules/?stock=N`, source « weecars.fr (page agence) ». Non ajoutées : déjà dans la liste (Annemasse, Angers, 5 déjà écrits) ou e-mail en double. Le précontrôle testera chaque stock puis mail « répondez OK ».
