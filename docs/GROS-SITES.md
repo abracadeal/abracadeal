@@ -93,3 +93,23 @@ Par ordre d'efficacité :
 Claude a construit les lecteurs génériques du 30–31/10 (Lovable/Supabase, Roselmac, Simplébo, Vehica, Ewigo, Simplici Car).
 La lecture en plusieurs fois touche le cœur de `syncFeed` / `readSmartSite` : prévenir dans `JOURNAL.md` (« en cours : lecture en plusieurs fois »)
 avant de commencer, pour que Claude ne modifie pas ces fonctions en même temps.
+
+## 6. Cas concret : Transakauto (réseau de franchises, exploré par Claude le 31/10/2026)
+
+- **Site national** `annonces.transakauto.com` (Symfony) : 16 669 véhicules pour tout le réseau. Chaque agence a une page
+  `/concessionnaire-voiture-occasion/agence-<ville>` (ex. `agence-montauban`), mais **la liste de cette page n'est pas filtrée
+  par agence** : elle charge le catalogue national.
+- **Source structurée trouvée** : la liste se charge en appelant la même adresse avec
+  `?_dvid=vehicule_catalog&_view=list&_pageLength=500&_start=0` (+ `Accept: application/json`) → JSON `{total, html}` ;
+  `_pageLength=500` fonctionne → **34 requêtes pour tout le réseau** (titre, prix, km, boîte, année, région, 1re photo, lien `/vehicule/VO…`).
+  Filtres possibles dans `vehicule_catalog_filters[...]` : brand, model, energy, region, country, prix, km, année, `autoGestionId` —
+  **aucun filtre agence**.
+- **L'agence n'apparaît que sur la fiche** `/vehicule/VO…` (e-mail de l'agence, ex. `pertuis@transakauto.com`).
+  Les e-mails d'agence suivent le modèle `<ville>@transakauto.com` (aussi dans le lien « Vendre » : `/vendre/?agency=montauban%40transakauto.com`).
+- **C'est exactement le cas « gros site »** : pour isoler le stock d'une agence il faut ouvrir les fiches (16 669 au total).
+  Piste conseillée : un seul flux « réseau » lu en plusieurs fois (§2), qui ouvre chaque fiche une fois, mémorise son agence
+  (`pro_stock_seen` + colonne agence) et ne relit ensuite que les nouvelles références de la liste ; chaque agence inscrite
+  reçoit alors ses véhicules à partir de cette mémoire commune. Filtrer d'abord par `region` réduit le travail pour une agence donnée.
+- Les voitures viennent du logiciel **Auto-Gestion** (`autoGestionId`, photos `mytransak.transakauto.com`) ; certaines agences ont
+  aussi un site `<agence>.auto-gestion.net` (`/all-vehicles`, chargé en JavaScript, non exploré).
+- Prospection : 9 adresses Transakauto sont dans la liste, en `segment='phase2_reseau'` (en pause, gros réseau gardé pour plus tard).
