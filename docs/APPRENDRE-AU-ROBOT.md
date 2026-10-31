@@ -22,6 +22,7 @@ Lecteurs génériques ajoutés le 30/10/2026 (Claude), à réutiliser avant d'é
 - `ewigo-reader.ts` : agences Ewigo (Laravel / Inertia, JSON dans `data-page`) → `/acheter` = stock de l'agence, `/vehicule/{id}` = fiche ; ne jamais lire `/achat` (stock national).
 - `simplicicar-reader.ts` : agences Simplici Car (page catalogue de l'agence `/N-occasions-…` sur simplicicar.com, fiches PrestaShop `data-product`).
 - Piège : l'en-tête `Accept` du robot préfère le JSON ; certains sites (PrestaShop) répondent alors en JSON au lieu de la page HTML.
+- `autogestion-reader.ts` : sites de garage Auto-Gestion (`*.auto-gestion.net`, agences Transakauto…) : `/vehicles?page=N` + fiches `/vehicle/<id>`.
 - Astuce : un site Laravel / Inertia (`data-page="{…}"`) contient toutes ses données en JSON dans la page.
 - Astuce générale : avant de lire les pages HTML d'un WordPress, regarder `/wp-json/wp/v2/types` : beaucoup de thèmes de garage / d'agence publient leur stock en JSON.
 

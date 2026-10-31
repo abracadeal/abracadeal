@@ -112,4 +112,5 @@ avant de commencer, pour que Claude ne modifie pas ces fonctions en même temps.
   reçoit alors ses véhicules à partir de cette mémoire commune. Filtrer d'abord par `region` réduit le travail pour une agence donnée.
 - Les voitures viennent du logiciel **Auto-Gestion** (`autoGestionId`, photos `mytransak.transakauto.com`) ; certaines agences ont
   aussi un site `<agence>.auto-gestion.net` (`/all-vehicles`, chargé en JavaScript, non exploré).
+- **Mise à jour (Claude, 31/10) : chaque agence a aussi son site Auto-Gestion, lu par `autogestion-reader.ts`** (Lyon 8 : 153 lus, 139 complets). Pour inscrire une agence Transakauto, donner l'adresse `<agence>.auto-gestion.net`, pas le site national.
 - Prospection : 9 adresses Transakauto sont dans la liste, en `segment='phase2_reseau'` (en pause, gros réseau gardé pour plus tard).

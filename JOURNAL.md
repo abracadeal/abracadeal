@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Lecteur Auto-Gestion (agences Transakauto et autres garages)
+- **Précision d'Anthony :** les garages Transakauto ont chacun leur site, tous identiques (comme Simplici Car). Ce sont des sites **Auto-Gestion** (`<garage>.auto-gestion.net`, Drupal multisite « agc.accommodata.fr »), utilisés aussi par d'autres garages (AUTO DUVAL, AK MOTORS, Select VO…).
+- **Fait (`autogestion-reader.ts`, branché avant Ewigo) :** liste `/vehicles?page=N` (liens `/vehicle/<id>` en guillemets simples), fiche : `<h1>` (titre coupé au premier « | », le reste en tête de description), tableau `<th scope="row">` (Constructeur, Modèle, Finition, Energie, Transmission, Kilométrage, Année, Mise en circulation, Chevaux Fiscaux, Puissance du moteur, Couleur, Sièges, Garantie), équipements, `.price`, « Réf. : », Crit'Air (image `critair/N.png`), galerie 848x565. Ville : titre du site (« … LYON 69008 »). « Essence / Courant électrique » → Hybride.
+- **Test :** Transakauto Lyon 8 : 153 lus, 139 complets, 4 658 photos ; 13 sans photo et 5 sans prix sur le site (arrivages). Déployé v135 (commit bca0629).
+- `docs/GROS-SITES.md` §6 : le site national annonces.transakauto.com reste un « gros site » (16 669 voitures, agence seulement sur la fiche) ; pour une agence, utiliser son site Auto-Gestion.
+
 ### 31/10/2026 — Claude — Note pour ChatGPT : gros sites (lecture en plusieurs fois)
 - **Demande d'Anthony :** donner à ChatGPT les infos pour les gros sites. → **`docs/GROS-SITES.md`** (à lire avant de commencer).
 - Problème : sur un gros stock, chaque passage recommence du début et s'arrête avant la fin ; une lecture partielle n'archive jamais rien → **les annonces vendues des gros sites ne sont jamais retirées**, une partie du stock n'est jamais lue, l'inscription reste « à vérifier ».
