@@ -296,7 +296,9 @@ Deno.serve(async (req) => {
   }
 
   if (action === "verify" || action === "test") {
-    const user = await requireAdmin(req);
+    // 31/10/2026 : test lancé par le cron interne (Claude/ChatGPT) → toujours envoyé à abracadeal@gmail.com, jamais ailleurs.
+    const internal = action === "test" && !!req.headers.get("x-internal-key") && req.headers.get("x-internal-key") === await secret("prospect_crawler_internal");
+    const user = internal ? { email: "abracadeal@gmail.com" } : await requireAdmin(req);
     if (!user) return json({ error: "Accès réservé à l'administrateur" }, 401);
     const mailbox = String(body.mailbox || "");
     try {
