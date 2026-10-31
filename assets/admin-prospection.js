@@ -74,21 +74,21 @@ async function loadProspects(){
   const st=$('statusFilter').value;if(st)q=q.eq('status',st);
   const cat=$('categoryFilter').value;if(cat)q=q.eq('category',cat);
   const {data,error}=await q;
-  if(error){$('prospectsBody').innerHTML='<tr><td colspan="8">Erreur : '+esc(error.message)+'</td></tr>';return}
+  if(error){$('prospectsBody').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
   allRows=data||[];
-  $('prospectsBody').innerHTML=allRows.length?allRows.map(r=>`<tr>
-    <td data-l="Société"><b>${esc(r.company)}</b></td>
-    <td data-l="E-mail">${esc(r.email)}</td>
-    <td data-l="Catégorie">${esc(r.category||'—')}</td>
-    <td data-l="Ville">${esc(r.city||'—')}</td>
-    <td data-l="Statut"><span class="pill ${esc(r.status)}">${esc(({ready:'Prêt',sent:'Envoyé',error:'Erreur',opted_out:'STOP',paused:'Pause',sending:'Envoi'})[r.status]||r.status)}</span></td>
-    <td data-l="Dernier envoi">${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR'):'—'}</td>
-    <td data-l="Clics">${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</td>
-    <td data-l="Action">${r.status==='opted_out'
-      ?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>'
-      :'<button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}
-    </td>
-  </tr>`).join(''):'<tr><td colspan="8" class="muted">Aucun prospect.</td></tr>';
+  renderProspects();
+}
+// 31/10/2026 (Anthony) : liste compacte, une ligne par prospect qui se déplie au toucher (fini le grand défilement).
+const P_ST={ready:'Prêt',sent:'Envoyé',error:'Erreur',opted_out:'STOP',paused:'Pause',sending:'Envoi'};
+function renderProspects(){
+  const q=($('pSearch')?.value||'').trim().toLowerCase();
+  const list=q?allRows.filter(r=>[r.company,r.email,r.city,r.category].some(x=>String(x||'').toLowerCase().includes(q))):allRows;
+  if($('pCount'))$('pCount').textContent=list.length+(allRows.length>=300?'+':'');
+  $('prospectsBody').innerHTML=list.length?list.map(r=>`<details class="pr"><summary><span class="prn">${esc(r.company||'Sans nom')}</span><span class="pill ${esc(r.status)}">${esc(P_ST[r.status]||r.status)}</span></summary><div class="prb">
+    <div><span>E-mail</span>${esc(r.email)}</div><div><span>Métier</span>${esc(r.category||'—')}</div><div><span>Ville</span>${esc(r.city||'—')}</div>
+    <div><span>Dernier envoi</span>${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—'}</div><div><span>Clics</span>${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</div>
+    <div class="pra">${r.status==='opted_out'?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>':'<button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}</div>
+  </div></details>`).join(''):'<div class="small">Aucun prospect.</div>';
 }
 
 async function loadTracking(){
@@ -112,6 +112,7 @@ async function loadTracking(){
   $('trackGroups').innerHTML=keys.map((k,gi)=>{const g=groups.get(k),acc=g.filter(r=>r.account_at).length;return '<details class="dayg"'+(gi===0?' open':'')+'><summary><span>'+esc(dayLabel(k))+'</span><span class="dayn">'+g.length+' pro'+(g.length>1?'s':'')+(acc?' · <b class="ok">'+acc+' compte'+(acc>1?'s':'')+'</b>':'')+'</span></summary><div class="dayl">'+g.map(r=>'<div class="cl"><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b>'+(r.account_at?'<span class="pill ok">Compte créé</span>':'')+'</div><div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · '+(Number(r.click_count||0))+' clic'+(Number(r.click_count||0)>1?'s':'')+'</div><div class="clm">'+esc(r.email||'')+' · envoyé '+esc(fmtDate(r.sent_at))+(r.followup_sent_at?' · relance '+esc(fmtDate(r.followup_sent_at)):'')+'</div>'+(r.account_at&&r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<div class="clm">Compte : '+esc(r.account_email)+'</div>':'')+'</div>').join('')+'</div></details>'}).join('');
 }
 
+document.addEventListener('input',e=>{if(e.target&&e.target.id==='pSearch')renderProspects();});
 async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking()])}
 
 async function markStop(id){

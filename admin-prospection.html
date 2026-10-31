@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script><script src="assets/admin-auth.js?v=1"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="assets/admin-prospection.css?v=20261031-jours">
+<link rel="stylesheet" href="assets/admin-prospection.css?v=20261031-plist">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
@@ -141,28 +141,21 @@
     <div id="sendMsg" class="notice" style="display:none"></div>
   </details>
 
-  <section class="card">
-    <div class="row" style="justify-content:space-between">
-      <h2 style="margin:0">Prospects</h2>
-      <div class="row">
-        <select id="statusFilter" style="width:auto">
-          <option value="">Tous statuts</option>
-          <option value="ready">Prêts</option>
-          <option value="sent">Envoyés</option>
-          <option value="error">Erreurs</option>
-          <option value="opted_out">STOP</option>
-          <option value="paused">En pause</option>
-        </select>
-        <button class="btn" id="refreshBtn">Actualiser</button>
-      </div>
+  <details class="card fold" id="prospectsFold"><summary>Liste des prospects <span class="dayn" id="pCount"></span></summary>
+    <div class="row pfilters">
+      <input id="pSearch" type="search" placeholder="Chercher un nom, un e-mail, une ville…">
+      <select id="statusFilter">
+        <option value="">Tous statuts</option>
+        <option value="ready">Prêts</option>
+        <option value="sent">Envoyés</option>
+        <option value="error">Erreurs</option>
+        <option value="opted_out">STOP</option>
+        <option value="paused">En pause</option>
+      </select>
+      <button class="btn" id="refreshBtn">↻</button>
     </div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Statut</th><th>Dernier envoi</th><th>Clics</th><th>Action</th></tr></thead>
-        <tbody id="prospectsBody"><tr><td colspan="8" class="muted">Chargement…</td></tr></tbody>
-      </table>
-    </div>
-  </section>
+    <div id="prospectsBody" class="plist"><div class="small">Chargement…</div></div>
+  </details>
 </main>
 
 <section class="card lock" id="lock">
@@ -171,7 +164,7 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261031-jours"></script>
+<script src="assets/admin-prospection.js?v=20261031-plist"></script>
 <script src="/assets/app-shell-20261018.js?v=6" defer></script>
 </body>
 </html>
