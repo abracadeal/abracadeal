@@ -6,10 +6,11 @@ const imageId=(s:string)=>{try{const u=new URL(s);const p=decodeURIComponent(u.p
 const area=(r:any)=>Number(r.surface)||Number(String(r.description||'').match(/(?:bas de villa|appartement|maison)[^.\n]{0,45}?\b(\d+(?:[.,]\d+)?)\s*m[²2]/i)?.[1]?.replace(',','.'))||0;
 const eligible=(r:any)=>r.category==='immobilier'&&/^https?:\/\/(?:www\.)?orpi\.com\//i.test(r.externalUrl||'')&&r.price>0&&area(r)>0&&r.rooms>0&&!/programme neuf|plusieurs lots|lot\s*(?:n[°o]|num[ée]ro)|r[ée]sidence neuve/i.test(r.title+' '+r.description);
 export async function dedupeEstateListings(rows:any[],photoDigest:(url:string)=>Promise<string|null>){
+ const eligibility=new WeakMap<object,boolean>(),areas=new WeakMap<object,number>();const can=(r:any)=>{if(!eligibility.has(r))eligibility.set(r,eligible(r));return eligibility.get(r);};const size=(r:any)=>{if(!areas.has(r))areas.set(r,area(r));return areas.get(r)!;};
  const groups:any[][]=[];let removed=0;const digests=new Map<string,Promise<string|null>>();
  const hash=(u:string)=>{if(!digests.has(u))digests.set(u,photoDigest(u).catch(()=>null));return digests.get(u)!;};
  for(const r of rows){let match:any[]|undefined;
-  if(eligible(r))for(const g of groups){const a=g[0];if(!eligible(a)||a.price!==r.price||Math.abs(area(a)-area(r))>0.1||a.rooms!==r.rooms||a.transaction!==r.transaction||String(a.postal||'').slice(0,2)!==String(r.postal||'').slice(0,2))continue;
+  if(can(r))for(const g of groups){const a=g[0];if(!can(a)||a.price!==r.price||Math.abs(size(a)-size(r))>0.1||a.rooms!==r.rooms||a.transaction!==r.transaction||String(a.postal||'').slice(0,2)!==String(r.postal||'').slice(0,2))continue;
    if(a.sub!==r.sub&&!( /bas de villa/i.test(a.description)&&/bas de villa/i.test(r.description)&&[a.sub,r.sub].every(s=>['vente-maison','vente-appartement'].includes(s))))continue;
    const x=grams(a.description),y=grams(r.description);if(Math.min(x.size,y.size)<60)continue;let common=0;for(const v of x)if(y.has(v))common++;const score=2*common/(x.size+y.size);if(score<0.75)continue;
    const ap=(a.photos||[]).filter((u:string)=>!isPlaceholderPhoto(u)),rp=(r.photos||[]).filter((u:string)=>!isPlaceholderPhoto(u));if(ap.length<3||rp.length<3)continue;
