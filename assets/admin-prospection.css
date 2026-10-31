@@ -88,3 +88,12 @@ details.fold[open]{padding:0 18px 18px}details.fold[open]>summary{padding:16px 0
   .tablewrap td[data-l="Société"]{font-size:1rem;text-align:left;padding-bottom:6px!important}.tablewrap td[data-l="Société"]::before{display:none}
   .tablewrap td[colspan]{display:block;text-align:center}.tablewrap td[colspan]::before{display:none}
 }
+
+.dayg{background:#140d1b;border:1px solid var(--line);border-radius:14px;margin-top:8px;overflow:hidden}
+.dayg>summary{list-style:none;cursor:pointer;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:800}
+.dayg>summary::-webkit-details-marker{display:none}.dayg>summary span:first-child::first-letter{text-transform:uppercase}
+.dayg>summary::after{content:'▾';color:var(--muted);transition:.2s}.dayg[open]>summary::after{transform:rotate(180deg)}
+.dayn{margin-left:auto;color:var(--muted);font-weight:600;font-size:.86rem}.dayn b.ok,.pill.ok{color:var(--green)}
+.dayl{padding:0 14px 10px}.cl{padding:9px 0;border-top:1px solid rgba(255,255,255,.06)}
+.clh{display:flex;justify-content:space-between;gap:8px;align-items:center}.clm{color:var(--muted);font-size:.82rem;margin-top:2px;word-break:break-word}
+.pill.ok{border:1px solid rgba(59,209,139,.4);border-radius:99px;padding:2px 8px;font-size:.72rem;font-weight:800;white-space:nowrap}

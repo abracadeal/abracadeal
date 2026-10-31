@@ -93,7 +93,7 @@ async function loadProspects(){
 
 async function loadTracking(){
   const {data,error}=await sb.rpc('admin_prospect_tracking');
-  if(error){$('trackBody').innerHTML='<tr><td colspan="8">Erreur : '+esc(error.message)+'</td></tr>';return}
+  if(error){$('trackGroups').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
   const t=data||{},sent=Number(t.sent||0),clicked=Number(t.clicked||0);
   $('tSent').textContent=sent;$('tClicked').textContent=clicked;$('tAccounts').textContent=Number(t.accounts||0);
   $('tRate').textContent=sent?(clicked/sent*100).toLocaleString('fr-FR',{maximumFractionDigits:1})+' %':'—';
@@ -103,12 +103,13 @@ async function loadTracking(){
   $('tByCat').innerHTML=(t.tracked_since?'<div class="small catsince">Suivi depuis le '+esc(fmtDate(t.tracked_since))+'</div>':'<div class="small catsince">Le suivi démarre avec les prochains envois.</div>')+
     (t.by_category||[]).map(c=>{const r=c.sent?Math.round(c.clicked/c.sent*1000)/10:0;return '<div class="catc"><div class="catn">'+esc(c.category)+'</div><div class="catv"><b>'+c.clicked+'</b> clic'+(c.clicked>1?'s':'')+' / '+c.sent+' mails · <b>'+r.toLocaleString('fr-FR')+' %</b>'+(c.accounts?' · <b class="ok">'+c.accounts+' compte'+(c.accounts>1?'s':'')+'</b>':'')+'</div><div class="catbar"><i style="width:'+Math.min(100,r*10)+'%"></i></div></div>'}).join('');
   const rows=t.rows||[];
-  $('trackBody').innerHTML=rows.length?rows.map(r=>`<tr>
-    <td data-l="Société"><b>${esc(r.company)}</b></td><td data-l="E-mail">${esc(r.email)}</td><td data-l="Catégorie">${esc(r.category||'—')}</td><td data-l="Ville">${esc(r.city||'—')}</td>
-    <td data-l="Envoyé">${esc(fmtDate(r.sent_at))}${r.followup_sent_at?'<br><span class="muted">relance '+esc(fmtDate(r.followup_sent_at))+'</span>':''}</td>
-    <td data-l="Clics">${Number(r.click_count||0)||'—'}</td><td data-l="Dernier clic">${esc(fmtDate(r.last_clicked_at))||'—'}</td>
-    <td data-l="Compte">${r.account_at?'<b>Oui</b> · '+esc(fmtDate(r.account_at))+(r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<br><span class="muted">'+esc(r.account_email)+'</span>':''):'—'}</td>
-  </tr>`).join(''):'<tr><td colspan="8" class="muted">Personne n’a encore cliqué.</td></tr>';
+  // 31/10/2026 (Anthony) : les prospects qui ont cliqué, regroupés par jour du dernier clic (le plus récent ouvert, les autres repliés).
+  if(!rows.length){$('trackGroups').innerHTML='<div class="small">Personne n’a encore cliqué.</div>';return}
+  const dayKey=d=>{const x=d?new Date(d):null;return x&&!isNaN(x)?x.toLocaleDateString('fr-CA',{timeZone:'Europe/Paris'}):'0000'};
+  const dayLabel=k=>{if(k==='0000')return 'Date inconnue';const t=new Date().toLocaleDateString('fr-CA',{timeZone:'Europe/Paris'}),y=new Date(Date.now()-864e5).toLocaleDateString('fr-CA',{timeZone:'Europe/Paris'});if(k===t)return 'Aujourd’hui';if(k===y)return 'Hier';const [a,m,j]=k.split('-');return new Date(+a,+m-1,+j).toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long'})};
+  const groups=new Map();for(const r of rows){const k=dayKey(r.last_clicked_at||r.sent_at);if(!groups.has(k))groups.set(k,[]);groups.get(k).push(r)}
+  const keys=[...groups.keys()].sort().reverse();
+  $('trackGroups').innerHTML=keys.map((k,gi)=>{const g=groups.get(k),acc=g.filter(r=>r.account_at).length;return '<details class="dayg"'+(gi===0?' open':'')+'><summary><span>'+esc(dayLabel(k))+'</span><span class="dayn">'+g.length+' clic'+(g.length>1?'s':'')+(acc?' · <b class="ok">'+acc+' compte'+(acc>1?'s':'')+'</b>':'')+'</span></summary><div class="dayl">'+g.map(r=>'<div class="cl"><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b>'+(r.account_at?'<span class="pill ok">Compte créé</span>':'')+'</div><div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · '+(Number(r.click_count||0))+' clic'+(Number(r.click_count||0)>1?'s':'')+'</div><div class="clm">'+esc(r.email||'')+' · envoyé '+esc(fmtDate(r.sent_at))+(r.followup_sent_at?' · relance '+esc(fmtDate(r.followup_sent_at)):'')+'</div>'+(r.account_at&&r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<div class="clm">Compte : '+esc(r.account_email)+'</div>':'')+'</div>').join('')+'</div></details>'}).join('');
 }
 
 async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking()])}

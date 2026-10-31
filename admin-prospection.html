@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script><script src="assets/admin-auth.js?v=1"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="assets/admin-prospection.css?v=20261031-mep">
+<link rel="stylesheet" href="assets/admin-prospection.css?v=20261031-jours">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
@@ -48,12 +48,7 @@
       <div class="metric"><span>Comptes créés</span><strong id="tAccounts">0</strong></div>
     </section>
     <div id="tByCat" class="catgrid"></div>
-    <div class="tablewrap">
-      <table>
-        <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Envoyé</th><th>Clics</th><th>Dernier clic</th><th>Compte</th></tr></thead>
-        <tbody id="trackBody"><tr><td colspan="8" class="muted">Chargement…</td></tr></tbody>
-      </table>
-    </div>
+    <div id="trackGroups"><div class="small">Chargement…</div></div>
   </section>
 
   <details class="card fold"><summary>Importer un fichier de prospects</summary>
@@ -176,7 +171,7 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261031-mep"></script>
+<script src="assets/admin-prospection.js?v=20261031-jours"></script>
 <script src="/assets/app-shell-20261018.js?v=6" defer></script>
 </body>
 </html>
