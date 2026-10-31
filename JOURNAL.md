@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — gros sites : reprise toutes les 15 min pendant un tour
+- `sync_all` : un flux site dont `pro_stock_crawl_state.state.completed` est vide (tour en cours, mis à jour < 72 h) est relancé à chaque cron (~15 min, mini 13 min) au lieu d'attendre 175 min. Une fois le tour fini, retour au rythme 3 h. Rien d'autre changé dans la lecture (code ChatGPT). Déployé v151 / e4af4ca.
+- Prospects : bouton « Mail normal » et « Supprimer » dans Sites en réparation (`admin_robot_learning_mail_normal`, `admin_robot_learning_delete`), offre Fondateurs refusée aux désinscrits (`private.founder_optout_conflict`, CGV mises à jour).
+
 ### 31/10/2026 — ChatGPT — Carnot, écart de compteur expliqué et complément JSON
 - Le compteur sans transaction 536 inclut 38 locations d'autres agences ; elles ont été identifiées dans la réponse publique `/recherche/ajax` (agimmo, Lancelot, etc.), hors des six locations de la recherche Carnot. Les compteurs filtrés officiels donnent 492 ventes et 6 locations : cible réelle 498, et non 536. Sept ventes n'étaient pas présentes dans les liens des pages catalogue consultées.
 - `orpi-catalogue.ts` lit la recherche JSON publique par transaction buy/rent, agency et onlyEnabled, et exige que l'agence et le total soient confirmés dans la réponse. Les ventes partagées présentes dans cette recherche restent autorisées, sans élargir aux locations d'autres agences. Catalogue > plafond JSON : complément par pagination HTML, total distinct obligatoirement égal au compteur filtré, sinon pas d'archivage.
