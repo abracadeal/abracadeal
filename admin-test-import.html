@@ -138,6 +138,7 @@ details.fold[open]{padding-bottom:14px}
  <details class="fold" id="fold-learn"><summary><span>Sites en réparation</span> <span class="fold-n" data-count="learnq"></span></summary>
 
  <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Demande à ChatGPT (ou à Claude) de les traiter : guide docs/APPRENDRE-AU-ROBOT.md.</p>
+ <div style="display:flex;justify-content:flex-end;margin:0 2px 8px"><button class="sbtn" type="button" id="refreshLearn">↻ Mettre à jour</button></div>
  <div class="reqs" id="learnq"><div class="empty">Chargement…</div></div>
  </details>
  <details class="fold" id="fold-unread"><summary><span>Sites à apprendre</span> <span class="fold-n" data-count="unread"></span></summary>
@@ -173,6 +174,7 @@ async function init(){
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
  E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();
+ E('refreshLearn').onclick=async()=>{const b=E('refreshLearn');b.disabled=true;b.textContent='Mise à jour…';try{await loadLearn();}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('sitePreview').onclick=previewSite;
  E('learnCur').onclick=async()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;if(await askLearn(u,E('sector').value,LEARN_CONTEXT?.company||'',LEARN_CONTEXT?.url===u?LEARN_CONTEXT.prospectId||null:null)){clearTest();E('status').innerHTML='Envoyé dans « Sites en réparation » : <b>'+esc(u)+'</b>';}};
