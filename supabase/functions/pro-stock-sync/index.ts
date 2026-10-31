@@ -312,7 +312,7 @@ async function loadOverrides(rows:any[]){
 async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const ovr=await loadOverrides(rows);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw0 of rows){const fx=ovr.get(hostOf(raw0?.url)+'|'+String(raw0?.reference??''));if(fx?._exclure)continue;const raw=fx?{...raw0,...Object.fromEntries(Object.entries(fx).filter(([k,v])=>!k.startsWith('_')&&v!==null&&v!==''))}:raw0;const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(fx)r.corrected=true;if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}if(r.description)r.description=tidyDescription(r.description,r.title);if(Array.isArray(r.photos))r.photos=dedupePhotos(r.photos);out.push(r);}
  // Geo is optional enrichment: bound its network time and process distinct cities in parallel.
  const cityGroups=new Map<string,any[]>();for(const r of out){const key=norm(String(r.city||''));if(!cityGroups.has(key))cityGroups.set(key,[]);cityGroups.get(key)!.push(r);}
- const groups=[...cityGroups.values()];let geoNext=0;await Promise.all(Array.from({length:4},async()=>{while(geoNext<groups.length){const group=groups[geoNext++];for(const r of group)await correctCityPostal(r);}}));
+ const groups=[...cityGroups.values()];let geoNext=0;await Promise.all(Array.from({length:4},async()=>{while(geoNext<Math.min(groups.length,4)){const group=groups[geoNext++];for(const r of group)await correctCityPostal(r);}}));
  // Même annonce publiée deux fois sur le site (références différentes) : on garde celle qui a le plus de photos.
  const seenL=new Map<string,number>();const res:any[]=[];let dup=0;
  for(const r of out){const k=listingKey(r);const j=seenL.get(k);if(j===undefined){seenL.set(k,res.length);res.push(r);continue;}dup++;if((r.photos?.length||0)>(res[j].photos?.length||0))res[j]=r;}
@@ -683,13 +683,14 @@ function parseOrpiEstate(html:string,url:string){
 }
 async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){
  const roots=[`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`,`/${slug}/acheter`];
+ const count=await fetchSiteHtml(new URL('/recherche/count?agency='+encodeURIComponent(slug),origin));const expected=/^\s*\d+\s*$/.test(count.text)?Number(count.text):undefined;
  return crawlCatalogue(new URL('/'+slug+'/',origin).toString(),'orpi-v2:'+slug,roots.map(p=>new URL(p,origin).toString()),fetchSiteHtml,(html,page)=>{
   const details=[...new Set([...html.matchAll(/href="(\/annonce-[a-z0-9-]+-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?[^" ]*)"/gi)].map(m=>new URL(decodeEntities(m[1]),origin).toString()))];
   const lists:string[]=[];
   for(const m of html.matchAll(/href=["']([^"']+)["']/g)){try{const u=new URL(decodeEntities(m[1]),page);if(u.origin===origin.origin&&roots.includes(u.pathname)&&/^\d+$/.test(u.searchParams.get('page')||'')&&Number(u.searchParams.get('page'))>Number(page.searchParams.get('page')||1)){const n=new URL(u.pathname,origin);n.searchParams.set('page',u.searchParams.get('page')!);lists.push(n.toString());}}catch{}}
   if(!/data-estate|annonce-|Aucun bien|aucun résultat|0 bien/i.test(html))throw Error('Catalogue Orpi non reconnu');
   return {lists,details};
- },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory);
+ },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory,{expectedTotal:expected});
 }
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).

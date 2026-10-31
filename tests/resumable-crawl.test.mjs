@@ -12,3 +12,7 @@ const replay=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,me
 state.started='2020-01-01T00:00:00Z';state.completed=null;state.rows.stale={reference:'stale'};rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});assert.equal(rows.some(x=>x.reference==='stale'),false);
 state=null;fail=true;for(let i=0;i<8;i++)rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});assert.equal(rows.partial,true);assert.ok(rows.stats.failed.length);assert.equal(state.completed,null);
 console.log('Resume: list pagination, multiple passes, replay, transient retry, permanent failure blocks completion, 72h reset OK');
+let collision=null;const collisionMemory={load:async()=>collision,save:async s=>{collision=structuredClone(s)}};const collisionRows=await crawlCatalogue(source,'collisions',[source],fetcher,()=>({lists:[],details:['https://example.com/a','https://example.com/c']}),()=>({reference:'same-mandate'}),collisionMemory);assert.equal(collisionRows.length,2);assert.equal(collisionRows.cycleSeen.length,1);
+console.log('Distinct source URLs sharing a mandate are retained for normalization OK');
+
+const mismatch=await crawlCatalogue(source,'count',[source],fetcher,()=>({lists:[],details:['https://example.com/a']}),parse,undefined,{expectedTotal:2});assert.equal(mismatch.partial,true);assert.equal(mismatch.stats.total_mismatch,true);
