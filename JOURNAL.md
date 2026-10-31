@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — Carnot, triple du canapé noir
+- Retour visuel d'Anthony confirmé : références 37511a11, e1004b51 et 204c545e, même bas de villa 100 m² / 4 pièces / 349000 €, deux Cannes et un Le Cannet, maison et appartement. Contrôle des photos : première image strictement identique (SHA-256 identique sur les trois fichiers téléchargés), galeries et descriptions cohérentes avec le même bien. La divergence de ville/type existe dans les trois fiches source.
+- `estate-duplicates.ts` ajoute un rapprochement Orpi prudent après le dédoublonnage existant : même transaction/prix/surface/pièces/département, description détaillée proche et preuve photographique (galerie très largement commune ou image strictement identique en octets). Les programmes/numéros de lots sont exclus ; pas de fusion sur la seule photo. Téléchargement image public limité à 3 Mo / 4 s, redirections et adresses contrôlées ; échec => fiches laissées séparées.
+- Conserve la fiche source avec le plus de photos (ou une fiche corrigée par l'admin), sans réécrire la ville ; aliases conservés pour contrôle. Affiche les villes contradictoires à la source dans l'aperçu. Autres connecteurs inchangés. Aucun import/publication/flux/prospect/mail modifié.
+- Test réel du triple + contre-exemples prix/surface/pièces/transaction/lot/photo différente ou indisponible et priorité de correction manuelle : OK. Production à contrôler avant de déclarer cette correction terminée.
+
 ### 31/10/2026 — Claude — gros sites : reprise toutes les 15 min pendant un tour
 - `sync_all` : un flux site dont `pro_stock_crawl_state.state.completed` est vide (tour en cours, mis à jour < 72 h) est relancé à chaque cron (~15 min, mini 13 min) au lieu d'attendre 175 min. Une fois le tour fini, retour au rythme 3 h. Rien d'autre changé dans la lecture (code ChatGPT). Déployé v151 / e4af4ca.
 - Prospects : bouton « Mail normal » et « Supprimer » dans Sites en réparation (`admin_robot_learning_mail_normal`, `admin_robot_learning_delete`), offre Fondateurs refusée aux désinscrits (`private.founder_optout_conflict`, CGV mises à jour).

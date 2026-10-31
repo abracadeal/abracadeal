@@ -1,3 +1,4 @@
+import {dedupeEstateListings} from "./estate-duplicates.ts";
 import { readOrpiCatalogue } from "./orpi-catalogue.ts";
 import { encodeCrawlState, decodeCrawlState } from "./crawl-transport.ts";
 import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
@@ -311,6 +312,9 @@ async function loadOverrides(rows:any[]){
  const{data}=await admin.from('pro_stock_overrides').select('host,ref,fields').in('host',hosts);
  for(const o of data||[])map.set(o.host+'|'+o.ref,o.fields||{});return map;
 }
+async function estatePhotoDigest(raw:string){
+ try{let url=new URL(raw);for(let i=0;i<3;i++){await publicFeedUrl(url);const r=await fetch(url,{redirect:'manual',signal:AbortSignal.timeout(4000)});if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc)return null;url=new URL(loc,url);continue;}if(!r.ok||!r.headers.get('content-type')?.startsWith('image/')||Number(r.headers.get('content-length')||0)>3_000_000){await r.body?.cancel();return null;}if(!r.body)return null;const reader=r.body.getReader(),parts:Uint8Array[]=[];let size=0;for(;;){const x=await reader.read();if(x.done)break;size+=x.value.length;if(size>3_000_000){await reader.cancel();return null;}parts.push(x.value);}const bytes=new Uint8Array(size);let offset=0;for(const p of parts){bytes.set(p,offset);offset+=p.length;}return [...new Uint8Array(await crypto.subtle.digest('SHA-256',bytes))].map(x=>x.toString(16).padStart(2,'0')).join('');}return null;}catch{return null;}
+}
 async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,preferSite=false){const own=await ownerLocation(ownerId);const ovr=await loadOverrides(rows);const site=(rows as any).siteLocation||null;const loc=preferSite?(site||own):(own||site);const force=!preferSite&&!!own?.city;const out=[];for(const raw0 of rows){const fx=ovr.get(hostOf(raw0?.url)+'|'+String(raw0?.reference??''));if(fx?._exclure)continue;const raw=fx?{...raw0,...Object.fromEntries(Object.entries(fx).filter(([k,v])=>!k.startsWith('_')&&v!==null&&v!==''))}:raw0;const r=sector==='immobilier'?normalizeImmo(raw):normalizeVehicle(raw);if(fx)r.corrected=true;if(/^\s*(?:vendue?s?|lou[ée]e?s?|sous compromis|compromis sign[ée]|r[ée]serv[ée]e?)\b/i.test(String(r.title||'')))continue;if(loc?.city&&((r.category==='vehicules'&&force)||!r.city)){r.city=loc.city;r.postal=loc.postal||(r.category==='vehicules'?'':r.postal)||'';r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');}if(r.description)r.description=tidyDescription(r.description,r.title);if(Array.isArray(r.photos))r.photos=dedupePhotos(r.photos);out.push(r);}
  // Geo is optional enrichment: bound its network time and process distinct cities in parallel.
  const cityGroups=new Map<string,any[]>();for(const r of out){const key=norm(String(r.city||''));if(!cityGroups.has(key))cityGroups.set(key,[]);cityGroups.get(key)!.push(r);}
@@ -318,7 +322,7 @@ async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,prefe
  // Même annonce publiée deux fois sur le site (références différentes) : on garde celle qui a le plus de photos.
  const seenL=new Map<string,number>();const res:any[]=[];let dup=0;
  for(const r of out){const k=listingKey(r);const j=seenL.get(k);if(j===undefined){seenL.set(k,res.length);res.push(r);continue;}dup++;if((r.photos?.length||0)>(res[j].photos?.length||0))res[j]=r;}
- (res as any).duplicates=dup;return res;}
+ const merged=await dedupeEstateListings(res,estatePhotoDigest);(merged.rows as any).duplicates=dup+merged.removed;return merged.rows;}
 
 async function authUser(req:Request){const h=req.headers.get('Authorization')||'';if(!h)return null;const c=createClient(SUPABASE_URL,ANON_KEY,{global:{headers:{Authorization:h}},auth:{persistSession:false}});const{data}=await c.auth.getUser();return data?.user||null;}
 async function cronOk(req:Request){const tok=req.headers.get('x-cron-token')||'';if(!tok)return false;const hash=await sha256(tok);const{data}=await admin.from('pro_sync_secrets').select('value_hash').eq('name','cron_sync').maybeSingle();return!!data&&data.value_hash===hash;}
