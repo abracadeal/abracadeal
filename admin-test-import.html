@@ -309,7 +309,8 @@ async function load(ev){
   // au moins 20 annonces complètes et 90 % du stock lu (le robot finira le reste après l'inscription).
   const okN=NORM.filter(n=>!(n.errors||[]).length).length,tot=Number(data.total_on_site||0);
   const bigOk=!!data.partial&&okN>=20&&(!tot||NORM.length>=tot*0.9);
-  E('siteValidate').hidden=(!!data.partial&&!bigOk)||!okN;E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
+  // Le bouton est toujours là dès qu'une annonce complète est lue ; si la lecture est loin d'être finie, une confirmation est demandée.
+  E('siteValidate').hidden=!okN;E('siteValidate').dataset.partialWarn=(!!data.partial&&!bigOk)?'1':'';E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
  }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
@@ -425,6 +426,7 @@ function clearTest(){
  LASTDATA=null;NORM=[];ROWS=[];LEARN_CONTEXT=null;
 }
 async function validateSite(){
+ if(E('siteValidate').dataset.partialWarn&&!confirm('Le test n’a lu qu’une partie du site. Valider quand même ? Le robot lira le reste après l’inscription.'))return;
  const b=E('siteValidate');b.disabled=true;b.textContent='Validation…';
  try{
   let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
