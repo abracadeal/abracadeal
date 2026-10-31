@@ -45,7 +45,7 @@ table{width:100%;border-collapse:collapse;margin:10px 0}td{padding:8px;border-bo
 
 h2.sec{font-size:18px;color:var(--violet);margin:26px 0 10px}
 select.sel{padding:12px;border-radius:10px;border:1px solid var(--line);background:#1b1124;color:#fff;font-size:16px}
-.reqs{display:grid;gap:12px}
+.reqs{display:grid;gap:8px}.rq{padding:0!important}.rq>summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:10px;padding:12px 14px}.rq>summary::-webkit-details-marker{display:none}.rq>summary::after{content:'▾';color:var(--muted);flex:0 0 auto}.rq[open]>summary::after{transform:rotate(180deg)}.rqn{flex:1;min-width:0;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rq .st{flex:0 0 auto;font-size:12px}.rq .meta,.rq .acts{padding:0 14px}.rq .acts{padding-bottom:12px}.rq .meta{margin-top:0}
 .req{background:var(--card);border-radius:14px;padding:14px;border:1px solid var(--line)}
 .req.pending{border-color:var(--gold)}
 .req-top{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;align-items:flex-start}
@@ -137,7 +137,7 @@ details.fold[open]{padding-bottom:14px}
  </details>
  <details class="fold" id="fold-learn"><summary><span>Sites en réparation</span> <span class="fold-n" data-count="learnq"></span></summary>
 
- <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Demande à ChatGPT (ou à Claude) de les traiter : guide docs/APPRENDRE-AU-ROBOT.md.</p>
+ <p class="muted" style="font-size:14px;margin:0 2px 8px">Sites envoyés avec « Réparer ». Touche un site pour le tester ou décider.</p>
  <div style="display:flex;justify-content:flex-end;margin:0 2px 8px"><button class="sbtn" type="button" id="refreshLearn">↻ Mettre à jour</button></div>
  <div class="reqs" id="learnq"><div class="empty">Chargement…</div></div>
  </details>
@@ -181,6 +181,8 @@ async function init(){
 }
 // 29/10/2026 : prospects au site illisible (test avant le 1er mail).
 // 29/10/2026 : file « Apprendre à lire ce site ».
+// 31/10/2026 (Anthony) : listes compactes — une ligne par site, on touche pour voir le détail et les boutons.
+const shortU=u=>String(u||'').replace(/^https?:\/\//i,'').replace(/^www\./i,'').replace(/\/+$/,'');
 async function loadLearn(){
  let{data,error}=await sb.rpc('admin_list_robot_learning',{p_limit:200});
  if(error){E('learnq').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
@@ -189,7 +191,7 @@ async function loadLearn(){
  // Une seule ligne par site : le dernier retour d’Anthony prévaut ; l’historique reste en base.
  const seenSites=new Set();data=data.filter(r=>{const key=String(r.url||'').toLowerCase().replace(/\/+$/,'');if(seenSites.has(key))return false;seenSites.add(key);return true});
  const L={pending:['pending','En attente'],in_progress:['pending','En cours'],done:['on','Réparé'],failed:['rej','Pas possible'],cancelled:['off','Annulé']};
- E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<div class="req"><div class="req-top"><h3>'+esc(r.company||r.url)+'</h3><span class="st '+st[0]+'">'+st[1]+'</span></div><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div><div class="acts"><button class="sbtn" type="button" data-learn-test="'+esc(r.url)+'" data-sector="'+esc(r.sector)+'" data-prospect-id="'+esc(r.prospect_id||'')+'" data-request-id="'+esc(r.id)+'">Tester</button><button class="sbtn" type="button" data-learn-generic="'+esc(r.id)+'">Mail normal</button><button class="sbtn no" type="button" data-learn-del="'+esc(r.id)+'" data-n="'+esc(r.company||r.url)+'">Supprimer</button></div></div>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
+ E('learnq').innerHTML=(data||[]).length?(data||[]).map(r=>{const st=L[r.status]||['off',r.status];return '<details class="req rq"><summary><span class="rqn">'+esc(r.company&&!/^https?:/i.test(r.company)?r.company:shortU(r.url))+'</span><span class="st '+st[0]+'">'+st[1]+'</span></summary><div class="meta"><span><a href="'+esc(r.url)+'" target="_blank" rel="noopener">'+esc(r.url)+'</a> · '+(r.sector==='immobilier'?'Immobilier':'Auto / Moto')+'</span>'+(r.note?'<span>Ta remarque : '+esc(r.note)+'</span>':'')+(r.result?'<span>Résultat'+(r.handled_by?' ('+esc(r.handled_by)+')':'')+' : '+esc(r.result)+'</span>':'')+'</div><div class="acts"><button class="sbtn" type="button" data-learn-test="'+esc(r.url)+'" data-sector="'+esc(r.sector)+'" data-prospect-id="'+esc(r.prospect_id||'')+'" data-request-id="'+esc(r.id)+'">Tester</button><button class="sbtn" type="button" data-learn-generic="'+esc(r.id)+'">Mail normal</button><button class="sbtn no" type="button" data-learn-del="'+esc(r.id)+'" data-n="'+esc(r.company||r.url)+'">Supprimer</button></div></details>';}).join(''):'<div class="empty">Aucune demande pour l\'instant.</div>';
 }
 async function askLearn(url,sector,company,prospect){
  const note=prompt('Qu\'est-ce qui ne va pas sur ce site ? (facultatif : prix faux, ville manquante, photos en double…)','');
@@ -208,7 +210,7 @@ async function loadUnread(){
  const inRepair=new Set((lq.data||[]).filter(r=>r.status==='pending'||r.status==='in_progress'||(r.status==='done'&&!r.visual_validated_at)).map(r=>normU(r.url)));
  const c=data?.counts||{};const list=(data?.prospects||[]).filter(p=>!inRepair.has(normU(p.url)));
  const head='<div class="empty" style="text-align:left">Sites lus : <b>'+(c.ok||0)+'</b> · vendent sur Leboncoin : <b>'+(c.manual||0)+'</b> · mail normal : <b>'+(c.generic||0)+'</b> · illisibles : <b>'+(c.unreadable||0)+'</b> · encore à tester : <b>'+(c.to_check||0)+'</b></div>';
- E('unread').innerHTML=head+list.map(p=>'<div class="req"><div class="req-top"><h3>'+esc(p.company||'Sans nom')+'</h3><span class="st off">'+esc(p.category||'')+'</span></div><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Réparer</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Valider</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button><button class="sbtn" data-g="'+esc(p.id)+'">Mail normal</button></div></div>').join('');
+ E('unread').innerHTML=head+list.map(p=>'<details class="req rq"><summary><span class="rqn">'+esc(p.company||shortU(p.url)||'Sans nom')+'</span><span class="st off">'+esc(p.category==='Agence immobilière'?'Immo':p.category==='Concession moto'?'Moto':'Auto')+'</span></summary><div class="meta"><span><a href="'+esc(p.url)+'" target="_blank" rel="noopener">'+esc(p.url)+'</a>'+(p.city?' · '+esc(p.city):'')+'</span><span>'+esc((p.platform?p.platform+' — ':'')+(p.reason||''))+'</span></div><div class="acts"><button class="sbtn" data-u="'+esc(p.url)+'" data-s="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'">Tester</button><button class="sbtn" data-l="'+esc(p.url)+'" data-ls="'+(p.category==='Agence immobilière'?'immobilier':'vehicules')+'" data-lc="'+esc(p.company||'')+'" data-lp="'+esc(p.id)+'">Réparer</button><button class="sbtn ok" data-r="'+esc(p.id)+'">Valider</button><button class="sbtn no" data-d="'+esc(p.id)+'" data-n="'+esc(p.company||'')+'">Supprimer</button><button class="sbtn" data-m="'+esc(p.id)+'">Vend sur Leboncoin</button><button class="sbtn" data-g="'+esc(p.id)+'">Mail normal</button></div></details>').join('');
 }
 document.addEventListener('click',async e=>{
  const ld=e.target.closest('#learnq [data-learn-del]');if(ld){if(!confirm('Supprimer « '+ld.dataset.n+' » ? La réparation s\'arrête et le pro est retiré des prospects : il ne recevra jamais de mail.'))return;ld.disabled=true;const{error}=await sb.rpc('admin_robot_learning_delete',{p_request_id:ld.dataset.learnDel});if(error){alert(error.message);ld.disabled=false;return}ld.closest('.req')?.remove();loadLearn();loadUnread();return}
