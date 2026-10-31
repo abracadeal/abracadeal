@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — Vernoux Immobilier / Orpi VIP Business
+- L'adresse vernoux.immobilier est une agence Orpi Commerces & Entreprises (VIP Business, Bourg-en-Bresse). La recherche résidentielle renvoyait zéro, alors que la recherche commerciale publique filtrée par agence annonce 37 ventes et 16 locations.
+- Reconnaissance des liens commerciaux propres à l'agence ; endpoints OCE pour compteurs/JSON, état de reprise séparé du résidentiel. Les références commerciales 21_0288 / 01_0427 et slugs courts sont acceptés ; pagination HTML de secours adaptée. Aucun catalogue de réseau élargi.
+- Nouveau parseur de fiche commerciale : métadonnées publiées de la même référence, prix principal (jamais CA/prix de loyer contenu dans le descriptif), ville/CP du bien et non agence, avis de l'agent complet, galerie originale sans logos/miniatures doublonnées, caractéristiques, diagnostics explicites. « DPE vierge » ne devient pas une exemption inventée. Contact de la carte du bien, agence identifiée comme agence.
+- Catégorie existante Bureaux et commerces réutilisée pour fonds/bureaux/locaux ; les terrains commerciaux gardent leur type terrain. Loyers mensuels conservés, annuel converti en mensuel seulement si l'unité est explicite et montant annuel original conservé dans la description ; prix au m² non inventé.
+- Tests réels vente/rental (Dijon 185000 € / 513 m², Ambérieu-en-Bugey 1600 € HT/mois / 531 m²), périmètre commercial, source de prix/unité, ville distincte agence, photos/contact, diagnostics vierges, Orpi résidentiel et triple du canapé : OK. Production à contrôler avant done. Aucun import/publication/activation, prospect ou mail.
+
 ### 31/10/2026 — Claude — pour ChatGPT : « Failed to send a request to the Edge Function » sur le test d'un gros Orpi
 - Anthony l'a eu sur mobile en testant une agence Orpi (lecture en plusieurs passages). Mesure : `crawl_state` ≈ 66 Ko à 25 fiches, 104 Ko à 50 (≈ 1,5 Ko/fiche → ~1 Mo à 500), et `preview_url` renvoie à chaque passage TOUTES les lignes brutes + normalisées cumulées (normalizeRows sur tout à chaque passage). Probable 546 / mémoire ou réponse trop lourde (pas d'en-têtes CORS → erreur réseau côté navigateur).
 - Côté page : chaque passage est réessayé 2 fois ; sinon on garde l'aperçu déjà lu et on propose « Continuer la lecture ». Côté robot (toi) : idéalement ne renvoyer que les nouvelles lignes par passage, ou normaliser seulement à la fin.

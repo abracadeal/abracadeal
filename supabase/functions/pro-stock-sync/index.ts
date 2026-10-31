@@ -1,5 +1,6 @@
+import {parseOrpiBusinessDetail} from "./orpi-business-detail.ts";
 import {dedupeEstateListings} from "./estate-duplicates.ts";
-import { readOrpiCatalogue } from "./orpi-catalogue.ts";
+import { readOrpiCatalogue, isOrpiBusinessAgency } from "./orpi-catalogue.ts";
 import { encodeCrawlState, decodeCrawlState } from "./crawl-transport.ts";
 import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isIzmoSite, readIzmoDealer } from "./izmo-reader.ts";
@@ -687,7 +688,7 @@ function parseOrpiEstate(html:string,url:string){
  if(photos.length)o.photos=photos.slice(0,45).join('|');
  return o.reference&&o.titre?o:null;
 }
-async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){return readOrpiCatalogue(origin,slug,u=>fetchSiteHtml(u,15_000_000),parseOrpiEstate,memory);}
+async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory,commercial=false){return readOrpiCatalogue(origin,slug,u=>fetchSiteHtml(u,15_000_000),commercial?parseOrpiBusinessDetail:parseOrpiEstate,memory,commercial);}
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).
 const C21_DPE:Record<string,string>={'#00a06d':'A','#52b153':'B','#a5cc74':'C','#f4e70f':'D','#f0b40f':'E','#eb8235':'F','#d7221f':'G'};
@@ -1002,7 +1003,7 @@ async function readFeed(feed:any,persistCrawl=false){
       const estate=parseOrpiEstate(text,url.toString());if(!estate)throw Error('Fiche Orpi indisponible ou données du bien absentes.');
       rows=[estate];platform='Orpi (fiche annonce)';feed.sector='immobilier';
     }
-    else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug,crawlMemory(feed,persistCrawl));platform='Orpi (page agence)';feed.sector='immobilier';}
+    else if(orpiSlug){const commercial=isOrpiBusinessAgency(text,orpiSlug);rows=await readOrpiAgency(origin,orpiSlug,crawlMemory(feed,persistCrawl),commercial);platform=commercial?'Orpi Commerces & Entreprises (agence)':'Orpi (page agence)';feed.sector='immobilier';}
     else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml);platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
     else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml);platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
     else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 48 fiches maximum)';feed.sector='immobilier';}
@@ -1193,7 +1194,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|smart-v1:)/.test(cp.data.state.scope||'')){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:)/.test(cp.data.state.scope||'')){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }
