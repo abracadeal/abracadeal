@@ -1,0 +1,3 @@
+-- 31/10/2026 (Anthony : « les sites en réparation reviennent sans arrêt »).
+-- admin_request_robot_learning : renvoyer un site « Réparé » non validé ferme l'ancienne demande (une seule ligne par site).
+-- + nettoyage des doublons existants. Appliqué via execute_sql ; définition : pg_get_functiondef('public.admin_request_robot_learning'::regproc).
