@@ -63,6 +63,12 @@ export function parseApimoDetail(raw:string,url:string){
   const gallery=modules.find(x=>/\bmodule-slider\b/.test(x))||'';const galleryAnchors=[...gallery.matchAll(/<a\b([^>]+)>/gi)].filter(m=>/class="[^"]*\bclick-fullscreen\b/.test(m[1])).map(m=>m[1].match(/href="([^"]+)"/i)?.[1]).filter((x):x is string=>!!x);o.photos=[...new Set(([...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>m[1]).length?[...gallery.matchAll(/data-image-url="([^"]+)"/gi)].map(m=>m[1]):galleryAnchors).map(x=>sDecode(x)).filter(x=>/^https?:\/\//.test(x)))].join('|');
   const diag=modules.find(x=>/energy-diagnostics/.test(x))||'';
   for(const m of diag.matchAll(/data:image\/svg\+xml;base64,([^"']+)/gi)){try{const svg=new TextDecoder().decode(Uint8Array.from(atob(m[1]),c=>c.charCodeAt(0)));const d=apimoDiagnostic(svg);if(d.kind&&d.letter)o[d.kind]=d.letter;if(d.kind==='dpe'&&d.values[0])o.consommation_energie=d.values[0];}catch{}}
+  // Certaines fiches Apimo publient le couple énergie / climat sur une ligne « DPE D ET C »
+  // ou « DPE D (240) et D (45) », même quand le graphique climat est vide.
+  // Lire uniquement cette notation complète dans la description propre au bien ; jamais
+  // une plage A à G, plusieurs logements, les suggestions ou un second caractère isolé.
+  const diagnosticPair=description.split('\n').map(line=>line.trim()).map(line=>line.match(/^DPE\s*:?\s*([A-G])(?:\s*\(\s*([0-9]{1,4}(?:[.,][0-9]+)?)\s*\))?\s*(?:\/|[eE][tT])\s*([A-G])(?:\s*\(\s*[0-9]{1,3}(?:[.,][0-9]+)?\s*\))?\s*[.;]?$/)).find(Boolean);
+  if(diagnosticPair){if(!o.dpe)o.dpe=diagnosticPair[1];if(!o.ges)o.ges=diagnosticPair[3];if(!o.consommation_energie&&diagnosticPair[2])o.consommation_energie=num(diagnosticPair[2]);}
   // Mentions textuelles utiles (charges, copropriété, coûts…) ; pas de lecture des biens similaires.
   o.texte_page+='\n'+text(diag.replace(/<img\b[^>]*>/gi,''));return o;
 }

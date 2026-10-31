@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — Select Azur, contrôle des images et diagnostics abrégés
+- Correction du précédent diagnostic : les sept GES n'étaient pas tous absents. Les 38 photos des sept galeries ont été contrôlées visuellement : logements/façades, aucune étiquette diagnostic supplémentaire. Cinq fiches publient le couple de classes dans leur propre description : « DPE : D / B. », « DPE D ET D », « DPE D (240) et D (45) », « DPE D (199 )et D (44) », « DPE D ET C ».
+- `apimo-reader.ts` sait désormais lire ces couples complets sur une ligne dédiée de la description propre au bien, sans référence figée. Les graphiques existants restent prioritaires. Rejet des plages A à G, textes multi-logements et couples incomplets/ambigus. Les classes uniques C des références 87544661 et 87541800 ne permettent toujours pas de renseigner leur GES.
+- Tests Select Azur (cinq notations réelles, cas négatifs, priorité graphique), Intuition, Cannisimmo, Raccosta, batch4 : OK. Lecture avant correction v133 / 187100 : 60 lus, 53 complets, 373 photos, sept GES manquants. Résultat après déploiement à consigner dans la demande de réparation.
+- Aucun prospect, import, publication, mail ou validation visuelle de notre part.
+
 ### 31/10/2026 — Claude — Lecteur Simplici Car (≈ 100 agences franchisées)
 - Un seul site national PrestaShop (simplicicar.com) ; chaque agence = une catégorie, ex. `/9-occasions-cannes-06` (liste : `/content/9-agences`). **Adresse à donner au robot = la page catalogue de l'agence.**
 - **Fait (`simplicicar-reader.ts`) :** liste paginée (?page=N) puis fiche de chaque voiture : bloc `data-product` (JSON PrestaShop) → marque, modèle, version, énergie, km, année, mise en circulation, couleur, portes, places, puissance, Crit'Air, CO2, ville de l'agence, équipements (« Oui »), photos `large_default`, prix. Seules les voitures dont `id_category_default` = l'agence ; quantité 0 / non commandable exclues.
