@@ -40,7 +40,7 @@ export async function readEwigoAgency(origin:URL,homeHtml:string,fetchHtml:Fetch
       const vParts=String(d.version||'').replace(/\s+/g,' ').trim().split(/\s*\/\s+|\s+\/\s*/);
       const version=vParts[0]||'',extras=vParts.slice(1).map(x=>x.trim()).filter(Boolean);
       const energy=String(d.energy||'');
-      const fuel=/hybride.*rechargeable|plug/i.test(energy)?'Hybride rechargeable':/hybride|hybrid/i.test(energy)?'Hybride':/lectrique/i.test(energy)?'Électrique':/gpl/i.test(energy)?'GPL':/e85|thanol/i.test(energy)?'Bioéthanol':cap(energy.replace(/\s*\(.*$/,''));
+      const fuel=/non[- ]rechargeable/i.test(energy)?'Hybride':/hybride.*rechargeable|plug/i.test(energy)?'Hybride rechargeable':/hybride|hybrid/i.test(energy)?'Hybride':/lectrique/i.test(energy)?'Électrique':/gpl/i.test(energy)?'GPL':/e85|thanol/i.test(energy)?'Bioéthanol':cap(energy.replace(/\s*\(.*$/,''));
       const warranty=d.warranty_1&&d.warranty_1_duration?`${d.warranty_1_duration} mois (${d.warranty_1})`:'';
       const descr=[extras.length?extras.join(' · '):'',d.description,d.condition?`État : ${d.condition}`:'',d.hands_count?`${d.hands_count} propriétaire${Number(d.hands_count)>1?'s':''} précédent${Number(d.hands_count)>1?'s':''}`:'',
         warranty?`Garantie : ${warranty}`:'',eq.length?'Équipements :\n- '+eq.join('\n- '):''].filter(Boolean).join('\n\n');

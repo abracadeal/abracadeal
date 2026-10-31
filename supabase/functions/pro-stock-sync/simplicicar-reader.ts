@@ -38,7 +38,7 @@ export async function readSimpliciAgency(url:URL,fetchHtml:Fetcher){
         for(const x of p.features||[]){const n=clean(x?.name),v=clean(x?.value);if(!n||!v)continue;if(/^oui$/i.test(v))eq.push(n);else if(!f.has(n))f.set(n,v);}
         const g=(...k:string[])=>{for(const key of k){for(const [n,v] of f)if(n.toLowerCase()===key.toLowerCase())return v;}return '';};
         const energy=g('Énergie','Energie');
-        const fuel=/rechargeable/i.test(energy)?'Hybride rechargeable':/hybride/i.test(energy)?'Hybride':/lectri/i.test(energy)?'Électrique':/diesel|gazole/i.test(energy)?'Diesel':/essence/i.test(energy)?'Essence':/gpl/i.test(energy)?'GPL':/e85|thanol/i.test(energy)?'Bioéthanol':energy;
+        const fuel=/non[- ]rechargeable/i.test(energy)?'Hybride':/rechargeable/i.test(energy)?'Hybride rechargeable':/hybride/i.test(energy)?'Hybride':/lectri/i.test(energy)?'Électrique':/diesel|gazole/i.test(energy)?'Diesel':/essence/i.test(energy)?'Essence':/gpl/i.test(energy)?'GPL':/e85|thanol/i.test(energy)?'Bioéthanol':energy;
         const city=g('Ville agence');if(city&&!agencyCity)agencyCity=cityCase(city);
         const mec=g('Mise en circulation');
         const photos=(p.images||[]).map((im:any)=>im?.bySize?.large_default?.url||im?.large?.url).filter((x:any)=>typeof x==='string');
