@@ -1,0 +1,4 @@
+-- 31/10/2026 (Anthony) : prospect qui a dit STOP / s'est désinscrit → pas d'offre Fondateurs s'il s'inscrit plus tard (tarif public).
+-- private.founder_optout_conflict(p_user) : même e-mail, même SIREN, ou même domaine pro (hors webmails, hors réseaux >= 3 adresses).
+-- Branché dans private.founder_identity_conflict → claim_founder_slot / get_my_founder_availability renvoient founder_already_used ;
+-- create-pro-subscription-order facture alors le tarif public. Définitions : voir pg_get_functiondef (appliqué via execute_sql).
