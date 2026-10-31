@@ -23,6 +23,7 @@ import { isSimpleboSite, readSimpleboStock } from "./simplebo-reader.ts";
 import { isVehicaSite, readVehicaSite } from "./vehica-reader.ts";
 import { isEwigoSite, readEwigoAgency } from "./ewigo-reader.ts";
 import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
+import { isAutoGestionSite, readAutoGestionSite } from "./autogestion-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
 const SERVICE_ROLE=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -1021,6 +1022,7 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(simpliciAgencyId(url)){rows=await readSimpliciAgency(url,fetchSiteHtml);platform='Simplici Car (stock de l\'agence)';feed.sector='vehicules';}
+    else if(isAutoGestionSite(text,url)){rows=await readAutoGestionSite(origin,text,fetchSiteHtml);platform='Auto-Gestion (site garage, ex. Transakauto)';feed.sector='vehicules';}
     else if(isEwigoSite(text,url)){rows=await readEwigoAgency(origin,text,fetchSiteHtml);platform='Ewigo (stock de l\'agence)';feed.sector='vehicules';}
     else if(isRoselmacSite(text)){rows=await readRoselmacSite(origin,fetchSiteHtml);platform='Roselmac (catalogue garage)';feed.sector='vehicules';}
     else if(feed.sector!=='immobilier'&&isSimpleboSite(text)){rows=await readSimpleboStock(origin,fetchSiteHtml);platform='Simplébo (page véhicules en vente)';feed.sector='vehicules';}
