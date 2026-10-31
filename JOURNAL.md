@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — en cours : lecture en plusieurs fois Orpi et lecteur automatique
+- `resumable-crawl.ts` : listes et fiches restantes, références et lignes déjà lues, reprise 35 s / 100 fiches, quatre téléchargements simultanés. Mémoire par flux existante `pro_stock_crawl_state`, source et périmètre isolés, reset après 72 h. Aucune nouvelle table. Enregistrement compare-and-swap avant retour au sync ; résultat rejouable après échec.
+- Orpi : retrait du plafond 220 et de la rotation quotidienne ; pagination publique de chaque liste de la seule agence. Lecteur automatique : reprise des listes, fiches et sitemaps, périmètre conservé. Autres lecteurs spécialisés conservés, Next/Openflex garde sa mémoire existante ; les lecteurs spécialisés encore plafonnés nécessitent leur propre adaptation, aucune promesse de lecture universelle.
+- Erreur réessayée une fois puis signalée : tour incomplet, aucun archivage. Le garde-fou 50 % et la vérification du checkpoint de sync restent actifs. Un tour sans aucune référence découverte ne peut être complet. Aucun flux activé, import, annonce publiée, mail ou statut prospect modifié pendant ces tests.
+- Aperçu admin : passages successifs en mémoire temporaire, progression visible, résultats cumulés sans import ni mémoire de flux écrite ; validation masquée tant que partiel. Action interne auto_review_dry accepte resumable/crawl_state pour vérifier un tour à blanc, sans écritures DB.
+- Tests moteur : reprise en plusieurs passes, pagination, relecture/rejeu, retry, blocage sur erreur permanente, reset 72 h OK. Régressions photos, batch4, Next/Openflex OK ; compilation esbuild OK. Production à vérifier avant de déclarer Carnot réparé.
+
 ### 31/10/2026 — Claude — aperçu des annonces du prospect + envois + corrections robot
 - **Aperçu prospect** : `pro-fondateur.html?r=<code>` affiche « voici vos N véhicules/biens sur Abracadeal » (6 annonces lues sur son site, photos marquées APERÇU) + bouton d'inscription. Table `prospect_previews` + RPC publique `prospect_preview(code)` (SQL `supabase/2026-10-31-prospect-previews.sql`). Rempli par `prospect_precheck` et, pour les déjà testés, par l'action `prospect_preview_fill` (cron `abracadeal-prospect-preview-fill`, ~285 à rattraper). Ne pas tester avec un vrai code : ça compte un clic du prospect.
 - Bouton « Je m'inscris gratuitement » en haut de pro-fondateur.html.

@@ -1,3 +1,4 @@
+import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isPlaceholderPhoto, photoKey, photoRank } from './photo-utils.ts';
 // Lecteur « intelligent » des sites de pros (28/10/2026) : utilisé quand aucun connecteur dédié ne reconnaît le site.
 // 1) repère les fiches d'annonces en regroupant les liens qui se répètent (même forme d'adresse, avec un numéro ou un long slug) ;
@@ -316,7 +317,24 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
 }
 
 // Parcours : accueil + pages de liste, puis fiches détectées. Budget en temps et en pages.
-export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any){
+export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any,memory?:CrawlMemory){
+  if(memory){
+    const host=origin.hostname.replace(/^www\./,''),scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,''):'';
+    const inScope=(u:string)=>!scope||scope.split('/').length<3||new URL(u).pathname.startsWith(scope+'/')||new URL(u).pathname===scope;
+    const source=extraStarts[0]||origin.toString();
+    return crawlCatalogue(source,'smart-v1:'+sector+':'+scope,[source],async u=>u.toString()===source?{text:homeHtml,url:u}:fetchHtml(u),(html,page)=>{
+      let xmlLists:string[]=[];
+      if(/<urlset\b|<sitemapindex\b/i.test(html)){const urls=[...html.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map(m=>sDecode(m[1]));xmlLists=urls.filter(u=>/\.xml(?:\?|$)/.test(u));html=urls.filter(u=>!xmlLists.includes(u)).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');}
+      const found=smartLinks(html,page,host);
+      if(page.toString()===source&&found.details.length<5&&!scope)xmlLists.push(new URL('/sitemap.xml',origin).toString());
+      const same=(u:string)=>{try{return new URL(u).hostname.replace(/^www\./,'')===host;}catch{return false;}};
+      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&inScope(u))};
+    },async(html,url)=>{
+      let row:any=null;if(ldParse)row=ldParse(html,url);if(row?._sold)return row;
+      const sd=smartDetail(html,url,sector);if(!row)row=sd;else if(sd){if(String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
+      if(!row)throw Error('Fiche non reconnue');return row;
+    },memory);
+  }
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
   const take=(html:string,page:URL)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details)if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};

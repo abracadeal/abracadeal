@@ -1,3 +1,4 @@
+import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isIzmoSite, readIzmoDealer } from "./izmo-reader.ts";
 import { isNextDealer, readNextDealer, type DealerState } from "./next-dealer-reader.ts";
 import { readBoschiAgency } from "./boschi-reader.ts";
@@ -680,26 +681,15 @@ function parseOrpiEstate(html:string,url:string){
  if(photos.length)o.photos=photos.slice(0,45).join('|');
  return o.reference&&o.titre?o:null;
 }
-async function readOrpiAgency(origin:URL,slug:string){
- const links=new Map<string,string>();
- // 29/10/2026 : « /acheter » ne montre qu'une sélection (≈ 9 biens) ; la liste complète est « /acheter/biens-en-vente » (pages de 30).
- for(const listPath of [`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`,`/${slug}/acheter`]){
-  for(let page=1;page<=40;page++){
-   const u=new URL(listPath,origin);if(page>1)u.searchParams.set('page',String(page));
-   const{text}=await fetchSiteHtml(u).catch(e=>{throw Error(`Liste des biens illisible (${listPath}, page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
-   const before=links.size;
-   for(const m of text.matchAll(/href="(\/annonce-[a-z0-9-]+-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?[^"]*)"/gi)){if(!links.has(m[2]))links.set(m[2],new URL(decodeEntities(m[1]),origin).toString());}
-   if(links.size===before)break;
-  }
- }
- if(!links.size)throw Error('Aucun bien trouvé sur la page de l\'agence Orpi : synchronisation annulée par sécurité.');
- // Grosse agence : 220 fiches par passage (limite de calcul), fenêtre décalée chaque jour pour tout couvrir en quelques synchros.
- const MAX=220;const all=[...links.entries()];const off=all.length>MAX?(Math.floor(Date.now()/86400000)*MAX)%all.length:0;const entries=[...all.slice(off),...all.slice(0,off)].slice(0,MAX);const rows:any[]=[];let i=0;
- await Promise.all(Array.from({length:4},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchSiteHtml(new URL(url));const o=parseOrpiEstate(text,url);rows.push(o||{reference:id,url});}catch{rows.push({reference:id,url});}}}));
- // Stock plus grand que la limite : lecture partielle (aucun bien n'est retiré pour cette synchro).
- if(links.size>MAX){(rows as any).partial=true;(rows as any).capped=true;}
- (rows as any).total=links.size;
- return rows;
+async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){
+ const roots=[`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`,`/${slug}/acheter`];
+ return crawlCatalogue(new URL('/'+slug+'/',origin).toString(),'orpi-v1:'+slug,roots.map(p=>new URL(p,origin).toString()),fetchSiteHtml,(html,page)=>{
+  const details=[...new Set([...html.matchAll(/href="(\/annonce-[a-z0-9-]+-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?[^" ]*)"/gi)].map(m=>new URL(decodeEntities(m[1]),origin).toString()))];
+  const lists:string[]=[];
+  for(const m of html.matchAll(/href=["']([^"']+)["']/g)){try{const u=new URL(decodeEntities(m[1]),page);if(u.origin===origin.origin&&roots.includes(u.pathname)&&/^\d+$/.test(u.searchParams.get('page')||'')&&Number(u.searchParams.get('page'))>Number(page.searchParams.get('page')||1)){const n=new URL(u.pathname,origin);n.searchParams.set('page',u.searchParams.get('page')!);lists.push(n.toString());}}catch{}}
+  if(!/data-estate|annonce-|Aucun bien|aucun résultat|0 bien/i.test(html))throw Error('Catalogue Orpi non reconnu');
+  return {lists,details};
+ },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory);
 }
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).
@@ -957,6 +947,13 @@ async function findNetworkPage(siteUrl:URL,html:string){
  }
  return null;
 }
+function crawlMemory(feed:any,persist:boolean):CrawlMemory|undefined{
+ if(feed._dryMemory)return feed._dryMemory;
+ if(!persist||!feed.id)return undefined;
+ let checkpoint:any=null;
+ return {load:async()=>{const r=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(r.error)throw r.error;checkpoint=r.data;return r.data?.state;},
+ save:async(state:any)=>{const payload={feed_id:feed.id,state,updated_at:new Date(Math.max(Date.now(),(Date.parse(checkpoint?.updated_at||'')||0)+1)).toISOString()};const r=checkpoint?await admin.from('pro_stock_crawl_state').update(payload).eq('feed_id',feed.id).eq('updated_at',checkpoint.updated_at).select('feed_id'):await admin.from('pro_stock_crawl_state').insert(payload).select('feed_id');if(r.error)throw r.error;if(!r.data?.length)throw Error('Une autre lecture a avancé, reprise au prochain passage.');}};
+}
 async function readFeed(feed:any,persistCrawl=false){
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
@@ -1008,7 +1005,7 @@ async function readFeed(feed:any,persistCrawl=false){
       const estate=parseOrpiEstate(text,url.toString());if(!estate)throw Error('Fiche Orpi indisponible ou données du bien absentes.');
       rows=[estate];platform='Orpi (fiche annonce)';feed.sector='immobilier';
     }
-    else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug);platform='Orpi (page agence)';feed.sector='immobilier';}
+    else if(orpiSlug){rows=await readOrpiAgency(origin,orpiSlug,crawlMemory(feed,persistCrawl));platform='Orpi (page agence)';feed.sector='immobilier';}
     else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml);platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
     else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml);platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
     else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 48 fiches maximum)';feed.sector='immobilier';}
@@ -1058,7 +1055,7 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
-      try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';rows=await readSmartSite(origin,text,sector,fetchSiteHtml,[url.toString()],sector==='immobilier'?ldImmo:ldVehicle);
+      try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';rows=await readSmartSite(origin,text,sector,fetchSiteHtml,[url.toString()],sector==='immobilier'?ldImmo:ldVehicle,crawlMemory(feed,persistCrawl));
         if(!rows.length)throw Error(`Aucune fiche ${sector==='immobilier'?'de bien':'véhicule'} lisible automatiquement sur ce site : il faudra une préparation manuelle (rien n'a été modifié).`);
         // 29/10/2026 : pages de rubrique (« Vous êtes acquéreur », « Nos biens loués », accueil…) prises pour des fiches :
         // quand la plupart des fiches ont la même forme d'adresse (ex. /details-…), on écarte celles qui ne l'ont pas.
@@ -1075,7 +1072,7 @@ async function readFeed(feed:any,persistCrawl=false){
         platform+=' · lecture automatique';}
       catch(e){
         const net=await findNetworkPage(url,text).catch(()=>null);
-        if(net?.kind==='orpi'){rows=await readOrpiAgency(new URL('https://www.orpi.com'),net.slug);platform=`Orpi (page agence orpi.com/${net.slug}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
+        if(net?.kind==='orpi'){rows=await readOrpiAgency(new URL('https://www.orpi.com'),net.slug,crawlMemory(feed,persistCrawl));platform=`Orpi (page agence orpi.com/${net.slug}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
         else if(net?.kind==='c21'){rows=await readC21Agency(new URL(net.url));platform=`Century 21 (${new URL(net.url).hostname}, le site ${url.hostname} n'est pas lisible)`;feed.sector='immobilier';}
         else{const err:any=new Error(`${e instanceof Error?e.message:String(e)} Prestataire du site : ${platform}.`);err.platform=platform;throw err;}}}
     (rows as any).platform=platform;(rows as any).siteLocation=(rows as any).siteLocation||siteLocation(text);if(feed.sector)(rows as any).sector=feed.sector;return rows;
@@ -1260,7 +1257,7 @@ async function autoReviewSite(feed:any,dryRun=false){
  return{...res,auto_review:'approved'};
 }
 
-Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,sector:(rows as any).sector||sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,total_on_site:(rows as any).total||null,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,(rows as any).sector||sector,body?.action==='preview_url'&&profile?.is_admin?null:user.id,body?.action==='preview_url')});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='debug_detail'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const u=new URL(String(body.url));const{text}=await fetchSiteHtml(u);const sector=body.sector==='vehicules'?'vehicules':'immobilier';let ld:any=null;try{ld=sector==='immobilier'?ldImmo(text,u.toString()):ldVehicle(text,u.toString());}catch(e){ld={error:String(e)};}const hp=text.search(/<h1[\s>]/i);const euros=[...text.matchAll(/.{0,90}€.{0,30}/g)].slice(0,12).map(m=>({at:m.index,s:m[0]}));return json({ok:true,len:text.length,...(body.include_html?{html:text}:{}),h1At:hp,euros,ld,smart:smartDetail(text,u.toString(),sector)});}if(body?.action==='prospect_preview_fill'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
+Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{headers:cors});if(req.method!=='POST')return json({error:'Method not allowed'},405);try{const body=await req.json().catch(()=>({}));if(body?.action==='normalize_preview'||body?.action==='preview_url'){const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const{data:profile}=await admin.from('profiles').select('account_type,is_admin').eq('id',user.id).maybeSingle();if(profile?.account_type!=='professionnel'&&!profile?.is_admin)return json({error:'Compte professionnel requis'},403);const sector=body?.sector==='immobilier'?'immobilier':'vehicules';let crawlState:any=body?.crawl_state||null;const dryMemory=body?.resumable?{load:async()=>crawlState,save:async(s:any)=>{crawlState=s;}}:undefined;const rows=body?.action==='preview_url'?await readFeed({feed_url:body.url,format:'auto',sector,_dryMemory:dryMemory}):(Array.isArray(body?.rows)?body.rows:[]);if(!rows.length)return json({error:'Aucune ligne à normaliser'},400);return json({ok:true,...(body?.resumable?{crawl_state:crawlState,crawl:(rows as any).stats}:{}),sector:(rows as any).sector||sector,platform:(rows as any).platform||null,partial:!!(rows as any).partial,total_on_site:(rows as any).total||null,raw:body?.action==='preview_url'&&body?.include_raw?rows:undefined,rows:await normalizeRows(rows,(rows as any).sector||sector,body?.action==='preview_url'&&profile?.is_admin?null:user.id,body?.action==='preview_url')});}if(body?.action==='moderation_probe'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const secret=await moderationSecret();if(!secret)throw Error('Secret de modération absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({action:'probe'}),signal:AbortSignal.timeout(90000)});return json(await r.json(),r.status);}const apiFeed=await feedByApiKey(req);if(apiFeed){const rows=parseJson(body?.vehicles??body?.properties??body?.items??body);return json(await sync(apiFeed,rows,body?.sync_mode));}if(body?.action==='debug_detail'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const u=new URL(String(body.url));const{text}=await fetchSiteHtml(u);const sector=body.sector==='vehicules'?'vehicules':'immobilier';let ld:any=null;try{ld=sector==='immobilier'?ldImmo(text,u.toString()):ldVehicle(text,u.toString());}catch(e){ld={error:String(e)};}const hp=text.search(/<h1[\s>]/i);const euros=[...text.matchAll(/.{0,90}€.{0,30}/g)].slice(0,12).map(m=>({at:m.index,s:m[0]}));return json({ok:true,len:text.length,...(body.include_html?{html:text}:{}),h1At:hp,euros,ld,smart:smartDetail(text,u.toString(),sector)});}if(body?.action==='prospect_preview_fill'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
    // 31/10/2026 : remplit l'aperçu des prospects déjà testés avant l'arrivée de l'aperçu (un par appel). Rien d'autre n'est modifié.
    const{data:done}=await admin.from('prospect_previews').select('prospect_id');const have=new Set((done||[]).map((x:any)=>x.prospect_id));
    const{data:cands}=await admin.from('prospection_prospects').select('id,company,category,source_url,status,updated_at').eq('site_check_status','ok').in('status',['ready','sent']).is('opted_out_at',null).not('segment','like','exclu%').neq('segment','phase2_reseau').order('status',{ascending:false}).order('updated_at',{ascending:true}).limit(400);
@@ -1299,7 +1296,7 @@ if(body?.action==='prospect_precheck'){if(!await cronOk(req))return json({error:
     `<p style="color:#666;font-size:13px">Sites lus avec succès sur la même période : ${okCount||0} (ils reçoivent le mail avec leur nombre d'annonces).</p><p>Abracadeal</p></div>`;
    const rr=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`unreadable-digest-${new Date().toISOString().slice(0,10)}`},body:JSON.stringify({from:'Abracadeal <contact@abracadeal.fr>',to:tos,subject:`Robot : ${(pros||[]).length+(feeds||[]).length} site(s) à apprendre`,html})});
    return json({ok:rr.ok,sent:rr.ok,status:rr.status,to:tos.length});}
-  if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);return json(await autoReviewSite({id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null},true));}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
+  if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);let checkpoint:any=body?.crawl_state||null;const f:any={id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null};if(body?.resumable)f._dryMemory={load:async()=>checkpoint,save:async(s:any)=>{checkpoint=s;}};const result=await autoReviewSite(f,true);return json({...result,...(body?.resumable?{crawl_state:checkpoint}:{})});}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
  // Une demande d'import « en attente » par passage : jamais essayée, ou dernier essai il y a plus de 24 h.
  const autoResults:any[]=[];const tAll=Date.now();{const{data:pend}=await admin.from('pro_stock_feeds').select('*').eq('source_kind','site').eq('review_status','pending').not('feed_url','is',null).or(`last_run_at.is.null,last_run_at.lt.${new Date(Date.now()-24*3600e3).toISOString()}`).order('created_at',{ascending:true}).limit(1);for(const f of pend||[]){try{autoResults.push(await autoReviewSite(f));}catch(e){autoResults.push({ok:false,feed_id:f.id,error:e instanceof Error?e.message:String(e)});}}}const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const results=[];const start=tAll;for(const f of feeds||[]){
  // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.
