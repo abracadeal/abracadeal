@@ -42,6 +42,9 @@ html body #resultats .ad-card.ad-card .ad-title{
   html body main#top #resultats .ad-card.immo-card .ad-photo{
     flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:6/7!important}
   html body main#top #resultats .ad-card .ad-photo img{width:100%!important;height:100%!important;object-fit:cover!important}
+  /* 31/10/2026 (Anthony) : image par défaut (annonce sans photo) affichée entière dans la vignette, pas rognée. */
+  html body main#top #resultats .ad-card .ad-photo img.abraca-default-photo{object-fit:contain!important;background:#1b052f!important}
+  html body main#top #resultats .ad-card .ad-photo:has(img.abraca-default-photo){background:#1b052f!important}
 }
 
 /* 30/10/2026 (Anthony) : textes des vignettes. Caractéristiques véhicule sur une seule ligne de texte
