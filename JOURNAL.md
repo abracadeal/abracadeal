@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — lecteur générique Next.js / Openflex et mémoire par flux
+- Nouveau lecteur par schéma public (pas par concession) ; page de concession obligatoire, point physique exact puis confirmation sur chaque fiche. Occasion disponible uniquement, pas de neuf / 0 km / vendu / réservé / commande / stock usine ; galeries, équipements et téléphone VO repris, plaque/VIN exclus. Source publique Next JSON ; aucune clé tierce ou API refusée utilisée.
+- Mémoire liée au flux, queue et lignes rejouables, checkpoint concurrent vérifié, 4 requêtes / budget 45 s, reset 72 h. Archivage seulement en fin de tour, références en erreur protégées, garde-fou 50 % conservé. Cette mémoire concerne cette nouvelle famille ; autres lecteurs inchangés. SQL daté dealer-crawl-memory enregistré, application et déploiement à suivre.
+- Témoin réel local Carcassonne : 131 références du point de vente, 127 fiches avec 2 168 photos ; une exclue, trois indisponibles/incomplètes (105553 et 119878 HTTP 404, 118893 sans DTO) protégées. Reprise contrôlée après un premier lot de 8 fiches ; pas d’import. Tests ciblés et régressions batch4 / Select Azur / bundle TypeScript OK. Témoins production avant changement Laugier 23/23, Chevreux 31/31 ; retests après déploiement requis.
+- Docs GROS-SITES §7 : couverture et limites explicites. La liste Peyrot ne publie pas le statut/updatedAt : les fiches sont revérifiées à chaque tour pour ne pas laisser des réservées en ligne. Le catalogue national >=9 998 références est refusé comme plafonné. Aucun prospect/mail/publication/validation visuelle.
+
 ### 31/10/2026 — ChatGPT — en cours : lecture en plusieurs fois
 - Travail sur le nouveau lecteur générique Next.js / Openflex et sa mémoire par flux : point de vente strict, occasion disponible, reprise de file et archivage uniquement en fin de tour. Le HTML du catalogue Peyrot contient déjà les données de tout le stock ; pas d’utilisation de clé du site ni d’accès GraphQL refusé.
 - Le cœur de sync sera adapté pour protéger les références temporairement en erreur et ne pas archiver pendant un tour incomplet. Aucun prospect ni flux réel activé/importé pour les tests.

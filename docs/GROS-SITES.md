@@ -114,3 +114,17 @@ avant de commencer, pour que Claude ne modifie pas ces fonctions en même temps.
   aussi un site `<agence>.auto-gestion.net` (`/all-vehicles`, chargé en JavaScript, non exploré).
 - **Mise à jour (Claude, 31/10) : chaque agence a aussi son site Auto-Gestion, lu par `autogestion-reader.ts`** (Lyon 8 : 153 lus, 139 complets). Pour inscrire une agence Transakauto, donner l'adresse `<agence>.auto-gestion.net`, pas le site national.
 - Prospection : 9 adresses Transakauto sont dans la liste, en `segment='phase2_reseau'` (en pause, gros réseau gardé pour plus tard).
+
+
+## 7. Lecteur Next.js / urql + Openflex (ChatGPT, 31/10/2026)
+
+`next-dealer-reader.ts` reconnaît le schéma public (`__NEXT_DATA__`, `urqlState`, `retail_points`, `i_pve_id`) sans domaine de concession codé en dur. Premier témoin : Groupe Peyrot, page **de concession** `/concessions/renault/renault-carcassonne`. Une adresse nationale est refusée. Le catalogue JSON Next.js publié contient les voitures et leur point de vente ; les coordonnées exactes + code postal du point sélectionnent les fiches, puis chacune doit confirmer le titre de la concession dans ses distributeurs. Une recherche à 30 km n'est pas un filtre de concession.
+
+- Fiches : `pageProps.dataVehiculeDetail.aVehicle` (JSON), données de stock Openflex, galerie, équipements, kilométrage, immatriculation initiale, puissances, garantie et téléphone de contact / VO. Plaque et VIN exclus du résultat.
+- Occasion uniquement, statut explicitement « Disponible à la vente », kilométrage positif, pas de neuf / 0 km / commande / stock usine. Aucune clé embarquée dans les scripts n'est réutilisée. L'API GraphQL refusée n'est pas appelée par le lecteur.
+- Mémoire **pour cette famille uniquement** : `public.pro_stock_crawl_state` (RLS, aucun droit anon/authenticated) ; état lié à l'URL du flux et au périmètre physique. File de fiches + lignes déjà lues rejouables ; quatre lectures simultanées, budget 45 s / 220 fiches par passage, reprise suivante ; reset après 72 h. Les autres familles n'utilisent pas encore cette mémoire.
+- Le catalogue structuré est lu en une requête par tour, avec plafond 15 Mo ; le plafond source de 9 998 références est refusé comme incomplet. Le lecteur ne prétend pas prendre en charge une pagination qu'il n'a pas observée.
+- Une fiche défaillante est réessayée une fois, puis sa référence reste vue (protection de l'annonce existante), sans réécriture avec une ancienne fiche. Les erreurs restent visibles dans `crawl.detail_errors`. Une lecture partielle n'archive rien ; en fin de tour, toutes les références vues sont transmises à `sync`, avec le garde-fou 50 % existant et contrôle du checkpoint avant archivage.
+- Une fiche inchangée n'est réutilisée que si la liste publie **à la fois** un horodatage de modification et son statut. Peyrot ne publie pas ces deux champs dans sa liste : chaque fiche est revérifiée à chaque tour, pour ne pas conserver une voiture devenue réservée malgré un titre/prix inchangé.
+- Aperçus / `auto_review_dry` sans écriture de mémoire. Seules les synchronisations et l'examen réel d'un flux utilisent la mémoire par flux. L'activation automatique reste prudente : un tour incomplet reste à vérifier.
+- Tests : `node --experimental-strip-types tests/next-dealer-reader.test.mjs`. Reprise en 3 passages, isolation même ville / point différent, refus catalogue national, filtres neuf/réservé/vendu/0 km, dédoublonnage galerie, deux essais d'une fiche en erreur, reset URL / 72 h.

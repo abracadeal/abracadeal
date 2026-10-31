@@ -1,3 +1,4 @@
+import { isNextDealer, readNextDealer, type DealerState } from "./next-dealer-reader.ts";
 import { readBoschiAgency } from "./boschi-reader.ts";
 import { decodeLegacyHtml } from "./legacy-html.ts";
 import { readBiasAgency, readPierrefeu } from "./regional-estate-readers.ts";
@@ -324,14 +325,14 @@ async function publicFeedUrl(url:URL){
 // Fail closed : si la liste ne peut pas être lue entièrement, on lève une erreur (aucun archivage).
 // 29/10/2026 : accueil sans photo (Laugier Automobiles) : pas de cdn-rivamedia, mais les images de l'interface viennent d'annonces-automobile.com.
 const isAaSiteHtml=(t:string)=>/annonces-automobile\.com/i.test(t)&&(/cdn-rivamedia\.com/i.test(t)||/www\.annonces-automobile\.com\/images\/graphic\//i.test(t));
-async function fetchSiteHtml(start:URL){
+async function fetchSiteHtml(start:URL,maxLength=5_000_000){
  let url=new URL(start.toString());
  for(let redirects=0;;redirects++){
   await publicFeedUrl(url);
   const r=await fetch(url.toString(),{headers:{Accept:'text/html,*/*;q=0.5','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},redirect:'manual',signal:AbortSignal.timeout(20000)});
   if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc||redirects>=4)throw Error('Redirection invalide');url=new URL(loc,url);continue;}
   if(!r.ok)throw Error(`HTTP ${r.status}`);
-  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>5_000_000)throw Error('Page trop volumineuse');
+  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>maxLength)throw Error('Page trop volumineuse');
   return{text,url};
  }
 }
@@ -946,7 +947,7 @@ async function findNetworkPage(siteUrl:URL,html:string){
  }
  return null;
 }
-async function readFeed(feed:any){
+async function readFeed(feed:any,persistCrawl=false){
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
@@ -1022,6 +1023,16 @@ async function readFeed(feed:any){
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(simpliciAgencyId(url)){rows=await readSimpliciAgency(url,fetchSiteHtml);platform='Simplici Car (stock de l\'agence)';feed.sector='vehicules';}
+    else if(isNextDealer(text)){
+      let checkpoint:any=null;
+      const memory=persistCrawl&&feed.id?{
+        load:async()=>{const r=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(r.error)throw r.error;checkpoint=r.data;return r.data?.state as DealerState|null;},
+        save:async(state:DealerState)=>{const payload={feed_id:feed.id,state,updated_at:new Date().toISOString()};
+          const r=checkpoint?await admin.from('pro_stock_crawl_state').update(payload).eq('feed_id',feed.id).eq('updated_at',checkpoint.updated_at).select('feed_id'):await admin.from('pro_stock_crawl_state').insert(payload).select('feed_id');
+          if(r.error)throw r.error;if(!r.data?.length)throw Error('Une autre lecture de ce flux a avancé ; réessayez au prochain passage.');}
+      }:undefined;
+      rows=await readNextDealer(url,text,u=>fetchSiteHtml(u,15_000_000),memory);platform='Next.js / Openflex (stock de la concession)';feed.sector='vehicules';
+    }
     else if(isAutoGestionSite(text,url)){rows=await readAutoGestionSite(origin,text,fetchSiteHtml);platform='Auto-Gestion (site garage, ex. Transakauto)';feed.sector='vehicules';}
     else if(isEwigoSite(text,url)){rows=await readEwigoAgency(origin,text,fetchSiteHtml);platform='Ewigo (stock de l\'agence)';feed.sector='vehicules';}
     else if(isRoselmacSite(text)){rows=await readRoselmacSite(origin,fetchSiteHtml);platform='Roselmac (catalogue garage)';feed.sector='vehicules';}
@@ -1149,10 +1160,15 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     if(Date.now()-t0<60000){await moderateListingInternal(listingId);moderated++;}else deferred++;
    }catch(e){console.error(e);errors++;failures.push(e instanceof Error?e.message:String(e));}
   }
+  for(const ref of (rawRows as any).cycleSeen||[])if(typeof ref==='string')seen.add(ref);
   const mode=modeOverride||feed.sync_mode;
   // Sécurité des sites lus automatiquement : lecture partielle, ou beaucoup moins de véhicules que d'habitude
   // (site en panne, mise en page changée) => on n'archive rien cette fois-ci.
   if(mode==='full'){
+   if((rawRows as any).cycleStarted){const checkpoint=await admin.from('pro_stock_crawl_state').select('state').eq('feed_id',feed.id).maybeSingle();
+    if(checkpoint.error)throw checkpoint.error;
+    if(checkpoint.data?.state?.started!==(rawRows as any).cycleStarted||!checkpoint.data?.state?.completed)archiveSkipped='tour de lecture incomplet ou repris par un autre passage';
+   }
    if((rawRows as any).partial)archiveSkipped='lecture partielle du site';
    else if(feed.source_kind==='site'){
     const{count}=await admin.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',feed.owner_id).eq('source',source).in('status',['active','pending']);
@@ -1211,7 +1227,7 @@ async function notifyAdminsSite(feed:any,kind:'approved'|'pending',info:any){
 }
 async function autoReviewSite(feed:any,dryRun=false){
  const mark=async(reason:string,platform:string|null)=>{if(dryRun)return{ok:false,auto_review:'pending',reason,platform};if(!feed.last_run_at)await notifyAdminsSite(feed,'pending',{reason});await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_run_at:new Date().toISOString(),last_error:'Validation manuelle nécessaire : '+reason,updated_at:new Date().toISOString()}).eq('id',feed.id).eq('review_status','pending');return{ok:false,feed_id:feed.id,auto_review:'pending',reason};};
- let rows:any[];try{rows=await readFeed(feed);}catch(e){return mark(e instanceof Error?e.message:String(e),(e as any)?.platform||null);}
+ let rows:any[];try{rows=await readFeed(feed,!dryRun);}catch(e){return mark(e instanceof Error?e.message:String(e),(e as any)?.platform||null);}
  const platform=(rows as any).platform||null;
  if((rows as any).partial&&!(rows as any).capped&&!dryRun)return mark('lecture partielle du site (trop long à lire en une fois)',platform);
  const norm=await normalizeRows(rows,feed.sector||'vehicules',feed.owner_id);
@@ -1266,7 +1282,7 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
  if(f.source_kind==='site'&&f.last_run_at&&Date.now()-new Date(f.last_run_at).getTime()<175*60000)continue;
  // Le reste passera au prochain passage du cron (toutes les 15 min), les plus anciens d'abord.
  if(Date.now()-start>40000){results.push({ok:false,feed_id:f.id,skipped:'reporté au prochain passage'});continue;}
- try{results.push(await sync(f,await readFeed(f)));}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',f.id);results.push({ok:false,feed_id:f.id,error:msg});}}return json({ok:true,auto_review:autoResults,results});}const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const feedId=String(body?.feed_id||'');if(!feedId)return json({error:'feed_id manquant'},400);const{data:feed}=await admin.from('pro_stock_feeds').select('*').eq('id',feedId).maybeSingle();if(!feed)return json({error:'Flux introuvable'},404);const{data:profile}=await admin.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();const isAdmin=!!profile?.is_admin;if(feed.owner_id!==user.id&&!isAdmin)return json({error:'Accès refusé'},403);
+ try{results.push(await sync(f,await readFeed(f,true)));}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',f.id);results.push({ok:false,feed_id:f.id,error:msg});}}return json({ok:true,auto_review:autoResults,results});}const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const feedId=String(body?.feed_id||'');if(!feedId)return json({error:'feed_id manquant'},400);const{data:feed}=await admin.from('pro_stock_feeds').select('*').eq('id',feedId).maybeSingle();if(!feed)return json({error:'Flux introuvable'},404);const{data:profile}=await admin.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();const isAdmin=!!profile?.is_admin;if(feed.owner_id!==user.id&&!isAdmin)return json({error:'Accès refusé'},403);
  // Aperçu admin d'un site en attente : lecture seule, rien n'est écrit sauf le prestataire détecté / l'erreur.
  if(body?.action==='preview_feed'){
   if(!isAdmin)return json({error:'Accès administrateur requis'},403);
@@ -1279,5 +1295,5 @@ Deno.serve(async(req)=>{if(req.method==='OPTIONS')return new Response('ok',{head
  }
  // Un site en attente de validation ne peut être synchronisé que par l'admin (après « Activer »).
  if(feed.review_status&&feed.review_status!=='approved'&&!isAdmin)return json({error:'Import en attente de validation par Abracadeal'},403);
- let rows:any[];try{rows=await readFeed(feed);}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);throw e;}
+ let rows:any[];try{rows=await readFeed(feed,true);}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',feed.id);throw e;}
  return json(await sync(feed,rows,body?.sync_mode));}catch(e){console.error(e);return json({error:e instanceof Error?e.message:'Erreur de synchronisation'},500);}});
