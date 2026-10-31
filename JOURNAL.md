@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — Peyrot et Lecluse visibles pour le contrôle d’Anthony
+- À sa demande, ajout de deux lignes done / Réparé dans robot_learning_requests : Groupe Peyrot — Renault Carcassonne (127 annonces complètes) et Lecluse — Volkswagen Le Mans (79). Elles étaient absentes malgré les tests de lecture effectués.
+- visual_validated_at laissé null, prospect_id null ; note Phase 2 / contrôle du lecteur uniquement. Anthony peut ouvrir Tester dans Sites en réparation. Aucun prospect, import ou mail modifié. Aucun déploiement de code nécessaire.
+
 ### 31/10/2026 — ChatGPT — v139 en ligne, retests production terminés
 - Déploiement pro-stock-sync v139 figé à 48e2af4167b81fe52209543120049b9f03b054e8, à partir de v138 réellement en ligne ; source, SQL, tests et docs poussés sur main.
 - Tests à blanc séquentiels : Laugier 188671 = 23/23, 756 photos ; Chevreux 188672 = 30/30, 277 photos (écart au témoin 31 restant à vérifier, lecteur inchangé) ; Ewigo La Rochelle 188673 = 68/68 disponibles, 2 071 photos (source /acheter contrôlée : 73 dont 5 vendues/réservées) ; Lecluse Volkswagen Le Mans 188674 = 79/79, 2 184 photos après dédoublonnage global, 79 téléphones VO, une seule requête catalogue de 500 ; Peyrot Carcassonne 188675 = 127/127 complètes, 2 168 photos, 127 téléphones, 131 candidates / une exclue / trois fiches source en erreur protégées. Tous HTTP 200, partial=false, zéro doublon de référence, erreurs normalisation vides.
