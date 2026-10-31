@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — 36 agences Weecars ajoutées à la prospection
+- Liste des 42 agences = menu « Nos agences » de `weecars.fr/319/vehicules/?stock=…` ; e-mail lu sur chaque page `weecars.fr/319/agence/?agence_id=N` (générique `ville@weecars.fr` ou personnel de l'agent).
+- **Ajoutées (36) :** `Garage / concession auto`, `petit_pro`, `ready`, adresse `…/vehicules/?stock=N`, source « weecars.fr (page agence) ». Non ajoutées : déjà dans la liste (Annemasse, Angers, 5 déjà écrits) ou e-mail en double. Le précontrôle testera chaque stock puis mail « répondez OK ».
+- **Test (Weecars Cannes, stock=1935) :** lu par le lecteur Spider VO : 24/24 complets, 575 photos ; le filtre `stock=` est bien appliqué par le site (voitures différentes de la page nationale). La ville lue est celle du siège (Castelnau-le-Lez, pied de page) : à l'import réel, la ville du compte du pro est prioritaire (`normalizeRows`, `ownerLocation`).
+
 ### 31/10/2026 — ChatGPT — MS Motors pagination
 - Lecture initiale v135 / 188316 : 10 véhicules seulement, faux partial=false. Les slugs courts de véhicules étaient classés comme listes ; parcours MS Motors limité maintenant aux quatre pages du catalogue et à toutes leurs fiches, sans archives marques/statuts ni boutique. Kilométrage étiqueté et description/options propres au véhicule repris. Galeries existantes conservées. Aucun prospect/import/mail/validation. Déployé v137 / dbd1755 sur main. Test production 188328 : 22/22 fiches, quatre pages catalogue (6+6+6+4), 20 complètes, 439 photos, aucun doublon, aucune fiche manquée, partial=false. Deux prix absents source (Brabus 900 Rocket et Mercedes GLA 45 AMG) et année Brabus invalide laissés signalés. Titres modèles complets conservés. Demande done, validation visuelle laissée à Anthony. Tests photos et batch4 OK.
 
