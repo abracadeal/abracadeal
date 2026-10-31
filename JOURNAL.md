@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — déploiement gros stocks et SQL de protection préparés
+- pro-stock-sync v138 déployé, figé au commit 8d895f1 ; migration dealer_crawl_memory appliquée. RLS activée, accès anon/authenticated refusé, service_role autorisé. Production Peyrot Carcassonne 188487 : 127/127 complètes, 2 168 photos, contacts/prix/villes/km/années/énergie/boîte/description 100 %, partial=false ; 131 références au catalogue dont une exclue et trois fiches source indisponibles protégées. Aucun import ni prospect.
+- Retests v138 : Laugier 188479 = 23/23 ; Chevreux 188482 = 30/30 (31 avant, parcours automatique variable : 88 fiches candidates, 19 ratés contre 16 avant ; écart non clos, pas présenté comme 31/31). Ewigo La Rochelle 188483 = 68/68, vérifié directement sur /acheter : 73 dans le JSON, cinq vendues/réservées exclues. Pas de modification des lecteurs témoins.
+- Restauration du journal effectuée entre-temps par Claude (63616e4), conservée intégralement avec son entrée Grok ; aucun écrasement concurrent repris.
+- Deux SQL demandés initialement enregistrés : limite par compte de 15 numéros distincts/10 min et 40/24 h (numéros normalisés et hachés, répétitions gratuites, propriétaire/admin exemptés, nettoyage 7 j), et suppression automatique des demandes failed/cancelled + nettoyage des failed existantes. Application et tests à suivre ; admin_confirm_robot_learning_visual non modifiée.
+- Autres gros sites : Estela publie /api/vehicules?per_page=500 (65 lignes, 3 concessions), mais les codes numériques de disponibilité restent à confirmer ; ne pas importer en les devinant. Lecluse : WordPress et pages concessions, source VO pas encore trouvée. Honda Nantes : 503. Reverdy.fr et autoeurope.fr hors sujet automobile d’occasion.
+
+
 ### 31/10/2026 — Grok (ajouté par Claude) — liste d'e-mails d'agences
 - Grok a écrit `docs/PROSPECTS-GROK.md` (e-mails publics d'agences Simplici Car, Transakauto, Ewigo). Rien n'est encore importé dans les prospects : à vérifier avant (sources « journal Claude » de Grok non fiables, e-mails Transakauto à confirmer).
 - Grok avait remplacé tout ce journal par une seule ligne (commits 7dabecc à 252080b) : restauré par Claude depuis 8d895f1.
