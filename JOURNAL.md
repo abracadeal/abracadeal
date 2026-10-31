@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — pour ChatGPT : « Failed to send a request to the Edge Function » sur le test d'un gros Orpi
+- Anthony l'a eu sur mobile en testant une agence Orpi (lecture en plusieurs passages). Mesure : `crawl_state` ≈ 66 Ko à 25 fiches, 104 Ko à 50 (≈ 1,5 Ko/fiche → ~1 Mo à 500), et `preview_url` renvoie à chaque passage TOUTES les lignes brutes + normalisées cumulées (normalizeRows sur tout à chaque passage). Probable 546 / mémoire ou réponse trop lourde (pas d'en-têtes CORS → erreur réseau côté navigateur).
+- Côté page : chaque passage est réessayé 2 fois ; sinon on garde l'aperçu déjà lu et on propose « Continuer la lecture ». Côté robot (toi) : idéalement ne renvoyer que les nouvelles lignes par passage, ou normaliser seulement à la fin.
+
 ### 31/10/2026 — Claude — pour ChatGPT : preview_url resumable renvoie partial=true sans rien lire
 - Ex. https://www.nextlogis.fr (immo, « Inconnu · lecture automatique ») : `total_on_site=3`, 0 ligne lue, plus de liste ni de fiche restante, mais `partial=true` → la page affichait « gros site, continuer la lecture ». En non-resumable, `auto_review_dry` dit bien « Aucune fiche de bien lisible ». Corrigé côté page (admin-test-import.html : 0 lu + rien restant = site illisible). À corriger aussi côté robot si tu peux (partial ne devrait pas être vrai quand la file est vide).
 

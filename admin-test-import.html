@@ -285,8 +285,15 @@ async function load(ev){
  try{
   let data,crawlState=LASTDATA?.source_url===url&&LASTDATA?.partial?LASTDATA.crawl_state:null;
   for(let pass=0;pass<100;pass++){
-   const response=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true,resumable:true,crawl_state:crawlState}});
-   if(response.error)throw Error(await fnError(response.error));data=response.data;
+   // 31/10/2026 (Anthony : « Failed to send a request to the Edge Function ») : un passage qui échoue (réseau du téléphone, robot surchargé)
+   // est réessayé 2 fois ; s'il échoue encore, on garde et affiche ce qui a déjà été lu au lieu de tout perdre.
+   let response=null,lastErr=null;
+   for(let tryN=0;tryN<3;tryN++){
+    try{response=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true,resumable:true,crawl_state:crawlState}});if(!response.error)break;lastErr=Error(await fnError(response.error));}catch(err){lastErr=err;}
+    response=null;E('status').textContent='Petit souci de connexion, nouvel essai ('+(tryN+2)+'/3)…';await new Promise(r=>setTimeout(r,2500*(tryN+1)));
+   }
+   if(!response){if(data?.ok){data.interrupted=String(lastErr?.message||lastErr||'');break;}throw lastErr||Error('Lecture impossible');}
+   data=response.data;
    if(!data?.ok||!data.partial||!data.crawl_state)break;
    crawlState=data.crawl_state;
    E('status').textContent='Lecture en cours : '+(data.raw?.length||0)+' annonces lues, '+(data.crawl?.remaining_lists||0)+' pages et '+(data.crawl?.remaining||0)+' fiches restantes…';
@@ -294,6 +301,7 @@ async function load(ev){
   }
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
   if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];data.source_url=url;LASTDATA=data;render(data,E('sector').value);btn.textContent=data.partial?'Continuer la lecture':'Lire le site';E('sitePreview').hidden=!NORM.length;
+  if(data.interrupted)E('status').innerHTML+='<br><span style="color:var(--gold)">Lecture interrompue après '+(NORM.length)+' annonces (connexion ou robot surchargé). Clique « Continuer la lecture » pour reprendre là où ça s’est arrêté.</span>';
   // 31/10/2026 (Anthony) : aucune annonce lue et plus rien à lire → ce n'est pas un « gros site », c'est un site que le robot ne sait pas lire.
   if(!NORM.length&&!data.crawl?.remaining&&!data.crawl?.remaining_lists){data.partial=false;LASTDATA.partial=false;btn.textContent='Lire le site';E('status').innerHTML='Type de site : <b>'+esc(data.platform||'inconnu')+'</b> · <span style="color:var(--bad)">Le robot ne sait pas lire les annonces de ce site'+(data.total_on_site?' (il en voit '+esc(String(data.total_on_site))+' mais n’arrive pas à ouvrir leurs fiches)':'')+'. Clique « Réparer ce site » pour qu’on lui apprenne, ou envoie le mail normal depuis « Sites à apprendre ».</span>';}
   // 30/10/2026 : site lu avec au moins une annonce complète → bouton « Valider ce site ».
