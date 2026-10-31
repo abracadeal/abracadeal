@@ -291,6 +291,8 @@ async function load(ev){
   }
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
   if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];data.source_url=url;LASTDATA=data;render(data,E('sector').value);btn.textContent=data.partial?'Continuer la lecture':'Lire le site';E('sitePreview').hidden=!NORM.length;
+  // 31/10/2026 (Anthony) : aucune annonce lue et plus rien à lire → ce n'est pas un « gros site », c'est un site que le robot ne sait pas lire.
+  if(!NORM.length&&!data.crawl?.remaining&&!data.crawl?.remaining_lists){data.partial=false;LASTDATA.partial=false;btn.textContent='Lire le site';E('status').innerHTML='Type de site : <b>'+esc(data.platform||'inconnu')+'</b> · <span style="color:var(--bad)">Le robot ne sait pas lire les annonces de ce site'+(data.total_on_site?' (il en voit '+esc(String(data.total_on_site))+' mais n’arrive pas à ouvrir leurs fiches)':'')+'. Clique « Réparer ce site » pour qu’on lui apprenne, ou envoie le mail normal depuis « Sites à apprendre ».</span>';}
   // 30/10/2026 : site lu avec au moins une annonce complète → bouton « Valider ce site ».
   E('siteValidate').hidden=!!data.partial||!NORM.some(n=>!(n.errors||[]).length);E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
  }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
