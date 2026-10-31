@@ -64,3 +64,27 @@ code{background:#0f0a14;border:1px solid var(--line);padding:2px 6px;border-radi
 .state .ok{color:#9df0c5}.state .ko{color:#ffacb5}.state .wait{color:#ffc77f}
 @media(max-width:900px){.mbox{grid-template-columns:1fr 1fr}}
 @media(max-width:560px){.mbox{grid-template-columns:1fr}}
+
+/* 31/10/2026 (Anthony) : mise en page plus claire, surtout sur téléphone. */
+.metric strong{background:linear-gradient(135deg,#fff,#f6b8de);-webkit-background-clip:text;background-clip:text;color:transparent}
+#mToday small{-webkit-text-fill-color:var(--muted);color:var(--muted)}
+.catgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;margin:12px 0}
+.catsince{grid-column:1/-1}
+.catc{background:#140d1b;border:1px solid var(--line);border-radius:14px;padding:12px}
+.catn{font-weight:800;margin-bottom:4px}.catv{color:var(--muted);font-size:.86rem}.catv b{color:var(--text)}.catv b.ok{color:var(--green)}
+.catbar{height:6px;border-radius:9px;background:#2a1a34;margin-top:8px;overflow:hidden}.catbar i{display:block;height:100%;background:linear-gradient(90deg,var(--purple),var(--pink))}
+details.fold{padding:0}details.fold>summary{list-style:none;cursor:pointer;padding:16px 18px;font-weight:800;font-size:1.02rem;display:flex;justify-content:space-between;align-items:center}
+details.fold>summary::-webkit-details-marker{display:none}details.fold>summary::after{content:'▾';color:var(--muted);transition:.2s}details.fold[open]>summary::after{transform:rotate(180deg)}
+details.fold[open]{padding:0 18px 18px}details.fold[open]>summary{padding:16px 0}
+@media(max-width:560px){
+  h1{font-size:1.7rem}.sub{margin:4px 0 14px}
+  .grid4{grid-template-columns:1fr 1fr;gap:8px}.metric{padding:12px;border-radius:14px}.metric span{font-size:.66rem;letter-spacing:.03em}.metric strong{font-size:1.45rem}
+  .tablewrap{overflow:visible;border:0;background:none}
+  .tablewrap table,.tablewrap tbody,.tablewrap tr,.tablewrap td{display:block;width:100%;min-width:0!important}
+  .tablewrap thead{display:none}
+  .tablewrap tr{background:#140d1b;border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px}
+  .tablewrap td{border:0!important;padding:3px 0!important;display:flex;justify-content:space-between;gap:12px;font-size:.88rem;text-align:right;word-break:break-word}
+  .tablewrap td::before{content:attr(data-l);color:var(--muted);font-size:.76rem;font-weight:700;text-align:left;flex:0 0 auto}
+  .tablewrap td[data-l="Société"]{font-size:1rem;text-align:left;padding-bottom:6px!important}.tablewrap td[data-l="Société"]::before{display:none}
+  .tablewrap td[colspan]{display:block;text-align:center}.tablewrap td[colspan]::before{display:none}
+}

@@ -77,14 +77,14 @@ async function loadProspects(){
   if(error){$('prospectsBody').innerHTML='<tr><td colspan="8">Erreur : '+esc(error.message)+'</td></tr>';return}
   allRows=data||[];
   $('prospectsBody').innerHTML=allRows.length?allRows.map(r=>`<tr>
-    <td><b>${esc(r.company)}</b></td>
-    <td>${esc(r.email)}</td>
-    <td>${esc(r.category||'—')}</td>
-    <td>${esc(r.city||'—')}</td>
-    <td><span class="pill ${esc(r.status)}">${esc(({ready:'Prêt',sent:'Envoyé',error:'Erreur',opted_out:'STOP',paused:'Pause',sending:'Envoi'})[r.status]||r.status)}</span></td>
-    <td>${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR'):'—'}</td>
-    <td>${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</td>
-    <td>${r.status==='opted_out'
+    <td data-l="Société"><b>${esc(r.company)}</b></td>
+    <td data-l="E-mail">${esc(r.email)}</td>
+    <td data-l="Catégorie">${esc(r.category||'—')}</td>
+    <td data-l="Ville">${esc(r.city||'—')}</td>
+    <td data-l="Statut"><span class="pill ${esc(r.status)}">${esc(({ready:'Prêt',sent:'Envoyé',error:'Erreur',opted_out:'STOP',paused:'Pause',sending:'Envoi'})[r.status]||r.status)}</span></td>
+    <td data-l="Dernier envoi">${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR'):'—'}</td>
+    <td data-l="Clics">${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</td>
+    <td data-l="Action">${r.status==='opted_out'
       ?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>'
       :'<button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}
     </td>
@@ -98,13 +98,16 @@ async function loadTracking(){
   $('tSent').textContent=sent;$('tClicked').textContent=clicked;$('tAccounts').textContent=Number(t.accounts||0);
   $('tRate').textContent=sent?(clicked/sent*100).toLocaleString('fr-FR',{maximumFractionDigits:1})+' %':'—';
   $('tByCat').innerHTML=(t.tracked_since?'Suivi depuis le '+esc(fmtDate(t.tracked_since))+'. ':'Aucun mail suivi pour l’instant : le suivi démarre avec les prochains envois. ')+
-    (t.by_category||[]).map(c=>'<b>'+esc(c.category)+'</b> : '+c.clicked+' clic(s) / '+c.sent+' mail(s)'+(c.accounts?' · '+c.accounts+' compte(s)':'')).join(' — ');
+    '';
+  // 31/10/2026 (Anthony) : une petite carte par métier (mails, clics, taux, comptes) au lieu d'une ligne de texte.
+  $('tByCat').innerHTML=(t.tracked_since?'<div class="small catsince">Suivi depuis le '+esc(fmtDate(t.tracked_since))+'</div>':'<div class="small catsince">Le suivi démarre avec les prochains envois.</div>')+
+    (t.by_category||[]).map(c=>{const r=c.sent?Math.round(c.clicked/c.sent*1000)/10:0;return '<div class="catc"><div class="catn">'+esc(c.category)+'</div><div class="catv"><b>'+c.clicked+'</b> clic'+(c.clicked>1?'s':'')+' / '+c.sent+' mails · <b>'+r.toLocaleString('fr-FR')+' %</b>'+(c.accounts?' · <b class="ok">'+c.accounts+' compte'+(c.accounts>1?'s':'')+'</b>':'')+'</div><div class="catbar"><i style="width:'+Math.min(100,r*10)+'%"></i></div></div>'}).join('');
   const rows=t.rows||[];
   $('trackBody').innerHTML=rows.length?rows.map(r=>`<tr>
-    <td><b>${esc(r.company)}</b></td><td>${esc(r.email)}</td><td>${esc(r.category||'—')}</td><td>${esc(r.city||'—')}</td>
-    <td>${esc(fmtDate(r.sent_at))}${r.followup_sent_at?'<br><span class="muted">relance '+esc(fmtDate(r.followup_sent_at))+'</span>':''}</td>
-    <td>${Number(r.click_count||0)||'—'}</td><td>${esc(fmtDate(r.last_clicked_at))||'—'}</td>
-    <td>${r.account_at?'<b>Oui</b> · '+esc(fmtDate(r.account_at))+(r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<br><span class="muted">'+esc(r.account_email)+'</span>':''):'—'}</td>
+    <td data-l="Société"><b>${esc(r.company)}</b></td><td data-l="E-mail">${esc(r.email)}</td><td data-l="Catégorie">${esc(r.category||'—')}</td><td data-l="Ville">${esc(r.city||'—')}</td>
+    <td data-l="Envoyé">${esc(fmtDate(r.sent_at))}${r.followup_sent_at?'<br><span class="muted">relance '+esc(fmtDate(r.followup_sent_at))+'</span>':''}</td>
+    <td data-l="Clics">${Number(r.click_count||0)||'—'}</td><td data-l="Dernier clic">${esc(fmtDate(r.last_clicked_at))||'—'}</td>
+    <td data-l="Compte">${r.account_at?'<b>Oui</b> · '+esc(fmtDate(r.account_at))+(r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<br><span class="muted">'+esc(r.account_email)+'</span>':''):'—'}</td>
   </tr>`).join(''):'<tr><td colspan="8" class="muted">Personne n’a encore cliqué.</td></tr>';
 }
 

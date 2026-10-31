@@ -8,7 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0"></script><script src="assets/admin-auth.js?v=1"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-<link rel="stylesheet" href="assets/admin-prospection.css?v=20261010-tpl2">
+<link rel="stylesheet" href="assets/admin-prospection.css?v=20261031-mep">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
@@ -29,7 +29,7 @@
 
 <main class="wrap" id="app" style="display:none">
   <h1>Prospection Pros</h1>
-  <p class="sub">Outil interne Abracadeal : import du fichier prospects, personnalisation automatique, envoi automatique depuis tes adresses Abracadeal (verrouillé jusqu’à ton feu vert) et liste d’opposition. Aucun envoi ne démarre sans action de ta part.</p>
+  <p class="sub">Mails automatiques aux pros, qui a cliqué, qui s’est inscrit, liste STOP.</p>
 
   <section class="grid4">
     <div class="metric"><span>Prospects</span><strong id="mTotal">0</strong></div>
@@ -40,14 +40,14 @@
 
   <section class="card" id="trackCard">
     <h2>Suivi : qui a cliqué ?</h2>
-    <p class="small">Chaque mail contient un lien personnel vers l’offre Fondateurs. On compte les vrais clics (les antivirus qui testent le lien à la réception sont ignorés) et les comptes créés ensuite. Les ouvertures ne sont pas suivies (pas fiables, et à éviter côté CNIL).</p>
+    <p class="small">Clics sur le lien personnel du mail (hors antivirus) et comptes créés ensuite. Les ouvertures ne sont pas suivies.</p>
     <section class="grid4">
       <div class="metric"><span>Mails suivis</span><strong id="tSent">0</strong></div>
       <div class="metric"><span>Ont cliqué</span><strong id="tClicked">0</strong></div>
       <div class="metric"><span>Taux de clic</span><strong id="tRate">—</strong></div>
       <div class="metric"><span>Comptes créés</span><strong id="tAccounts">0</strong></div>
     </section>
-    <div class="small" id="tByCat" style="margin:8px 0"></div>
+    <div id="tByCat" class="catgrid"></div>
     <div class="tablewrap">
       <table>
         <thead><tr><th>Société</th><th>E-mail</th><th>Catégorie</th><th>Ville</th><th>Envoyé</th><th>Clics</th><th>Dernier clic</th><th>Compte</th></tr></thead>
@@ -56,8 +56,7 @@
     </div>
   </section>
 
-  <section class="card">
-    <h2>1. Importer le fichier prospects</h2>
+  <details class="card fold"><summary>Importer un fichier de prospects</summary>
     <div class="row">
       <div class="field grow">
         <label>Fichier Excel ou CSV</label>
@@ -67,10 +66,10 @@
     </div>
     <div class="small">Colonnes reconnues automatiquement : Société / Entreprise, Email, Catégorie, Ville, Département, Téléphone, Source, URL. Les doublons d’e-mail sont ignorés.</div>
     <div id="importMsg" class="notice" style="display:none"></div>
-  </section>
+  </details>
 
   <section class="card" id="mailerCard">
-    <h2>2. Envoi automatique depuis tes adresses Abracadeal</h2>
+    <h2>Envoi automatique</h2>
     <div class="small">Les mots de passe sont rangés dans le coffre-fort chiffré de la base : ils ne s’affichent jamais, même ici. « Vérifier » teste seulement la connexion à OVH, sans rien envoyer.</div>
     <div id="mailboxes"></div>
     <div class="sep"></div>
@@ -86,8 +85,7 @@
     <div id="mailerMsg" class="notice" style="display:none"></div>
   </section>
 
-  <section class="card">
-    <h2>Option : envoi manuel via Gmail</h2>
+  <details class="card fold"><summary>Option : envoi manuel via Gmail</summary>
     <div class="row">
       <div class="field grow">
         <label>Google OAuth Client ID</label>
@@ -98,10 +96,9 @@
     </div>
     <div class="small" style="margin-top:8px">Le jeton Gmail reste uniquement dans cette page pendant la session. Aucun mot de passe Gmail n’est stocké. Autorisation demandée : envoi d’e-mails uniquement.</div>
     <div id="gmailState" class="notice">Gmail non connecté.</div>
-  </section>
+  </details>
 
-  <section class="card">
-    <h2>3. Mail de prospection</h2>
+  <details class="card fold"><summary>Texte du mail de prospection</summary>
     <div class="row" style="margin-bottom:10px">
       <div class="field" style="min-width:260px">
         <label>Version du message (envoyée selon le métier du pro)</label>
@@ -131,10 +128,9 @@
       <button class="btn" id="previewBtn">Prévisualiser</button>
     </div>
     <div id="previewBox" class="notice" style="display:none;white-space:pre-wrap"></div>
-  </section>
+  </details>
 
-  <section class="card">
-    <h2>Envoi manuel d’un lot via Gmail</h2>
+  <details class="card fold"><summary>Envoi manuel d’un lot via Gmail</summary>
     <div class="toolbar">
       <button class="btn primary" id="sendBatchBtn">Envoyer le prochain lot</button>
       <button class="btn red" id="stopBatchBtn" disabled>Arrêter le lot</button>
@@ -148,7 +144,7 @@
     </div>
     <div class="progress"><i id="progressBar"></i></div>
     <div id="sendMsg" class="notice" style="display:none"></div>
-  </section>
+  </details>
 
   <section class="card">
     <div class="row" style="justify-content:space-between">
@@ -180,7 +176,7 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261031-relances"></script>
+<script src="assets/admin-prospection.js?v=20261031-mep"></script>
 <script src="/assets/app-shell-20261018.js?v=6" defer></script>
 </body>
 </html>
