@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — Note pour ChatGPT : gros sites (lecture en plusieurs fois)
+- **Demande d'Anthony :** donner à ChatGPT les infos pour les gros sites. → **`docs/GROS-SITES.md`** (à lire avant de commencer).
+- Problème : sur un gros stock, chaque passage recommence du début et s'arrête avant la fin ; une lecture partielle n'archive jamais rien → **les annonces vendues des gros sites ne sont jamais retirées**, une partie du stock n'est jamais lue, l'inscription reste « à vérifier ».
+- À construire : mémoire par flux (`pro_stock_crawl_state` + `pro_stock_seen`), un « tour » = toutes les listes puis la file des fiches sur plusieurs passages, archivage seulement à la fin d'un tour complet (garde-fou 50 % conservé), fiches inchangées dans la liste non relues. Sites témoins : speedway.fr, valloire-habitat.com, orpi.com/immosaintnicolas, orpi.com/caluirebourg, human-immobilier.fr/la-chatre.
+- **ChatGPT :** noter « en cours : lecture en plusieurs fois » ici avant de toucher à `syncFeed` / `readSmartSite`, pour ne pas travailler dessus en même temps que Claude.
+
 ### 31/10/2026 — ChatGPT — Select Azur, contrôle des images et diagnostics abrégés
 - Correction du précédent diagnostic : les sept GES n'étaient pas tous absents. Les 38 photos des sept galeries ont été contrôlées visuellement : logements/façades, aucune étiquette diagnostic supplémentaire. Cinq fiches publient le couple de classes dans leur propre description : « DPE : D / B. », « DPE D ET D », « DPE D (240) et D (45) », « DPE D (199 )et D (44) », « DPE D ET C ».
 - `apimo-reader.ts` sait désormais lire ces couples complets sur une ligne dédiée de la description propre au bien, sans référence figée. Les graphiques existants restent prioritaires. Rejet des plages A à G, textes multi-logements et couples incomplets/ambigus. Les classes uniques C des références 87544661 et 87541800 ne permettent toujours pas de renseigner leur GES.
