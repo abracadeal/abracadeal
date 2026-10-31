@@ -683,7 +683,7 @@ function parseOrpiEstate(html:string,url:string){
  if(photos.length)o.photos=photos.slice(0,45).join('|');
  return o.reference&&o.titre?o:null;
 }
-async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){return readOrpiCatalogue(origin,slug,fetchSiteHtml,parseOrpiEstate,memory);}
+async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){return readOrpiCatalogue(origin,slug,u=>fetchSiteHtml(u,15_000_000),parseOrpiEstate,memory);}
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).
 const C21_DPE:Record<string,string>={'#00a06d':'A','#52b153':'B','#a5cc74':'C','#f4e70f':'D','#f0b40f':'E','#eb8235':'F','#d7221f':'G'};
