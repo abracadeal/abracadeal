@@ -280,7 +280,7 @@ async function load(ev){
  E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';
  let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
  try{
-  let data,crawlState=null;
+  let data,crawlState=LASTDATA?.source_url===url&&LASTDATA?.partial?LASTDATA.crawl_state:null;
   for(let pass=0;pass<100;pass++){
    const response=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_url',url,sector:E('sector').value,include_raw:true,resumable:true,crawl_state:crawlState}});
    if(response.error)throw Error(await fnError(response.error));data=response.data;
@@ -290,7 +290,7 @@ async function load(ev){
    if(!data.crawl?.remaining_lists&&!data.crawl?.remaining)break;
   }
   if(!data?.ok)throw Error(data?.error||'Réponse inattendue');
-  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];LASTDATA=data;render(data,E('sector').value);E('sitePreview').hidden=!NORM.length;
+  if(data.sector&&data.sector!==E('sector').value){E('sector').value=data.sector;}if(E('oSector')&&data.sector)E('oSector').value=data.sector;ROWS=data.raw||[];NORM=data.rows||[];data.source_url=url;LASTDATA=data;render(data,E('sector').value);btn.textContent=data.partial?'Continuer la lecture':'Lire le site';E('sitePreview').hidden=!NORM.length;
   // 30/10/2026 : site lu avec au moins une annonce complète → bouton « Valider ce site ».
   E('siteValidate').hidden=!!data.partial||!NORM.some(n=>!(n.errors||[]).length);E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
  }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
