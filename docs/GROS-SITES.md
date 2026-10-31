@@ -128,3 +128,16 @@ avant de commencer, pour que Claude ne modifie pas ces fonctions en même temps.
 - Une fiche inchangée n'est réutilisée que si la liste publie **à la fois** un horodatage de modification et son statut. Peyrot ne publie pas ces deux champs dans sa liste : chaque fiche est revérifiée à chaque tour, pour ne pas conserver une voiture devenue réservée malgré un titre/prix inchangé.
 - Aperçus / `auto_review_dry` sans écriture de mémoire. Seules les synchronisations et l'examen réel d'un flux utilisent la mémoire par flux. L'activation automatique reste prudente : un tour incomplet reste à vérifier.
 - Tests : `node --experimental-strip-types tests/next-dealer-reader.test.mjs`. Reprise en 3 passages, isolation même ville / point différent, refus catalogue national, filtres neuf/réservé/vendu/0 km, dédoublonnage galerie, deux essais d'une fiche en erreur, reset URL / 72 h.
+
+
+## 8. Izmocars : stocks complets dans les listes (ChatGPT, 31/10/2026)
+
+`izmo-reader.ts` lit le JSON littéral public `var izmoGlobalData = {...}` sans exécuter les scripts. Un lecteur pour le fabricant, aucun domaine/concession codé en dur. Le stock contient déjà galeries, équipements, prix, date de première circulation, km, statut et identifiant de concession : les fiches individuelles ne sont pas nécessaires.
+
+- Témoin Lecluse : le site groupe renvoie vers les sites propres aux concessions, ex. `https://www.volkswagen-le-mans.fr/vehicules-occasion-stock-fr-fr.htm`.
+- Le JSON de cette page contient `dealerIds=107670,107669,105586` : **ne jamais considérer ce champ comme le périmètre autorisé**. Le lecteur impose le `dealerInfo.dealerId` du site physique et contrôle sur chaque véhicule `invDlrId` ET `localDealerId`. Plusieurs adresses physiques sur le site : refus, sélection d'une concession nécessaire.
+- `listingPerPage=500&page=1` fonctionne : Le Mans 79/79 en une page au lieu de 7 pages de 12, avec 2 190 photos ; service VO 02 43 78 50 70. Valeurs du site d'essai, pas des constantes du lecteur.
+- Uniquement `inventoryType=USED`, `status=ACTV`, sans date de vente ni réservation, kilométrage positif. VN/0 km/commande/stock usine exclus. Plaque et VIN non repris dans les champs.
+- Les pages supplémentaires sont lues seulement si le compteur l'exige ; compteur stable et nombre de références distinctes égal au total source obligatoires. Les filtres et numéros de pages sont contrôlés dans chaque réponse ; stock incomplet/changé ou page répétée : erreur, aucun archivage.
+- Lecture complète en une requête pour le témoin ; aucun besoin de mémoire de fiches. Les longs catalogues structurés peuvent finir en quelques listes. Au-delà de 40 pages ou 45 s : refus explicite, pas de faux résultat complet ; adaptateur à étendre plutôt que recommencer silencieusement.
+- Tests : `node --experimental-strip-types tests/izmo-reader.test.mjs`.

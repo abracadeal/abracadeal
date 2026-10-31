@@ -1,3 +1,4 @@
+import { isIzmoSite, readIzmoDealer } from "./izmo-reader.ts";
 import { isNextDealer, readNextDealer, type DealerState } from "./next-dealer-reader.ts";
 import { readBoschiAgency } from "./boschi-reader.ts";
 import { decodeLegacyHtml } from "./legacy-html.ts";
@@ -1023,6 +1024,7 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
     else if(simpliciAgencyId(url)){rows=await readSimpliciAgency(url,fetchSiteHtml);platform='Simplici Car (stock de l\'agence)';feed.sector='vehicules';}
+    else if(isIzmoSite(text)){rows=await readIzmoDealer(url,text,fetchSiteHtml);platform='Izmocars (stock occasion de la concession)';feed.sector='vehicules';}
     else if(isNextDealer(text)){
       let checkpoint:any=null;
       const memory=persistCrawl&&feed.id?{
