@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — mail « Robot : N site(s) à apprendre » arrêté
+- Demande d'Anthony : plus de mail quotidien des sites à réparer (il arrivait en Promotions). Cron `abracadeal-unreadable-sites-digest` (17:10) supprimé. La liste reste visible dans admin-test-import.html (Sites à apprendre / Sites en réparation). Ne pas le remettre.
+
 ### 31/10/2026 — ChatGPT — Carnot, triple du canapé noir
 - Retour visuel d'Anthony confirmé : références 37511a11, e1004b51 et 204c545e, même bas de villa 100 m² / 4 pièces / 349000 €, deux Cannes et un Le Cannet, maison et appartement. Contrôle des photos : première image strictement identique (SHA-256 identique sur les trois fichiers téléchargés), galeries et descriptions cohérentes avec le même bien. La divergence de ville/type existe dans les trois fiches source.
 - `estate-duplicates.ts` ajoute un rapprochement Orpi prudent après le dédoublonnage existant : même transaction/prix/surface/pièces/département, description détaillée proche et preuve photographique (galerie très largement commune ou image strictement identique en octets). Les programmes/numéros de lots sont exclus ; pas de fusion sur la seule photo. Téléchargement image public limité à 3 Mo / 4 s, redirections et adresses contrôlées ; échec => fiches laissées séparées.
