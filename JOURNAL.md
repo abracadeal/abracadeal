@@ -1,1 +1,1 @@
-$(cat /tmp/journal_final.md)
+PLACEHOLDER_TO_BE_REPLACED
