@@ -305,7 +305,11 @@ async function load(ev){
   // 31/10/2026 (Anthony) : aucune annonce lue et plus rien à lire → ce n'est pas un « gros site », c'est un site que le robot ne sait pas lire.
   if(!NORM.length&&!data.crawl?.remaining&&!data.crawl?.remaining_lists){data.partial=false;LASTDATA.partial=false;btn.textContent='Lire le site';E('status').innerHTML='Type de site : <b>'+esc(data.platform||'inconnu')+'</b> · <span style="color:var(--bad)">Le robot ne sait pas lire les annonces de ce site'+(data.total_on_site?' (il en voit '+esc(String(data.total_on_site))+' mais n’arrive pas à ouvrir leurs fiches)':'')+'. Clique « Réparer ce site » pour qu’on lui apprenne, ou envoie le mail normal depuis « Sites à apprendre ».</span>';}
   // 30/10/2026 : site lu avec au moins une annonce complète → bouton « Valider ce site ».
-  E('siteValidate').hidden=!!data.partial||!NORM.some(n=>!(n.errors||[]).length);E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
+  // 31/10/2026 (Anthony : 736 lus sur 737, « je peux pas valider ») : un gros site peut être validé sans être lu à 100 % au test :
+  // au moins 20 annonces complètes et 90 % du stock lu (le robot finira le reste après l'inscription).
+  const okN=NORM.filter(n=>!(n.errors||[]).length).length,tot=Number(data.total_on_site||0);
+  const bigOk=!!data.partial&&okN>=20&&(!tot||NORM.length>=tot*0.9);
+  E('siteValidate').hidden=(!!data.partial&&!bigOk)||!okN;E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
  }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
  finally{btn.disabled=false}
 }
