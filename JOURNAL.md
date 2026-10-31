@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — pour ChatGPT : preview_url resumable renvoie partial=true sans rien lire
+- Ex. https://www.nextlogis.fr (immo, « Inconnu · lecture automatique ») : `total_on_site=3`, 0 ligne lue, plus de liste ni de fiche restante, mais `partial=true` → la page affichait « gros site, continuer la lecture ». En non-resumable, `auto_review_dry` dit bien « Aucune fiche de bien lisible ». Corrigé côté page (admin-test-import.html : 0 lu + rien restant = site illisible). À corriger aussi côté robot si tu peux (partial ne devrait pas être vrai quand la file est vide).
+
 ### 31/10/2026 — Claude — mail « Robot : N site(s) à apprendre » arrêté
 - Demande d'Anthony : plus de mail quotidien des sites à réparer (il arrivait en Promotions). Cron `abracadeal-unreadable-sites-digest` (17:10) supprimé. La liste reste visible dans admin-test-import.html (Sites à apprendre / Sites en réparation). Ne pas le remettre.
 
