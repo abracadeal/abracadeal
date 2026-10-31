@@ -1,0 +1,3 @@
+-- 31/10/2026 (Anthony) : bouton « Mail normal » dans « Sites en réparation » (site protégé / impossible à lire).
+-- Ferme la demande (cancelled) et passe le prospect en mail normal (site_check_reason 'Choix Anthony : …'). Appliqué via execute_sql.
+-- Définition complète : pg_get_functiondef('public.admin_robot_learning_mail_normal'::regproc).
