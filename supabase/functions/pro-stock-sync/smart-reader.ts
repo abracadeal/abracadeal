@@ -197,7 +197,7 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   if(!(prix>0)&&nearTitle)prix=firstAmount(nearTitle,priceRe);
   if(!(prix>0))prix=firstAmount(text,new RegExp('(?:prix|loyer|tarif)[^0-9€]{0,40}'+priceRe.source,'iu'));
   if(!(prix>0))prix=firstAmount(text,priceRe);
-  if(!(prix>=50&&prix<100000000))return null;
+  if(!(prix>=50&&prix<100000000)&&!(base.hostname.replace(/^www\./,'')==='msmotors.fr'&&/^\/vehicules\/[^/]+\/?$/.test(base.pathname)))return null;
   const refM=base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
   const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
@@ -306,9 +306,11 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const phone=ownContact.match(/href="tel:([^"<>]+)"/i)?.[1];if(phone&&advisor)o.contact_telephone=phone;
   }
   if(base.hostname.replace(/^www\./,'')==='msmotors.fr'){
+    o.titre=h1;
+    const ownPrice=clean(rawHtml.match(/<span class="price">([\s\S]*?)<\/span>/)?.[1]||'').replace(/[^0-9]/g,'');if(ownPrice)o.prix=ownPrice;else delete o.prix;
     const keys:Record<string,string>={'Nombre de kilomètre':'kilometrage','Carburant':'carburant','Boite de vitesse':'boite','Année':'annee','Extérieur':'couleur','Intérieur':'sellerie','Puissance':'puissance_din'};
     for(const m of rawHtml.matchAll(/<p>([^<]+)<\/p>\s*<span class="value">([^<]*)<\/span>/g)){const k=keys[clean(m[1])];if(k&&clean(m[2]))o[k]=clean(m[2]);}
-    const options=rawHtml.split('id="optionsContainer"')[1]?.split('id="videosContainer"')[0];if(options)o.description=clean(options.replace(/^[^>]*>/,''));
+    const options=rawHtml.split('id="optionsContainer"')[1]?.split(/<div\b[^>]*id="(?:videosContainer|informationsRequestContainer)"/)[0];if(options)o.description=clean(options.replace(/^[^>]*>/,''));
   }
   return o;
 }
