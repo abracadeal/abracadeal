@@ -8,6 +8,7 @@ let rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory
 rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});assert.equal(rows.partial,true);fail=false;
 for(let i=0;i<5&&!state.completed;i++)rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});
 assert.equal(rows.partial,false);assert.equal(rows.length,3);assert.equal(new Set(rows.map(x=>x.reference)).size,3);assert.equal(rows.cycleSeen.length,3);
+const replay=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory);assert.equal(replay.length,3);assert.equal(replay.stats.details,0);
 state.started='2020-01-01T00:00:00Z';state.completed=null;state.rows.stale={reference:'stale'};rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});assert.equal(rows.some(x=>x.reference==='stale'),false);
 state=null;fail=true;for(let i=0;i<8;i++)rows=await crawlCatalogue(source,'scope',[source],fetcher,links,parse,memory,{maxDetails:1});assert.equal(rows.partial,true);assert.ok(rows.stats.failed.length);assert.equal(state.completed,null);
 console.log('Resume: list pagination, multiple passes, replay, transient retry, permanent failure blocks completion, 72h reset OK');
