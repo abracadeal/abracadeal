@@ -26,6 +26,12 @@ export function smartLinks(html:string,page:URL,host:string){
     if(/\.(css|js|png|jpe?g|gif|svg|webp|ico|pdf|xml|zip|woff2?|mp4)(\?|$)/i.test(u.pathname))continue;
     u.hash='';const full=u.toString();
     if(SKIP_PATH.test(u.pathname))continue;
+    if(host==='msmotors.fr'){
+      if(/^\/vehicules\/(?:page\/\d+\/?)?$/.test(u.pathname)){lists.add(full);continue;}
+      if(/^\/vehicules\/[^/]+\/?$/.test(u.pathname)){if(!groups.has('ms-vehicle'))groups.set('ms-vehicle',new Set());groups.get('ms-vehicle')!.add(full);}
+      continue;
+    }
+
     if(/\/(?:maisons|appartements|terrains)[^/]*\.php$/i.test(u.pathname)){lists.add(full);continue;}
     if(isDetailish(u)&&!(/[?&]pcsd=/.test(u.search)&&/\.php$/i.test(u.pathname))){const p=pathPattern(u)+(u.search?'?'+[...u.searchParams.keys()].sort().join('&'):'');if(!groups.has(p))groups.set(p,new Set());groups.get(p)!.add(full);}
     else if(LIST_PATH.test(u.pathname+u.search)||/\/(?:maisons|appartements|terrains)[^/]*\.php$/i.test(u.pathname)||/[?&](page|p|pg|start|offset)=\d+|\/page[-/]?\d+/i.test(u.pathname+u.search))lists.add(full);
@@ -298,6 +304,11 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const advisor=metaAll(headHtml,'product:retailer_title')[0];if(advisor)o.contact_nom=advisor;
     const ownContact=rawHtml.match(/<form\b[^>]*id="[^"<>]*public_contact[^"<>]*"[^>]*>([\s\S]*?)<\/form>/i)?.[1]||'';
     const phone=ownContact.match(/href="tel:([^"<>]+)"/i)?.[1];if(phone&&advisor)o.contact_telephone=phone;
+  }
+  if(base.hostname.replace(/^www\./,'')==='msmotors.fr'){
+    const keys:Record<string,string>={'Nombre de kilomètre':'kilometrage','Carburant':'carburant','Boite de vitesse':'boite','Année':'annee','Extérieur':'couleur','Intérieur':'sellerie','Puissance':'puissance_din'};
+    for(const m of rawHtml.matchAll(/<p>([^<]+)<\/p>\s*<span class="value">([^<]*)<\/span>/g)){const k=keys[clean(m[1])];if(k&&clean(m[2]))o[k]=clean(m[2]);}
+    const options=rawHtml.split('id="optionsContainer"')[1]?.split('id="videosContainer"')[0];if(options)o.description=clean(options.replace(/^[^>]*>/,''));
   }
   return o;
 }

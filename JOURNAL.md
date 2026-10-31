@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — MS Motors pagination
+- Lecture initiale v135 / 188316 : 10 véhicules seulement, faux partial=false. Les slugs courts de véhicules étaient classés comme listes ; parcours MS Motors limité maintenant aux quatre pages du catalogue et à toutes leurs fiches, sans archives marques/statuts ni boutique. Kilométrage étiqueté et description/options propres au véhicule repris. Galeries existantes conservées. Aucun prospect/import/mail/validation. Vérification production après déploiement consignée dans la demande.
+
 ### 31/10/2026 — Claude — Prospects Transakauto remis en prospection ; Weecars
 - **Transakauto (demande d'Anthony) :** 6 agences sorties de `phase2_reseau` → `petit_pro` / `ready`, adresse = leur site Auto-Gestion (`transakauto<ville>.auto-gestion.net`, stock vérifié) et e-mail de l'agence lu sur sa page contact : Dreux, Cambrai, Abbeville, Manosque (`serviceclient@` national remplacé par `manosque@transakauto.com`), Bastia, Lyon 8 ; noms « Transakauto <ville> ». Le précontrôle les testera puis mail « répondez OK ».
 - Restent en pause : Montauban (site Auto-Gestion sans véhicule), Conflans (pas de site Auto-Gestion trouvé), Paris Espace Automobile (site propre, à tester). TransakMoto Lieusaint déjà écrit le 28/10.
