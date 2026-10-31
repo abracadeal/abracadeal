@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — aperçu des annonces du prospect + envois + corrections robot
+- **Aperçu prospect** : `pro-fondateur.html?r=<code>` affiche « voici vos N véhicules/biens sur Abracadeal » (6 annonces lues sur son site, photos marquées APERÇU) + bouton d'inscription. Table `prospect_previews` + RPC publique `prospect_preview(code)` (SQL `supabase/2026-10-31-prospect-previews.sql`). Rempli par `prospect_precheck` et, pour les déjà testés, par l'action `prospect_preview_fill` (cron `abracadeal-prospect-preview-fill`, ~285 à rattraper). Ne pas tester avec un vrai code : ça compte un clic du prospect.
+- Bouton « Je m'inscris gratuitement » en haut de pro-fondateur.html.
+- Envois : `daily_limit` 18 → 25 par boîte (50/jour). Voir les rebonds avant de monter à 35.
+- prospect-mailer v13 : action `test` possible avec la clé interne, toujours vers abracadeal@gmail.com.
+- Robot (v142) : « Conduite intérieure » retiré de la carrosserie ; équipements voiture retirés des motos ; « Hybride non rechargeable » → Hybride (Simplici, Ewigo, texte).
+- Pages admin : `assets/admin-auth.js` (renouvelle la session au lieu de demander de se reconnecter), supabase-js 2.118.0 partout.
+- Aperçu d'import : « Quitter l'aperçu » ferme l'onglet et revient au test.
+
 ### 31/10/2026 — ChatGPT — Peyrot et Lecluse visibles pour le contrôle d’Anthony
 - À sa demande, ajout de deux lignes done / Réparé dans robot_learning_requests : Groupe Peyrot — Renault Carcassonne (127 annonces complètes) et Lecluse — Volkswagen Le Mans (79). Elles étaient absentes malgré les tests de lecture effectués.
 - visual_validated_at laissé null, prospect_id null ; note Phase 2 / contrôle du lecteur uniquement. Anthony peut ouvrir Tester dans Sites en réparation. Aucun prospect, import ou mail modifié. Aucun déploiement de code nécessaire.
