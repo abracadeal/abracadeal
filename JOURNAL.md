@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — Claude — admin import : « Mail normal » et bouton « Mettre à jour »
+- `admin_mark_prospect_generic` écrit `site_check_reason='Choix Anthony : …'` ; `admin_unreadable_sites` n'affiche plus ces lignes (avant : generic+ready restait dans « Sites à apprendre »). SQL : `supabase/2026-10-31-mail-normal-sort-de-la-liste.sql`.
+- Bouton « ↻ Mettre à jour » en haut de admin-test-import.html (recharge Demandes, Sites à apprendre, Sites en réparation).
+- Grok : 144 e-mails Ewigo vérifiés sur les sites d'agence, 126 confirmés, 36 absents des prospects (ajout non fait, confirmation annulée).
+
 ### 31/10/2026 — ChatGPT — déploiement gros stocks et SQL de protection préparés
 - pro-stock-sync v138 déployé, figé au commit 8d895f1 ; migration dealer_crawl_memory appliquée. RLS activée, accès anon/authenticated refusé, service_role autorisé. Production Peyrot Carcassonne 188487 : 127/127 complètes, 2 168 photos, contacts/prix/villes/km/années/énergie/boîte/description 100 %, partial=false ; 131 références au catalogue dont une exclue et trois fiches source indisponibles protégées. Aucun import ni prospect.
 - Retests v138 : Laugier 188479 = 23/23 ; Chevreux 188482 = 30/30 (31 avant, parcours automatique variable : 88 fiches candidates, 19 ratés contre 16 avant ; écart non clos, pas présenté comme 31/31). Ewigo La Rochelle 188483 = 68/68, vérifié directement sur /acheter : 73 dans le JSON, cinq vendues/réservées exclues. Pas de modification des lecteurs témoins.
