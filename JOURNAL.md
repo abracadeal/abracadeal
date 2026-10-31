@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 31/10/2026 — ChatGPT — Carnot, écart de compteur expliqué et complément JSON
+- Le compteur sans transaction 536 inclut 38 locations d'autres agences ; elles ont été identifiées dans la réponse publique `/recherche/ajax` (agimmo, Lancelot, etc.), hors des six locations de la recherche Carnot. Les compteurs filtrés officiels donnent 492 ventes et 6 locations : cible réelle 498, et non 536. Sept ventes n'étaient pas présentes dans les liens des pages catalogue consultées.
+- `orpi-catalogue.ts` lit la recherche JSON publique par transaction buy/rent, agency et onlyEnabled, et exige que l'agence et le total soient confirmés dans la réponse. Les ventes partagées présentes dans cette recherche restent autorisées, sans élargir aux locations d'autres agences. Catalogue > plafond JSON : complément par pagination HTML, total distinct obligatoirement égal au compteur filtré, sinon pas d'archivage.
+- Réutilisation des checkpoints Orpi existants : ajoute les listes JSON à la file sans jeter les fiches déjà lues. Champs, galerie et description intégrale restent lus sur chaque fiche ; aucun JavaScript exécuté et aucune clé réutilisée. Tests périmètre, transactions et compteurs filtrés OK, compilation OK. Production à vérifier avant done. Aucun import/activation/prospect/mail.
+
 ### 31/10/2026 — ChatGPT — lecture en plusieurs fois Orpi et lecteur automatique
 - `resumable-crawl.ts` : listes et fiches restantes, références et lignes déjà lues, reprise 35 s / 100 fiches (Orpi : lots de 25, plus lourds), quatre téléchargements simultanés. Mémoire par flux existante `pro_stock_crawl_state`, source et périmètre isolés, reset après 72 h sans progression ; un tour vieux de plus de 72 h ne permet aucun archivage. Aucune nouvelle table. Enregistrement compare-and-swap avant retour au sync ; résultat rejouable après échec.
 - Orpi : retrait du plafond 220 et de la rotation quotidienne ; pagination publique de chaque liste de la seule agence. Lecteur automatique : reprise des listes, fiches et sitemaps, périmètre conservé. Autres lecteurs spécialisés conservés, Next/Openflex garde sa mémoire existante ; les lecteurs spécialisés encore plafonnés nécessitent leur propre adaptation, aucune promesse de lecture universelle.

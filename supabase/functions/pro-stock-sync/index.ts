@@ -1,3 +1,4 @@
+import { readOrpiCatalogue } from "./orpi-catalogue.ts";
 import { encodeCrawlState, decodeCrawlState } from "./crawl-transport.ts";
 import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isIzmoSite, readIzmoDealer } from "./izmo-reader.ts";
@@ -682,17 +683,7 @@ function parseOrpiEstate(html:string,url:string){
  if(photos.length)o.photos=photos.slice(0,45).join('|');
  return o.reference&&o.titre?o:null;
 }
-async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){
- const roots=[`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`,`/${slug}/acheter`];
- const count=await fetchSiteHtml(new URL('/recherche/count?agency='+encodeURIComponent(slug),origin));const expected=/^\s*\d+\s*$/.test(count.text)?Number(count.text):undefined;
- return crawlCatalogue(new URL('/'+slug+'/',origin).toString(),'orpi-v2:'+slug,roots.map(p=>new URL(p,origin).toString()),fetchSiteHtml,(html,page)=>{
-  const details=[...new Set([...html.matchAll(/href="(\/annonce-[a-z0-9-]+-([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/?[^" ]*)"/gi)].map(m=>new URL(decodeEntities(m[1]),origin).toString()))];
-  const lists:string[]=[];
-  for(const m of html.matchAll(/href=["']([^"']+)["']/g)){try{const u=new URL(decodeEntities(m[1]),page);if(u.origin===origin.origin&&roots.includes(u.pathname)&&/^\d+$/.test(u.searchParams.get('page')||'')&&Number(u.searchParams.get('page'))>Number(page.searchParams.get('page')||1)){const n=new URL(u.pathname,origin);n.searchParams.set('page',u.searchParams.get('page')!);lists.push(n.toString());}}catch{}}
-  if(!/data-estate|annonce-|Aucun bien|aucun résultat|0 bien/i.test(html))throw Error('Catalogue Orpi non reconnu');
-  return {lists,details};
- },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory,{expectedTotal:expected,maxDetails:25});
-}
+async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){return readOrpiCatalogue(origin,slug,fetchSiteHtml,parseOrpiEstate,memory);}
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).
 const C21_DPE:Record<string,string>={'#00a06d':'A','#52b153':'B','#a5cc74':'C','#f4e70f':'D','#f0b40f':'E','#eb8235':'F','#d7221f':'G'};
