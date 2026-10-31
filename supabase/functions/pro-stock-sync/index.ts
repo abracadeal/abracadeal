@@ -691,7 +691,7 @@ async function readOrpiAgency(origin:URL,slug:string,memory?:CrawlMemory){
   for(const m of html.matchAll(/href=["']([^"']+)["']/g)){try{const u=new URL(decodeEntities(m[1]),page);if(u.origin===origin.origin&&roots.includes(u.pathname)&&/^\d+$/.test(u.searchParams.get('page')||'')&&Number(u.searchParams.get('page'))>Number(page.searchParams.get('page')||1)){const n=new URL(u.pathname,origin);n.searchParams.set('page',u.searchParams.get('page')!);lists.push(n.toString());}}catch{}}
   if(!/data-estate|annonce-|Aucun bien|aucun résultat|0 bien/i.test(html))throw Error('Catalogue Orpi non reconnu');
   return {lists,details};
- },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory,{expectedTotal:expected});
+ },(html,url)=>{const row=parseOrpiEstate(html,url);if(!row)throw Error('Fiche Orpi absente ou indisponible');return row;},memory,{expectedTotal:expected,maxDetails:25});
 }
 // Agences Century 21 (site propre de l'agence, ex. century21-gastaldy-cap-d-ail.com) : listes /annonces/achat/ et
 // /annonces/location/ (pages /page-N/), puis chaque fiche /trouver_logement/detail/<id>/ (JSON-LD + page).
