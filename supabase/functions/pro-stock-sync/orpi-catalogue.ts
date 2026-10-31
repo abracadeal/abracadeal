@@ -2,7 +2,7 @@ import {crawlCatalogue,type CrawlMemory} from './resumable-crawl.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const decode=(s:string)=>s.replace(/&amp;/g,'&');
 // Agence propriétaire d'une fiche (attribut data-estate) : null si introuvable.
-function agencyOf(html:string){const raw=html.match(/data-estate="([^"]*)"/)?.[1];if(!raw)return null;const m=raw.replace(/&quot;/g,'"').match(/"agency"\s*:\s*\{[^{}]*?"slug"\s*:\s*"([^"]+)"/);return m?m[1]:null;}
+function agencyOf(html:string){const raw=html.match(/data-estate="([^"]*)"/)?.[1];if(!raw)return null;const txt=raw.replace(/&#x([0-9a-f]+);/gi,(_m,h)=>String.fromCharCode(parseInt(h,16))).replace(/&#(\d+);/g,(_m,d)=>String.fromCharCode(Number(d))).replace(/&quot;/g,'"').replace(/&amp;/g,'&');const m=txt.match(/"agency"\s*:\s*\{[^{}]*?"slug"\s*:\s*"([^"]+)"/);return m?m[1]:null;}
 export function isOrpiBusinessAgency(html:string,slug:string){
  return [...html.matchAll(/href=["']([^"']+)["']/gi)].some(m=>{try{const u=new URL(decode(m[1]),'https://www.orpi.com');return u.hostname==='www.orpi.com'&&u.pathname.startsWith('/'+slug+'/commerces-entreprises/');}catch{return false;}});
 }
