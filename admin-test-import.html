@@ -103,6 +103,7 @@ details.fold[open]{padding-bottom:14px}
 <h1>Imports depuis les sites des pros</h1>
 <p class="muted">Les pros qui donnent l'adresse de leur site à l'inscription (et cochent l'autorisation) apparaissent ici. Rien n'est publié tant que vous n'avez pas cliqué sur « Activer ».</p>
 <div id="app" hidden>
+ <div style="display:flex;justify-content:flex-end;margin:0 0 8px"><button class="sbtn" type="button" id="refreshAll">↻ Mettre à jour</button></div>
  <details class="fold" id="fold-test" open><summary><span>Tester une adresse</span></summary>
 
  <form class="bar" id="form"><input id="url" class="clearable" type="text" inputmode="url" autocapitalize="none" value="https://www.lifecars.fr" placeholder="www.site-du-pro.fr" required><select class="sel" id="sector"><option value="vehicules">Auto / Moto</option><option value="immobilier">Immobilier</option></select><button class="btn" id="go">Lire le stock</button></form>
@@ -172,6 +173,7 @@ async function init(){
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
  E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();
+ E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('sitePreview').onclick=previewSite;
  E('learnCur').onclick=async()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;if(await askLearn(u,E('sector').value,LEARN_CONTEXT?.company||'',LEARN_CONTEXT?.url===u?LEARN_CONTEXT.prospectId||null:null)){clearTest();E('status').innerHTML='Envoyé dans « Sites en réparation » : <b>'+esc(u)+'</b>';}};
 }

@@ -1,0 +1,3 @@
+-- 31/10/2026 (Claude, demande d'Anthony) : « Mail normal » cliqué par Anthony => le site sort de « Sites à apprendre ».
+-- admin_mark_prospect_generic écrit site_check_reason 'Choix Anthony : …' ; admin_unreadable_sites ignore ces lignes.
+-- (Appliqué en base via execute_sql ; définitions complètes : voir pg_get_functiondef.)
