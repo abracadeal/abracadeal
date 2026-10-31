@@ -56,13 +56,16 @@ async function logAction(prospectId,action,detail=''){
 }
 
 async function loadMetrics(){
-  const [{count:total},{count:ready},{count:stop},{count:today}]=await Promise.all([
+  // 31/10/2026 (Anthony) : « Envoyés aujourd'hui » = premiers mails + relances (les deux comptent dans la limite par adresse).
+  const [{count:total},{count:ready},{count:stop},{count:today},{count:fu}]=await Promise.all([
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}),
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}).in('status',['ready','paused']),
     sb.from('prospection_prospects').select('*',{count:'exact',head:true}).eq('status','opted_out'),
-    sb.from('prospection_prospects').select('*',{count:'exact',head:true}).eq('status','sent').gte('sent_at',localMidnightIso())
+    sb.from('prospection_prospects').select('*',{count:'exact',head:true}).gte('sent_at',localMidnightIso()),
+    sb.from('prospection_prospects').select('*',{count:'exact',head:true}).gte('followup_sent_at',localMidnightIso())
   ]);
-  $('mTotal').textContent=total||0;$('mReady').textContent=ready||0;$('mStop').textContent=stop||0;$('mToday').textContent=today||0;
+  $('mTotal').textContent=total||0;$('mReady').textContent=ready||0;$('mStop').textContent=stop||0;
+  $('mToday').innerHTML=((today||0)+(fu||0))+'<small style="display:block;font-size:.8rem;font-weight:600;opacity:.75;margin-top:4px">'+(today||0)+' 1ers mails · '+(fu||0)+' relances</small>';
   return {total:total||0,ready:ready||0,stop:stop||0,today:today||0};
 }
 
