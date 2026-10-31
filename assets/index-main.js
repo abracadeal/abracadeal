@@ -3423,8 +3423,10 @@ function showImportPreviewBanner(){
   if(!IMPORT_PREVIEW||document.getElementById('importPreviewBanner'))return;
   const b=document.createElement('div');b.id='importPreviewBanner';
   b.style.cssText='position:sticky;top:0;z-index:9999;background:#451657;color:#fff;padding:10px 14px;font-size:14px;line-height:1.4;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap';
-  b.innerHTML='<span><b>Aperçu de l’import</b> · '+IMPORT_PREVIEW.ads.length+' annonce'+(IMPORT_PREVIEW.ads.length>1?'s':'')+(IMPORT_PREVIEW.site?' de '+esc(IMPORT_PREVIEW.site):'')+' telles qu’elles apparaîtront sur Abracadeal. Rien n’est publié.</span><a href="index.html" style="color:#fff;font-weight:700">Quitter l’aperçu</a>';
+  b.innerHTML='<span><b>Aperçu de l’import</b> · '+IMPORT_PREVIEW.ads.length+' annonce'+(IMPORT_PREVIEW.ads.length>1?'s':'')+(IMPORT_PREVIEW.site?' de '+esc(IMPORT_PREVIEW.site):'')+' telles qu’elles apparaîtront sur Abracadeal. Rien n’est publié.</span><a href="admin-test-import.html" id="importPreviewQuit" style="color:#fff;font-weight:700">Quitter l’aperçu</a>';
   document.body.prepend(b);
+  // 31/10/2026 (Anthony) : « Quitter l’aperçu » revient sur la page de test (ferme l’onglet ouvert par le test, sinon y retourne).
+  b.querySelector('#importPreviewQuit').addEventListener('click',e=>{if(window.opener&&!window.opener.closed){e.preventDefault();try{window.opener.focus();}catch(_){}window.close();}});
 }
 async function loadAds(){
   if(IMPORT_PREVIEW){allAds=IMPORT_PREVIEW.ads;catalogLoadedOnce=true;IMPORT_PREVIEW.ads.forEach(a=>{try{detailAdsCache.set(a.id,a);}catch(_){}});renderAds();showImportPreviewBanner();return;}
