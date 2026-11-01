@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : DPE écrit dans un menu dépliant (Espaces Atypiques), pro-stock-sync v177
+- Anthony : le DPE d'Espaces Atypiques est dans un menu dépliant (« Consommation énergie primaire — b : 82 kWh/m².an », « A : 3 kg CO2/m².an »), non lu.
+- `smart-reader.ts` : lit « X : nombre kWh » (DPE) et « X : nombre kg CO2 » (GES), et la barre marquée active (`class="… active" id="cep-b"`, `eges-a`…).
+- Les Herbiers : B / A (comme le site). Les Sables : DPE trouvé sur 4 biens sur 5 ; le 5e est « DPE vierge ou en cours » sur le site.
+
 ### 01/11/2026 — Claude : DPE + GES dans une même image (Guy Hoquet), pro-stock-sync v176
 - Anthony : annonce Guy Hoquet Montner affichée sans DPE alors que le site montre B / A en image.
 - Guy Hoquet ne donne souvent que la conso (84 kWh) et une image `image_DPE_GES` (immo-facile) avec les deux échelles côte à côte.
