@@ -62,7 +62,10 @@ export async function readCityaNdfAgency(url:URL,fetchHtml:Fetcher){
   for(let i=0;i<links.length;i+=5){
     await Promise.all(links.slice(i,i+5).map(async l=>{
       try{const{text}=await fetchHtml(new URL(l));const r:any=smartDetail(text,l,'immobilier');if(!r)return;
-        r.reference=l.replace(/\/+$/,'').split('/').pop();r.transaction=/\/annonce\/location-/.test(l)?'location':'vente';rows.push(r);}catch{failed++;}
+        r.reference=l.replace(/\/+$/,'').split('/').pop();r.transaction=/\/annonce\/location-/.test(l)?'location':'vente';
+        // Ville / code postal pris dans l'adresse de la fiche (« vente-maison-avec-terrain-fournes-en-weppes-59134-… ») si la page ne les donne pas.
+        if(!r.ville||!r.code_postal){const t=String(r.reference).split('-');const k=t.findIndex(x=>/^\d{5}$/.test(x));if(k>0){const skip=new Set(['vente','location','maison','appartement','avec','terrain','immeuble','local','commercial','parking','garage','studio','duplex','loft','villa','bureau','bureaux','commerce','propriete','ferme','batiment','box','de','ville','plain','pied']);let i0=0;while(i0<k-1&&skip.has(t[i0]))i0++;const city=t.slice(i0,k).join('-').replace(/(^|-)([a-z])/g,(_m:string,a:string,b:string)=>a+b.toUpperCase()).replace(/-(En|Sur|Sous|Les|Le|La|De|Du|Des|Lez|Les)-/g,(m:string)=>m.toLowerCase());if(!r.ville&&city)r.ville=city;if(!r.code_postal)r.code_postal=t[k];}}
+        rows.push(r);}catch{failed++;}
     }));
   }
   if(failed)(rows as any).partial=true;
