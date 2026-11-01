@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : bilan du test anti-robot de tous les sites des prospects
+- 7 384 sites visités (tâche `abracadeal-antirobot-probe`, arrêtée seule) : 5 191 normaux, 1 795 injoignables ou trop lents (non touchés), 398 protégés : 373 pare-feu Amazon (AWS WAF, page « challenge » 202 de 2,4 Ko, petites agences immobilières toutes différentes), 17 Cloudflare (« Just a moment… », dont Stéphane Plaza), 8 DataDome (Espacevo).
+- Contrôle : 2 sites AWS WAF passés au vrai robot → « aucune fiche lisible » aussi. Le seul site protégé déjà lu avec succès par le robot a été gardé.
+- 432 prospects retirés (segment `exclu_admin`, note « site anti-robot », jamais de mail, réversible) ; 14 demandes de réparation encore ouvertes annulées.
+- Les 1 795 injoignables ne sont pas retirés (site en panne, lent ou adresse fausse : le robot les revérifiera).
+
 ### 01/11/2026 — Claude : vitrine remplie automatiquement à l'inscription d'un pro (admin-onboard-pro v2)
 - Anthony : à l'inscription, remplir tout ce qui est possible depuis le site du pro, sans rien inventer ; si rien, laisser vide.
 - `admin-onboard-pro` (action create, compte neuf ou existant) : après la demande d'import, lit la page d'accueil du site et remplit la vitrine (`pro_showrooms`) seulement là où elle est vide :
