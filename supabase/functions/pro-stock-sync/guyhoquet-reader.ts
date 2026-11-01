@@ -38,6 +38,8 @@ export async function readGuyHoquetAgency(url:URL,_fetchHtml?:Fetcher){
       salles_de_bain:info.SDB||'',etage:info.Etage||'',annee_construction:info.AnneeConstruction||'',
       chauffage:[info.Chauffage,info.ModeChauffage].filter(Boolean).join(' ').replace(/_/g,' / '),
       dpe:/^[A-G]$/.test(dpe)?dpe:'',consommation_energie:info.conso_energ||'',
+      // 01/11/2026 : la lettre manque souvent ; l'image « dpe_ges » (DPE + GES côte à côte) est lue par energy-image.ts
+      dpe_image:info.image_DPE_GES||info.image_DPE||'',ges_image:info.image_DPE_GES||'',
       cout_energie_min:info.MontantDepensesEnergieMin||'',cout_energie_max:info.MontantDepensesEnergieMax||'',
       nombre_lots:info.NbLotsCopro||'',
     });
