@@ -9,11 +9,11 @@ type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const RESERVED=/^(ventes|locations|biens-vendus|location-ephemere|location-saisonniere|vente-interactive|pro|wp-content|wp-json|contact|agences|recrutement|blog|magazine|estimation|mentions-legales)$/i;
 export const isEspacesAtypiquesAgency=(url:URL)=>/^(?:www\.)?espaces-atypiques\.com$/i.test(url.hostname)&&!!url.pathname.split('/').filter(Boolean)[0]&&!RESERVED.test(url.pathname.split('/').filter(Boolean)[0]);
 const slug=(s:string)=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
-const cap=(x:string)=>x.split('-').map((w,i)=>i>0&&/^(de|du|des|la|le|les|sur|sous|en|aux?|et)$/.test(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join('-');
+const cap=(x:string)=>x.split('-').map((w,i)=>i>0&&/^(de|du|des|la|le|les|sur|sous|en|aux?|et)$/.test(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join('-').replace(/-([dl])-/gi,(_,x)=>`-${x.toLowerCase()}'`).replace(/^(Les?|La)-/,'$1 ');/* les-sables-d-olonne → Les Sables-d'Olonne */
 export async function readEspacesAtypiquesAgency(url:URL,fetchHtml:Fetcher){
   const base=new URL(url.pathname.replace(/\/?$/,'/'),url.origin);
   const links=new Set<string>();
-  const add=(html:string)=>{for(const m of html.matchAll(/href="(https:\/\/www\.espaces-atypiques\.com\/(?:ventes|locations)\/\d{5}-[a-z0-9-]+-\d+\/?)"/gi))links.add(m[1].replace(/\/?$/,'/'));};
+  const add=(html:string)=>{for(const m of html.matchAll(/href="(https:\/\/www\.espaces-atypiques\.com\/(?:ventes|locations)\/\d{5}-[a-z0-9-]+-[a-z]{0,4}\d+(?:-\d+)?\/?)"/gi))links.add(m[1].replace(/\/?$/,'/'));};
   const{text}=await fetchHtml(base);add(text);
   for(let p=2;p<=10;p++){if(!new RegExp(`${base.pathname}page/${p}/`).test(text))break;try{const{text:t}=await fetchHtml(new URL(`page/${p}/`,base));const n=links.size;add(t);if(links.size===n)break;}catch{break;}}
   if(!links.size)throw Error('Aucun bien sur la page de l’agence Espaces Atypiques.');
