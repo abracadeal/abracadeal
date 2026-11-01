@@ -98,3 +98,40 @@ export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher){
   if(!rows.length&&i>=links.length)throw Error(`Aucune annonce de cette agence en ligne (${checked} annonces du réseau vérifiées).`);
   return rows;
 }
+
+// ---------- BH Car ----------
+// 01/11/2026 (Anthony : « ça lit toute la France d'un coup ») : bhcar.fr est un réseau (4 200 véhicules, des dizaines d'agences).
+// La page d'une agence (bhcar.fr/agences/bhcar-<ville>, ?page=2…) liste ses véhicules ; chaque fiche dit « chez BH Car <ville> » :
+// seuls les véhicules de l'agence sont gardés. L'accueil du réseau n'est jamais lu en entier.
+export const isBhCarSite=(url:URL)=>/^(?:www\.)?bhcar\.fr$/i.test(url.hostname);
+export async function readBhCarAgency(url:URL,fetchHtml:Fetcher,ldParse:(html:string,url:string)=>any){
+  const slug=url.pathname.match(/^\/agences\/(bhcar-[a-z0-9-]+)/i)?.[1]?.toLowerCase();
+  if(!slug)throw Error('BH Car est un réseau national : indiquez la page de l’agence (bhcar.fr/agences/bhcar-<ville>), pas l’accueil du site.');
+  const base='https://bhcar.fr';
+  const links=new Set<string>();let name='';
+  for(let p=1;p<=30;p++){
+    let text='';try{({text}=await fetchHtml(new URL(`/agences/${slug}${p>1?`?page=${p}`:''}`,base)));}catch{break;}
+    if(p===1){name=(text.match(/<title>([^<]{2,80}?)\s+-\s+Voitures/i)?.[1]||'').replace(/&#x27;/g,"'").trim();if(!name)throw Error('Page d’agence BH Car introuvable.');}
+    const n=links.size;for(const m of text.matchAll(/href="(?:https:\/\/(?:www\.)?bhcar\.fr)?(\/acheter\/bhc?-[a-z0-9]+-[a-z0-9-]+)"/gi))links.add(base+m[1]);
+    if(links.size===n||!new RegExp(`/agences/${slug}\\?page=${p+1}\\b`).test(text))break;
+  }
+  if(!links.size)throw Error(`Aucun véhicule en ligne pour ${name||'cette agence BH Car'}.`);
+  const list=[...links];const rows:any[]=[];let failed=0,i=0;const key=name.toLowerCase();
+  await Promise.all(Array.from({length:4},async()=>{
+    while(i<list.length&&cpuLeft()){
+      const l=list[i++];
+      try{
+        const{text:h}=await fetchHtml(new URL(l));
+        const chez=(h.match(/chez (BH ?Car [^(<"]{2,60}?) \(/i)?.[1]||'').toLowerCase();
+        if(chez&&key&&chez!==key)continue;
+        let r:any=null;try{r=ldParse(h,l);}catch{r=null;}
+        const sd:any=smartDetail(h,l,'vehicules');
+        if(!r)r=sd;else if(sd){for(const k of Object.keys(sd))if(r[k]==null||r[k]==='')r[k]=sd[k];}
+        if(!r||r._sold)continue;r.url=l;rows.push(r);
+      }catch{failed++;}
+    }
+  }));
+  if(failed||i<list.length)(rows as any).partial=true;
+  (rows as any).total=list.length;
+  return rows;
+}

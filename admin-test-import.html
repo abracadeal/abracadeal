@@ -352,7 +352,8 @@ const VMETA_KEYS=['firstRegistration','body','doors','seats','permit','finish','
 function previewSite(){
  const immo=E('sector').value==='immobilier';const now=new Date().toISOString();
  const pick=(r,keys)=>{const m={};for(const k of keys){const v=r[k];if(v!==null&&v!==undefined&&v!==''&&(!Array.isArray(v)||v.length))m[k]=v;}return m;};
- const ads=NORM.filter(r=>!(r.errors||[]).length).slice(0,220).map((r,i)=>{
+ // 01/11/2026 (Anthony : « pourquoi que 220 en aperçu ») : toutes les annonces prêtes ; on n'en retire que si le navigateur manque de place.
+ const ads=NORM.filter(r=>!(r.errors||[]).length).map((r,i)=>{
   const meta=r.category==='immobilier'?pick(r,IMETA_KEYS):pick(r,VMETA_KEYS);
   let description=`[ABRACA_SUB:${r.sub||''}]\n[ABRACA_REF:${r.ref||''}]\n[ABRACA_SOURCE:feed:apercu]\n`;
   if(r.category==='immobilier')description+=`[ABRACA_IMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;else if(Object.keys(meta).length)description+=`[ABRACA_VMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;
@@ -363,7 +364,8 @@ function previewSite(){
  });
  if(!ads.length){alert('Aucune annonce prête à publier à montrer.');return}
  let site='';try{site=new URL((E('url').value.match(/^https?:/i)?'':'https://')+E('url').value.trim()).hostname.replace(/^www\./,'')}catch{}
- try{localStorage.setItem('abraca_import_preview',JSON.stringify({at:now,site,ads}));}catch(e){alert('Aperçu trop gros pour le navigateur : '+e.message);return}
+ let n=ads.length;for(;;){try{localStorage.setItem('abraca_import_preview',JSON.stringify({at:now,site,ads:ads.slice(0,n)}));break;}catch(e){try{localStorage.removeItem('abraca_import_preview')}catch{}if(n<=20){alert('Aperçu trop gros pour le navigateur : '+e.message);return}n=Math.floor(n*0.75);}}
+ if(n<ads.length)alert('Aperçu : '+n+' annonces sur '+ads.length+' (limite de place du navigateur). Toutes seront publiées.');
  window.open('index.html?apercu=import','_blank');
 }
 function editCar(i){
