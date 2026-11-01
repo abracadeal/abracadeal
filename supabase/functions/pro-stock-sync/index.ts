@@ -30,6 +30,7 @@ import { isSimpleboSite, readSimpleboStock } from "./simplebo-reader.ts";
 import { isVehicaSite, readVehicaSite } from "./vehica-reader.ts";
 import { isEwigoSite, readEwigoAgency } from "./ewigo-reader.ts";
 import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
+import { cityaAgencyId, readCityaAgency } from "./citya-reader.ts";
 import { isAutoGestionSite, readAutoGestionSite } from "./autogestion-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
@@ -964,6 +965,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
   // 31/10/2026 (Claude) : page agence Simplici Car — PrestaShop répond en JSON à l'en-tête « Accept: application/json » du flux,
   // la page n'arrivait donc jamais au choix du lecteur de site : on lit directement l'agence.
+  if(cityaAgencyId(url)){const rows=await readCityaAgency(url,fetchSiteHtml);(rows as any).platform='Citya (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(simpliciAgencyId(url)){const rows=await readSimpliciAgency(url,fetchSiteHtml);(rows as any).platform='Simplici Car (stock de l\'agence)';(rows as any).siteLocation=(rows as any).siteLocation||null;(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   const headers:Record<string,string>={
     Accept:'application/json, application/xml, text/xml, text/csv, application/csv, text/plain;q=0.8, */*;q=0.5',
@@ -1032,6 +1034,7 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    else if(cityaAgencyId(url)){rows=await readCityaAgency(url,fetchSiteHtml);platform='Citya (biens de l\'agence)';feed.sector='immobilier';}
     else if(simpliciAgencyId(url)){rows=await readSimpliciAgency(url,fetchSiteHtml);platform='Simplici Car (stock de l\'agence)';feed.sector='vehicules';}
     else if(isIzmoSite(text)){rows=await readIzmoDealer(url,text,fetchSiteHtml);platform='Izmocars (stock occasion de la concession)';feed.sector='vehicules';}
     else if(isNextDealer(text)){
