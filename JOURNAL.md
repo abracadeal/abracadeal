@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : compteur de visites du showroom
+- Anthony : ok pour compter aussi les visites du showroom.
+- Table `showroom_views` + `track_showroom_view` (visiteurs inscrits ou non, 1 fois par jour, pro et admin exclus), appelé par `pro.html` ; ligne « Visites du showroom » en tête des statistiques de la fenêtre admin. Testé en anonyme sur la vraie base (visite de test effacée).
+
 ### 01/11/2026 — Claude : showroom en aperçu pour les visiteurs sans compte — ANNULÉ (Anthony : « laisse », numéro et message déjà réservés aux inscrits) : showroom de nouveau entièrement visible ; seul le bouton Contacter garde « Créer un compte / Se connecter » avec retour au showroom
 - Anthony : faire s'inscrire pour voir le showroom (plus d'inscrits). Choix retenu (après avoir déconseillé de tout bloquer : adresse courte et Google) : aperçu puis inscription.
 - `pro.html` : sans compte, 6 premiers véhicules puis encart « Inscrivez-vous gratuitement pour voir les N autres véhicules de <pro> » (Créer un compte gratuit / Se connecter) ; même choix dans « Contacter ». Connecté : tout visible comme avant.

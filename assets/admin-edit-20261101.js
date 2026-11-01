@@ -52,7 +52,7 @@
     // 01/11/2026 (Anthony) : compteurs pour l'admin (à envoyer plus tard aux pros) — 1 visiteur compté une fois par jour et par annonce.
     function statsHtml(){
       if(!stats)return '';
-      var T=stats.totaux||{},rows=[['view','Vues des annonces'],['phone','« Voir le numéro »'],['call','Appels (clic sur le numéro)'],['message','« Envoyer un message »'],['share','Partages']];
+      var T=stats.totaux||{},rows=[['showroom','Visites du showroom'],['view','Vues des annonces'],['phone','« Voir le numéro »'],['call','Appels (clic sur le numéro)'],['message','« Envoyer un message »'],['share','Partages']];
       var cell=function(k,f){return (T[k]&&T[k][f])||0;};
       var tbl='<table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="text-align:left;color:#7b6c88"><th style="padding:6px 4px">Compteur</th><th>7 jours</th><th>30 jours</th><th>Total</th></tr>'+rows.map(function(x){return '<tr style="border-top:1px solid #eee"><td style="padding:6px 4px">'+x[1]+'</td><td><b>'+cell(x[0],'j7')+'</b></td><td><b>'+cell(x[0],'j30')+'</b></td><td>'+cell(x[0],'tout')+'</td></tr>';}).join('')+'</table>';
       var ann=(stats.annonces||[]).filter(function(a){return a.vues||a.numero||a.appels||a.messages||a.partages;}).slice(0,10);

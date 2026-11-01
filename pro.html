@@ -157,6 +157,8 @@ async function init(){
     isFollowing=!!followRow;
   }
   renderShell();
+  // 01/11/2026 (Anthony) : compteur de visites du showroom (même identifiant anonyme que les annonces ; 1 fois par jour)
+  try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
   // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/lifecars) affichée dans la barre d'adresse.
   if(showroom?.slug&&/\/pro\.html$/i.test(location.pathname)){try{history.replaceState(null,'','/'+showroom.slug);}catch(_){}}
 }

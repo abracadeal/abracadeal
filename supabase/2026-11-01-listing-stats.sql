@@ -3,3 +3,5 @@
 --  - track_listing_event accepte aussi 'message' (clic « Envoyer un message ») ; 'phone' (clic « Voir le numéro ») désormais envoyé par le site ;
 --    1 visiteur compté une fois par jour, par annonce et par type ; le pro et l'admin ne sont pas comptés.
 --  - admin_pro_stats(p_user) : totaux 7 j / 30 j / total par type, détail par annonce (30 j), conversations ouvertes (30 j). Réservé à l'admin.
+-- Migration « showroom_view_counter » : table showroom_views (owner_id, viewer_key, day) ; track_showroom_view(p_owner,p_visitor)
+-- appelé par pro.html (identifiant anonyme abraca_vid, 1 fois par jour ; pro et admin non comptés) ; admin_pro_stats renvoie aussi 'showroom'.
