@@ -3,7 +3,7 @@ import { sDecode } from './smart-reader.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const text=(s:string)=>sDecode(s.replace(/<br\s*\/?>|<\/(?:p|li|div|h[1-6])>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').split('\n').map(x=>x.trim()).filter(Boolean).join('\n');
 const num=(s:string)=>s.replace(/[\s\u00a0\u202f]/g,'').replace(',','.');
-export const isApimoModules=(html:string)=>/apimo\.net\/[^"']*site-internet/i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer)\/?"/i.test(html);
+export const isApimoModules=(html:string)=>/apimo\.net\/[^"']*site-internet/i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes)\/?"/i.test(html);
 // Les lettres sont dessinées en tracés SVG. Lire la couleur de la ligne agrandie et encadrée,
 // pas une classe déduite de seuils numériques ni la légende complète A→G.
 export function apimoDiagnostic(svg:string){
@@ -83,7 +83,8 @@ export function parseApimoDetail(raw:string,url:string){
 export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher){
   if(/\/propriete\/[^/]+\+\d+\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
   const root=new URL(start.origin);const links=[...home.matchAll(/href="([^"]+)"/gi)].map(m=>{try{return new URL(sDecode(m[1]),start);}catch{return null;}}).filter((u):u is URL=>!!u&&u.hostname===start.hostname);
-  const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
+  // 01/11/2026 (Anthony, Solution Immobilier : « manque les biens à vendre ») : certaines agences appellent la liste des ventes « nos-biens » / « nos-proprietes ».
+  const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes|biens|proprietes|annonces)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
   if(!bases.length)throw Error('Listes actives de vente/location Apimo introuvables.');
   const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0;
   while(queue.length&&pages<40){const next=queue.shift()!;if(seen.has(next))continue;seen.add(next);let html='';try{html=(await fetchHtml(new URL(next))).text;}catch{partial=true;continue;}pages++;
