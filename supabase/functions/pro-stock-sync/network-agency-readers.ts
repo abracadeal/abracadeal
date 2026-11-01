@@ -82,7 +82,7 @@ export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher,memory?:Cr
         if(/\s-\s*(?:-|$)/.test(String(r.titre||''))&&first.length>=10&&first.length<=120)r.titre=first;
         return r;
   },memory);
-  if(!rows.length&&!(rows as any).partial)throw Error(`Aucune annonce de cette agence en ligne (${links.length} annonces du réseau vérifiées).`);
+  if(!rows.length&&!(rows as any).partial)throw Error(`Site lu sans problème, mais cette agence n'a aucune annonce en ligne sur le site La Française Immobilière aujourd'hui : ${links.length} annonces du réseau vérifiées une par une, aucune n'est à elle. Ses annonces seront lues dès qu'elle en publiera.`);
   // Le total des annonces lues porte sur tout le réseau : on ne l'affiche pas comme « annonces sur le site » de l'agence.
   (rows as any).total=undefined;
   return rows;
