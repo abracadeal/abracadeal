@@ -312,8 +312,12 @@ async function load(ev){
   const okN=NORM.filter(n=>!(n.errors||[]).length).length,tot=Number(data.total_on_site||0);
   const bigOk=!!data.partial&&okN>=20&&(!tot||NORM.length>=tot*0.9);
   // Le bouton est toujours là dès qu'une annonce complète est lue ; si la lecture est loin d'être finie, une confirmation est demandée.
-  E('siteValidate').hidden=!okN;E('siteValidate').dataset.partialWarn=(!!data.partial&&!bigOk)?'1':'';E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
- }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}
+  E('siteValidate').dataset.empty='';E('siteValidate').hidden=!okN;E('siteValidate').dataset.partialWarn=(!!data.partial&&!bigOk)?'1':'';E('siteValidate').disabled=false;E('siteValidate').textContent='Valider ce site';
+ }catch(e){E('siteValidate').hidden=true;E('status').innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>';
+  // 02/11/2026 (Anthony : « je peux même pas valider ») : site bien lu mais agence sans annonce aujourd'hui → on peut valider quand même
+  // (ses annonces seront importées dès qu'elle en publiera).
+  if(/^Site lu sans problème/.test(String(e.message||''))){let u=E('url').value.trim();if(!/^https?:\/\//i.test(u))u='https://'+u;NORM=[];ROWS=[];LASTDATA={source_url:u,platform:/francaise-immobiliere/i.test(u)?'La Française Immobilière (biens de l\'agence)':null,total_on_site:0,partial:false};
+   E('status').innerHTML='<span style="color:var(--gold)">'+esc(e.message||e)+'</span>';const v=E('siteValidate');v.hidden=false;v.disabled=false;v.dataset.partialWarn='';v.dataset.empty='1';v.textContent='Valider (aucune annonce aujourd’hui)';}}
  finally{btn.disabled=false}
 }
 function render(data,sector){
@@ -439,6 +443,7 @@ function clearTest(){
  LASTDATA=null;NORM=[];ROWS=[];LEARN_CONTEXT=null;
 }
 async function validateSite(){
+ if(E('siteValidate').dataset.empty==='1'&&!confirm('Le site est bien lu mais cette agence n’a aucune annonce en ligne aujourd’hui. Valider quand même ? Ses annonces seront importées dès qu’elle en publiera.'))return;
  if(E('siteValidate').dataset.partialWarn&&!confirm('Le test n’a lu qu’une partie du site. Valider quand même ? Le robot lira le reste après l’inscription.'))return;
  const b=E('siteValidate');b.disabled=true;b.textContent='Validation…';
  try{
