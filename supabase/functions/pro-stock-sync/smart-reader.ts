@@ -206,6 +206,11 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
   const photos=pickPhotos(region,base,ogs,refM?.[1]||'');
+  // 01/11/2026 (Anthony, La Grandière : « mauvaise photo ») : photo principale de la fiche (og:image) absente de la galerie lue →
+  // remise en 1re position, seulement si son nom de fichier reprend le titre de l'annonce (jamais un logo ou une bannière).
+  {const og=ogs[0]||'';const words=(x:string)=>new Set(x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>=3));
+   const tw=words(titre),fw=words(decodeURIComponent((og.split('?')[0].split('/').pop()||'')));let common=0;for(const w of fw)if(tw.has(w))common++;
+   if(og&&common>=3&&!/logo|favicon|placeholder|default/i.test(og)&&!photos.some((p:string)=>p.split('?')[0]===og.split('?')[0]))photos.unshift(og);}
   // Fiche conservée pour afficher « aucune photo » dans les erreurs de l’aperçu.
   const o:any={reference,url:pageUrl,titre:titre.slice(0,160),prix:String(Math.round(prix)),photos:photos.join('|')};
   const ogDesc=metaAll(headHtml,'og:description')[0]||metaAll(headHtml,'description')[0]||'';
