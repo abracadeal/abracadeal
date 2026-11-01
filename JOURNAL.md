@@ -25,6 +25,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Titres coupés au trait d'union (« belle maison de plain » pour « plain-pied ») : seul « - » entouré d'espaces sépare le nom du site.
 - Locations lues « vente » : un montant libellé « Loyer » près du titre = location.
 - Villes : « Proche Tram » et autres mots de situation (gare, quartier, commerces…) ne sont plus pris pour une ville ; sans ville, la commune du titre est cherchée même si un code postal (souvent celui d'une autre annonce de la page) a été lu, et son code postal le remplace.
+- Code postal vérifié contre la commune (geo.api.gouv.fr) : « Le Bouscat 33700 » (code de Mérignac, pris dans un lien voisin) → 33110. « Acheter un bien immobilier » n'est plus pris pour une ville (v226).
+- Test Dolce Immo : 6 à 8 photos par bien, les biens vendus (ex. Caudéran T4, Mérignac T4) et l'article « Évaluation d'une maison » ne sont plus dans l'aperçu. Site lent : la lecture se fait en plusieurs passages.
 
 ### 02/11/2026 — Claude : demandes renvoyées par Anthony (« soi-disant réparés ») (pro-stock-sync v214)
 - 9 demandes remises « à réparer » avec une note. Repris une par une :
