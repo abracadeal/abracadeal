@@ -75,3 +75,8 @@ html body .detail-photo-count,html body #detailModal .detail-photo-count{right:a
 .photo-lightbox-inner{grid-template-rows:minmax(0,1fr)!important}
 .photo-lightbox-stage{min-height:0!important;max-height:100%!important;overflow:hidden}
 .photo-lightbox-side{max-height:100%!important;overflow-y:auto!important;align-self:center;overscroll-behavior:contain;padding-right:4px}
+
+/* 01/11/2026 : photo en hauteur affichée entière sur fond flou (classe posée par card-photo-fit-20261101.js). */
+.photo-fit{position:relative;overflow:hidden;isolation:isolate;background:#140a1c!important}
+.photo-fit::before{content:"";position:absolute;inset:-24px;background:var(--photo-bg) center/cover no-repeat;filter:blur(18px) brightness(.62) saturate(1.1);z-index:-1;pointer-events:none}
+.photo-fit>img,html body main#top #resultats .ad-card .ad-photo.photo-fit img{object-fit:contain!important;background:transparent!important}
