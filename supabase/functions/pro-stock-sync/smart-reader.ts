@@ -23,7 +23,12 @@ function isDetailish(u:URL){const last=u.pathname.replace(/\/+$/,'').split('/').
 // Les gros sites (pages de 100 à 250 Ko, 300 pages et plus) dépassaient cette limite. Le temps de lecture des pages est compté ;
 // au-delà du budget, le parcours s'arrête proprement (lecture partielle, reprise au passage suivant), sans planter.
 export function smartLinks(html:string,page:URL,host:string){const t=performance.now();try{return smartLinksRaw(html,page,host);}finally{cpu.ms+=performance.now()-t;}}
-export function smartDetail(rawHtml:string,pageUrl:string,sector:string){const t=performance.now();try{return smartDetailRaw(rawHtml,pageUrl,sector);}finally{cpu.ms+=performance.now()-t;}}
+// 01/11/2026 (Anthony, capture Laroca : fiches « Vente et achat appartements - » avec le logo en photo, « ville manquante ») :
+// sur les sites Twimmo, les pages « /vente-appartement-a-<ville>.html », « /immobilier-a-<ville>.html » sont des listes, pas des biens.
+// Une fiche Twimmo a toujours son numéro en fin d'adresse : « …-cerbere-1-247v562a.html ».
+const TWIMMO_DETAIL=/-\d+-\d+v\d+[a-z]*\.html$/i;
+const notTwimmoDetail=(html:string,url:string)=>{try{return /\.html$/i.test(new URL(url).pathname)&&!TWIMMO_DETAIL.test(new URL(url).pathname)&&/twimmo/i.test(html.slice(-60000));}catch{return false;}};
+export function smartDetail(rawHtml:string,pageUrl:string,sector:string){const t=performance.now();try{if(notTwimmoDetail(rawHtml,pageUrl))return null;return smartDetailRaw(rawHtml,pageUrl,sector);}finally{cpu.ms+=performance.now()-t;}}
 function smartLinksRaw(html:string,page:URL,host:string){
   // Le <base href> est utilisé aussi pour les liens relatifs des fiches AdnPix.
   try{const b=html.match(/<base\b[^>]*href=["']([^"']+)["']/i);if(b){const u=new URL(sDecode(b[1]),page);if(u.hostname.replace(/^www\./,'')===host)page=u;}}catch{}
