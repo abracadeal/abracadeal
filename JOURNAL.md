@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude — vignettes : orientation des photos, photos en hauteur, galerie
+- `generate-listing-thumbs` v2 : applique l'orientation EXIF (photos de téléphone couchées dans les miniatures). Les 88 miniatures ont été refaites (cron temporaire `abracadeal-thumbs-catchup-tmp`, à supprimer une fois vide). `thumbUrl` ajoute `?o=2` (les anciennes miniatures étaient en cache 1 an).
+- `assets/card-photo-fit-20261101.js` + CSS `.photo-fit` : photo en hauteur affichée entière sur fond flou dans les vignettes.
+- Galerie (lightbox) : la colonne des miniatures défile ; la grande photo n'est plus poussée sous la barre du bas quand il y a beaucoup de photos.
+- **Orpi (31/10 soir, à finir — ChatGPT)** : la recherche `/recherche/ajax?agency=X` renvoie aussi les biens partagés des autres agences (St Cyprien : 39 à elle sur 500 ; Carnot : 21 au lieu de 498). Corrigé pour la liste JSON (filtre `item.agency.slug`). Reste : les fiches trouvées par les pages HTML de secours — ouvertes avec `?agency=slug`, leur data-estate affiche l'agence inscrite, donc le filtre ne marche pas ; il faut ouvrir la fiche SANS `?agency` (ou ne garder que les références de la liste JSON). Ne pas activer d'agence Orpi avant.
+
 ### 31/10/2026 — ChatGPT — Vernoux Immobilier / Orpi VIP Business
 - L'adresse vernoux.immobilier est une agence Orpi Commerces & Entreprises (VIP Business, Bourg-en-Bresse). La recherche résidentielle renvoyait zéro, alors que la recherche commerciale publique filtrée par agence annonce 37 ventes et 16 locations.
 - Reconnaissance des liens commerciaux propres à l'agence ; endpoints OCE pour compteurs/JSON, état de reprise séparé du résidentiel. Les références commerciales 21_0288 / 01_0427 et slugs courts sont acceptés ; pagination HTML de secours adaptée. Aucun catalogue de réseau élargi.
