@@ -170,7 +170,8 @@ function photoUrl(path){
 function thumbUrl(path){
   if(!path||privatePhotoUrls.has(path)||/^https?:\/\//i.test(String(path))||!sb) return photoUrl(path);
   const {data}=sb.storage.from('listing-thumbs').getPublicUrl(path);
-  return data?.publicUrl||photoUrl(path);
+  // 01/11/2026 : ?o=2 = miniatures refaites avec la bonne orientation (les anciennes restaient en cache 1 an).
+  return data?.publicUrl?data.publicUrl+'?o=2':photoUrl(path);
 }
 function thumbImgAttrs(path){
   const full=photoUrl(path), t=thumbUrl(path);
