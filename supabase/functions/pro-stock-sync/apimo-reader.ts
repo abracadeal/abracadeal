@@ -51,9 +51,9 @@ export function parseApimoDetail(raw:string,url:string){
   if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
   const all=text(summary);
   // 01/11/2026 (Anthony, Croisette : 1490 m² de terrain affichés comme surface habitable, appartements sans surface) :
-  // 1) « Surface / Surface habitable / Superficie / Carrez » du sommaire ; 2) floorSize des données structurées de la fiche ;
+  // 1) « Surface / Surface habitable / totale / Superficie / Carrez » du sommaire ; 2) floorSize des données structurées de la fiche ;
   // 3) en dernier, un « … m² » du bandeau qui n'est PAS sur une ligne terrain / jardin / terrasse / balcon / parcelle / cave / garage.
-  const areaM=all.match(/(?:^|\n)(?:Surface(?:\s+habitable)?|Superficie(?:\s+habitable)?|Surface\s+(?:loi\s+)?Carrez)\s*:?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/i);
+  const areaM=all.match(/(?:^|\n)(?:Surface(?:\s+(?:habitable|totale|utile|privative))?|Superficie(?:\s+(?:habitable|totale))?|Surface\s+(?:loi\s+)?Carrez)\s*:?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/i);
   let areaV=areaM?num(areaM[1]):'';
   if(!areaV&&Number(property?.floorSize?.value)>0)areaV=String(Number(property.floorSize.value));
   if(!areaV){const line=infoText.split('\n').find(l=>/\d\s*m²/.test(l)&&!/terrain|jardin|terrasse|balcon|parcelle|cave|garage|parking/i.test(l));const m=line?.match(/(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/);if(m)areaV=num(m[1]);}
