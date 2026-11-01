@@ -188,7 +188,10 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const hpos=html.search(/<h1[\s>]/i);const nearTitle=hpos>=0?clean(html.slice(Math.max(0,hpos-4000),hpos+4000)):'';
   // 29/10/2026 (Nestenn) : « 690 € CC/Mois » à côté du titre, « À louer » en tête de description = location.
   const rental=immo&&(/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname)||/\d\s*€\s*(?:cc|hc|charges comprises|hors charges)?\s*(?:\/|par)\s*mois/i.test(nearTitle)||/(?:^|\n|\.\s)\s*(?:à|a) louer\b/i.test(text.slice(0,6000)));
-  const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;const v=num(m[1]);if(v>0)return v;}return NaN;};
+  const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;
+    // 01/11/2026 (Anthony, Agence Résidence : « 140 € c'est les charges ») : un montant libellé charges / quote-part / taxe / honoraires / énergie / dépôt n'est jamais le prix.
+    const label=src.slice(Math.max(0,(m.index||0)-70),m.index||0);if(/(charges?|quote[- ]?part|taxe|fonci[èe]re|honoraires?|frais|[ée]nergie|d[ée]p[ôo]t|garantie|caution|copropri[ée]t[ée]|entre)\b[^\d€]{0,30}$/i.test(label)&&!/\b(?:prix|loyer)\b/i.test(label.slice(-45)))continue;
+    const v=num(m[1]);if(v>0)return v;}return NaN;};
   const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
   if(declared){const canonical=declared.replace(/\s/g,'');prix=/^\d+(?:[.,]\d+)?$/.test(canonical)?Number(canonical.replace(',','.')):num(declared);}
   const metaDesc=(metaAll(headHtml,'description')[0]||'')+' \n'+(metaAll(headHtml,'og:description')[0]||'');
