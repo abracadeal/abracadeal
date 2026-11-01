@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : DPE / GES en pastilles (Cimm), pro-stock-sync v178
+- Anthony : sur Cimm, DPE et GES affichés en 7 pastilles A→G, celle du bien plus grande ; non lus.
+- `smart-reader.ts` : repère les séries de 7 pastilles A→G avec une taille (style width) ; la seule plus grande (≥ 1,2 ×) = classe ; 1re série DPE, 2e GES.
+- Guipry-Messac maison 134 m² : D / B (comme le site). Agence : DPE trouvé sur 90 % des biens (3 sans).
+
 ### 01/11/2026 — Claude : DPE écrit dans un menu dépliant (Espaces Atypiques), pro-stock-sync v177
 - Anthony : le DPE d'Espaces Atypiques est dans un menu dépliant (« Consommation énergie primaire — b : 82 kWh/m².an », « A : 3 kg CO2/m².an »), non lu.
 - `smart-reader.ts` : lit « X : nombre kWh » (DPE) et « X : nombre kg CO2 » (GES), et la barre marquée active (`class="… active" id="cep-b"`, `eges-a`…).
