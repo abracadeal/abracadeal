@@ -223,7 +223,12 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   const refM=base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
   const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
-  const photos=pickPhotos(region,base,ogs,refM?.[1]||'');
+  let photos=pickPhotos(region,base,ogs,refM?.[1]||'');
+  // 02/11/2026 (Anthony, Ford Alliance / Dealer K : « manque les photos principales ») : la page (600 Ko) range la galerie du véhicule
+  // dans une liste JSON en tête de page (« imageList » : image800…) ; la zone lue autour du titre ne contenait que la fin de la galerie
+  // et les véhicules similaires. Première liste « imageList » de la page = photos du véhicule, dans l'ordre.
+  {const at=rawHtml.indexOf('"imageList":[');if(at>=0){const seg=rawHtml.slice(at,at+60000);const end=seg.indexOf('}]');const list=[...seg.slice(0,end>0?end+2:seg.length).matchAll(/"image800"\s*:\s*"([^"]+)"/g)].map(m=>m[1].replace(/\\\//g,'/'));
+    if(list.length>=2){const abs=list.map(u=>{try{return new URL(u,base).toString();}catch{return '';}}).filter(Boolean);if(abs.length)photos=[...new Set(abs)];}}}
   // 01/11/2026 (Anthony, La Grandière : « mauvaise photo ») : photo principale de la fiche (og:image) absente de la galerie lue →
   // remise en 1re position, seulement si son nom de fichier reprend le titre de l'annonce (jamais un logo ou une bannière).
   {const og=ogs[0]||'';const words=(x:string)=>new Set(x.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/[^a-z0-9]+/).filter(w=>w.length>=3));
