@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : le robot lit les DPE / GES affichés en image (pro-stock-sync v174)
+- Demande d'Anthony : « les DPE en images, il faut entraîner le robot à les lire, il les met de côté à chaque fois ».
+- Nouveau `energy-image.ts` : décode l'image (JPEG / PNG, npm jpeg-js / fast-png) et repère l'échelle officielle A→G (7 barres de longueur croissante) ; la classe du bien = la barre nettement plus haute (≥ 1,3 × les autres). Dans le doute : rien (jamais de classe inventée).
+- `smart-reader.ts` note `dpe_image` / `ges_image` (balises <img> DPE / GES / énergie) quand la classe n'est pas écrite ; `normalizeRows` lit ces images (80 max par passage, 6 à la fois, même image lue une fois).
+- Testé sur 6 étiquettes La Boîte Immo (DPE C, C, D ; GES C, A, B) + petit format 300 px + grand format : tout juste ; bruit / échelle sans barre choisie → rien.
+- influences.immo (La Boîte Immo) : DPE trouvé sur 100 % des annonces (5 sans DPE avant) → « Réparé · à valider ». Vaut pour tous les sites La Boîte Immo et les étiquettes au modèle officiel 2021.
+- Ajout d'une action de diagnostic `debug_image` (protégée cron) qui renvoie une image en base64.
+- Limite : les anciennes étiquettes (flèche à côté de la barre, avant 2021) ne sont pas encore lues.
+
 ### 01/11/2026 — Claude : réseaux Guy Hoquet et Espaces Atypiques appris, Laforêt vérifié (pro-stock-sync v172)
 - `guyhoquet-reader.ts` : toute agence `<agence>.guy-hoquet.com`. Le site renvoie tous les biens de l'agence en JSON (`/biens/result?with_markers=true` + en-tête `X-Requested-With`), une seule requête, filtrée sur l'agence (shop_id). Lien de fiche `/achat-vente|location/<texte>-<id>`. Avant : seuls les ~12 biens de l'accueil étaient lus (Tours 12 → 72/72) ou aucun (Canohès 0 → 43/43).
 - `espaces-atypiques-reader.ts` : pages agence `espaces-atypiques.com/<région>/[<ville>/]`. Liens `/ventes|locations/<cp>-<ville>-<titre>-<réf>/` (réf. « 15710 », « sa5421 », « lry5805 », « sa5214-1 »). Ville et code postal pris du titre de la page / du lien (la fiche donnait « Informations complémentaires » ou « Paris »). Avant : 503 (exploration de tout le site national). Albi 21/21, Les Sables 5/5, Cherbourg 7/7, Biarritz 3/3.
