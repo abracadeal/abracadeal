@@ -4121,7 +4121,9 @@ function detailSpecsFor(a){
     }else{
       specs.push(['Honoraires',m.fees||NC]);
       const copro=String(m.coownership||'');const noCopro=/^non$/i.test(copro);
-      if(immoSub!=='vente-terrain'&&immoSub!=='vente-batiment'){
+      // 01/11/2026 (Anthony) : une maison n'est en général pas en copropriété → rien d'affiché sauf si l'annonce le dit.
+      const houseNoCopro=immoSub==='vente-maison'&&!copro&&!has(m.lots)&&!has(m.annualCharges)&&!m.procedure;
+      if(immoSub!=='vente-terrain'&&immoSub!=='vente-batiment'&&!houseNoCopro){
         specs.push(['Copropriété',copro||(has(m.lots)||has(m.annualCharges)?'Oui':NC)]);
         if(!noCopro){
           specs.push(['Nombre de lots',has(m.lots)?String(m.lots):NC]);
@@ -4133,7 +4135,7 @@ function detailSpecsFor(a){
     }
     if(has(m.landSurface)) specs.push(['Terrain',`${Number(m.landSurface).toLocaleString('fr-FR')} m²`]);
     if(has(m.bathrooms)) specs.push(['Salles de bain / eau',String(m.bathrooms)]);
-    if(has(m.floor)) specs.push(['Étage',Number(m.floor)===0?'Rez-de-chaussée':String(m.floor)]);
+    if(has(m.floor)&&!(immoSub==='vente-maison'&&Number(m.floor)===0)) specs.push(['Étage',Number(m.floor)===0?'Rez-de-chaussée':String(m.floor)]);
     if(has(m.totalFloors)) specs.push(['Étages immeuble',String(m.totalFloors)]);
     if(!isRental&&m.furnished) specs.push(['Meublé',m.furnished]);
     if(m.yearBuilt) specs.push(['Année de construction',String(m.yearBuilt)]);
@@ -4143,6 +4145,8 @@ function detailSpecsFor(a){
     if(m.neighborhood) specs.push(['Quartier / secteur',m.neighborhood]);
     if(m.mandate) specs.push(['Référence / mandat',m.mandate]);
     if(m.availableDate) specs.push(['Disponible le',new Date(m.availableDate+'T12:00:00').toLocaleDateString('fr-FR')]);
+    // 01/11/2026 (Anthony) : « évite de mettre les infos non communiquées, laisse vide » → lignes absentes masquées.
+    return specs.filter(x=>x[1]!==NC);
   }
   return specs;
 }

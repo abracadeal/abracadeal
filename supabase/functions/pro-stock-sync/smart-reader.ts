@@ -286,6 +286,9 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
       const g3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*2/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:e?ges|climat|co2)[-_]([a-g])"|<[^>]+\bid="(?:e?ges|climat|co2)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
       if(!o.dpe&&d3)o.dpe=d3.toUpperCase();if(!o.ges&&g3)o.ges=g3.toUpperCase();
     }
+    // 01/11/2026 (Anthony, Cimm) : « dépenses annuelles d'énergie … : entre 2580€ et 3570€ » écrit sur plusieurs lignes.
+    if(!o.cout_energie_min){const flat=text.replace(/\s+/g,' ');const ec=flat.match(/d[ée]penses?[^.€]{0,220}?entre\s*(\d[\d\s.]*)\s*(?:€|euros?)\s*et\s*(\d[\d\s.]*)\s*(?:€|euros?)/i);
+      if(ec){o.cout_energie_min=ec[1].replace(/[^\d]/g,'');o.cout_energie_max=ec[2].replace(/[^\d]/g,'');}}
     // 01/11/2026 (Anthony, Cimm) : 7 pastilles A→G dont celle du bien est plus grande (style="width: 40px" contre 25px).
     if(!o.dpe||!o.ges){
       const dots=[...html.matchAll(/<(?:div|span|li)\b[^>]*style="[^"]*\bwidth:\s*(\d+(?:\.\d+)?)px[^"]*"[^>]*>\s*([A-G])\s*<\//g)].map(m=>({w:Number(m[1]),k:m[2]}));
