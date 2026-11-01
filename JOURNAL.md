@@ -18,6 +18,17 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : demandes renvoyées par Anthony (« soi-disant réparés ») (pro-stock-sync v214)
+- 9 demandes remises « à réparer » avec une note. Repris une par une :
+  - La Résidence Sartrouville / Chatou (description coupée, DPE « performance ») : renvoyées avant la correction de 23 h ; retest 22/24 et 26/27 DPE, descriptions complètes.
+  - ad-nostra (« mauvaise photo ») : vrai bug, tous sites Drupal : `IMG_BAD` contenait « default » → le dossier `/sites/default/files/` était pris pour une image d'attente. Corrigé (`default(?!\/)`) : 1,7 → 10 photos par bien ; GES 0 → 35/42 (étiquette « NEW-GES-D.jpg »).
+  - Valloire Habitat (photo et DPE) : DPE dessiné par un script encodé en base64 (`dpe.dpe({value:'D'})`) → lu, 0 → 29/29. Le site ne publie qu'une photo et deux lignes par logement (vérifié).
+  - Dolce Immo (DPE image) : étiquette Jalis sans lettre `data-dpe="102;non renseigné"` → classe calculée (seuils DPE 2021, la moins bonne de l'énergie et du GES ; même règle pour le curseur Calliope). 24 → 31/37.
+  - Laroca (photo) : corrigé hier soir (pages liste Twimmo, doublons moyenne/HD) ; retest 52 biens, 11,7 photos.
+  - Pierrefeu (photo) : vérifié, galerie du bien correcte (réf. 3862 : 10/10) ; demande d'exemple précis si besoin.
+  - La Française Saint-Malo / Montauban (« illisible ») : le site n'a aucune annonce de ces agences (73 vérifiées) ; message du test rendu explicite (« Site lu sans problème, mais cette agence n'a aucune annonce en ligne… »).
+- Toutes repassées à « Réparé · à valider ». regie-conseil.fr (nouvelle demande, site illisible) reste à faire.
+
 ### 01/11/2026 — Claude : suite du contrôle DPE, robot qui plantait encore (pro-stock-sync v211)
 - Contrôle passé sur 15 prospects de plus. Nouvelles lectures : image d'étiquette nommée par sa lettre « dpeV2-D.jpg » / « gesV2-B.jpg » et « DPE en B » écrit dans le texte (une seule lettre sur la page) : Cassis Immobilier 38 → 53/61.
 - Déjà bons : Salanié 16/16, Neyt 68/74, Lyon Immo 27/31, Netty (agencedelocre 21/28, GSM 5/5), Expertim 51/52, LF immo (les manques sont des murs commerciaux / terrains).
