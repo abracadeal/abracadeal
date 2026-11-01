@@ -50,6 +50,23 @@ Deno.serve(async (req) => {
   if (!k || !sec?.secret_value || k !== sec.secret_value) return json({ error: "forbidden" }, 403);
 
   const body = await req.json().catch(() => ({}));
+  // 01/11/2026 : diagnostic (clé interne) — dimensions et orientation EXIF de la photo d'origine et de sa miniature.
+  if (Array.isArray(body?.probe)) {
+    const out: unknown[] = [];
+    for (const path of body.probe.slice(0, 10)) {
+      const r: Record<string, unknown> = { path };
+      for (const bucket of ["listing-images", "listing-thumbs"]) {
+        try {
+          const { data: f } = await admin.storage.from(bucket).download(String(path));
+          if (!f) { r[bucket] = "absent"; continue; }
+          const b = new Uint8Array(await f.arrayBuffer()); const im = await Image.decode(b);
+          r[bucket] = { w: im.width, h: im.height, exif: exifOrientation(b), bytes: b.length };
+        } catch (e) { r[bucket] = String(e).slice(0, 120); }
+      }
+      out.push(r);
+    }
+    return json({ ok: true, probe: out });
+  }
   const limit = Math.min(Math.max(Number(body?.limit) || 4, 1), 10);
   const started = Date.now();
   const done: string[] = [], failed: { path: string; error: string }[] = [];
