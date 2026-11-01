@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : alerte e-mail des messages toutes les minutes
+- Anthony : Life Cars n'a pas d'e-mail public (formulaire) → il demandera l'e-mail du garage ; un pro doit être prévenu par mail quand un client lui écrit.
+- Déjà en place (`process-message-email-alerts`) : e-mail au destinataire d'un message non lu depuis 1 min s'il n'est pas sur le site. La tâche cron `process-message-email-alerts-every-minute` tournait toutes les 5 min → remise à chaque minute (`* * * * *`).
+
 ### 01/11/2026 — Claude : adresse courte des showrooms (abracadeal.fr/lifecars)
 - Anthony : que les pros sans site puissent utiliser une adresse du genre abracadeal.fr/lifecars.
 - Base (`supabase/2026-11-01-pro-short-address.sql`) : `pro_showrooms.slug` unique ; adresse créée automatiquement pour tout compte pro (trigger sur profiles) : « Life Cars » → lifecars, 3 mots et plus → avec tirets (auto-cevennes-ales), doublon → -2 ; mots et pages du site réservés. Pros existants : elite-prestige-services, oxoto, auto-cevennes-ales.
