@@ -69,3 +69,9 @@ html body .flow-error-card.error .flow-error-pill{background:#e5484d!important;c
    Le compteur de photos de la page annonce passe en bas à gauche. */
 html body .detail-photo-count,html body #detailModal .detail-photo-count{right:auto!important;left:12px!important;bottom:12px!important}
 @media (max-width:760px){html body #detailModal .detail-photo-count,html body .detail-photo-count{left:10px!important;bottom:10px!important}}
+
+/* 01/11/2026 (Anthony, Life Cars : photo à moitié cachée) : avec beaucoup de photos, la colonne des miniatures dépassait l'écran,
+   la ligne de la grille grandissait et la grande photo descendait sous la barre du bas. Miniatures défilantes, photo toujours entière. */
+.photo-lightbox-inner{grid-template-rows:minmax(0,1fr)!important}
+.photo-lightbox-stage{min-height:0!important;max-height:100%!important;overflow:hidden}
+.photo-lightbox-side{max-height:100%!important;overflow-y:auto!important;align-self:center;overscroll-behavior:contain;padding-right:4px}
