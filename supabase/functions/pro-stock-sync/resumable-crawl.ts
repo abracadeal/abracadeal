@@ -28,3 +28,10 @@ export async function crawlCatalogue(source:string,scope:string,starts:string[],
 export async function crawlDetails(source:string,scope:string,details:string[],fetchHtml:(u:URL)=>Promise<{text:string,url:URL}>,parse:(html:string,url:string)=>any,memory?:CrawlMemory,maxDetails=400){
  return crawlCatalogue(source,scope,[source],async u=>u.toString()===source?{text:'',url:u}:fetchHtml(u),()=>({lists:[],details}),parse,memory,{maxDetails});
 }
+// 01/11/2026 : même chose pour un lecteur qui lit lui-même chaque fiche (fn = lecture d'une adresse → annonce, null si écartée).
+// La liste des adresses est connue d'avance ; l'avancement est mémorisé (reprise au passage suivant).
+export async function eachDetailResumable(scope:string,links:string[],fn:(url:string)=>Promise<any>,memory?:CrawlMemory,maxDetails=400){
+ if(!links.length)return Object.assign([] as any[],{partial:false,total:0});
+ const source=new URL('/?abraca_liste='+encodeURIComponent(scope),links[0]).toString();
+ return crawlCatalogue(source,scope,[source],async u=>({text:'',url:u}),()=>({lists:[],details:links}),async(_h,l)=>{const r=await fn(l);return r??{_sold:1};},memory,{maxDetails});
+}

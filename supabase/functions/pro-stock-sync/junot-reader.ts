@@ -1,4 +1,5 @@
 // Junot : onglets actifs de l'agence, jamais les biens vendus ni les suggestions.
+import { eachDetailResumable, type CrawlMemory } from './resumable-crawl.ts';
 import { sDecode } from './smart-reader.ts';
 import { apimoDiagnostic } from './apimo-reader.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
@@ -36,12 +37,12 @@ export function parseJunotDetail(raw:string,url:string){
   const t=o.texte_page;const charges=t.match(/Montant moyen annuel de la quote part de charges courantes\s*:\s*([\d\s.,]+)\s*€/i);if(charges)o.charges_annuelles=num(charges[1]);const tax=t.match(/Taxe foncière\s*:\s*([\d\s.,]+)\s*€/i);if(tax)o.taxe_fonciere=num(tax[1]);
   return o;
 }
-export async function readJunot(start:URL,home:string,fetchHtml:Fetcher){
+export async function readJunot(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory){
   if(/^\/fr\/biens\/\d+-/.test(start.pathname)){const r=parseJunotDetail(home,start.toString());return r?[r]:[];}
   if(!/^\/fr\/agences\/[^/]+\/?$/.test(start.pathname))throw Error('Pour Junot, utiliser la page de votre agence.');
   const links=junotAgencyLinks(home,start);if(!links.length)throw Error('Aucun bien actif dans les onglets de cette agence Junot.');
-  const rows:any[]=[];let i=0;
-  await Promise.all(Array.from({length:3},async()=>{while(i<links.length){const url=links[i++];try{const {text}=await fetchHtml(new URL(url));rows.push(parseJunotDetail(text,url)||{reference:new URL(url).pathname.split('/').pop(),url});}catch{rows.push({reference:new URL(url).pathname.split('/').pop(),url});}}}));
+  // 01/11/2026 : lecture des fiches par étapes mémorisée.
+  const rows:any=await eachDetailResumable('junot-v1:'+start.pathname,links,async url=>{const {text}=await fetchHtml(new URL(url));return parseJunotDetail(text,url)||{reference:new URL(url).pathname.split('/').pop(),url};},memory);
   // Le site annonce les « derniers biens », sans total ni liste exhaustive d'agence.
   // L'aperçu reste utile, mais ne doit pas autoriser de retrait automatique du stock.
   (rows as any).partial=true;(rows as any).stats={pages:1,details:links.length,read:rows.length,note:'Derniers biens proposés par cette agence ; stock exhaustif non confirmé.'};return rows;

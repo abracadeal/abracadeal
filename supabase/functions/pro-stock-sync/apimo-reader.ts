@@ -1,4 +1,5 @@
 // Sites Apimo à modules HTML : listes actives uniquement, informations propres à la fiche.
+import { eachDetailResumable, type CrawlMemory } from './resumable-crawl.ts';
 import { sDecode } from './smart-reader.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const text=(s:string)=>sDecode(s.replace(/<br\s*\/?>|<\/(?:p|li|div|h[1-6])>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').split('\n').map(x=>x.trim()).filter(Boolean).join('\n');
@@ -80,7 +81,7 @@ export function parseApimoDetail(raw:string,url:string){
   // Mentions textuelles utiles (charges, copropriété, coûts…) ; pas de lecture des biens similaires.
   o.texte_page+='\n'+text(diag.replace(/<img\b[^>]*>/gi,''));return o;
 }
-export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher){
+export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory){
   if(/\/propriete\/[^/]+\+\d+\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
   const root=new URL(start.origin);const links=[...home.matchAll(/href="([^"]+)"/gi)].map(m=>{try{return new URL(sDecode(m[1]),start);}catch{return null;}}).filter((u):u is URL=>!!u&&u.hostname===start.hostname);
   // 01/11/2026 (Anthony, Solution Immobilier : « manque les biens à vendre ») : certaines agences appellent la liste des ventes « nos-biens » / « nos-proprietes ».
@@ -95,7 +96,8 @@ export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher){
       else if(bases.some(b=>u.origin+u.pathname===b)&&/^\d+$/.test(u.searchParams.get('page')||'')&&!seen.has(u.toString())&&!queue.includes(u.toString()))queue.push(u.toString());}
   }
   if(queue.length)partial=true;
-  const entries=[...details.entries()],rows:any[]=[];let i=0;
-  await Promise.all(Array.from({length:3},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchHtml(new URL(url));const row=parseApimoDetail(text,url);rows.push(row||{reference:id,url});if(!row)partial=true;}catch{rows.push({reference:id,url});partial=true;}}}));
+  const entries=[...details.entries()];const ids=new Map(entries.map(([id,u])=>[String(u),id]));
+  // 01/11/2026 : lecture des fiches par étapes mémorisée.
+  const rows:any=await eachDetailResumable('apimo-v1:'+start.hostname,entries.map(e=>String(e[1])),async url=>{const{text}=await fetchHtml(new URL(url));const row=parseApimoDetail(text,url);if(!row)partial=true;return row||{reference:ids.get(url),url};},memory);partial=partial||rows.partial;
   (rows as any).partial=partial;(rows as any).total=details.size;(rows as any).stats={pages,details:details.size,read:rows.length};return rows;
 }

@@ -1,3 +1,4 @@
+import { eachDetailResumable, type CrawlMemory } from './resumable-crawl.ts';
 import {sDecode} from './smart-reader.ts';
 import {dedupePhotos} from './photo-utils.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
@@ -22,7 +23,7 @@ export function parseAjpDetail(raw:string,url:string){
  if(/(?:DPE|diagnostic)[^.\n]{0,60}non soumis|non soumis[^.\n]{0,40}DPE/i.test(clean(html)))o.dpe='NON SOUMIS';
  o.texte_page=clean(html.slice(html.indexOf('Description de ce bien'))).slice(0,12000);return o;
 }
-export async function readAjpAgency(start:URL,home:string,fetchHtml:Fetcher){
+export async function readAjpAgency(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory){
  if(/^\/annonces\/(?:achat|locations)\//.test(start.pathname)){const row=parseAjpDetail(home,start.toString());return row?[row]:[];}
  const roots=links(home,start).filter(u=>/^\/immobilier\/(?:achat|locations)\/[^/]+\/\d+\/?$/.test(u.pathname));
  const unique=[...new Map(roots.map(u=>[u.pathname,u])).values()];const ids=new Set(unique.map(u=>u.pathname.match(/\/(\d+)\/?$/)![1]));
@@ -38,7 +39,8 @@ export async function readAjpAgency(start:URL,home:string,fetchHtml:Fetcher){
   }if(queue.length)partial=true;
  }
  if(entries.size!==total)partial=true;
- const rows:any[]=[];const failures:string[]=[];let next=0,sold=0;const details=[...entries.entries()];
- await Promise.all(Array.from({length:3},async()=>{while(next<details.length){const[id,u]=details[next++];try{const html=(await fetchHtml(u)).text;const row=parseAjpDetail(html,u.toString());if(row)rows.push(row);else{if(ajpProperties(html).some(x=>String(x.id)===id&&/vendu|loué|retiré/i.test(x.status||'')))sold++;else{rows.push({reference:id,url:u.toString()});failures.push(u.toString());partial=true;}}}catch{rows.push({reference:id,url:u.toString()});failures.push(u.toString());partial=true;}}}));
+ const failures:string[]=[];let sold=0;const details=[...entries.entries()];const idOf=new Map(details.map(([id,u])=>[String(u),id]));
+ // 01/11/2026 : lecture des fiches par étapes mémorisée.
+ const rows:any=await eachDetailResumable('ajp-v1:'+start.pathname,details.map(d=>String(d[1])),async l=>{const id=idOf.get(l)!;const html=(await fetchHtml(new URL(l))).text;const row=parseAjpDetail(html,l);if(row)return row;if(ajpProperties(html).some(x=>String(x.id)===id&&/vendu|loué|retiré/i.test(x.status||''))){sold++;return null;}failures.push(l);partial=true;return{reference:id,url:l};},memory);partial=partial||rows.partial;
  (rows as any).partial=partial;(rows as any).total=total;(rows as any).stats={pages,details:entries.size,read:rows.length,sold,failures,agency_id:agencyId};return rows;
 }

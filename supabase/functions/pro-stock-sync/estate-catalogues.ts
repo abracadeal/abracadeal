@@ -1,4 +1,5 @@
 // Scoped public catalogues: Progressia data file, Human agency and Citya agency.
+import { eachDetailResumable, type CrawlMemory } from './resumable-crawl.ts';
 import {sDecode} from './smart-reader.ts';
 import {dedupePhotos} from './photo-utils.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
@@ -55,7 +56,7 @@ export function parseNetworkEstate(html:string,url:string,kind:'human'|'citya'){
  o.photos=dedupePhotos(photos.length?photos:Array.isArray(listing.image)?listing.image:[listing.image].filter(Boolean)).join('|');return o;
 }
 const hrefs=(html:string,base:URL)=>[...html.matchAll(/href=["']([^"']+)["']/gi)].flatMap(m=>{try{return[new URL(sDecode(m[1]),base)];}catch{return[];}});
-export async function readNetworkAgency(start:URL,html:string,kind:'human'|'citya',fetchHtml:Fetcher){
+export async function readNetworkAgency(start:URL,html:string,kind:'human'|'citya',fetchHtml:Fetcher,memory?:CrawlMemory){
  let roots:URL[]=[];
  if(kind==='human'){
   if(/^\/annonce-(achat|location)-/.test(start.pathname)){const row=parseNetworkEstate(html,start.toString(),kind);return row?[row]:[];}
@@ -82,9 +83,10 @@ export async function readNetworkAgency(start:URL,html:string,kind:'human'|'city
  // A shared agency catalogue may legitimately contain several reference prefixes.
  if(kind==='human'&&!entries.size&&total>0)throw Error('Catalogue Human vide malgré le stock annoncé.');
  if(entries.size!==total)partial=true;
- const urls=[...entries.values()],rows:any[]=[];let next=0,misses=0,sold=0;const failures:any[]=[];
- await Promise.all(Array.from({length:4},async()=>{while(next<urls.length){const u=urls[next++];try{const o=parseNetworkEstate((await fetchHtml(u)).text,u.toString(),kind);if(o)rows.push(o);else sold++;}catch(e){partial=true;misses++;failures.push({url:u.toString(),error:String(e)});}}}));
- if(rows.length+sold!==total)partial=true;(rows as any).partial=partial;(rows as any).total=total;(rows as any).stats={pages,details:entries.size,read:rows.length,misses,sold,failures};return rows;
+ const urls=[...entries.values()];
+ // 01/11/2026 : lecture des fiches par étapes mémorisée (reprise là où le passage précédent s'est arrêté).
+ const rows:any=await eachDetailResumable(kind+'-v1:'+roots.map(r=>r.pathname).join(','),urls.map(u=>u.toString()),async l=>parseNetworkEstate((await fetchHtml(new URL(l))).text,l,kind),memory);
+ const st=rows.stats||{};rows.partial=partial||rows.partial;rows.total=total;rows.stats={...st,pages:pages+(st.pages||0),details:entries.size,read:rows.length};return rows;
 }
 export function parseProgressia(text:string,start:URL){
  const match=text.match(/^\s*window\.PROGRESSIA_LISTINGS\s*=\s*([\s\S]*?)\s*;?\s*$/);if(!match)throw Error('Catalogue Progressia non reconnu.');const d=JSON.parse(match[1]);

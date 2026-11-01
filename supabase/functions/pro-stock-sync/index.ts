@@ -1000,8 +1000,8 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isBhCarSite(url)){const rows=await readBhCarAgency(url,fetchSiteHtml,ldVehicle,crawlMemory(feed,persistCrawl));(rows as any).platform='BH Car (véhicules de l\'agence)';(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   if(isLaResidenceAgency(url)){const rows=await readLaResidenceAgency(url,fetchSiteHtml,ldImmo,crawlMemory(feed,persistCrawl));(rows as any).platform='La Résidence (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isLaFrancaiseAgency(url)){const rows=await readLaFrancaiseAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='La Française Immobilière (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
-  if(cityaNdfAgency(url)){const rows=await readCityaNdfAgency(url,fetchSiteHtml);(rows as any).platform='Citya Nord de France (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
-  if(cityaAgencyId(url)){const rows=await readCityaAgency(url,fetchSiteHtml);(rows as any).platform='Citya (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
+  if(cityaNdfAgency(url)){const rows=await readCityaNdfAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='Citya Nord de France (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
+  if(cityaAgencyId(url)){const rows=await readCityaAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='Citya (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(simpliciAgencyId(url)){const rows=await readSimpliciAgency(url,fetchSiteHtml);(rows as any).platform='Simplici Car (stock de l\'agence)';(rows as any).siteLocation=(rows as any).siteLocation||null;(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   const headers:Record<string,string>={
     Accept:'application/json, application/xml, text/xml, text/csv, application/csv, text/plain;q=0.8, */*;q=0.5',
@@ -1047,24 +1047,24 @@ async function readFeed(feed:any,persistCrawl=false){
       rows=[estate];platform='Orpi (fiche annonce)';feed.sector='immobilier';
     }
     else if(orpiSlug){const commercial=isOrpiBusinessAgency(text,orpiSlug);rows=await readOrpiAgency(origin,orpiSlug,crawlMemory(feed,persistCrawl),commercial);platform=commercial?'Orpi Commerces & Entreprises (agence)':'Orpi (page agence)';feed.sector='immobilier';}
-    else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml);platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
-    else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml);platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
+    else if(/(^|\.)kermarrec-habitation\.fr$/i.test(url.hostname)){rows=await readKermarrec(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Kermarrec Habitation (agence)';feed.sector='immobilier';}
+    else if(/(^|\.)junot\.fr$/i.test(url.hostname)){rows=await readJunot(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Junot (agence, derniers biens)';feed.sector='immobilier';}
     else if(/^(?:www\.)?lfimmo\.fr$/i.test(url.hostname)){rows=await readLFimmo(url,text,fetchSiteHtml);platform='LF immo (catalogue paginé, 48 fiches maximum)';feed.sector='immobilier';}
     else if(/^(?:www\.)?salanie-immobilier\.fr$/i.test(url.hostname)){rows=await readSalanie(url,text,fetchSiteHtml);platform='Salanié (catalogues actifs et villes publiées)';feed.sector='immobilier';}
-    else if(/^(?:www\.)?ajp-immobilier\.com$/i.test(url.hostname)){rows=await readAjpAgency(url,text,fetchSiteHtml);platform='AJP (catalogues agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?ajp-immobilier\.com$/i.test(url.hostname)){rows=await readAjpAgency(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='AJP (catalogues agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?4sconcept\.com$/i.test(url.hostname)){rows=await readFourS(url,text,fetchSiteHtml);platform='4S Concept (stock et galerie Motors)';feed.sector='vehicules';}
     else if(/^(?:www\.)?biasimmobilier\.fr$/i.test(url.hostname)){rows=await readBiasAgency(url,text,fetchSiteHtml);platform='BIAS (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?immobilier-pierrefeu\.com$/i.test(url.hostname)){rows=await readPierrefeu(url,text,fetchSiteHtml);platform='Immobilier Pierrefeu (catalogues paginés)';feed.sector='immobilier';}
     else if(/^(?:www\.)?boschi-immobilier\.com$/i.test(url.hostname)){rows=await readBoschiAgency(url);platform='Boschi (catalogue public filtré par agence)';feed.sector='immobilier';}
-    else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml);platform='Apimo (listes actives)';feed.sector='immobilier';}
+    else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?bye-buy-car\.com$/i.test(url.hostname)){rows=await readByeBuyCar(url,text);platform='Bye Buy Car (catalogue et agences)';feed.sector='vehicules';}
     else if(/^(?:www\.)?robynscar\.com$/i.test(url.hostname)){rows=await readRobynsCar(url,text,fetchSiteHtml);platform='Robyns Car (catalogue paginé)';feed.sector='vehicules';}
     else if(/^(?:www\.)?progressia-immobilier\.fr$/i.test(url.hostname)){rows=await readProgressia(url,fetchSiteHtml);platform='Progressia (catalogue public)';feed.sector='immobilier';}
-    else if(/^(?:www\.)?human-immobilier\.fr$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'human',fetchSiteHtml);platform='Human (catalogue agence)';feed.sector='immobilier';}
-    else if(/^(?:www\.)?citya\.com$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'citya',fetchSiteHtml);platform='Citya (catalogue agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?human-immobilier\.fr$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'human',fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Human (catalogue agence)';feed.sector='immobilier';}
+    else if(/^(?:www\.)?citya\.com$/i.test(url.hostname)){rows=await readNetworkAgency(url,text,'citya',fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Citya (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?bnyscar\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'bnys',fetchSiteHtml);platform="BNY’S Car (stock actif)";feed.sector='vehicules';}
     else if(/^(?:www\.)?decrosautomobiles\.fr$/i.test(url.hostname)){rows=await readVehicleCatalogue(url,text,'decros',fetchSiteHtml);platform='Decros (Regicom)';feed.sector='vehicules';}
     else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
@@ -1076,8 +1076,8 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(isBhCarSite(url)){rows=await readBhCarAgency(url,fetchSiteHtml,ldVehicle,crawlMemory(feed,persistCrawl));platform='BH Car (véhicules de l\'agence)';feed.sector='vehicules';}
     else if(isLaResidenceAgency(url)){rows=await readLaResidenceAgency(url,fetchSiteHtml,ldImmo,crawlMemory(feed,persistCrawl));platform='La Résidence (biens de l\'agence)';feed.sector='immobilier';}
     else if(isLaFrancaiseAgency(url)){rows=await readLaFrancaiseAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='La Française Immobilière (biens de l\'agence)';feed.sector='immobilier';}
-    else if(cityaNdfAgency(url)){rows=await readCityaNdfAgency(url,fetchSiteHtml);platform='Citya Nord de France (biens de l\'agence)';feed.sector='immobilier';}
-    else if(cityaAgencyId(url)){rows=await readCityaAgency(url,fetchSiteHtml);platform='Citya (biens de l\'agence)';feed.sector='immobilier';}
+    else if(cityaNdfAgency(url)){rows=await readCityaNdfAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Citya Nord de France (biens de l\'agence)';feed.sector='immobilier';}
+    else if(cityaAgencyId(url)){rows=await readCityaAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Citya (biens de l\'agence)';feed.sector='immobilier';}
     else if(simpliciAgencyId(url)){rows=await readSimpliciAgency(url,fetchSiteHtml);platform='Simplici Car (stock de l\'agence)';feed.sector='vehicules';}
     else if(isIzmoSite(text)){rows=await readIzmoDealer(url,text,fetchSiteHtml);platform='Izmocars (stock occasion de la concession)';feed.sector='vehicules';}
     else if(isNextDealer(text)){

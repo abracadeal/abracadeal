@@ -1,3 +1,4 @@
+import { eachDetailResumable, type CrawlMemory } from './resumable-crawl.ts';
 // Lecteur Kermarrec Habitation : pagination filtrée par agence, puis données de chaque fiche.
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const decode=(s:string)=>String(s||'').replace(/&#x([0-9a-f]+);/gi,(_,n)=>String.fromCodePoint(parseInt(n,16))).replace(/&#(\d+);/g,(_,n)=>String.fromCodePoint(Number(n))).replace(/&nbsp;/g,' ').replace(/&sup2;/g,'²').replace(/&euro;/g,'€').replace(/&quot;/g,'"').replace(/&amp;/g,'&').replace(/&apos;/g,"'");
@@ -36,7 +37,7 @@ export function parseKermarrecDetail(raw:string,url:string){
   for(const m of html.matchAll(/(?:href|src|data-src|content)=["']([^"']+\.(?:jpe?g|webp)(?:\?[^"']*)?)["']/gi)){let u:URL;try{u=new URL(decode(m[1]),url);}catch{continue;}const file=u.pathname.split('/').pop()||'';const p=file.match(new RegExp('^('+id+'[a-z]+)(?:-(\\d+)x(\\d+))?\\.(?:jpe?g|webp)$','i'));if(!p)continue;const size=p[2]?Number(p[2])*Number(p[3]):Infinity;const prior=photos.get(p[1]);if(!prior||size>prior.size)photos.set(p[1],{url:u.toString(),size});}
   o.photos=[...photos.values()].map(p=>p.url).join('|');return o;
 }
-export async function readKermarrec(start:URL,home:string,fetchHtml:Fetcher){
+export async function readKermarrec(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory){
   if(/\/bien-\d+\//.test(start.pathname)){const row=parseKermarrecDetail(home,start.toString());return row?[row]:[];}
   const slug=start.pathname.match(/\/(?:nos-agences|(?:achat|location)\/agence)\/([^/]+)/)?.[1];
   if(!slug)throw Error('Donnez la page de l’agence Kermarrec pour limiter la lecture à son stock.');
@@ -50,7 +51,8 @@ export async function readKermarrec(start:URL,home:string,fetchHtml:Fetcher){
       else if(bases.some(b=>u.pathname.startsWith(new URL(b).pathname))&&/\/page\/\d+\/$/.test(u.pathname)&&!seen.has(u.toString())&&!queue.includes(u.toString()))queue.push(u.toString());}
   }
   if(queue.length||total&&details.size<total)partial=true;
-  const entries=[...details.entries()];const rows:any[]=[];let i=0;
-  await Promise.all(Array.from({length:3},async()=>{while(i<entries.length){const[id,url]=entries[i++];try{const{text}=await fetchHtml(new URL(url));const row=parseKermarrecDetail(text,url);rows.push(row||{reference:id,url});}catch{rows.push({reference:id,url});partial=true;}}}));
+  const entries=[...details.entries()];const ids=new Map(entries.map(([id,u])=>[String(u),id]));
+  // 01/11/2026 : lecture des fiches par étapes mémorisée.
+  const rows:any=await eachDetailResumable('kermarrec-v1:'+start.pathname,entries.map(e=>String(e[1])),async url=>{const{text}=await fetchHtml(new URL(url));return parseKermarrecDetail(text,url)||{reference:ids.get(url),url};},memory);partial=partial||rows.partial;
   (rows as any).partial=partial;(rows as any).total=total||details.size;(rows as any).stats={pages,details:details.size,read:rows.length};return rows;
 }
