@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : vitrine remplie automatiquement à l'inscription d'un pro (admin-onboard-pro v2)
+- Anthony : à l'inscription, remplir tout ce qui est possible depuis le site du pro, sans rien inventer ; si rien, laisser vide.
+- `admin-onboard-pro` (action create, compte neuf ou existant) : après la demande d'import, lit la page d'accueil du site et remplit la vitrine (`pro_showrooms`) seulement là où elle est vide :
+  - logo : image nommée / marquée « logo », ou image d'en-tête liée à l'accueil (étoiles, icônes, labels, partenaires, réseaux sociaux exclus ; PNG / JPEG / WebP / GIF seulement) ;
+  - bannière : image de partage du site (og:image / twitter:image), si ce n'est pas le logo ;
+  - présentation : description du site (og:description / meta description), ≥ 40 caractères, accents décodés.
+  - Images copiées dans le stockage pro-showroom/<user>/. Le résultat s'affiche dans les remarques de la création (« Vitrine remplie depuis le site : logo ✓, bannière — (non trouvée)… »).
+- Testé sur les vraies pages : Life Cars → logo ✓ + présentation ✓, pas de bannière (pas d'image de partage) ; Junot → étoile de notation écartée, logo SVG non pris ; AJP → bannière = logo, écartée.
+- Déployé en v2 (import du commit 999262b), démarrage vérifié.
+
 ### 01/11/2026 — Claude : démo « gestion du stock » de Life Cars
 - Anthony : montrer à Life Cars sa page showroom avec la gestion du stock (création du compte prévue le 02/11).
 - Nouvelle page `demo/life-cars/gestion.html` (noindex, bandeau « Démonstration ») : synchronisation automatique de lifecars.fr toutes les 15 min, 49 véhicules / 49 fiches complètes, ce qui se passe tout seul (nouveau, modifié, vendu), liste de véhicules avec Modifier / Booster / Supprimer, autres envois (CSV, Excel, XML, JSON, API). Uniquement des fonctions qui existent sur le site. Lien vers le showroom de démo.
