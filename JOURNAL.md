@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude — Citya Nord de France + prix « price/prix » (v166 / 83494a3)
+- `readCityaNdfAgency` (citya-ndf.com/agence/agence-de-X/) : liens « /annonces/?status=acheter|louer&address=Agence de X » de la page agence, display=48, pages /annonces/page/N/ ; ville/CP repris de l'adresse de la fiche si absents. Tests : La Bassée 15/15, Calais 25/25, Armentières 1/1. 48 prospects remis en test.
+- smart-reader : prix lu d'abord dans un élément dont la classe contient price/prix (sinon « 1 » salle de bain + « 179 500 € » donnait 1 179 500 €).
+
 ### 01/11/2026 — Claude — lecteur Citya + retest des 104 réparations (v163 / 40d6891)
 - `citya-reader.ts` : agences www.citya.com (`/agences-immobilieres/…/<n°>` ou `/annonces/agence/<n°>/…`) → listes `/annonces/agence/<n°>/vente|location` (+?page=N), fiches lues par smartDetail, photos limitées à `/biens/<n°>/`. Tests : 26/26, 13/13, 28/28. 24 prospects citya.com remis en test. Reste citya-ndf.com (WordPress Beyot, `/annonces/?status=acheter&address=Agence%20de%20X`), Square Habitat, Laforêt, Espaces Atypiques, Guy Hoquet, Cimm.
 - Retest des 104 demandes en attente : 9 passent maintenant (passées « Réparé, à valider »), 95 restent (73 « aucune fiche lisible »).
