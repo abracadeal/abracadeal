@@ -11,6 +11,8 @@ export async function readOrpiCatalogue(origin:URL,slug:string,fetchHtml:Fetcher
  const prefix=commercial?'/commerces-entreprises':'',scope=(commercial?'orpi-oce-v3:':'orpi-v4:')+slug;
  const counts=new Map<string,number>();
  for(const t of ['buy','rent']){const r=await fetchHtml(query(prefix+'/recherche/count',t));if(r.url.origin!==origin.origin||!/^\s*\d+\s*$/.test(r.text))throw Error('Compteur Orpi filtré non reconnu');counts.set(t,Number(r.text));}
+ // 01/11/2026 (Anthony, 4F Gestion Saint-Nizier) : agence sans aucune annonce en ligne → message clair (pas « lecture ratée »).
+ if(!commercial&&(counts.get('buy')||0)===0&&(counts.get('rent')||0)===0)throw Error('Cette agence n’a aucune annonce en ligne sur Orpi (0 en vente, 0 en location) : rien à importer pour l’instant.');
  // 01/11/2026 (Anthony : St Cyprien « 727 fiches restantes ») : le catalogue JSON ne renvoie que 500 annonces (réseau compris) et
  // ignore « page ». Trié dans un sens puis dans l'autre (sort=date-down / date-up), il couvre jusqu'à 1 000 annonces : plus besoin
  // des pages de liste HTML, qui mélangent les biens de toutes les agences (727 fiches à ouvrir pour en garder 61).
