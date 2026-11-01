@@ -32,7 +32,7 @@
     var r=await Promise.all([
       sb.from('public_profiles').select('id,display_name,account_type,city').eq('id',userId).maybeSingle(),
       sb.from('profiles').select('phone').eq('id',userId).maybeSingle(),
-      sb.from('pro_showrooms').select('description,banner_path,logo_path').eq('user_id',userId).maybeSingle(),
+      sb.from('pro_showrooms').select('description,banner_path,logo_path,slug').eq('user_id',userId).maybeSingle(),
       sb.from('reviews').select('id,reviewer_name,rating,comment,seller_reply,status,created_at').eq('seller_id',userId).order('created_at',{ascending:false}),
       sb.from('vacation_reviews').select('id,rating,comment,subject_reply,status,created_at').eq('subject_id',userId).order('created_at',{ascending:false})
     ]);
@@ -50,13 +50,13 @@
       '<div class="row"><button type="button" class="ab pri" data-save>Enregistrer cet avis</button><button type="button" class="ab del" data-del>Supprimer cet avis</button></div></div>';}
     var draft={};
     // garde la saisie en cours quand la fenêtre est redessinée (ajout / retrait d'une image)
-    function grab(){var g=function(id){var e=d.querySelector('#'+id);return e?e.value:undefined;};['aeName','aeCity','aePhone','aeDesc'].forEach(function(id){var v=g(id);if(v!==undefined)draft[id]=v;});}
+    function grab(){var g=function(id){var e=d.querySelector('#'+id);return e?e.value:undefined;};['aeName','aeCity','aePhone','aeDesc','aeSlug'].forEach(function(id){var v=g(id);if(v!==undefined)draft[id]=v;});}
     function val(id,def){return id in draft?draft[id]:def;}
     function draw(){
       d.innerHTML='<div class="ae"><div class="row" style="justify-content:space-between"><h2 style="margin:0;font-size:20px">Modifier ce compte (admin)</h2><button type="button" class="ab" id="aeClose">Fermer</button></div>'+
         '<p class="muted">Les modifications sont visibles tout de suite sur le site.</p>'+
         '<h3>Profil</h3><label>Nom affiché<input id="aeName" value="'+h(val('aeName',p.display_name))+'"></label><label>Ville<input id="aeCity" value="'+h(val('aeCity',p.city))+'"></label><label>Téléphone<input id="aePhone" value="'+h(val('aePhone',phone))+'"></label>'+
-        (isPro?'<h3>Vitrine pro</h3><label>Description<textarea id="aeDesc" style="min-height:120px">'+h(val('aeDesc',sh.description))+'</textarea></label><div class="row" style="align-items:flex-start">'+imgBox('logo','Logo','1/1')+imgBox('banner','Bannière','3/1')+'</div>':'')+
+        (isPro?'<h3>Vitrine pro</h3><label>Adresse courte du showroom<span style="display:flex;align-items:center;gap:4px"><span class="muted">abracadeal.fr/</span><input id="aeSlug" style="flex:1" value="'+h(val('aeSlug',sh.slug))+'"></span></label><label>Description<textarea id="aeDesc" style="min-height:120px">'+h(val('aeDesc',sh.description))+'</textarea></label><div class="row" style="align-items:flex-start">'+imgBox('logo','Logo','1/1')+imgBox('banner','Bannière','3/1')+'</div>':'')+
         '<div class="row" style="margin-top:14px"><button type="button" class="ab pri" id="aeSave">Enregistrer le profil'+(isPro?' et la vitrine':'')+'</button><span class="muted" id="aeMsg"></span></div>'+
         '<h3>Avis reçus ('+(revs.length+vrevs.length)+')</h3>'+(revs.length+vrevs.length?revs.map(function(x){return revBox('avis',x);}).join('')+vrevs.map(function(x){return revBox('vacances',x);}).join(''):'<p class="muted">Aucun avis.</p>')+'</div>';
       d.querySelector('#aeClose').onclick=function(){d.close();refresh(userId);};
@@ -86,7 +86,9 @@
             if(old[k]&&old[k]!==st[k])obsolete.push(old[k]);}
           var e2=(await sb.from('pro_showrooms').upsert({user_id:userId,description:(d.querySelector('#aeDesc').value||'').trim()||null,banner_path:st.banner,logo_path:st.logo,updated_at:new Date().toISOString()},{onConflict:'user_id'})).error;if(e2)throw e2;
           if(obsolete.length)await sb.storage.from('pro-showroom').remove(obsolete);
-          sh={description:d.querySelector('#aeDesc').value,banner_path:st.banner,logo_path:st.logo};st.newBanner=null;st.newLogo=null;
+          var slugIn=(d.querySelector('#aeSlug').value||'').trim(),newSlug=sh.slug||null;
+          if(slugIn&&slugIn!==sh.slug){var rs=await sb.rpc('pro_slug_set',{p_user:userId,p_slug:slugIn});if(rs.error)throw rs.error;newSlug=rs.data;}
+          sh={description:d.querySelector('#aeDesc').value,banner_path:st.banner,logo_path:st.logo,slug:newSlug};st.newBanner=null;st.newLogo=null;
         }
         p.display_name=upd.display_name;p.city=upd.city;if('phone' in upd)phone=upd.phone||'';
         draft={};msg.textContent='Enregistré ✓';

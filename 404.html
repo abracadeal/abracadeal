@@ -5,6 +5,15 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,follow">
 <script>
+/* 01/11/2026 (Anthony) : adresse courte d'un pro, ex. abracadeal.fr/lifecars → son showroom. */
+(function(){var m=location.pathname.match(/^\/([a-z0-9][a-z0-9-]{1,38}[a-z0-9])\/?$/i);if(!m)return;
+ document.documentElement.style.visibility='hidden';
+ var show=function(){document.documentElement.style.visibility='';};
+ fetch('https://jplzvxmpbpjssyinozap.supabase.co/rest/v1/rpc/pro_slug_resolve',{method:'POST',headers:{'Content-Type':'application/json',apikey:'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF'},body:JSON.stringify({p_slug:m[1]})})
+  .then(function(r){return r.ok?r.json():null}).then(function(id){if(id&&/^[0-9a-f-]{36}$/i.test(id))location.replace('/pro.html?id='+id);else show();}).catch(show);
+ setTimeout(show,6000);})();
+</script>
+<script>
 /* Fix 08/10/2026 : lien de partage d'une annonce dont la page /annonce/<id>/ n'est pas encore
    generee (annonce toute neuve, generation toutes les ~10 min) : on ouvre directement la fiche. */
 (function(){var m=location.pathname.match(/^\/annonce\/([0-9a-f-]{36})\/?/i);if(m)location.replace('/?annonce='+m[1]);})();

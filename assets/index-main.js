@@ -6105,15 +6105,16 @@ function paintProShowroomMedia(){
 }
 async function loadProShowroomData(populateForm=false){
   if(!sb||!currentUser||currentProfile?.account_type!=='professionnel')return;
-  const {data,error}=await sb.from('pro_showrooms').select('description,banner_path,logo_path,updated_at').eq('user_id',currentUser.id).maybeSingle();
+  const {data,error}=await sb.from('pro_showrooms').select('description,banner_path,logo_path,updated_at,slug').eq('user_id',currentUser.id).maybeSingle();
   if(error){console.error('Showroom Pro indisponible',error);return;}
   const legacy=currentUser?.user_metadata?.company_showroom?.description||'';
   proShowroomRecord=data||{description:legacy,banner_path:null,logo_path:null,updated_at:null};
   if(populateForm){
     const field=document.getElementById('accountCompanyDescription');if(field)field.value=proShowroomRecord.description||'';
     const count=document.getElementById('accountCompanyDescriptionCount');if(count)count.textContent=String((proShowroomRecord.description||'').length);
+    const sl=document.getElementById('accountCompanySlug');if(sl)sl.value=proShowroomRecord.slug||'';
   }
-  const link=document.getElementById('proPublicPageLink');if(link)link.href='pro.html?id='+encodeURIComponent(currentUser.id);
+  const link=document.getElementById('proPublicPageLink');if(link)link.href=proShowroomRecord.slug?'/'+proShowroomRecord.slug:'pro.html?id='+encodeURIComponent(currentUser.id);
   const saveBtn=document.getElementById('saveCompanyShowroomBtn');
   if(saveBtn){
     saveBtn.hidden=false;
@@ -6151,6 +6152,10 @@ async function saveProShowroom(e){
     const payload={user_id:currentUser.id,description:description||null,banner_path:bannerPath,logo_path:logoPath,updated_at:new Date().toISOString()};
     const {error}=await sb.from('pro_showrooms').upsert(payload,{onConflict:'user_id'});
     if(error)throw error;
+    // 01/11/2026 : adresse courte du showroom (abracadeal.fr/<adresse>)
+    let slug=proShowroomRecord.slug||null;const slugIn=(document.getElementById('accountCompanySlug')?.value||'').trim();
+    if(slugIn&&slugIn!==slug){const {data:sv,error:se}=await sb.rpc('pro_slug_set',{p_user:currentUser.id,p_slug:slugIn});if(se)throw se;slug=sv;const sl=document.getElementById('accountCompanySlug');if(sl)sl.value=sv;}
+    payload.slug=slug;{const lk=document.getElementById('proPublicPageLink');if(lk&&slug)lk.href='/'+slug;}
     const obsolete=[];
     if(proShowroomPendingBanner&&proShowroomRecord.banner_path&&proShowroomRecord.banner_path!==bannerPath)obsolete.push(proShowroomRecord.banner_path);
     if(proShowroomPendingLogo&&proShowroomRecord.logo_path&&proShowroomRecord.logo_path!==logoPath)obsolete.push(proShowroomRecord.logo_path);
@@ -6255,6 +6260,7 @@ document.getElementById('proShowroomCoverLive')?.addEventListener('keydown',e=>{
 document.getElementById('proLogoChangeBtn')?.addEventListener('click',()=>document.getElementById('accountCompanyLogo')?.click());
 document.getElementById('accountCompanyBanner')?.addEventListener('change',e=>{const file=e.target.files?.[0];e.target.value='';openProCrop(file,'banner')});
 document.getElementById('accountCompanyLogo')?.addEventListener('change',e=>{const file=e.target.files?.[0];e.target.value='';openProCrop(file,'logo')});
+document.getElementById('accountCompanySlug')?.addEventListener('input',()=>markShowroomMediaDirty());
 document.getElementById('accountCompanyDescription')?.addEventListener('input',e=>{const c=document.getElementById('accountCompanyDescriptionCount');if(c)c.textContent=String(e.target.value.length);refreshProShowroomPreview();markShowroomMediaDirty()});
 document.getElementById('proCropCancel')?.addEventListener('click',closeProCrop);
 document.getElementById('proCropValidate')?.addEventListener('click',validateProCrop);

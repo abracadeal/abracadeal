@@ -75,7 +75,7 @@ function tempPassword() {
   return "Ab#" + Array.from(b).map((x) => x.toString(36).padStart(2, "0")).join("").slice(0, 30) + "9z";
 }
 
-function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean }) {
+function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean; slug?: string | null }) {
   const total = p.online + p.pending;
   const title = total > 0 ? "Vos annonces sont sur Abracadeal" : "Votre espace Pro Abracadeal est prêt";
   const paras = [
@@ -85,6 +85,7 @@ function welcomeMail(p: { company: string; site: string; online: number; pending
       ? `<strong>${total} annonce${total > 1 ? "s" : ""}</strong> ${total > 1 ? "ont été importées" : "a été importée"}${p.pending > 0 ? ` (${p.pending} encore en vérification, en ligne d’ici quelques minutes)` : ""}. Vous n’avez rien à ressaisir.`
       : `Vos annonces sont en cours d’import et seront en ligne dans les prochaines minutes. Vous n’avez rien à ressaisir.`,
     `Elles se mettent à jour toutes seules à partir de votre site : un véhicule ajouté apparaît, un véhicule vendu disparaît.`,
+    ...(p.slug ? [`Votre showroom a sa propre adresse, à donner à vos clients : <strong>abracadeal.fr/${esc(p.slug)}</strong>`] : []),
     `Pour accéder à votre espace (voir vos annonces, les mettre à la une, les partager), choisissez simplement votre mot de passe :`,
   ];
   const bullets = [
@@ -304,10 +305,11 @@ Deno.serve(async (req) => {
       const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "recovery", email: u.user.email, options: { redirectTo: "https://abracadeal.fr/" } });
       if (linkErr || !link?.properties?.action_link) throw new Error("Lien de mot de passe impossible : " + (linkErr?.message || ""));
       const { data: sub } = await admin.from("pro_subscriptions").select("founder_number,status").eq("user_id", userId).maybeSingle();
+      const { data: shw } = await admin.from("pro_showrooms").select("slug").eq("user_id", userId).maybeSingle();
       const mail = welcomeMail({
         company: m.display_name || "votre entreprise", site: m.stock_site?.url || "",
         online: Math.max(0, Number(body?.online) || 0), pending: Math.max(0, Number(body?.pending) || 0),
-        link: link.properties.action_link, founder: sub?.founder_number != null,
+        link: link.properties.action_link, founder: sub?.founder_number != null, slug: shw?.slug || null,
       });
       const r = await fetch("https://api.resend.com/emails", {
         method: "POST",

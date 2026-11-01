@@ -1,0 +1,7 @@
+-- 01/11/2026 (Anthony) : adresse courte du showroom, ex. abracadeal.fr/lifecars.
+-- Appliqué via migrations « pro_short_address » et « pro_short_address_words » :
+--  - pro_showrooms.slug (unique, insensible à la casse) ;
+--  - private.slugify / slug_reserved (pages et mots du site interdits) / free_slug (« Life Cars » → lifecars ; 3 mots et plus → avec tirets ; doublon → -2) ;
+--  - private.ensure_pro_slug + trigger zz_pro_slug sur profiles : tout compte pro reçoit son adresse ;
+--  - public.pro_slug_resolve(p_slug) (public) et public.pro_slug_set(p_user,p_slug) (le pro lui-même ou l'admin).
+-- Côté site : 404.html redirige /<adresse> vers pro.html?id=… ; pro.html remet /<adresse> dans la barre et la partage.
