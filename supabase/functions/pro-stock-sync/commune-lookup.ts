@@ -4,7 +4,7 @@
 // Seul un nom identique à une vraie commune est retenu (jamais de ville devinée).
 const norm=(s:string)=>s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/\bsaint\b/g,'st').replace(/\bsainte\b/g,'ste').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'');
 const STOP=new Set(['maison','appartement','appart','vente','location','villa','terrain','centre','centre-ville','ville','cour','jardin','garage','parking','studio','duplex','loft','immeuble','local','commerce','bureau','bureaux','neuf','ancien','charme','belle','beau','bel','grand','grande','petit','petite','plain-pied','proche','secteur','quartier','exclusivite','exclusif','prix','pieces','piece','chambres','chambre','terrasse','balcon','piscine','vue','mer','port','plage','campagne','bourg','village','hameau','ferme','longere','moulin','chateau','manoir','domaine','propriete','residence','lot','lots','fonds','bar','tabac','restaurant','hotel','boutique','atelier','entrepot','hangar','box','cave','auto','autos','cars','car','motors','moto','occasion','garantie','voiture','agence','immobilier','immo','france','paris-centre','nord','sud','est','ouest','haut','bas','rue','avenue','place','route','chemin','les','le','la','de','du','des']);
-const cache=new Map<string,Promise<{nom:string,cp:string,pop:number}|null>>();let calls=0;
+const cache=new Map<string,Promise<{nom:string,cp:string,cps:string[],pop:number}|null>>();let calls=0;
 async function commune(name:string){
   const k=norm(name);if(k.length<3||STOP.has(k)||/^\d+$/.test(k))return null;
   if(!cache.has(k)){
@@ -16,7 +16,7 @@ async function commune(name:string){
       const c=same[0];if(!c)return null;
       // un mot seul et très courant comme nom de lieu-dit : seulement une commune d'au moins 1 000 habitants
       if(!k.includes('-')&&(c.population||0)<1000)return null;
-      return{nom:String(c.nom),cp:String((c.codesPostaux||[])[0]||''),pop:Number(c.population||0)};
+      return{nom:String(c.nom),cp:String((c.codesPostaux||[])[0]||''),cps:(c.codesPostaux||[]).map(String),pop:Number(c.population||0)};
     }catch{return null;}})());
   }
   return cache.get(k)!;
@@ -45,4 +45,7 @@ export async function findCommune(title:string,url:string,description:string){
   for(const t of tries){const k=norm(t);if(seen.has(k))continue;seen.add(k);if(++n>25)break;const c=await commune(t);if(c)return c;}
   return null;
 }
+// 02/11/2026 (Dolce Immo : « Le Bouscat » avec le code postal 33700 de Mérignac, pris dans une autre annonce de la page) :
+// code postal vérifié contre la commune ; s'il ne lui appartient pas, celui de la commune le remplace.
+export async function checkPostal(ville:string,cp:string){if(!/^\d{5}$/.test(cp))return null;const c=await commune(ville);if(!c||!c.cps.length||c.cps.includes(cp))return null;return c.cps[0];}
 export const resetCommuneCalls=()=>{calls=0;};

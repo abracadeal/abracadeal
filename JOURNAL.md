@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : Laroca « 586 annonces », Dolce Immo photos / vendus (pro-stock-sync v223–v224)
+- Laroca (« c sûr ça ? ») : le site compte 202 biens (somme des compteurs par ville). Le chiffre « annonces sur le site » de la lecture par étapes comptait toutes les pages découvertes (pages de ville, fiches vendues…) → il compte maintenant les biens lus + ceux qui restent à lire.
+- Dolce Immo (Jalis, « 8 photos sur le site, 3 chez nous ») : la fiche montre 3 photos en tête puis la galerie complète plus bas (`section-gallery2`) ; le robot s'arrêtait à la première galerie. Toutes les galeries d'une fiche sont maintenant réunies (règle générale). 3 → 7,6 photos par bien.
+- Biens vendus / indisponibles (sites Jalis) : « Biens vendus » au-dessus du titre ou badge `selection vendu / indisponible` avant le titre → écarté (les badges plus bas sont ceux des biens « À découvrir »). Les articles du site (`<body class="fiche">` sans `fiche_produit`) ne sont plus lus comme des biens (aussi Helix).
+- Titres coupés au trait d'union (« belle maison de plain » pour « plain-pied ») : seul « - » entouré d'espaces sépare le nom du site.
+- Locations lues « vente » : un montant libellé « Loyer » près du titre = location.
+- Villes : « Proche Tram » et autres mots de situation (gare, quartier, commerces…) ne sont plus pris pour une ville ; sans ville, la commune du titre est cherchée même si un code postal (souvent celui d'une autre annonce de la page) a été lu, et son code postal le remplace.
+
 ### 02/11/2026 — Claude : demandes renvoyées par Anthony (« soi-disant réparés ») (pro-stock-sync v214)
 - 9 demandes remises « à réparer » avec une note. Repris une par une :
   - La Résidence Sartrouville / Chatou (description coupée, DPE « performance ») : renvoyées avant la correction de 23 h ; retest 22/24 et 26/27 DPE, descriptions complètes.
