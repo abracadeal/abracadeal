@@ -317,14 +317,22 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const gA=region.match(/diagPreview--ges"[^>]*?data-current-class="([A-G])"/i)?.[1]||region.match(/data-ges="\d[\d.,]*;([a-g])"/i)?.[1];
       if(!o.dpe&&dA)o.dpe=dA.toUpperCase();if(!o.ges&&gA)o.ges=gA.toUpperCase();
     }
+    // 02/11/2026 (Anthony, Dolce Immo « DPE pas lu ») : étiquette Jalis sans lettre : data-dpe="102;non renseigné" data-ges="24;non renseigné".
+    // Classe calculée avec les seuils du DPE 2021 ; la classe énergie retenue est la moins bonne des deux (règle du DPE 2021).
+    if(!o.dpe||!o.ges){
+      const vD=region.match(/data-dpe="(\d{1,4})(?:[.,]\d+)?;[^"]*"/i)?.[1],vG=region.match(/data-ges="(\d{1,4})(?:[.,]\d+)?;[^"]*"/i)?.[1];
+      const at=(v:number,t:number[])=>{const i=t.findIndex(x=>v<=x);return i<0?6:i;};
+      if(vD||vG){const iE=vD?at(Number(vD),[70,110,180,250,330,420]):-1,iG=vG?at(Number(vG),[6,10,29,49,69,99]):-1;
+        if(!o.ges&&iG>=0)o.ges='ABCDEFG'[iG];if(!o.dpe&&iE>=0)o.dpe='ABCDEFG'[Math.max(iE,iG)];}
+    }
     // 01/11/2026 (contrôle automatique, Calliope) : échelle A→G avec un curseur portant la valeur du bien
     // (<div class="dpe_target">…123</div>) : classe déduite de la valeur avec les seuils du DPE 2021.
     if(!o.dpe||!o.ges){
       const kwh=region.match(/class="dpe_target"[^>]*>[\s\S]{0,120}?<\/span>\s*(\d{1,4})\s*</)?.[1];
       const co2=region.match(/class="ges_target"[^>]*>[\s\S]{0,120}?<\/span>\s*(\d{1,4})\s*</)?.[1];
       const cls=(v:number,t:number[])=>'ABCDEFG'[t.findIndex(x=>v<=x)<0?6:t.findIndex(x=>v<=x)];
-      if(!o.dpe&&kwh)o.dpe=cls(Number(kwh),[70,110,180,250,330,420]);
       if(!o.ges&&co2)o.ges=cls(Number(co2),[6,10,29,49,69,99]);
+      if(!o.dpe&&kwh){const e=cls(Number(kwh),[70,110,180,250,330,420]);o.dpe=co2&&o.ges>e?o.ges:e;}
     }
     // 01/11/2026 (contrôle automatique) : image d'étiquette nommée par sa lettre « dpeV2-D.jpg » / « gesV2-B.jpg » (Cassis),
     // et lettre écrite dans le texte « DPE en B », « DPE : C » (Valmo) — une seule lettre sur la page.
