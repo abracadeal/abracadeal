@@ -32,6 +32,8 @@ import { isEwigoSite, readEwigoAgency } from "./ewigo-reader.ts";
 import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
 import { cityaAgencyId, readCityaAgency, cityaNdfAgency, readCityaNdfAgency } from "./citya-reader.ts";
 import { isCimmAgency, readCimmAgency } from "./cimm-reader.ts";
+import { isGuyHoquetAgency, readGuyHoquetAgency } from "./guyhoquet-reader.ts";
+import { isEspacesAtypiquesAgency, readEspacesAtypiquesAgency } from "./espaces-atypiques-reader.ts";
 import { isAutoGestionSite, readAutoGestionSite } from "./autogestion-reader.ts";
 
 const SUPABASE_URL=Deno.env.get('SUPABASE_URL')!;
@@ -966,6 +968,8 @@ async function readFeed(feed:any,persistCrawl=false){
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
   // 31/10/2026 (Claude) : page agence Simplici Car — PrestaShop répond en JSON à l'en-tête « Accept: application/json » du flux,
   // la page n'arrivait donc jamais au choix du lecteur de site : on lit directement l'agence.
+  if(isEspacesAtypiquesAgency(url)){const rows=await readEspacesAtypiquesAgency(url,fetchSiteHtml);(rows as any).platform='Espaces Atypiques (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
+  if(isGuyHoquetAgency(url)){const rows=await readGuyHoquetAgency(url,fetchSiteHtml);(rows as any).platform='Guy Hoquet (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isCimmAgency(url)){const rows=await readCimmAgency(url,fetchSiteHtml);(rows as any).platform='Cimm Immobilier (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(cityaNdfAgency(url)){const rows=await readCityaNdfAgency(url,fetchSiteHtml);(rows as any).platform='Citya Nord de France (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(cityaAgencyId(url)){const rows=await readCityaAgency(url,fetchSiteHtml);(rows as any).platform='Citya (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
@@ -1037,6 +1041,8 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/^(?:www\.)?lyonimmo\.com$/i.test(url.hostname)){rows=await readLyonImmo(url,text,fetchSiteHtml);platform='Lyon Immo (Studio HB, agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?neytimmobilier\.com$/i.test(url.hostname)){rows=await readNeyt(url,fetchSiteHtml);platform='Neyt (Selection-Immo)';feed.sector='immobilier';}
     else if(isAaSiteHtml(text)){rows=await readAaSite(origin);platform='Annonces-Automobile';}
+    else if(isEspacesAtypiquesAgency(url)){rows=await readEspacesAtypiquesAgency(url,fetchSiteHtml);platform='Espaces Atypiques (biens de l\'agence)';feed.sector='immobilier';}
+    else if(isGuyHoquetAgency(url)){rows=await readGuyHoquetAgency(url,fetchSiteHtml);platform='Guy Hoquet (biens de l\'agence)';feed.sector='immobilier';}
     else if(isCimmAgency(url)){rows=await readCimmAgency(url,fetchSiteHtml);platform='Cimm Immobilier (biens de l\'agence)';feed.sector='immobilier';}
     else if(cityaNdfAgency(url)){rows=await readCityaNdfAgency(url,fetchSiteHtml);platform='Citya Nord de France (biens de l\'agence)';feed.sector='immobilier';}
     else if(cityaAgencyId(url)){rows=await readCityaAgency(url,fetchSiteHtml);platform='Citya (biens de l\'agence)';feed.sector='immobilier';}
