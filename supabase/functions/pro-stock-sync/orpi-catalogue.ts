@@ -8,10 +8,14 @@ export function isOrpiBusinessAgency(html:string,slug:string){
 }
 export async function readOrpiCatalogue(origin:URL,slug:string,fetchHtml:Fetcher,parse:(html:string,url:string)=>any,memory?:CrawlMemory,commercial=false){
  const query=(path:string,transaction:string)=>{const u=new URL(path,origin);u.searchParams.set('agency',slug);u.searchParams.set('onlyEnabled','1');u.searchParams.set('transactions[0]',transaction);return u;};
- const prefix=commercial?'/commerces-entreprises':'',scope=(commercial?'orpi-oce-v2:':'orpi-v3:')+slug;
+ const prefix=commercial?'/commerces-entreprises':'',scope=(commercial?'orpi-oce-v3:':'orpi-v4:')+slug;
  const counts=new Map<string,number>();
  for(const t of ['buy','rent']){const r=await fetchHtml(query(prefix+'/recherche/count',t));if(r.url.origin!==origin.origin||!/^\s*\d+\s*$/.test(r.text))throw Error('Compteur Orpi filtré non reconnu');counts.set(t,Number(r.text));}
- const api=['buy','rent'].map(t=>query(prefix+'/recherche/ajax',t).toString());
+ // 01/11/2026 (Anthony : St Cyprien « 727 fiches restantes ») : le catalogue JSON ne renvoie que 500 annonces (réseau compris) et
+ // ignore « page ». Trié dans un sens puis dans l'autre (sort=date-down / date-up), il couvre jusqu'à 1 000 annonces : plus besoin
+ // des pages de liste HTML, qui mélangent les biens de toutes les agences (727 fiches à ouvrir pour en garder 61).
+ const api=['buy','rent'].flatMap(t=>{const n=counts.get(t)||0;const q=query(prefix+'/recherche/ajax',t);if(n<=500)return[q.toString()];
+   return ['date-down','date-up'].map(o=>{const u=new URL(q);u.searchParams.set('sort',o);return u.toString();});});
  const roots=commercial?[`/${slug}/commerces-entreprises/acheter`,`/${slug}/commerces-entreprises/louer`]:[`/${slug}/acheter/biens-en-vente`,`/${slug}/louer/biens-en-location`];
  const mem=memory?{...memory,load:async()=>{const s=await memory.load();if(s?.scope===scope&&s.source===new URL('/'+slug+'/',origin).toString()&&!s.completed&&Array.isArray(s.lists)&&Array.isArray(s.visited))for(const url of api)if(!s.visited.includes(url)&&!s.lists.some((x:any)=>x.url===url))s.lists.push({url,tries:0});return s;}}:undefined;
  return crawlCatalogue(new URL('/'+slug+'/',origin).toString(),scope,api,fetchHtml,(html,page)=>{
@@ -23,7 +27,7 @@ export async function readOrpiCatalogue(origin:URL,slug:string,fetchHtml:Fetcher
    // des AUTRES agences du réseau (St Cyprien : 39 à elle sur 500). On ne garde que ceux de l'agence inscrite.
    for(const e of j.items){if(e?.agency?.slug&&e.agency.slug!==slug)continue;if(e.transaction!==t||e.enabled!==true||e.sold||!/^[-a-z0-9]+$/i.test(e.slug||''))throw Error('Annonce Orpi hors transaction ou indisponible');const u=new URL('/annonce-'+(t==='buy'?'vente':'location')+'-'+e.slug+'/',origin);details.push(u.toString());/* 01/11/2026 : sans ?agency= (avec, la fiche s'affiche au nom de l'agence inscrite même si le bien est à une autre) */}
    if(new Set(details).size!==details.length)throw Error('Page JSON Orpi répétée');
-   return {details,lists:j.items.length<Number(j.count)?[new URL(roots[t==='buy'?0:1],origin).toString()]:[]};
+   return {details,lists:Number(j.count)>1000?[new URL(roots[t==='buy'?0:1],origin).toString()]:[]};/* au-delà de 1 000, seules les listes HTML complètent */
   }
   if(!roots.includes(page.pathname))throw Error('Liste hors agence');
   const details=[...new Set([...html.matchAll(/href="(\/annonce-(?:vente|location)-[a-z0-9-]+\/?[^" ]*)"/gi)].map(m=>{const u=new URL(decode(m[1]),origin);u.search='';return u.toString();}))];const lists:string[]=[];
