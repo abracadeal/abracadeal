@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : adresse courte des showrooms (abracadeal.fr/lifecars)
+- Anthony : que les pros sans site puissent utiliser une adresse du genre abracadeal.fr/lifecars.
+- Base (`supabase/2026-11-01-pro-short-address.sql`) : `pro_showrooms.slug` unique ; adresse créée automatiquement pour tout compte pro (trigger sur profiles) : « Life Cars » → lifecars, 3 mots et plus → avec tirets (auto-cevennes-ales), doublon → -2 ; mots et pages du site réservés. Pros existants : elite-prestige-services, oxoto, auto-cevennes-ales.
+- `404.html` : /<adresse> → pro.html?id=… (page masquée pendant la recherche ; adresse inconnue → page introuvable normale). Testé (Playwright, réponses simulées) + appel public réel de `pro_slug_resolve`.
+- `pro.html` : la barre d'adresse affiche abracadeal.fr/<adresse>, l'adresse est écrite sous le nom, « Partager » donne l'adresse courte.
+- Modifiable : par le pro (Mon compte → vitrine, champ « Adresse de votre showroom ») et par l'admin (« Modifier ce compte ») via `pro_slug_set` (contrôle : 3 caractères min., réservée, déjà prise).
+- Mail de bienvenue (admin-onboard-pro v3) : « Votre showroom a sa propre adresse : abracadeal.fr/<adresse> ».
+
 ### 01/11/2026 — Claude : accès direct au showroom depuis une annonce de pro
 - Anthony : « si je clique sur Life Cars je vais sur le showroom, ou une touche Voir le showroom Life Cars ».
 - `assets/index-main.js` (fiche annonce) : vendeur pro → nom cliquable « Life Cars › » et bouton « Voir le showroom <nom> » (pro.html?id=…, nouvel onglet), au-dessus de « Voir le profil et les avis » ; sur mobile, la carte vendeur d'un pro ouvre directement son showroom (particuliers inchangés). Version index-main `20261101-showroom`.
