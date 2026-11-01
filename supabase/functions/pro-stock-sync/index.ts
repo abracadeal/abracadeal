@@ -865,6 +865,9 @@ function ldVehicle(html:string,url:string){
  const date=ldText(v.dateVehicleFirstRegistered||v.vehicleModelDate||v.productionDate||v.modelDate||v.releaseDate);const y=date.match(/(19|20)\d{2}/);if(y){o.annee=y[0];o.mise_en_circulation=date;}
  const fuel=ldText(v.fuelType||v.vehicleEngine?.fuelType);if(fuel)o.carburant=fuel.replace(/^https?:\/\/[^/]+\//,'');
  const tr=ldText(v.vehicleTransmission);if(tr)o.boite=/manual|manuel|m[ée]ca/i.test(tr)?'manuelle':/auto/i.test(tr)?'automatique':tr;
+ // 01/11/2026 (BH Car) : ville du garage dans l'offre (vendeur / lieu de disponibilité) : adresse postale trouvée dans la fiche.
+ {const find=(x:any,d=0):any=>{if(!x||typeof x!=='object'||d>5)return null;if(ldTypes(x).includes('postaladdress')&&(x.addressLocality||x.postalCode))return x;for(const k of Object.keys(x)){const r=find(x[k],d+1);if(r)return r;}return null;};
+  const ad=find(v);if(ad){const c=ldText(ad.addressLocality);if(c&&!/^\d+$/.test(c))o.ville=c;const cp=ldText(ad.postalCode);if(/^\d{5}$/.test(cp))o.code_postal=cp;}}
  const color=ldText(v.color);if(color)o.couleur=color;
  const doors=ldText(v.numberOfDoors);if(doors)o.portes=doors;
  const power=ldText(v.vehicleEngine?.enginePower);if(power)o.puissance_din=power;
