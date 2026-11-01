@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : compteurs messages / téléphone / annonces pour l'admin
+- Anthony : un compteur sur chaque bouton message, téléphone et annonce, pour nous (stats à envoyer ensuite aux pros).
+- Déjà comptés : vues d'annonce, partages, appels (clic sur le numéro). Ajoutés : clic « Voir le numéro » (`phone`) et clic « Envoyer un message » (`message`, même avant connexion). 1 visiteur = 1 fois par jour et par annonce ; le pro et l'admin ne comptent pas.
+- `admin_pro_stats` + section « Statistiques » en haut de « ✏️ Modifier ce compte (admin) » : 7 jours / 30 jours / total, conversations ouvertes, annonces les plus vues (`supabase/2026-11-01-listing-stats.sql`).
+
 ### 01/11/2026 — Claude : e-mail de connexion des pros plus jamais affiché
 - Anthony (Life Cars) : ses coordonnées ne doivent être affichées nulle part. Le bouton « Contacter » du showroom (pro.html) montrait l'e-mail de connexion du pro aux visiteurs connectés (`get_public_pro_contact`).
 - `get_public_pro_contact` ne renvoie plus l'e-mail (null), seulement le téléphone du compte (migration `hide_pro_login_email`). Les clients passent par la messagerie, le pro est prévenu par e-mail (alerte messages).

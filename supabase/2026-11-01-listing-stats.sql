@@ -1,0 +1,5 @@
+-- 01/11/2026 (Anthony) : compteurs par annonce pour l'admin (à envoyer plus tard aux pros).
+-- Migration « listing_events_message_and_stats » :
+--  - track_listing_event accepte aussi 'message' (clic « Envoyer un message ») ; 'phone' (clic « Voir le numéro ») désormais envoyé par le site ;
+--    1 visiteur compté une fois par jour, par annonce et par type ; le pro et l'admin ne sont pas comptés.
+--  - admin_pro_stats(p_user) : totaux 7 j / 30 j / total par type, détail par annonce (30 j), conversations ouvertes (30 j). Réservé à l'admin.

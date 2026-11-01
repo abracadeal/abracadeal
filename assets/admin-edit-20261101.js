@@ -34,9 +34,10 @@
       sb.from('profiles').select('phone').eq('id',userId).maybeSingle(),
       sb.from('pro_showrooms').select('description,banner_path,logo_path,slug').eq('user_id',userId).maybeSingle(),
       sb.from('reviews').select('id,reviewer_name,rating,comment,seller_reply,status,created_at').eq('seller_id',userId).order('created_at',{ascending:false}),
-      sb.from('vacation_reviews').select('id,rating,comment,subject_reply,status,created_at').eq('subject_id',userId).order('created_at',{ascending:false})
+      sb.from('vacation_reviews').select('id,rating,comment,subject_reply,status,created_at').eq('subject_id',userId).order('created_at',{ascending:false}),
+      sb.rpc('admin_pro_stats',{p_user:userId})
     ]);
-    var p=r[0].data||{},phone=(r[1].data||{}).phone||'',sh=r[2].data||{},revs=r[3].data||[],vrevs=r[4].data||[];
+    var stats=(r[5]&&r[5].data)||null,p=r[0].data||{},phone=(r[1].data||{}).phone||'',sh=r[2].data||{},revs=r[3].data||[],vrevs=r[4].data||[];
     var isPro=p.account_type==='professionnel';
     var st={banner:sh.banner_path||null,logo:sh.logo_path||null,newBanner:null,newLogo:null};
     function imgBox(kind,label,ratio){var path=st[kind],file=st['new'+kind[0].toUpperCase()+kind.slice(1)];
@@ -48,6 +49,16 @@
       '<label>Avis<textarea data-f="comment">'+h(x.comment)+'</textarea></label>'+
       '<label>Réponse du '+(kind==='vacances'?'propriétaire':'vendeur')+'<textarea data-f="reply" style="min-height:50px">'+h(kind==='vacances'?x.subject_reply:x.seller_reply)+'</textarea></label>'+
       '<div class="row"><button type="button" class="ab pri" data-save>Enregistrer cet avis</button><button type="button" class="ab del" data-del>Supprimer cet avis</button></div></div>';}
+    // 01/11/2026 (Anthony) : compteurs pour l'admin (à envoyer plus tard aux pros) — 1 visiteur compté une fois par jour et par annonce.
+    function statsHtml(){
+      if(!stats)return '';
+      var T=stats.totaux||{},rows=[['view','Vues des annonces'],['phone','« Voir le numéro »'],['call','Appels (clic sur le numéro)'],['message','« Envoyer un message »'],['share','Partages']];
+      var cell=function(k,f){return (T[k]&&T[k][f])||0;};
+      var tbl='<table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="text-align:left;color:#7b6c88"><th style="padding:6px 4px">Compteur</th><th>7 jours</th><th>30 jours</th><th>Total</th></tr>'+rows.map(function(x){return '<tr style="border-top:1px solid #eee"><td style="padding:6px 4px">'+x[1]+'</td><td><b>'+cell(x[0],'j7')+'</b></td><td><b>'+cell(x[0],'j30')+'</b></td><td>'+cell(x[0],'tout')+'</td></tr>';}).join('')+'</table>';
+      var ann=(stats.annonces||[]).filter(function(a){return a.vues||a.numero||a.appels||a.messages||a.partages;}).slice(0,10);
+      var top=ann.length?'<div class="muted" style="margin:10px 0 4px">Annonces les plus vues (30 jours)</div>'+ann.map(function(a){return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0;border-top:1px solid #f0eaf4"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(a.title)+'</span><span style="white-space:nowrap">👁 '+a.vues+' · ☎ '+a.numero+' · 💬 '+a.messages+'</span></div>';}).join(''):'<p class="muted">Pas encore d’activité sur ses annonces.</p>';
+      return '<h3>Statistiques</h3><p class="muted" style="margin:0 0 6px">Conversations ouvertes (30 jours) : <b>'+(stats.conversations_30j||0)+'</b></p>'+tbl+top;
+    }
     var draft={};
     // garde la saisie en cours quand la fenêtre est redessinée (ajout / retrait d'une image)
     function grab(){var g=function(id){var e=d.querySelector('#'+id);return e?e.value:undefined;};['aeName','aeCity','aePhone','aeDesc','aeSlug'].forEach(function(id){var v=g(id);if(v!==undefined)draft[id]=v;});}
@@ -55,7 +66,7 @@
     function draw(){
       d.innerHTML='<div class="ae"><div class="row" style="justify-content:space-between"><h2 style="margin:0;font-size:20px">Modifier ce compte (admin)</h2><button type="button" class="ab" id="aeClose">Fermer</button></div>'+
         '<p class="muted">Les modifications sont visibles tout de suite sur le site.</p>'+
-        '<h3>Profil</h3><label>Nom affiché<input id="aeName" value="'+h(val('aeName',p.display_name))+'"></label><label>Ville<input id="aeCity" value="'+h(val('aeCity',p.city))+'"></label><label>Téléphone<input id="aePhone" value="'+h(val('aePhone',phone))+'"></label>'+
+        statsHtml()+'<h3>Profil</h3><label>Nom affiché<input id="aeName" value="'+h(val('aeName',p.display_name))+'"></label><label>Ville<input id="aeCity" value="'+h(val('aeCity',p.city))+'"></label><label>Téléphone<input id="aePhone" value="'+h(val('aePhone',phone))+'"></label>'+
         (isPro?'<h3>Vitrine pro</h3><label>Adresse courte du showroom<span style="display:flex;align-items:center;gap:4px"><span class="muted">abracadeal.fr/</span><input id="aeSlug" style="flex:1" value="'+h(val('aeSlug',sh.slug))+'"></span></label><label>Description<textarea id="aeDesc" style="min-height:120px">'+h(val('aeDesc',sh.description))+'</textarea></label><div class="row" style="align-items:flex-start">'+imgBox('logo','Logo','1/1')+imgBox('banner','Bannière','3/1')+'</div>':'')+
         '<div class="row" style="margin-top:14px"><button type="button" class="ab pri" id="aeSave">Enregistrer le profil'+(isPro?' et la vitrine':'')+'</button><span class="muted" id="aeMsg"></span></div>'+
         '<h3>Avis reçus ('+(revs.length+vrevs.length)+')</h3>'+(revs.length+vrevs.length?revs.map(function(x){return revBox('avis',x);}).join('')+vrevs.map(function(x){return revBox('vacances',x);}).join(''):'<p class="muted">Aucun avis.</p>')+'</div>';

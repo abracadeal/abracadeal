@@ -5050,6 +5050,7 @@ async function loadConversationMessages(scrollToBottom=true){
   await refreshUnreadMessages();
 }
 window.startMessageForListing=async(listingId)=>{
+  trackListingEvent(listingId,'message');/* 01/11/2026 : compteur « Envoyer un message » (1 par visiteur et par jour) */
   if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour envoyer un message');return;}
   const ad=allAds.find(x=>x.id===listingId);
   if(ad&&ad.owner_id===currentUser.id){toast('C’est votre annonce');return;}
@@ -5060,6 +5061,7 @@ window.startMessageForListing=async(listingId)=>{
   await openMessages(data);
 };
 window.viewListingPhone=async(listingId)=>{
+  trackListingEvent(listingId,'phone');/* 01/11/2026 : compteur « Voir le numéro » */
   if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
   const {data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId});
   if(error){toast(error.message||'Impossible d’afficher le numéro');return;}
