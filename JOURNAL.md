@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : lecture par étapes pour tous les lecteurs d'agences (pro-stock-sync v199)
+- Anthony : « il fait tout le temps ça pour tous les sites » (lecture qui s'arrête avant la fin et repart du début).
+- `resumable-crawl.ts` : `crawlDetails` (liste des fiches déjà connue → lecture par étapes mémorisée). Utilisé par La Résidence, La Française Immobilière, Cimm, Espaces Atypiques (en plus de BH Car). La page de test enchaîne les passages toute seule jusqu'à la fin ; une fois le pro inscrit, la synchro reprend là où elle s'était arrêtée.
+- Tests : La Résidence Chatou 44/44 (cycle complet), Espaces Atypiques Albi 21/21, Cimm Guipry 29/30 (1 fonds de commerce illisible), La Française Cleunay 11 (le total « annonces sur le site » n'affiche plus les 79 du réseau).
+
 ### 01/11/2026 — Claude : BH Car lisait toute la France ; aperçu limité à 220 (pro-stock-sync v195)
 - Anthony (capture test bhcar.fr : « 4207 annonces sur le site », 879 lues) : « ça lit toute la France d'un coup et pourquoi que 220 en aperçu ».
 - BH Car est un réseau national. `network-agency-readers.ts` : lecteur BH Car par agence (`bhcar.fr/agences/bhcar-<ville>`, ?page=2…), fiche gardée seulement si elle dit « chez BH Car <agence> ». L'accueil du réseau n'est plus lu : message « indiquez la page de l'agence ». Test Lille : 214 véhicules de l'agence, 136 lus au 1er passage, tous complets. bhcar-angouleme : page d'agence introuvable.
