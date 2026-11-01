@@ -47,6 +47,7 @@ export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(h
         const slugCity=cap(l.split('/')[4]||'');
         r.ville=cp?.[1]?.trim()||slugCity;if(cp?.[2])r.code_postal=cp[2];
         if(l.includes('/louer/'))r.transaction='location';
+        r.titre=String(r.titre||'').replace(/\s*-\s*R[ée]f\s*:.*$/i,'').replace(/\s*-\s*LA RESIDENCE\s*$/i,'').replace(/\s{2,}/g,' ').trim();
         rows.push(r);
       }catch{failed++;}
     }
@@ -88,7 +89,7 @@ export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher){
         if(dpe&&!r.dpe)r.dpe=dpe;if(ges&&!r.ges)r.ges=ges;
         // Titre de la fiche souvent tronqué (« Vente Appartement T3 - ») : première ligne de la description à la place.
         const first=String(r.description||'').split('\n')[0].trim();
-        if(/-\s*$/.test(String(r.titre||''))&&first.length>=10&&first.length<=120)r.titre=first;
+        if(/\s-\s*(?:-|$)/.test(String(r.titre||''))&&first.length>=10&&first.length<=120)r.titre=first;
         rows.push(r);
       }catch{failed++;}
     }
