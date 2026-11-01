@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Life Cars · Gestion du stock · Abracadeal</title>
+<link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
+<style>
+/* 01/11/2026 — Claude : démo de l'espace Pro « gestion du stock » de Life Cars (fonctions réelles du site, données de démonstration). */
+:root{--bg:#130c1a;--card:#25172e;--card2:#2f1f3a;--line:#4a3656;--txt:#fff;--muted:#bba9c9;--pink:#e2539b;--violet:#8a3ab9;--ok:#2fa36b;--gold:#d8a84b}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:16px 16px 110px}
+.demo{background:var(--gold);color:#1b0f22;font-weight:800;text-align:center;padding:8px 12px;border-radius:12px;margin:0 0 14px;font-size:14px}
+.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:0 0 14px}
+.top h1{margin:0;font-size:24px}.top .sub{color:var(--muted);font-size:14px;margin-top:2px}
+.btn{display:inline-flex;align-items:center;gap:6px;border:0;border-radius:12px;padding:10px 14px;font-weight:700;font-size:14px;cursor:pointer;text-decoration:none;color:#fff;background:var(--card2)}
+.btn.pri{background:linear-gradient(90deg,var(--pink),var(--violet))}.btn.sm{padding:7px 10px;font-size:13px;border-radius:10px}.btn.danger{background:#4a1d2a;color:#ffb3c1}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px;margin:0 0 14px}
+.card h2{margin:0 0 10px;font-size:18px}
+.sync{display:flex;gap:14px;align-items:flex-start}
+.dot{width:12px;height:12px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 5px rgba(47,163,107,.2);margin-top:6px;flex:none}
+.muted{color:var(--muted);font-size:14px;line-height:1.5}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0 0}
+.kpi{background:var(--card2);border-radius:14px;padding:12px}.kpi b{display:block;font-size:24px}.kpi span{color:var(--muted);font-size:13px}
+.how{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.how div{background:var(--card2);border-radius:14px;padding:12px;font-size:14px;line-height:1.45}.how div b{display:block;margin-bottom:4px}
+.row{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line)}
+.row:first-of-type{border-top:0}
+.row img{width:96px;height:72px;object-fit:cover;border-radius:10px;background:#000;flex:none}
+.row .t{flex:1;min-width:0}.row .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .p{color:#e9a7ff;font-weight:800}.tag{display:inline-block;font-size:12px;font-weight:700;border-radius:999px;padding:2px 8px;background:rgba(47,163,107,.18);color:#7fe0ae;margin-left:6px}
+.acts{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.more{color:var(--muted);font-size:14px;padding-top:10px;border-top:1px solid var(--line)}
+.files{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 0}.files span{background:var(--card2);border-radius:8px;padding:4px 8px;font-size:12px;font-weight:700}
+@media(max-width:720px){.kpis{grid-template-columns:repeat(2,1fr)}.how{grid-template-columns:1fr}.row{flex-wrap:wrap}.row img{width:80px;height:60px}.acts{width:100%;justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="demo">Démonstration — aperçu de l'espace Pro de Life Cars une fois le compte créé</div>
+
+  <div class="top">
+    <div><h1>Mon stock · Life Cars</h1><div class="sub">Espace Pro Abracadeal · Mouans-Sartoux</div></div>
+    <a class="btn" href="index.html">Voir mon showroom →</a>
+  </div>
+
+  <section class="card">
+    <div class="sync"><span class="dot"></span><div>
+      <h2 style="margin:0 0 4px">Synchronisation automatique active</h2>
+      <div class="muted">Auto / Moto · votre site <b style="color:#fff">lifecars.fr</b> est lu automatiquement <b style="color:#fff">toutes les 15 minutes</b>.<br>Dernière synchro : aujourd'hui, il y a quelques minutes.</div>
+    </div></div>
+    <div class="kpis">
+      <div class="kpi"><b>49</b><span>véhicules en ligne</span></div>
+      <div class="kpi"><b>49 / 49</b><span>fiches complètes</span></div>
+      <div class="kpi"><b>30</b><span>photos en moyenne</span></div>
+      <div class="kpi"><b>15 min</b><span>entre deux mises à jour</span></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Vous n'avez rien à faire</h2>
+    <div class="how">
+      <div><b>➕ Nouveau véhicule sur votre site</b>Il est publié ici automatiquement, avec ses photos et ses caractéristiques.</div>
+      <div><b>✏️ Prix ou annonce modifiés</b>La mise à jour est reprise au tour suivant.</div>
+      <div><b>✅ Véhicule vendu</b>Retiré de votre site, il est retiré d'Abracadeal automatiquement.</div>
+    </div>
+  </section>
+
+  <section class="card">
+    <div class="top" style="margin:0 0 4px"><h2 style="margin:0">Mes véhicules (49)</h2><a class="btn sm" href="index.html">Voir comme un acheteur</a></div>
+    <div id="list"></div>
+    <div class="more">… et 46 autres véhicules, gérés de la même façon.</div>
+  </section>
+
+  <section class="card">
+    <h2>Autres façons d'envoyer votre stock</h2>
+    <div class="muted">Si un jour vous changez de site ou de logiciel : importez un fichier, ou connectez le flux de votre logiciel de gestion de stock.</div>
+    <div class="files"><span>CSV</span><span>Excel</span><span>XML</span><span>JSON</span><span>API</span></div>
+  </section>
+</div>
+<script>
+const CDN='https://auto.cdn-rivamedia.com/photos/annoncecli/intermediate/';
+const cars=[
+ {t:'Mercedes Classe S Maybach 580 Limousine',p:154990,img:CDN+'mercedes-classe-s-maybach-580-limousine-2022-503ch-francaise-entretien-complet-mercedes-211025810.jpg'},
+ {t:'Land Rover Range Rover Sport P550e Autobiography',p:114990,img:CDN+'land-rover-range-rover-sport-3-0-p550e-550ch-phev-autobiography-1ere-main-2025-tva-recuperable-garantie-constructeur-217841675.jpg'},
+ {t:'Audi R8 Spyder V10 5.2 FSI quattro',p:134990,img:CDN+'audi-r8-spyder-2014-5-2-v10-fsi-boite-manuelle-525ch-quattro-entretien-complet-2eme-main-kit-carrosserie-razor-214878638.jpg'}
+];
+const esc=s=>String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
+const note=b=>{b.textContent='Disponible une fois le compte créé';b.disabled=true;};
+document.getElementById('list').innerHTML=cars.map(c=>'<div class="row"><img src="'+esc(c.img)+'" alt="" loading="lazy" onerror="this.style.visibility=\'hidden\'"><div class="t"><b>'+esc(c.t)+'</b><span class="p">'+c.p.toLocaleString('fr-FR')+' €</span><span class="tag">En ligne · synchro</span></div><div class="acts"><button class="btn sm" type="button">Modifier</button><button class="btn sm pri" type="button">Booster</button><button class="btn sm danger" type="button">Supprimer</button></div></div>').join('');
+document.querySelectorAll('.acts button').forEach(b=>b.onclick=()=>note(b));
+</script>
+<script src="/assets/app-shell-20261018.js?v=6" defer></script>
+</body>
+</html>

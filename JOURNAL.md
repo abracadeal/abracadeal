@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : démo « gestion du stock » de Life Cars
+- Anthony : montrer à Life Cars sa page showroom avec la gestion du stock (création du compte prévue le 02/11).
+- Nouvelle page `demo/life-cars/gestion.html` (noindex, bandeau « Démonstration ») : synchronisation automatique de lifecars.fr toutes les 15 min, 49 véhicules / 49 fiches complètes, ce qui se passe tout seul (nouveau, modifié, vendu), liste de véhicules avec Modifier / Booster / Supprimer, autres envois (CSV, Excel, XML, JSON, API). Uniquement des fonctions qui existent sur le site. Lien vers le showroom de démo.
+
 ### 01/11/2026 — Claude : sites anti-robot supprimés (prospects retirés, réparations annulées)
 - Anthony : « tout ce qui est anti-robot, on supprime ».
 - Même effet que le bouton « Supprimer » de Sites en réparation (pas d'effacement définitif) : réparation annulée, prospect en segment `exclu_admin`, jamais de mail.
