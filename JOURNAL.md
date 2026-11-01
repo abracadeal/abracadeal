@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : réseaux Guy Hoquet et Espaces Atypiques appris, Laforêt vérifié (pro-stock-sync v172)
+- `guyhoquet-reader.ts` : toute agence `<agence>.guy-hoquet.com`. Le site renvoie tous les biens de l'agence en JSON (`/biens/result?with_markers=true` + en-tête `X-Requested-With`), une seule requête, filtrée sur l'agence (shop_id). Lien de fiche `/achat-vente|location/<texte>-<id>`. Avant : seuls les ~12 biens de l'accueil étaient lus (Tours 12 → 72/72) ou aucun (Canohès 0 → 43/43).
+- `espaces-atypiques-reader.ts` : pages agence `espaces-atypiques.com/<région>/[<ville>/]`. Liens `/ventes|locations/<cp>-<ville>-<titre>-<réf>/` (réf. « 15710 », « sa5421 », « lry5805 », « sa5214-1 »). Ville et code postal pris du titre de la page / du lien (la fiche donnait « Informations complémentaires » ou « Paris »). Avant : 503 (exploration de tout le site national). Albi 21/21, Les Sables 5/5, Cherbourg 7/7, Biarritz 3/3.
+- Laforêt : les pages agence `laforet.com/agence-immobiliere/<agence>` étaient déjà lues (Pontarlier 7/7). Paris 1 Saint-Martin : page supprimée (404) → demande annulée, mail normal.
+- Demandes canohes et les-sables-olonne → « Réparé · à valider ». ~125 prospects Cimm / Guy Hoquet / Espaces Atypiques / Laforêt remis en file.
+- Reste : Square Habitat (API cachée), anciens domaines guyhoquet-immobilier-<ville>.com à vérifier.
+
 ### 01/11/2026 — Claude : réseau Cimm Immobilier appris par le robot (pro-stock-sync v168)
 - Nouveau `supabase/functions/pro-stock-sync/cimm-reader.ts` : toute agence `<ville>.cimm.com` est lue (liste des biens sur la page d'accueil de l'agence, fiches `cimm.com/bien/…-p<n°>`).
 - Ville : lue sur la photo principale (« Maison à Montlouis-sur-Loire »), sinon ville de l'agence. Corrige « ville manquante ».
