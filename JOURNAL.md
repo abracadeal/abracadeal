@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : accès direct au showroom depuis une annonce de pro
+- Anthony : « si je clique sur Life Cars je vais sur le showroom, ou une touche Voir le showroom Life Cars ».
+- `assets/index-main.js` (fiche annonce) : vendeur pro → nom cliquable « Life Cars › » et bouton « Voir le showroom <nom> » (pro.html?id=…, nouvel onglet), au-dessus de « Voir le profil et les avis » ; sur mobile, la carte vendeur d'un pro ouvre directement son showroom (particuliers inchangés). Version index-main `20261101-showroom`.
+- Démo `demo/life-cars/annonce.html` : même nom cliquable + bouton vers le showroom de démo.
+
 ### 01/11/2026 — Claude : bilan du test anti-robot de tous les sites des prospects
 - 7 384 sites visités (tâche `abracadeal-antirobot-probe`, arrêtée seule) : 5 191 normaux, 1 795 injoignables ou trop lents (non touchés), 398 protégés : 373 pare-feu Amazon (AWS WAF, page « challenge » 202 de 2,4 Ko, petites agences immobilières toutes différentes), 17 Cloudflare (« Just a moment… », dont Stéphane Plaza), 8 DataDome (Espacevo).
 - Contrôle : 2 sites AWS WAF passés au vrai robot → « aucune fiche lisible » aussi. Le seul site protégé déjà lu avec succès par le robot a été gardé.
