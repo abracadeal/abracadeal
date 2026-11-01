@@ -126,7 +126,7 @@ export async function readBhCarAgency(url:URL,fetchHtml:Fetcher,ldParse:(html:st
         if(chez&&key&&chez!==key)continue;
         let r:any=null;try{r=ldParse(h,l);}catch{r=null;}
         const sd:any=smartDetail(h,l,'vehicules');
-        if(!r)r=sd;else if(sd){for(const k of Object.keys(sd))if(r[k]==null||r[k]==='')r[k]=sd[k];}
+        if(!r)r=sd;else if(sd){for(const k of Object.keys(sd))if(k!=='photos'&&(r[k]==null||r[k]===''))r[k]=sd[k];}
         if(!r||r._sold)continue;r.url=l;rows.push(r);
       }catch{failed++;}
     }
