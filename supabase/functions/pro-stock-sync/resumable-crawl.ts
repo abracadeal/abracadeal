@@ -1,3 +1,4 @@
+import { cpuLeft } from './cpu-meter.ts';
 // Bounded, replayable catalogue crawl. State contains public source data only.
 export type CrawlState={source:string,scope:string,started:string,completed:string|null,lists:{url:string,tries:number}[],details:{url:string,tries:number}[],visited:string[],discovered:string[],rows:Record<string,any>,failed:string[],applied?:boolean,touched?:string};
 export type CrawlMemory={load:()=>Promise<any>,save:(state:any)=>Promise<void>};
@@ -7,7 +8,7 @@ export async function crawlCatalogue(source:string,scope:string,starts:string[],
  // 01/11/2026 : index des adresses déjà vues (les recherches dans les listes coûtaient trop de calcul sur les gros plans de site).
  const seenList=new Set<string>([...state.visited,...state.lists.map(x=>x.url)]),discovered=new Set<string>(state.discovered);
  let pages=0,details=0;const budget=options.budgetMs??35000;
- while(clock()-t0<budget&&(state.lists.length||state.details.length)&&details<(options.maxDetails??100)){
+ while(clock()-t0<budget&&(state.lists.length||state.details.length)&&details<(options.maxDetails??100)&&cpuLeft()){
   const listing=!!state.lists.length,queue=listing?state.lists:state.details,batch=queue.splice(0,Math.min(4,listing?4:(options.maxDetails??100)-details));if(!listing)details+=batch.length;
   await Promise.all(batch.map(async item=>{try{
    const result=await fetchHtml(new URL(item.url));pages++;

@@ -1,3 +1,4 @@
+import { cpu, cpuLeft } from './cpu-meter.ts';
 import { energyImageUrls } from './energy-image.ts';
 import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isPlaceholderPhoto, photoKey, photoRank } from './photo-utils.ts';
@@ -18,7 +19,12 @@ function pathPattern(u:URL){return u.pathname.split('/').filter(Boolean).map(s=>
 function isDetailish(u:URL){const last=u.pathname.replace(/\/+$/,'').split('/').pop()||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product)=/i.test(u.search);}
 
 // Liens de la page : fiches probables (formes répétées) et pages de liste à suivre.
-export function smartLinks(html:string,page:URL,host:string){
+// 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : la plateforme coupe le robot au-delà d'environ 2 s de calcul.
+// Les gros sites (pages de 100 à 250 Ko, 300 pages et plus) dépassaient cette limite. Le temps de lecture des pages est compté ;
+// au-delà du budget, le parcours s'arrête proprement (lecture partielle, reprise au passage suivant), sans planter.
+export function smartLinks(html:string,page:URL,host:string){const t=performance.now();try{return smartLinksRaw(html,page,host);}finally{cpu.ms+=performance.now()-t;}}
+export function smartDetail(rawHtml:string,pageUrl:string,sector:string){const t=performance.now();try{return smartDetailRaw(rawHtml,pageUrl,sector);}finally{cpu.ms+=performance.now()-t;}}
+function smartLinksRaw(html:string,page:URL,host:string){
   // Le <base href> est utilisé aussi pour les liens relatifs des fiches AdnPix.
   try{const b=html.match(/<base\b[^>]*href=["']([^"']+)["']/i);if(b){const u=new URL(sDecode(b[1]),page);if(u.hostname.replace(/^www\./,'')===host)page=u;}}catch{}
   const groups=new Map<string,Set<string>>();const lists=new Set<string>();
@@ -162,7 +168,7 @@ export function activeEnergyDiagnostics(html:string){
  }
  return out;
 }
-export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
+function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   if(sector==='immobilier'&&/class=["']annonce-detail-titre["']/i.test(rawHtml))return adnpixDetail(rawHtml,pageUrl);
   const base=new URL(pageUrl);const immo=sector==='immobilier';
   // Économie de calcul (limite CPU des fonctions) : on ne travaille que sur l'en-tête et la zone autour du titre principal.
@@ -387,7 +393,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   const inScope=(u:string)=>!scope||scope.split('/').length<3||new URL(u).pathname.startsWith(scope);
   // Listes d'abord (pour trouver les fiches), en parallèle limité.
   let lists=0;
-  while(listQ.length&&lists<20&&Date.now()-t0<20000){
+  while(listQ.length&&lists<20&&Date.now()-t0<20000&&cpuLeft()){
     const batch=listQ.splice(0,4).filter(u=>!seenPages.has(u)&&inScope(u));batch.forEach(u=>seenPages.add(u));pages+=batch.length;lists+=batch.length;
     await Promise.all(batch.map(async u=>{try{const{text,url}=await fetchHtml(new URL(u));take(text.length>700000?text.slice(0,700000):text,url);}catch{}}));
   }
@@ -404,7 +410,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   }
   let i=0;
   await Promise.all(Array.from({length:4},async()=>{
-    while(i<detailQ.length&&pages<400&&Date.now()-t0<50000){
+    while(i<detailQ.length&&pages<400&&Date.now()-t0<50000&&cpuLeft()){
       const u=detailQ[i++];if(seenPages.has(u))continue;seenPages.add(u);pages++;
       try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
         // Données structurées souvent incomplètes (1 photo, pas de description) : on complète avec la lecture de la page.

@@ -33,6 +33,7 @@ import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
 import { cityaAgencyId, readCityaAgency, cityaNdfAgency, readCityaNdfAgency } from "./citya-reader.ts";
 import { isCimmAgency, readCimmAgency } from "./cimm-reader.ts";
 import { fillEnergyFromImages } from "./energy-image.ts";
+import { cpu, cpuReset } from "./cpu-meter.ts";
 import { isGuyHoquetAgency, readGuyHoquetAgency } from "./guyhoquet-reader.ts";
 import { isEspacesAtypiquesAgency, readEspacesAtypiquesAgency } from "./espaces-atypiques-reader.ts";
 import { isAutoGestionSite, readAutoGestionSite } from "./autogestion-reader.ts";
@@ -378,7 +379,7 @@ async function fetchSiteHtml(start:URL,maxLength=5_000_000){
   const parts:Uint8Array[]=[];let size=0;const reader=r.body?.getReader();
   if(reader)for(;;){const{done,value}=await reader.read();if(done)break;size+=value.length;if(size>maxLength){await reader.cancel();throw Error('Page trop volumineuse');}parts.push(value);}
   const buf=new Uint8Array(size);{let o=0;for(const p of parts){buf.set(p,o);o+=p.length;}}
-  const text=decodeLegacyHtml(buf,r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>maxLength)throw Error('Page trop volumineuse');
+  const td=performance.now();const text=decodeLegacyHtml(buf,r.headers.get('content-type')||'');cpu.ms+=performance.now()-td;if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>maxLength)throw Error('Page trop volumineuse');
   trace(url.toString(),'ok '+text.length);
   return{text,url};
  }
@@ -982,6 +983,7 @@ function crawlMemory(feed:any,persist:boolean):CrawlMemory|undefined{
  save:async(state:any)=>{const payload={feed_id:feed.id,state,updated_at:new Date(Math.max(Date.now(),(Date.parse(checkpoint?.updated_at||'')||0)+1)).toISOString()};const r=checkpoint?await admin.from('pro_stock_crawl_state').update(payload).eq('feed_id',feed.id).eq('updated_at',checkpoint.updated_at).select('feed_id'):await admin.from('pro_stock_crawl_state').insert(payload).select('feed_id');if(r.error)throw r.error;if(!r.data?.length)throw Error('Une autre lecture a avancé, reprise au prochain passage.');}};
 }
 async function readFeed(feed:any,persistCrawl=false){
+  cpuReset();/* 01/11/2026 : budget de calcul par site lu (cpu-meter.ts) */
   if(!feed.feed_url)throw new Error('Aucune URL de flux configurée.');
   let url:URL;
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
