@@ -5905,6 +5905,8 @@ if(sb){
 
   sb.auth.onAuthStateChange((event,session)=>{
     passwordRecovery.handleAuth(event,session);
+    // 01/11/2026 : retour au showroom après inscription / connexion (valable 2 jours, ex. après confirmation de l'e-mail)
+    if(event==='SIGNED_IN'&&session){try{const r=JSON.parse(localStorage.getItem('abracaReturnTo')||'null');if(r&&r.u&&Date.now()-r.t<2*86400e3&&!/[?&]type=recovery/.test(location.hash+location.search)){localStorage.removeItem('abracaReturnTo');setTimeout(()=>{location.href=r.u;},700);}else if(r)localStorage.removeItem('abracaReturnTo');}catch(_){}}
 
     setTimeout(async()=>{
       try{
@@ -6294,6 +6296,11 @@ document.getElementById('publishBackBtn')?.addEventListener('click',()=>{publish
 // pour ne jamais republier la meme annonce.
 (function(){
   const qs=new URLSearchParams(location.search);
+  // 01/11/2026 (Anthony) : « Créer un compte / Se connecter » depuis un showroom : ouvre le bon onglet et revient au showroom ensuite.
+  {const mode=qs.get('compte');if(mode==='inscription'||mode==='connexion'){const back=qs.get('retour')||'';
+    if(/^\/[A-Za-z0-9._\-\/?=&%]*$/.test(back)&&!back.startsWith('//')){try{localStorage.setItem('abracaReturnTo',JSON.stringify({u:back,t:Date.now()}));}catch(_){}}
+    qs.delete('compte');qs.delete('retour');history.replaceState(null,'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash);
+    setTimeout(()=>{try{window.setAuthTab(mode==='inscription'?'signup':'login');openModal('accountModal');}catch(_){}},500);}}
   if(qs.get('commerce')==='success'){
     qs.delete('commerce');history.replaceState(null,'',location.pathname+(qs.toString()?'?'+qs:'')+location.hash);
     setTimeout(()=>toast('Paiement validé ✓ Vos options sont en cours d’activation.'),600);

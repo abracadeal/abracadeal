@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : showroom en aperçu pour les visiteurs sans compte
+- Anthony : faire s'inscrire pour voir le showroom (plus d'inscrits). Choix retenu (après avoir déconseillé de tout bloquer : adresse courte et Google) : aperçu puis inscription.
+- `pro.html` : sans compte, 6 premiers véhicules puis encart « Inscrivez-vous gratuitement pour voir les N autres véhicules de <pro> » (Créer un compte gratuit / Se connecter) ; même choix dans « Contacter ». Connecté : tout visible comme avant.
+- `assets/index-main.js` : `/?compte=inscription|connexion&retour=/lifecars` ouvre le bon onglet ; après connexion (SIGNED_IN, y compris après confirmation de l'e-mail, 2 jours max) retour automatique au showroom. Version `20261101-gate`.
+- Testé (Playwright, données simulées, 10 véhicules) : 6 cartes + encart, adresse /lifecars, lien d'inscription avec retour.
+
 ### 01/11/2026 — Claude : compteurs messages / téléphone / annonces pour l'admin
 - Anthony : un compteur sur chaque bouton message, téléphone et annonce, pour nous (stats à envoyer ensuite aux pros).
 - Déjà comptés : vues d'annonce, partages, appels (clic sur le numéro). Ajoutés : clic « Voir le numéro » (`phone`) et clic « Envoyer un message » (`message`, même avant connexion). 1 visiteur = 1 fois par jour et par annonce ; le pro et l'admin ne comptent pas.
