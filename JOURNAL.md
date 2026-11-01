@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : dépenses d'énergie ×100 corrigées (pro-stock-sync v181)
+- Anthony : « 67 000 € à 94 000 € » de dépenses d'énergie sur une location à Bourg-en-Bresse (site : 670.00 € et 940.00 €).
+- Cause : ma lecture Cimm du jour (`smart-reader.ts`) supprimait le point des centimes. Montant maintenant lu avec centimes « .00 » / « ,50 » retirés, et accepté seulement s'il est plausible.
+- Garde-fou général (`normalizeImmo`) : dépenses ≥ 20 000 € (min) ou ≥ 30 000 € (max) écartées, tous sites.
+- Aucune annonce enregistrée ni aperçu prospect touchés (seul l'aperçu de test l'affichait).
+
 ### 01/11/2026 — Claude : l'admin peut tout modifier (annonces importées : photos ; comptes, vitrines pros, avis)
 - Anthony : photo en double sur une annonce d'essai Espaces Atypiques, la correction ne permettait que le texte ; l'admin doit pouvoir modifier / supprimer textes et images partout (choix : annonces et photos, profils et pages pros, avis).
 - Espaces Atypiques (robot) : seules les photos rangées dans le dossier de la référence du bien sont gardées (les images de décoration de l'agence étaient prises).
