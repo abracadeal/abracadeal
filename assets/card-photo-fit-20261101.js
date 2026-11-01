@@ -7,7 +7,7 @@
     if(!box||img.classList.contains('abraca-default-photo')||!img.naturalWidth)return;
     const r=img.naturalWidth/img.naturalHeight,bw=box.clientWidth||1,bh=box.clientHeight||1,br=bw/bh;
     const crop=r>br?1-br/r:1-r/br; // part de la photo cachée par le rognage
-    const on=crop>0.22;
+    const on=crop>0.3; // > 30 % caché : photo en hauteur dans une vignette en largeur (ou l’inverse), quelle que soit la taille d’écran
     box.classList.toggle('photo-fit',on);
     if(on){try{box.style.setProperty('--photo-bg','url("'+img.currentSrc.replace(/"/g,'%22')+'")');}catch(_){}}
   };
