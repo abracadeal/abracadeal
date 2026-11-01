@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : e-mail de connexion des pros plus jamais affiché
+- Anthony (Life Cars) : ses coordonnées ne doivent être affichées nulle part. Le bouton « Contacter » du showroom (pro.html) montrait l'e-mail de connexion du pro aux visiteurs connectés (`get_public_pro_contact`).
+- `get_public_pro_contact` ne renvoie plus l'e-mail (null), seulement le téléphone du compte (migration `hide_pro_login_email`). Les clients passent par la messagerie, le pro est prévenu par e-mail (alerte messages).
+- Pour Life Cars demain : téléphone du compte = 04 83 43 33 01 (garage, affiché aux acheteurs) ; e-mail de connexion à confirmer (fiche prospect : direction@lifecars.fr), jamais affiché.
+
 ### 01/11/2026 — Claude : alerte e-mail des messages toutes les minutes
 - Anthony : Life Cars n'a pas d'e-mail public (formulaire) → il demandera l'e-mail du garage ; un pro doit être prévenu par mail quand un client lui écrit.
 - Déjà en place (`process-message-email-alerts`) : e-mail au destinataire d'un message non lu depuis 1 min s'il n'est pas sur le site. La tâche cron `process-message-email-alerts-every-minute` tournait toutes les 5 min → remise à chaque minute (`* * * * *`).
