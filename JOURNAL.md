@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : La Résidence, La Française Immobilière, photos Laroca (pro-stock-sync v194)
+- `network-agency-readers.ts` (nouveau) :
+  - **La Résidence** (`laresidence.fr/agences-immobilieres/<agence>`) : listes `/acheter` et `/louer` de l'agence (?Page=2…), fiches lues par les données structurées + la page ; ville et code postal pris dans le titre (la lecture automatique donnait « Achat maison »), titre sans « Réf … - LA RESIDENCE ». Chatou 44/44, Sartrouville 38/38.
+  - **La Française Immobilière** (`la-francaise-immobiliere.fr/agences/…`) : annonces du réseau par l'API WordPress (`/wp-json/wp/v2/achat` et `/location`), gardées seulement si la fiche renvoie à l'agence (lien « Plus d'infos ») ; DPE / GES lus dans le SVG (`<g id="EnergieC">`, `<g id="GesC">`) ; ville prise dans le lien ; titre tronqué remplacé par la 1re ligne de la description. Rennes Cleunay 9/9. Saint-Malo et Montauban-de-Bretagne : aucune annonce en ligne aujourd'hui (73 annonces du réseau vérifiées), message clair.
+  - 4 demandes passées à « Réparé · à valider ».
+- Anthony (capture Laroca : cartes « Vente et achat appartements - » avec le logo en photo, « ville manquante ») : sur Twimmo, les pages liste (`/vente-appartement-a-<ville>.html`, `/immobilier-a-…`) étaient lues comme des biens. `smart-reader.ts` : sur un site Twimmo, seule une adresse `…-1-247v562a.html` est une fiche. Nouveau test Laroca : 93 complètes sur 93 lues.
+- `photo-utils.ts` : « -photo-moyenne » / « -photo-hd » (Twimmo) reconnus comme la même photo (la plus grande gardée) ; ajout des mots moyenne, petite, grande, vignette, miniature.
+
 ### 01/11/2026 — Claude : sites à réparer, robot qui plantait (erreur 503) sur les gros sites (pro-stock-sync v190)
 - Plan validé par Anthony (« ok ») : 1. relancer les 6 sites jamais testés ; 2. La Résidence / La Française Immobilière ; 3. plateformes connues ; 4. sites uniques.
 - raccosta.com : 256/256, réparé. jlcarsparis.fr : aucune fiche véhicule lisible (Appidev), reste à faire.
