@@ -301,6 +301,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const g3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*2/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:e?ges|climat|co2)[-_]([a-g])"|<[^>]+\bid="(?:e?ges|climat|co2)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
       if(!o.dpe&&d3)o.dpe=d3.toUpperCase();if(!o.ges&&g3)o.ges=g3.toUpperCase();
     }
+    // 01/11/2026 (contrôle automatique, Activimmo) : lettre écrite après la valeur : « 199 kWhep/m²an D », « 8 KgCO²/m²an B ».
+    if(!o.dpe||!o.ges){
+      // une seule lettre sur toute la page (jamais une légende A→G)
+      const uniq=(re:RegExp)=>{const set=new Set([...text.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
+      const d5=uniq(/\d[\d\s.,]*\s*kWh\s*(?:ep|EP|e\.p\.)?\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/g);
+      const g5=uniq(/\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*(?:2|²)\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/gi);
+      if(!o.dpe&&d5)o.dpe=d5;if(!o.ges&&g5)o.ges=g5.toUpperCase();
+    }
     // 01/11/2026 (Anthony : « toujours énormément de DPE pas lus ») : étiquettes dessinées dans la page (SVG) :
     // <g id="GES_E"> / <g id="DPE_C"> (La Résidence), <g id="EnergieC"> / <g id="GesC"> (La Française), conteneur « diagnosticShortened dpeE », La Boîte Immo (extension wp-dpe-ges) « diagnostic-diagram numberC » / « emission-diagram numberB ».
     if(!o.dpe||!o.ges){
