@@ -1,0 +1,6 @@
+-- 01/11/2026 (Anthony) : « tout ce qui est anti-robot, on supprime ».
+-- Appliqué via migration « auto_exclude_anti_robot » :
+--  - trigger exclude_anti_robot sur prospection_prospects : site anti-robot (raison / plateforme) → segment 'exclu_admin',
+--    statut ready/sending → paused, note « retiré … site anti-robot » (jamais de mail, comme le bouton Supprimer).
+--  - trigger cancel_anti_robot sur robot_learning_requests : demande en attente qui parle d'anti-robot → annulée.
+-- Nettoyage du jour : 13 demandes annulées, 20 prospects retirés (dont 6 Stéphane Plaza, même site protégé).

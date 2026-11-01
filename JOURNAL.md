@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : sites anti-robot supprimés (prospects retirés, réparations annulées)
+- Anthony : « tout ce qui est anti-robot, on supprime ».
+- Même effet que le bouton « Supprimer » de Sites en réparation (pas d'effacement définitif) : réparation annulée, prospect en segment `exclu_admin`, jamais de mail.
+- Fait aujourd'hui : 13 demandes de réparation annulées (aixty, lex-immo, lajosassienne, lucievidalimmo, imozoum, acces-conseil-immobilier, cabinet-girondin, placyr-immo, comeback-immo, horizonimmo, thisse, agence-majorelle, mister-property) ; 20 prospects retirés (dont 6 Stéphane Plaza, site commun protégé).
+- Automatique ensuite : triggers `exclude_anti_robot` (prospects) et `cancel_anti_robot` (demandes) — `supabase/2026-11-01-auto-exclude-anti-robot.sql`.
+- Au passage (test des gros réseaux) : lisibles Orpi, Human, Nestenn (DPE 14 % à améliorer), Weecars ; non lisibles Peugeot (377, pages concession sans VO), Square Habitat, Foncia, Volvo (partiel), Volkswagen, Cobredia, Porsche (429), Toyota, Ofim (lent), Mercedes (anti-robot).
+
 ### 01/11/2026 — Claude : Laforêt Paris 10 + DPE Laforêt (pro-stock-sync v183)
 - Anthony : laforet.com/agence-immobiliere/paris1saintmartinetsaintdenis revenu dans « à réparer ». La page n'existe plus (404) ; l'e-mail du prospect est paris10saintdenis@laforet.com → adresse du prospect corrigée vers /agence-immobiliere/paris10saintdenis, remis en vérification.
 - Laforêt : DPE / GES en image SVG (/ajax/properties/<n°>/dpe, `<g id="DPE_D">`, `<g id="GES_D">`) désormais lus (`energy-image.ts`). Paris 10 : 10 % → 75 % (tous les logements ; les 2 locaux commerciaux n'ont pas de DPE).
