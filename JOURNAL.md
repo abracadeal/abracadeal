@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : DPE + GES dans une même image (Guy Hoquet), pro-stock-sync v176
+- Anthony : annonce Guy Hoquet Montner affichée sans DPE alors que le site montre B / A en image.
+- Guy Hoquet ne donne souvent que la conso (84 kWh) et une image `image_DPE_GES` (immo-facile) avec les deux échelles côte à côte.
+- `energy-image.ts` : image coupée le long de la bande verticale vide (DPE à gauche, GES à droite) ; image posée sur fond blanc (bords adoucis par la transparence) ; seuils rapportés à la zone lue ; bandes trop fines écartées ; lignes dont la « barre » part loin du bord commun écartées (texte « kg CO2 ») ; la barre choisie n'entre pas dans le contrôle des longueurs croissantes (trait « —— 7 »).
+- `guyhoquet-reader.ts` : dpe_image / ges_image = image_DPE_GES ; `fillEnergyFromImages` lit les deux classes d'une image combinée.
+- Tests : 5 images Guy Hoquet (D/B, B/A, A/A, A/A, A/A) + les 6 La Boîte Immo + réductions / agrandissements : tout juste ; bruit → rien. Canohès : DPE 47 % → 81 % ; les 6 restants n'ont pas de DPE (grange, local commercial, villas neuves livrées en 2026, une maison).
+- Coût : ~16 ms par image PNG, ~37 ms par JPEG ; 80 images max par passage.
+
 ### 01/11/2026 — Claude : zoom de la galerie photo refait (bug du retour après zoom)
 - Anthony : après un zoom à deux doigts dans la galerie, le retour arrière laissait la page agrandie, le site apparaissait derrière. La remise à 100 % par la balise viewport (closePhotoLightbox) est ignorée par l'iPhone.
 - Nouveau `assets/lightbox-zoom-20261101.js` (chargé en fin de index.html) : zoom propre à la photo (pincer jusqu'à ×5, glisser la photo zoomée, double toucher ×2,5 / retour, molette et double clic sur ordinateur). Zoom du téléphone bloqué tant que la galerie est ouverte (touch-action:none, gesturestart). Photo remise à sa taille à chaque changement de photo et à la fermeture (bouton, fond, Échap, retour arrière).
