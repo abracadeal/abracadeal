@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : contrôle automatique des DPE (pro-stock-sync v206)
+- Anthony : « je peux pas vérifier chaque annonce ». `smart-reader.ts` : quand le DPE n'est pas trouvé alors que la page en parle (« classe énergie », « diagnostic de performance », DPE, kWh/m²), la fiche est marquée (`_dpe_hint`, sauf « non soumis / vierge »). Le test de site renvoie `quality.dpe_missed` + exemples, et `desc_short` = descriptions finissant par « … » ou de moins de 120 caractères (une description courte écrite telle quelle sur le site n'est plus comptée).
+- Passé sur une trentaine de prospects ; nouvelles lectures (tous sites) :
+  - lettre après la valeur « 225 KWHep/m²an D », « 8 KgCO²/m²an B » (Activimmo) : 14 → 23 DPE sur 25 ;
+  - attributs `data-current-class` (diagPreview--pe / --ges), `data-energetic-class`, `data-dpe="201;d"` (Jalis) : bel-avenir 0 → 15/15, Helix 0 → 40/58 ;
+  - curseur avec valeur sur une échelle (`dpe_target` … 123) → classe par les seuils du DPE 2021 : Calliope 0 → 13/15.
+- Restent : Nestenn (DPE absent de la page, chargé à part ; 9/31 à Combourg), anciens DPE « ancienne version » (La Boîte Immo), quelques pages d'articles prises pour des biens chez Helix.
+
 ### 01/11/2026 — Claude : lecture par étapes pour Citya, Human, Apimo, AJP, Junot, Kermarrec ; DPE et descriptions (pro-stock-sync v202)
 - Anthony : « ceux qu'on a déjà faits, comment ça se passe » puis « ok fais ». `resumable-crawl.ts` : `eachDetailResumable` (le lecteur lit lui-même chaque fiche, l'avancement est mémorisé). Branché sur Citya, Citya Nord de France, Human, Citya (catalogue), Apimo, AJP, Junot, Kermarrec. Citya Belfort plantait (503) : maintenant 72 lus au 1er passage, 20 restants repris au suivant. Les autres lecteurs (BIAS, Pierrefeu, LF immo, Salanié, 4S, Robyns, BNYS / Decros, Lyon Immo, Neyt, Simplici, Ewigo, Izmo, Auto-Gestion, Century 21) lisent des agences de moins de 60 biens et finissent en un passage (BIAS Bernay 56/59) : laissés tels quels.
 - Anthony : « toujours énormément de DPE pas lus et des descriptions pas entières ». Test de site : nouvelle mesure `quality` (DPE, GES, descriptions de moins de 300 caractères).
