@@ -125,7 +125,7 @@ async function classesOf(src:string){
     // 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : le décodage coûte du calcul ;
     // une étiquette fait rarement plus de 2 Mpx, et au-delà de ~900 ms de décodage cumulé on s'arrête pour ce passage.
     // 01/11/2026 : budget commun avec la lecture des pages (cpu-meter) : la lecture + les images ne dépassent pas ~1,4 s de calcul.
-    const dim=imageSize(b);if(!dim||dim.w*dim.h>1_500_000||spent>600||cpu.ms>CPU_BUDGET_MS+650)return none;
+    const dim=imageSize(b);if(!dim||dim.w*dim.h>1_500_000||spent>350||cpu.ms>CPU_BUDGET_MS+350)return none;
     const t0=performance.now();try{return energyClassesFromBytes(b);}finally{const d=performance.now()-t0;spent+=d;cpu.ms+=d;}}catch{return none;}})());
   return seen.get(src)!;
 }
