@@ -1091,6 +1091,10 @@ async function readFeed(feed:any,persistCrawl=false){
          const cnt=new Map<string,number>();for(const r of rows){const k=shape(String(r.url||''));if(k)cnt.set(k,(cnt.get(k)||0)+1);}
          const top=[...cnt.entries()].sort((a,b)=>b[1]-a[1])[0];
          if(top&&!top[0].endsWith('txt')&&top[1]>=5&&top[1]>=rows.length*0.6){const kept=rows.filter((r:any)=>shape(String(r.url||''))===top[0]);rows.length=0;rows.push(...kept);}}
+        // 01/11/2026 (Anthony, Laforêt Paris 10) : page d'une agence d'un réseau (laforet.com/agence-immobiliere/<agence>) → seuls les biens
+        // de cette agence (des biens d'autres agences, ex. Issy-les-Moulineaux, sont mis en avant sur la page).
+        {const m=url.pathname.match(/^\/(agence-immobiliere|agence|agences)\/([^\/]+)/i);
+         if(m&&/(^|\.)laforet\.com$/i.test(url.hostname)){const base='/'+m[1]+'/'+m[2]+'/';const kept=rows.filter((r:any)=>{try{return new URL(String(r.url||'')).pathname.startsWith(base);}catch{return false;}});if(kept.length){rows.length=0;rows.push(...kept);}}}
         platform+=' · lecture automatique';}
       catch(e){
         const net=await findNetworkPage(url,text).catch(()=>null);

@@ -264,6 +264,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
     const kind=head+' '+base.pathname;
     const isHouse=/maison|villa|\bmas\b|(?<!co)propri[ée]t[ée]|chalet|bastide|long[èe]re|\bferme\b/i,isFlat=/appartement|studio|duplex|triplex|loft|penthouse/i;
     o.type_bien=isHouse.test(head)?'maison':isFlat.test(head)?'appartement':isHouse.test(kind)?'maison':isFlat.test(kind)||/\b[TF]\d\b/i.test(kind)?'appartement':/terrain/i.test(kind)?'terrain':/bureau|local|commerce|boutique|fonds|entrep[oô]t/i.test(kind)?'bureau':/\b[TF]-?\d\b|chambres?\b|pi[eè]ces?\b|\d\s*m(?:²|2)\b/i.test(head)&&!/^\s*(parking|garage|box)/i.test(head)?(/jardin|terrain|plain[- ]pied/i.test(head)?'maison':'appartement'):/parking|garage|\bbox\b|stationnement/i.test(kind)?'parking':'appartement';
+    // 01/11/2026 (Laforêt) : l'adresse de la fiche dit le type (« /fonds-de-commerce-52742371 », « /local-commercial-… ») : prioritaire.
+    {const pth=(()=>{try{return new URL(pageUrl).pathname.toLowerCase();}catch{return'';}})();if(/fonds-de-commerce|local-commercial|locaux-commerciaux|bureaux?[-/]|murs-commerciaux|\/commerce[-/]/.test(pth))o.type_bien='bureau';else if(/(?:^|[/-])parking|[/-]garage[-/]|[/-]box[-/]/.test(pth))o.type_bien='parking';}
     const sm=all.match(/(\d+(?:[.,]\d+)?)\s*m(?:²|2)(?![a-z0-9])/i);if(sm)o.surface=sm[1];
     const pm2=all.match(/(\d{1,2})\s*pi[eè]ces?/i)||all.match(/\b[TF](\d)\b/);if(pm2)o.pieces=pm2[1];else if(/studio/i.test(head))o.pieces='1';
     const c=all.match(/(\d{1,2})\s*chambres?/i);if(c)o.chambres=c[1];
