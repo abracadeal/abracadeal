@@ -38,3 +38,34 @@ export async function readCityaAgency(url:URL,fetchHtml:Fetcher){
   rows.sort((a,b)=>links.indexOf(a.url)-links.indexOf(b.url));
   return rows;
 }
+
+// Citya Nord de France (citya-ndf.com, WordPress) : page agence /agence/agence-de-<ville>/ → ses liens
+// « /annonces/?status=acheter|louer&address=Agence de <ville> » (filtre de l'agence), 48 par page, pages /page/N/.
+export const cityaNdfAgency=(url:URL)=>/(^|\.)citya-ndf\.com$/i.test(url.hostname)&&/^\/agence\/[^/]+\/?$/.test(url.pathname);
+export async function readCityaNdfAgency(url:URL,fetchHtml:Fetcher){
+  const{text:home}=await fetchHtml(url);
+  const dec=(s:string)=>s.replace(/&#0?38;|&amp;/g,'&');
+  let lists=[...new Set([...home.matchAll(/href="((?:https:\/\/citya-ndf\.com)?\/annonces\/\?status=(?:acheter|louer)&(?:amp;|#0?38;)?address=[^"]+)"/g)].map(m=>dec(m[1])))].filter(l=>!/label=vendu/.test(l));
+  if(!lists.length)throw Error('Liens « annonces de l’agence » introuvables sur la page Citya Nord de France.');
+  const links:string[]=[];
+  for(const l0 of lists){
+    for(let page=1;page<=20;page++){
+      const u=new URL(l0,url.origin);u.searchParams.set('display','48');if(page>1)u.pathname=`/annonces/page/${page}/`;
+      let text='';try{({text}=await fetchHtml(u));}catch{break;}
+      const found=[...new Set([...text.matchAll(/href="(https:\/\/citya-ndf\.com\/annonce\/[a-z0-9-]+\/)"/g)].map(m=>m[1]))];
+      const fresh=found.filter(x=>!links.includes(x));links.push(...fresh);
+      if(!fresh.length||found.length<48)break;
+    }
+  }
+  if(!links.length)throw Error('Aucun bien dans la liste de l’agence Citya Nord de France.');
+  const rows:any[]=[];let failed=0;
+  for(let i=0;i<links.length;i+=5){
+    await Promise.all(links.slice(i,i+5).map(async l=>{
+      try{const{text}=await fetchHtml(new URL(l));const r:any=smartDetail(text,l,'immobilier');if(!r)return;
+        r.reference=l.replace(/\/+$/,'').split('/').pop();r.transaction=/\/annonce\/location-/.test(l)?'location':'vente';rows.push(r);}catch{failed++;}
+    }));
+  }
+  if(failed)(rows as any).partial=true;
+  rows.sort((a,b)=>links.indexOf(a.url)-links.indexOf(b.url));
+  return rows;
+}
