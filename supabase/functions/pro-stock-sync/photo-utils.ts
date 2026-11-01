@@ -11,7 +11,7 @@ export function isPlaceholderPhoto(raw:string,depth=0):boolean{
  return false;
 }
 const SIZE_Q=/^(w|h|width|height|q|quality|fit|crop|resize|size|format|fm|auto|dpr|scale|mode|rs|ver|version|cache|itok|sw|sh)$/i;
-const SIZE_WORD='thumb|thumbs|thumbnail|thumbnails|small|medium|large|big|ibig|intermediate|mini|xl|xxl|hd|full|original|orig|sm|md|lg|xs|preview|zoom|max|min|resized|crop|cropped';
+const SIZE_WORD='thumb|thumbs|thumbnail|thumbnails|small|medium|large|big|ibig|intermediate|mini|xl|xxl|hd|full|original|orig|sm|md|lg|xs|preview|zoom|max|min|resized|crop|cropped|moyenne|moyen|petite|petit|grande|grand|vignette|miniature';/* 01/11/2026 : Twimmo « -photo-moyenne » / « -photo-hd » */
 export function photoKey(u:string){
  try{const x=new URL(u);const keep=[...x.searchParams.entries()].filter(([k])=>!SIZE_Q.test(k)).map(([k,v])=>k+'='+v).sort().join('&');
   let p=decodeURIComponent(x.pathname).toLowerCase();
