@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude — réparations Croisette, Agence Résidence, Solution Immobilier, La Grandière (v162 / 8cb46b1)
+- Apimo : surface « Surface totale / habitable / utile / Superficie / Carrez », puis `floorSize` (JSON-LD), jamais une ligne terrain/jardin/terrasse ; liste « nos-biens » / « nos-proprietes » reconnue (Solution Immobilier : 30 au lieu de 2).
+- smart-reader `firstAmount` : un montant précédé de charges / quote-part / taxe / honoraires / énergie / dépôt / garantie n'est jamais le prix (sauf « Prix … »/« Loyer … » juste avant). Agence Résidence : 23 avec vrai prix, 4 sans prix affiché écartées.
+- smart-reader : og:image dont le nom de fichier reprend le titre (≥ 3 mots) remise en 1re photo si absente de la galerie (La Grandière).
+- admin-test-import : statut « ✓ Réparé · à valider (qui, date) », réparés en haut.
+
 ### 01/11/2026 — Claude — GES manquant ne bloque plus (v157 / cd6edcb)
 - Demande d'Anthony : un DPE sans GES n'est plus une erreur (beaucoup d'agences ne publient pas le GES). `gesFromText` le reprend de la description s'il y est écrit (« GES : C », « gaz à effet de serre classe D », « émissions de GES … (classe E) »).
 - Tests : Croisette 98/100, Agence Résidence 27/27, Solution Immobilier 2/2, La Grandière 2/2 → demandes passées « Réparé, à valider ». 16 prospects immo « mail normal » pour annonces incomplètes remis en test (site_check_status=null).
