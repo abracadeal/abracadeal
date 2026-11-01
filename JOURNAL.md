@@ -18,7 +18,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
-### 01/11/2026 — Claude : showroom en aperçu pour les visiteurs sans compte
+### 01/11/2026 — Claude : showroom en aperçu pour les visiteurs sans compte — ANNULÉ (Anthony : « laisse », numéro et message déjà réservés aux inscrits) : showroom de nouveau entièrement visible ; seul le bouton Contacter garde « Créer un compte / Se connecter » avec retour au showroom
 - Anthony : faire s'inscrire pour voir le showroom (plus d'inscrits). Choix retenu (après avoir déconseillé de tout bloquer : adresse courte et Google) : aperçu puis inscription.
 - `pro.html` : sans compte, 6 premiers véhicules puis encart « Inscrivez-vous gratuitement pour voir les N autres véhicules de <pro> » (Créer un compte gratuit / Se connecter) ; même choix dans « Contacter ». Connecté : tout visible comme avant.
 - `assets/index-main.js` : `/?compte=inscription|connexion&retour=/lifecars` ouvre le bon onglet ; après connexion (SIGNED_IN, y compris après confirmation de l'e-mail, 2 jours max) retour automatique au showroom. Version `20261101-gate`.

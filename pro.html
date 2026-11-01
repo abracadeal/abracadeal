@@ -115,18 +115,14 @@ function renderAds(){
   if(listings.length>6){['stockSearch','stockCategory','stockSort'].forEach(x=>document.getElementById(x).addEventListener(x==='stockSearch'?'input':'change',applyFilters));}
   filtered=[...listings];shown=24;renderCards();
 }
-function gateBox(title,sub){return '<div class="gate" style="margin:18px 0 6px;padding:20px;border-radius:18px;background:linear-gradient(115deg,#1c0b2d,#52206f);color:#fff;text-align:center"><div style="font-size:19px;font-weight:800;margin:0 0 6px">'+title+'</div><div style="opacity:.85;margin:0 0 14px">'+esc(sub)+'</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><a href="#" data-gate="inscription" style="background:#fff;color:#4a1766;font-weight:800;padding:11px 18px;border-radius:12px;text-decoration:none">Créer un compte gratuit</a><a href="#" data-gate="connexion" style="color:#fff;font-weight:700;padding:11px 18px;border-radius:12px;border:1px solid rgba(255,255,255,.5);text-decoration:none">Se connecter</a></div></div>';}
 function bindGate(root){root?.querySelectorAll('[data-gate]').forEach(a=>a.onclick=e=>{e.preventDefault();location.href='/?compte='+a.dataset.gate+'&retour='+encodeURIComponent(location.pathname+location.search);});}
 function renderCards(){
   const host=document.getElementById('stockResults');if(!host)return;
   if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
-  // 01/11/2026 (Anthony) : sans compte, aperçu des 6 premiers véhicules, puis invitation à s'inscrire / se connecter.
-  const PREVIEW=6,locked=!currentUser&&filtered.length>PREVIEW,limit=locked?PREVIEW:shown;
-  const cards=filtered.slice(0,limit).map(l=>{
+  const cards=filtered.slice(0,shown).map(l=>{
     const photo=photoUrl(firstPhoto(l)),url='https://abracadeal.fr/?annonce='+encodeURIComponent(l.id);
     return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div><div class="city">'+esc(l.city||'')+'</div></div></a>';
   }).join('');
-  if(locked){const rest=filtered.length-PREVIEW;host.innerHTML='<div class="grid">'+cards+'</div>'+gateBox('Inscrivez-vous gratuitement pour voir les '+rest+' autre'+(rest>1?'s':'')+' véhicule'+(rest>1?'s':'')+' de '+esc(profile.display_name||'ce professionnel'),'Et pour le contacter, voir son numéro et suivre ses nouveautés.');bindGate(host);return;}
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
   document.getElementById('moreBtn')?.addEventListener('click',()=>{shown+=24;renderCards()});
 }
