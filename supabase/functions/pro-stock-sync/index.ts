@@ -357,14 +357,29 @@ async function publicFeedUrl(url:URL){
 // Fail closed : si la liste ne peut pas être lue entièrement, on lève une erreur (aucun archivage).
 // 29/10/2026 : accueil sans photo (Laugier Automobiles) : pas de cdn-rivamedia, mais les images de l'interface viennent d'annonces-automobile.com.
 const isAaSiteHtml=(t:string)=>/annonces-automobile\.com/i.test(t)&&(/cdn-rivamedia\.com/i.test(t)||/www\.annonces-automobile\.com\/images\/graphic\//i.test(t));
+// 01/11/2026 : trace de diagnostic (action auto_review_dry avec trace:true) : chaque page lue est notée avec la mémoire utilisée,
+// pour voir où le robot s'arrête quand il plante (pas de journaux accessibles).
+let traceRun='';const traceT0={v:0};
+function trace(url:string,step:string){if(!traceRun)return;let heap=0;try{heap=Math.round(Deno.memoryUsage().rss/1e5)/10;}catch{}
+  admin.from('stock_crawl_trace').insert({run:traceRun,url:url.slice(0,300),step,heap_mb:heap,ms:Date.now()-traceT0.v}).then(()=>{},()=>{});}
 async function fetchSiteHtml(start:URL,maxLength=5_000_000){
+ trace(start.toString(),'fetch');
  let url=new URL(start.toString());
  for(let redirects=0;;redirects++){
   await publicFeedUrl(url);
   const r=await fetch(url.toString(),{headers:{Accept:'text/html,*/*;q=0.5','User-Agent':'Abracadeal-StockSync/1.0 (+https://abracadeal.fr)'},redirect:'manual',signal:AbortSignal.timeout(20000)});
   if(r.status>=300&&r.status<400){const loc=r.headers.get('location');await r.body?.cancel();if(!loc||redirects>=4)throw Error('Redirection invalide');url=new URL(loc,url);continue;}
   if(!r.ok)throw Error(`HTTP ${r.status}`);
-  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>maxLength)throw Error('Page trop volumineuse');
+  // 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : un fichier lourd (vidéo, PDF, archive) lu en entier
+  // saturait la mémoire. Les fichiers qui ne sont pas des pages sont refusés, et la lecture s'arrête à la taille maximale.
+  const ct=(r.headers.get('content-type')||'').toLowerCase();
+  if(/^(image|video|audio|font)\/|application\/(pdf|zip|octet-stream|x-|vnd\.|msword|gzip)/.test(ct)&&!/xml|json|html/.test(ct)){await r.body?.cancel();throw Error('Pas une page ('+ct.split(';')[0]+')');}
+  if(Number(r.headers.get('content-length')||0)>maxLength){await r.body?.cancel();throw Error('Page trop volumineuse');}
+  const parts:Uint8Array[]=[];let size=0;const reader=r.body?.getReader();
+  if(reader)for(;;){const{done,value}=await reader.read();if(done)break;size+=value.length;if(size>maxLength){await reader.cancel();throw Error('Page trop volumineuse');}parts.push(value);}
+  const buf=new Uint8Array(size);{let o=0;for(const p of parts){buf.set(p,o);o+=p.length;}}
+  const text=decodeLegacyHtml(buf,r.headers.get('content-type')||'');if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text))throw Error('Protection anti-robots : challenge AWS WAF / UUSEC, lecture non validée.');if(text.length>maxLength)throw Error('Page trop volumineuse');
+  trace(url.toString(),'ok '+text.length);
   return{text,url};
  }
 }
@@ -1329,7 +1344,7 @@ if(body?.action==='prospect_precheck'){if(!await cronOk(req))return json({error:
     `<p style="color:#666;font-size:13px">Sites lus avec succès sur la même période : ${okCount||0} (ils reçoivent le mail avec leur nombre d'annonces).</p><p>Abracadeal</p></div>`;
    const rr=await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`unreadable-digest-${new Date().toISOString().slice(0,10)}`},body:JSON.stringify({from:'Abracadeal <contact@abracadeal.fr>',to:tos,subject:`Robot : ${(pros||[]).length+(feeds||[]).length} site(s) à apprendre`,html})});
    return json({ok:rr.ok,sent:rr.ok,status:rr.status,to:tos.length});}
-  if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);let checkpoint:any=await decodeCrawlState(body?.crawl_state);const f:any={id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null};if(body?.resumable)f._dryMemory={load:async()=>checkpoint,save:async(s:any)=>{checkpoint=s;}};const result=await autoReviewSite(f,true);return json({...result,...(body?.resumable?{crawl_state:await encodeCrawlState(checkpoint)}:{})});}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
+  if(body?.action==='auto_review_dry'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);if(body?.trace){traceRun=String(body.trace).slice(0,40);traceT0.v=Date.now();}let checkpoint:any=await decodeCrawlState(body?.crawl_state);const f:any={id:null,feed_url:String(body?.url||''),format:'auto',sector:body?.sector==='immobilier'?'immobilier':'vehicules',owner_id:body?.owner_id||null};if(body?.resumable)f._dryMemory={load:async()=>checkpoint,save:async(s:any)=>{checkpoint=s;}};const result=await autoReviewSite(f,true);return json({...result,...(body?.resumable?{crawl_state:await encodeCrawlState(checkpoint)}:{})});}if(body?.action==='auto_review'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);const{data:f}=await admin.from('pro_stock_feeds').select('*').eq('id',String(body?.feed_id||'')).eq('source_kind','site').eq('review_status','pending').maybeSingle();if(!f)return json({ok:false,error:'Demande introuvable ou déjà traitée'},404);return json(await autoReviewSite(f));}if(body?.action==='sync_all'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
  // Une demande d'import « en attente » par passage : jamais essayée, ou dernier essai il y a plus de 24 h.
  const autoResults:any[]=[];const tAll=Date.now();{const{data:pend}=await admin.from('pro_stock_feeds').select('*').eq('source_kind','site').eq('review_status','pending').not('feed_url','is',null).or(`last_run_at.is.null,last_run_at.lt.${new Date(Date.now()-24*3600e3).toISOString()}`).order('created_at',{ascending:true}).limit(1);for(const f of pend||[]){try{autoResults.push(await autoReviewSite(f));}catch(e){autoResults.push({ok:false,feed_id:f.id,error:e instanceof Error?e.message:String(e)});}}}const{data:feeds}=await admin.from('pro_stock_feeds').select('*').eq('active',true).not('feed_url','is',null).order('last_run_at',{ascending:true,nullsFirst:true});const crawlActive=new Set<string>();try{const{data:cs}=await admin.from('pro_stock_crawl_state').select('feed_id,state,updated_at').gte('updated_at',new Date(Date.now()-72*3600e3).toISOString());for(const c of cs||[])if(c?.state&&!c.state.completed)crawlActive.add(c.feed_id);}catch{}const results=[];const start=tAll;for(const f of feeds||[]){
  // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.
