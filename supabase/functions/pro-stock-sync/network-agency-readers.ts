@@ -11,15 +11,14 @@
 // DPE / GES dessinés en SVG dans la page : <g id="EnergieC">, <g id="GesC">. Ville absente de la fiche : prise dans le lien
 // (« vente-appartement-t3-rennes-61466680 » → Rennes).
 import { smartDetail } from './smart-reader.ts';
-import { cpuLeft } from './cpu-meter.ts';
-import { crawlCatalogue, type CrawlMemory } from './resumable-crawl.ts';
+import { crawlCatalogue, crawlDetails, type CrawlMemory } from './resumable-crawl.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const cap=(s:string)=>s.split('-').map((w,i)=>i>0&&/^(de|du|des|la|le|les|sur|sous|en|aux?|et|l|d)$/.test(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join('-').replace(/-([dl])-/gi,(_,x)=>`-${x.toLowerCase()}'`);
 const soldTitle=/\b(vendu|lou[ée]|sous offre|sous compromis)\b/i;
 
 // ---------- La Résidence ----------
 export const isLaResidenceAgency=(url:URL)=>/^(?:www\.)?laresidence\.fr$/i.test(url.hostname)&&/^\/agences-immobilieres\/[a-z0-9-]+\/?/i.test(url.pathname);
-export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(html:string,url:string)=>any){
+export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(html:string,url:string)=>any,memory?:CrawlMemory){
   const agency=url.pathname.split('/').filter(Boolean)[1].toLowerCase();
   const links=new Set<string>();
   const add=(html:string)=>{for(const m of html.matchAll(/(?:https:\/\/www\.laresidence\.fr)?(\/(?:acheter|louer)\/[a-z0-9-]+\/[a-z0-9-]+\/\d{6,})(?=["'?#\s])/gi))links.add('https://www.laresidence.fr'+m[1]);};
@@ -32,16 +31,12 @@ export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(h
     }
   }
   if(!links.size)throw Error('Aucun bien en ligne sur la page de cette agence La Résidence.');
-  const list=[...links];const rows:any[]=[];let failed=0,i=0;
-  await Promise.all(Array.from({length:4},async()=>{
-    while(i<list.length&&cpuLeft()){
-      const l=list[i++];
-      try{
-        const{text:h}=await fetchHtml(new URL(l));
+  const list=[...links];
+  const rows=await crawlDetails(url.toString(),'laresidence-v1:'+agency,list,fetchHtml,(h,l)=>{
         let r:any=null;try{r=ldParse(h,l);}catch{r=null;}
         const sd:any=smartDetail(h,l,'immobilier');
         if(!r)r=sd;else if(sd){for(const k of Object.keys(sd))if(!['ville','prix','description','titre'].includes(k)&&(r[k]==null||r[k]===''))r[k]=sd[k];}
-        if(!r||r._sold||soldTitle.test(String(r.titre||'')))continue;
+        if(!r)throw Error('Fiche non reconnue');if(r._sold||soldTitle.test(String(r.titre||'')))return{_sold:1};
         r.url=l;r.reference=l.match(/\/(\d{6,})$/)?.[1]||r.reference;
         // Titre de la page : « Maison à vendre 85m² - 3 pièces - 2 chambres Chatou - 78400 »
         const t=h.match(/<title>([^<]{0,200})/i)?.[1]||'';const cp=t.match(/\s([A-ZÀ-Üa-zà-ü' -]{2,50}?)\s+-\s+(\d{5})\b/);
@@ -49,19 +44,14 @@ export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(h
         r.ville=cp?.[1]?.trim()||slugCity;if(cp?.[2])r.code_postal=cp[2];
         if(l.includes('/louer/'))r.transaction='location';
         r.titre=String(r.titre||'').replace(/\s*-\s*R[ée]f\s*:.*$/i,'').replace(/\s*-\s*LA RESIDENCE\s*$/i,'').replace(/\s{2,}/g,' ').trim();
-        rows.push(r);
-      }catch{failed++;}
-    }
-  }));
-  if(failed||i<list.length)(rows as any).partial=true;
-  (rows as any).total=list.length;
-  rows.sort((a,b)=>list.indexOf(a.url)-list.indexOf(b.url));
+        return r;
+  },memory);
   return rows;
 }
 
 // ---------- La Française Immobilière ----------
 export const isLaFrancaiseAgency=(url:URL)=>/^(?:www\.)?la-francaise-immobiliere\.fr$/i.test(url.hostname)&&/^\/agences\/.+/i.test(url.pathname);
-export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher){
+export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const agency=url.pathname.split('/').filter(Boolean).pop()!.toLowerCase();
   const base='https://www.la-francaise-immobiliere.fr';
   const links:string[]=[];
@@ -75,14 +65,9 @@ export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher){
   }
   if(!links.length)throw Error('Aucune annonce en ligne sur le site La Française Immobilière.');
   const own=new RegExp(`href="${base.replace(/\./g,'\\.')}/agences/(?:[a-z0-9-]+/)*${agency}/"\\s+class="link"`,'i');
-  const rows:any[]=[];let failed=0,i=0,checked=0;
-  await Promise.all(Array.from({length:4},async()=>{
-    while(i<links.length&&cpuLeft()){
-      const l=links[i++];
-      try{
-        const{text:h}=await fetchHtml(new URL(l));checked++;
-        if(!own.test(h))continue;
-        const r:any=smartDetail(h,l,'immobilier');if(!r)continue;
+  const rows=await crawlDetails(url.toString(),'lfi-v1:'+agency,links,fetchHtml,(h,l)=>{
+        if(!own.test(h))return{_sold:1};
+        const r:any=smartDetail(h,l,'immobilier');if(!r)throw Error('Fiche non reconnue');
         r.url=l;
         const m=new URL(l).pathname.match(/\/(achat|location)\/(?:vente|location)-([a-z]+)-(?:(?:t|f|p)\d+-)?(?:\d+-pieces?-)?([a-z0-9-]+?)-(\d{5,})\/?$/i);
         if(m){r.reference=r.reference||m[4];if(!r.ville)r.ville=cap(m[3]);if(m[1]==='location')r.transaction='location';}
@@ -91,12 +76,9 @@ export async function readLaFrancaiseAgency(url:URL,fetchHtml:Fetcher){
         // Titre de la fiche souvent tronqué (« Vente Appartement T3 - ») : première ligne de la description à la place.
         const first=String(r.description||'').split('\n')[0].trim();
         if(/\s-\s*(?:-|$)/.test(String(r.titre||''))&&first.length>=10&&first.length<=120)r.titre=first;
-        rows.push(r);
-      }catch{failed++;}
-    }
-  }));
-  if(failed||i<links.length)(rows as any).partial=true;
-  if(!rows.length&&i>=links.length)throw Error(`Aucune annonce de cette agence en ligne (${checked} annonces du réseau vérifiées).`);
+        return r;
+  },memory);
+  if(!rows.length&&!(rows as any).partial)throw Error(`Aucune annonce de cette agence en ligne (${links.length} annonces du réseau vérifiées).`);
   return rows;
 }
 

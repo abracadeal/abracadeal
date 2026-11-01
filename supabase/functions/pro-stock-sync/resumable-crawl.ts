@@ -23,3 +23,8 @@ export async function crawlCatalogue(source:string,scope:string,starts:string[],
  if(memory)await memory.save(state);
  const rows:any[]=Object.values(state.rows);Object.assign(rows,{partial:!state.completed||clock()-Date.parse(state.started)>72*3600e3,total:state.discovered.length,cycleStarted:memory?state.started:null,cycleSeen:state.completed?[...new Set(Object.values(state.rows).map((r:any)=>String(r.reference)))]:[],stats:{pages,details,stale_cycle:clock()-Date.parse(state.started)>72*3600e3,expected_total:options.expectedTotal??null,total_mismatch:options.expectedTotal!=null&&state.discovered.length!==options.expectedTotal,remaining_lists:state.lists.length,remaining:state.details.length,failed:state.failed,cycle_complete:!!state.completed,ms:clock()-t0}});return rows;
 }
+// 01/11/2026 (Anthony : « il fait tout le temps ça pour tous les sites ») : lecteurs qui connaissent déjà la liste des fiches
+// (agence d'un réseau) : lecture des fiches par étapes mémorisée, reprise là où le passage précédent s'est arrêté.
+export async function crawlDetails(source:string,scope:string,details:string[],fetchHtml:(u:URL)=>Promise<{text:string,url:URL}>,parse:(html:string,url:string)=>any,memory?:CrawlMemory,maxDetails=400){
+ return crawlCatalogue(source,scope,[source],async u=>u.toString()===source?{text:'',url:u}:fetchHtml(u),()=>({lists:[],details}),parse,memory,{maxDetails});
+}
