@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : Orpi « 727 fiches restantes » corrigé (pro-stock-sync v184) + incident pg_net
+- Anthony : test d'Orpi St Cyprien → « 727 fiches restantes ».
+- Cause : le catalogue JSON d'Orpi (`/recherche/ajax?agency=…`) ne renvoie que 500 annonces sur 752 (biens partagés du réseau compris) et ignore `page` ; le lecteur complétait alors avec les pages de liste HTML, qui mélangent toutes les agences (727 fiches à ouvrir).
+- `orpi-catalogue.ts` : au-delà de 500 annonces, catalogue lu deux fois (`sort=date-down` puis `sort=date-up`) → les 752 couverts (vérifié), filtrés sur l'agence → St Cyprien : 61 biens à vendre (avant on n'en voyait que 38). Listes HTML seulement au-delà de 1 000. Portées de reprise `orpi-v4` / `orpi-oce-v3`.
+- Test lecture par étapes : total 61, 25 lus au 1er passage, 36 restants.
+- Incident : mon `VACUUM FULL` de net._http_response (311 Mo laissés par le test anti-robot) a bloqué le moteur pg_net ~10 min (requêtes des tâches cron en file) → `net.worker_restart()`, file vidée. Ne plus faire de VACUUM FULL sur cette table (un simple DELETE suffit).
+
 ### 01/11/2026 — Claude : compteur de visites du showroom
 - Anthony : ok pour compter aussi les visites du showroom.
 - Table `showroom_views` + `track_showroom_view` (visiteurs inscrits ou non, 1 fois par jour, pro et admin exclus), appelé par `pro.html` ; ligne « Visites du showroom » en tête des statistiques de la fenêtre admin. Testé en anonyme sur la vraie base (visite de test effacée).
