@@ -192,7 +192,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   let titre=(h1&&h1.length>=6&&h1.length<=160?h1:'')||ogTitle||docTitle;
   titre=titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/,(m)=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
   if(!titre)return null;
-  const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]*?<\/\1>/gi,' ')).slice(0,40000);
+  const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]{0,40000}?<\/\1>/gi,' ')).slice(0,40000);/* 01/11/2026 : bornée (un <header> mal fermé avalait la fiche) */
   const head=h1+' \n'+ogTitle+' \n'+docTitle;
   // Prix : données de prix déclarées, titre, données de la page, libellé « Prix », premier montant.
   // 29/10/2026 : un retour à la ligne sépare (« Appartement à vendre\n145 350 € » était refusé et le robot prenait les charges).
@@ -375,6 +375,9 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     for(const m of rawHtml.matchAll(/<p>([^<]+)<\/p>\s*<span class="value">([^<]*)<\/span>/g)){const k=keys[clean(m[1])];if(k&&clean(m[2]))o[k]=clean(m[2]);}
     const options=rawHtml.split('id="optionsContainer"')[1]?.split(/<div\b[^>]*id="(?:videosContainer|informationsRequestContainer)"/)[0];if(options)o.description=clean(options.replace(/^[^>]*>/,''));
   }
+  // 01/11/2026 (Anthony : « je peux pas vérifier chaque annonce ») : contrôle automatique. DPE non trouvé alors que la page en parle
+  // (« classe énergie », « diagnostic de performance », kWh/m²…) → noté pour le test de site (« DPE présent mais pas lu »).
+  if(immo&&!o.dpe){const m=text.match(/(?:classe\s*(?:[ée]nergie|[ée]nerg[ée]tique|energy)|diagnostic\s*de\s*performance|performance\s*[ée]nerg[ée]tique|\bDPE\b|kWh\s*(?:ep|EP)?\s*\/\s*m)[^\n]{0,60}/i);if(m)o._dpe_hint=m[0].slice(0,90);}
   return o;
 }
 
