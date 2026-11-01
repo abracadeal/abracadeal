@@ -100,6 +100,14 @@ export function energyImageUrls(html:string,pageUrl:string){
 
 // Lit les images notées par la lecture de fiche (dpe_image / ges_image) quand la classe n'est pas écrite.
 // Au plus 80 images par passage, 6 à la fois ; une même image (même adresse) n'est lue qu'une fois.
+let spent=0;
+// Taille lue dans l'en-tête, sans décoder (PNG : IHDR ; JPEG : segment SOFn ; GIF/WebP : écartés plus loin par decodeImage).
+function imageSize(b:Uint8Array):{w:number,h:number}|null{
+  if(b[0]===0x89&&b[1]===0x50)return{w:(b[16]<<24|b[17]<<16|b[18]<<8|b[19])>>>0,h:(b[20]<<24|b[21]<<16|b[22]<<8|b[23])>>>0};
+  if(b[0]===0xFF&&b[1]===0xD8){let i=2;while(i+9<b.length){if(b[i]!==0xFF){i++;continue;}const m=b[i+1];if(m===0xD8||m===0x01||(m>=0xD0&&m<=0xD7)){i+=2;continue;}
+    if(m>=0xC0&&m<=0xCF&&m!==0xC4&&m!==0xC8&&m!==0xCC)return{h:b[i+5]<<8|b[i+6],w:b[i+7]<<8|b[i+8]};i+=2+(b[i+2]<<8|b[i+3]);}return null;}
+  return{w:0,h:0};
+}
 const seen=new Map<string,Promise<{dpe:string|null,ges:string|null,both?:boolean}>>();
 const safeHost=(u:URL)=>u.protocol==='https:'||u.protocol==='http:'?!/^(\d+\.){3}\d+$|^\[|localhost|\.local$|\.internal$|supabase\.(co|in)$/i.test(u.hostname):false;
 // Une image peut porter une échelle (DPE ou GES seul) ou deux (DPE à gauche, GES à droite).
@@ -113,10 +121,14 @@ async function classesOf(src:string){
     if(/^(<\?xml[^>]*>\s*)?<svg\b/i.test(head)){const t=new TextDecoder().decode(b);
       const one=(re:RegExp)=>{const set=new Set([...t.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:null;};
       return{dpe:one(/\bid="(?:DPE|CEP|etiquette[_-]?dpe)[_-]([A-G])"/gi),ges:one(/\bid="(?:GES|EGES|etiquette[_-]?ges)[_-]([A-G])"/gi),both:true};}
-    return energyClassesFromBytes(b);}catch{return none;}})());
+    // 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : le décodage coûte du calcul ;
+    // une étiquette fait rarement plus de 2 Mpx, et au-delà de ~900 ms de décodage cumulé on s'arrête pour ce passage.
+    const dim=imageSize(b);if(!dim||dim.w*dim.h>2_500_000||spent>900)return none;
+    const t0=performance.now();try{return energyClassesFromBytes(b);}finally{spent+=performance.now()-t0;}}catch{return none;}})());
   return seen.get(src)!;
 }
 export async function fillEnergyFromImages(rows:any[]){
+  spent=0;const until=Date.now()+25000;
   const jobs:(()=>Promise<void>)[]=[];
   for(const r of rows){
     if(!r||typeof r!=='object')continue;
@@ -126,6 +138,6 @@ export async function fillEnergyFromImages(rows:any[]){
     if(!r.ges&&r.ges_image)jobs.push(async()=>{const k=(await classesOf(r.ges_image)).dpe;if(k&&!r.ges){r.ges=k;r.ges_source='image';}});
   }
   const list=jobs.slice(0,80);let i=0;
-  await Promise.all(Array.from({length:Math.min(6,list.length)},async()=>{while(i<list.length)await list[i++]();}));
+  await Promise.all(Array.from({length:Math.min(6,list.length)},async()=>{while(i<list.length&&Date.now()<until)await list[i++]();}));
   return rows;
 }
