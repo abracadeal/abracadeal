@@ -183,6 +183,16 @@ export function activeEnergyDiagnostics(html:string){
 function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   if(sector==='immobilier'&&/class=["']annonce-detail-titre["']/i.test(rawHtml))return adnpixDetail(rawHtml,pageUrl);
   const base=new URL(pageUrl);const immo=sector==='immobilier';
+  // 02/11/2026 (Anthony, Dolce Immo : « badges VENDU / INDISPONIBLE ») — sites Jalis : une fiche d'article (<body class="fiche …">
+  // sans « fiche_produit ») n'est pas un bien ; un bien vendu porte « Biens vendus » au-dessus du titre ou un badge
+  // « selection vendu / indisponible » avant le titre (les badges plus bas sont ceux des autres biens « À découvrir »).
+  if(/jalis\.pro/i.test(rawHtml.slice(0,8000))){
+    const body=rawHtml.match(/<body\b[^>]*class=["']([^"']*)["']/i)?.[1]||'';
+    if(/(?:^|\s)fiche(?:\s|$)/.test(body)&&!/fiche_produit/.test(body))return null;
+    const h1J=rawHtml.search(/<h1[\s>]/i);
+    if(h1J>0){const before=rawHtml.slice(Math.max(0,h1J-8000),h1J);
+      if(/>\s*Biens (?:vendus|lou[ée]s)\s*<\/div>\s*$/i.test(before)||/class=["']selection (?:vendu|indisponible|sous-offre|compromis)\b/i.test(before))return{_sold:1,reference:base.pathname.split('/').pop(),url:pageUrl};}
+  }
   // Économie de calcul (limite CPU des fonctions) : on ne travaille que sur l'en-tête et la zone autour du titre principal.
   const headEnd=rawHtml.search(/<\/head>/i);const headHtml=rawHtml.slice(0,headEnd>0?Math.min(headEnd,200000):60000);
   const h1At=rawHtml.search(/<h1[\s>]/i);
