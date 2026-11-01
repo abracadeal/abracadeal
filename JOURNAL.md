@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : fiche immo sans « Non communiqué » ; dépenses d'énergie Cimm (pro-stock-sync v179)
+- Anthony : « quand c'est une maison, en général pas de copropriété… évite de mettre les infos non communiquées, laisse vide ».
+- `assets/index-main.js` (fiche immobilier) : les lignes sans information ne sont plus affichées (plus de « Non communiqué ») ; maison sans info de copropriété → aucune ligne copropriété / lots / charges / procédure ; maison au rez-de-chaussée → pas de ligne « Étage ». Version index-main `20261101-nc`.
+- Robot (`smart-reader.ts`) : « dépenses annuelles d'énergie … entre 2580€ et 3570€ » écrit sur plusieurs lignes (Cimm) désormais lu. Guipry-Messac 134 m² : 2 580 € à 3 570 €, D / B.
+
 ### 01/11/2026 — Claude : DPE / GES en pastilles (Cimm), pro-stock-sync v178
 - Anthony : sur Cimm, DPE et GES affichés en 7 pastilles A→G, celle du bien plus grande ; non lus.
 - `smart-reader.ts` : repère les séries de 7 pastilles A→G avec une taille (style width) ; la seule plus grande (≥ 1,2 ×) = classe ; 1re série DPE, 2e GES.
