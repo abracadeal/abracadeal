@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude — lecteur Citya + retest des 104 réparations (v163 / 40d6891)
+- `citya-reader.ts` : agences www.citya.com (`/agences-immobilieres/…/<n°>` ou `/annonces/agence/<n°>/…`) → listes `/annonces/agence/<n°>/vente|location` (+?page=N), fiches lues par smartDetail, photos limitées à `/biens/<n°>/`. Tests : 26/26, 13/13, 28/28. 24 prospects citya.com remis en test. Reste citya-ndf.com (WordPress Beyot, `/annonces/?status=acheter&address=Agence%20de%20X`), Square Habitat, Laforêt, Espaces Atypiques, Guy Hoquet, Cimm.
+- Retest des 104 demandes en attente : 9 passent maintenant (passées « Réparé, à valider »), 95 restent (73 « aucune fiche lisible »).
+- Galerie : en fermant, le zoom à deux doigts est remis à 100 % (viewport maximum-scale le temps d'un instant).
+
 ### 01/11/2026 — Claude — réparations Croisette, Agence Résidence, Solution Immobilier, La Grandière (v162 / 8cb46b1)
 - Apimo : surface « Surface totale / habitable / utile / Superficie / Carrez », puis `floorSize` (JSON-LD), jamais une ligne terrain/jardin/terrasse ; liste « nos-biens » / « nos-proprietes » reconnue (Solution Immobilier : 30 au lieu de 2).
 - smart-reader `firstAmount` : un montant précédé de charges / quote-part / taxe / honoraires / énergie / dépôt / garantie n'est jamais le prix (sauf « Prix … »/« Loyer … » juste avant). Agence Résidence : 23 avec vrai prix, 4 sans prix affiché écartées.

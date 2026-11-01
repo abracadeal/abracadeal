@@ -4788,6 +4788,9 @@ window.closePhotoLightbox=()=>{
   box.classList.remove('open');
   box.setAttribute('aria-hidden','true');
   document.body.style.overflow='';
+  // 01/11/2026 (Anthony) : après un zoom à deux doigts sur la photo, le retour laissait la page agrandie (le site apparaissait
+  // de travers derrière). On remet le zoom du téléphone à 100 % en fermant la galerie.
+  try{if(window.visualViewport&&window.visualViewport.scale>1.01){const vp=document.querySelector('meta[name="viewport"]');if(vp){const orig=vp.getAttribute('content');vp.setAttribute('content',orig.replace(/,?\s*maximum-scale=[^,]*/,'')+', maximum-scale=1');setTimeout(()=>vp.setAttribute('content',orig),350);}}}catch(_){}
 };
 
 document.addEventListener('keydown',e=>{
