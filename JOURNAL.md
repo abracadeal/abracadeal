@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : suite du contrôle DPE, robot qui plantait encore (pro-stock-sync v211)
+- Contrôle passé sur 15 prospects de plus. Nouvelles lectures : image d'étiquette nommée par sa lettre « dpeV2-D.jpg » / « gesV2-B.jpg » et « DPE en B » écrit dans le texte (une seule lettre sur la page) : Cassis Immobilier 38 → 53/61.
+- Déjà bons : Salanié 16/16, Neyt 68/74, Lyon Immo 27/31, Netty (agencedelocre 21/28, GSM 5/5), Expertim 51/52, LF immo (les manques sont des murs commerciaux / terrains).
+- agencelenain.com plantait (503) : trace → arrêt pendant la lecture des étiquettes DPE en image (84 images générées par le site) après la lecture des pages. Le compteur de calcul sous-estime le calcul réel : budget abaissé à 500 ms de lecture + 350 ms d'images (cpu-meter / energy-image), images limitées à 1,5 Mpx. Dans la lecture par étapes, l'étiquette en image est lue fiche par fiche et mémorisée avec la fiche (avant : relue pour toutes les fiches à chaque passage, budget épuisé). Lenain : plus de plantage (23 lues par passage) ; DPE 7/23 (ses étiquettes en image sont à revoir).
+- Trace : étapes « normalize start / images done » et temps de calcul dans `stock_crawl_trace`.
+
 ### 01/11/2026 — Claude : contrôle automatique des DPE (pro-stock-sync v206)
 - Anthony : « je peux pas vérifier chaque annonce ». `smart-reader.ts` : quand le DPE n'est pas trouvé alors que la page en parle (« classe énergie », « diagnostic de performance », DPE, kWh/m²), la fiche est marquée (`_dpe_hint`, sauf « non soumis / vierge »). Le test de site renvoie `quality.dpe_missed` + exemples, et `desc_short` = descriptions finissant par « … » ou de moins de 120 caractères (une description courte écrite telle quelle sur le site n'est plus comptée).
 - Passé sur une trentaine de prospects ; nouvelles lectures (tous sites) :
