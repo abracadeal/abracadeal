@@ -279,6 +279,13 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
       const d2=one(/(?:class=["'][^"']*\b|\/)(?:dpe|etiquette[-_]?dpe|energie|dpe[-_]energie)[-_]([a-g])(?![a-z0-9])/gi),g2=one(/(?:class=["'][^"']*\b|\/)(?:ges|etiquette[-_]?ges|climat|dpe[-_]ges)[-_]([a-g])(?![a-z0-9])/gi);
       if(d2&&g2){o.dpe=d2;o.ges=g2;}
       const dd=text.match(/diagnostic\s*r[ée]alis[ée]\s*le\s*:?\s*(\d{2})\/(\d{2})\/(\d{4})/i);if(dd&&!o.date_dpe)o.date_dpe=`${dd[3]}-${dd[2]}-${dd[1]}`;}
+    // 01/11/2026 (Anthony, Espaces Atypiques) : DPE dans un menu dépliant, écrit « b : 82 kWh/m².an » / « A : 3 kg CO2/m².an »,
+    // ou barre choisie marquée « active » (<li class="classe-cep active" id="cep-b">).
+    if(!o.dpe||!o.ges){
+      const d3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kWh/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:cep|dpe|energie|energy)[-_]([a-g])"|<[^>]+\bid="(?:cep|dpe|energie|energy)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
+      const g3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*2/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:e?ges|climat|co2)[-_]([a-g])"|<[^>]+\bid="(?:e?ges|climat|co2)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
+      if(!o.dpe&&d3)o.dpe=d3.toUpperCase();if(!o.ges&&g3)o.ges=g3.toUpperCase();
+    }
     // 01/11/2026 (Anthony) : DPE / GES affichés seulement en image → adresses notées, lues ensuite (energy-image.ts).
     if(!o.dpe||!o.ges){const im=energyImageUrls(rawHtml,pageUrl);if(!o.dpe&&im.dpe)o.dpe_image=im.dpe;if(!o.ges&&im.ges)o.ges_image=im.ges;}
     const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
