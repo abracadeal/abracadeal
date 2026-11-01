@@ -325,6 +325,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       if(!o.dpe&&kwh)o.dpe=cls(Number(kwh),[70,110,180,250,330,420]);
       if(!o.ges&&co2)o.ges=cls(Number(co2),[6,10,29,49,69,99]);
     }
+    // 01/11/2026 (contrôle automatique) : image d'étiquette nommée par sa lettre « dpeV2-D.jpg » / « gesV2-B.jpg » (Cassis),
+    // et lettre écrite dans le texte « DPE en B », « DPE : C » (Valmo) — une seule lettre sur la page.
+    if(!o.dpe||!o.ges){
+      const uq=(src:string,re:RegExp)=>{const set=new Set([...src.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
+      const d6=uq(region,/\/(?:dpe|cep|energie)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bDPE\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
+      const g6=uq(region,/\/(?:ges|climat|co2)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bGES\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
+      if(!o.dpe&&d6)o.dpe=d6;if(!o.ges&&g6)o.ges=g6;
+    }
     // 01/11/2026 (Anthony : « toujours énormément de DPE pas lus ») : étiquettes dessinées dans la page (SVG) :
     // <g id="GES_E"> / <g id="DPE_C"> (La Résidence), <g id="EnergieC"> / <g id="GesC"> (La Française), conteneur « diagnosticShortened dpeE », La Boîte Immo (extension wp-dpe-ges) « diagnostic-diagram numberC » / « emission-diagram numberB ».
     if(!o.dpe||!o.ges){
