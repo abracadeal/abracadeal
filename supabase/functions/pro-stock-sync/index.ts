@@ -445,12 +445,16 @@ function svoCap(v:string){return v.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(
 function parseSpiderVoDetail(html:string,url:string,vid:string){
  const o:any={reference:vid,url,etat:'occasion'};
  if(/class="ribbon"[\s\S]{0,200}?>\s*(?:VENDU|R[ÉE]SERV[ÉE])\s*</i.test(html))o._svo_sold='1';
- const ld=ldBlocks(html).find(x=>ldTypes(x).includes('product'))||{};
+ // 02/11/2026 (Anthony, Ventury Motors : « prix dans la description, vérifier les virgules ») : données structurées de type Car / Vehicle aussi,
+ // prix « 19990.00 » lu comme un nombre (avant : chiffres collés → 1 999 000 €).
+ const ld=ldBlocks(html).find(x=>ldTypes(x).some((t:string)=>['product','car','vehicle'].includes(t)))||{};
  const h1=aaClean(html.match(/<h1\b[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
  const h2=aaClean(html.match(/<\/h1>\s*(?:<span>)?\s*<h2\b[^>]*>([\s\S]*?)<\/h2>/i)?.[1]||'');
  o.titre=[h1,h2].filter(Boolean).join(' ').replace(/\s+/g,' ').trim()||decodeEntities(String(ld.name||'')).replace(/\s+/g,' ').trim();
  if(ld.brand?.name)o.marque=String(ld.brand.name);
- const pr=html.match(/class="montant"[^>]*>\s*([\d\s .]+)\s*(?:&euro;|€)/i)?.[1]||String(ld.offers?.price||'');if(pr&&/\d/.test(pr))o.prix=pr.replace(/[^\d]/g,'');
+ const pm=html.match(/class="montant"[^>]*>\s*([\d\s .]+)\s*(?:&euro;|€)/i)?.[1];const off=Array.isArray(ld.offers)?ld.offers[0]:ld.offers;
+ if(pm&&/\d/.test(pm))o.prix=pm.replace(/[^\d]/g,'');else{const n=Number(String(off?.price??'').replace(/\s/g,'').replace(',','.'));if(n>0)o.prix=String(Math.round(n));}
+ if(!o.prix){const t=decodeEntities(String(ld.description||'')).match(/prix[^:\n]{0,20}:\s*(\d{1,3}(?:[ .\u00a0]\d{3})+|\d{4,6})(?:[.,]\d{2})?\s*(?:€|euros?)/i)?.[1];if(t)o.prix=t.replace(/\D/g,'');}
  const box=html.match(/caracteristiques_techniques"\s*>([\s\S]*?)<div id="svositec_contenu_onglet_2"/i)?.[1]||html.match(/class="contenu_onglet[^"]*caracteristiques_techniques"[^>]*>([\s\S]{0,8000})/i)?.[1]||'';
  const kv:Record<string,string>={};
  for(const m of box.matchAll(/<div>\s*<span>([\s\S]*?)<\/span>\s*<span>([\s\S]*?)<\/span>\s*<\/div>/gi)){const k=aaClean(m[1]).toLowerCase(),v=aaClean(m[2]);if(k&&v&&!/^\{.*\}$/.test(v))kv[k]=v;}
