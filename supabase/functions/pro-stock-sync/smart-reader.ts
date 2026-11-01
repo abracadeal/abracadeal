@@ -62,14 +62,18 @@ function jsonVal(html:string,keys:string[]){const h=html.replace(/&quot;/g,'"');
 // Une galerie explicitement identifiée appartient à la fiche ; les logos, conseillers
 // et suggestions autour ne doivent pas devenir la photo principale.
 function photoGallery(html:string):string{
+  // 02/11/2026 (Anthony, Dolce Immo / Jalis : « au moins 8 photos et nous seulement 3 ») : la fiche montre 3 photos en tête
+  // (« +4 photos ») et la galerie complète plus bas (« section-gallery2 ») → toutes les galeries de la fiche sont réunies.
+  const blocks:string[]=[];let after=0;
   for(const m of html.matchAll(/<(div|section|ul|figure)\b[^>]*>/gi)){
+    if((m.index||0)<after)continue;
     const labels=[...m[0].matchAll(/\s(?:class|id)\s*=\s*(["'])([\s\S]*?)\1/gi)].map(x=>x[2]).join(' ');
-    if(!/(?:^|[\s_-])(?:gallery|galerie|fotorama)(?:$|[\s_-])|\bmodule-slider\b|\b(?:property|product|vehicle|listing)[-_]slider\b/i.test(labels)||/thumb|miniature|related|similar|suggest|recommend|testimonial/i.test(labels))continue;
+    if(!/(?:^|[\s_-])(?:gallery|galerie|fotorama)\d?(?:$|[\s_-])|\bmodule-slider\b|\b(?:property|product|vehicle|listing)[-_]slider\b/i.test(labels)||/thumb|miniature|related|similar|suggest|recommend|testimonial/i.test(labels))continue;
     const tags=new RegExp('<\\/?'+m[1]+'\\b[^>]*>','gi');tags.lastIndex=(m.index||0)+m[0].length;let depth=1,end=html.length;
     for(let t;(t=tags.exec(html));){depth+=/^<\//.test(t[0])?-1:1;if(!depth){end=tags.lastIndex;break;}}
-    const block=html.slice(m.index,end);if(/<img\b|data-image-url=/i.test(block))return block;
+    const block=html.slice(m.index,end);if(/<img\b|data-image-url=/i.test(block)){blocks.push(block);after=end;if(blocks.length>=4)break;}
   }
-  return '';
+  return blocks.join('\n');
 }
 
 function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
@@ -191,7 +195,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   const h1=clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
   const docTitle=clean(headHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
   let titre=(h1&&h1.length>=6&&h1.length<=160?h1:'')||ogTitle||docTitle;
-  titre=titre.replace(/\s*[|–—-]\s*[^|–—-]{2,60}$/,(m)=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
+  /* 02/11/2026 (Dolce Immo « belle maison de plain ») : un trait d'union dans un mot (« plain-pied ») n'est pas un séparateur de nom de site */titre=titre.replace(/(?:\s*[|–—]\s*|\s+-\s+)(?:(?!\s-\s)[^|–—]){2,60}$/,(m)=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
   if(!titre)return null;
   const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]{0,40000}?<\/\1>/gi,' ')).slice(0,40000);/* 01/11/2026 : bornée (un <header> mal fermé avalait la fiche) */
   const head=h1+' \n'+ogTitle+' \n'+docTitle;
@@ -202,7 +206,8 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   // Montants mensuels (crédit, LOA, « dès … / mois ») ignorés, sauf pour une location immobilière.
   const hpos=html.search(/<h1[\s>]/i);const nearTitle=hpos>=0?clean(html.slice(Math.max(0,hpos-4000),hpos+4000)):'';
   // 29/10/2026 (Nestenn) : « 690 € CC/Mois » à côté du titre, « À louer » en tête de description = location.
-  const rental=immo&&(/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname)||/\d\s*€\s*(?:cc|hc|charges comprises|hors charges)?\s*(?:\/|par)\s*mois/i.test(nearTitle)||/(?:^|\n|\.\s)\s*(?:à|a) louer\b/i.test(text.slice(0,6000)));
+  /* 02/11/2026 (Dolce Immo : location lue « vente ») : montant libellé « Loyer » à côté du titre */const loyerLabel=hpos>=0&&/>\s*Loyer(?:\s+(?:mensuel|CC|HC|charges comprises))?\s*:?\s*</i.test(html.slice(hpos,hpos+3000));
+  const rental=immo&&(loyerLabel||/\b(louer|location|loyer|a-louer)\b/i.test(head+' '+base.pathname)||/\d\s*€\s*(?:cc|hc|charges comprises|hors charges)?\s*(?:\/|par)\s*mois/i.test(nearTitle)||/(?:^|\n|\.\s)\s*(?:à|a) louer\b/i.test(text.slice(0,6000)));
   const firstAmount=(src:string,re:RegExp)=>{for(const m of src.matchAll(new RegExp(re.source,'giu'))){const after=src.slice((m.index||0)+m[0].length,(m.index||0)+m[0].length+14);const before=src.slice(Math.max(0,(m.index||0)-30),m.index||0);if(!rental&&(/^\s*(?:\/|par)\s*mois|^\s*(?:ht\s*)?\/\s*m/i.test(after)||/(d[èe]s|[àa] partir de|mensualit|loa|lld|cr[ée]dit|financement)\W*$/i.test(before)))continue;
     // 01/11/2026 (Anthony, Agence Résidence : « 140 € c'est les charges ») : un montant libellé charges / quote-part / taxe / honoraires / énergie / dépôt n'est jamais le prix.
     const label=src.slice(Math.max(0,(m.index||0)-70),m.index||0);if(/(charges?|quote[- ]?part|taxe|fonci[èe]re|honoraires?|frais|[ée]nergie|d[ée]p[ôo]t|garantie|caution|copropri[ée]t[ée]|entre)\b[^\d€]{0,30}$/i.test(label)&&!/\b(?:prix|loyer)\b/i.test(label.slice(-45)))continue;
