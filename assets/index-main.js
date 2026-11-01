@@ -4416,7 +4416,8 @@ window.openAd=id=>{
       <button type="button" class="dm-icon-btn" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)">${dmIcon('share')}</button>
       <button type="button" class="dm-icon-btn dm-fav ${dmFavActive?'active':''}" data-favorite-id="${a.id}" aria-label="${dmFavActive?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="dm-fav-count" data-fav-count-id="${a.id}"></span><span class="heart-icon">${dmFavActive?'♥':'♡'}</span></button>
     </div>`;
-  const dmSeller=a.is_showroom?'':`<button type="button" class="dm-seller" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">
+  // 01/11/2026 (Anthony) : vendeur pro → un clic ouvre directement son showroom.
+  const dmSeller=a.is_showroom?'':`<button type="button" class="dm-seller" onclick="${a.seller_type==='professionnel'?`window.open('pro.html?id=${encodeURIComponent(a.owner_id)}','_blank','noopener')`:`closeModal('detailModal');openSellerProfile('${a.owner_id}')`}">
       <span class="dm-seller-avatar" id="dmSellerAvatar-${a.id}">${dmInitials(sellerLabel)}</span>
       <span class="dm-seller-info">
         <b id="dmSellerName-${a.id}">${sellerLabel}</b>
@@ -4525,6 +4526,7 @@ window.openAd=id=>{
                 <p>${esc(a.city)}</p>
                 <div class="seller-rating-line"><span class="stars">☆☆☆☆☆</span><span class="rating-muted">Chargement des avis…</span></div>
               </div>
+              ${a.seller_type==='professionnel'?`<a class="btn primary seller-showroom-btn" id="sellerShowroom-${a.id}" href="pro.html?id=${encodeURIComponent(a.owner_id)}" target="_blank" rel="noopener" style="display:flex;justify-content:center;text-decoration:none;margin:10px 0 6px">Voir le showroom</a>`:''}
               <button type="button" class="seller-profile-link" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">Voir le profil et les avis</button>
 
               <div class="seller-contact">
@@ -5128,8 +5130,10 @@ async function hydrateSellerCard(sellerId,listingId){
         .catch(()=>{});
     }
   }catch(_){}
+  const isPro=profile?.account_type==='professionnel',showUrl='pro.html?id='+encodeURIComponent(sellerId);
+  const btn=document.getElementById(`sellerShowroom-${listingId}`);if(btn&&isPro&&profile?.display_name)btn.textContent='Voir le showroom '+profile.display_name;
   host.innerHTML=`
-    <h3>${esc(profile?.display_name || (profile?.account_type==='professionnel'?'Vendeur professionnel':'Vendeur particulier'))}</h3>
+    <h3>${isPro?`<a href="${showUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" title="Voir le showroom">${esc(profile?.display_name||'Vendeur professionnel')} ›</a>`:esc(profile?.display_name || 'Vendeur particulier')}</h3>
     <p>${esc(profile?.city||'')}</p>
     <div class="seller-rating-line">
       <span class="stars">${starsText(avg)}</span>
