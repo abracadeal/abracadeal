@@ -1,4 +1,5 @@
 import { cpuLeft } from './cpu-meter.ts';
+import { fillEnergyFromImages } from './energy-image.ts';
 // Bounded, replayable catalogue crawl. State contains public source data only.
 export type CrawlState={source:string,scope:string,started:string,completed:string|null,lists:{url:string,tries:number}[],details:{url:string,tries:number}[],visited:string[],discovered:string[],rows:Record<string,any>,failed:string[],applied?:boolean,touched?:string};
 export type CrawlMemory={load:()=>Promise<any>,save:(state:any)=>Promise<void>};
@@ -14,7 +15,7 @@ export async function crawlCatalogue(source:string,scope:string,starts:string[],
    const result=await fetchHtml(new URL(item.url));pages++;
    if(result.url.hostname.replace(/^www\./,'')!==new URL(source).hostname.replace(/^www\./,''))throw Error('Redirection hors du site inscrit');
    if(listing){const found=links(result.text,result.url);for(const url of found.lists)if(!seenList.has(url)){seenList.add(url);state.lists.push({url,tries:0});}for(const url of found.details)if(!discovered.has(url)){discovered.add(url);state.discovered.push(url);state.details.push({url,tries:0});}state.visited.push(item.url);}
-   else{const row=await parse(result.text,item.url);if(row&&!row._sold){if(!row.reference)throw Error('Référence absente');state.rows[item.url]=row;}}
+   else{const row=await parse(result.text,item.url);if(row&&!row._sold){if(!row.reference)throw Error('Référence absente');/* 01/11/2026 : DPE en image lu ici et mémorisé avec la fiche (avant : relu pour toutes les fiches à chaque passage, budget épuisé) */if((row.dpe_image||row.ges_image)&&(!row.dpe||!row.ges)&&cpuLeft()){try{await fillEnergyFromImages([row]);}catch{}}state.rows[item.url]=row;}}
   }catch(e){if(item.tries<1)queue.push({...item,tries:item.tries+1});else state.failed.push(item.url);}}));
  }
  if(options.expectedTotal!=null&&state.discovered.length!==options.expectedTotal)state.completed=null;
