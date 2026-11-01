@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : zoom de la galerie photo refait (bug du retour après zoom)
+- Anthony : après un zoom à deux doigts dans la galerie, le retour arrière laissait la page agrandie, le site apparaissait derrière. La remise à 100 % par la balise viewport (closePhotoLightbox) est ignorée par l'iPhone.
+- Nouveau `assets/lightbox-zoom-20261101.js` (chargé en fin de index.html) : zoom propre à la photo (pincer jusqu'à ×5, glisser la photo zoomée, double toucher ×2,5 / retour, molette et double clic sur ordinateur). Zoom du téléphone bloqué tant que la galerie est ouverte (touch-action:none, gesturestart). Photo remise à sa taille à chaque changement de photo et à la fermeture (bouton, fond, Échap, retour arrière).
+- Testé (Playwright iPhone 13) : page toujours à l'échelle 1 après pincement, glisser, fermeture → taille normale, double toucher OK, filigrane suit la photo.
+
 ### 01/11/2026 — Claude : biens vendus / sous offre écartés, message du test corrigé (pro-stock-sync v175)
 - Anthony (influences.immo) : « 18 biens sur le site et seulement 9 lus ? » + photos tamponnées « vendu » / « sous offre ».
 - Les 18 = pages d'annonces trouvées, dont des biens vendus encore en ligne (sans prix → déjà ignorés, ou avec prix → importés à tort).
