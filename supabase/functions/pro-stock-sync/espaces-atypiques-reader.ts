@@ -26,7 +26,11 @@ export async function readEspacesAtypiquesAgency(url:URL,fetchHtml:Fetcher){
         if(m){
           r.reference=m[4];r.code_postal=m[2];if(m[1]==='locations')r.transaction='location';
           const t=slug(r.titre||'');let c=m[3];if(t&&c.endsWith('-'+t))c=c.slice(0,-t.length-1);else if(t){const k=c.indexOf('-'+t.split('-')[0]+'-');if(k>0)c=c.slice(0,k);}
-          if(c&&c!==m[3])r.ville=cap(c);else if(!r.ville||/information|compl[ée]mentaire/i.test(r.ville))r.ville=cap(c.split('-')[0]);
+          // Titre de la page : « … à BELLEVIGNY - 275 m2 - 530000 € » ; gardé seulement s'il correspond au début du lien.
+          const og=h.match(/content="[^"]*? à ([^"]{2,60}?) - \d[^"]*"/i)?.[1]||'';
+          if(og&&m[3].startsWith(slug(og)+'-'))r.ville=cap(slug(og));
+          else if(c&&c!==m[3])r.ville=cap(c);
+          else if(!r.ville||!m[3].startsWith(slug(r.ville)+'-'))r.ville=cap(c.split('-')[0]);
         }
         rows.push(r);
       }catch{failed++;}
