@@ -1,6 +1,7 @@
 // 01/11/2026 — Claude (Anthony : « apprends au robot » les réseaux entiers) : agences Espaces Atypiques
 // (www.espaces-atypiques.com/<region>/[<ville>/], 39 prospects). La page de l'agence liste ses biens
 // (/ventes/<cp>-<ville>-<titre>-<n°>/ et /locations/…) ; chaque fiche est lue par la lecture automatique.
+// Référence en fin de lien : « 15710 », « sa5421 », « lry5805 », « sa5214-1 ».
 // Ville et code postal pris dans le lien : sur la fiche, la lecture automatique prenait « Informations complémentaires ».
 // Sans ce lecteur, l'exploration générale parcourait tout le site national (erreur 503, trop long).
 import { smartDetail } from './smart-reader.ts';
@@ -21,7 +22,7 @@ export async function readEspacesAtypiquesAgency(url:URL,fetchHtml:Fetcher){
     await Promise.all(list.slice(i,i+4).map(async l=>{
       try{
         const{text:h}=await fetchHtml(new URL(l));const r:any=smartDetail(h,l,'immobilier');if(!r)return;
-        const m=l.match(/\/(ventes|locations)\/(\d{5})-([a-z0-9-]+)-(\d+)\/$/i);
+        const m=l.match(/\/(ventes|locations)\/(\d{5})-([a-z0-9-]+?)-([a-z]{0,4}\d+(?:-\d+)?)\/$/i);
         if(m){
           r.reference=m[4];r.code_postal=m[2];if(m[1]==='locations')r.transaction='location';
           const t=slug(r.titre||'');let c=m[3];if(t&&c.endsWith('-'+t))c=c.slice(0,-t.length-1);else if(t){const k=c.indexOf('-'+t.split('-')[0]+'-');if(k>0)c=c.slice(0,k);}
