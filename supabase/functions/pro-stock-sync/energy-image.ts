@@ -6,6 +6,7 @@
 //  - on regroupe les lignes en bandes et on cherche 7 bandes de suite, de longueur croissante (sinon ce n'est pas une échelle) ;
 //  - la bande la plus haute, au moins 1,3 × les autres, donne la lettre.
 // Dans le doute on ne renvoie rien : jamais de classe inventée.
+import { cpu, CPU_BUDGET_MS } from './cpu-meter.ts';
 import jpeg from 'npm:jpeg-js@0.4.4';
 import { decode as decodePng } from 'npm:fast-png@6.2.0';
 
@@ -123,8 +124,9 @@ async function classesOf(src:string){
       return{dpe:one(/\bid="(?:DPE|CEP|etiquette[_-]?dpe)[_-]([A-G])"/gi),ges:one(/\bid="(?:GES|EGES|etiquette[_-]?ges)[_-]([A-G])"/gi),both:true};}
     // 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : le décodage coûte du calcul ;
     // une étiquette fait rarement plus de 2 Mpx, et au-delà de ~900 ms de décodage cumulé on s'arrête pour ce passage.
-    const dim=imageSize(b);if(!dim||dim.w*dim.h>2_500_000||spent>900)return none;
-    const t0=performance.now();try{return energyClassesFromBytes(b);}finally{spent+=performance.now()-t0;}}catch{return none;}})());
+    // 01/11/2026 : budget commun avec la lecture des pages (cpu-meter) : la lecture + les images ne dépassent pas ~1,4 s de calcul.
+    const dim=imageSize(b);if(!dim||dim.w*dim.h>1_500_000||spent>600||cpu.ms>CPU_BUDGET_MS+650)return none;
+    const t0=performance.now();try{return energyClassesFromBytes(b);}finally{const d=performance.now()-t0;spent+=d;cpu.ms+=d;}}catch{return none;}})());
   return seen.get(src)!;
 }
 export async function fillEnergyFromImages(rows:any[]){
