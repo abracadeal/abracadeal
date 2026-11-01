@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : biens vendus / sous offre écartés, message du test corrigé (pro-stock-sync v175)
+- Anthony (influences.immo) : « 18 biens sur le site et seulement 9 lus ? » + photos tamponnées « vendu » / « sous offre ».
+- Les 18 = pages d'annonces trouvées, dont des biens vendus encore en ligne (sans prix → déjà ignorés, ou avec prix → importés à tort).
+- `isSoldText` (index.ts, normalizeRows) : écarte les biens dont le début de description dit « est désormais VENDU », « sous offre », « sous compromis », « offre acceptée », « trop tard, ce bien… » ; « vendu meublé / loué / avec… » restent en vente. Influences : 7 → 4 biens, tous en vente. Les biens vendus déjà publiés seront retirés au prochain tour complet.
+- admin-test-import.html : le message « N annonces sur le site… gros site » n'apparaît plus pour un petit site ; à la place : « N pages d'annonces trouvées, dont des biens vendus… le robot ne garde que les X biens encore en vente ».
+
 ### 01/11/2026 — Claude : le robot lit les DPE / GES affichés en image (pro-stock-sync v174)
 - Demande d'Anthony : « les DPE en images, il faut entraîner le robot à les lire, il les met de côté à chaque fois ».
 - Nouveau `energy-image.ts` : décode l'image (JPEG / PNG, npm jpeg-js / fast-png) et repère l'échelle officielle A→G (7 barres de longueur croissante) ; la classe du bien = la barre nettement plus haute (≥ 1,3 × les autres). Dans le doute : rien (jamais de classe inventée).
