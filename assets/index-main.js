@@ -5229,9 +5229,15 @@ window.openSellerProfile=async sellerId=>{
         <div class="review-actions">
           <button class="review-action" type="button" onclick="reportReview('${r.id}')">Signaler cet avis</button>
         </div>`:''}
+      ${adminViewing?`
+        <div class="review-actions">
+          <button class="review-action" type="button" onclick="adminEditReview('avis','${r.id}','${sellerId}')">Modifier (admin)</button>
+          <button class="review-action" type="button" style="color:#c0392b" onclick="adminDeleteReview('avis','${r.id}','${sellerId}')">Supprimer (admin)</button>
+        </div>`:''}
     </article>`).join(''):`<div class="note">Aucun avis pour le moment.</div>`;
 
   body.innerHTML=`
+    ${adminViewing?`<div style="margin:0 0 12px"><button class="btn primary" type="button" onclick="adminEditAccount('${sellerId}')">✏️ Modifier ce compte (admin)</button></div>`:''}
     ${profile.account_type==='professionnel'?`<div style="aspect-ratio:3/1;border-radius:16px;margin:0 0 14px;background:${showroomBanner?'url(&quot;'+esc(showroomBanner)+'&quot;) center/cover no-repeat':'linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43)'}"></div><a class="btn primary" style="display:inline-flex;text-decoration:none;margin:0 0 18px" href="pro.html?id=${encodeURIComponent(sellerId)}" target="_blank" rel="noopener">Voir le showroom du professionnel</a>`:''}
     <div class="seller-profile-head">
       <div>

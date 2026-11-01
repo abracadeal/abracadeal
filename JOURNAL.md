@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : l'admin peut tout modifier (annonces importées : photos ; comptes, vitrines pros, avis)
+- Anthony : photo en double sur une annonce d'essai Espaces Atypiques, la correction ne permettait que le texte ; l'admin doit pouvoir modifier / supprimer textes et images partout (choix : annonces et photos, profils et pages pros, avis).
+- Espaces Atypiques (robot) : seules les photos rangées dans le dossier de la référence du bien sont gardées (les images de décoration de l'agence étaient prises).
+- admin-test-import.html « Modifier la fiche » : photos (✕ retirer, ★ mettre en premier, remettre d'origine), gardées comme correction (`photos`). `admin_set_stock_override` additionne désormais les corrections au lieu d'écraser.
+- Annonces publiées : l'admin pouvait déjà tout modifier (bouton Modifier, photos comprises).
+- Base : droits admin sur profiles (update), pro_showrooms (insert/update/delete), stockage pro-showroom, reviews / vacation_reviews ; fonctions `admin_review_edit` / `admin_review_delete` (`supabase/2026-11-01-admin-edit-everything.sql`).
+- Site : page vendeur → « ✏️ Modifier ce compte (admin) » (`assets/admin-edit-20261101.js`) : nom, ville, téléphone, description de la vitrine, logo / bannière (remplacer, retirer), tous les avis reçus (texte, note, réponse, supprimer) ; « Modifier / Supprimer (admin) » sur chaque avis. Testé avec une base simulée (Playwright).
+- Reste : textes fixes des pages (accueil, CGV…) non modifiables depuis le site (non demandé).
+
 ### 01/11/2026 — Claude : fiche immo sans « Non communiqué » ; dépenses d'énergie Cimm (pro-stock-sync v179)
 - Anthony : « quand c'est une maison, en général pas de copropriété… évite de mettre les infos non communiquées, laisse vide ».
 - `assets/index-main.js` (fiche immobilier) : les lignes sans information ne sont plus affichées (plus de « Non communiqué ») ; maison sans info de copropriété → aucune ligne copropriété / lots / charges / procédure ; maison au rez-de-chaussée → pas de ligne « Étage ». Version index-main `20261101-nc`.
