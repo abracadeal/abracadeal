@@ -1,3 +1,4 @@
+import { energyImageUrls } from './energy-image.ts';
 import { crawlCatalogue, type CrawlMemory } from "./resumable-crawl.ts";
 import { isPlaceholderPhoto, photoKey, photoRank } from './photo-utils.ts';
 // Lecteur « intelligent » des sites de pros (28/10/2026) : utilisé quand aucun connecteur dédié ne reconnaît le site.
@@ -278,6 +279,8 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
       const d2=one(/(?:class=["'][^"']*\b|\/)(?:dpe|etiquette[-_]?dpe|energie|dpe[-_]energie)[-_]([a-g])(?![a-z0-9])/gi),g2=one(/(?:class=["'][^"']*\b|\/)(?:ges|etiquette[-_]?ges|climat|dpe[-_]ges)[-_]([a-g])(?![a-z0-9])/gi);
       if(d2&&g2){o.dpe=d2;o.ges=g2;}
       const dd=text.match(/diagnostic\s*r[ée]alis[ée]\s*le\s*:?\s*(\d{2})\/(\d{2})\/(\d{4})/i);if(dd&&!o.date_dpe)o.date_dpe=`${dd[3]}-${dd[2]}-${dd[1]}`;}
+    // 01/11/2026 (Anthony) : DPE / GES affichés seulement en image → adresses notées, lues ensuite (energy-image.ts).
+    if(!o.dpe||!o.ges){const im=energyImageUrls(rawHtml,pageUrl);if(!o.dpe&&im.dpe)o.dpe_image=im.dpe;if(!o.ges&&im.ges)o.ges_image=im.ges;}
     const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
     // Lignes de faits (charges, taxe, lots, copropriété, procédure, dépôt, mandat…) gardées pour la lecture des champs, hors description.
     o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);
