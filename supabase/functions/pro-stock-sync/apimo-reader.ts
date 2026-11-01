@@ -49,7 +49,15 @@ export function parseApimoDetail(raw:string,url:string){
   if(advisorName)o.contact_nom=text(advisorName).replace(/\s+/g,' ').trim();
   if(!advisorName&&/\buser-template-5\b/.test(advisorModule)){const name=advisorModule.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i)?.[1];if(name)o.contact_nom=text(name).replace(/\s+/g,' ').trim();}
   if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
-  const all=text(summary);const area=all.match(/(?:^|\n)Surface\s+(\d+(?:[.,]\d+)?)\s*m²/i)||infoText.match(/(\d+(?:[.,]\d+)?)\s*m²/i);if(area)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=num(area[1]);
+  const all=text(summary);
+  // 01/11/2026 (Anthony, Croisette : 1490 m² de terrain affichés comme surface habitable, appartements sans surface) :
+  // 1) « Surface / Surface habitable / Superficie / Carrez » du sommaire ; 2) floorSize des données structurées de la fiche ;
+  // 3) en dernier, un « … m² » du bandeau qui n'est PAS sur une ligne terrain / jardin / terrasse / balcon / parcelle / cave / garage.
+  const areaM=all.match(/(?:^|\n)(?:Surface(?:\s+habitable)?|Superficie(?:\s+habitable)?|Surface\s+(?:loi\s+)?Carrez)\s*:?\s*(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/i);
+  let areaV=areaM?num(areaM[1]):'';
+  if(!areaV&&Number(property?.floorSize?.value)>0)areaV=String(Number(property.floorSize.value));
+  if(!areaV){const line=infoText.split('\n').find(l=>/\d\s*m²/.test(l)&&!/terrain|jardin|terrasse|balcon|parcelle|cave|garage|parking/i.test(l));const m=line?.match(/(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/);if(m)areaV=num(m[1]);}
+  if(areaV)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=areaV;
   const rooms=infoText.match(/(\d+)\s*pi[eè]ces?/i)||all.match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=infoText.match(/(\d+)\s*chambres?/i)||all.match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if((variant12||variant19)&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
   for(const m of surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)){const t=text(m[1]);const land=t.match(/^\d+\s*(?:Terrain|Jardin)\s+(\d+(?:[.,]\d+)?)\s*m²/i);if(land&&!o.surface_terrain)o.surface_terrain=num(land[1]);const bath=t.match(/^(\d+)\s+Salle de (?:bains?|douche)/i);if(bath)baths+=Number(bath[1]);}
