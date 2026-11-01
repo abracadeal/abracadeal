@@ -7,7 +7,9 @@
     if(!box||img.classList.contains('abraca-default-photo')||!img.naturalWidth)return;
     const r=img.naturalWidth/img.naturalHeight,bw=box.clientWidth||1,bh=box.clientHeight||1,br=bw/bh;
     const crop=r>br?1-br/r:1-r/br; // part de la photo cachée par le rognage
-    const on=crop>0.3; // > 30 % caché : photo en hauteur dans une vignette en largeur (ou l’inverse), quelle que soit la taille d’écran
+    // 01/11/2026 (Anthony) : photo prise en hauteur (téléphone) → toujours entière sur fond flou, même si elle paraît plus petite ;
+    // sinon (photo en largeur) seulement si plus de 30 % serait coupé.
+    const on=r<0.95||crop>0.3;
     box.classList.toggle('photo-fit',on);
     if(on){try{box.style.setProperty('--photo-bg','url("'+img.currentSrc.replace(/"/g,'%22')+'")');}catch(_){}}
   };
