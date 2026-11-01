@@ -1,0 +1,3 @@
+-- 01/11/2026 (Claude) : admin_set_stock_override — les corrections s'additionnent au lieu de s'écraser
+-- (corriger les photos d'une fiche importée n'efface plus une correction de texte faite avant).
+-- Appliqué via migration « stock_override_merge » : voir la définition dans la base.

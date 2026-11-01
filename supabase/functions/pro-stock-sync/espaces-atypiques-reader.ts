@@ -24,7 +24,10 @@ export async function readEspacesAtypiquesAgency(url:URL,fetchHtml:Fetcher){
         const{text:h}=await fetchHtml(new URL(l));const r:any=smartDetail(h,l,'immobilier');if(!r)return;
         const m=l.match(/\/(ventes|locations)\/(\d{5})-([a-z0-9-]+?)-([a-z]{0,4}\d+(?:-\d+)?)\/$/i);
         if(m){
-          r.reference=m[4];r.code_postal=m[2];if(m[1]==='locations')r.transaction='location';
+          r.reference=m[4];r.code_postal=m[2];
+          // 01/11/2026 (Anthony) : photos du bien = dossier de sa référence (/uploads/<n°>/sa5421/…) ; les images de décoration de l'agence
+          // (« Espaces-Atypiques-Maison-Appartement-Loft-… ») sont écartées.
+          {const ref=m[4].toLowerCase().replace(/-\d+$/,'');const ph=String(r.photos||'').split('|').filter(Boolean);const own=ph.filter(u=>u.toLowerCase().includes('/'+ref+'/'));if(own.length)r.photos=own.join('|');}if(m[1]==='locations')r.transaction='location';
           const t=slug(r.titre||'');let c=m[3];if(t&&c.endsWith('-'+t))c=c.slice(0,-t.length-1);else if(t){const k=c.indexOf('-'+t.split('-')[0]+'-');if(k>0)c=c.slice(0,k);}
           // Titre de la page : « … à BELLEVIGNY - 275 m2 - 530000 € » ; gardé seulement s'il correspond au début du lien.
           const og=h.match(/content="[^"]*? à ([^"]{2,60}?) - \d[^"]*"/i)?.[1]||'';

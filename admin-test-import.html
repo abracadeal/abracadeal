@@ -376,19 +376,28 @@ function editCar(i){
   else if(t.startsWith('sel:'))h='<select id="'+id+'">'+t.slice(4).split('|').map(o=>'<option value="'+esc(o)+'"'+(String(v).toLowerCase()===o.toLowerCase()?' selected':'')+'>'+esc(o||'—')+'</option>').join('')+'</select>';
   else h='<input id="'+id+'" type="'+(t==='number'?'text':'text')+'" inputmode="'+(t==='number'?'decimal':'text')+'" value="'+esc(v)+'">';
   return '<label class="'+(full?'full':'')+'">'+esc(l)+h+'</label>';};
- E('db').innerHTML='<h2 style="margin:0 0 6px;font-size:18px">Modifier la fiche</h2><p class="muted" style="margin:0">'+esc(host)+' · réf. '+esc(r.reference)+'<br>La correction est gardée et réappliquée à chaque mise à jour du stock du pro.</p><div class="edf">'+f.map(inp).join('')+'<label class="full" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="ed__exclure" style="width:22px;height:22px">Ne pas publier cette annonce</label></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="edSave">Enregistrer la correction</button><button class="sbtn" type="button" id="edCancel">Annuler</button><button class="sbtn no" type="button" id="edReset">Supprimer ma correction</button></div><p class="muted" id="edMsg"></p>';
+ E('db').innerHTML='<h2 style="margin:0 0 6px;font-size:18px">Modifier la fiche</h2><p class="muted" style="margin:0">'+esc(host)+' · réf. '+esc(r.reference)+'<br>La correction est gardée et réappliquée à chaque mise à jour du stock du pro.</p><div class="edf">'+f.map(inp).join('')+'<div class="full" id="edPhotos"></div>'+'<label class="full" style="flex-direction:row;align-items:center;gap:10px"><input type="checkbox" id="ed__exclure" style="width:22px;height:22px">Ne pas publier cette annonce</label></div><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn" type="button" id="edSave">Enregistrer la correction</button><button class="sbtn" type="button" id="edCancel">Annuler</button><button class="sbtn no" type="button" id="edReset">Supprimer ma correction</button></div><p class="muted" id="edMsg"></p>';
+ // 01/11/2026 (Anthony) : photos modifiables aussi (photo en double, photo hors sujet) : ✕ pour retirer, ★ pour la mettre en premier.
+ const ph0=(n.photos&&n.photos.length?n.photos:String(r.photos||'').split('|')).filter(Boolean);let phs=[...ph0];
+ const drawPh=()=>{E('edPhotos').innerHTML='<div style="font-weight:700;margin:6px 0">Photos ('+phs.length+')</div><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px">'+phs.map((u,k)=>'<div style="position:relative;border-radius:10px;overflow:hidden;background:#000;aspect-ratio:4/3"><img src="'+esc(u)+'" style="width:100%;height:100%;object-fit:cover" loading="lazy">'+(k===0?'<span style="position:absolute;left:4px;top:4px;background:var(--gold,#d8a84b);color:#000;font-size:11px;font-weight:800;padding:2px 6px;border-radius:6px">Principale</span>':'<button type="button" data-first="'+k+'" title="Mettre en premier" style="position:absolute;left:4px;top:4px;border:0;border-radius:6px;padding:3px 6px;font-weight:800;cursor:pointer">★</button>')+'<button type="button" data-del="'+k+'" title="Retirer cette photo" style="position:absolute;right:4px;top:4px;border:0;border-radius:6px;padding:3px 7px;font-weight:800;background:#c0392b;color:#fff;cursor:pointer">✕</button></div>').join('')+'</div>'+(phs.join('|')!==ph0.join('|')?'<button class="sbtn" type="button" id="edPhReset" style="margin-top:8px">Remettre les photos d’origine</button>':'');
+  E('edPhotos').querySelectorAll('[data-del]').forEach(b=>b.onclick=()=>{if(phs.length<=1){alert('Il faut garder au moins une photo.');return}phs.splice(Number(b.dataset.del),1);drawPh();});
+  E('edPhotos').querySelectorAll('[data-first]').forEach(b=>b.onclick=()=>{const k=Number(b.dataset.first);phs.unshift(...phs.splice(k,1));drawPh();});
+  const rb=E('edPhReset');if(rb)rb.onclick=()=>{phs=[...ph0];drawPh();};};
+ drawPh();
  E('edCancel').onclick=()=>openCar(i);
  const send=async(fields)=>{E('edMsg').textContent='Enregistrement…';const{error}=await sb.rpc('admin_set_stock_override',{p_host:host,p_ref:String(r.reference),p_fields:fields});if(error){E('edMsg').textContent=error.message;return false}return true;};
  E('edReset').onclick=async()=>{if(await send({})){E('edMsg').textContent='Correction supprimée. Relance « Lire le stock » pour revoir la fiche d\'origine.';}};
  E('edSave').onclick=async()=>{
   const fields={};for(const[k]of f){const el=E('ed_'+k);if(!el)continue;const v=el.value.trim();const before=cur[k]==null?'':String(cur[k]).trim();if(v!==before&&v!=='')fields[k]=v;}
   if(E('ed__exclure').checked)fields._exclure=true;
+  if(phs.join('|')!==ph0.join('|'))fields.photos=phs.join('|');
   if(!Object.keys(fields).length){E('edMsg').textContent='Aucun changement.';return}
   if(!(await send(fields)))return;
   // affichage immédiat
   Object.assign(ROWS[i],Object.fromEntries(Object.entries(fields).filter(([k])=>!k.startsWith('_'))));
   if(NN[i]){NN[i].corrected=true;if(fields.ville)NN[i].city=fields.ville;if(fields.code_postal)NN[i].postal=fields.code_postal;if(fields.prix)NN[i].price=Number(fields.prix.replace(/\s/g,'').replace(',','.'));if(fields.description)NN[i].description=fields.description;
    const fixes={ville:'ville manquante',prix:'prix manquant',dpe:'GES manquant',ges:'GES manquant'};NN[i].errors=(NN[i].errors||[]).filter(e=>!Object.entries(fixes).some(([k,m])=>fields[k]&&e===m));}
+  if(fields.photos&&NN[i])NN[i].photos=phs.slice();
   if(fields._exclure){ROWS[i].titre='(retirée) '+(ROWS[i].titre||'');}
   render({platform:LASTDATA?.platform,partial:LASTDATA?.partial,total_on_site:LASTDATA?.total_on_site},E('sector').value);
   E('edMsg').textContent='Correction enregistrée : elle sera appliquée à chaque mise à jour.';setTimeout(()=>{if(!fields._exclure)openCar(i);else E('dlg').close();},700);
