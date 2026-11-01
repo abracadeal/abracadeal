@@ -286,6 +286,19 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
       const g3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*2/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:e?ges|climat|co2)[-_]([a-g])"|<[^>]+\bid="(?:e?ges|climat|co2)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
       if(!o.dpe&&d3)o.dpe=d3.toUpperCase();if(!o.ges&&g3)o.ges=g3.toUpperCase();
     }
+    // 01/11/2026 (Anthony, Cimm) : 7 pastilles A→G dont celle du bien est plus grande (style="width: 40px" contre 25px).
+    if(!o.dpe||!o.ges){
+      const dots=[...html.matchAll(/<(?:div|span|li)\b[^>]*style="[^"]*\bwidth:\s*(\d+(?:\.\d+)?)px[^"]*"[^>]*>\s*([A-G])\s*<\//g)].map(m=>({w:Number(m[1]),k:m[2]}));
+      const scales:string[]=[];
+      for(let i=0;i+7<=dots.length;){
+        const win=dots.slice(i,i+7);
+        if(win.map(d=>d.k).join('')!=='ABCDEFG'){i++;continue;}
+        const max=Math.max(...win.map(d=>d.w)),big=win.filter(d=>d.w===max),rest=win.filter(d=>d.w!==max);
+        if(big.length===1&&rest.length===6&&max>=Math.max(...rest.map(d=>d.w))*1.2)scales.push(big[0].k);
+        i+=7;
+      }
+      if(scales.length){if(!o.dpe)o.dpe=scales[0];if(!o.ges&&scales[1])o.ges=scales[1];}
+    }
     // 01/11/2026 (Anthony) : DPE / GES affichés seulement en image → adresses notées, lues ensuite (energy-image.ts).
     if(!o.dpe||!o.ges){const im=energyImageUrls(rawHtml,pageUrl);if(!o.dpe&&im.dpe)o.dpe_image=im.dpe;if(!o.ges&&im.ges)o.ges_image=im.ges;}
     const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
