@@ -943,7 +943,9 @@ async function readGenericSite(origin:URL,homeHtml:string,sector='vehicules'){
 }
 // Adresse du garage / de l'agence publiée sur son site : données structurées (JSON-LD), sinon « 30100 ALES » le plus fréquent.
 function siteLocation(html:string){
- for(const x of ldBlocks(html)){const a=x?.address;const ad=Array.isArray(a)?a[0]:a;if(ad&&typeof ad==='object'){const city=ldText(ad.addressLocality);const cp=normalizePostal(ldText(ad.postalCode));if(city&&!/^\d+$/.test(city))return{city,postal:/^\d{5}$/.test(cp)?cp:''};}}
+ // 02/11/2026 (Triumph Quimper) : adresse aussi cherchée plus profond (publisher.address d'un Article, etc.), « ERGUE GABERIC, France » nettoyé.
+ const deep=(x:any,d=0):any=>{if(!x||typeof x!=='object'||d>5)return null;if(Array.isArray(x)){for(const y of x){const r=deep(y,d+1);if(r)return r;}return null;}if(x.address){const ad=Array.isArray(x.address)?x.address[0]:x.address;if(ad&&typeof ad==='object'&&ad.addressLocality)return ad;}for(const k of Object.keys(x)){const r=deep(x[k],d+1);if(r)return r;}return null;};
+ for(const x of ldBlocks(html)){const ad=deep(x);if(ad){let city=ldText(ad.addressLocality).replace(/\s*,\s*(?:France|FR)\s*$/i,'').trim();if(city&&city===city.toUpperCase())city=city.toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(_:string,a:string,b:string)=>a+b.toUpperCase());const cp=normalizePostal(ldText(ad.postalCode));if(city&&!/^\d+$/.test(city))return{city,postal:/^\d{5}$/.test(cp)?cp:''};}}
  const text=decodeEntities(html.replace(/<(script|style|svg)\b[\s\S]*?<\/\1>/gi,' ').replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'\n'));
  const counts=new Map<string,number>();
  // ville parfois en minuscules (« 75017 paris ») : remise en forme (« Paris »).
