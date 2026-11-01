@@ -29,8 +29,11 @@
     const crop=1-Math.min(ir,br)/Math.max(ir,br);
     // 29/10/2026 (Anthony) : la photo remplit toujours toute la vignette (plus de bandes ni de fond flou).
     // Recadrage léger : ancrée en bas à droite (filigrane incrusté) ; recadrage fort (portrait…) : centrée.
-    img.style.setProperty('object-fit','cover','important');
-    img.style.setProperty('object-position',crop<=MAX_CROP?'right bottom':'center','important');
+    // 01/11/2026 (Anthony) : photo prise en hauteur (téléphone) ou très coupée → entière, sur fond flou (classe .photo-fit,
+    // posée par card-photo-fit-20261101.js). Sinon la photo remplit la vignette comme avant.
+    const whole=ir<0.95||crop>0.3;
+    img.style.setProperty('object-fit',whole?'contain':'cover','important');
+    img.style.setProperty('object-position',whole?'center':(crop<=MAX_CROP?'right bottom':'center'),'important');
     box.classList.remove('thumb-fit-contain');
     box.style.removeProperty('--thumb-bg');
   }
