@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : réseau Cimm Immobilier appris par le robot (pro-stock-sync v168)
+- Nouveau `supabase/functions/pro-stock-sync/cimm-reader.ts` : toute agence `<ville>.cimm.com` est lue (liste des biens sur la page d'accueil de l'agence, fiches `cimm.com/bien/…-p<n°>`).
+- Ville : lue sur la photo principale (« Maison à Montlouis-sur-Loire »), sinon ville de l'agence. Corrige « ville manquante ».
+- Tests : Ballan-Miré 22/22, Guipry-Messac 29/29, Le Touvet 25/25 complètes. Demandes guipry-messac et letouvet → « Réparé · à valider ». 26 prospects Cimm remis en file de vérification.
+- Commit c3d2110 (déployé avec le SHA complet).
+- Reste : réseaux Laforêt, Guy Hoquet, Espaces Atypiques, Square Habitat (API cachée).
+
 ### 01/11/2026 — Claude — Citya Nord de France + prix « price/prix » (v166 / 83494a3)
 - `readCityaNdfAgency` (citya-ndf.com/agence/agence-de-X/) : liens « /annonces/?status=acheter|louer&address=Agence de X » de la page agence, display=48, pages /annonces/page/N/ ; ville/CP repris de l'adresse de la fiche si absents. Tests : La Bassée 15/15, Calais 25/25, Armentières 1/1. 48 prospects remis en test.
 - smart-reader : prix lu d'abord dans un élément dont la classe contient price/prix (sinon « 1 » salle de bain + « 179 500 € » donnait 1 179 500 €).
