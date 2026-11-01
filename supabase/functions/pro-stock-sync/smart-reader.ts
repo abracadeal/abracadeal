@@ -195,6 +195,9 @@ export function smartDetail(rawHtml:string,pageUrl:string,sector:string){
   const declared=metaAll(headHtml,'product:price:amount')[0]||metaAll(headHtml,'og:price:amount')[0]||(region.match(/itemprop=["']price["'][^>]*content=["']([\d.,\s]+)["']/i)?.[1]||'');
   if(declared){const canonical=declared.replace(/\s/g,'');prix=/^\d+(?:[.,]\d+)?$/.test(canonical)?Number(canonical.replace(',','.')):num(declared);}
   const metaDesc=(metaAll(headHtml,'description')[0]||'')+' \n'+(metaAll(headHtml,'og:description')[0]||'');
+  // 01/11/2026 (Citya Nord de France : « 1 » salle de bain + « 179 500 € » lus comme 1 179 500 €) : un élément dont la classe dit « price / prix »
+  // est lu seul, avant le texte de la page (où des chiffres voisins se collent au prix).
+  if(!(prix>0)){for(const m of region.matchAll(/class="[^"]*\b(?:[a-z-]*-)?(?:price|prix)\b[^"]*"[^>]*>\s*([^<]{2,40}?)\s*</gi)){const v=firstAmount(clean(m[1]),priceRe);if(v>0){prix=v;break;}}}
   if(!(prix>0))prix=firstAmount(head+' \n'+metaDesc,priceRe);
   if(!(prix>0)){const j=jsonVal(region,['itemPrice','price','prix','prixVente','prix_vente','sale_price','salePrice']);if(/^\d{3,9}(\.\d+)?$/.test(j))prix=Number(j);}
   // 29/10/2026 (Nestenn) : prix affiché à côté du titre mais dans un <header> (retiré du texte) : on regarde autour du titre d'abord.
