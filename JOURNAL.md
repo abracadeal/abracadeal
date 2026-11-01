@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : BH Car lisait toute la France ; aperçu limité à 220 (pro-stock-sync v195)
+- Anthony (capture test bhcar.fr : « 4207 annonces sur le site », 879 lues) : « ça lit toute la France d'un coup et pourquoi que 220 en aperçu ».
+- BH Car est un réseau national. `network-agency-readers.ts` : lecteur BH Car par agence (`bhcar.fr/agences/bhcar-<ville>`, ?page=2…), fiche gardée seulement si elle dit « chez BH Car <agence> ». L'accueil du réseau n'est plus lu : message « indiquez la page de l'agence ». Test Lille : 214 véhicules de l'agence, 136 lus au 1er passage, tous complets. bhcar-angouleme : page d'agence introuvable.
+- Demande bhcar.fr (prospect « BH CAR », ville Limoges, e-mail marmande@) remise en attente : il faut savoir quelle agence.
+- `admin-test-import.html` : « Voir comme sur le site » montrait au plus 220 annonces ; maintenant toutes, réduit seulement si le navigateur manque de place (message avec le nombre).
+
 ### 01/11/2026 — Claude : La Résidence, La Française Immobilière, photos Laroca (pro-stock-sync v194)
 - `network-agency-readers.ts` (nouveau) :
   - **La Résidence** (`laresidence.fr/agences-immobilieres/<agence>`) : listes `/acheter` et `/louer` de l'agence (?Page=2…), fiches lues par les données structurées + la page ; ville et code postal pris dans le titre (la lecture automatique donnait « Achat maison »), titre sans « Réf … - LA RESIDENCE ». Chatou 44/44, Sartrouville 38/38.
