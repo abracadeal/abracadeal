@@ -309,6 +309,22 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const g5=uniq(/\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*(?:2|²)\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/gi);
       if(!o.dpe&&d5)o.dpe=d5;if(!o.ges&&g5)o.ges=g5.toUpperCase();
     }
+    // 01/11/2026 (contrôle automatique) : classe donnée en attribut : data-current-class (diagPreview--pe / --ges),
+    // data-energetic-class, data-dpe="201;d" / data-ges="42;d" (étiquette Jalis).
+    if(!o.dpe||!o.ges){
+      const dA=region.match(/diagPreview--(?:pe|dpe|energy)"[^>]*?data-current-class="([A-G])"/i)?.[1]||region.match(/data-energetic-class="([A-G])"/i)?.[1]||region.match(/data-dpe="\d[\d.,]*;([a-g])"/i)?.[1];
+      const gA=region.match(/diagPreview--ges"[^>]*?data-current-class="([A-G])"/i)?.[1]||region.match(/data-ges="\d[\d.,]*;([a-g])"/i)?.[1];
+      if(!o.dpe&&dA)o.dpe=dA.toUpperCase();if(!o.ges&&gA)o.ges=gA.toUpperCase();
+    }
+    // 01/11/2026 (contrôle automatique, Calliope) : échelle A→G avec un curseur portant la valeur du bien
+    // (<div class="dpe_target">…123</div>) : classe déduite de la valeur avec les seuils du DPE 2021.
+    if(!o.dpe||!o.ges){
+      const kwh=region.match(/class="dpe_target"[^>]*>[\s\S]{0,120}?<\/span>\s*(\d{1,4})\s*</)?.[1];
+      const co2=region.match(/class="ges_target"[^>]*>[\s\S]{0,120}?<\/span>\s*(\d{1,4})\s*</)?.[1];
+      const cls=(v:number,t:number[])=>'ABCDEFG'[t.findIndex(x=>v<=x)<0?6:t.findIndex(x=>v<=x)];
+      if(!o.dpe&&kwh)o.dpe=cls(Number(kwh),[70,110,180,250,330,420]);
+      if(!o.ges&&co2)o.ges=cls(Number(co2),[6,10,29,49,69,99]);
+    }
     // 01/11/2026 (Anthony : « toujours énormément de DPE pas lus ») : étiquettes dessinées dans la page (SVG) :
     // <g id="GES_E"> / <g id="DPE_C"> (La Résidence), <g id="EnergieC"> / <g id="GesC"> (La Française), conteneur « diagnosticShortened dpeE », La Boîte Immo (extension wp-dpe-ges) « diagnostic-diagram numberC » / « emission-diagram numberB ».
     if(!o.dpe||!o.ges){
@@ -385,7 +401,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   }
   // 01/11/2026 (Anthony : « je peux pas vérifier chaque annonce ») : contrôle automatique. DPE non trouvé alors que la page en parle
   // (« classe énergie », « diagnostic de performance », kWh/m²…) → noté pour le test de site (« DPE présent mais pas lu »).
-  if(immo&&!o.dpe){const m=text.match(/(?:classe\s*(?:[ée]nergie|[ée]nerg[ée]tique|energy)|diagnostic\s*de\s*performance|performance\s*[ée]nerg[ée]tique|\bDPE\b|kWh\s*(?:ep|EP)?\s*\/\s*m)[^\n]{0,60}/i);if(m)o._dpe_hint=m[0].slice(0,90);}
+  if(immo&&!o.dpe&&!/non soumis|dpe vierge|non requis|non concern/i.test(text)){const m=text.match(/(?:classe\s*(?:[ée]nergie|[ée]nerg[ée]tique|energy)|diagnostic\s*de\s*performance|performance\s*[ée]nerg[ée]tique|\bDPE\b|kWh\s*(?:ep|EP)?\s*\/\s*m)[^\n]{0,60}/i);if(m)o._dpe_hint=m[0].slice(0,90);}
   return o;
 }
 
