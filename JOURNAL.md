@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude — GES manquant ne bloque plus (v157 / cd6edcb)
+- Demande d'Anthony : un DPE sans GES n'est plus une erreur (beaucoup d'agences ne publient pas le GES). `gesFromText` le reprend de la description s'il y est écrit (« GES : C », « gaz à effet de serre classe D », « émissions de GES … (classe E) »).
+- Tests : Croisette 98/100, Agence Résidence 27/27, Solution Immobilier 2/2, La Grandière 2/2 → demandes passées « Réparé, à valider ». 16 prospects immo « mail normal » pour annonces incomplètes remis en test (site_check_status=null).
+
 ### 01/11/2026 — Claude — vignettes : orientation des photos, photos en hauteur, galerie
 - `generate-listing-thumbs` v2 : applique l'orientation EXIF (photos de téléphone couchées dans les miniatures). Les 88 miniatures ont été refaites (cron temporaire `abracadeal-thumbs-catchup-tmp`, à supprimer une fois vide). `thumbUrl` ajoute `?o=2` (les anciennes miniatures étaient en cache 1 an).
 - `assets/card-photo-fit-20261101.js` + CSS `.photo-fit` : photo en hauteur affichée entière sur fond flou dans les vignettes.
