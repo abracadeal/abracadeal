@@ -13,7 +13,8 @@ export const sDecode=(v:string)=>String(v||'').replace(/&#(\d+);/g,(_,n)=>String
 const clean=(v:string)=>sDecode(String(v||'').replace(/<br\s*\/?>/gi,'\n').replace(/<\/(p|div|li|h\d)>/gi,'\n').replace(/<[^>]+>/g,' ')).replace(/[ \t\u00a0\u2009\u202f]+/g,' ').split('\n').map(l=>l.trim()).filter(Boolean).join('\n').trim();
 const SKIP_PATH=/(blog|actualit|news|article|conseil|guide|lexique|contact|mention|cgv|cgu|conditions|confidential|cookie|rgpd|recrut|emploi|carriere|estim|vendre|faire-gerer|gestion|syndic|financ|assurance|faq|aide|login|connexion|compte|favori|alerte|newsletter|plan-du-site|sitemap|avis|temoignage|equipe|agence(s)?\/?$|qui-sommes|a-propos|services?$|honoraires|bareme|print|imprim|share|partag|tel:|mailto:|javascript:|wp-admin|wp-login|feed|tag\/|categorie?\/|author)/i;
 const LIST_PATH=/(acheter|achat|vente|vendre-|a-vendre|louer|location|annonce|biens?|nos-biens|catalog|recherche|search|resultat|offres?|stock|vehicules?|voitures?|occasions?|motos?|utilitaires?|nos-|liste|programme|immobilier)/i;
-const IMG_BAD=/(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|partners?\/|partenaires?\/|modules\/|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default|no[-_]?photo|noimage|thumb_?nail_?small)/i;
+// 02/11/2026 (Anthony, ad-nostra « mauvaise photo ») : « default » seulement comme nom d'image, pas le dossier Drupal /sites/default/files/.
+const IMG_BAD=/(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|partners?\/|partenaires?\/|modules\/|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default(?!\/)|no[-_]?photo|noimage|thumb_?nail_?small)/i;
 
 function pathPattern(u:URL){return u.pathname.split('/').filter(Boolean).map(s=>/\d{3,}/.test(s)?(s.replace(/\d+/g,'#').length>12?'*#':'#'):(s.split('-').length>=4?'*':s)).join('/');}
 function isDetailish(u:URL){const last=u.pathname.replace(/\/+$/,'').split('/').pop()||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product)=/i.test(u.search);}
@@ -329,9 +330,17 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     // et lettre écrite dans le texte « DPE en B », « DPE : C » (Valmo) — une seule lettre sur la page.
     if(!o.dpe||!o.ges){
       const uq=(src:string,re:RegExp)=>{const set=new Set([...src.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
-      const d6=uq(region,/\/(?:dpe|cep|energie)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bDPE\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
-      const g6=uq(region,/\/(?:ges|climat|co2)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bGES\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
+      const d6=uq(region,/[\/_-](?:dpe|cep|energie)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bDPE\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
+      const g6=uq(region,/[\/_-](?:ges|climat|co2)(?:v\d)?[-_]([a-g])\.(?:jpe?g|png|gif|svg|webp)\b/gi)||uq(text,/\bGES\s*(?:en|:|=|classe)\s*([A-G])\b(?![\s]*(?:à|a|-|–)\s*[A-G]\b)/gi);
       if(!o.dpe&&d6)o.dpe=d6;if(!o.ges&&g6)o.ges=g6;
+    }
+    // 02/11/2026 (Anthony, Valloire Habitat « DPE pas lu ») : étiquette dessinée par script : dpe.dpe({domId:'dpe', value:'D'}),
+    // script parfois encodé (src="data:text/javascript;base64,…").
+    if(!o.dpe||!o.ges){
+      let js=region;for(const m of region.matchAll(/src=["']data:text\/javascript;base64,([A-Za-z0-9+\/=]{20,6000})["']/g)){try{js+='\n'+atob(m[1]);}catch{}}
+      const dJ=js.match(/\.(?:dpe|cep|energie)\s*\(\s*\{[^}]{0,300}?value\s*:\s*['"]([A-G])['"]/i)?.[1];
+      const gJ=js.match(/\.(?:ges|climat|co2)\s*\(\s*\{[^}]{0,300}?value\s*:\s*['"]([A-G])['"]/i)?.[1];
+      if(!o.dpe&&dJ)o.dpe=dJ.toUpperCase();if(!o.ges&&gJ)o.ges=gJ.toUpperCase();
     }
     // 01/11/2026 (Anthony : « toujours énormément de DPE pas lus ») : étiquettes dessinées dans la page (SVG) :
     // <g id="GES_E"> / <g id="DPE_C"> (La Résidence), <g id="EnergieC"> / <g id="GesC"> (La Française), conteneur « diagnosticShortened dpeE », La Boîte Immo (extension wp-dpe-ges) « diagnostic-diagram numberC » / « emission-diagram numberB ».
