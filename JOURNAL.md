@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : Laforêt Paris 10 + DPE Laforêt (pro-stock-sync v183)
+- Anthony : laforet.com/agence-immobiliere/paris1saintmartinetsaintdenis revenu dans « à réparer ». La page n'existe plus (404) ; l'e-mail du prospect est paris10saintdenis@laforet.com → adresse du prospect corrigée vers /agence-immobiliere/paris10saintdenis, remis en vérification.
+- Laforêt : DPE / GES en image SVG (/ajax/properties/<n°>/dpe, `<g id="DPE_D">`, `<g id="GES_D">`) désormais lus (`energy-image.ts`). Paris 10 : 10 % → 75 % (tous les logements ; les 2 locaux commerciaux n'ont pas de DPE).
+- Laforêt : seuls les biens de l'agence demandée (des biens d'Issy-les-Moulineaux étaient pris).
+- Type de bien pris de l'adresse quand elle le dit (« /fonds-de-commerce-… », « /local-commercial-… », « /parking-… ») : un fonds de commerce était classé appartement.
+
 ### 01/11/2026 — Claude : dépenses d'énergie ×100 corrigées (pro-stock-sync v181)
 - Anthony : « 67 000 € à 94 000 € » de dépenses d'énergie sur une location à Bourg-en-Bresse (site : 670.00 € et 940.00 €).
 - Cause : ma lecture Cimm du jour (`smart-reader.ts`) supprimait le point des centimes. Montant maintenant lu avec centimes « .00 » / « ,50 » retirés, et accepté seulement s'il est plausible.
