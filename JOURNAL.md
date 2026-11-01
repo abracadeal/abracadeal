@@ -18,6 +18,20 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : sites à réparer, robot qui plantait (erreur 503) sur les gros sites (pro-stock-sync v190)
+- Plan validé par Anthony (« ok ») : 1. relancer les 6 sites jamais testés ; 2. La Résidence / La Française Immobilière ; 3. plateformes connues ; 4. sites uniques.
+- raccosta.com : 256/256, réparé. jlcarsparis.fr : aucune fiche véhicule lisible (Appidev), reste à faire.
+- axeylia, laroca-immobilier, valloire-habitat, bhcar : le robot était coupé par la plateforme (erreur 503 sans message) après 5 à 12 s. Trace de diagnostic ajoutée (table `stock_crawl_trace`, option `trace` du test) : 250 à 400 pages de 90 à 250 Ko lues, donc plus de ~2 s de calcul → coupure. Ce n'était pas la lecture des DPE en image (bhcar est un garage).
+- Corrections :
+  - `cpu-meter.ts` (nouveau) : temps de lecture des pages compté par site (décodage + lecture de fiche + recherche des liens) ; au-delà d'1 s, le parcours s'arrête proprement (lecture partielle, reprise au passage suivant) au lieu de planter. Utilisé dans `smart-reader.ts` et `resumable-crawl.ts`.
+  - `resumable-crawl.ts` : index des liens déjà vus (Set) au lieu de recherches dans des listes.
+  - `fetchSiteHtml` : fichiers qui ne sont pas des pages (vidéo, PDF, archive) refusés ; lecture arrêtée à la taille maximale au lieu de tout charger.
+  - `energy-image.ts` : images DPE de plus de 2,5 Mpx ignorées, décodage cumulé limité à ~0,9 s, 25 s maximum.
+  - Lecture véhicule (données structurées) : ville / code postal du garage pris dans l'adresse de l'offre (BH Car n'avait aucune ville → 0 annonce complète).
+- Résultats du test : laroca 82 complètes / 97 lues, valloire-habitat 87/87, bhcar 99/99 (lectures partielles, la suite aux passages suivants) → demandes passées à « Réparé · à valider ».
+- axeylia (axeylia-immobilier.fr) : ne plante plus, mais aucune fiche dans les pages (biens chargés en JavaScript, plan du site = 1 440 pages « secteur ») : à traiter avec les sites uniques.
+- Fonction de test temporaire `pro-stock-sync-bisect` remplacée par une page vide (410).
+
 ### 01/11/2026 — Claude : Orpi 4F Gestion Saint-Nizier (pro-stock-sync v185)
 - Anthony : « pourquoi il ne sait pas lire https://www.orpi.com/4fgestion.saintnizier/ ».
 - Vérifié : l'agence n'a aucune annonce en ligne sur Orpi (catalogue 0 en vente / 0 en location, page agence sans bien ; « biens en vente / location » renvoient à l'accueil). Agence de gestion locative / conciergerie ; seul lien externe : un site de locations de vacances (4fgestion-conciergerie.lodgify.com).
