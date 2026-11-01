@@ -122,7 +122,9 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
 
 function longestText(html:string){
   // Découpe par blocs (sans expressions coûteuses) et garde le plus long texte « rédigé ».
-  const body=html.replace(/<(script|style|svg|noscript|nav|header|footer|form|select|button)\b[\s\S]*?<\/\1>/gi,' ');
+  // 01/11/2026 (Anthony : « descriptions pas entières », Twimmo) : un <button> sans fermeture avalait tout jusqu'au </button> suivant,
+  // description comprise → longueur bornée pour les petits éléments (bouton, liste) et les blocs de navigation / formulaires.
+  const body=html.replace(/<(script|style|svg|noscript)\b[\s\S]*?<\/\1>/gi,' ').replace(/<(select|button)\b[\s\S]{0,4000}?<\/\1>/gi,' ').replace(/<(nav|header|footer|form)\b[\s\S]{0,40000}?<\/\1>/gi,' ');
   let best='';
   for(const chunk of body.split(/<\/?(?:div|section|article|table|ul|ol|aside|main)\b[^>]*>/i)){
     if(chunk.length<120)continue;const t=clean(chunk);
@@ -298,6 +300,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const d3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kWh/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:cep|dpe|energie|energy)[-_]([a-g])"|<[^>]+\bid="(?:cep|dpe|energie|energy)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
       const g3=text.match(/(?:^|[\s>(])([A-G])\s*:\s*\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*2/i)?.[1]||html.match(/<[^>]+\bclass="[^"]*\b(?:active|selected|current)\b[^"]*"[^>]*\bid="(?:e?ges|climat|co2)[-_]([a-g])"|<[^>]+\bid="(?:e?ges|climat|co2)[-_]([a-g])"[^>]*\bclass="[^"]*\b(?:active|selected|current)\b/i)?.slice(1).find(Boolean);
       if(!o.dpe&&d3)o.dpe=d3.toUpperCase();if(!o.ges&&g3)o.ges=g3.toUpperCase();
+    }
+    // 01/11/2026 (Anthony : « toujours énormément de DPE pas lus ») : étiquettes dessinées dans la page (SVG) :
+    // <g id="GES_E"> / <g id="DPE_C"> (La Résidence), <g id="EnergieC"> / <g id="GesC"> (La Française), conteneur « diagnosticShortened dpeE », La Boîte Immo (extension wp-dpe-ges) « diagnostic-diagram numberC » / « emission-diagram numberB ».
+    if(!o.dpe||!o.ges){
+      const one=(re:RegExp)=>{const set=new Set([...region.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
+      const d4=one(/<g\s+id="(?:DPE|Dpe|Energie|ENERGIE|Cep|CEP)[_-]?([A-G])"/g)||one(/class="[^"]*\bdiagnosticShortened\s+dpe([A-G])\b/g)||one(/class="diagnostic-(?:scale|diagram)\s+number([A-G])"/g);
+      const g4=one(/<g\s+id="(?:GES|Ges|Eges|EGES|Climat)[_-]?([A-G])"/g)||one(/class="[^"]*\bdiagnosticShortened\s+ges([A-G])\b/g)||one(/class="emission-(?:scale|diagram)\s+number([A-G])"/g);
+      if(!o.dpe&&d4)o.dpe=d4;if(!o.ges&&g4)o.ges=g4;
     }
     // 01/11/2026 (Anthony, Cimm) : « dépenses annuelles d'énergie … : entre 2580€ et 3570€ » écrit sur plusieurs lignes.
     // 01/11/2026 (Anthony) : « 670.00 € » / « 1 580,50 € » → centimes retirés (avant : 670.00 lu 67000).

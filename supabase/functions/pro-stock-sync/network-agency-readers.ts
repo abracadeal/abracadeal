@@ -10,7 +10,7 @@
 // (lien « Plus d'infos » vers /agences/…/<agence>/) : seules les fiches de l'agence inscrite sont gardées.
 // DPE / GES dessinés en SVG dans la page : <g id="EnergieC">, <g id="GesC">. Ville absente de la fiche : prise dans le lien
 // (« vente-appartement-t3-rennes-61466680 » → Rennes).
-import { smartDetail } from './smart-reader.ts';
+import { smartDetail, sDecode } from './smart-reader.ts';
 import { crawlCatalogue, crawlDetails, type CrawlMemory } from './resumable-crawl.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const cap=(s:string)=>s.split('-').map((w,i)=>i>0&&/^(de|du|des|la|le|les|sur|sous|en|aux?|et|l|d)$/.test(w)?w:w.charAt(0).toUpperCase()+w.slice(1)).join('-').replace(/-([dl])-/gi,(_,x)=>`-${x.toLowerCase()}'`);
@@ -43,6 +43,10 @@ export async function readLaResidenceAgency(url:URL,fetchHtml:Fetcher,ldParse:(h
         const slugCity=cap(l.split('/')[4]||'');
         r.ville=cp?.[1]?.trim()||slugCity;if(cp?.[2])r.code_postal=cp[2];
         if(l.includes('/louer/'))r.transaction='location';
+        // 01/11/2026 (Anthony : « descriptions pas entières ») : les données structurées coupent le texte (~160 caractères) ;
+        // texte complet sous « Descriptif de votre professionnel ».
+        {const dm=h.match(/id="descriptif_anchor"[\s\S]{0,400}?<\/p>\s*<p class="mt-2 mb-0 fs-sm">([\s\S]*?)<\/p>/);
+         if(dm){const full=sDecode(dm[1].replace(/<br\s*\/?>/gi,'\n').replace(/<[^>]+>/g,'')).replace(/[ \t]+/g,' ').replace(/\n{3,}/g,'\n\n').trim();if(full.length>String(r.description||'').length)r.description=full;}}
         r.titre=String(r.titre||'').replace(/\s*-\s*R[ée]f\s*:.*$/i,'').replace(/\s*-\s*LA RESIDENCE\s*$/i,'').replace(/\s{2,}/g,' ').trim();
         return r;
   },memory);
