@@ -305,7 +305,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     if(!o.dpe||!o.ges){
       // une seule lettre sur toute la page (jamais une légende A→G)
       const uniq=(re:RegExp)=>{const set=new Set([...text.matchAll(re)].map(m=>m[1].toUpperCase()));return set.size===1?[...set][0]:'';};
-      const d5=uniq(/\d[\d\s.,]*\s*kWh\s*(?:ep|EP|e\.p\.)?\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/g);
+      const d5=uniq(/\d[\d\s.,]*\s*kWh\s*(?:ep|EP|e\.p\.)?\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/gi);
       const g5=uniq(/\d[\d\s.,]*\s*kg\s*(?:[ée]q\.?\s*)?CO\s*(?:2|²)\s*\/\s*m(?:²|2)\s*[./]?\s*an\.?\s*:?\s*\(?([A-G])\)?(?![a-zà-ü])/gi);
       if(!o.dpe&&d5)o.dpe=d5;if(!o.ges&&g5)o.ges=g5.toUpperCase();
     }
