@@ -5,6 +5,7 @@
 //  - create  {siret,email,phone,site_url,sector,consent} → compte Pro créé (e-mail confirmé, CGU à accepter au 1er mot de passe),
 //            SIRET vérifié, offre Fondateur activée si une place est disponible, demande d'import du site créée.
 //            L'activation + la synchro du site sont faites ensuite par la page admin (admin_review_site_import + pro-stock-sync).
+//            01/11/2026 : vitrine (logo, bannière, présentation) remplie depuis le site du pro, sans rien inventer.
 //  - welcome {user_id,online,pending}                 → mail « vos annonces sont en ligne » avec le lien pour choisir le mot de passe.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
@@ -108,6 +109,85 @@ ${paras.map((x) => `<p style="margin:0 0 14px 0;line-height:1.55;color:#21132d;"
   return { subject: title, html, text };
 }
 
+// 01/11/2026 (Anthony) : à l'inscription, la vitrine du pro est remplie avec ce qui est VRAIMENT sur son site, rien d'inventé :
+//  - logo : image du site dont le nom / alt / classe contient « logo » (sinon rien) ;
+//  - bannière : image de partage du site (og:image), si ce n'est pas le logo ;
+//  - présentation : description du site (meta description / og:description), si elle fait au moins 40 caractères.
+// Rien n'est remplacé si le pro a déjà rempli sa vitrine. Ce qui n'est pas trouvé reste vide.
+const ENT: Record<string, string> = { amp: "&", quot: '"', apos: "'", lt: "<", gt: ">", nbsp: " ", eacute: "é", egrave: "è", ecirc: "ê", euml: "ë", agrave: "à", acirc: "â", ccedil: "ç", icirc: "î", iuml: "ï", ocirc: "ô", ugrave: "ù", ucirc: "û", uuml: "ü", Eacute: "É", Egrave: "È", Agrave: "À", Ccedil: "Ç", rsquo: "’", lsquo: "‘", rdquo: "”", ldquo: "“", laquo: "«", raquo: "»", hellip: "…", ndash: "–", mdash: "—", euro: "€", deg: "°", oelig: "œ" };
+const decodeHtml = (s: string) => s.replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/&([a-z]+);/gi, (m, k) => ENT[k] ?? m);
+const metaContent = (html: string, key: string) => {
+  const re1 = new RegExp(`<meta[^>]+(?:name|property)=["']${key}["'][^>]*content=["']([^"']+)["']`, "i");
+  const re2 = new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]*(?:name|property)=["']${key}["']`, "i");
+  return decodeHtml((html.match(re1) || html.match(re2) || [])[1] || "").trim();
+};
+async function fetchImage(url: string) {
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Abracadeal/1.0)", Accept: "image/*" }, signal: AbortSignal.timeout(12000) });
+    if (!r.ok) return null;
+    const type = (r.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    if (!/^image\/(png|jpe?g|webp|gif)$/.test(type)) { await r.body?.cancel(); return null; }
+    const b = new Uint8Array(await r.arrayBuffer());
+    if (b.length < 800 || b.length > 4_000_000) return null;
+    return { bytes: b, type, ext: type === "image/jpeg" || type === "image/jpg" ? "jpg" : type.split("/")[1] };
+  } catch { return null; }
+}
+async function autofillShowroom(userId: string, site: string) {
+  const out = { logo: false, banner: false, description: false };
+  try {
+    const { data: cur } = await admin.from("pro_showrooms").select("description,banner_path,logo_path").eq("user_id", userId).maybeSingle();
+    if (cur?.description && cur?.banner_path && cur?.logo_path) return out;
+    const r = await fetch(site, { headers: { "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36", Accept: "text/html" }, signal: AbortSignal.timeout(15000) });
+    if (!r.ok) return out;
+    const html = (await r.text()).slice(0, 1_500_000);
+    const base = r.url || site;
+    const abs = (u: string) => { try { return new URL(decodeHtml(u), base).toString(); } catch { return ""; } };
+    // logo
+    // Logo : image nommée / marquée « logo », ou image de l'en-tête liée à l'accueil ; icônes, étoiles, labels, partenaires exclus.
+    let logoUrl = "", best = 0;
+    const headerEnd = (() => { const i = html.search(/<\/header>/i); return i > 0 ? i : Math.floor(html.length * 0.25); })();
+    const homeHref = (h: string) => { try { const u = new URL(decodeHtml(h), base); const b = new URL(base); return u.hostname === b.hostname && (u.pathname === "/" || u.pathname === "" || /^\/(index\.\w+)?$/.test(u.pathname)); } catch { return false; } };
+    for (const m of html.matchAll(/(<a\b[^>]*>\s*(?:<[^>]+>\s*){0,3})?<img\b[^>]*>/gi)) {
+      const tag = m[0].slice(m[0].search(/<img\b/i)), link = m[1] || "";
+      const src = (tag.match(/\b(?:data-src|data-lazy-src|src)=["']([^"']+)["']/i) || [])[1] || "";
+      if (!src || /^data:/i.test(src)) continue;
+      const file = decodeHtml(src).split("?")[0].split("/").pop() || "";
+      if (/star|etoile|icon|picto|arrow|fleche|flag|drapeau|badge|avis|rating|note|payment|paiement|visa|mastercard|partenaire|partner|label|certif|award|trophee|google|facebook|instagram|youtube|linkedin|tiktok|whatsapp|fnaim|orias|loader|spinner|placeholder/i.test(file)) continue;
+      let sc = 0;
+      if (/logo/i.test(file)) sc += 3;
+      if (/\balt=["'][^"']*logo|\b(?:class|id)=["'][^"']*logo/i.test(tag)) sc += 3;
+      if ((m.index || 0) < headerEnd) sc += 2;
+      const href = (link.match(/\bhref=["']([^"']+)["']/i) || [])[1];
+      if (href && homeHref(href)) sc += 2;
+      if (sc >= 4 && sc > best) { best = sc; logoUrl = abs(src); }
+    }
+    // bannière (image de partage) et présentation
+    const og = metaContent(html, "og:image") || metaContent(html, "twitter:image");
+    const bannerUrl = og ? abs(og) : "";
+    let desc = metaContent(html, "og:description") || metaContent(html, "description");
+    desc = desc.replace(/\s+/g, " ").trim().slice(0, 1000);
+    const upd: Record<string, unknown> = {};
+    const stamp = Date.now();
+    if (!cur?.logo_path && logoUrl) {
+      const img = await fetchImage(logoUrl);
+      if (img) { const path = `${userId}/logo-${stamp}.${img.ext}`; const { error } = await admin.storage.from("pro-showroom").upload(path, img.bytes, { contentType: img.type, upsert: false, cacheControl: "3600" }); if (!error) { upd.logo_path = path; out.logo = true; } }
+    }
+    if (!cur?.banner_path && bannerUrl && bannerUrl !== logoUrl && !/logo|favicon|icon/i.test(bannerUrl)) {
+      const img = await fetchImage(bannerUrl);
+      if (img && img.bytes.length >= 8000) { const path = `${userId}/banner-${stamp}.${img.ext}`; const { error } = await admin.storage.from("pro-showroom").upload(path, img.bytes, { contentType: img.type, upsert: false, cacheControl: "3600" }); if (!error) { upd.banner_path = path; out.banner = true; } }
+    }
+    if (!cur?.description && desc.length >= 40) { upd.description = desc; out.description = true; }
+    if (Object.keys(upd).length) {
+      const row = { user_id: userId, description: cur?.description ?? null, banner_path: cur?.banner_path ?? null, logo_path: cur?.logo_path ?? null, ...upd, updated_at: new Date().toISOString() };
+      const { error } = await admin.from("pro_showrooms").upsert(row, { onConflict: "user_id" });
+      if (error) { console.error("vitrine", error); return { logo: false, banner: false, description: false }; }
+    }
+  } catch (e) { console.error("vitrine", e); }
+  return out;
+}
+const showroomNote = (v: { logo: boolean; banner: boolean; description: boolean }) =>
+  `Vitrine remplie depuis le site : logo ${v.logo ? "✓" : "— (non trouvé)"}, bannière ${v.banner ? "✓" : "— (non trouvée)"}, présentation ${v.description ? "✓" : "— (non trouvée)"}. Modifiable ensuite par le pro ou par l’admin.`;
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Méthode non autorisée" }, 405);
@@ -162,7 +242,8 @@ Deno.serve(async (req) => {
         if (prof?.account_type !== "professionnel") return json({ error: "Un compte particulier existe déjà avec cet e-mail : utilisez une autre adresse du garage." }, 409);
         const { data: imp, error: impErr } = await caller.rpc("admin_create_site_import", { p_owner_id: existingUser.id, p_url: site, p_sector: sector });
         if (impErr) throw impErr;
-        return json({ ok: true, existing: true, user_id: existingUser.id, feed_id: imp?.feed_id, company, sector, founder: null, warnings: ["Ce garage avait déjà un compte : seul l’import de son site a été ajouté."] });
+        const vitrine = await autofillShowroom(existingUser.id, site);
+        return json({ ok: true, existing: true, user_id: existingUser.id, feed_id: imp?.feed_id, company, sector, founder: null, showroom: vitrine, warnings: ["Ce garage avait déjà un compte : seul l’import de son site a été ajouté.", showroomNote(vitrine)] });
       }
 
       const { data: phoneFree } = await admin.rpc("abracadeal_phone_available", { p_phone: phone, p_account_type: "professionnel" });
@@ -208,7 +289,9 @@ Deno.serve(async (req) => {
 
       const { data: imp, error: impErr } = await caller.rpc("admin_create_site_import", { p_owner_id: userId, p_url: site, p_sector: sector });
       if (impErr) throw new Error("Compte créé, mais demande d’import impossible : " + impErr.message);
-      return json({ ok: true, existing: false, user_id: userId, feed_id: imp?.feed_id, company, sector, founder, warnings });
+      const vitrine = await autofillShowroom(userId, site);
+      warnings.push(showroomNote(vitrine));
+      return json({ ok: true, existing: false, user_id: userId, feed_id: imp?.feed_id, company, sector, founder, showroom: vitrine, warnings });
     }
 
     if (action === "welcome") {
