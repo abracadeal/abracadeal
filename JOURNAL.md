@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : Orpi 4F Gestion Saint-Nizier (pro-stock-sync v185)
+- Anthony : « pourquoi il ne sait pas lire https://www.orpi.com/4fgestion.saintnizier/ ».
+- Vérifié : l'agence n'a aucune annonce en ligne sur Orpi (catalogue 0 en vente / 0 en location, page agence sans bien ; « biens en vente / location » renvoient à l'accueil). Agence de gestion locative / conciergerie ; seul lien externe : un site de locations de vacances (4fgestion-conciergerie.lodgify.com).
+- `orpi-catalogue.ts` : message clair au lieu de « aucune annonce complète lue » : « Cette agence n’a aucune annonce en ligne sur Orpi (0 en vente, 0 en location) : rien à importer pour l’instant. »
+
 ### 01/11/2026 — Claude : Orpi « 727 fiches restantes » corrigé (pro-stock-sync v184) + incident pg_net
 - Anthony : test d'Orpi St Cyprien → « 727 fiches restantes ».
 - Cause : le catalogue JSON d'Orpi (`/recherche/ajax?agency=…`) ne renvoie que 500 annonces sur 752 (biens partagés du réseau compris) et ignore `page` ; le lecteur complétait alors avec les pages de liste HTML, qui mélangent toutes les agences (727 fiches à ouvrir).
