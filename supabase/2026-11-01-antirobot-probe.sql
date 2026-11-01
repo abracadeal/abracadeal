@@ -1,0 +1,6 @@
+-- 01/11/2026 (Anthony) : « fais ça pour tous les sites protégés par robot ».
+-- Appliqué via migration « antirobot_probe_tick » : table private.antirobot_probe (1 ligne par site de prospect, 7384 sites),
+-- tâche cron 'abracadeal-antirobot-probe' (chaque minute) : 500 pages d'accueil visitées par pg_net, verdict « anti-robot »
+-- seulement sur une vraie page de blocage (Cloudflare « Just a moment », DataDome 403, AWS WAF, UUSEC, Incapsula 403,
+-- PerimeterX, captcha 403/503). À la fin : prospects de ces sites (sauf ceux déjà lus par le robot) marqués
+-- « Protection anti-robots » → trigger exclude_anti_robot → retirés (exclu_admin) ; la tâche s'arrête seule.
