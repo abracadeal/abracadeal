@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 01/11/2026 — Claude : lecture par étapes pour Citya, Human, Apimo, AJP, Junot, Kermarrec ; DPE et descriptions (pro-stock-sync v202)
+- Anthony : « ceux qu'on a déjà faits, comment ça se passe » puis « ok fais ». `resumable-crawl.ts` : `eachDetailResumable` (le lecteur lit lui-même chaque fiche, l'avancement est mémorisé). Branché sur Citya, Citya Nord de France, Human, Citya (catalogue), Apimo, AJP, Junot, Kermarrec. Citya Belfort plantait (503) : maintenant 72 lus au 1er passage, 20 restants repris au suivant. Les autres lecteurs (BIAS, Pierrefeu, LF immo, Salanié, 4S, Robyns, BNYS / Decros, Lyon Immo, Neyt, Simplici, Ewigo, Izmo, Auto-Gestion, Century 21) lisent des agences de moins de 60 biens et finissent en un passage (BIAS Bernay 56/59) : laissés tels quels.
+- Anthony : « toujours énormément de DPE pas lus et des descriptions pas entières ». Test de site : nouvelle mesure `quality` (DPE, GES, descriptions de moins de 300 caractères).
+  - Descriptions : `longestText` retirait les `<button>…</button>` ; sur Twimmo un bouton sans fermeture avalait la description jusqu'au </button> suivant → seule la méta-description (coupée) restait. Longueur bornée pour bouton / liste / navigation / formulaire. Laroca : 90 descriptions courtes sur 90 → 3.
+  - La Résidence : descriptif complet pris sous « Descriptif de votre professionnel » (les données structurées coupent à ~160 caractères). 43 courtes sur 44 → 0.
+  - DPE / GES dessinés dans la page, pour tous les sites : `<g id="GES_E">` / `<g id="DPE_C">`, `<g id="EnergieC">` / `<g id="GesC">`, « diagnosticShortened dpeE », La Boîte Immo « diagnostic-diagram numberC » / « emission-diagram numberB ». La Résidence DPE 2/44 → 41/44 ; La Boîte Immo (cisn-immobilier) 2/48 → 34/48 (45 prospects sur La Boîte Immo).
+  - Laroca : DPE 66/91, les autres ont une étiquette « dpe-ID.svg » (DPE non disponible sur le site).
+
 ### 01/11/2026 — Claude : lecture par étapes pour tous les lecteurs d'agences (pro-stock-sync v199)
 - Anthony : « il fait tout le temps ça pour tous les sites » (lecture qui s'arrête avant la fin et repart du début).
 - `resumable-crawl.ts` : `crawlDetails` (liste des fiches déjà connue → lecture par étapes mémorisée). Utilisé par La Résidence, La Française Immobilière, Cimm, Espaces Atypiques (en plus de BH Car). La page de test enchaîne les passages toute seule jusqu'à la fin ; une fois le pro inscrit, la synchro reprend là où elle s'était arrêtée.
