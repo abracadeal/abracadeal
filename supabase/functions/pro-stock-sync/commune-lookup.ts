@@ -28,10 +28,19 @@ let NEAR:{lat:number,lon:number}|null=null;
 const km=(a:{lat:number,lon:number},b:{lat:number,lon:number})=>{const r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r;const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(h)));};
 export const distanceKm=(c:Commune|null)=>NEAR&&c&&c.lat?Math.round(km(NEAR,c)):null;
 // Position de l'agence (ville + code postal de la fiche pro ou du site).
-export async function setNear(city:string,postal:string){
+// Agence sans adresse connue (site testé avant inscription) : point médian des annonces dont ville et code postal concordent
+// (ou, à défaut, des codes postaux seuls) — les quelques annonces mal lues ne le déplacent pas.
+export async function setNear(city:string,postal:string,rows:any[]=[]){
   NEAR=null;const l=await loadList();if(!l)return;
   let c=l.byName.get(norm(city))||[];if(/^\d{5}$/.test(postal||'')){const f=c.filter(x=>x.cps.includes(postal));c=f.length?f:(c.length?c:(l.byCp.get(postal)||[]));}
-  const best=[...c].sort((a,b)=>b.pop-a.pop)[0];if(best?.lat)NEAR={lat:best.lat,lon:best.lon};
+  const best=[...c].sort((a,b)=>b.pop-a.pop)[0];if(best?.lat){NEAR={lat:best.lat,lon:best.lon};return;}
+  const pts:{lat:number,lon:number}[]=[],cpPts:{lat:number,lon:number}[]=[];
+  for(const r of rows.slice(0,400)){const cp=String(r?.code_postal??r?.cp??'').trim();if(!/^\d{5}$/.test(cp))continue;
+    const v=String(r?.ville??r?.city??'');const m=v?(l.byName.get(norm(v))||[]).find(x=>x.cps.includes(cp)):undefined;if(m?.lat){pts.push(m);continue;}
+    const byCp=(l.byCp.get(cp)||[]).sort((a,b)=>b.pop-a.pop)[0];if(byCp?.lat)cpPts.push(byCp);}
+  const use=pts.length>=2?pts:cpPts.length>=2?cpPts:[];if(!use.length)return;
+  const med=(a:number[])=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
+  NEAR={lat:med(use.map(p=>p.lat)),lon:med(use.map(p=>p.lon))};
 }
 // « site » : ville donnée par la fiche (nom unique en France accepté où qu'il soit ; homonymes : le plus proche, à 60 km au plus).
 // « texte » : nom repéré dans un titre / une description / un lien (à 100 km au plus de l'agence).
