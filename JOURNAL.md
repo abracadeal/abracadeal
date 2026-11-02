@@ -2117,3 +2117,4 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Données lues via `get_demo_preview(token)` (lien secret, expire au bout de 60 jours). Lien : https://abracadeal.fr/demo/infinity/?k=OuXQwIhe4ushx2pP
 - À faire si Infinity accepte : régler la ville des biens à l'étranger dans le lecteur Apimo avant l'import. Supprimer la démo après.
 - Ajout (demande d'Anthony « une vue client plutôt ») : `demo/infinity/client.html` = vue acheteur, avec le vrai look du site (en-tête, bannière, cartes d'annonces, fiche annonce, barre du bas), 154 biens, tri par prix, encart « Vos biens sur Abracadeal, sans rien ressaisir ». Lien à envoyer : https://abracadeal.fr/demo/infinity/client.html?k=OuXQwIhe4ushx2pP
+- pro-stock-sync : l'aperçu de lecture à blanc donne aussi DPE (`d`) et GES (`g`) ; avec `preview_limit` > 6 : chambres, honoraires, charges annuelles, description et jusqu'à 15 photos (pour les démos).
