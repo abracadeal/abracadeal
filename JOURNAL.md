@@ -2049,3 +2049,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Menu desktop : nouvel onglet « Équipements » (auto, moto, caravaning, nautisme, vélo, pièces) ; le sous-menu Véhicules ne liste plus que des véhicules.
 - `description-helper-20261013.js` v=3 : retrait du regroupement Auto/Moto + équipements (18/10).
 - Recherche IA (`smart-search` v=20261102-equipements) : casque, blouson, pièces, pneus, jantes… → « Équipements & pièces », jamais Véhicules.
+
+### 02/11/2026 — Claude — Vélos sortis de Véhicules
+- Demande d'Anthony : même les vélos doivent sortir de Véhicules.
+- `index-main.js` v=20261102-sans-velos : `NON_VEHICLE_TYPES` = vélos + équipements + pièces. Véhicules = voitures, motos, utilitaires, caravaning, nautisme. La rubrique devient « Vélos, équipements & pièces » (accueil, filtre, onglet desktop « Vélos & équipements »).
+- Recherche IA (v=20261102-velos) : vélo, VTT, VAE, BMX → sous-catégorie Vélos.
