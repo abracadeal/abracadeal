@@ -460,12 +460,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
 }
 
 // Parcours : accueil + pages de liste, puis fiches détectées. Budget en temps et en pages.
+export const smartHooks:{trace:(url:string,step:string)=>void}={trace:()=>{}};
 export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any,memory?:CrawlMemory){
   if(memory){
     // 02/11/2026 (groupe 123 immo : « /agences/auxerre-centre/1 ») : le numéro de page final ne fait pas partie du périmètre de l'agence.
     const host=origin.hostname.replace(/^www\./,''),scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
     const inScope=(u:string)=>!scope||scope.split('/').length<3||new URL(u).pathname.startsWith(scope+'/')||new URL(u).pathname===scope;
     const source=extraStarts[0]||origin.toString();
+    smartHooks.trace(source,'smart memory scope='+scope+' len='+homeHtml.length);
     return crawlCatalogue(source,'smart-v1:'+sector+':'+scope,[source],async u=>u.toString()===source?{text:homeHtml,url:u}:fetchHtml(u),(html,page)=>{
       let xmlLists:string[]=[];const isMap=/<urlset\b|<sitemapindex\b/i.test(html);
       if(isMap){const urls=[...html.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map(m=>sDecode(m[1]));xmlLists=urls.filter(u=>/\.xml(?:\?|$)/.test(u));html=urls.filter(u=>!xmlLists.includes(u)).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');}
@@ -485,7 +487,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
   const take=(html:string,page:URL)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details)if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
-  take(homeHtml,origin);seenPages.add(origin.toString());
+  take(homeHtml,origin);seenPages.add(origin.toString());smartHooks.trace(origin.toString(),'smart home len='+homeHtml.length+' details='+detailQ.length+' lists='+listQ.length+' memory=0');
   for(const s of extraStarts)if(!listQ.includes(s))listQ.unshift(s);
   let pages=0;let misses=0;
   // Adresse d'une agence dans un réseau (ex. /agence-immobiliere/cannes) : on reste sous ce chemin.

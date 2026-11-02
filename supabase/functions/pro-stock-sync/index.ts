@@ -14,7 +14,7 @@ import { readSalanie } from "./salanie-reader.ts";
 import { readLFimmo } from "./lfimmo-reader.ts";
 import { isPlaceholderPhoto, dedupePhotos } from './photo-utils.ts';
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import { readSmartSite, sDecode, smartDetail, smartLinks } from "./smart-reader.ts";
+import { readSmartSite, sDecode, smartDetail, smartLinks, smartHooks } from "./smart-reader.ts";
 import { readKermarrec } from "./kermarrec-reader.ts";
 import { isApimoModules, readApimoModules } from "./apimo-reader.ts";
 import { readJunot } from "./junot-reader.ts";
@@ -364,6 +364,7 @@ const isAaSiteHtml=(t:string)=>/annonces-automobile\.com/i.test(t)&&(/cdn-rivame
 // 01/11/2026 : trace de diagnostic (action auto_review_dry avec trace:true) : chaque page lue est notée avec la mémoire utilisée,
 // pour voir où le robot s'arrête quand il plante (pas de journaux accessibles).
 let traceRun='';const traceT0={v:0};
+smartHooks.trace=(u:string,s:string)=>trace(u,s);
 function trace(url:string,step:string){if(!traceRun)return;let heap=0;try{heap=Math.round(Deno.memoryUsage().rss/1e5)/10;}catch{}
   admin.from('stock_crawl_trace').insert({run:traceRun,url:url.slice(0,300),step:step+' cpu='+Math.round(cpu.ms),heap_mb:heap,ms:Date.now()-traceT0.v}).then(()=>{},()=>{});}
 async function fetchSiteHtml(start:URL,maxLength=5_000_000){
