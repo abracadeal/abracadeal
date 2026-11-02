@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Mails vérifiés + tableau de bord des visiteurs
+- **Configuration des mails vérifiée** (en-têtes de mails reçus sur abracadeal@gmail.com + DNS) : contact@abracadeal.fr et partenaires@abracadeal.com passent SPF, DKIM (sélecteur OVH `ovhmo-selector-1`) et DMARC (p=none), score anti-spam OVH 0. Rien à corriger.
+- **Constat trafic** : avant ce soir, seulement les vues d'annonces étaient comptées — 39 vues par 5 visiteurs depuis le 29/10, 1 numéro affiché. Aucun compteur de visites du site.
+- Ajouté : `site_visits` + `track_site_visit` (index-main.js v=20261102-visiteurs : accueil / annonce ; pro.html : showroom ; 1 fois par visiteur, page et jour ; provenance Google/Facebook/direct… ; admins connectés exclus) et `admin_traffic_stats` → nouvelle section « Visiteurs et contacts » dans admin-pilotage.html (totaux, sources, par jour, par vendeur, annonces les plus vues ; 7/14/30/90 jours). Doc : `supabase/2026-11-02-site-visits.sql`.
+
 ### 02/11/2026 — Claude — Prospection : mail « votre stock est prêt, regardez » + bouton « Je publie »
 - Anthony : « fais comme si c'était ton site ». Constat : 521 pros contactés, 31 clics, 0 inscription → changer le message avant d'envoyer plus.
 - Quota remis à 25/jour/boîte relances comprises (migration `prospect_claim_shared_quota_preview_first`), premiers mails d'abord aux prospects dont l'aperçu est prêt (363 prêts : 334 agences, 29 garages).
