@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : adresses courtes des showrooms visibles par Google et les réseaux
+- Avant : `abracadeal.fr/weecars-angers` n'existait pas en vrai ; c'est le script de `404.html` qui envoyait au showroom. Google, Facebook, WhatsApp recevaient donc « page introuvable » (code 404) et aucun aperçu.
+- `build_pro_pages.py` : lit `pro_showrooms.slug` et écrit `/<slug>/index.html` (même contenu que la page `garage/…`, adresse officielle = la page `garage/…`, le visiteur part directement au showroom). Nom ignoré s'il est déjà pris par une page du site ; ancienne adresse supprimée si le pro la change (champ `short` dans `pro-pages.json`).
+- `share-pages.yml` : ces dossiers sont ajoutés au commit automatique.
+
 ### 02/11/2026 — Claude : référencement, titres Google des annonces
 - `build_share_pages.py` (VERSION 10) : titre de page (celui que Google affiche) lisible quand le vendeur écrit tout en majuscules (« PEUGEOT 5008 1.5 BLUEHDI… » → « Peugeot 5008 1.5 Bluehdi… », sigles courts et mots avec chiffres inchangés) ; « occasion » ajouté aux véhicules (pas aux équipements / pièces, ni aux véhicules neufs) car c'est ce que tapent les acheteurs. Ex. : « Audi A4 Avant 2.0 40 TDI 190 S-Line S-Tronic BVA 2018 occasion – 24 490 € – Les Ponts-de-Cé (49) | Abracadeal ». Le titre affiché sur la fiche reste celui du vendeur.
 

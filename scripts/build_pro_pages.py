@@ -103,9 +103,9 @@ def load_data():
         ids = "(" + ",".join(chunk) + ")"
         for p in rest("public_profiles", {"select": "id,display_name,city", "id": f"in.{ids}"}):
             pros.setdefault(p["id"], {}).update(display_name=p.get("display_name"), city=p.get("city"))
-        for s in rest("pro_showrooms", {"select": "user_id,description,banner_path,logo_path", "user_id": f"in.{ids}"}):
+        for s in rest("pro_showrooms", {"select": "user_id,description,banner_path,logo_path,slug", "user_id": f"in.{ids}"}):
             pros.setdefault(s["user_id"], {}).update(description=s.get("description"), banner_path=s.get("banner_path"),
-                                                     logo_path=s.get("logo_path"))
+                                                     logo_path=s.get("logo_path"), slug=s.get("slug"))
     for oid in owners:
         try:
             v = rpc("get_public_pro_verification", {"p_user_id": oid})
@@ -251,6 +251,7 @@ def main():
         if l.get("owner_id"):
             by_owner[l["owner_id"]].append(l)
     registry = load_registry()
+    old_shorts = {v["short"] for v in registry.values() if v.get("short")}
     pages, entries = {}, collections.defaultdict(list)
     for oid, listings in by_owner.items():
         p = pros.get(oid, {})
@@ -267,6 +268,32 @@ def main():
         if oid not in by_owner:
             v["active"] = False
             v["count"] = 0
+    # 02/11/2026 (Anthony : « on mettrait pas plutôt abracadeal.fr/weecars-angers ? ») : l'adresse courte du showroom
+    # n'était résolue que par un script dans 404.html — Google, Facebook, WhatsApp y voyaient une page introuvable.
+    # Elle devient une vraie page (même contenu, adresse officielle = la page garage/…, le visiteur part au showroom).
+    shorts = {}
+    for oid in by_owner:
+        slug = (pros.get(oid, {}).get("slug") or "").strip().lower()
+        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,38}[a-z0-9]", slug):
+            continue
+        folder = os.path.join(BASE, slug)
+        if (os.path.exists(folder) and slug not in old_shorts) or os.path.exists(folder + ".html") or slug in KINDS:
+            continue  # nom déjà pris par une page du site
+        shorts[slug] = registry[oid]["path"]
+        registry[oid]["short"] = slug
+    for v in registry.values():
+        if v.get("short") and v["short"] not in shorts:
+            v.pop("short")
+    for slug in old_shorts - set(shorts):
+        old = os.path.join(BASE, slug, "index.html")
+        if os.path.exists(old):
+            os.remove(old)
+            try:
+                os.rmdir(os.path.dirname(old))
+            except OSError:
+                pass
+    for slug, path in shorts.items():
+        write_if_changed(os.path.join(BASE, slug, "index.html"), pages[path])
     keep = set()
     for path, content in pages.items():
         folder = os.path.join(BASE, *path.split("/"))

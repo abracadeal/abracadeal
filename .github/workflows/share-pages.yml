@@ -37,6 +37,10 @@ jobs:
           for p in garage immo professionnel; do
             if [ -e "$p" ] || git ls-files --error-unmatch "$p" >/dev/null 2>&1; then git add -A "$p"; fi
           done
+          # 02/11/2026 : adresses courtes des showrooms (abracadeal.fr/weecars-angers) — actuelles et anciennes (supprimées)
+          for p in $( (cat pro-pages.json; git show HEAD:pro-pages.json 2>/dev/null) | python -c "import sys,re;print(' '.join(sorted(set(re.findall(r'\"short\": \"([a-z0-9-]+)\"',sys.stdin.read())))))"); do
+            if [ -e "$p" ] || git ls-files --error-unmatch "$p" >/dev/null 2>&1; then git add -A "$p"; fi
+          done
           if git diff --cached --quiet; then echo "Aucun changement"; exit 0; fi
           git config user.name "abracadeal-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
