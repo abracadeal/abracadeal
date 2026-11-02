@@ -507,6 +507,10 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
 // Parcours : accueil + pages de liste, puis fiches détectées. Budget en temps et en pages.
 export const smartHooks:{trace:(url:string,step:string)=>void}={trace:()=>{}};
 export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any,memory?:CrawlMemory){
+  // 02/11/2026 (monagenceautomobile « /acheter-un-vehicule/?agencie=54 ») : liste d'une agence filtrée par un paramètre → seules les pages
+  // de liste qui gardent ce paramètre sont suivies (sinon le robot part sur tout le réseau).
+  const qKeep:string[]=[];try{if(extraStarts[0])for(const [k,v] of new URL(extraStarts[0]).searchParams)if(/agenc|agency|store|site_id|garage|concession|magasin/i.test(k)&&v)qKeep.push(k+'='+v);}catch{}
+  const qOk=(u:string)=>!qKeep.length||(()=>{try{const sp=new URL(u).searchParams;return qKeep.every(x=>{const [k,v]=x.split('=');return sp.get(k)===v;});}catch{return false;}})();
   if(memory){
     // 02/11/2026 (groupe 123 immo : « /agences/auxerre-centre/1 ») : le numéro de page final ne fait pas partie du périmètre de l'agence.
     const host=origin.hostname.replace(/^www\./,''),scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
@@ -523,7 +527,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       // même si leur adresse n'est pas sous celle de l'agence. Ailleurs, seules les fiches sous le chemin de l'agence sont gardées.
       const ownPage=!!scope&&!isMap&&inScope(page.toString());
       /* 02/11/2026 (Cimalpes) : si la page de l'agence a ses propres fiches sous son chemin, les autres liens sont le menu du réseau (autres stations) */const own3=ownPage&&found.details.filter(u=>same(u)&&inScope(u)).length<3;
-      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(own3||inScope(u)))};
+      return {lists:[...found.lists.filter(inScope).filter(qOk),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(own3||inScope(u)))};
     },async(html,url)=>{
       let row:any=null;if(ldParse)row=ldParse(html,url);if(row?._sold)return row;
       const sd=smartDetail(html,url,sector);if(row&&!sd&&String(row.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(html,url);if(ph.length>String(row.photos||'').split('|').filter(Boolean).length)row.photos=ph.join('|');}if(!row)row=sd;else if(sd){/* 01/11/2026 (Anthony, BH Car : photos d'autres véhicules ajoutées à la fin) : la liste des données structurées est celle du véhicule ; les photos de la page (qui comprennent les « véhicules similaires ») ne servent que si elle en a 3 ou moins. */if(String(row.photos||'').split('|').filter(Boolean).length<=3&&String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
@@ -533,7 +537,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
   const fromOwn=new Set<string>();const scope0=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
-  const take=(html:string,page:URL,own=false)=>{const {details,lists}=smartLinks(html,page,host);/* 02/11/2026 (Cimalpes) : page d'agence avec ses fiches sous son chemin → le reste est le menu du réseau */if(own&&scope0&&details.filter(d=>{try{return new URL(d).pathname.startsWith(scope0+'/');}catch{return false;}}).length>=3)own=false;for(const d of details){if(own)fromOwn.add(d);if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);}for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
+  const take=(html:string,page:URL,own=false)=>{const {details,lists}=smartLinks(html,page,host);/* 02/11/2026 (Cimalpes) : page d'agence avec ses fiches sous son chemin → le reste est le menu du réseau */if(own&&scope0&&details.filter(d=>{try{return new URL(d).pathname.startsWith(scope0+'/');}catch{return false;}}).length>=3)own=false;for(const d of details){if(own)fromOwn.add(d);if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);}for(const l of lists)if(qOk(l)&&!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
   take(homeHtml,origin,true);seenPages.add(origin.toString());smartHooks.trace(origin.toString(),'smart home len='+homeHtml.length+' details='+detailQ.length+' lists='+listQ.length+' memory=0');
   for(const s of extraStarts)if(!listQ.includes(s))listQ.unshift(s);
   let pages=0;let misses=0;
@@ -563,7 +567,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       const u=detailQ[i++];if(seenPages.has(u))continue;seenPages.add(u);pages++;
       try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
         // Données structurées souvent incomplètes (1 photo, pas de description) : on complète avec la lecture de la page.
-        else{const sd=smartDetail(text,url.toString(),sector);if(!sd&&String(o.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(text,url.toString());if(ph.length>String(o.photos||'').split('|').filter(Boolean).length)o.photos=ph.join('|');}if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(o.photos)<=3&&n(sd.photos)>n(o.photos))o.photos=sd.photos;for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
+        else{const sd=smartDetail(text,url.toString(),sector);if(!sd&&String(o.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(text,url.toString());if(ph.length>String(o.photos||'').split('|').filter(Boolean).length)o.photos=ph.join('|');}if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(o.photos)<=3&&n(sd.photos)>n(o.photos))o.photos=sd.photos;/* 02/11/2026 (groupe 123 immo) : mêmes fichiers que la page mais à une autre adresse → celles de la page (affichées par le site, donc valides) */else{const bn=(u:string)=>u.split('?')[0].split('/').pop()||'';const a=String(o.photos||'').split('|').filter(Boolean),b=String(sd.photos||'').split('|').filter(Boolean);if(a.length&&b.length>=a.length&&a.every(u=>b.some(w=>bn(w)===bn(u)))&&a.some(u=>!b.includes(u)))o.photos=b.join('|');}for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
         if(o?._sold)continue;
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).
