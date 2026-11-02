@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Site lent : base de données saturée
+- Remarque d'Anthony : « le site est très trop lent ».
+- Cause trouvée : les files d'attente de la prospection (`prospect_crawler_next`, `domain_guess_next`, `promote_annuaire_leads`) relisaient toute la table `private.prospect_leads` (233 000 lignes, 87 Mo, aucun index) à chaque appel : 1,2 à 2,5 s par appel, des milliers d'appels. Sur la petite base (60 connexions), ces lectures occupaient le disque et les connexions → erreurs « Too many connections » et pages lentes pour les visiteurs. Mes tests avec `pg_sleep` (30 s chacun) ont aggravé la situation : abandonnés.
+- Corrigé (`supabase/2026-11-02-prospect-leads-indexes.sql`, appliqué en direct) : index partiels sur les files d'attente + `lower(email)` sur `prospection_prospects` et `email_opt_outs`. `domain_guess_next` : 2,5 s → 0,05 s.
+- Miniatures : les 48 vignettes manquantes depuis la refonte 900 px (l'accueil chargeait les photos d'origine à la place) ont été générées ; il n'en reste aucune en attente.
+- Vérifié : la requête du catalogue de l'accueil (156 annonces) prend 20 ms côté base.
+
 ### 02/11/2026 — Claude : WeeCars Angers, stock complet en ligne (127 véhicules)
 - Anthony : « mets-les maintenant ». Synchro lancée à la main (`sync_all`) : 24 → 127 annonces en ligne, toutes passées par la modération automatique.
 - Les deux premiers passages ont été coupés par la limite de durée de la fonction (503) après ~57 puis ~56 créations ; rien de perdu (les fiches déjà créées sont mises à jour). `readSpiderVo` : 3 fiches à la fois, et arrêt propre après 80 s (lecture partielle → aucun retrait, la suite au passage suivant). Dernier passage complet : 127 lus, 14 créés, 112 inchangés.
