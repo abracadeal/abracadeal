@@ -14,6 +14,19 @@
 *{box-sizing:border-box}body{margin:0;background:#f6f2f7;color:#28172f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:inherit}.top{background:#1b0d2d;color:#fff}.topin{max-width:1180px;margin:auto;padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}.brand{font-weight:900;font-size:22px;text-decoration:none}.back{color:#fff;text-decoration:none;font-weight:750}.wrap{max-width:1180px;margin:26px auto;padding:0 18px}.card{background:#fff;border:1px solid #eadfed;border-radius:24px;overflow:hidden;box-shadow:0 18px 50px #2d123b14}.banner{width:100%;aspect-ratio:3/1;background:linear-gradient(115deg,#1c0b2d,#52206f 58%,#d09a43) center/cover no-repeat}.identity{display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;padding:22px 28px 16px}.logo{width:96px;height:96px;border-radius:20px;background:#fff center/cover no-repeat;border:4px solid #fff;box-shadow:0 6px 20px #0002;display:grid;place-items:center;color:#6d2b88;font-weight:900;font-size:26px}.name{font-size:28px;font-weight:900;line-height:1.1}.meta{margin-top:7px;color:#716775;display:flex;gap:9px;flex-wrap:wrap;align-items:center}.badge{background:#f0e6f5;color:#5d2371;border-radius:999px;padding:5px 9px;font-size:12px;font-weight:850}.identity-actions{display:flex;gap:10px;align-items:center;flex-wrap:wrap}.share,.follow,.contact-toggle{border:1px solid #6d2b88;background:#fff;color:#6d2b88;border-radius:12px;padding:10px 15px;font-weight:850;cursor:pointer}.follow{background:#6d2b88;color:#fff}.follow.following{background:#f1e7f5;color:#5d2371}.follow:disabled{opacity:.65;cursor:default}.contact-box{margin:0 28px 18px;border:1px solid #eadfed;border-radius:14px;padding:14px 16px;background:#fbf8fc;display:flex;align-items:center;gap:10px;flex-wrap:wrap}.contact-box.hidden{display:none}.contact-box strong{margin-right:auto}.contact-link{display:inline-flex;align-items:center;justify-content:center;text-decoration:none;border:1px solid #6d2b88;border-radius:10px;padding:9px 12px;font-weight:800;color:#6d2b88;background:#fff}.tabs{display:flex;gap:4px;border-bottom:1px solid #ece4ee;padding:0 22px;overflow:auto}.tabs button{border:0;background:none;padding:14px 15px;font-weight:850;white-space:nowrap;cursor:pointer}.tabs button.active{color:#6d2b88;border-bottom:3px solid #6d2b88}.pane{padding:22px}.tools{display:grid;grid-template-columns:1fr 190px 190px;gap:10px;margin-bottom:18px}.tools input,.tools select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 12px;background:#fff}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}.ad{display:block;text-decoration:none;border:1px solid #e9e1eb;border-radius:16px;overflow:hidden;background:#fff;transition:.15s transform,.15s box-shadow}.ad:hover{transform:translateY(-2px);box-shadow:0 10px 26px #32154116}.photo{aspect-ratio:4/3;background:#eee6f0 center/cover no-repeat}.adbody{padding:11px}.adtitle{font-weight:850;line-height:1.25;min-height:2.5em}.price{font-weight:900;color:#5b2170;margin-top:6px}.city{color:#746a77;font-size:13px;margin-top:4px}.more{display:block;margin:20px auto 0;border:0;border-radius:12px;background:#6d2b88;color:#fff;padding:11px 18px;font-weight:850;cursor:pointer}.about{display:grid;grid-template-columns:1.4fr .6fr;gap:22px}.box{border:1px solid #e9e1eb;border-radius:16px;padding:18px}.box h3{margin-top:0}.facts{display:grid;gap:12px}.fact{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid #eee7ef;padding-bottom:10px}.review{border:1px solid #e9e1eb;border-radius:16px;padding:16px;margin-bottom:12px}.stars{color:#a46b1b;font-weight:900}.muted{color:#776c7b}.empty{padding:30px;text-align:center;color:#776c7b}.error{max-width:620px;margin:80px auto;background:#fff;border-radius:20px;padding:30px;text-align:center;border:1px solid #eadfed}.error a{display:inline-block;margin-top:12px;color:#6d2b88;font-weight:850}
 @media(max-width:900px){.grid{grid-template-columns:repeat(3,minmax(0,1fr))}.tools{grid-template-columns:1fr 1fr}.tools input{grid-column:1/-1}.about{grid-template-columns:1fr}}
 @media(max-width:620px){.wrap{margin:14px auto;padding:0 10px}.card{border-radius:18px}.identity{grid-template-columns:72px 1fr;padding:16px 14px 12px;gap:12px}.logo{width:72px;height:72px;border-radius:16px;font-size:20px}.name{font-size:21px}.identity .identity-actions{grid-column:1/-1;width:100%;display:grid;grid-template-columns:1fr 1fr}.identity .share,.identity .follow,.identity .contact-toggle{width:100%}.contact-box{margin:0 14px 14px}.contact-box strong{width:100%;margin:0}.tabs{padding:0 8px}.pane{padding:14px 10px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.tools{grid-template-columns:1fr}.tools input{grid-column:auto}.adbody{padding:9px}.adtitle{font-size:14px}.price{font-size:15px}.topin{padding:12px}.brand{font-size:19px}}
+
+/* 02/11/2026 : filtres de la vitrine */
+.tools{display:block!important;margin-bottom:16px}
+.tools input{width:100%;min-height:46px;border:1px solid #ddd0e1;border-radius:12px;padding:0 14px;background:#fff;font-size:16px;margin-bottom:10px}
+.fgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.fgrid .f{display:flex;flex-direction:column;gap:4px;min-width:0}
+.fgrid .f span{font-size:12px;font-weight:800;color:#6f5a78;text-transform:uppercase;letter-spacing:.03em}
+.fgrid select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 10px;background:#fff;font-size:15px;color:#28172f}
+.tools .count{margin-top:12px;color:#5b4565;font-size:14px}
+.tools .count button{border:0;background:none;color:#6d2b88;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;font-size:14px}
+.specs{font-size:13px;color:#6f5a78;margin-top:2px}
+@media(max-width:900px){.fgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:620px){.fgrid{grid-template-columns:1fr 1fr}}
 </style>
 <link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
 </head>
@@ -103,17 +116,48 @@ function setTab(tab){
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   if(tab==='ads')renderAds();else if(tab==='about')renderAbout();else renderReviews();
 }
+/* 02/11/2026 (Anthony) : vrais filtres dans la vitrine — marque, budget, carburant, boîte, kilométrage, année (véhicules) ;
+   chaque filtre n'apparaît que s'il sert (au moins 2 choix dans le stock du pro). */
+const nice=v=>{v=String(v||'').trim();return v?v.charAt(0).toUpperCase()+v.slice(1).toLowerCase():''};
+const brand=v=>String(v||'').trim().toUpperCase();
+const fmtN=n=>Number(n).toLocaleString('fr-FR');
+function steps(vals,list){const min=Math.min(...vals),max=Math.max(...vals);return list.filter((x,i)=>x>=min&&(x<max||(i>0&&list[i-1]<max)));}
+function sel(id,label,opts){return '<label class="f"><span>'+label+'</span><select id="'+id+'"><option value="">Tous</option>'+opts.map(o=>'<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>').join('')+'</select></label>';}
+let isVeh=false;
 function applyFilters(){
-  const q=(document.getElementById('stockSearch')?.value||'').trim().toLowerCase(),cat=document.getElementById('stockCategory')?.value||'',sort=document.getElementById('stockSort')?.value||'recent';
-  filtered=listings.filter(l=>(!q||(l.title||'').toLowerCase().includes(q)||(l.city||'').toLowerCase().includes(q))&&(!cat||l.category===cat));
-  filtered.sort((a,b)=>sort==='price-asc'?Number(a.price??Infinity)-Number(b.price??Infinity):sort==='price-desc'?Number(b.price??-Infinity)-Number(a.price??-Infinity):new Date(b.created_at)-new Date(a.created_at));
+  const g=id=>document.getElementById(id)?.value||'';
+  const q=g('stockSearch').trim().toLowerCase(),mk=g('fMake'),pmax=Number(g('fPrice'))||0,fu=g('fFuel'),tr=g('fGear'),kmax=Number(g('fKm'))||0,ymin=Number(g('fYear'))||0,sort=g('stockSort')||'recent';
+  filtered=listings.filter(l=>(!q||(l.title||'').toLowerCase().includes(q))
+    &&(!mk||brand(l.vehicle_make)===mk)&&(!pmax||Number(l.price)<=pmax)&&(!fu||nice(l.fuel)===fu)&&(!tr||nice(l.transmission)===tr)
+    &&(!kmax||(l.mileage!=null&&Number(l.mileage)<=kmax))&&(!ymin||(l.vehicle_year!=null&&Number(l.vehicle_year)>=ymin)));
+  const num=(v,d)=>v==null||v===''?d:Number(v);
+  filtered.sort((a,b)=>sort==='price-asc'?num(a.price,Infinity)-num(b.price,Infinity):sort==='price-desc'?num(b.price,-Infinity)-num(a.price,-Infinity)
+    :sort==='km-asc'?num(a.mileage,Infinity)-num(b.mileage,Infinity):sort==='year-desc'?num(b.vehicle_year,-Infinity)-num(a.vehicle_year,-Infinity):new Date(b.created_at)-new Date(a.created_at));
+  const active=[mk,pmax,fu,tr,kmax,ymin,q].filter(Boolean).length;
+  const c=document.getElementById('stockCount');
+  if(c)c.innerHTML='<b>'+filtered.length+'</b> '+(isVeh?'véhicule':'annonce')+(filtered.length>1?'s':'')+(active?' · <button type="button" id="fReset">Effacer les filtres</button>':'');
+  document.getElementById('fReset')?.addEventListener('click',()=>{document.querySelectorAll('.tools select,.tools input').forEach(e=>{e.value=e.id==='stockSort'?'recent':''});applyFilters();});
   shown=24;renderCards();
 }
 function renderAds(){
-  const pane=document.getElementById('pane'),cats=[...new Set(listings.map(l=>l.category).filter(Boolean))];
-  pane.innerHTML=(listings.length>6?'<div class="tools"><input id="stockSearch" placeholder="Rechercher dans ce stock"><select id="stockSort"><option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
-  if(listings.length>6){['stockSearch','stockSort'].forEach(x=>document.getElementById(x).addEventListener(x==='stockSearch'?'input':'change',applyFilters));}
-  filtered=[...listings];shown=24;renderCards();
+  const pane=document.getElementById('pane');
+  isVeh=listings.filter(l=>l.category==='vehicules').length>listings.length/2;
+  const uniq=f=>[...new Set(listings.map(f).filter(Boolean))];
+  const prices=listings.map(l=>Number(l.price)).filter(n=>n>0),kms=listings.map(l=>l.mileage==null?NaN:Number(l.mileage)).filter(n=>n>=0),years=listings.map(l=>Number(l.vehicle_year)).filter(n=>n>1900);
+  let f='';
+  if(isVeh){const makes=uniq(l=>brand(l.vehicle_make)).sort();if(makes.length>1)f+=sel('fMake','Marque',makes.map(m=>[m,m]));}
+  if(prices.length>1){const ps=steps(prices,[5000,7500,10000,12500,15000,20000,25000,30000,40000,50000,75000,100000,150000,250000,500000,1000000]);if(ps.length>1)f+=sel('fPrice','Budget max',ps.map(x=>[x,fmtN(x)+' €']));}
+  if(isVeh){
+    const fuels=uniq(l=>nice(l.fuel)).sort();if(fuels.length>1)f+=sel('fFuel','Carburant',fuels.map(x=>[x,x]));
+    const gears=uniq(l=>nice(l.transmission)).sort();if(gears.length>1)f+=sel('fGear','Boîte',gears.map(x=>[x,x]));
+    if(kms.length>1){const ks=steps(kms,[10000,30000,50000,75000,100000,125000,150000,200000]);if(ks.length>1)f+=sel('fKm','Km max',ks.map(x=>[x,fmtN(x)+' km']));}
+    if(years.length>1){const min=Math.min(...years),max=Math.max(...years);if(max>min){const opts=[];for(let y=max-1;y>=min;y--)opts.push([y,'Depuis '+y]);f+=sel('fYear','Année',opts);}}
+  }
+  const sortOpts='<option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option>'+(isVeh?'<option value="km-asc">Moins de kilomètres</option><option value="year-desc">Année la plus récente</option>':'');
+  pane.innerHTML=(listings.length>3?'<div class="tools"><input id="stockSearch" type="search" placeholder="'+(isVeh?'Rechercher un modèle (ex. Golf, 308…)':'Rechercher dans ce stock')+'"><div class="fgrid">'+f+'<label class="f"><span>Trier</span><select id="stockSort">'+sortOpts+'</select></label></div><div class="count" id="stockCount"></div></div>':'')+'<div id="stockResults"></div>';
+  document.querySelectorAll('.tools select').forEach(e=>e.addEventListener('change',applyFilters));
+  document.getElementById('stockSearch')?.addEventListener('input',applyFilters);
+  filtered=[...listings];applyFilters();
 }
 function bindGate(root){root?.querySelectorAll('[data-gate]').forEach(a=>a.onclick=e=>{e.preventDefault();location.href='/?compte='+a.dataset.gate+'&retour='+encodeURIComponent(location.pathname+location.search);});}
 function renderCards(){
@@ -121,7 +165,7 @@ function renderCards(){
   if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
   const cards=filtered.slice(0,shown).map(l=>{
     const photo=photoUrl(firstPhoto(l)),url='https://abracadeal.fr/?annonce='+encodeURIComponent(l.id);
-    return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div><div class="city">'+esc(l.city||'')+'</div></div></a>';
+    return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div>'+(l.category==='vehicules'&&(l.vehicle_year||l.mileage!=null||l.fuel)?'<div class="specs">'+esc([l.vehicle_year,l.mileage!=null?fmtN(l.mileage)+' km':'',nice(l.fuel),nice(l.transmission)].filter(Boolean).join(' · '))+'</div>':'')+'<div class="city">'+esc(l.city||'')+'</div></div></a>';
   }).join('');
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
   document.getElementById('moreBtn')?.addEventListener('click',()=>{shown+=24;renderCards()});
@@ -139,7 +183,7 @@ async function init(){
   const [p,s,l,r]=await Promise.all([
     sb.from('public_profiles').select('id,display_name,account_type,city,joined_at').eq('id',id).maybeSingle(),
     sb.from('pro_showrooms').select('description,banner_path,logo_path,updated_at,slug').eq('user_id',id).maybeSingle(),
-    sb.from('listings').select('id,title,price,city,category,created_at,listing_photos(storage_path,position)').eq('owner_id',id).eq('status','active').eq('visibility_scope','public').order('created_at',{ascending:false}),
+    sb.from('listings').select('id,title,price,city,category,created_at,vehicle_make,vehicle_year,mileage,fuel,transmission,listing_photos(storage_path,position)').eq('owner_id',id).eq('status','active').eq('visibility_scope','public').order('created_at',{ascending:false}),
     sb.from('reviews').select('rating,comment,created_at').eq('seller_id',id).eq('status','active').order('created_at',{ascending:false})
   ]);
   if(p.error||!p.data||p.data.account_type!=='professionnel'){fail();return}

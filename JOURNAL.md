@@ -2026,3 +2026,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `pro.html` : plus de filtre « Toutes les catégories » dans la vitrine d'un pro (un pro = un domaine) ; recherche et tri conservés.
 - Fiche annonce (`index-main.js` v=20261102-logo-vendeur, `detail-mobile-20261019.css` v=2) : la carte vendeur d'un pro affiche son logo au lieu des initiales (initiales si pas de logo).
 - `admin-set-showroom-banner-once` accepte `kind: logo`.
+
+### 02/11/2026 — Claude — Vitrine pro : vrais filtres
+- `pro.html` : recherche « modèle » + filtres Marque, Budget max, Carburant, Boîte, Km max, Année (véhicules) ; Budget max pour les autres domaines. Un filtre n'apparaît que s'il offre au moins 2 choix dans le stock du pro ; les paliers de prix/km suivent le stock (du moins cher au plus cher).
+- Tri : récentes, prix croissant/décroissant, moins de kilomètres, année la plus récente. Compteur « N véhicules » + « Effacer les filtres ».
+- Cartes véhicules : ligne « année · km · carburant · boîte » sous le prix. Libellés harmonisés (« HYBRIDE ESSENCE » → « Hybride essence »).
