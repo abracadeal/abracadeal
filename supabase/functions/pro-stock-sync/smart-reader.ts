@@ -101,7 +101,10 @@ function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
     if(srcset){const candidates=srcset.split(',').map(v=>v.trim().split(/\s+/)).filter(v=>valid(v[0]));candidates.sort((a,b)=>(parseFloat(b[1])||1)-(parseFloat(a[1])||1));if(candidates[0]){add(candidates[0][0]);continue;}}
     const lazy=['data-src','data-lazy-src','data-lazy','data-image'].map(k=>attrs.get(k)).find(valid);
     if(lazy){add(lazy);continue;}
-    if(/^<img\b/i.test(tag)){add(attrs.get('src')||'');continue;}
+    if(/^<img\b/i.test(tag)){const src=attrs.get('src')||'';
+      /* 02/11/2026 (Martin Gestion : photos « /storage/product/1630/6ae79a4728b86 » sans extension) : image d'un dossier de stockage, dans une balise <img> */
+      if(src&&!/\.[a-z0-9]{3,4}(\?|$)/i.test(src)&&/\/(?:storage|uploads?|files?)\/(?:[^/]+\/)*(?:products?|biens?|annonces?|properties|property|listings?|vehicules?|photos?)\//i.test(src)){try{const u=new URL(sDecode(src),base).toString();if(!IMG_BAD.test(u)&&!isPlaceholderPhoto(u))all.push(u);}catch{}continue;}
+      add(src);continue;}
     if(/^<a\b/i.test(tag))add(attrs.get('href')||'');
     if(/^<meta\b/i.test(tag)&&/^(?:og:image(?::url)?|image)$/i.test(attrs.get('property')||attrs.get('itemprop')||''))add(attrs.get('content')||'');
   }
