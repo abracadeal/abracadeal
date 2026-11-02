@@ -85,7 +85,8 @@ function photoGallery(html:string):string{
 }
 
 function pickPhotos(html:string,base:URL,ogs:string[],ref:string){
-  const all:string[]=[];const add=(raw:string)=>{if(!raw)return;let u:string;try{u=new URL(sDecode(raw.trim()),base).toString();}catch{return;}if(!/^https?:/i.test(u)||!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(u)&&!/\/(image|photo|img|media|picture)s?\//i.test(u))return;if(IMG_BAD.test(u.split('?')[0])||isPlaceholderPhoto(u))return;all.push(u);};
+  const all:string[]=[];const add=(raw:string)=>{if(!raw)return;let u:string;try{u=new URL(sDecode(raw.trim()),base).toString();}catch{return;}
+    /* 02/11/2026 (Kombishop, PrestaShop) : miniatures « 29170-small_default/… » → même photo en grand */u=u.replace(/(\/\d+-)(?:small|medium|home|cart|thickbox)_default(\/)/,'$1large_default$2');if(!/^https?:/i.test(u)||!/\.(jpe?g|png|webp|avif)(\?|$)/i.test(u)&&!/\/(image|photo|img|media|picture)s?\//i.test(u))return;if(IMG_BAD.test(u.split('?')[0])||isPlaceholderPhoto(u))return;all.push(u);};
   const gallery=photoGallery(html);if(gallery){html=gallery;ogs=[];}
   ogs.forEach(add);
   // Un élément lazy-load désigne une seule photo. Ne pas récupérer son src d’attente
@@ -461,16 +462,20 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
 // Parcours : accueil + pages de liste, puis fiches détectées. Budget en temps et en pages.
 export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fetchHtml:Fetcher,extraStarts:string[]=[],ldParse?:(html:string,url:string)=>any,memory?:CrawlMemory){
   if(memory){
-    const host=origin.hostname.replace(/^www\./,''),scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,''):'';
+    // 02/11/2026 (groupe 123 immo : « /agences/auxerre-centre/1 ») : le numéro de page final ne fait pas partie du périmètre de l'agence.
+    const host=origin.hostname.replace(/^www\./,''),scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
     const inScope=(u:string)=>!scope||scope.split('/').length<3||new URL(u).pathname.startsWith(scope+'/')||new URL(u).pathname===scope;
     const source=extraStarts[0]||origin.toString();
     return crawlCatalogue(source,'smart-v1:'+sector+':'+scope,[source],async u=>u.toString()===source?{text:homeHtml,url:u}:fetchHtml(u),(html,page)=>{
-      let xmlLists:string[]=[];
-      if(/<urlset\b|<sitemapindex\b/i.test(html)){const urls=[...html.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map(m=>sDecode(m[1]));xmlLists=urls.filter(u=>/\.xml(?:\?|$)/.test(u));html=urls.filter(u=>!xmlLists.includes(u)).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');}
+      let xmlLists:string[]=[];const isMap=/<urlset\b|<sitemapindex\b/i.test(html);
+      if(isMap){const urls=[...html.matchAll(/<loc>\s*([^<]+)\s*<\/loc>/gi)].map(m=>sDecode(m[1]));xmlLists=urls.filter(u=>/\.xml(?:\?|$)/.test(u));html=urls.filter(u=>!xmlLists.includes(u)).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');}
       const found=smartLinks(html,page,host);
       if(page.toString()===source&&found.details.length<5&&!scope)xmlLists.push(new URL('/sitemap.xml',origin).toString());
       const same=(u:string)=>{try{return new URL(u).hostname.replace(/^www\./,'')===host;}catch{return false;}};
-      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&inScope(u))};
+      // Fiches liées depuis une page de l'agence elle-même (ex. /agences/auxerre-centre/2 → /vente/2-auxerre/…) : ce sont ses biens,
+      // même si leur adresse n'est pas sous celle de l'agence. Ailleurs, seules les fiches sous le chemin de l'agence sont gardées.
+      const ownPage=!!scope&&!isMap&&inScope(page.toString());
+      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(ownPage||inScope(u)))};
     },async(html,url)=>{
       let row:any=null;if(ldParse)row=ldParse(html,url);if(row?._sold)return row;
       const sd=smartDetail(html,url,sector);if(!row)row=sd;else if(sd){/* 01/11/2026 (Anthony, BH Car : photos d'autres véhicules ajoutées à la fin) : la liste des données structurées est celle du véhicule ; les photos de la page (qui comprennent les « véhicules similaires ») ne servent que si elle en a 3 ou moins. */if(String(row.photos||'').split('|').filter(Boolean).length<=3&&String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
