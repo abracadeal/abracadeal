@@ -65,7 +65,7 @@ function smartLinksRaw(html:string,page:URL,host:string){
   // 02/11/2026 (Anthony, Cosmopolitan « soi-disant réparé ») : « /acheter-appartement-maison-nice.html », « /liste-biens-….html » pris pour
   // des biens à côté des vraies fiches « /immobilier-…-313.html ». Quand au moins 2 fiches d'un même niveau finissent par un numéro,
   // celles de ce niveau sans numéro et au nom de liste (liste, acheter, vente, biens…) sont des pages de liste.
-  {const info=(f:string)=>{try{const segs=new URL(f).pathname.split('/').filter(Boolean);const last=(segs[segs.length-1]||'').replace(/\.(?:html?|php|aspx?)$/i,'');return{d:segs.length,n:/(?:^|[-_])\d{2,}$/.test(last),l:/(?:^|[-_])(?:liste|listing|acheter|achat|vente|vendre|louer|location|biens|programmes?|annonces|recherche|nos|tous|toutes|catalogue|stock)(?:[-_]|$)/i.test(last)};}catch{return{d:0,n:false,l:false};}};
+  {const info=(f:string)=>{try{const segs=new URL(f).pathname.split('/').filter(Boolean);const last=(segs[segs.length-1]||'').replace(/\.(?:html?|php|aspx?)$/i,'');return{d:segs.length,n:/(?:^|[-_])\d{2,}$/.test(last)||/\d{3,}/.test(last)/* Twimmo « …-1-247v562a » (Laroca) */,l:/(?:^|[-_])(?:liste|listing|acheter|achat|vente|vendre|louer|location|biens|programmes?|annonces|recherche|nos|tous|toutes|catalogue|stock)(?:[-_]|$)/i.test(last)};}catch{return{d:0,n:false,l:false};}};
    const numAt=new Map<number,number>();for(const f of details){const i=info(f);if(i.n)numAt.set(i.d,(numAt.get(i.d)||0)+1);}
    if(numAt.size){const keep=details.filter(f=>{const i=info(f);if(!i.n&&i.l&&(numAt.get(i.d)||0)>=2){lists.add(f);return false;}return true;});details.length=0;details.push(...keep);}}
   return{details,lists:[...lists]};
