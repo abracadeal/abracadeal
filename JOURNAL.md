@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — « Recherche IA » retiré
+- Remarque d'Anthony : « pourquoi il y a écrit IA si ce n'en est pas ». La recherche est à règles (mots-clés + critères reconnus), sans IA.
+- `index.html` : champ « ✦ Recherche IA » → « Rechercher : c63, studio Cannes… » ; `smart-search-20260924.js` (v=20261102-sans-ia) : « Recherche intelligente : » → « Critères reconnus : ».
+- Proposé : vraie recherche IA (empreintes de sens des annonces + compréhension de la phrase), en attente du choix d'Anthony (Mistral payant recommandé).
+
 ### 02/11/2026 — Claude — Recherche : « c63 » / « c 63 »
 - Remarque d'Anthony : « c63 » ne trouvait rien ; « c 63 » trouvait les deux C 63 AMG mais aussi 2 vans et une Alfa Romeo.
 - Cause : « c63 » n'apparaît pas tel quel (« C 63 AMG ») ; et chaque mot était cherché comme un morceau de texte (« c » partout, « 63 » dans 63000, 163…).
