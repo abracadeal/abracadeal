@@ -1,0 +1,5 @@
+-- 02/11/2026 — Claude — Recherche IA gratuite (appliqué en direct : migration listing_embeddings).
+-- extension vector ; private.listing_embeddings(listing_id, embedding vector(384), source_hash, updated_at).
+-- public.ai_embed_next(limit) / ai_embed_save(id, embedding, hash) / ai_match_listings(embedding, limit) : service_role seulement.
+-- Fonction ai-search (gte-small, inclus dans Supabase) : { action:"embed" } (cron abracadeal-ai-embeddings, chaque minute, 6 annonces
+-- par appel — au-delà, limite de ressources) ; { q } public → annonces proches par le sens.
