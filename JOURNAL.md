@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Prospection : relances en plus des premiers mails
+- État constaté : 521 entreprises contactées (52 sur 3 jours), 874 mails dont 320 relances, 31 clics, 0 inscription ; aperçus prêts pour 531 prospects (470 avec ≥ 5 annonces), mais seuls 85 des 521 contactés en avaient un à l'envoi.
+- Demande d'Anthony : garder les relances automatiques, mais « envoyer en plus du prospect ». Avant, le quota de chaque boîte (25/jour) était partagé moitié-moitié entre premiers mails et relances.
+- `prospect_mailer_claim` (migration `prospect_relances_en_plus`, copie `supabase/2026-11-02-relances-en-plus.sql`) : premiers mails = quota complet (25/jour/boîte) ; relances en plus, quota séparé (25/jour/boîte), même répartition sur la journée. Au plus ~100 mails/jour sur les 2 boîtes au lieu de ~50. Règles de sélection inchangées.
+- Proposé (pas fait) : n'écrire qu'aux prospects avec aperçu et le montrer dans le mail ; bouton « Je publie » (SIRET + e-mail) sur l'aperçu.
+
 ### 02/11/2026 — Claude — Champ de recherche : texte « Rechercher »
 - Demande d'Anthony : enlever « c63, studio Cannes… » du champ. `index.html` : placeholder « Rechercher ».
 
