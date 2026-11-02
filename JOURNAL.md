@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : Cimalpes Courchevel (réparation refaite)
+- Anthony : « soi-disant réparé ». La 1re réparation lisait en fait 7 biens de l'Alpe d'Huez : la page « à propos » de l'agence (`/fr/a-propos/agence-courchevel-1850/`) n'a que le menu du réseau, et ses liens étaient gardés comme « fiches de l'agence ».
+- `index.ts` : page d'agence de type à propos / agence-<ville> sans fiche de sa ville → le robot part de la liste du site qui porte le nom de la ville (`/fr/immobilier-courchevel/`, la vente plutôt que la location saisonnière en immobilier).
+- `smart-reader.ts` : quand la page de l'agence a au moins 3 fiches sous son propre chemin, ses autres liens (menu du réseau) sont ignorés. groupe 123 immo (fiches hors du chemin de l'agence) inchangé : 21/21, villes de l'Yonne.
+- Test Cimalpes : 9 biens de Courchevel complets sur 9, DPE sur les 9 (1er passage, la suite aux synchros suivantes).
+
 ### 02/11/2026 — Claude : page Imports de sites, « Demandes » ne garde que l'attente
 - `admin-test-import.html` : « Demandes » n'affiche plus que les demandes en attente. Les pros déjà activés ou en pause (ex. WeeCars Angers) passent dans un nouveau bloc replié « Pros connectés », avec les mêmes boutons (Aperçu, Synchroniser, Pause).
 
