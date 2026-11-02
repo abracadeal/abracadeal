@@ -18,6 +18,20 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : revérification des 50 sites « réparés » + robot plus solide
+- Anthony : « répare bien les sites à lire, enfin le robot ». Les 50 sites marqués réparés ont été relus un par un (titres, villes, photos), pas seulement compter les biens.
+- Corrigé dans le robot (`pro-stock-sync`) :
+  - homonymes lointains : « Bordeaux Saint-Michel » lu Saint-Michel (Aisne) → commune proche cherchée dans le titre puis l'adresse de la fiche ; si rien, ville de l'agence (signalé) — seulement quand le nom est porté par plusieurs communes (une vraie ville lointaine comme Lorient reste, signalée) ;
+  - commune écrite dans l'adresse de la fiche (`…/type-3-neuf-bourg-en-bresse/` lu « Lyon ») ; commune d'un seul mot dans un lien refusée tant que la position de l'agence est inconnue (« centre-bourg » → Le Bourg dans le Lot) ;
+  - agence sans adresse : sa commune lue dans l'adresse du site (guipry-messac.cimm.com) → « St-Just » = Saint-Just 35 et non 34 ;
+  - code postal inexistant retiré (covapro « 31747 ») ; code postal ajouté quand la commune n'en a qu'un ; entités HTML décodées (« Val d&#039;Anast ») ; ville de l'agence au nom officiel (« Bourg en Bresse » → Bourg-en-Bresse) ;
+  - pages qui ne sont pas des biens : pages racine écartées quand les biens sont dans un dossier `/bien/…` (pages quartiers d'agence-bordeaux), titres de pages de liste écartés (« Ventes immobilières », « Trouver un bien ») ;
+  - fiche sans ville, agence sans adresse → ville de la grande majorité des autres biens (signalé) ;
+  - liste officielle des communes gardée dans notre base (`commune_ref`, `supabase/2026-11-02-commune-ref.sql`) : avant, sous charge, l'API de l'État ne répondait pas à temps et les villes n'étaient plus vérifiées pendant 10 min (Triumph « Ergue Gaberic »).
+- Régression évitée : la règle « pages de liste sans numéro » écartait aussi les fiches Twimmo (`…-1-247v562a.html`) → Laroca relu 37 biens au 1er passage.
+- Échec honnête : Human Immobilier (La Flotte-en-Ré, La Châtre) renvoie maintenant toutes ses pages d'agence vers l'accueil pour notre robot → marqué en échec.
+- Résultat : 47 sites relus corrects (titres réels, villes officielles, photos du site), dont Cimalpes 9 biens Courchevel, Cosmopolitan 6/6, agence-bordeaux 20/21, bgi01 6/6 Bourg-en-Bresse, guipry-messac 29/29.
+
 ### 02/11/2026 — Claude : Cosmopolitan Real Estate (réparation refaite)
 - Anthony : « soi-disant réparé ». L'aperçu montrait « Trouver un bien », « Cosmopolitan Real Estate » (pages de liste lues comme des biens) et des photos cassées.
 - `smart-reader.ts` : quand au moins 2 fiches d'un même niveau finissent par un numéro (`/immobilier-…-313.html`), les pages de ce niveau sans numéro et au nom de liste (`/acheter-…`, `/liste-biens-…`, `/vente-…`) sont des listes. Résultat : 6 biens réels sur 6 (Nice, 1 à Antibes d'après la fiche), DPE sur 4.
