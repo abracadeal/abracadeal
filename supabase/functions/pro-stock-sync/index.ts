@@ -1064,7 +1064,7 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/^(?:www\.)?biasimmobilier\.fr$/i.test(url.hostname)){rows=await readBiasAgency(url,text,fetchSiteHtml);platform='BIAS (catalogue agence)';feed.sector='immobilier';}
     else if(/^(?:www\.)?immobilier-pierrefeu\.com$/i.test(url.hostname)){rows=await readPierrefeu(url,text,fetchSiteHtml);platform='Immobilier Pierrefeu (catalogues paginés)';feed.sector='immobilier';}
     else if(/^(?:www\.)?boschi-immobilier\.com$/i.test(url.hostname)){rows=await readBoschiAgency(url);platform='Boschi (catalogue public filtré par agence)';feed.sector='immobilier';}
-    else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Apimo (listes actives)';feed.sector='immobilier';}
+    else if(isApimoModules(text)){rows=await readApimoModules(url,text,fetchSiteHtml,crawlMemory(feed,persistCrawl),(h:string,l:string)=>{let r:any=null;try{r=ldImmo(h,l);}catch{r=null;}const sd:any=smartDetail(h,l,'immobilier');if(!r)return sd;if(sd){for(const k of Object.keys(sd))if(r[k]==null||r[k]==='')r[k]=sd[k];if(String(sd.photos||'').split('|').length>String(r.photos||'').split('|').length)r.photos=sd.photos;}return r;});platform='Apimo (listes actives)';feed.sector='immobilier';}
     else if(ladPath){rows=await readLadresseAgency(origin,ladPath);platform="L'Adresse (page agence)";feed.sector='immobilier';}
     else if(c21Link&&!/century21\.fr$/i.test(new URL(c21Link).hostname)){rows=await readC21Agency(new URL(c21Link));platform='Century 21 (site agence)';feed.sector='immobilier';}
     else if(isC21AgencySite(url,text)){rows=await readC21Agency(origin);platform='Century 21 (site agence)';feed.sector='immobilier';}

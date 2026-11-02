@@ -51,7 +51,15 @@ function smartLinksRaw(html:string,page:URL,host:string){
     else if(LIST_PATH.test(u.pathname+u.search)||/\/(?:maisons|appartements|terrains)[^/]*\.php$/i.test(u.pathname)||/[?&](page|p|pg|start|offset)=\d+|\/page[-/]?\d+/i.test(u.pathname+u.search))lists.add(full);
   }
   const details:string[]=[];
-  for(const [,set] of [...groups.entries()].sort((a,b)=>b[1].size-a[1].size)){if(set.size>=2)details.push(...set);}
+  const loose=new Map<string,Set<string>>();
+  for(const [,set] of [...groups.entries()].sort((a,b)=>b[1].size-a[1].size)){if(set.size>=2)details.push(...set);else for(const f of set){
+    // 02/11/2026 (Christine Dumas / groupe 123 immo, La Boîte Immo : « /vente/1-brest/appartement/t1/379-… », « …/maison/t8/375-… ») :
+    // une petite agence a souvent un seul bien de chaque type, donc chaque forme d'adresse n'apparaît qu'une fois.
+    // Second regroupement : même rubrique (1er dossier de liste), même profondeur, numéro de fiche en fin d'adresse.
+    try{const u=new URL(f);const segs=u.pathname.split('/').filter(Boolean);const last=segs[segs.length-1]||'';
+      if(segs.length>=3&&LIST_PATH.test(segs[0])&&/(?:^|[-_])\d{2,}(?:[-_.]|$)|\d{3,}/.test(last)){const k=segs[0]+'|'+segs.length;if(!loose.has(k))loose.set(k,new Set());loose.get(k)!.add(f);}}catch{}
+  }}
+  for(const [,set] of loose)if(set.size>=2||(set.size===1&&details.length===0))details.push(...set);
   return{details,lists:[...lists]};
 }
 
