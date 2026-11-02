@@ -2088,3 +2088,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `pro.html` : quand le pro regarde sa propre page, plus de « S'abonner » ni « Contacter » (il ne peut pas s'abonner à lui-même) → bouton « Modifier ma page » (vers /?espace=pro) + « Partager », et un bandeau « C'est votre page : vos clients la voient exactement comme ça. »
 - Ses propres visites ne sont plus comptées dans les vues du showroom.
 - Côté espace Pro d'un Fondateur, les seuls éléments payants visibles sont les options de visibilité (Boosts, Options).
+
+### 02/11/2026 — Claude — Annonces reprises du site du pro : message avant modification / suppression
+- Demande d'Anthony : expliquer au pro que la modification est possible, mais doit être faite en priorité sur son site principal, sinon la mise à jour automatique la remet comme avant.
+- `index-main.js` v=20261102-synchro : dans le formulaire « Modifier » d'une annonce `source = feed:*`, encadré orange : « Cette annonce est reprise automatiquement depuis votre site… faites la modification en priorité sur votre site principal : sinon, à la prochaine mise à jour (environ toutes les 3 heures), l'annonce reviendra comme avant. » Version admin : renvoie vers Imports sites → Modifier (correction qui reste).
+- Supprimer une annonce reprise : confirmation « Retirez-la en priorité de votre site principal : sinon, elle réapparaîtra… ».

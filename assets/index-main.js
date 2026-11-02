@@ -2390,6 +2390,7 @@ function openPromotionForListing(id){
 }
 
 function resetPublishForm(){
+  document.getElementById('listingSyncNotice')?.remove();
   $('#publishForm').reset(); selectedPhotos=[]; editingId=null; existingPhotoPaths=[]; editOriginalPhotos=[]; editPhotosLoading=false; selectedPublishPack='free'; selectedPublishOffers.clear(); publishStep=1; showAllPhotoSlots=false; pendingNoPhotoConfirm=false;
   editingOriginalOwnerId=null; editingOriginalStatus=null; editingOriginalSellerType=null; editingOriginalPhotoLimit=null;
   hideLocationSuggestions();
@@ -2504,6 +2505,16 @@ window.openAdminEditAd=function(id,ownerEdit=false){
   if(ownerEdit){sb.from('listing_contacts').select('phone').eq('listing_id',id).maybeSingle().then(({data})=>{if(editingId===id){$('#adPhone').value=data?.phone||'';editFormBaseline=editFormState();}});}
   $('#listingEditNotice')?.remove();
   if(ownerEdit){const notice=document.createElement('p');notice.id='listingEditNotice';notice.style.cssText='background:#f5eaf9;color:#3b1d4a;font-weight:600;font-size:12.5px;padding:10px 12px;border-radius:10px;line-height:1.45';notice.textContent='Baisse de prix seule : gratuite et illimitée, sans remontée. Toute autre modification : « Modifier et remonter mon annonce ». L’ancienne version et ses options restent en ligne pendant la vérification.';$('#publishForm').prepend(notice);sb.rpc('get_my_commerce_pricing').then(({data})=>{const offer=(data||[]).find(o=>o.code==='private_listing_edit');if(offer&&editingId===id)notice.textContent='Baisse de prix seule : gratuite et illimitée, sans remontée. Toute autre modification vous sera facturée '+(Number(offer.amount_cents)/100).toLocaleString('fr-FR',{minimumFractionDigits:2})+' € TTC. Après paiement et validation, votre annonce remontera en tête des résultats. L’ancienne version et ses options restent en ligne pendant la vérification.';});}
+  /* 02/11/2026 (Anthony) : annonce reprise du site du pro — la modifier d'abord sur son site, sinon la synchro la remet comme avant */
+  $('#listingSyncNotice')?.remove();
+  if(String(a.source||'').startsWith('feed:')){
+    const sn=document.createElement('p');sn.id='listingSyncNotice';
+    sn.style.cssText='background:#fff4e0;color:#5a3a00;border:1px solid #f1d39a;font-weight:600;font-size:12.5px;padding:10px 12px;border-radius:10px;line-height:1.45;margin:0 0 10px';
+    sn.textContent=ownerEdit
+      ?'Cette annonce est reprise automatiquement depuis votre site. Vous pouvez la modifier ici, mais faites la modification en priorité sur votre site principal : sinon, à la prochaine mise à jour (environ toutes les 3 heures), l’annonce reviendra comme avant.'
+      :'Annonce reprise du site du pro : une modification faite ici sera écrasée à la prochaine synchro (≈ 3 h). Pour une correction qui reste : Administration → Imports sites → la fiche → Modifier.';
+    $('#publishForm').prepend(sn);
+  }
   editFormBaseline=editFormState();
   openModal('publishModal');
 };
@@ -5558,6 +5569,8 @@ function askRemovalReason(){
 }
 window.deleteAd=async id=>{
   if(!currentUser){toast('Connexion requise');return;}
+  const synced=(allAds||[]).find(x=>x.id===id);
+  if(synced&&String(synced.source||'').startsWith('feed:')&&!confirm('Cette annonce est reprise automatiquement depuis votre site.\n\nRetirez-la en priorité de votre site principal : sinon, elle réapparaîtra à la prochaine mise à jour (environ toutes les 3 heures).\n\nContinuer ?'))return;
   const reason=await askRemovalReason();
   if(!reason)return;
   const {data:owned,error:ownerError}=await sb.from('listings').select('id,category').eq('id',id).eq('owner_id',currentUser.id).maybeSingle();
