@@ -89,10 +89,10 @@ export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,m
   if(!bases.length)throw Error('Listes actives de vente/location Apimo introuvables.');
   const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0;
   while(queue.length&&pages<40){const next=queue.shift()!;if(seen.has(next))continue;seen.add(next);let html='';try{html=(await fetchHtml(new URL(next))).text;}catch{partial=true;continue;}pages++;
-    const list=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi).filter(x=>/\bmodule-listing\b/.test(x)).join('');
-    if(!list){partial=true;continue;}
+    let list=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi).filter(x=>/\bmodule-listing\b/.test(x)).join('');
+    /* 02/11/2026 (Dana, Gambetta) : liste sans module « listing » reconnu → liens de toute la page (les pages « vendus » ne sont pas dans les listes suivies) */if(!list)list=html;
     for(const m of list.matchAll(/href="([^"]+)"/gi)){let u:URL;try{u=new URL(sDecode(m[1]),next);}catch{continue;}u.hash='';if(u.hostname!==start.hostname)continue;
-      const id=u.pathname.match(/^\/[a-z]{2}\/propriete\/(?:vente|location)\+[^/]+\+(\d+)\/?$/)?.[1];if(id){u.search='';details.set(id,u.toString());}
+      let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}/* 02/11/2026 (Gambetta « /fr/propriété/86167598 ») : adresse de fiche sans « vente+… », avec accents */const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)\+[^/]+\+)?(\d{5,})\/?$/)?.[1];if(id){u.search='';details.set(id,u.toString());}
       else if(bases.some(b=>u.origin+u.pathname===b)&&/^\d+$/.test(u.searchParams.get('page')||'')&&!seen.has(u.toString())&&!queue.includes(u.toString()))queue.push(u.toString());}
   }
   if(queue.length)partial=true;
