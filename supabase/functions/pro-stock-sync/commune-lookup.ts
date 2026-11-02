@@ -14,9 +14,18 @@ const mk=(c:any):Commune=>({nom:String(c.nom),cp:String((c.codesPostaux||[])[0]|
 let LIST:Promise<Lists|null>|null=null;let listFailedAt=0;
 function loadList(){
   if(LIST)return LIST;
-  if(Date.now()-listFailedAt<10*60_000)return Promise.resolve(null);
-  LIST=(async()=>{try{
-    const r=await fetch('https://geo.api.gouv.fr/communes?fields=nom,codesPostaux,population,centre&format=json',{signal:AbortSignal.timeout(20000)});
+  if(Date.now()-listFailedAt<60_000)return Promise.resolve(null);
+  LIST=(async()=>{
+    // 02/11/2026 (tests en série : villes non vérifiées quand l'API de l'État ne répondait pas à temps) : copie de la liste
+    // gardée dans notre base (table commune_ref), chargée en un appel ; l'API de l'État reste en secours.
+    try{const u=Deno.env.get('SUPABASE_URL'),k=Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+      if(u&&k){const r=await fetch(u+'/rest/v1/rpc/commune_list_compact',{method:'POST',headers:{apikey:k,Authorization:'Bearer '+k,'Content-Type':'application/json'},body:'{}',signal:AbortSignal.timeout(20000)});
+        if(r.ok){const txt=String(await r.json()||'');const lines=txt.split('\n');if(lines.length>=30000){
+          const byName=new Map<string,Commune[]>(),byCp=new Map<string,Commune[]>();
+          for(const ln of lines){const [nom,cps,pop,lat,lon]=ln.split('|');if(!nom)continue;const cl=cps?cps.split(','):[];const c:Commune={nom,cp:cl[0]||'',cps:cl,pop:Number(pop)||0,lat:Number(lat)||0,lon:Number(lon)||0};const kk=norm(nom);(byName.get(kk)||byName.set(kk,[]).get(kk)!).push(c);for(const cp of cl)(byCp.get(cp)||byCp.set(cp,[]).get(cp)!).push(c);}
+          return{byName,byCp};}}}}catch{}
+    try{
+    const r=await fetch('https://geo.api.gouv.fr/communes?fields=nom,codesPostaux,population,centre&format=json',{signal:AbortSignal.timeout(25000)});
     if(!r.ok)throw Error(String(r.status));const arr:any[]=await r.json();if(!Array.isArray(arr)||arr.length<30000)throw Error('liste incomplète');
     const byName=new Map<string,Commune[]>(),byCp=new Map<string,Commune[]>();
     for(const x of arr){const c=mk(x);const k=norm(c.nom);(byName.get(k)||byName.set(k,[]).get(k)!).push(c);for(const cp of c.cps)(byCp.get(cp)||byCp.set(cp,[]).get(cp)!).push(c);}
