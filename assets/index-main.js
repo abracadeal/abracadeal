@@ -3057,7 +3057,9 @@ function diagnosticScaleHtml(kind,grade){
 // SEO : titre de carte = vrai lien <a href> vers la page publique /annonce/<id>/ (crawlable par Google).
 // Clic normal : on ouvre la fiche dans l'application comme avant ; Ctrl/Cmd/clic molette : nouvel onglet.
 // 26/10/2026 : titres tout en MAJUSCULES affichés en minuscules (1re lettre en majuscule) ; le titre du vendeur n'est pas modifié en base.
-function displayListingTitle(raw){
+/* 03/11/2026 : displayVehicleTitle vient de assets/vehicle-title-20261103.js (chargé avant ce fichier ; aussi utilisé par pro.html). */
+function displayListingTitle(raw,a){
+  if(a&&a.category==='vehicules'&&!equipmentTypeOf(a)&&!/^equipement/.test(vehicleSubcategoryOf(a)||'')&&typeof window.displayVehicleTitle==='function')return window.displayVehicleTitle(raw);
   const t=String(raw||'').trim();
   const letters=t.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ]/g,'');
   if(letters.length<6) return t;
@@ -3079,7 +3081,7 @@ function listingAgeLabel(a){
 // 26/10/2026 : on n'affiche plus l'ancienneté (« il y a 12 jours » joue contre nous tant que le trafic est faible) ; seulement un badge « Nouveau » de moins de 3 jours.
 function listingIsNew(a){const d=new Date(a&&a.created_at||0);return !!(a&&a.created_at&&!isNaN(d)&&(Date.now()-d.getTime())<3*86400000);}
 function adSeoTitle(a){
-  const t=esc(displayListingTitle(a.title));
+  const t=esc(displayListingTitle(a.title,a));
   const isPublic=a&&a.status==='active'&&(a.visibility_scope||'public')==='public'&&!a.revision_of&&/^[0-9a-f-]{36}$/i.test(String(a.id||''));
   return isPublic?`<a href="/annonce/${a.id}/" class="ad-seo-link" style="color:inherit;text-decoration:none" onclick="return adSeoClick(event,'${a.id}')">${t}</a>`:t;
 }
@@ -4612,7 +4614,7 @@ window.openAd=id=>{
   const dmEquipment=listingEquipmentOf(a);
   const dmTopbar=`<div class="dm-topbar">
       <button type="button" class="dm-icon-btn" aria-label="Retour" onclick="closeModal('detailModal')">${dmIcon('back')}</button>
-      <div class="dm-topbar-title">${esc(a.title||'Annonce')}</div>
+      <div class="dm-topbar-title">${esc(displayListingTitle(a.title||'Annonce',a))}</div>
       <button type="button" class="dm-icon-btn" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)">${dmIcon('share')}</button>
       <button type="button" class="dm-icon-btn dm-fav ${dmFavActive?'active':''}" data-favorite-id="${a.id}" aria-label="${dmFavActive?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="dm-fav-count" data-fav-count-id="${a.id}"></span><span class="heart-icon">${dmFavActive?'♥':'♡'}</span></button>
     </div>`;
@@ -4644,7 +4646,7 @@ window.openAd=id=>{
         <main>
           <div class="detail-topline">
             <div>
-              <h1 class="detail-title-main">${esc(a.title)}</h1>
+              <h1 class="detail-title-main">${esc(displayListingTitle(a.title,a))}</h1>
               <div class="detail-price-main">${money(a.price)}</div>
               <div class="detail-location">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
               <div class="detail-meta-line">${esc(categoryLabel)}${created?' · Publiée le '+esc(created):''}</div>
@@ -4805,7 +4807,7 @@ function relatedCardHtml(a){
       ${media}${listingCardActions(a)}
     </div>
     <div class="detail-related-body">
-      <div class="detail-related-title">${esc(a.title||'Annonce')}</div>
+      <div class="detail-related-title">${esc(displayListingTitle(a.title||'Annonce',a))}</div>
       <div class="detail-related-price">${money(a.price)}</div>
       <div class="detail-related-city">📍 ${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
     </div>

@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — Titres de véhicules propres + showroom sans « 0 abonné / Aucun avis »
+- Revue visuelle (iPhone et ordinateur, vrai catalogue) : mise en page propre, mais titres de voitures « amateurs » (« Mini mini 2.0 205 cooper s jcw », « Ds ds 7 », « RENAULT TWINGO Twingo III », « Bmw serie 1 116d dkg f40 m sport »).
+- Nouveau `assets/vehicle-title-20261103.js` (chargé par index.html et pro.html) : `displayVehicleTitle` — marques (BMW, DS, MG, Citroën…), sigles (TDI, TSI, BlueHDi, dCi, BVA, DSG, 4Matic, xDrive, AMG, JCW…), codes (A3, X1, GLA, F40, 116d), chiffres romains (III, VII), mots répétés supprimés, casse déjà travaillée conservée. **Affichage seulement** (cartes, fiche, en-tête, annonces liées, showroom) ; les annonces ne sont pas modifiées. Testé sur les 127 titres WeeCars.
+- `index-main.js` v=20261103-titres : `displayListingTitle(titre, annonce)` utilise ce formatage pour les véhicules (pas pour les équipements ni les autres rubriques).
+- `pro.html` : « Aucun avis » et « 0 abonné » ne s'affichent plus en tête du showroom (affichés dès qu'il y a un avis / un abonné).
+
 ### 03/11/2026 (nuit) — Claude — « Ne pas me compter » dans les statistiques
 - Anthony : les 40 clics Google d'octobre sont sûrement les siens. Search Console : « Actions manuelles » = aucun problème.
 - `index-main.js` (v=20261103-moi) + `pro.html` : ouvrir abracadeal.fr/?moi=1 sur un appareil → cet appareil n'est plus compté (visites, vues d'annonces, numéros, showrooms), même déconnecté ; ?moi=0 pour annuler (localStorage `abraca_not_counted`).
