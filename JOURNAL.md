@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : sites renvoyés par Anthony (Ventury, rmcars93, monagenceautomobile, groupe 123 immo)
+- Ventury (« Perpignan la ville et non Paris ») : les données du site donnent le siège parisien. Nouveau : adresse du pro fixée pour tout un site (`pro_stock_overrides`, `ref = '*'`, `{ville, code_postal}`) → Perpignan 66000 (le site dit aussi « Le Soler »).
+- rmcars93 (« Noisy-le-Grand ») : « SEAT LEON » était lu comme la commune de Léon (40). Véhicules : plus de commune devinée dans le titre ni l'adresse de la fiche (Leon, Ibiza…), seulement dans la description, puis ville majoritaire du garage pour tous ; ville lointaine (> 150 km) d'un véhicule remplacée par celle du garage.
+- monagenceautomobile (« plus d'annonces non lues ») : la page `/agence/chateauroux-54` ne montre que 5 véhicules → le robot part de la liste filtrée `/acheter-un-vehicule/?agencie=54` et ne suit que les pages qui gardent ce filtre. 13/13.
+- groupe 123 immo (« problème photo ») : La Boîte Immo — les liens photo des données structurées (`…/600xauto/images/1/…`) répondent 404 ; corrigés en `…/1600xauto/images/biens/1/…`, et les photos de la page sont préférées quand ce sont les mêmes fichiers. Concerne aussi Christine Dumas, Arlim, Influences, Agence Résidence. Accents cassés (« Ã  », « mÂ² ») réparés.
+- Arlim : vérifié que Cannes / Paris / Eygalières restent (ville réelle lointaine, signalée), plus remplacées.
+- covapro : grande commune lue dans l'adresse de la fiche même sans position d'agence (« …-dole-31747 » → Dole).
+
 ### 02/11/2026 — Claude : revérification des 50 sites « réparés » + robot plus solide
 - Anthony : « répare bien les sites à lire, enfin le robot ». Les 50 sites marqués réparés ont été relus un par un (titres, villes, photos), pas seulement compter les biens.
 - Corrigé dans le robot (`pro-stock-sync`) :
