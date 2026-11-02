@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : annonce ouverte par-dessus le showroom (Anthony : « y a un passage quand même sur la page d'accueil »)
+- `pro.html` : un clic sur une annonce du showroom ouvre la fiche dans une fenêtre intégrée par-dessus le showroom (`/?annonce=<id>&embed=1`), sans quitter la page ; retour du navigateur / Échap / croix de la fiche → retour au showroom. Ctrl / Cmd / clic molette : nouvel onglet comme avant.
+- `index.html` (+ `index-main.js` `20261102-embed`) : en mode intégré (`?embed=1` dans une fenêtre intégrée), en-tête, page d'accueil, pied de page et barre mobile masqués, fond transparent : on ne voit que la fiche, le showroom flouté derrière. La fiche prévient le showroom quand elle est affichée (fin du « Chargement ») et quand elle est fermée. Le retour par `&retour=` reste en secours pour les liens ouverts autrement.
+
 ### 02/11/2026 — Claude : annonce ouverte depuis un showroom (Anthony : « ça l'ouvre et nous emmène en même temps sur le site principal »)
 - `pro.html` : les annonces du showroom ouvrent `/?annonce=<id>&retour=<adresse du showroom>`.
 - `assets/index-main.js` (`20261102-retour`) : fiche ouverte avec `retour` → en la fermant (croix, retour, fond), on revient au showroom (retour arrière du navigateur si on vient de lui, sinon chargement de l'adresse). Pas de retour si une autre fenêtre s'ouvre à la place (connexion pour écrire, profil du vendeur). Adresse de retour limitée aux chemins du site.

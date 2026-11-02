@@ -186,7 +186,29 @@ async function init(){
     isFollowing=!!followRow;
   }
   renderShell();
-  // 01/11/2026 (Anthony) : compteur de visites du showroom (même identifiant anonyme que les annonces ; 1 fois par jour)
+  // 02/11/2026 (Anthony : « un passage sur la page d'accueil quand on clique sur une annonce ») : la fiche s'ouvre par-dessus
+// le showroom, dans une fenêtre intégrée (accueil caché). Clic molette / Ctrl / Cmd : nouvel onglet comme avant.
+(function(){
+  let wrap=null,opened=false;
+  function closeAd(fromHistory){if(!wrap)return;wrap.remove();wrap=null;document.body.style.overflow='';if(opened&&!fromHistory){opened=false;history.back();}opened=false;}
+  function openAd(id,href){
+    if(wrap)closeAd(true);
+    wrap=document.createElement('div');wrap.id='adFrameWrap';
+    wrap.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,4,18,.55)';
+    wrap.innerHTML='<div style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:600 14px system-ui">Chargement de l’annonce…</div>';
+    const f=document.createElement('iframe');f.src='/?annonce='+encodeURIComponent(id)+'&embed=1';f.title='Annonce';f.setAttribute('allowtransparency','true');
+    f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;opacity:0;transition:opacity .15s';
+    f.onload=()=>{f.style.opacity='1';};setTimeout(()=>{f.style.opacity='1';},4000);
+    wrap.appendChild(f);document.body.appendChild(wrap);document.body.style.overflow='hidden';
+    history.pushState({adFrame:id},'',location.pathname+location.search+'#annonce-'+id);opened=true;
+  }
+  window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data)return;if(e.data.type==='abraca-annonce-close')closeAd(false);else if(e.data.type==='abraca-annonce-ready'&&wrap){wrap.style.background='transparent';const l=wrap.firstElementChild;if(l&&l.tagName!=='IFRAME')l.remove();}});
+  window.addEventListener('popstate',()=>{if(wrap)closeAd(true);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&wrap)closeAd(false);});
+  document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a.ad');if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    const id=new URL(a.href,location.href).searchParams.get('annonce');if(!id)return;e.preventDefault();openAd(id,a.href);});
+})();
+// 01/11/2026 (Anthony) : compteur de visites du showroom (même identifiant anonyme que les annonces ; 1 fois par jour)
   if(!(currentUser&&currentUser.id===id))try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
   // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/lifecars) affichée dans la barre d'adresse.
   if(showroom?.slug&&/\/pro\.html$/i.test(location.pathname)){try{history.replaceState(null,'','/'+showroom.slug);}catch(_){}}

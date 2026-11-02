@@ -120,6 +120,7 @@ function openModal(id){
   const modalBody=el.querySelector('.modal-body');
   if(modalBody) modalBody.scrollTop=0;
   document.body.style.overflow='hidden';
+  if(id==='detailModal'&&document.documentElement.classList.contains('abraca-embed')){try{window.parent.postMessage({type:'abraca-annonce-ready'},location.origin);}catch(_){}}
 }
 function closeModal(id){
   const el=document.getElementById(id);
@@ -128,7 +129,9 @@ function closeModal(id){
      annonce ouverte depuis un showroom (…?annonce=<id>&retour=/lifecars) → en la fermant on revient au showroom. */
   /* Seulement quand la fiche est vraiment fermée : si une autre fenêtre s'ouvre juste après (connexion pour envoyer un message,
      profil du vendeur…), on reste sur place. */
-  if(id==='detailModal'&&window.__annonceRetour){const back=window.__annonceRetour;
+  if(id==='detailModal'&&document.documentElement.classList.contains('abraca-embed')){
+    setTimeout(()=>{if(document.querySelector('.modal-backdrop.open'))return;try{window.parent.postMessage({type:'abraca-annonce-close'},location.origin);}catch(_){}},80);}
+  else if(id==='detailModal'&&window.__annonceRetour){const back=window.__annonceRetour;
     setTimeout(()=>{if(document.querySelector('.modal-backdrop.open'))return;window.__annonceRetour=null;
       try{const ref=document.referrer?new URL(document.referrer):null;if(ref&&ref.origin===location.origin&&ref.pathname+ref.search===back&&history.length>1){history.back();return;}}catch(_){}
       location.href=back;},80);}

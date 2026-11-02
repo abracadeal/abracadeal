@@ -2,6 +2,14 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<!-- 02/11/2026 (Anthony : « un passage sur la page d'accueil quand on clique sur une annonce dans le showroom ») :
+     fiche ouverte depuis un showroom dans une fenêtre intégrée (?embed=1) : seule la fiche s'affiche, sur fond transparent. -->
+<script>(function(){try{var q=new URLSearchParams(location.search);if(q.get('embed')==='1'&&window.parent!==window){document.documentElement.classList.add('abraca-embed');}}catch(e){}})();</script>
+<style>
+html.abraca-embed,html.abraca-embed body{background:transparent!important;background-image:none!important}
+html.abraca-embed body>header,html.abraca-embed body>.mobile-topbar,html.abraca-embed body>main,html.abraca-embed body>main#top,html.abraca-embed body>footer,html.abraca-embed .mobile-bottom-nav,html.abraca-embed .portrait-only-overlay,html.abraca-embed .install-app-banner,html.abraca-embed .founder-strip{display:none!important}
+html.abraca-embed body::before,html.abraca-embed body::after{display:none!important}
+</style>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="assets/tablet-as-mobile-20261007.js?v=4"></script>
 <script src="assets/back-gesture-20261007.js?v=3"></script>
@@ -1811,7 +1819,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
 <script src="assets/card-photo-fit-20261101.js?v=5" defer></script>
-<script src="assets/index-main.js?v=20261102-retour"></script>
+<script src="assets/index-main.js?v=20261102-embed"></script>
 <script src="assets/social-login-20261018.js?v=8"></script>
 <script src="assets/description-helper-20261013.js?v=3" defer></script>
 <script src="assets/publish-more-details-20261026.js?v=3" defer></script>
