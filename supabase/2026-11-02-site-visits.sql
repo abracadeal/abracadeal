@@ -1,0 +1,6 @@
+-- 02/11/2026 — Claude — appliqué en direct (migration site_visits_and_traffic_stats).
+-- public.site_visits(viewer_key, day, page, source, mobile) : 1 ligne par visiteur, jour et type de page (accueil, annonce, showroom…),
+--   provenance google / bing / facebook / instagram / email / direct / autre_site. Administrateurs connectés non comptés.
+-- public.track_site_visit(p_visitor, p_page, p_source, p_mobile) : anon + authenticated.
+-- public.admin_traffic_stats(p_days) : admin seulement — par jour (visiteurs, mobiles, vues, numéros, messages, showrooms, recherches),
+--   sources, annonces les plus vues, par vendeur. Affiché dans admin-pilotage.html (assets/admin-traffic-20261102.js).

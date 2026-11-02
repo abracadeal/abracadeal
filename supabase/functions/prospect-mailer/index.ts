@@ -106,6 +106,50 @@ async function withTracking(body: string, prospectId: string) {
   } catch { return body; }
 }
 type Tpl = { subject: string; body: string };
+// v15 02/11/2026 (Claude, « fais comme si c'était ton site ») : quand l'aperçu du prospect est prêt (≥ 3 annonces lues),
+// le mail le MONTRE au lieu d'expliquer : « vos N véhicules sont déjà prêts, regardez », lien personnel vers l'aperçu,
+// bouton « Je publie » (accord + SIRET) sur la page. Rien n'est publié sans cet accord.
+function apercuNoun(category: string, n: number) {
+  const w = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
+  return n > 1 ? `vos ${n} ${w[1]}` : `votre ${w[0]}`;
+}
+function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
+  const vos = apercuNoun(category, n), plural = n > 1;
+  const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
+  if (followup) return { subject: "Re: " + subject, body:
+`Bonjour,
+
+Je me permets de vous redonner le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix.
+
+Voir l'aperçu : https://abracadeal.fr/pro-fondateur.html
+
+Si cela vous convient, un clic sur « Je publie » et votre SIRET suffisent. Gratuit, sans carte bancaire, sans engagement.
+
+Le Service Pros Abracadeal
+abracadeal.fr – {{expediteur}}` };
+  return { subject, body:
+`Bonjour,
+
+Nous avons préparé la page de {{societe}} sur Abracadeal : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, ${plural ? "repris" : "repris"} depuis votre site.
+
+Regardez à quoi elle ressemble (aperçu privé, rien n'est publié) :
+https://abracadeal.fr/pro-fondateur.html
+
+Si elle vous plaît, cliquez sur « Je publie » et indiquez votre SIRET : vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site (nouveautés, prix, ventes).
+
+Abracadeal est un nouveau site d'annonces, gratuit pour les professionnels. Sans carte bancaire, sans engagement.
+
+Le Service Pros Abracadeal
+abracadeal.fr – {{expediteur}}` };
+}
+async function previewCount(prospectId: string): Promise<number> {
+  try {
+    const { data } = await admin.from("prospect_previews").select("count,rows").eq("prospect_id", prospectId).maybeSingle();
+    if (!data) return 0;
+    const n = Number(data.count || 0) || (Array.isArray(data.rows) ? data.rows.length : 0);
+    return Array.isArray(data.rows) && data.rows.length >= 3 ? n : 0;
+  } catch { return 0; }
+}
 // kind : "" (site lu), "manuel" (vend sur Leboncoin), "normal" (site qui bloque les robots).
 async function templates(category: string, followup: boolean, variant: string, kind: boolean | string = ""): Promise<Tpl> {
   CURRENT_CATEGORY = category || "";
@@ -343,7 +387,7 @@ Deno.serve(async (req) => {
     for (const j of list) {
       const followup = j.kind === "followup";
       try {
-        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status").eq("id", j.id).single();
+        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status,mail_kind").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         if (isProviderEmail(j.email)) throw new Error("Adresse de l’hébergeur / du créateur du site, pas du pro : non envoyé");
@@ -351,15 +395,21 @@ Deno.serve(async (req) => {
         // 29/10/2026 (Anthony) : le mail « nous avons testé votre site » (et sa relance) seulement si le site a vraiment été lu
         // avec au moins une annonce ; sinon mail « normal » (jamais de nombre ni de « tout est prêt » inventés).
         const tested = row?.site_check_status === "ok" && Number(row?.site_check_count || 0) > 0;
-        const tpl = await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
+        // v15 : aperçu prêt → mail « regardez » (et sa relance). Pour une relance, seulement si le 1er mail était déjà le mail aperçu
+        // (même objet dans le même fil) : sinon on garde la relance d'origine.
+        const nPrev = await previewCount(j.id);
+        const firstWasApercu = followup ? row?.mail_kind === "apercu" : true;
+        const useApercu = nPrev >= 3 && firstWasApercu;
+        const tpl = useApercu ? apercuTemplates(j.category || "", nPrev, followup)
+          : await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
         else {
           await admin.rpc("prospect_mailer_done", { p_id: j.id, p_ok: true, p_error: null, p_message_id: msgId });
-          await admin.from("prospection_prospects").update({ ab_variant: variant }).eq("id", j.id);
+          await admin.from("prospection_prospects").update({ ab_variant: variant, mail_kind: useApercu ? "apercu" : "standard" }).eq("id", j.id);
         }
-        res[j.mailbox] = (followup ? "relance envoyée" : "envoyé") + " (" + variant + ")";
+        res[j.mailbox] = (followup ? "relance envoyée" : "envoyé") + " (" + (useApercu ? "aperçu" : variant) + ")";
       } catch (e) {
         const msg = String((e as Error).message || e);
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: false, p_error: msg });

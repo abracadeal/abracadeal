@@ -18,6 +18,27 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Mails vérifiés + tableau de bord des visiteurs
+- **Configuration des mails vérifiée** (en-têtes de mails reçus sur abracadeal@gmail.com + DNS) : contact@abracadeal.fr et partenaires@abracadeal.com passent SPF, DKIM (sélecteur OVH `ovhmo-selector-1`) et DMARC (p=none), score anti-spam OVH 0. Rien à corriger.
+- **Constat trafic** : avant ce soir, seulement les vues d'annonces étaient comptées — 39 vues par 5 visiteurs depuis le 29/10, 1 numéro affiché. Aucun compteur de visites du site.
+- Ajouté : `site_visits` + `track_site_visit` (index-main.js v=20261102-visiteurs : accueil / annonce ; pro.html : showroom ; 1 fois par visiteur, page et jour ; provenance Google/Facebook/direct… ; admins connectés exclus) et `admin_traffic_stats` → nouvelle section « Visiteurs et contacts » dans admin-pilotage.html (totaux, sources, par jour, par vendeur, annonces les plus vues ; 7/14/30/90 jours). Doc : `supabase/2026-11-02-site-visits.sql`.
+
+### 02/11/2026 — Claude — Prospection : mail « votre stock est prêt, regardez » + bouton « Je publie »
+- Anthony : « fais comme si c'était ton site ». Constat : 521 pros contactés, 31 clics, 0 inscription → changer le message avant d'envoyer plus.
+- Quota remis à 25/jour/boîte relances comprises (migration `prospect_claim_shared_quota_preview_first`), premiers mails d'abord aux prospects dont l'aperçu est prêt (363 prêts : 334 agences, 29 garages).
+- `prospect-mailer` v15 : si l'aperçu a ≥ 3 annonces → objet « {{societe}} : vos N véhicules/biens sont déjà prêts sur Abracadeal », mail court avec le lien personnel vers l'aperçu et « Je publie » ; relance assortie seulement si le 1er mail était celui-là (`mail_kind`). Sinon anciens mails inchangés.
+- `pro-fondateur.html?r=…` : sous l'aperçu, formulaire « Je publie » (SIRET + e-mail + téléphone facultatif + case d'accord) → `prospect_accept` (contrôle du SIRET, lien personnel obligatoire, 3 envois max) → `private.prospect_acceptances` (+ `siren_matches` si le SIREN du prospect est connu), relance arrêtée, ligne `accept` dans `prospection_logs`. **Rien n'est publié automatiquement** : l'import se lance ensuite (accord + SIRET = règle d'Anthony respectée). Testé sur iPhone simulé (SIRET faux refusé, accord enregistré).
+- Tâche de surveillance des mails : ajoute les accords « Je publie » à son compte rendu.
+
+### 02/11/2026 — Claude — Prospection : relances en plus des premiers mails
+- État constaté : 521 entreprises contactées (52 sur 3 jours), 874 mails dont 320 relances, 31 clics, 0 inscription ; aperçus prêts pour 531 prospects (470 avec ≥ 5 annonces), mais seuls 85 des 521 contactés en avaient un à l'envoi.
+- Demande d'Anthony : garder les relances automatiques, mais « envoyer en plus du prospect ». Avant, le quota de chaque boîte (25/jour) était partagé moitié-moitié entre premiers mails et relances.
+- `prospect_mailer_claim` (migration `prospect_relances_en_plus`, copie `supabase/2026-11-02-relances-en-plus.sql`) : premiers mails = quota complet (25/jour/boîte) ; relances en plus, quota séparé (25/jour/boîte), même répartition sur la journée. Au plus ~100 mails/jour sur les 2 boîtes au lieu de ~50. Règles de sélection inchangées.
+- Proposé (pas fait) : n'écrire qu'aux prospects avec aperçu et le montrer dans le mail ; bouton « Je publie » (SIRET + e-mail) sur l'aperçu.
+
+### 02/11/2026 — Claude — Champ de recherche : texte « Rechercher »
+- Demande d'Anthony : enlever « c63, studio Cannes… » du champ. `index.html` : placeholder « Rechercher ».
+
 ### 02/11/2026 — Claude — Tri « Au hasard » retiré du menu (ordre aléatoire gardé)
 - Demande d'Anthony : « enlève la touche au hasard ».
 - `index.html` : option retirée (menu : Plus récentes, Prix croissant, Prix décroissant). `index-main.js` (v=20261102-sans-bouton-hasard) : l'ordre reste aléatoire tant que la personne n'a pas choisi un tri elle-même (`sortChosenByUser`, remis à zéro avec les filtres) ; choisir « Plus récentes » donne vraiment les plus récentes. Testé : 3 visites → 3 ordres différents.
