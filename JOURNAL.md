@@ -2066,3 +2066,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Accueil : rubriques en rangées complètes
 - Signalé par Anthony (tablette en paysage, 6 colonnes) : « Auto & Moto » montrait 8 annonces → une rangée de 6 + une rangée de 2 à moitié vide.
 - `index-main.js` v=20261102-rangees : le nombre d'annonces par rubrique s'adapte au nombre de colonnes de la grille (6 col. → 12, 4 → 8, 3 → 9, 2 → 8). S'il n'y a pas assez d'annonces pour une rangée de plus, on s'arrête à la dernière rangée complète. Recalcul automatique si on tourne la tablette.
+
+### 02/11/2026 — Claude — Accueil : « Toutes les annonces » en bas
+- Demande d'Anthony : la dernière rubrique de l'accueil doit montrer toutes les annonces.
+- `index-main.js` v=20261102-toutes : « Toutes les autres annonces » → « Toutes les annonces », avec la totalité du catalogue (y compris les annonces déjà montrées dans Auto & Moto, Immobilier, Vélos/équipements).

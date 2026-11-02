@@ -3918,7 +3918,7 @@ const HOME_GROUPS=[
   {key:'immobilier',title:'Immobilier',icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.2V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.2"/>',test:a=>a.category==='immobilier',limit:8},
   /* 02/11/2026 (Anthony) : casques, blousons, pièces… ne se mélangent plus aux voitures dans « Auto & Moto » */
   {key:'vehicules',sub:EQUIPMENT_ALL,title:'Vélos, équipements & pièces',icon:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',test:a=>a.category==='vehicules',limit:8},
-  {key:'',title:'Toutes les autres annonces',icon:'<path d="M6 7h12l-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>',test:()=>true,limit:Infinity}
+  {key:'',all:true,title:'Toutes les annonces',icon:'<path d="M6 7h12l-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>',test:()=>true,limit:Infinity}
 ];
 function isHomeDefaultView(){
   return !onlyMine&&!favoritesMode&&!moderationMode&&!hasActiveCatalogueFilters()&&($('#sortAds')?.value||'newest')==='newest';
@@ -3948,9 +3948,10 @@ function groupHomeAds(ads){
   homeGridColsSeen=homeGridColumns();
   const rest=[...ads],out=[];
   for(const g of HOME_GROUPS){
-    const items=rest.filter(g.test);
+    /* 02/11/2026 (Anthony) : en bas, « Toutes les annonces » = vraiment toutes, y compris celles des rubriques du haut */
+    const items=g.all?[...ads]:rest.filter(g.test);
     if(!items.length)continue;
-    items.forEach(a=>rest.splice(rest.indexOf(a),1));
+    if(!g.all) items.forEach(a=>rest.splice(rest.indexOf(a),1));
     const shown=items.slice(0,homeGroupCount(g.limit,items.length));
     out.push({__homeHeader:true,key:g.key,sub:g.sub||'',title:g.title,icon:g.icon,total:items.length,shown:shown.length,first:!out.length});
     out.push(...shown);
