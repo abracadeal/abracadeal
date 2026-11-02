@@ -2012,3 +2012,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Erreurs de flux (admin) :** « Relancer la synchro » (efface l'alerte si plus d'erreur), « Voir le pro » (sa page publique), « Supprimer ».
 - Nettoyage : alertes WeeCars Angers (admin + pro) résolues, l'erreur était réglée.
 - Fichiers : `assets/index-main.js` v=20261102-alertes, `assets/index-core.css` v=20261102-alertes.
+
+### 02/11/2026 — Claude — Bannière WeeCars Angers
+- Image fournie par Anthony (logo WeeCars, fond bleu) : `assets/pro-banners/weecars-angers.jpg`, copiée dans le stockage `pro-showroom` et posée en `banner_path` de la vitrine (signature-motors-group-weecars).
+- Fonction ponctuelle `admin-set-showroom-banner-once` (clé interne obligatoire, source limitée au dépôt GitHub) : réutilisable pour poser la bannière d'un autre pro.
