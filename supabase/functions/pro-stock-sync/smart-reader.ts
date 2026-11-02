@@ -17,7 +17,9 @@ const LIST_PATH=/(acheter|achat|vente|vendre-|a-vendre|louer|location|annonce|bi
 const IMG_BAD=/(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|partners?\/|partenaires?\/|modules\/|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default(?!\/)|no[-_]?photo|noimage|thumb_?nail_?small)/i;
 
 function pathPattern(u:URL){return u.pathname.split('/').filter(Boolean).map(s=>/\d{3,}/.test(s)?(s.replace(/\d+/g,'#').length>12?'*#':'#'):(s.split('-').length>=4?'*':s)).join('/');}
-function isDetailish(u:URL){const last=u.pathname.replace(/\/+$/,'').split('/').pop()||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product)=/i.test(u.search);}
+function isDetailish(u:URL){const segs=u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);const last=segs[segs.length-1]||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product|cle|idann|id_annonce|idbien|reference)=/i.test(u.search)
+  /* 02/11/2026 (Régie Conseil : « /nos-annonces/ventes/lyon/appartement/13/ » ; Crefimo / Adapt'immo : « detail.htm?cle=920125671 ») */
+  ||(segs.length>=4&&/^\d{1,6}$/.test(last)&&LIST_PATH.test(segs[0])&&!/^(?:page|p|pg)$/i.test(segs[segs.length-2]||''));}
 
 // Liens de la page : fiches probables (formes répétées) et pages de liste à suivre.
 // 01/11/2026 (robot en erreur 503 sur axeylia, laroca, valloire, bhcar) : la plateforme coupe le robot au-delà d'environ 2 s de calcul.
@@ -57,7 +59,7 @@ function smartLinksRaw(html:string,page:URL,host:string){
     // une petite agence a souvent un seul bien de chaque type, donc chaque forme d'adresse n'apparaît qu'une fois.
     // Second regroupement : même rubrique (1er dossier de liste), même profondeur, numéro de fiche en fin d'adresse.
     try{const u=new URL(f);const segs=u.pathname.split('/').filter(Boolean);const last=segs[segs.length-1]||'';
-      if(segs.length>=3&&LIST_PATH.test(segs[0])&&/(?:^|[-_])\d{2,}(?:[-_.]|$)|\d{3,}/.test(last)){const k=segs[0]+'|'+segs.length;if(!loose.has(k))loose.set(k,new Set());loose.get(k)!.add(f);}}catch{}
+      if(segs.length>=3&&LIST_PATH.test(segs[0])&&(/(?:^|[-_])\d{2,}(?:[-_.]|$)|\d{3,}/.test(last)||(segs.length>=4&&/^\d{1,6}$/.test(last)))){const k=segs[0]+'|'+segs.length;if(!loose.has(k))loose.set(k,new Set());loose.get(k)!.add(f);}}catch{}
   }}
   for(const [,set] of loose)if(set.size>=2||(set.size===1&&details.length===0))details.push(...set);
   return{details,lists:[...lists]};
