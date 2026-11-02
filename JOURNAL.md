@@ -19,7 +19,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ## Entrées
 
 ### 02/11/2026 — Claude : WeeCars dans toute la France, Spider VO lu en entier
-- Anthony : « mettre d'autres WeeCars dans les 4 coins de la France ». 40 agences WeeCars dans les prospects, dont une vingtaine pointaient vers le stock d'Angers (`?stock=993`). Le site WeeCars liste 36 agences avec leur numéro de stock → 30 adresses de prospects corrigées ; 7 agences absentes de la liste (Lille Est / Ouest, Narbonne, La Rochelle, Charleville-Mézières…) : adresse retirée, note ajoutée.
+- Anthony : « mettre d'autres WeeCars dans les 4 coins de la France ». 40 agences WeeCars dans les prospects, dont une vingtaine pointaient vers le stock d'Angers (`?stock=993`). Le site WeeCars liste 36 agences avec leur numéro de stock → 30 adresses de prospects corrigées ; 5 agences absentes de la liste (Lille Est, Lille Ouest, Narbonne, La Rochelle, Charleville-Mézières) : adresse retirée, note ajoutée.
 - Spider VO (`readSpiderVo`) : la liste n'affiche que 24 véhicules, la suite est chargée par `/xhr_ws.php?xhr_func=svositec_aj002` avec le cookie de session « svo » → toutes les pages lues (jusqu'à 300). WeeCars Brest 24 → 138, WeeCars Angers 24 → 127, Ventury 24 → 46.
 - Agence d'un réseau (`?stock=`) : ville = nom de l'agence dans le menu du site (Brest), plus l'adresse du siège (Castelnau-le-Lez) ; avec un compte pro, la ville du compte reste prioritaire.
 - À savoir : à la prochaine synchro, WeeCars Angers (compte actif, 24 annonces en ligne) aura ~100 véhicules de plus, envoyés à la modération automatique.
