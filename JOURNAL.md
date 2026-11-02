@@ -2031,3 +2031,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `pro.html` : recherche « modèle » + filtres Marque, Budget max, Carburant, Boîte, Km max, Année (véhicules) ; Budget max pour les autres domaines. Un filtre n'apparaît que s'il offre au moins 2 choix dans le stock du pro ; les paliers de prix/km suivent le stock (du moins cher au plus cher).
 - Tri : récentes, prix croissant/décroissant, moins de kilomètres, année la plus récente. Compteur « N véhicules » + « Effacer les filtres ».
 - Cartes véhicules : ligne « année · km · carburant · boîte » sous le prix. Libellés harmonisés (« HYBRIDE ESSENCE » → « Hybride essence »).
+
+### 02/11/2026 — Claude — Accueil : équipements et pièces sortis de « Auto & Moto »
+- Remarque d'Anthony : un blouson/casque dans la rubrique Auto & Moto de l'accueil, « pas ouf ».
+- `HOME_GROUPS` (index-main.js v=20261102-equipements) : « Auto & Moto » ne montre plus que les véhicules ; les sous-catégories `equipement-*` (casques, blousons, pièces, jantes…) ont leur propre rubrique « Équipements & pièces auto / moto », après Immobilier. Catégories et recherche inchangées.
