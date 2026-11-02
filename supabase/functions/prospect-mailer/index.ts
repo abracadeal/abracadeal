@@ -144,6 +144,10 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
     `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`;
   return { data, msgId };
 }
+// v14 02/11/2026 : adresse ramassée sur le site mais qui appartient à l'hébergeur / au créateur du site / à un logiciel
+// (ex. privacy@railway.com pour SKH Global Motors) → jamais d'envoi, ni 1er mail ni relance.
+const PROVIDER_EMAIL_DOMAINS = /(^|\.)(railway\.com|railway\.app|vercel\.com|netlify\.com|wix\.com|wixsite\.com|wordpress\.com|automattic\.com|ovh\.(com|net|fr)|ovhcloud\.com|o2switch\.fr|ionos\.(fr|com|de)|1and1\.(fr|com)|gandi\.net|hostinger\.(com|fr)|godaddy\.com|squarespace\.com|shopify\.com|cloudflare\.com|strikingly\.(co|com)|webador\.(fr|com)|jimdo\.com|weebly\.com|webflow\.(com|io)|apiwork\.com|apimo\.(com|net)|sentry\.io|example\.(com|org|fr)|domain\.(com|fr)|e-monsite\.com|site-pro\.fr|simplebo\.fr|solocal\.com|pagesjaunes\.fr|leboncoin\.fr|lacentrale\.fr|ubiflow\.net|spider-vo\.(net|com)|annonces-automobile\.com|seloger\.com)$/i;
+function isProviderEmail(email: string) { return PROVIDER_EMAIL_DOMAINS.test((email.split("@")[1] || "").toLowerCase()); }
 // v6 22/10/2026 : avant un 1er mail, on vérifie que le domaine du destinataire existe (MX, ou A à défaut).
 // Domaine inexistant → pas d'envoi (évite les retours « Host not found » qui abîment la réputation des boîtes).
 // Panne DNS passagère (autre erreur) → on envoie quand même.
@@ -342,6 +346,7 @@ Deno.serve(async (req) => {
         const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
+        if (isProviderEmail(j.email)) throw new Error("Adresse de l’hébergeur / du créateur du site, pas du pro : non envoyé");
         const c = await creds(j.mailbox);
         // 29/10/2026 (Anthony) : le mail « nous avons testé votre site » (et sa relance) seulement si le site a vraiment été lu
         // avec au moins une annonce ; sinon mail « normal » (jamais de nombre ni de « tout est prêt » inventés).
