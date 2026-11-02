@@ -26,3 +26,12 @@ begin
   get diagnostics n = row_count; return n;
 end $$;
 revoke all on function public.commune_ref_refresh(bigint) from public, anon, authenticated;
+
+-- 02/11/2026 (suite) : code INSEE + anciennes communes (déléguées / associées) reconnues avec la position de la commune actuelle.
+--   select net.http_get('https://geo.api.gouv.fr/communes?fields=nom,code,codesPostaux,population,centre&format=json', timeout_milliseconds:=60000);
+--   select net.http_get('https://geo.api.gouv.fr/communes_associees_deleguees?fields=nom,code,chefLieu,type&format=json');
+--   select public.commune_ref_refresh(<id 1>), public.commune_ref_aliases(<id 2>);
+alter table public.commune_ref add column if not exists code text;
+alter table public.commune_ref add column if not exists alias_of text;
+create index if not exists commune_ref_code on public.commune_ref(code);
+-- (fonctions commune_ref_refresh / commune_ref_aliases : voir la migration « commune_ref_aliases »)

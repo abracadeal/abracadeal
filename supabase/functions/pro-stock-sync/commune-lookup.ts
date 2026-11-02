@@ -47,6 +47,8 @@ export async function setNear(city:string,postal:string,rows:any[]=[]){
   let c=l.byName.get(norm(city))||[];if(/^\d{5}$/.test(postal||'')){const f=c.filter(x=>x.cps.includes(postal));c=f.length?f:(c.length?c:(l.byCp.get(postal)||[]));}
   const best=[...c].sort((a,b)=>b.pop-a.pop)[0];if(best?.lat){NEAR={lat:best.lat,lon:best.lon};return;}
   const pts:{lat:number,lon:number}[]=[],cpPts:{lat:number,lon:number}[]=[];
+  /* 02/11/2026 (herreman-charles : agence du Gers sans code postal sur les fiches → « Montréal » pris dans l'Aude) : les villes au nom unique en France situent aussi l'agence */
+  for(const r of rows.slice(0,400)){const cp=String(r?.code_postal??r?.cp??'').trim();if(/^\d{5}$/.test(cp))continue;const v=String(r?.ville??r?.city??'');const arr=v?(l.byName.get(norm(v))||[]):[];if(arr.length===1&&arr[0].lat)pts.push(arr[0]);}
   for(const r of rows.slice(0,400)){const cp=String(r?.code_postal??r?.cp??'').trim();if(!/^\d{5}$/.test(cp))continue;
     const v=String(r?.ville??r?.city??'');const m=v?(l.byName.get(norm(v))||[]).find(x=>x.cps.includes(cp)):undefined;if(m?.lat){pts.push(m);continue;}
     const byCp=(l.byCp.get(cp)||[]).sort((a,b)=>b.pop-a.pop)[0];if(byCp?.lat)cpPts.push(byCp);}
