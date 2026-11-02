@@ -2450,6 +2450,8 @@ window.openAdminEditAd=function(id,ownerEdit=false){
   if(!currentProfile?.is_admin&&!ownerEdit){toast('Accès administrateur requis');return;}
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);
   if(!a){toast('Annonce introuvable');return;}
+  // 02/11/2026 : jamais de modification sur la description courte du catalogue (elle écraserait le texte complet).
+  if(a.description_cut){ensureFullListing(a).then(ok=>ok?window.openAdminEditAd(id,ownerEdit):toast('Annonce momentanément indisponible, réessaie'));return;}
   if(ownerEdit&&(a.owner_id!==currentUser?.id||a.status!=='active'||a.revision_of)){toast('Annonce en ligne requise');return;}
   resetPublishForm();
   editingId=a.id;
@@ -3443,11 +3445,32 @@ const PUBLIC_CATALOG_STARTUP_MS=6000;
 let publicCatalogPromise=null;
 let publicCatalogAt=0;
 let catalogLoadedOnce=false;
+// 02/11/2026 (Anthony : « le site est très trop lent ») : catalogue allégé via public_catalog() — description courte
+// (balises [ABRACA_*] gardées, sans la liste d'équipements, texte coupé à 600 caractères) ; la fiche et la modification
+// rechargent le texte complet (ensureFullListing). Si la fonction échoue, ancienne requête complète.
 function fetchPublicCatalog(){
-  return sb.from('listings').select(PUBLIC_CATALOG_SELECT)
+  const full=()=>sb.from('listings').select(PUBLIC_CATALOG_SELECT)
     .is('revision_of',null).eq('status','active').eq('visibility_scope','public')
     .order('created_at',{ascending:false});
+  return Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
 }
+const fullListingLoads=new Map();
+function ensureFullListing(a){
+  if(!a||!a.description_cut||!a.id)return Promise.resolve(true);
+  if(fullListingLoads.has(a.id))return fullListingLoads.get(a.id);
+  const p=Promise.resolve(sb.from('listings').select('description,listing_photos(id,storage_path,storage_bucket,position)').eq('id',a.id).maybeSingle())
+    .then(({data,error})=>{
+      if(error||!data)throw error||new Error('introuvable');
+      const apply=o=>{if(o&&o.id===a.id){o.description=data.description;if(Array.isArray(data.listing_photos)&&data.listing_photos.length)o.listing_photos=data.listing_photos;o.description_cut=false;}};
+      apply(a);try{apply(detailAdsCache.get(a.id));(allAds||[]).forEach(o=>{if(o!==a&&o.id===a.id)apply(o);});}catch(_){}
+      return true;
+    })
+    .catch(err=>{console.error('Texte complet de l’annonce indisponible',err);return false;})
+    .finally(()=>fullListingLoads.delete(a.id));
+  fullListingLoads.set(a.id,p);
+  return p;
+}
+window.ensureFullListing=ensureFullListing;
 function getPublicCatalog(){
   const now=performance.now();
   const startup=now<PUBLIC_CATALOG_STARTUP_MS;
@@ -4426,6 +4449,7 @@ function trackListingEvent(id,kind){try{if(!sb||!id)return;sb.rpc('track_listing
 window.trackListingEvent=trackListingEvent;
 window.openAd=id=>{
   const a=allAds.find(x=>x.id===id)||detailAdsCache.get(id);if(!a)return;
+  if(a.description_cut){ensureFullListing(a).then(ok=>{if(!ok)a.description_cut=false;window.openAd(id);});return;}
   if(a.category==='vacances'){
     rememberViewed(id);
     location.href='logement-vacances.html?id='+encodeURIComponent(id);
