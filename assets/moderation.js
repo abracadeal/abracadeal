@@ -89,7 +89,9 @@ function card(a){
       '<div class="seller">'+esc(sellerName(a))+'</div></div>'+
     '</div>'+
     '<div class="review-state">'+riskMarkup(a)+statusChip+'</div>'+
-    (Number(state.mods.get(a.id)?.reused_photo_count)>0?'<div class="photo-reuse-alert">⚠ '+Number(state.mods.get(a.id).reused_photo_count)+' photo(s) réutilisée(s) par un autre compte · +30 points</div>':'')+retryErrorMarkup(a)+reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+preview+actions+'<button class="action no" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button>'+
+    (Number(state.mods.get(a.id)?.reused_photo_count)>0?'<div class="photo-reuse-alert">⚠ '+Number(state.mods.get(a.id).reused_photo_count)+' photo(s) réutilisée(s) par un autre compte · +30 points</div>':'')+retryErrorMarkup(a)+reasonsMarkup(a)+(state.reports.has(a.id)?'<div class="reasons">'+state.reports.get(a.id)+' signalement(s)'+(a.status==='hidden'?' · Masquée':'')+'</div>':'')+
+    /* 02/11/2026 (Anthony : « refais une bonne mise en page ») : boutons regroupés en bas de la carte, alignés d'une carte à l'autre ; Pharos en lien discret (action grave, rare). */
+    '<div class="card-foot">'+preview+actions+'<div class="danger-row"><button type="button" class="pharos-link" data-action="pharos" data-id="'+a.id+'">Signaler à Pharos</button></div></div>'+
   '</article>';
 }
 

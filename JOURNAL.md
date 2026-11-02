@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : mise en page des cartes de modération (Anthony : « refais une bonne mise en page »)
+- `assets/moderation.js` / `moderation.css` (version `20261102-layout`) : « Voir l'annonce complète », Valider / Refuser / Supprimer regroupés dans un pied de carte (`.card-foot`) collé en bas → boutons alignés d'une carte à l'autre, sur toute la largeur. « Signaler à Pharos » n'est plus un gros bouton qui dépasse de la carte : lien discret en bas à droite (action grave et rare, confirmation inchangée). Vérifié en capture bureau et mobile.
+
 ### 02/11/2026 (nuit) — Claude : sites à réparer, suite (pro-stock-sync v233–v242)
 - Corrections générales du lecteur automatique (`smart-reader.ts`, `index.ts`, `apimo-reader.ts`, `legacy-html.ts`) :
   - petites agences avec un seul bien par type d'adresse (« /vente/1-brest/appartement/t1/379-… ») : second regroupement par rubrique ;
