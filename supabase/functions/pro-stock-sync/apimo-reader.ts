@@ -86,7 +86,7 @@ export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,m
   const root=new URL(start.origin);const links=[...home.matchAll(/href="([^"]+)"/gi)].map(m=>{try{return new URL(sDecode(m[1]),start);}catch{return null;}}).filter((u):u is URL=>!!u&&u.hostname===start.hostname);
   // 01/11/2026 (Anthony, Solution Immobilier : « manque les biens à vendre ») : certaines agences appellent la liste des ventes « nos-biens » / « nos-proprietes ».
   const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes|biens|proprietes|annonces)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
-  if(!bases.length)throw Error('Listes actives de vente/location Apimo introuvables.');
+  if(!bases.length&&!links.some(u=>{let p=u.pathname;try{p=decodeURIComponent(p);}catch{}return /^\/[a-z]{2}\/propri[ée]t[ée]\//.test(p);}))throw Error('Listes actives de vente/location Apimo introuvables.');
   const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0;
   while(queue.length&&pages<40){const next=queue.shift()!;if(seen.has(next))continue;seen.add(next);let html='';try{html=(await fetchHtml(new URL(next))).text;}catch{partial=true;continue;}pages++;
     let list=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi).filter(x=>/\bmodule-listing\b/.test(x)).join('');
@@ -96,6 +96,8 @@ export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,m
       else if(bases.some(b=>u.origin+u.pathname===b)&&/^\d+$/.test(u.searchParams.get('page')||'')&&!seen.has(u.toString())&&!queue.includes(u.toString()))queue.push(u.toString());}
   }
   if(queue.length)partial=true;
+  /* 02/11/2026 (Dana Immobilier : pas de page « ventes », les biens à vendre sont sur l'accueil) : fiches liées depuis la page de départ aussi */
+  for(const u of links){let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)\+[^/]+\+)?(\d{5,})\/?$/)?.[1];if(id&&!details.has(id)){const c=new URL(u.toString());c.search='';c.hash='';details.set(id,c.toString());}}
   const entries=[...details.entries()];const ids=new Map(entries.map(([id,u])=>[String(u),id]));
   // 01/11/2026 : lecture des fiches par étapes mémorisée.
   const rows:any=await eachDetailResumable('apimo-v1:'+start.hostname,entries.map(e=>String(e[1])),async url=>{const{text}=await fetchHtml(new URL(url));/* 02/11/2026 (duo-immo : modèle de fiche Apimo inconnu → fiches vides « Appartement · Martigues ») : lecture des données structurées de la fiche à la place */let row=parseApimoDetail(text,url);if(!row&&fallback){const f=fallback(text,url);if(f?.titre&&f?.prix){row={...f,url,reference:ids.get(url)||f.reference};for(const m of text.matchAll(/data:image\/svg\+xml;base64,([^"')]+)/gi)){try{const svg=new TextDecoder().decode(Uint8Array.from(atob(m[1]),c=>c.charCodeAt(0)));const d=apimoDiagnostic(svg);if(d.kind&&d.letter&&!row[d.kind])row[d.kind]=d.letter;if(d.kind==='dpe'&&d.values[0]&&!row.consommation_energie)row.consommation_energie=d.values[0];}catch{}}}}if(!row)partial=true;return row||{reference:ids.get(url),url};},memory);partial=partial||rows.partial;
