@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Champ de recherche : texte « Rechercher »
+- Demande d'Anthony : enlever « c63, studio Cannes… » du champ. `index.html` : placeholder « Rechercher ».
+
 ### 02/11/2026 — Claude — Tri « Au hasard » retiré du menu (ordre aléatoire gardé)
 - Demande d'Anthony : « enlève la touche au hasard ».
 - `index.html` : option retirée (menu : Plus récentes, Prix croissant, Prix décroissant). `index-main.js` (v=20261102-sans-bouton-hasard) : l'ordre reste aléatoire tant que la personne n'a pas choisi un tri elle-même (`sortChosenByUser`, remis à zéro avec les filtres) ; choisir « Plus récentes » donne vraiment les plus récentes. Testé : 3 visites → 3 ordres différents.
