@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Vignettes 640 px en ligne
+- Les 156 miniatures refaites en 640 px / JPEG 78 (moyenne 70 Ko au lieu de ~130 Ko) ; cron temporaire `abracadeal-thumbs-640-tmp` supprimé. `thumbUrl` : `?o=4` (index-main.js v=20261102-vignettes-640).
+- Copie des autres photos (2 819 sur 3 034 encore lues sur les sites des pros, surtout spidervo) : refusée par Anthony (stockage gratuit limité à 1 Go, gain faible au premier affichage).
+
+### 02/11/2026 — Claude — Recherche IA gratuite : testée, pas mise en ligne
+- Modèle gratuit gte-small (Supabase), 147 annonces traitées, 12 recherches testées. Bon : « casque moto », « SUV diesel automatique », « trottinette électrique ». Mauvais : « c63 » → Citroën C3 en premier ; « citadine pas chère », « appartement terrasse », « maison avec piscine » → lampes, fauteuil, radiateur. Scores tous entre 0,79 et 0,89 : impossible de séparer les bons résultats du bruit. Modèle anglais, trop faible en français.
+- Non mis en ligne (branche `recherche-ia` gardée). Cron `abracadeal-ai-embeddings` (47) mis en pause ; table `private.listing_embeddings` et fonction `ai-search` conservées.
+- Vérifié : la recherche par mots-clés corrige déjà les fautes (mersedes, apartement terrase, trotinete electrique, voiture familliale, casqe moto, mercede).
+- Alternative gratuite proposée à Anthony : Mistral (offre gratuite « Experiment », modèle d'empreintes français), à brancher sur le même code.
+
 ### 02/11/2026 — Claude — Premier affichage plus rapide sur mobile
 - Remarque d'Anthony : c'est le premier affichage qui est lent sur mobile.
 - `index.html` : le catalogue (`public_catalog`) est demandé dès le début de la page, en parallèle des styles et scripts (`window.__abracaCatalogPrefetch`, sauf fiche intégrée / lien d'annonce / aperçu) ; supabase-js servi depuis le site (`assets/supabase-js-2.118.0.js`, plus de connexion à jsdelivr) ; polices Google chargées sans bloquer l'affichage.
