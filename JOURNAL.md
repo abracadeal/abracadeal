@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — Pages Google par grande ville (agglomérations)
+- Les gens cherchent « voiture occasion Angers », pas « Les Ponts-de-Cé » (commune de WeeCars Angers).
+- `scripts/build_share_pages.py` : `AGGLOS` (Angers, Paris + petite couronne 75/92/93/94, Cannes, Nice, Antibes, Marseille, Perpignan, Lyon, Bordeaux, Toulouse, Nantes, Lille) : la page de la grande ville (/annonces/<ville>/ et /annonces/<catégorie>/<ville>/) regroupe aussi les annonces des communes voisines (dès 3 annonces), avec un texte qui cite les communes. Les pages de chaque commune restent.
+- Testé hors ligne (vrai catalogue) : /annonces/angers/ et /annonces/voitures-occasion/angers/ créées (« Voitures d’occasion à Angers », indexables, 120 liens d'annonces), /annonces/paris/ regroupe Paris + Alfortville. Mises en ligne au prochain passage du robot des pages (toutes les 10 min) et ajoutées au plan du site.
+
 ### 03/11/2026 (nuit) — Claude — Prêt pour beaucoup plus d'annonces : affichage par paquets + catalogue 2 fois plus léger
 - Anthony : faire le chargement par pages tout de suite (la nuit, peu de visiteurs).
 - **Affichage par paquets** (`index-main.js` v=20261103-pagination) : les listes n'affichent plus toutes les annonces d'un coup — 60 d'abord, puis 48 de plus en arrivant en bas (bouton « Voir plus d'annonces (N) », déclenché tout seul au défilement). La limite repart à 60 quand la recherche, les filtres, la catégorie ou le tri changent. Modération et « Mes annonces » : tout, comme avant.
