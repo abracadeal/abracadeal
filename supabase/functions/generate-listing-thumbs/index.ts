@@ -73,8 +73,15 @@ Deno.serve(async (req) => {
   const started = Date.now();
   const done: string[] = [], failed: { path: string; error: string }[] = [];
 
-  const { data: batch, error } = await admin.rpc("thumbs_next_batch", { p_limit: limit });
-  if (error) return json({ error: error.message }, 500);
+  // 02/11/2026 : { paths: [...] } = refaire ces miniatures (changement de taille), sinon la file habituelle.
+  let batch: { storage_path: string }[] | null = null;
+  if (Array.isArray(body?.paths) && body.paths.length) {
+    batch = body.paths.slice(0, limit).map((x: unknown) => ({ storage_path: String(x) })).filter((x: { storage_path: string }) => x.storage_path && !/^https?:/i.test(x.storage_path));
+  } else {
+    const { data, error } = await admin.rpc("thumbs_next_batch", { p_limit: limit });
+    if (error) return json({ error: error.message }, 500);
+    batch = data;
+  }
 
   for (const row of (batch || []) as { storage_path: string }[]) {
     if (Date.now() - started > 20000) break;
