@@ -3294,6 +3294,9 @@ window.carouselStep=function(el,dir){
     const wm=el.querySelector('.photo-watermark');
     if(wm)wm.classList.remove('hidden');
     img.src=urls[idx];
+    // 02/11/2026 (Anthony : « pas de latence entre les photos ? ») : photos suivante et précédente chargées d'avance
+    // (les photos importées s'affichent depuis le site du pro).
+    for(const j of [idx+1,idx-1]){const u=urls[(j%urls.length+urls.length)%urls.length];if(u){const pre=new Image();pre.decoding='async';pre.src=u;}}
   }
   el.querySelectorAll('.carousel-dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
 };
