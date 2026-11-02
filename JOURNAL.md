@@ -21,7 +21,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Base : sauvegarde avant allègement
 - Demande d'Anthony : alléger la base (203 Mo ; limite de l'offre gratuite 500 Mo). Gros postes : `private.prospect_leads` 88 Mo (233 754 lignes), `net._http_response` 47 Mo (réponses web gardées 6 h, dont mes pages de test de cet après-midi).
 - Sauvegarde faite (fonction `prospect-backup`, lecture seule) : les 212 856 entreprises sans site ni e-mail (`guess_failed`, `no_site`) → bucket privé `backups`, 8 fichiers `prospect_leads_sans_site_2026-11-02_partNN.jsonl.gz` (13 Mo).
-- À faire, avec confirmation d'Anthony depuis l'ordinateur (les confirmations Supabase sont annulées sur téléphone) : supprimer ces lignes + `vacuum full private.prospect_leads`, vider `net._http_response`.
+- Fait avec l'accord d'Anthony (« vas-y la base ») : `truncate net._http_response`, suppression des 212 856 lignes, `vacuum full private.prospect_leads` → 20 898 lignes (6 Mo). Base : 203 Mo → 74 Mo.
 
 ### 02/11/2026 — Claude — Vignettes 640 px en ligne
 - Les 156 miniatures refaites en 640 px / JPEG 78 (moyenne 70 Ko au lieu de ~130 Ko) ; cron temporaire `abracadeal-thumbs-640-tmp` supprimé. `thumbUrl` : `?o=4` (index-main.js v=20261102-vignettes-640).
