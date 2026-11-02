@@ -21,6 +21,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude : place des photos (Anthony : « on peut encore compresser, la qualité était top »)
 - Constat : photos importées copiées telles quelles (pas de recompression) ; vignettes 480 px JPEG 70 générées pour **toutes** les photos alors que les cartes n'affichent que la 1re.
 - Changé (`supabase/2026-11-02-thumbs-first-photo-only.sql`) : miniatures seulement pour la 1re photo de chaque annonce ; les autres sont supprimées par le ménage de `generate-listing-thumbs`.
+- Bug trouvé (Anthony : « 271 photos, j'y crois pas ») : 271 = fichiers, pas photos. À la publication, chaque photo était copiée de `listing-images-pending` vers `listing-images` sans supprimer la copie en attente → stockage x2. `generate-listing-thumbs` (toutes les 5 min) supprime maintenant ces copies (`pending_photo_duplicates`, hors `retention-evidence/` ; la quarantaine recopie la photo publiée si besoin). Nettoyé : 88 copies + 59 miniatures inutiles → 124 fichiers, 15 Mo au lieu de 30.
 - Mesures : stockage actuel ~30 Mo. Life Cars : 1 471 photos lues, 150 à 190 Ko chacune (déjà compressées par leur fournisseur, comme notre cible de 120 à 200 Ko pour les photos envoyées depuis le site) → ~240 Mo à 30 photos par véhicule. Offre gratuite Supabase : 1 Go.
 
 ### 02/11/2026 — Claude : IndexNow (Anthony : « les annonces de Life Cars demain peuvent être référencées rapidement ? »)
