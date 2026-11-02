@@ -458,10 +458,10 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);
     if(!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;
   }else{
-    const all=head+' \n'+text.slice(0,6000);
+    /* 02/11/2026 (complexeautomobile, thème WordPress Motors) : les caractéristiques sont après un long menu → texte autour du titre aussi */const tH=h1?text.indexOf(h1.slice(0,40)):-1;const all=head+' \n'+text.slice(0,6000)+(tH>6000?' \n'+text.slice(tH,tH+12000):'');
     const km=all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})/i)||all.match(/(?<![\p{L}\d][\s\u00a0.]?)(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})\s*km\b/iu);
     if(km)o.kilometrage=km[1].replace(/[\s.\u00a0]/g,'');
-    const y=all.match(/(?:ann[ée]e|mise en (?:circulation|service)|\bMEC\b|1[èe]re immatriculation|immatricul[ée]e? le|date d'immatriculation|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}[\/.\-]){0,2}((?:19[5-9]|20[0-3])\d)\b/i)||all.match(/(?:mise en circulation|immatricul\w*|\bMEC\b)[^0-9]{0,30}((?:19[5-9]|20[0-3])\d)-\d{2}-\d{2}/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];
+    const y=all.match(/(?:ann[ée]e|mise en (?:circulation|service)|\bMEC\b|1[èe]re immatriculation|immatricul[ée]e? le|date d'immatriculation|mod[èe]le)[^0-9]{0,30}(?:\d{1,2}[\/.\-]){0,2}((?:19[5-9]|20[0-3])\d)\b/i)||all.match(/(?:mise en circulation|immatricul\w*|\bMEC\b)[^0-9]{0,30}((?:19[5-9]|20[0-3])\d)-\d{2}-\d{2}/i)||head.match(/\b((?:19[5-9]|20[0-3])\d)\b/);if(y)o.annee=y[1];/* « Année 2 010 » */if(!o.annee){const y2=all.match(/ann[ée]e[^0-9]{0,30}(19|20)[\s\u00a0](\d{2})\b/i);if(y2&&Number(y2[1]+y2[2])>=1950&&Number(y2[1]+y2[2])<=2039)o.annee=y2[1]+y2[2];}
     // 30/10/2026 : énergie et boîte lues d'abord sur leur libellé (« Carburant : Essence », « Boîte : Manuelle »), puis dans le titre.
     // Plus de recherche à l'aveugle dans toute la page : « rétroviseurs électriques » donnait « électrique »,
     // « climatisation automatique » donnait « automatique » (ex. Ford Fiesta essence manuelle).
