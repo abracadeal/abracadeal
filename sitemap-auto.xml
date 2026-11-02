@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url><loc>https://abracadeal.fr/auto/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/citroen/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/citroen/c4-picasso/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/serie-3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/diesel/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/essence/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/moins-de-10000-euros/</loc></url>
   <url><loc>https://abracadeal.fr/auto/moins-de-20000-euros/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/peugeot/</loc></url>
-  <url><loc>https://abracadeal.fr/auto/peugeot/508/</loc></url>
   <url><loc>https://abracadeal.fr/auto/seat/</loc></url>
   <url><loc>https://abracadeal.fr/auto/seat/ateca/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/golf/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/volkswagen/transporter/</loc></url>
 </urlset>
