@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — Prêt pour beaucoup plus d'annonces : affichage par paquets + catalogue 2 fois plus léger
+- Anthony : faire le chargement par pages tout de suite (la nuit, peu de visiteurs).
+- **Affichage par paquets** (`index-main.js` v=20261103-pagination) : les listes n'affichent plus toutes les annonces d'un coup — 60 d'abord, puis 48 de plus en arrivant en bas (bouton « Voir plus d'annonces (N) », déclenché tout seul au défilement). La limite repart à 60 quand la recherche, les filtres, la catégorie ou le tri changent. Modération et « Mes annonces » : tout, comme avant.
+- **Catalogue** : 1re photo seulement + `photo_count` (doc `supabase/2026-11-03-public-catalog-first-photo.sql`) → 0,35 Mo pour 156 annonces (1,38 Mo hier soir). Cartes : flèches / glissement conservés — au premier appui, les autres photos de l'annonce sont chargées (`carouselStep` + `ensureFullListing`, qui prépare aussi les photos privées). Fiche et modification : annonce complète rechargée avant affichage (jamais d'enregistrement d'une version partielle).
+- Testé (iPhone simulé, vrai catalogue) : 60 cartes puis 108 / 156 / 172 en défilant, recherche « mercedes » 15 sans bouton, retour à 60 ; carrousel 1 → 20 photos au 1er appui (1 seul appel) ; fiche « 1 / 20 » ; ordre aléatoire, showroom/retour, recherche c63 toujours OK.
+- Limite restante : au-delà de quelques milliers d'annonces, la recherche devra se faire côté serveur (le catalogue reste chargé en entier, même allégé).
+
 ### 02/11/2026 — Claude — Mails vérifiés + tableau de bord des visiteurs
 - **Configuration des mails vérifiée** (en-têtes de mails reçus sur abracadeal@gmail.com + DNS) : contact@abracadeal.fr et partenaires@abracadeal.com passent SPF, DKIM (sélecteur OVH `ovhmo-selector-1`) et DMARC (p=none), score anti-spam OVH 0. Rien à corriger.
 - **Constat trafic** : avant ce soir, seulement les vues d'annonces étaient comptées — 39 vues par 5 visiteurs depuis le 29/10, 1 numéro affiché. Aucun compteur de visites du site.
