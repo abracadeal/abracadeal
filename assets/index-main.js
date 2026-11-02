@@ -3923,13 +3923,35 @@ const HOME_GROUPS=[
 function isHomeDefaultView(){
   return !onlyMine&&!favoritesMode&&!moderationMode&&!hasActiveCatalogueFilters()&&($('#sortAds')?.value||'newest')==='newest';
 }
+/* 02/11/2026 (Anthony, tablette) : une rubrique de l'accueil remplit toujours des rangées complètes
+   (6 colonnes → 12 annonces, 4 → 8, 3 → 9…), au lieu de laisser une rangée à moitié vide. */
+function homeGridColumns(){
+  try{
+    const cols=getComputedStyle($('#adsGrid')).gridTemplateColumns.split(' ').filter(x=>x&&x!=='none').length;
+    return cols>0?cols:2;
+  }catch(_){return 2;}
+}
+function homeGroupCount(limit,available){
+  if(!Number.isFinite(limit)) return available;
+  const cols=homeGridColumns();
+  let n=Math.ceil(limit/cols)*cols;
+  if(available<n) n=available>=cols?Math.floor(available/cols)*cols:available;
+  return n;
+}
+let homeGridColsSeen=0;
+window.addEventListener('resize',()=>{
+  if(!isHomeDefaultView()) return;
+  const c=homeGridColumns();
+  if(homeGridColsSeen&&c!==homeGridColsSeen){ homeGridColsSeen=c; try{renderAds();}catch(_){} }
+});
 function groupHomeAds(ads){
+  homeGridColsSeen=homeGridColumns();
   const rest=[...ads],out=[];
   for(const g of HOME_GROUPS){
     const items=rest.filter(g.test);
     if(!items.length)continue;
     items.forEach(a=>rest.splice(rest.indexOf(a),1));
-    const shown=items.slice(0,g.limit);
+    const shown=items.slice(0,homeGroupCount(g.limit,items.length));
     out.push({__homeHeader:true,key:g.key,sub:g.sub||'',title:g.title,icon:g.icon,total:items.length,shown:shown.length,first:!out.length});
     out.push(...shown);
   }
