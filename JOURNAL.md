@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Accueil : plus de doublons entre « D'après vos recherches » et « Récemment consultées »
+- Remarque d'Anthony (capture) : les mêmes C 63 dans les deux rubriques.
+- `index-main.js` (v=20261102-sans-doublon) : « D'après vos recherches récentes » exclut les annonces déjà affichées dans « Récemment consultées » (rubrique cachée s'il ne reste rien) ; les recherches passées utilisent la même recherche par mots-clés que le site (« c63 » = « c 63 »).
+
 ### 02/11/2026 — Claude — Showroom : fiche préchargée
 - Retour d'Anthony après l'ouverture rapide : « bof ». Le gros du délai restait le chargement de toute la page du site (HTML, scripts, styles) dans la fenêtre de la fiche à chaque clic.
 - `pro.html` : une fenêtre de fiche (`/?embed=1`) est préchargée en arrière-plan dès que le showroom est affiché ; au clic, le showroom lui demande d'ouvrir l'annonce (`abraca-open-annonce`) → plus de rechargement de page. Fermeture / retour / Échap : la fenêtre est cachée et gardée pour l'annonce suivante (`abraca-close-annonce`). Si elle n'est pas encore prête : ancienne méthode.
