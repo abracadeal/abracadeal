@@ -212,7 +212,7 @@
       <div class="demo-pitch">
         <h2>Vos biens sur Abracadeal, sans rien ressaisir</h2>
         <ul>
-          <li>Vos annonces sont reprises depuis votre site, avec votre accord, avec leurs photos, leur description et leur DPE.</li>
+          <li>Vos annonces sont reprises depuis votre site, avec votre accord : toutes les photos, la description, le DPE, les charges et les honoraires.</li>
           <li>Elles se mettent à jour toutes seules : nouveau mandat, baisse de prix, bien vendu.</li>
           <li>Chaque bien a sa propre page trouvable sur Google et se partage en un clic sur WhatsApp ou Facebook.</li>
           <li>Abracadeal est un site toutes catégories : vos biens sont vus par tous ses visiteurs, pas seulement ceux qui cherchent de l’immobilier.</li>
@@ -345,12 +345,15 @@ function openModal(id){var el=document.getElementById(id);el.classList.add('open
 function closeModal(id){var el=document.getElementById(id);el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 document.addEventListener('click',function(e){var c=e.target.closest('[data-close]');if(c){e.preventDefault();closeModal(c.getAttribute('data-close'));}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal('detailModal');});
-function specs(a){return [a.surface?Math.round(a.surface)+' m²':'',a.rooms?a.rooms+' pièce'+(a.rooms>1?'s':''):''].filter(Boolean)}
+function gradeOk(v){return /^[A-G]$/.test(String(v||'').trim().toUpperCase())}
+function specs(a){return [a.surface?Math.round(a.surface)+' m²':'',a.rooms?a.rooms+' pièce'+(a.rooms>1?'s':''):'',a.bedrooms?a.bedrooms+' ch.':''].filter(Boolean)}
+function scale(kind,g){g=String(g||'').trim().toUpperCase();if(!gradeOk(g))return '<span class="diagnostic-na">Non communiqué</span>';return '<div class="diagnostic-scale '+(kind==='ges'?'climate':'energy')+'">'+['A','B','C','D','E','F','G'].map(function(x){return '<span class="diagnostic-grade g-'+x.toLowerCase()+(x===g?' selected':'')+'">'+x+'</span>'}).join('')+'</div>'}
+function eur(n){return Number(n).toLocaleString('fr-FR')+' €'}
 function card(a){
  return '<article class="ad-card" onclick="openAd('+a.i+')" role="link" tabindex="0" onkeydown="if(event.key===\'Enter\')openAd('+a.i+')">'
  +'<div class="ad-photo">'+(a.photo?'<img class="ad-photo-img" src="'+esc(a.photo)+'" alt="" loading="lazy" decoding="async">':'')+'<span class="photo-watermark">Abracadeal</span><div class="card-top-badges"><span class="pro-card-badge">PRO</span></div></div>'
  +'<div class="ad-body"><div class="ad-meta">'+esc(TYPES[a.sub]||'Immobilier')+' · Professionnel</div><h3 class="ad-title">'+esc(a.title)+'</h3><div class="ad-price">'+esc(money(a))+'</div>'
- +(specs(a).length?'<div class="ad-specs">'+specs(a).map(function(x){return '<span class="ad-spec">'+esc(x)+'</span>'}).join('')+'</div>':'')
+ +((specs(a).length||gradeOk(a.dpe))?'<div class="ad-specs">'+specs(a).map(function(x){return '<span class="ad-spec">'+esc(x)+'</span>'}).join('')+(gradeOk(a.dpe)?'<span class="ad-spec immo-card-dpe grade-'+String(a.dpe).trim().toLowerCase()+'">DPE '+esc(String(a.dpe).trim().toUpperCase())+'</span>':'')+'</div>':'')
  +'<div class="ad-city">'+esc(a.city)+'</div></div></article>';
 }
 function render(){
@@ -359,19 +362,24 @@ function render(){
 }
 $('#demoMore').addEventListener('click',function(){shown+=24;render();});
 $('#demoSort').addEventListener('change',function(e){var v=e.target.value;LIST=ADS.slice();if(v)LIST.sort(function(a,b){return v==='asc'?(a.price==null?1e15:a.price)-(b.price==null?1e15:b.price):(b.price==null?-1:b.price)-(a.price==null?-1:a.price)});shown=24;render();});
+var cur=null,idx=0;
+window.selectDetailPhoto=function(k){if(!cur||!cur.photos.length)return;idx=k;var m=document.getElementById('detailMainPhoto');if(m)m.src=cur.photos[k];var c=document.getElementById('detailPhotoCount');if(c)c.textContent=(k+1)+' / '+cur.photos.length;document.querySelectorAll('.detail-thumbs button').forEach(function(b,j){b.classList.toggle('active',j===k)});};
+window.changeDetailPhoto=function(d){if(cur)selectDetailPhoto((idx+d+cur.photos.length)%cur.photos.length)};
 window.demoOnly=function(btn,txt){btn.textContent=txt||'Disponible une fois en ligne';};
 window.openAd=function(i){
  var a=ADS[i];if(!a)return;
- var info=[['Type de bien',TYPES[a.sub]||'Immobilier']].concat(a.surface?[['Surface',Math.round(a.surface)+' m²']]:[]).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat([['Ville',a.city]]);
+ cur=a;idx=0;var info=[['Type de bien',TYPES[a.sub]||'Immobilier']].concat(a.surface?[['Surface',Math.round(a.surface)+' m²']]:[]).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat(a.bedrooms?[['Chambres',String(a.bedrooms)]]:[]).concat(a.charges?[['Charges annuelles',eur(a.charges)]]:[]).concat(a.fees?[['Honoraires',String(a.fees)]]:[]).concat([['Ville',a.city]]);
+ var thumbs=a.photos.length>1?'<div class="detail-thumbs">'+a.photos.map(function(u,k){return '<button type="button" class="'+(k===0?'active':'')+'" onclick="selectDetailPhoto('+k+')"><img src="'+esc(u)+'" alt="Photo '+(k+1)+'" loading="lazy"></button>'}).join('')+'</div>':'';
  $('#detailBody').innerHTML=
  '<div class="listing-detail dm-has-actions">'
  +'<div class="dm-topbar"><button type="button" class="dm-icon-btn" aria-label="Retour" onclick="closeModal(\'detailModal\')">'+dmIcon('back')+'</button><div class="dm-topbar-title">'+esc(a.title)+'</div><button type="button" class="dm-icon-btn" aria-label="Partager">'+dmIcon('share')+'</button></div>'
- +'<div class="detail-gallery"><div class="detail-main-wrap">'+(a.photo?'<img class="detail-main-photo" src="'+esc(a.photo)+'" alt="'+esc(a.title)+'">':'')+'<span class="photo-watermark">Abracadeal</span></div></div>'
+ +'<div class="detail-gallery"><div class="detail-main-wrap">'+(a.photo?'<img class="detail-main-photo" id="detailMainPhoto" src="'+esc(a.photo)+'" alt="'+esc(a.title)+'">':'')+(a.photos.length>1?'<button type="button" class="detail-gallery-arrow detail-gallery-prev" aria-label="Photo précédente" onclick="changeDetailPhoto(-1)">&#10094;</button><button type="button" class="detail-gallery-arrow detail-gallery-next" aria-label="Photo suivante" onclick="changeDetailPhoto(1)">&#10095;</button><div class="detail-photo-count" id="detailPhotoCount">1 / '+a.photos.length+'</div>':'')+'<span class="photo-watermark">Abracadeal</span></div>'+thumbs+'</div>'
  +'<div class="detail-content"><main>'
  +'<div class="detail-topline"><div><h1 class="detail-title-main">'+esc(a.title)+'</h1><div class="detail-price-main">'+esc(money(a))+'</div><div class="detail-location">'+esc(a.city)+'</div><div class="detail-meta-line">Immobilier · '+esc(TYPES[a.sub]||'')+' · Professionnel</div></div></div>'
  +'<button type="button" class="dm-seller" onclick="closeModal(\'detailModal\')"><span class="dm-seller-avatar">IG</span><span class="dm-seller-info"><b>Infinity Group Immobilier</b><span class="dm-seller-badge">PRO</span></span></button>'
  +'<section class="detail-section"><h3>Les informations clés</h3><div class="detail-specs">'+info.map(function(s){return '<div class="detail-spec"><span><i class="dm-spec-icon">'+dmSpecIcon(s[0])+'</i>'+esc(s[0])+'</span><b>'+esc(s[1])+'</b></div>'}).join('')+'</div></section>'
- +'<section class="detail-section"><h3>Description</h3><div class="detail-description">Une fois en ligne, la fiche reprend toutes les photos de votre site, la description complète, le DPE, les charges et les honoraires.</div></section>'
+ +((gradeOk(a.dpe)||gradeOk(a.ges))?'<section class="detail-section"><h3>Diagnostics</h3><div class="diagnostic-panel"><div class="diagnostic-row"><div class="diagnostic-label"><span class="diagnostic-icon">▤</span><span>Classe énergie</span></div><div>'+scale('dpe',a.dpe)+'</div></div><div class="diagnostic-row"><div class="diagnostic-label"><span class="diagnostic-icon">▤</span><span>GES</span></div><div>'+scale('ges',a.ges)+'</div></div></div></section>':'<section class="detail-section"><h3>Diagnostics</h3><div class="diagnostic-panel"><span class="diagnostic-na">DPE non communiqué sur l’annonce d’origine</span></div></section>')
+ +'<section class="detail-section"><h3>Description</h3><div class="detail-description" style="white-space:pre-line">'+esc(a.desc||'Description reprise depuis votre site.')+'</div></section>'
  +'<section class="detail-section"><h3>Localisation</h3><div class="detail-map-head"><div><div class="detail-map-place">'+esc(a.city)+'</div><div class="detail-map-note">Localisation approximative · l’adresse exacte n’est jamais affichée.</div></div></div></section>'
  +'</main><aside><div class="seller-card"><span class="seller-badge">PRO</span><div><h3>Infinity Group Immobilier</h3><p>Le Cannet</p></div></div>'
  +'<div class="seller-contact"><button class="btn primary" type="button" onclick="demoOnly(this)">Envoyer un message</button><button class="btn ghost" type="button" onclick="demoOnly(this)" style="margin-top:8px">Voir le numéro</button></div></aside></div>'
@@ -383,7 +391,7 @@ window.openAd=function(i){
  var k=new URLSearchParams(location.search).get('k')||'';
  var res=k?await sb.rpc('get_demo_preview',{p_token:k}):{data:null};
  if(!res||!res.data){$('#resultSubtitle').textContent='Ce lien d’aperçu n’est pas valide ou a expiré.';return}
- ADS=(res.data.rows||[]).map(function(r,i){return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,rooms:r.r,sub:r.sub||'',photo:r.ph||''}});
+ ADS=(res.data.rows||[]).map(function(r,i){var pp=(r.pp&&r.pp.length?r.pp:(r.ph?[r.ph]:[]));return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,rooms:r.r,bedrooms:r.ch,sub:r.sub||'',photo:r.ph||pp[0]||'',photos:pp,dpe:r.d,ges:r.g,fees:r.fe,charges:r.ac,desc:r.de||''}});
  LIST=ADS.slice();
  $('#demoProLine').textContent='Agence immobilière · Le Cannet · '+ADS.length+' biens';
  $('#resultSubtitle').textContent=ADS.length+' biens · touchez une annonce pour l’ouvrir';
