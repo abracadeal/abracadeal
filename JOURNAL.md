@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Annonces dans un ordre aléatoire
+- Demande d'Anthony : « il faut que les annonces tournent aléatoirement ».
+- `index.html` : nouveau tri « Au hasard », par défaut (« Plus récentes », « Prix croissant/décroissant » toujours au choix). `index-main.js` (v=20261102-hasard) : ordre tiré au hasard à chaque visite (graine au chargement, stable pendant la visite : la liste ne saute pas à chaque redessin). Toujours au plus 2 annonces d'affilée du même vendeur ; annonces boostées toujours en positions 1, 4, 7. Recherche par mots-clés, « Mes annonces », favoris et modération : plus récentes d'abord.
+- Testé : 3 visites → 3 ordres différents, ordre identique après redessin.
+
 ### 02/11/2026 — Claude — Réglage général (« règle bien tout le site »)
 - Audit sur téléphone simulé (iPhone 13, Playwright) avec le vrai catalogue (156 annonces), réponses Supabase simulées.
 - **Trouvé : 624 appels `get_listing_favorite_count` à chaque ouverture de l'accueil** (un par vignette, répété à chaque redessin, sans dédoublonnage). Corrigé : `public_catalog()` renvoie `favorite_count` (migration `public_catalog_favorite_count`), le site remplit le cache avec (`primeFavoriteCounts`) et ne demande jamais deux fois le même compteur en même temps. 624 → 0 appel ; annonces affichées en ~1 s au lieu de 2,6 s (en local).
