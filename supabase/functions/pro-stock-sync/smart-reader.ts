@@ -189,6 +189,15 @@ export function activeEnergyDiagnostics(html:string){
  }
  return out;
 }
+// 02/11/2026 (monagenceautomobile : prix absent du texte de la page → lecture de la page refusée, 1 seule photo des données structurées
+// alors que la page en a 21) : photos de la page seules, pour compléter des données structurées pauvres en photos.
+export function smartPhotos(rawHtml:string,pageUrl:string):string[]{const t=performance.now();try{
+  const base=new URL(pageUrl);const headEnd=rawHtml.search(/<\/head>/i);const headHtml=rawHtml.slice(0,headEnd>0?Math.min(headEnd,200000):60000);
+  const h1At=rawHtml.search(/<h1[\s>]/i);const from=h1At>0?Math.max(headEnd>0?headEnd:0,h1At-30000):(headEnd>0?headEnd:0);
+  const region=rawHtml.slice(from,from+220000).replace(/<script\b(?![^>]*ld\+json)[^>]*>[\s\S]*?<\/script>/gi,' ');
+  const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];
+  return pickPhotos(region,base,ogs,base.pathname.match(/(\d{4,})(?!.*\d{4,})/)?.[1]||'');
+ }catch{return [];}finally{cpu.ms+=performance.now()-t;}}
 function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   if(sector==='immobilier'&&/class=["']annonce-detail-titre["']/i.test(rawHtml))return adnpixDetail(rawHtml,pageUrl);
   const base=new URL(pageUrl);const immo=sector==='immobilier';
@@ -480,7 +489,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(ownPage||inScope(u)))};
     },async(html,url)=>{
       let row:any=null;if(ldParse)row=ldParse(html,url);if(row?._sold)return row;
-      const sd=smartDetail(html,url,sector);if(!row)row=sd;else if(sd){/* 01/11/2026 (Anthony, BH Car : photos d'autres véhicules ajoutées à la fin) : la liste des données structurées est celle du véhicule ; les photos de la page (qui comprennent les « véhicules similaires ») ne servent que si elle en a 3 ou moins. */if(String(row.photos||'').split('|').filter(Boolean).length<=3&&String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
+      const sd=smartDetail(html,url,sector);if(row&&!sd&&String(row.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(html,url);if(ph.length>String(row.photos||'').split('|').filter(Boolean).length)row.photos=ph.join('|');}if(!row)row=sd;else if(sd){/* 01/11/2026 (Anthony, BH Car : photos d'autres véhicules ajoutées à la fin) : la liste des données structurées est celle du véhicule ; les photos de la page (qui comprennent les « véhicules similaires ») ne servent que si elle en a 3 ou moins. */if(String(row.photos||'').split('|').filter(Boolean).length<=3&&String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
       if(!row)throw Error('Fiche non reconnue');return row;
     },memory);
   }
@@ -517,7 +526,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       const u=detailQ[i++];if(seenPages.has(u))continue;seenPages.add(u);pages++;
       try{const{text,url}=await fetchHtml(new URL(u));let o:any=null;if(ldParse){try{o=ldParse(text,url.toString());}catch{o=null;}if(o?._sold){misses++;continue;}}if(!o)o=smartDetail(text,url.toString(),sector);
         // Données structurées souvent incomplètes (1 photo, pas de description) : on complète avec la lecture de la page.
-        else{const sd=smartDetail(text,url.toString(),sector);if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(o.photos)<=3&&n(sd.photos)>n(o.photos))o.photos=sd.photos;for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
+        else{const sd=smartDetail(text,url.toString(),sector);if(!sd&&String(o.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(text,url.toString());if(ph.length>String(o.photos||'').split('|').filter(Boolean).length)o.photos=ph.join('|');}if(sd){const n=(x:any)=>String(x||'').split('|').filter(Boolean).length;if(n(o.photos)<=3&&n(sd.photos)>n(o.photos))o.photos=sd.photos;for(const k of Object.keys(sd))if(o[k]==null||o[k]==='')o[k]=sd[k];if(String(sd.description||'').length>String(o.description||'').length*1.5)o.description=sd.description;}}
         if(o?._sold)continue;
         if(o&&!refs.has(o.reference)){refs.add(o.reference);rows.push(o);}else if(!o)misses++;
         // Une fiche peut mener à d'autres fiches (« biens similaires », pagination).

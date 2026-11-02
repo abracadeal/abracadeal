@@ -1132,6 +1132,9 @@ async function readFeed(feed:any,persistCrawl=false){
         // de cette agence (des biens d'autres agences, ex. Issy-les-Moulineaux, sont mis en avant sur la page).
         {const m=url.pathname.match(/^\/(agence-immobiliere|agence|agences)\/([^\/]+)/i);
          if(m&&/(^|\.)laforet\.com$/i.test(url.hostname)){const base='/'+m[1]+'/'+m[2]+'/';const kept=rows.filter((r:any)=>{try{return new URL(String(r.url||'')).pathname.startsWith(base);}catch{return false;}});if(kept.length){rows.length=0;rows.push(...kept);}}}
+        // 02/11/2026 (Kombishop : boutique de tentes de toit + vans) : en véhicules, quand une partie des fiches a un kilométrage ou une année,
+        // celles qui n'ont ni l'un ni l'autre (accessoires, tentes, pièces…) ne sont pas des véhicules.
+        if(sector==='vehicules'){const isV=(r:any)=>!!(r.kilometrage||r.km||r.annee||r.mise_en_circulation||r.year);const v=rows.filter(isV);if(v.length&&v.length<rows.length){rows.length=0;rows.push(...v);}}
         platform+=' · lecture automatique';}
       catch(e){
         const net=await findNetworkPage(url,text).catch(()=>null);
