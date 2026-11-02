@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : nom officiel des villes (tirets)
+- `pro-stock-sync` : une ville reconnue dans la liste officielle prend toujours son nom officiel. Avant, « Mouans Sartoux » (Life Cars) restait sans tiret, car la comparaison ignorait tirets et accents → maintenant « Mouans-Sartoux ».
+
 ### 02/11/2026 — Claude : adresses courtes des showrooms visibles par Google et les réseaux
 - Avant : `abracadeal.fr/weecars-angers` n'existait pas en vrai ; c'est le script de `404.html` qui envoyait au showroom. Google, Facebook, WhatsApp recevaient donc « page introuvable » (code 404) et aucun aperçu.
 - `build_pro_pages.py` : lit `pro_showrooms.slug` et écrit `/<slug>/index.html` (même contenu que la page `garage/…`, adresse officielle = la page `garage/…`, le visiteur part directement au showroom). Nom ignoré s'il est déjà pris par une page du site ; ancienne adresse supprimée si le pro la change (champ `short` dans `pro-pages.json`).
