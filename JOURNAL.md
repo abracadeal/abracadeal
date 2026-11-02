@@ -1992,3 +1992,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Corrigé :** si l'adresse donnée est déjà une page `/<n°>/vehicules/`, elle est lue telle quelle, avec son filtre. Les autres sites Spider VO (adresse d'accueil) ne changent pas.
 - **Nettoyage :** les 10 annonces créées par erreur (3 en ligne, 7 en attente) passées en `archived` / `import_removed`.
 - **Attention :** la note du 31/10 (« filtre `stock=` bien appliqué ») concernait le site WeeCars lui-même, pas notre lecteur. Toutes les agences Weecars de la prospection sont concernées : à relire avec ce correctif avant tout import.
+
+### 02/11/2026 — Claude — Titres de plus de 100 caractères coupés à l'import
+- WeeCars Angers : un Transporter refusé par `listings_title_check` (100 max). `pro-stock-sync` coupe désormais le titre proprement avec « … ».

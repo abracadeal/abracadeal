@@ -1193,6 +1193,8 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      if(txt.length>room){txt=txt.slice(0,Math.max(0,room-1)).replace(/\s+\S*$/,'')+'…';if(txt.length>room)txt=txt.slice(0,room);}
      description=(h+txt).slice(0,5000);
     }
+    /* 02/11/2026 (WeeCars Angers) : titre limité à 100 caractères par la base (listings_title_check) → coupé proprement */
+    if(r.title&&String(r.title).length>100){let t=String(r.title).replace(/\s+/g,' ').trim();if(t.length>100){t=t.slice(0,99).replace(/[\s\-\/,.:;]+\S*$/,'').trim();if(t.length<3)t=String(r.title).slice(0,99);t=t+'…';}r.title=t.slice(0,100);}
     const payload:any={owner_id:feed.owner_id,category:r.category,title:r.title,description,price:r.price,city:r.city,postal_code:r.postal||null,seller_type:'professionnel',source,external_id:r.ref,external_url:r.externalUrl||feed.feed_url||null,last_synced_at:new Date().toISOString(),show_phone:r.showPhone};
     if(r.category==='vehicules'){
      payload.item_condition=r.condition||null;payload.vehicle_make=r.make||null;payload.vehicle_model=r.model||null;
