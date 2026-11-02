@@ -1039,7 +1039,8 @@ async function readFeed(feed:any,persistCrawl=false){
   }
   const len=Number(r.headers.get('content-length')||0);
   if(len>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
-  const text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');
+  let text=decodeLegacyHtml(new Uint8Array(await r.arrayBuffer()),r.headers.get('content-type')||'');
+  /* 02/11/2026 (Kombishop, PrestaShop : page vide pour l'en-tête « flux ») : page d'accueil vide → relue comme un navigateur */if(text.trim().length<500&&/html/i.test(r.headers.get('content-type')||'')){try{const again=await fetchSiteHtml(url);if(again.text.length>text.length)text=again.text;}catch{}}
   if(text.length>25_000_000)throw new Error('Flux trop volumineux (> 25 Mo).');
   if(/token\.awswaf\.com|<title>UUSEC WAF<\/title>/i.test(text)){const err:any=new Error('Protection anti-robots : challenge AWS WAF / UUSEC. Un accès autorisé au robot ou un flux fourni par le professionnel est nécessaire.');err.platform='Protection anti-robots';throw err;}
   const ct=(r.headers.get('content-type')||'').toLowerCase();

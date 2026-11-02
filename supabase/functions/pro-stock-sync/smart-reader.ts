@@ -486,20 +486,21 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   }
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
-  const take=(html:string,page:URL)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details)if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
-  take(homeHtml,origin);seenPages.add(origin.toString());smartHooks.trace(origin.toString(),'smart home len='+homeHtml.length+' details='+detailQ.length+' lists='+listQ.length+' memory=0');
+  const fromOwn=new Set<string>();
+  const take=(html:string,page:URL,own=false)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details){if(own)fromOwn.add(d);if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);}for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
+  take(homeHtml,origin,true);seenPages.add(origin.toString());smartHooks.trace(origin.toString(),'smart home len='+homeHtml.length+' details='+detailQ.length+' lists='+listQ.length+' memory=0');
   for(const s of extraStarts)if(!listQ.includes(s))listQ.unshift(s);
   let pages=0;let misses=0;
   // Adresse d'une agence dans un réseau (ex. /agence-immobiliere/cannes) : on reste sous ce chemin.
-  const scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,''):'';
+  const scope=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
   const inScope=(u:string)=>!scope||scope.split('/').length<3||new URL(u).pathname.startsWith(scope);
   // Listes d'abord (pour trouver les fiches), en parallèle limité.
   let lists=0;
   while(listQ.length&&lists<20&&Date.now()-t0<20000&&cpuLeft()){
     const batch=listQ.splice(0,4).filter(u=>!seenPages.has(u)&&inScope(u));batch.forEach(u=>seenPages.add(u));pages+=batch.length;lists+=batch.length;
-    await Promise.all(batch.map(async u=>{try{const{text,url}=await fetchHtml(new URL(u));take(text.length>700000?text.slice(0,700000):text,url);}catch{}}));
+    await Promise.all(batch.map(async u=>{try{const{text,url}=await fetchHtml(new URL(u));take(text.length>700000?text.slice(0,700000):text,url,true);}catch{}}));
   }
-  if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(inScope);detailQ.length=0;detailQ.push(...keep);}
+  if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(u=>inScope(u)||fromOwn.has(u));detailQ.length=0;detailQ.push(...keep);}
   // Listes chargées en JavaScript : les fiches sont souvent dans le plan du site (sitemap).
   if(detailQ.length<5){
     const maps=[new URL('/sitemap.xml',origin).toString()];
@@ -508,7 +509,7 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
     for(let k=0;k<maps.length&&seenMaps.size<10&&Date.now()-t0<25000;k++){const sm=maps[k];if(seenMaps.has(sm))continue;seenMaps.add(sm);
       try{const{text}=await fetchHtml(new URL(sm));for(const m of text.matchAll(/<loc>\s*([^<\s]+)\s*<\/loc>/gi)){const loc=sDecode(m[1]);if(/\.xml(\?|$)/i.test(loc)){if(!/(post|page|categor|tag|author|blog|actualit|news)/i.test(loc))maps.push(loc);}else fromMaps.push(loc);}}catch{}}
     const fake=fromMaps.slice(0,5000).map(u=>`<a href="${u.replace(/"/g,'&quot;')}">`).join('');take(fake,origin);
-    if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(inScope);detailQ.length=0;detailQ.push(...keep);}
+    if(scope&&scope.split('/').length>=3){const keep=detailQ.filter(u=>inScope(u)||fromOwn.has(u));detailQ.length=0;detailQ.push(...keep);}
   }
   let i=0;
   await Promise.all(Array.from({length:4},async()=>{
