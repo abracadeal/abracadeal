@@ -6056,6 +6056,16 @@ if(sb){
   // sans attendre la vérification du compte ; il est ensuite rafraîchi normalement.
   try{Promise.resolve(getPublicCatalog()).then(()=>{if(!catalogLoadedOnce&&!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});});}catch(_){}
   try{applyUrlCatalogueFilters();}catch(_){}
+  // 02/11/2026 (Anthony : « quand on clique sur une annonce dans le showroom, ça met du temps ») : lien direct vers une
+  // annonce (?annonce=…, showroom, partage) → la fiche est lue seule et ouverte tout de suite, sans attendre le compte,
+  // les favoris et tout le catalogue. Une fois le compte vérifié, la fiche est redessinée (boutons du propriétaire, favori).
+  let fastSharedId=null;
+  try{const pq=new URLSearchParams(location.search);const fid=pq.get('annonce');
+    if(fid&&!pq.get('admin_preview')&&!IMPORT_PREVIEW){
+      Promise.resolve(sb.from('listings').select(PUBLIC_CATALOG_SELECT).eq('id',fid).eq('status','active').eq('visibility_scope','public').maybeSingle())
+        .then(({data})=>{if(data&&!sharedListingHandled){detailAdsCache.set(fid,data);fastSharedId=fid;return openSharedListingFromUrl();}})
+        .catch(err=>console.error('Ouverture rapide de l’annonce impossible',err));
+    }}catch(_){}
   (async()=>{
     try{await refreshAuth();}
     catch(error){console.error('Initialisation du compte impossible',error);}
@@ -6065,6 +6075,7 @@ if(sb){
     catch(error){console.error('Catalogue indisponible',error);}
     try{await openSharedListingFromUrl();}
     catch(error){console.error('Ouverture du lien partagé impossible',error);}
+    try{if(fastSharedId&&currentUser&&document.getElementById('detailModal')?.classList.contains('open'))window.openAd(fastSharedId);}catch(_){}
 
     setTimeout(async()=>{
       try{
