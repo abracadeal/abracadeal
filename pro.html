@@ -34,6 +34,7 @@
 @media(max-width:620px){.fgrid{grid-template-columns:1fr 1fr}}
 </style>
 <link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
+<script src="/assets/vehicle-title-20261103.js?v=1"></script>
 </head>
 <body>
 <header class="top"><div class="topin"><a class="brand" href="index.html">Abracadeal</a><a class="back" href="index.html#resultats">← Retour aux annonces</a></div></header>
@@ -72,7 +73,7 @@ function renderShell(){
   app.innerHTML='<div class="card">'+
     '<div class="banner"'+(banner?' style="background-image:url(&quot;'+esc(banner)+'&quot;)"':'')+'></div>'+
     '<div class="identity"><div class="logo"'+(logo?' style="background-image:url(&quot;'+esc(logo)+'&quot;)"':'')+'>'+(logo?'':esc(initials(profile.display_name)))+'</div>'+
-    '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+'<span>★ '+esc(r.label)+'</span>'+(showroom?.slug?'<span>abracadeal.fr/'+esc(showroom.slug)+'</span>':'')+'<span id="followersCount">'+followerCount+' abonné'+(followerCount>1?'s':'')+'</span></div></div>'+
+    '<div><div class="name">'+esc(profile.display_name||'Professionnel Abracadeal')+'</div><div class="meta"><span class="badge">✓ Professionnel</span>'+(profile.city?'<span>'+esc(profile.city)+'</span>':'')+(r.avg?'<span>★ '+esc(r.label)+'</span>':'')+(showroom?.slug?'<span>abracadeal.fr/'+esc(showroom.slug)+'</span>':'')+'<span id="followersCount">'+(followerCount?followerCount+' abonné'+(followerCount>1?'s':''):'')+'</span></div></div>'+
     /* 02/11/2026 (Anthony) : le pro qui regarde sa propre page ne peut pas s'abonner ni se contacter lui-même */
     (isOwner
       ?'<div class="identity-actions"><a class="follow" id="editPageBtn" href="/?espace=pro" style="text-decoration:none;text-align:center">Modifier ma page</a><button class="share" id="shareBtn" type="button">Partager</button></div></div><div class="owner-note">C’est votre page : vos clients la voient exactement comme ça.</div>'
@@ -115,7 +116,7 @@ async function toggleFollow(){
     btn.classList.toggle('following',isFollowing);
     btn.textContent=isFollowing?'✓ Abonné':'♡ S’abonner';
     const count=document.getElementById('followersCount');
-    if(count)count.textContent=followerCount+' abonné'+(followerCount>1?'s':'');
+    if(count)count.textContent=followerCount?followerCount+' abonné'+(followerCount>1?'s':''):'';
   }catch(error){
     console.error(error);
     alert('Impossible de modifier votre abonnement pour le moment.');
@@ -150,7 +151,7 @@ function renderCards(){
   if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
   const cards=filtered.slice(0,shown).map(l=>{
     const photo=photoUrl(firstPhoto(l)),url='/?annonce='+encodeURIComponent(l.id)+'&retour='+encodeURIComponent(location.pathname+location.search);/* 02/11/2026 : fermer l'annonce ramène au showroom */
-    return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title||'Annonce')+'</div><div class="price">'+esc(money(l.price))+'</div>'+(l.category==='vehicules'&&(l.vehicle_year||l.mileage!=null||l.fuel)?'<div class="specs">'+esc([l.vehicle_year,l.mileage!=null?fmtN(l.mileage)+' km':'',nice(l.fuel),nice(l.transmission)].filter(Boolean).join(' · '))+'</div>':'')+'<div class="city">'+esc(l.city||'')+'</div></div></a>';
+    return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.category==='vehicules'&&window.displayVehicleTitle?window.displayVehicleTitle(l.title||'Annonce'):(l.title||'Annonce'))+'</div><div class="price">'+esc(money(l.price))+'</div>'+(l.category==='vehicules'&&(l.vehicle_year||l.mileage!=null||l.fuel)?'<div class="specs">'+esc([l.vehicle_year,l.mileage!=null?fmtN(l.mileage)+' km':'',nice(l.fuel),nice(l.transmission)].filter(Boolean).join(' · '))+'</div>':'')+'<div class="city">'+esc(l.city||'')+'</div></div></a>';
   }).join('');
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
   document.getElementById('moreBtn')?.addEventListener('click',()=>{shown+=24;renderCards()});
