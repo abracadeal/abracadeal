@@ -1906,7 +1906,7 @@ a.btn{cursor:pointer}
     flex:0 0 auto;margin:0;border:0;border-bottom:1px solid #eadff0;border-radius:0;padding:9px 14px;background:#f8f2fb;font-size:.78rem;line-height:1.35;
   }
   #messagesModal .message-safety p{display:none}
-  #messagesModal #moderationNotices,#messagesModal #proSyncNotices{flex:0 0 auto;max-height:96px;overflow:auto;margin:0;border-radius:0}
+  #messagesModal #moderationNotices,#messagesModal #proSyncNotices{flex:0 0 auto;max-height:45vh;overflow:auto;margin:0;border-radius:0}
   .messages-shell{display:block!important;flex:1 1 auto;min-height:0!important;height:auto!important;border:0!important;border-radius:0!important;overflow:hidden!important}
   .conversation-panel{height:100%;display:flex;flex-direction:column;border:0!important;min-height:0}
   .conversation-panel-head{flex:0 0 auto;padding:12px 14px;background:#fbf8fc}
@@ -4437,3 +4437,10 @@ header #flowErrorsBtn{
 .home-group-more{background:linear-gradient(120deg,#9b3fd1 0%,#d63fa4 100%);border:0;border-radius:999px;padding:8px 16px;color:#fff;font-weight:850;font-size:.9rem;cursor:pointer;white-space:nowrap;box-shadow:0 4px 14px rgba(214,63,164,.3);transition:transform .15s ease,box-shadow .15s ease}
 .home-group-more:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(214,63,164,.45)}
 .home-group-head{align-items:center!important}
+
+/* 02/11/2026 : boutons des alertes (Messages + Erreurs de flux) */
+.notice-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.notice-actions .btn{background:linear-gradient(135deg,#e52c9c,#aa28cc);color:#fff;border:1px solid #d83cae;border-radius:9px;padding:9px 13px;font-weight:800;cursor:pointer;font-size:.9rem}
+.notice-actions .btn.ghost{background:#fff;color:#5b2a78;border:1px solid #d9c6e6;box-shadow:none}
+.notice-actions .btn.ghost.danger{color:#c0262d;border-color:#f0b7b9}
+.notice-actions .btn:disabled{opacity:.6;cursor:wait}

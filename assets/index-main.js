@@ -4846,8 +4846,46 @@ async function loadAdminFlowErrors(){
     <div class="flow-error-head"><div><b>${esc(n.company_name||'Professionnel')}</b><div class="small">${esc(n.feed_name||'Flux professionnel')}</div></div><span class="flow-error-pill">${critical?'À traiter':'À surveiller'}</span></div>
     <div class="flow-error-meta"><span>${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</span><span>${fails} échec${fails>1?'s':''} consécutif${fails>1?'s':''}</span>${n.last_run_at?`<span>Dernier essai : ${esc(formatMessageTime(n.last_run_at))}</span>`:''}${n.last_success_at?`<span>Dernier succès : ${esc(formatMessageTime(n.last_success_at))}</span>`:''}</div>
     <p class="flow-error-message">${esc(n.message||'Erreur de synchronisation')}</p>
+    <div class="notice-actions"><button type="button" class="btn" onclick="retryProSyncFeed('${n.feed_id}','${n.id}',this)">Relancer la synchro</button>${n.owner_id?`<button type="button" class="btn ghost" onclick="openProFromNotice('${n.owner_id}')">Voir le pro</button>`:''}<button type="button" class="btn ghost danger" onclick="deleteProSyncNotice('${n.id}')">Supprimer</button></div>
   </article>`}).join('');
 }
+/* 02/11/2026 (Anthony) : alertes de flux avec de vrais boutons (relancer, voir, supprimer) */
+window.retryProSyncFeed=async(feedId,noticeId,btn)=>{
+  if(!currentProfile?.is_admin){toast('Accès administrateur requis');return;}
+  if(btn){btn.disabled=true;btn.textContent='Synchro en cours…';}
+  try{
+    const {data,error}=await sb.functions.invoke('pro-stock-sync',{body:{feed_id:feedId}});
+    if(error)throw error;
+    const r=data?.results?.[0]||data||{};
+    const errs=Number(r.error_count??r.errors??0);
+    if(!errs&&noticeId)await sb.from('pro_sync_notices').update({read_at:new Date().toISOString(),resolved_at:new Date().toISOString()}).eq('id',noticeId).eq('recipient_id',currentUser.id);
+    toast(errs?`Synchro terminée : ${errs} annonce(s) encore en erreur`:'Synchro réussie');
+  }catch(e){console.error(e);toast('La synchro a échoué : '+(e?.message||'erreur inconnue'));}
+  await loadAdminFlowErrors();await refreshFlowErrorsCount();await loadProSyncNotices();await refreshUnreadMessages();
+};
+window.deleteProSyncNotice=async id=>{
+  if(!currentUser)return;
+  const now=new Date().toISOString();
+  const {error}=await sb.from('pro_sync_notices').update({read_at:now,resolved_at:now}).eq('id',id).eq('recipient_id',currentUser.id);
+  if(error){toast('Impossible de supprimer cette alerte');return;}
+  toast('Alerte supprimée');
+  if(currentProfile?.is_admin){await loadAdminFlowErrors();await refreshFlowErrorsCount();}
+  await loadProSyncNotices();await refreshUnreadMessages();
+};
+window.openProFromNotice=async ownerId=>{
+  const {data}=await sb.from('pro_showrooms').select('slug').eq('user_id',ownerId).maybeSingle();
+  if(data?.slug){location.href='/'+encodeURIComponent(data.slug);return;}
+  toast('Ce pro n’a pas encore de page publique');
+};
+window.openSyncNotice=async(id,severity)=>{
+  await sb.from('pro_sync_notices').update({read_at:new Date().toISOString()}).eq('id',id).eq('recipient_id',currentUser.id).is('read_at',null);
+  if(currentProfile?.is_admin){
+    if(severity==='site_review'||severity==='new_pro'){location.href='admin-test-import.html';return;}
+    closeModal?.('messagesModal');await openAdminFlowErrors();return;
+  }
+  closeModal?.('messagesModal');
+  openModal('accountModal');setTimeout(()=>document.getElementById('proDashboardPanel')?.scrollIntoView({behavior:'smooth',block:'start'}),120);
+};
 
 function formatMessageTime(v){
   if(!v) return '';
@@ -4912,7 +4950,10 @@ async function loadProSyncNotices(){
   if(!box)return;
   if(error){box.classList.remove('hidden');box.textContent='Les alertes de synchronisation sont momentanément indisponibles.';return;}
   box.classList.toggle('hidden',!data?.length);
-  box.innerHTML=(data||[]).map(n=>`<article class="moderation-notice"><b>Abracadeal · ${n.severity==='new_pro'?'Nouveau pro en ligne':n.severity==='site_review'?'Site d’un pro à vérifier':(n.severity==='error'?'Erreur':'Alerte')+' de synchronisation'}</b><p><strong>${esc(n.feed_name)}</strong> · ${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</p><p>${esc(n.message)}</p><small>${esc(formatMessageTime(n.created_at))}</small>${!n.read_at?` <button type="button" class="btn" onclick="markProSyncNoticeRead('${n.id}')">Marquer comme lu</button>`:''}</article>`).join('');
+  const isAdm=!!currentProfile?.is_admin;
+  /* 02/11/2026 : un pro ne voit pas le message technique (ex. « OpenAI Moderation HTTP 429 ») ; boutons Ouvrir / Lu / Supprimer */
+  const friendly=n=>isAdm||['new_pro','site_review'].includes(n.severity)?n.message:'Une partie de vos annonces n’a pas pu être mise à jour depuis votre site. Nous réessayons automatiquement, vous n’avez rien à faire.';
+  box.innerHTML=(data||[]).map(n=>`<article class="moderation-notice"><b>Abracadeal · ${n.severity==='new_pro'?'Nouveau pro en ligne':n.severity==='site_review'?'Site d’un pro à vérifier':(n.severity==='error'?'Erreur':'Alerte')+' de synchronisation'}</b><p><strong>${esc(n.feed_name)}</strong> · ${n.sector==='immobilier'?'Immobilier':'Auto / Moto'}</p><p>${esc(friendly(n))}</p><small>${esc(formatMessageTime(n.created_at))}</small><div class="notice-actions"><button type="button" class="btn" onclick="openSyncNotice('${n.id}','${esc(n.severity)}')">Ouvrir</button>${!n.read_at?`<button type="button" class="btn ghost" onclick="markProSyncNoticeRead('${n.id}')">Marquer comme lu</button>`:''}<button type="button" class="btn ghost danger" onclick="deleteProSyncNotice('${n.id}')">Supprimer</button></div></article>`).join('');
 }
 window.markProSyncNoticeRead=async id=>{
   if(!currentUser)return;

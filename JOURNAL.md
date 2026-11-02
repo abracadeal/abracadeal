@@ -2004,3 +2004,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `moderate-listing` : une annonce `professionnel` dont le compte a un SIRET vérifié (`pro_verifications.verified_at`) ne passe plus par OpenAI Moderation (texte + photos). Raison : la limite de débit gratuite bloquait la mise en ligne des stocks des pros.
 - Toujours actifs pour les pros : offres interdites (`prohibitedTerms`), anti-republication 30 j, score de risque (prix, téléphone étranger, e-mail jetable…), signalements.
 - Les particuliers et les comptes pro sans SIRET vérifié gardent l'analyse OpenAI.
+
+### 02/11/2026 — Claude — Alertes de synchro : vrais boutons + plus coupées
+- **Demande d'Anthony :** les alertes (Messages et Admin > Erreurs de flux) s'affichaient sans moyen d'agir.
+- **Messages :** la zone des alertes était limitée à 96 px (le bouton « Marquer comme lu » était caché) → 45 % de l'écran. Chaque alerte a « Ouvrir » (admin : Erreurs de flux, ou page des imports pour nouveau pro / site à vérifier ; pro : son espace pro), « Marquer comme lu », « Supprimer ».
+- **Un pro ne voit plus le message technique** (ex. « OpenAI Moderation HTTP 429 ») mais une phrase simple : mise à jour partielle, nouvel essai automatique, rien à faire.
+- **Erreurs de flux (admin) :** « Relancer la synchro » (efface l'alerte si plus d'erreur), « Voir le pro » (sa page publique), « Supprimer ».
+- Nettoyage : alertes WeeCars Angers (admin + pro) résolues, l'erreur était réglée.
+- Fichiers : `assets/index-main.js` v=20261102-alertes, `assets/index-core.css` v=20261102-alertes.
