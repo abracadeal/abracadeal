@@ -1,0 +1,6 @@
+-- 02/11/2026 (Claude) : appliqué via les migrations « demo_preview_links » et « demo_preview_foreign_filter ».
+-- Aperçu « showroom » d'un prospect lisible seulement avec un lien secret (demo/<nom>/?k=<token>).
+-- private.demo_preview_links(token, prospect_id, display_name, city, expires_at = +60 jours)
+-- public.get_demo_preview(p_token) → {name, city, count, rows} depuis prospect_previews (biens à l'étranger exclus).
+-- Pour un nouveau prospect : lecture à blanc avec preview_limit=300, copier la réponse dans prospect_previews.rows,
+-- puis insérer une ligne dans private.demo_preview_links.

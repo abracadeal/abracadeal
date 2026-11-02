@@ -2109,3 +2109,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 02/11/2026 — Claude — pro-stock-sync : aperçu complet en lecture à blanc
 - `auto_review_dry` accepte `preview_limit` (max 300, défaut 6 inchangé) pour récupérer toutes les fiches d'un site avec photo, sans rien enregistrer — utilisé pour l'aperçu de l'agence Infinity Group Immo.
+
+### 02/11/2026 — Claude — Aperçu showroom pour l'agence Infinity Group Immobilier (Le Cannet)
+- Demande d'Anthony : un aperçu à envoyer au patron d'Infinity (via une amie qui a travaillé pour eux).
+- Lecture à blanc de infinitygroup-immo.com (Apimo, 173 biens lus, rien publié) ; les 172 fiches avec photo sont dans `prospect_previews`.
+- Page `demo/infinity/index.html` (noindex, /demo/ bloqué dans robots.txt) : vrai look du showroom, tri par prix, 154 biens (les 18 biens à l'étranger — Phuket, Marrakech, Espagne, Ibiza — sont exclus : le robot leur mettait une ville française fausse, ex. « Antibes », « Mont-de-Marsan »).
+- Données lues via `get_demo_preview(token)` (lien secret, expire au bout de 60 jours). Lien : https://abracadeal.fr/demo/infinity/?k=OuXQwIhe4ushx2pP
+- À faire si Infinity accepte : régler la ville des biens à l'étranger dans le lecteur Apimo avant l'import. Supprimer la démo après.
