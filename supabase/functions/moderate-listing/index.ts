@@ -112,7 +112,15 @@ Deno.serve(async(req)=>{
        await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:100,risk_level:'red',reasons:[reason],engine:'anti-republication-30d',ai_checked:false,auto_published:false});
        return json({ok:false,error:reason,status:'rejected',risk_level:'red'});
       }
-      safety=await scanSafety(admin,listing,photos);
+      /* 02/11/2026 (décision d'Anthony) : analyse OpenAI réservée aux particuliers. Un pro au SIRET vérifié
+         (pro_verifications) n'y passe plus : la limite de débit gratuite bloquait l'import des stocks
+         (24 voitures × ~30 photos). Les autres contrôles (offres interdites, republication, score) restent actifs. */
+      const {data:proCheck}=listing.seller_type==='professionnel'
+        ?await admin.from('pro_verifications').select('verified_at').eq('user_id',listing.owner_id).not('verified_at','is',null).maybeSingle()
+        :{data:null};
+      safety=proCheck
+        ?{categories:[],snapshot:snapshot(listing,photos),imagesChecked:0,skippedForPro:true}
+        :await scanSafety(admin,listing,photos);
       await recordSafety(admin,listing.id,safety);
       const reuseSaved=await admin.from('listing_moderation').update({reused_photo_count:reusedPhotos}).eq('listing_id',listing.id);
       if(reuseSaved.error)throw reuseSaved.error;
