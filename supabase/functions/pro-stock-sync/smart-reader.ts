@@ -456,7 +456,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     const hon=text.match(/honoraires(?:[^.\n]|\.(?=\d)){0,140}/i);if(hon&&/\d|charge/i.test(hon[0]))o.honoraires=hon[0].replace(/\s+/g,' ').trim();
     // Lignes de faits (charges, taxe, lots, copropriété, procédure, dépôt, mandat…) gardées pour la lecture des champs, hors description.
     o.texte_page=text.split('\n').filter(l=>l.length<=220&&/charges|taxe|lots?\b|copropri|proc[ée]dure|honoraires|mandat|d[ée]penses|[ée]nergie|DPE|GES|d[ée]p[ôo]t|loyer|meubl|carrez|chauffage|[ée]tage|ascenseur|construction/i.test(l)).slice(0,120).join('\n').slice(0,8000);
-    if(!(o.surface||o.pieces||o.chambres||o.surface_terrain))return null;
+    if(!(o.surface||o.pieces||o.chambres||o.surface_terrain)){lastRefusal.v='ni surface ni pièces';return null;}
   }else{
     /* 02/11/2026 (complexeautomobile, thème WordPress Motors) : les caractéristiques sont après un long menu → texte autour du titre aussi */const tH=h1?text.indexOf(h1.slice(0,40)):-1;const all=head+' \n'+text.slice(0,6000)+(tH>6000?' \n'+text.slice(tH,tH+12000):'');
     const km=all.match(/kilom[ée]trage[^0-9]{0,25}(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})/i)||all.match(/(?<![\p{L}\d][\s\u00a0.]?)(\d{1,3}(?:[\s.\u00a0]\d{3})+|\d{1,6})\s*km\b/iu);
@@ -478,7 +478,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
     const make=head.trim().split(/\s+/)[0];if(make&&/^[A-Za-zÀ-ÿ-]{2,}$/.test(make)&&!/^(vente|achat|occasion|voiture|v[ée]hicule|annonce)$/i.test(make))o.marque=make;
     o.etat=/\bneuf\b|\b0\s*km\b/i.test(head)?'neuf':'occasion';
     o.type=/\b(moto|scooter|quad|motocross|enduro|roadster|trail)\b/i.test(head+' '+base.pathname)?'moto':/\b(camping[- ]car|caravane|van am[ée]nag)/i.test(head)?'camping-car':/\b(fourgon|utilitaire|plateau|benne|L\dH\d|master|trafic|jumper|boxer|ducato|sprinter|transit)\b/i.test(head)?'utilitaire':'voiture';
-    if(!(o.kilometrage||o.annee))return null;
+    if(!(o.kilometrage||o.annee)){lastRefusal.v='ni kilométrage ni année';return null;}
   }
   if(immo&&/^(?:www\.)?lfimmo\.fr$/.test(base.hostname)&&/^\/annonces\/\d+-/.test(base.pathname)){
     o.reference=base.pathname.match(/^\/annonces\/(\d+)-/)![1];
