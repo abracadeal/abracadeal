@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Showroom : fiche ouverte plus vite
+- Remarque d'Anthony : cliquer sur une annonce dans le showroom « met du temps ».
+- Cause : la fiche (index.html?annonce=…&embed=1) attendait, l'un après l'autre, la vérification du compte, les favoris et tout le catalogue avant de s'ouvrir.
+- `index-main.js` (v=20261102-fiche-rapide) : avec `?annonce=`, l'annonce est lue seule (une ligne) et ouverte dès qu'elle arrive ; une fois le compte vérifié, la fiche est redessinée si un utilisateur est connecté (boutons propriétaire, favori). Aperçu admin et import inchangés.
+
 ### 02/11/2026 — Claude — « Recherche IA » retiré
 - Remarque d'Anthony : « pourquoi il y a écrit IA si ce n'en est pas ». La recherche est à règles (mots-clés + critères reconnus), sans IA.
 - `index.html` : champ « ✦ Recherche IA » → « Rechercher : c63, studio Cannes… » ; `smart-search-20260924.js` (v=20261102-sans-ia) : « Recherche intelligente : » → « Critères reconnus : ».
