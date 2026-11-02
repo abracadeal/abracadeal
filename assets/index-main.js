@@ -5168,6 +5168,8 @@ async function hydrateSellerCard(sellerId,listingId){
     const name=profile?.display_name||(profile?.account_type==='professionnel'?'Vendeur professionnel':'Vendeur particulier');
     const nameEl=document.getElementById(`dmSellerName-${listingId}`);if(nameEl)nameEl.textContent=name;
     const av=document.getElementById(`dmSellerAvatar-${listingId}`);if(av)av.textContent=dmInitials(profile?.display_name||name);
+    /* 02/11/2026 (Anthony) : logo du pro sur la fiche annonce au lieu des initiales */
+    if(av&&profile?.account_type==='professionnel'){sb.from('pro_showrooms').select('logo_path').eq('user_id',sellerId).maybeSingle().then(({data:sr})=>{const u=sr?.logo_path?showroomAssetUrl(sr.logo_path):'';if(!u)return;const img=new Image();img.alt='';img.onload=()=>{av.textContent='';av.classList.add('has-logo');av.appendChild(img);};img.src=u;}).catch(()=>{});}
     const rt=document.getElementById(`dmSellerRating-${listingId}`);
     if(rt)rt.innerHTML=list.length?`<span class="dm-stars">${starsText(avg)}</span><span>${list.length} avis</span>`:`<span class="dm-muted">Pas encore d’avis</span>`;
     if(document.getElementById(`dmSellerCount-${listingId}`)){

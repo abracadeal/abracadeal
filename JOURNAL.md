@@ -2020,3 +2020,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — WeeCars Angers : nom affiché et adresse courte
 - Nom affiché : « WeeCars Angers » (raison sociale SIGNATURE MOTORS GROUP (WEECARS) conservée dans `pro_verifications`).
 - Adresse : abracadeal.fr/weecars-angers. L'ancienne (signature-motors-group-weecars), envoyée dans le mail de bienvenue, fonctionne toujours : nouvelle colonne `pro_showrooms.old_slugs`, lue par `pro_slug_resolve` (`supabase/2026-11-02-pro-old-slugs.sql`, appliqué).
+
+### 02/11/2026 — Claude — Vitrine pro : logo, filtre catégories, logo sur les annonces
+- WeeCars Angers : logo refait (mot WeeCars sur fond bleu, carré, tiré de la bannière fournie) → `assets/pro-banners/weecars-angers-logo.jpg`, posé en `logo_path` (l'ancien logo lu sur le site était un « C » coupé).
+- `pro.html` : plus de filtre « Toutes les catégories » dans la vitrine d'un pro (un pro = un domaine) ; recherche et tri conservés.
+- Fiche annonce (`index-main.js` v=20261102-logo-vendeur, `detail-mobile-20261019.css` v=2) : la carte vendeur d'un pro affiche son logo au lieu des initiales (initiales si pas de logo).
+- `admin-set-showroom-banner-once` accepte `kind: logo`.

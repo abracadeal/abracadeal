@@ -127,3 +127,7 @@
   #detailModal .dm-action-ghost{background:#fff;color:#5f2279;border:1.5px solid #5f2279}
   #detailModal .dm-action-primary{background:linear-gradient(135deg,#c8326b,#e0479a);color:#fff;border:0;box-shadow:0 6px 16px rgba(200,50,107,.25)}
 }
+
+  /* 02/11/2026 : logo du pro dans la carte vendeur */
+  #detailModal .dm-seller-avatar.has-logo{background:#fff;border:1px solid #eadff0;overflow:hidden;padding:0}
+  #detailModal .dm-seller-avatar.has-logo img{width:100%;height:100%;object-fit:cover;display:block}

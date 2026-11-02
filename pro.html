@@ -111,8 +111,8 @@ function applyFilters(){
 }
 function renderAds(){
   const pane=document.getElementById('pane'),cats=[...new Set(listings.map(l=>l.category).filter(Boolean))];
-  pane.innerHTML=(listings.length>6?'<div class="tools"><input id="stockSearch" placeholder="Rechercher dans ce stock"><select id="stockCategory"><option value="">Toutes les catégories</option>'+cats.map(c=>'<option value="'+esc(c)+'">'+esc(catLabel(c))+'</option>').join('')+'</select><select id="stockSort"><option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
-  if(listings.length>6){['stockSearch','stockCategory','stockSort'].forEach(x=>document.getElementById(x).addEventListener(x==='stockSearch'?'input':'change',applyFilters));}
+  pane.innerHTML=(listings.length>6?'<div class="tools"><input id="stockSearch" placeholder="Rechercher dans ce stock"><select id="stockSort"><option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
+  if(listings.length>6){['stockSearch','stockSort'].forEach(x=>document.getElementById(x).addEventListener(x==='stockSearch'?'input':'change',applyFilters));}
   filtered=[...listings];shown=24;renderCards();
 }
 function bindGate(root){root?.querySelectorAll('[data-gate]').forEach(a=>a.onclick=e=>{e.preventDefault();location.href='/?compte='+a.dataset.gate+'&retour='+encodeURIComponent(location.pathname+location.search);});}
