@@ -9,7 +9,8 @@
     const crop=r>br?1-br/r:1-r/br; // part de la photo cachée par le rognage
     // 01/11/2026 (Anthony) : photo prise en hauteur (téléphone) → toujours entière sur fond flou, même si elle paraît plus petite ;
     // sinon (photo en largeur) dès que plus de 15 % serait coupé.
-    const on=r<0.95||crop>0.15;
+    // 02/11/2026 (Anthony : « qualité bof ») : photo en largeur → remplit la vignette ; fond flou seulement si plus de 45 % serait coupé.
+    const on=r<0.95||crop>0.45;
     box.classList.toggle('photo-fit',on);
     if(on){try{box.style.setProperty('--photo-bg','url("'+img.currentSrc.replace(/"/g,'%22')+'")');}catch(_){}}
   };

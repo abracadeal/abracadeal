@@ -31,9 +31,11 @@
     // Recadrage léger : ancrée en bas à droite (filigrane incrusté) ; recadrage fort (portrait…) : centrée.
     // 01/11/2026 (Anthony) : photo prise en hauteur (téléphone) ou très coupée → entière, sur fond flou (classe .photo-fit,
     // posée par card-photo-fit-20261101.js). Sinon la photo remplit la vignette comme avant.
-    const whole=ir<0.95||crop>0.15;
+    // 02/11/2026 (Anthony : vignettes « bof ») : une photo en largeur (voitures…) remplit la vignette, centrée, au lieu d'être
+    // réduite sur fond flou. Seules les photos prises en hauteur ou très panoramiques restent entières.
+    const whole=ir<0.95||crop>0.45;
     img.style.setProperty('object-fit',whole?'contain':'cover','important');
-    img.style.setProperty('object-position',whole?'center':(crop<=MAX_CROP?'right bottom':'center'),'important');
+    img.style.setProperty('object-position',whole?'center':(crop<=MAX_CROP?'right bottom':'center 55%'),'important');
     box.classList.remove('thumb-fit-contain');
     box.style.removeProperty('--thumb-bg');
   }

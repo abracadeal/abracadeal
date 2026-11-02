@@ -2035,3 +2035,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Accueil : équipements et pièces sortis de « Auto & Moto »
 - Remarque d'Anthony : un blouson/casque dans la rubrique Auto & Moto de l'accueil, « pas ouf ».
 - `HOME_GROUPS` (index-main.js v=20261102-equipements) : « Auto & Moto » ne montre plus que les véhicules ; les sous-catégories `equipement-*` (casques, blousons, pièces, jantes…) ont leur propre rubrique « Équipements & pièces auto / moto », après Immobilier. Catégories et recherche inchangées.
+
+### 02/11/2026 — Claude — Vignettes plus nettes et mieux remplies
+- Remarque d'Anthony : qualité des miniatures « bof ».
+- `generate-listing-thumbs` : miniatures 900 px / JPEG 82 (au lieu de 480 px / 70). Toutes les miniatures refaites (`private.listing_photo_thumbs` vidé) ; adresse `?o=3` côté site pour ne pas garder les anciennes en cache.
+- `thumb-fit-20261009.js` v5 et `card-photo-fit-20261101.js` v5 : une photo en largeur (voitures) remplit la vignette, centrée, au lieu d'être réduite sur fond flou (seuil 15 % → 45 % de photo coupée). Photos prises en hauteur : toujours entières sur fond flou (règle du 01/11 inchangée).
