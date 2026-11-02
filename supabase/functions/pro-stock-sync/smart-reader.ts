@@ -227,8 +227,11 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   const ogTitle=metaAll(headHtml,'og:title')[0]||'';
   const h1=clean(html.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i)?.[1]||'');
   const docTitle=clean(headHtml.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]||'');
-  let titre=(h1&&h1.length>=6&&h1.length<=160?h1:'')||ogTitle||docTitle;
+  /* 02/11/2026 (Crefimo : titre principal = « - 449 000 € * ») : un titre qui n'est qu'un prix n'est pas le titre du bien */
+  const priceOnly=(x:string)=>/^[\s\-–—:]*[\d\s.,\u00a0\u202f]+\s*(?:€|eur|euros?)?\s*\*?\s*$/i.test(x);
+  let titre=(h1&&h1.length>=6&&h1.length<=160&&!priceOnly(h1)?h1:'')||ogTitle||docTitle;
   /* 02/11/2026 (Dolce Immo « belle maison de plain ») : un trait d'union dans un mot (« plain-pied ») n'est pas un séparateur de nom de site */titre=titre.replace(/(?:\s*[|–—]\s*|\s+-\s+)(?:(?!\s-\s)[^|–—]){2,60}$/,(m)=>/€|\d/.test(m)?m:'').replace(/\s+/g,' ').trim();
+  titre=titre.replace(/^(?:ACHAT\s+VENTE|VENTE|LOCATION|ACHAT)\s*[-–:]\s*/i,'').replace(/\s*!?\s*Agence immobili[eè]re\s+[^!.|]{2,40}$/i,'').replace(/\s*!\s*$/,'').trim();/* 02/11/2026 (Adapt'immo : « ACHAT VENTE - Maison familiale à Asnières ! Agence immobilière CREFIMO ») */
   if(!titre)return null;
   const text=clean(html.replace(/<(nav|header|footer)\b[\s\S]{0,40000}?<\/\1>/gi,' ')).slice(0,40000);/* 01/11/2026 : bornée (un <header> mal fermé avalait la fiche) */
   const head=h1+' \n'+ogTitle+' \n'+docTitle;
@@ -259,7 +262,9 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   if(!(prix>0))prix=firstAmount(text,priceRe);
   if(!(prix>=50&&prix<100000000)&&!(base.hostname.replace(/^www\./,'')==='msmotors.fr'&&/^\/vehicules\/[^/]+\/?$/.test(base.pathname)))return null;
   const refM=base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
-  const reference=(refM?.[1]||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
+  /* 02/11/2026 (Crefimo : toutes les fiches « detail.htm?cle=… » avaient la référence « detail.htm » → fusionnées en une seule) */
+  const qRef=[...base.searchParams.entries()].find(([k,v])=>/^(?:cle|id|ref|reference|idann|id_annonce|idbien|annonce|bien)$/i.test(k)&&/\d{2,}/.test(v))?.[1];
+  const reference=(refM?.[1]||qRef||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
   let photos=pickPhotos(region,base,ogs,refM?.[1]||'');
   // 02/11/2026 (Anthony, Ford Alliance / Dealer K : « manque les photos principales ») : la page (600 Ko) range la galerie du véhicule
