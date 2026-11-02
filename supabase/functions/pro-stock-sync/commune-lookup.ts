@@ -36,6 +36,8 @@ function loadList(){
 let NEAR:{lat:number,lon:number}|null=null;
 const km=(a:{lat:number,lon:number},b:{lat:number,lon:number})=>{const r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r;const h=Math.sin(dl/2)**2+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)**2;return 12742*Math.asin(Math.min(1,Math.sqrt(h)));};
 export const nearKnown=()=>!!NEAR;
+// 02/11/2026 : nombre de communes portant ce nom (« Saint-Michel » : des dizaines ; « Lorient » : une seule).
+export async function homonyms(name:string){const l=await loadList();if(!l)return 0;return (l.byName.get(norm(name))||[]).length;}
 export const distanceKm=(c:Commune|null)=>NEAR&&c&&c.lat?Math.round(km(NEAR,c)):null;
 // Position de l'agence (ville + code postal de la fiche pro ou du site).
 // Agence sans adresse connue (site testé avant inscription) : point médian des annonces dont ville et code postal concordent
