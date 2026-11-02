@@ -8,7 +8,8 @@ import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 // 02/11/2026 (Anthony : « qualité bof ») : 480 px / qualité 70 → 900 px / qualité 82 (net sur écran de téléphone).
-const MAX_SIDE = 900;
+// 02/11/2026 (Anthony : « trop lent sur mobile ») : 900 px / 82 → 640 px / 78 (environ 2 fois plus léger, encore net sur téléphone).
+const MAX_SIDE = 640;
 
 // 01/11/2026 (Anthony : vignettes de travers) : les photos de téléphone sont souvent enregistrées couchées avec une
 // étiquette EXIF « Orientation » ; le navigateur les redresse, mais la miniature les gardait couchées (et rognées).
@@ -88,7 +89,7 @@ Deno.serve(async (req) => {
         if (img.width >= img.height) img.resize(MAX_SIDE, Image.RESIZE_AUTO);
         else img.resize(Image.RESIZE_AUTO, MAX_SIDE);
       }
-      const jpeg = await img.encodeJPEG(82);
+      const jpeg = await img.encodeJPEG(78);
       const { error: uErr } = await admin.storage.from("listing-thumbs").upload(path, jpeg, { upsert: true, contentType: "image/jpeg", cacheControl: "31536000" });
       if (uErr) throw uErr;
       await admin.rpc("thumbs_mark", { p_path: path, p_error: null });
