@@ -18,6 +18,24 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 (nuit) — Claude : sites à réparer, suite (pro-stock-sync v233–v242)
+- Corrections générales du lecteur automatique (`smart-reader.ts`, `index.ts`, `apimo-reader.ts`, `legacy-html.ts`) :
+  - petites agences avec un seul bien par type d'adresse (« /vente/1-brest/appartement/t1/379-… ») : second regroupement par rubrique ;
+  - fiches à numéro court (« /nos-annonces/ventes/lyon/appartement/13/ ») et à paramètre (« ?cle= », « ?post_detail= ») reconnues ; référence prise dans le paramètre (avant : toutes les fiches « detail.htm » fusionnées) ;
+  - page d'agence d'un réseau (« /agences/auxerre-centre/1 ») : numéro de page hors périmètre, fiches liées depuis les pages de l'agence gardées (lecture par étapes et test) ;
+  - page d'accueil vide avec l'en-tête « flux » → relue comme un navigateur (Kombishop) ;
+  - pages windows-1252 annoncées utf-8 (« Asni�res ») décodées correctement ;
+  - fiches Apimo d'un modèle inconnu : données structurées + page + étiquettes DPE dessinées ;
+  - photos : page lue quand la fiche n'a que 1 à 3 photos dans ses données structurées ; photos sans extension d'un dossier de stockage ; miniatures PrestaShop remplacées par la grande taille ;
+  - description : paragraphe sous un titre « Description » prioritaire sur le texte des liens de bas de page ; titre principal qui n'est qu'un prix ignoré ; « ACHAT VENTE - … Agence immobilière X » nettoyé ;
+  - DPE : flèches « flecheDPE/flecheGES » et étiquettes Adapt'immo (valeur → classe ; anciens seuils pour les DPE d'avant 2021, prix « indexés au 15/08/2015 ») ; « DPE non communiqué » n'est plus compté comme oubli ;
+  - véhicules : sur un site boutique (tentes, accessoires), seules les fiches avec kilométrage ou année sont gardées ;
+  - action de diagnostic `debug_links` (liens repérés sur une page) et traces du lecteur.
+- Réparés (« Réparé · à valider ») : Triumph Quimper 38/38, rmcars93 34/34, agence-bordeaux 19/20, Ventury 22/24, duo-immo 26/26, Christine Dumas 5/5, groupe 123 immo 30/30, monagenceautomobile 5/5, Barraine 20/20, Covapro 68/70, Cosmopolitan 6/6, Cimalpes 7/7, Martin Gestion 32/32, Régie Conseil 24/24, Crefimo 21/21, Martel 3/3.
+- Impossibles (pare-feu anti-robots AWS WAF / UUSEC) → « failed » avec explication : village-immobilier, villaret, absolutehabitat, monceau-montaigne.
+- Liste « à apprendre » (prospects illisibles / manuels, 30 sites retestés) : devenus lisibles et passés « ok » : Orpi Agence du Loup (14), Foncia La Rochelle Les Minimes (14) et Noirmoutier (12), Spliit (11), Vacherand Lille (89), Valloire Habitat (28). Les autres restent illisibles (sites Wix, garages moto à catalogue chargé en JavaScript, Starterre sans véhicule du garage…).
+- Restent : sites dont les annonces sont chargées en JavaScript (18avenue, arcade, l'autre immobilier, berge, i3v, nextlogis…), sites Wix/Squarespace, garages dont le stock vient de Leboncoin (garagevrauto, jlcars), BH Car (agence à préciser par Anthony), Kombishop (photos), Ford Alliance (photos manquantes sur 9 véhicules).
+
 ### 02/11/2026 — Claude : photos importées affichées depuis le site du pro (Anthony : « si on a un aperçu pour chaque site testé, c'est que ça fonctionne »)
 - `moderate-listing` v29 (`import-images.ts`) : seule la 1re photo d'une annonce importée est copiée chez nous (vignettes, aperçu WhatsApp/Facebook, Google Images) ; les suivantes restent des liens vers le site du pro. Life Cars : ~48 photos stockées au lieu de 1 471 (~8 Mo au lieu de ~240 Mo).
 - Modération inchangée sur le fond : chaque photo externe est téléchargée (contrôles d'adresse et 5 Mo max) puis envoyée à l'analyse en base64, jamais stockée (`safety.ts`). Empreinte anti-réutilisation seulement pour les photos stockées (`policy.ts`).
