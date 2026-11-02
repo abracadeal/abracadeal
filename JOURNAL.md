@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : complexeautomobile réparé, robot (véhicules, photos, diagnostic)
+- complexeautomobile (WordPress, thème Motors) : pour les véhicules, le robot ne lisait que les 6 000 premiers caractères de la page (le menu) → texte autour du titre lu aussi ; année « 2 010 » comprise. 17 véhicules, 16 complets.
+- Photos : image d'attente du thème Motors (`plchldr350.png`) et photos iPhone HEIC (non affichées par Chrome / Firefox) écartées.
+- Diagnostic : `debug_detail` renvoie `refusal` (pourquoi une page n'est pas retenue : pas de titre, prix, ni km ni année, ni surface ni pièces).
+- Restent illisibles (contenu chargé en JavaScript ou sites fermés aux robots) : 18avenue, i3v, arcade, l'autre immobilier, nextlogis, berry-sologne (Naos), atelierautoretro, ats-sud, autopiacars, garagevrauto, ultimatecar83, axeylia, etc.
+
 ### 02/11/2026 — Claude : sites renvoyés par Anthony (Ventury, rmcars93, monagenceautomobile, groupe 123 immo)
 - Ventury (« Perpignan la ville et non Paris ») : les données du site donnent le siège parisien. Nouveau : adresse du pro fixée pour tout un site (`pro_stock_overrides`, `ref = '*'`, `{ville, code_postal}`) → Perpignan 66000 (le site dit aussi « Le Soler »).
 - rmcars93 (« Noisy-le-Grand ») : « SEAT LEON » était lu comme la commune de Léon (40). Véhicules : plus de commune devinée dans le titre ni l'adresse de la fiche (Leon, Ibiza…), seulement dans la description, puis ville majoritaire du garage pour tous ; ville lointaine (> 150 km) d'un véhicule remplacée par celle du garage.
