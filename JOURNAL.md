@@ -2070,3 +2070,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Accueil : « Toutes les annonces » en bas
 - Demande d'Anthony : la dernière rubrique de l'accueil doit montrer toutes les annonces.
 - `index-main.js` v=20261102-toutes : « Toutes les autres annonces » → « Toutes les annonces », avec la totalité du catalogue (y compris les annonces déjà montrées dans Auto & Moto, Immobilier, Vélos/équipements).
+
+### 02/11/2026 — Claude — Fondateur : plus de formules ni d'annonce supplémentaire visibles
+- Demande d'Anthony (WeeCars Angers, Fondateur n°2) : un Fondateur ne doit pas voir d'« annonce supplémentaire » payante.
+- Vérifié côté serveur : `enforce_founder_50_listing_limit` laisse passer sans plafond un Fondateur en période gratuite (règle du 29/10) → jamais de message « achetez une annonce supplémentaire ».
+- `index-app.js` v=20261102-fondateur : encadré « Mon abonnement Pro » d'un Fondateur = badge « Fondateur », Offre Fondateur n°X, Annonces illimitées, Gratuit jusqu'au …, « Aucun prélèvement pendant vos 12 mois ». Plus de « Jusqu'à 50 annonces » ni de bouton « Changer de formule » (portail Stripe avec les tarifs). « Résilier » reste.
+- `admin-account-layout` v=9 : tuile « Formules » (page tarifs) → « Mon offre » (renvoie à l'encadré Fondateur) pour un Fondateur en période gratuite.
+- Les Boosts payants restent visibles (règle : boosts / visibilité payants pour tous).

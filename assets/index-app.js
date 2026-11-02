@@ -725,7 +725,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     try{
       const {data,error}=await sb
         .from('pro_subscriptions')
-        .select('plan_code,status,source,stripe_customer_id,stripe_subscription_id,current_period_start,current_period_end,cancel_at_period_end,free_until,billing_starts_at')
+        .select('plan_code,status,source,stripe_customer_id,stripe_subscription_id,current_period_start,current_period_end,cancel_at_period_end,free_until,billing_starts_at,founder_number')
         .eq('user_id',currentUser.id)
         .maybeSingle();
       if(error)throw error;
@@ -744,31 +744,38 @@ document.addEventListener('DOMContentLoaded',()=>{
       const hasSubscription=!!data.stripe_subscription_id;
       const cancelled=data.status==='canceled'||legacyScheduled;
       const accessEnd=data.free_until||data.current_period_end||null;
+      /* 02/11/2026 (Anthony) : un Fondateur en période gratuite n'a pas de plafond d'annonces —
+         on n'affiche ni « Jusqu'à 50 annonces » ni rien qui ressemble à une annonce supplémentaire payante. */
+      const founderFree=data.founder_number!=null&&data.status==='trialing'&&!cancelled;
       const billingStart=data.billing_starts_at||data.free_until||null;
 
       if(intro){
         intro.textContent=cancelled
           ?'Votre abonnement est résilié : aucun futur prélèvement ne sera effectué. Votre accès reste disponible jusqu’à la date indiquée.'
           :(data.status==='trialing'
-            ?'Votre période gratuite est active. Vous pouvez gérer votre carte ou résilier immédiatement avant le début de la facturation.'
+            ?(founderFree?'Vous êtes Fondateur Abracadeal : vos annonces sont illimitées et gratuites pendant 12 mois.':'Votre période gratuite est active. Vous pouvez gérer votre carte ou résilier immédiatement avant le début de la facturation.')
             :'Gérez votre moyen de paiement, vos factures et votre abonnement depuis Stripe.');
       }
       if(badge){
-        badge.textContent=cancelled?'Résilié':(statusLabels[data.status]||data.status||'—');
+        badge.textContent=cancelled?'Résilié':(founderFree?'Fondateur':(statusLabels[data.status]||data.status||'—'));
         badge.className='pro-billing-status '+billingStatusClass(data);
       }
       if(details){
-        details.innerHTML=[
+        details.innerHTML=(founderFree?[
+          ['Offre','Fondateur n°'+data.founder_number],
+          ['Annonces','Illimitées'],
+          ['Gratuit jusqu’au',fmtDate(accessEnd)]
+        ]:[
           ['Formule',planLabels[data.plan_code]||data.plan_code||'—'],
           ['Statut',cancelled?'Résilié':(statusLabels[data.status]||data.status||'—')],
           ['Début de facturation',fmtDate(billingStart)],
           [cancelled?'Accès jusqu’au':'Prochaine échéance / fin de période',fmtDate(accessEnd)]
-        ].map(([label,value])=>'<div class="pro-billing-detail"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>').join('');
+        ]).map(([label,value])=>'<div class="pro-billing-detail"><span>'+esc(label)+'</span><strong>'+esc(value)+'</strong></div>').join('');
       }
 
       const canManage=hasCustomer&&data.source==='stripe';
       actions?.classList.toggle('hidden',!canManage);
-      if(manageBtn)manageBtn.classList.toggle('hidden',!canManage);
+      if(manageBtn)manageBtn.classList.toggle('hidden',!canManage||founderFree); /* Fondateur : pas de changement de formule ni de tarifs affichés */
 
       const canCancel=canManage&&hasSubscription&&!cancelled;
       if(cancelBtn){
@@ -780,6 +787,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(note){
         if(cancelled){
           note.textContent='La résiliation est effective côté Stripe. Aucun renouvellement ni nouveau prélèvement ne sera effectué.';
+        }else if(founderFree){
+          note.textContent='Aucun prélèvement pendant vos 12 mois. Vous pouvez arrêter quand vous voulez.';
         }else if(data.status==='trialing'){
           note.textContent='Une résiliation pendant la période gratuite annule immédiatement l’abonnement Stripe et empêche tout démarrage de facturation.';
         }else if(canManage){

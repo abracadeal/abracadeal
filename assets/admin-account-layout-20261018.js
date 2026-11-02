@@ -79,7 +79,22 @@
     pgrid.appendChild(imp);
     pgrid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
     pgrid.appendChild(tile('Ma vitrine', 'star', function () { var c = $('#companyAccountSection'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
-    pgrid.appendChild(tile('Formules', 'finance', null, 'pro-fondateur.html'));
+    var formulesTile = tile('Formules', 'finance', null, 'pro-fondateur.html');
+    pgrid.appendChild(formulesTile);
+    /* 02/11/2026 (Anthony) : un Fondateur en période gratuite ne voit pas les formules payantes —
+       la tuile devient « Mon offre » et mène à son encadré Fondateur (annonces illimitées, gratuit jusqu'au…). */
+    try {
+      if (typeof sb !== 'undefined' && sb && typeof currentUser !== 'undefined' && currentUser) {
+        sb.from('pro_subscriptions').select('status,founder_number').eq('user_id', currentUser.id).maybeSingle().then(function (r) {
+          var d = r && r.data;
+          if (!d || d.founder_number == null || d.status !== 'trialing') return;
+          formulesTile.removeAttribute('href');
+          formulesTile.setAttribute('role', 'button');
+          formulesTile.querySelector('.aal-tile-label').textContent = 'Mon offre';
+          formulesTile.addEventListener('click', function (e) { e.preventDefault(); var b = $('#proBillingPanel'); if (b) b.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+        });
+      }
+    } catch (_) {}
     pro.appendChild(pgrid);
     dash.insertBefore(pro, dash.firstChild);
 
