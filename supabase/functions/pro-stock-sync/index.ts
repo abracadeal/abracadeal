@@ -1121,7 +1121,7 @@ async function readFeed(feed:any,persistCrawl=false){
         /* 02/11/2026 (Anthony, Cimalpes « soi-disant réparé ») : la page « à propos » d'une agence (/a-propos/agence-courchevel-1850/) ne liste
            pas ses biens ; son menu mène à toutes les stations du réseau. On part de la liste du site qui porte le nom de la ville de l'agence
            (/immobilier-courchevel/), et on reste dessous. */
-        let start=url.toString(),startHtml=text;{const m=url.pathname.toLowerCase().match(/(?:^|\/)(?:agence|agences|bureau)[-\/]([a-z][a-z-]{3,})\/?$/);
+        let start=url.toString(),startHtml=text;{const m=url.pathname.toLowerCase().match(/(?:^|\/)(?:agence|agences|bureau)[-\/]([a-z][a-z0-9-]{3,})\/?$/);
           if(m&&/a-propos|qui-sommes|nos-agences|agences?\//i.test(url.pathname)){const town=m[1].split('-').find(w=>w.length>=4&&!/^(immo|immobili|agence|centre|ville)/.test(w));
             if(town){const{lists,details}=smartLinks(text,url,origin.hostname.replace(/^www\./,''));const has=(u:string)=>{try{return new URL(u).pathname.toLowerCase().replace(/\/+$/,'').split('/').slice(-1)[0].split('-').includes(town);}catch{return false;}};
               const c=lists.filter(has).sort((a,b)=>a.length-b.length);const pick=(sector==='immobilier'?c.find(u=>/immobili|vente|achat|acheter|a-vendre/i.test(u)):null)||(sector==='immobilier'?c.find(u=>!/location/i.test(u)):c[0]);
