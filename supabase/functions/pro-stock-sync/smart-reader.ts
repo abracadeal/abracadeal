@@ -271,6 +271,10 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   const o:any={reference,url:pageUrl,titre:titre.slice(0,160),prix:String(Math.round(prix)),photos:photos.join('|')};
   const ogDesc=metaAll(headHtml,'og:description')[0]||metaAll(headHtml,'description')[0]||'';
   const long=longestText(html);o.description=(long.length>ogDesc.replace(/(\.{3}|…)$/,'').length?long:ogDesc).slice(0,6000);
+  // 02/11/2026 (Cosmopolitan : texte des liens du pied de page « Vente appartements Nice / Maison à vendre… » pris pour la description) :
+  // un paragraphe sous un titre « Description » appartient à la fiche ; s'il n'est pas déjà dans le texte retenu, c'est lui la description.
+  {const dm=html.match(/<h[2-5]\b[^>]*>\s*(?:<[^>]+>\s*)*(?:Description|Descriptif)(?:\s+du\s+bien)?\s*(?:<\/[^>]+>\s*)*<\/h[2-5]>\s*((?:<p\b[^>]*>[\s\S]{0,6000}?<\/p>\s*){1,6})/i);
+   if(dm){const d=clean(dm[1]);if(d.length>=40&&!o.description.includes(d.slice(0,40)))o.description=d.slice(0,6000);}}
   if(immo){
     const cityJ=jsonVal(region,['itemCity','addressLocality','city','ville','commune']);const cpJ=jsonVal(region,['itemZipcode','postalCode','zipcode','zipCode','codePostal','code_postal']);
     const zone=head+' \n'+nearTitle+' \n'+text.slice(0,4000);
@@ -362,6 +366,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const at=(v:number,t:number[])=>{const i=t.findIndex(x=>v<=x);return i<0?6:i;};
       if(vD||vG){const iE=vD?at(Number(vD),[70,110,180,250,330,420]):-1,iG=vG?at(Number(vG),[6,10,29,49,69,99]):-1;
         if(!o.ges&&iG>=0)o.ges='ABCDEFG'[iG];if(!o.dpe&&iE>=0)o.dpe='ABCDEFG'[Math.max(iE,iG)];}
+    }
+    // 02/11/2026 (Cosmopolitan, ancien modèle de site) : flèche « flecheDPE.png » / « flecheGES.png » portant la valeur du bien
+    // (<img src="…/flecheDPE.png"…><span…>197</span>) : classe déduite avec les seuils du DPE 2021 (la moins bonne des deux).
+    if(!o.dpe||!o.ges){
+      const vD=rawHtml.match(/fl[eè]che_?(?:DPE|energie|conso)[^"']*\.(?:png|gif|jpe?g)["'][^>]*>\s*<span[^>]*>\s*(\d{1,4})\s*</i)?.[1],vG=rawHtml.match(/fl[eè]che_?(?:GES|climat|co2)[^"']*\.(?:png|gif|jpe?g)["'][^>]*>\s*<span[^>]*>\s*(\d{1,4})\s*</i)?.[1];
+      const at=(v:number,t:number[])=>{const i=t.findIndex(x=>v<=x);return i<0?6:i;};
+      if(vD||vG){const iE=vD?at(Number(vD),[70,110,180,250,330,420]):-1,iG=vG?at(Number(vG),[6,10,29,49,69,99]):-1;
+        if(!o.ges&&iG>=0)o.ges='ABCDEFG'[iG];if(!o.dpe&&iE>=0)o.dpe='ABCDEFG'[Math.max(iE,iG)];if(vD&&!o.consommation_energie)o.consommation_energie=vD;}
     }
     // 01/11/2026 (contrôle automatique, Calliope) : échelle A→G avec un curseur portant la valeur du bien
     // (<div class="dpe_target">…123</div>) : classe déduite de la valeur avec les seuils du DPE 2021.
@@ -464,7 +476,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   }
   // 01/11/2026 (Anthony : « je peux pas vérifier chaque annonce ») : contrôle automatique. DPE non trouvé alors que la page en parle
   // (« classe énergie », « diagnostic de performance », kWh/m²…) → noté pour le test de site (« DPE présent mais pas lu »).
-  if(immo&&!o.dpe&&!/non soumis|dpe vierge|non requis|non concern/i.test(text)){const m=text.match(/(?:classe\s*(?:[ée]nergie|[ée]nerg[ée]tique|energy)|diagnostic\s*de\s*performance|performance\s*[ée]nerg[ée]tique|\bDPE\b|kWh\s*(?:ep|EP)?\s*\/\s*m)[^\n]{0,60}/i);if(m)o._dpe_hint=m[0].slice(0,90);}
+  if(immo&&!o.dpe&&!/non soumis|dpe vierge|non requis|non concern|non communiqu|non renseign|en cours/i.test(text)){const m=text.match(/(?:classe\s*(?:[ée]nergie|[ée]nerg[ée]tique|energy)|diagnostic\s*de\s*performance|performance\s*[ée]nerg[ée]tique|\bDPE\b|kWh\s*(?:ep|EP)?\s*\/\s*m)[^\n]{0,60}/i);if(m)o._dpe_hint=m[0].slice(0,90);}
   return o;
 }
 
