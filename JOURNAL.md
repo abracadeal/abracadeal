@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : annonce ouverte depuis un showroom (Anthony : « ça l'ouvre et nous emmène en même temps sur le site principal »)
+- `pro.html` : les annonces du showroom ouvrent `/?annonce=<id>&retour=<adresse du showroom>`.
+- `assets/index-main.js` (`20261102-retour`) : fiche ouverte avec `retour` → en la fermant (croix, retour, fond), on revient au showroom (retour arrière du navigateur si on vient de lui, sinon chargement de l'adresse). Pas de retour si une autre fenêtre s'ouvre à la place (connexion pour écrire, profil du vendeur). Adresse de retour limitée aux chemins du site.
+
 ### 02/11/2026 — Claude : bouton « Voir le showroom » de la fiche annonce (Anthony : « mieux que ça »)
 - `assets/index-main.js` + `index-overrides.css` (`20261102-showroombtn`) : bouton sur une seule ligne « Voir le showroom » avec icône boutique, sous-titre « 24 annonces en ligne » (nombre réel des annonces du pro), flèche ; dégradé violet → rose, plus de texte « Voir le showroom WeeCars Angers » coupé sur deux lignes. Ville du pro en majuscules (« LES PONTS-DE-CE ») affichée en minuscules accentuées comme saisie (`prettyCity`).
 
