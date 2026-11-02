@@ -3324,6 +3324,16 @@ window.carouselStep=function(el,dir){
   if(!el) return;
   let urls;
   try{urls=JSON.parse(decodeURIComponent(el.dataset.photoUrls||''));}catch(e){urls=[];}
+  /* 02/11/2026 : le catalogue n'envoie plus que la 1re photo (photo_count = total) ; au premier appui sur une flèche,
+     les autres photos de l'annonce sont chargées, puis le carrousel avance. */
+  if((!Array.isArray(urls)||urls.length<2)&&el.dataset.photoMore&&el.dataset.adId){
+    if(el.dataset.photoLoading)return;el.dataset.photoLoading='1';
+    const a=allAds.find(x=>x.id===el.dataset.adId)||detailAdsCache.get(el.dataset.adId);
+    if(!a){delete el.dataset.photoLoading;return;}
+    ensureFullListing(a).then(()=>{delete el.dataset.photoLoading;const full=visiblePhotosFor(a).map(p=>photoUrl(p.storage_path));
+      if(full.length<2){delete el.dataset.photoMore;return;}el.dataset.photoUrls=encodeURIComponent(JSON.stringify(full));delete el.dataset.photoMore;window.carouselStep(el,dir);});
+    return;
+  }
   if(!Array.isArray(urls)||urls.length<2) return;
   const idx=((parseInt(el.dataset.photoIdx||'0',10)+dir)%urls.length+urls.length)%urls.length;
   el.dataset.photoIdx=idx;
@@ -3350,7 +3360,7 @@ window.carouselStep=function(el,dir){
 (function(){
   let sx=null,sy=null,box=null;
   document.addEventListener('touchstart',e=>{
-    const b=e.target.closest('.ad-photo[data-photo-urls]');
+    const b=e.target.closest('.ad-photo[data-photo-urls],.ad-photo[data-photo-more]');
     if(!b){box=null;return;}
     box=b;sx=e.touches[0].clientX;sy=e.touches[0].clientY;
   },{passive:true});
@@ -3480,7 +3490,7 @@ function ensureFullListing(a){
       if(error||!data)throw error||new Error('introuvable');
       const apply=o=>{if(o&&o.id===a.id){o.description=data.description;if(Array.isArray(data.listing_photos)&&data.listing_photos.length)o.listing_photos=data.listing_photos;o.description_cut=false;}};
       apply(a);try{apply(detailAdsCache.get(a.id));(allAds||[]).forEach(o=>{if(o!==a&&o.id===a.id)apply(o);});}catch(_){}
-      return true;
+      return Promise.resolve(hydratePrivatePhotos([a])).catch(()=>{}).then(()=>true);
     })
     .catch(err=>{console.error('Texte complet de l’annonce indisponible',err);return false;})
     .finally(()=>fullListingLoads.delete(a.id));
@@ -4111,6 +4121,17 @@ function renderAds(){
   }
   if(!ads.length){grid.innerHTML=moderationMode?'<div class="empty-state" style="grid-column:1/-1"><b>Rien à modérer ✓</b>Les annonces propres sont publiées automatiquement. Seules les exceptions apparaissent ici.</div>':'<div class="empty-state" style="grid-column:1/-1"><b>Soyez le premier à publier ici</b>Abracadeal vient d’ouvrir : une annonce déposée maintenant sera en tête de liste.<br><button type="button" class="btn primary" style="margin-top:12px" onclick="document.querySelector(\'.publish-trigger\')?.click()">＋ Déposer une annonce gratuitement</button></div>';return}
   if(isHomeDefaultView()) ads=groupHomeAds(ads);
+  /* 02/11/2026 (Anthony : « quand il y aura plusieurs pros ça va être compliqué ») : on n'affiche plus toutes les annonces
+     d'un coup — les 60 premières, puis 48 de plus à chaque fois qu'on arrive en bas (bouton « Voir plus » chargé tout seul).
+     Modération et « Mes annonces » : tout, comme avant. La limite repart de 60 quand la recherche ou les filtres changent. */
+  let moreLeft=0;
+  if(!moderationMode&&!onlyMine){
+    const key=catalogueViewKey();
+    if(key!==catalogueRender.key){catalogueRender.key=key;catalogueRender.limit=CATALOGUE_FIRST;}
+    let cards=0,cut=ads.length;
+    for(let i=0;i<ads.length;i++){if(ads[i].__homeHeader)continue;cards++;if(cards>catalogueRender.limit){cut=i;break;}}
+    if(cut<ads.length){moreLeft=ads.slice(cut).filter(a=>!a.__homeHeader).length;ads=ads.slice(0,cut);}
+  }
   grid.innerHTML=ads.map(a=>{
     if(a.__homeHeader) return homeGroupHeaderHtml(a);
     const photos=visiblePhotosFor(a);
@@ -4119,8 +4140,9 @@ function renderAds(){
        les photos de la dernière annonce de la liste dès que la liste se redessinait). */
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
     const img=photoUrls.length?`<img class="ad-photo-img" ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
-    const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button>`:'';
-    const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:'';
+    const morePhotos=photoUrls.length===1&&Number(a.photo_count||0)>1&&listingPhotoLimit(a)>1;
+    const carouselHtml=(photoUrls.length>1||morePhotos)?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button>`:'';
+    const photoAttrs=photoUrls.length>1?` data-photo-urls="${esc(encodeURIComponent(JSON.stringify(photoUrls)))}" data-photo-idx="0"`:(morePhotos?` data-photo-more="1" data-ad-id="${esc(a.id)}" data-photo-idx="0"`:'');
     const canDelete=!!(currentUser&&(a.owner_id===currentUser.id||currentProfile?.is_admin));
     const canUseProBoost=!!(
       a.status==='active' &&
@@ -4167,9 +4189,23 @@ function renderAds(){
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
-  }).join('');
+  }).join('')+(moreLeft?`<div class="catalogue-more" style="grid-column:1/-1;display:flex;justify-content:center;padding:18px 0"><button type="button" class="mini-btn" id="catalogueMoreBtn" style="min-height:46px;padding:0 26px;font-size:15px">Voir plus d’annonces (${moreLeft})</button></div>`:'');
+  if(moreLeft)setupCatalogueMore();
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
   updateQuickFilterLabels();
+}
+const CATALOGUE_FIRST=60,CATALOGUE_STEP=48;
+const catalogueRender={key:'',limit:CATALOGUE_FIRST,io:null};
+function catalogueViewKey(){
+  const ids=['searchQuery','searchCity','filterCategory','filterSubcategory','filterPriceMin','filterPriceMax','filterCondition','filterSeller','filterVehicleMake','filterVehicleModel','filterYearMin','filterYearMax','filterMileageMax','filterFuel','filterImmoTransaction','filterImmoPropertyType','filterImmoSurfaceMin','filterImmoSurfaceMax','filterImmoRoomsMin','filterImmoBedroomsMin','filterImmoDpe','filterImmoFurnished','filterImmoOutdoor','filterImmoParking','filterImmoRadius','sortAds'];
+  return ids.map(id=>String(document.getElementById(id)?.value||'')).join('|')+'|'+activeCategory+'|'+activeVehicleSubcategory+'|'+(favoritesMode?1:0)+'|'+(immoNearbyFilterState?.active?1:0);
+}
+function setupCatalogueMore(){
+  const btn=document.getElementById('catalogueMoreBtn');if(!btn)return;
+  const more=()=>{if(btn.dataset.busy)return;btn.dataset.busy='1';catalogueRender.limit+=CATALOGUE_STEP;try{catalogueRender.io&&catalogueRender.io.disconnect();}catch(_){}renderAds();};
+  btn.addEventListener('click',more);
+  try{catalogueRender.io&&catalogueRender.io.disconnect();}catch(_){}
+  if('IntersectionObserver' in window){catalogueRender.io=new IntersectionObserver(es=>{if(es.some(e=>e.isIntersecting))more();},{rootMargin:'0px 0px 700px 0px'});catalogueRender.io.observe(btn);}
 }
 
 $('#promotionPayBtn')?.addEventListener('click',()=>toast('Tarification Abracadeal en cours de refonte.'));

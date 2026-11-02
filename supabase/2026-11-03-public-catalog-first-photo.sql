@@ -1,0 +1,4 @@
+-- 03/11/2026 (nuit du 02) — Claude — appliqué en direct (migration public_catalog_first_photo_only).
+-- public_catalog() : seulement la 1re photo par annonce + photo_count ; description_cut = vrai si texte coupé OU autres photos
+-- non envoyées → la fiche, le carrousel des cartes (1er appui sur une flèche / glissement) et la modification rechargent l'annonce.
+-- 156 annonces : 1,38 Mo (début de soirée) → 0,76 Mo → 0,35 Mo.
