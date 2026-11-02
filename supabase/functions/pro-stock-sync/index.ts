@@ -1117,7 +1117,16 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(/cdn\.shopify\.com|Shopify\.theme/i.test(text)){rows=await readShopify(origin,feed.sector||'vehicules');platform='Shopify';}
     else{platform=detectSitePlatform(text);
       // Lecteur « intelligent » : repère les fiches tout seul ; les données structurées (JSON-LD) restent prioritaires sur chaque fiche.
-      try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';rows=await readSmartSite(origin,text,sector,fetchSiteHtml,[url.toString()],sector==='immobilier'?ldImmo:ldVehicle,crawlMemory(feed,persistCrawl));
+      try{const sector=feed.sector==='immobilier'?'immobilier':'vehicules';
+        /* 02/11/2026 (Anthony, Cimalpes « soi-disant réparé ») : la page « à propos » d'une agence (/a-propos/agence-courchevel-1850/) ne liste
+           pas ses biens ; son menu mène à toutes les stations du réseau. On part de la liste du site qui porte le nom de la ville de l'agence
+           (/immobilier-courchevel/), et on reste dessous. */
+        let start=url.toString(),startHtml=text;{const m=url.pathname.toLowerCase().match(/(?:^|\/)(?:agence|agences|bureau)[-\/]([a-z][a-z-]{3,})\/?$/);
+          if(m&&/a-propos|qui-sommes|nos-agences|agences?\//i.test(url.pathname)){const town=m[1].split('-').find(w=>w.length>=4&&!/^(immo|immobili|agence|centre|ville)/.test(w));
+            if(town){const{lists,details}=smartLinks(text,url,origin.hostname.replace(/^www\./,''));const has=(u:string)=>{try{return new URL(u).pathname.toLowerCase().replace(/\/+$/,'').split('/').slice(-1)[0].split('-').includes(town);}catch{return false;}};
+              const c=lists.filter(has).sort((a,b)=>a.length-b.length);const pick=(sector==='immobilier'?c.find(u=>/immobili|vente|achat|acheter|a-vendre/i.test(u)):null)||(sector==='immobilier'?c.find(u=>!/location/i.test(u)):c[0]);
+              if(pick&&!details.some(has)){try{const r2=await fetchSiteHtml(new URL(pick));if(r2?.text){start=pick;startHtml=r2.text;smartHooks.trace(url.toString(),'agence → liste '+pick);}}catch{}}}}}
+        rows=await readSmartSite(origin,startHtml,sector,fetchSiteHtml,[start],sector==='immobilier'?ldImmo:ldVehicle,crawlMemory(feed,persistCrawl));
         if(!rows.length&&!(rows as any).partial)throw Error(`Aucune fiche ${sector==='immobilier'?'de bien':'véhicule'} lisible automatiquement sur ce site : il faudra une préparation manuelle (rien n'a été modifié).`);
         // 29/10/2026 : pages de rubrique (« Vous êtes acquéreur », « Nos biens loués », accueil…) prises pour des fiches :
         // quand la plupart des fiches ont la même forme d'adresse (ex. /details-…), on écarte celles qui ne l'ont pas.
