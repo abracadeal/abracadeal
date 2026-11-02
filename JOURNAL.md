@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — « Ne pas me compter » dans les statistiques
+- Anthony : les 40 clics Google d'octobre sont sûrement les siens. Search Console : « Actions manuelles » = aucun problème.
+- `index-main.js` (v=20261103-moi) + `pro.html` : ouvrir abracadeal.fr/?moi=1 sur un appareil → cet appareil n'est plus compté (visites, vues d'annonces, numéros, showrooms), même déconnecté ; ?moi=0 pour annuler (localStorage `abraca_not_counted`).
+
 ### 03/11/2026 (nuit) — Claude — Pages Google par grande ville (agglomérations)
 - Les gens cherchent « voiture occasion Angers », pas « Les Ponts-de-Cé » (commune de WeeCars Angers).
 - `scripts/build_share_pages.py` : `AGGLOS` (Angers, Paris + petite couronne 75/92/93/94, Cannes, Nice, Antibes, Marseille, Perpignan, Lyon, Bordeaux, Toulouse, Nantes, Lille) : la page de la grande ville (/annonces/<ville>/ et /annonces/<catégorie>/<ville>/) regroupe aussi les annonces des communes voisines (dès 3 annonces), avec un texte qui cite les communes. Les pages de chaque commune restent.

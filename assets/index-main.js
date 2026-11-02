@@ -4537,14 +4537,18 @@ function dmInitials(name){
 
 // 29/10/2026 : statistiques vendeur (vues, numéros affichés, clics Appeler) — une fois par visiteur, annonce et jour.
 function abracaVisitorId(){try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}return v;}catch(_){return'';}}
-function trackListingEvent(id,kind){try{if(!sb||!id)return;sb.rpc('track_listing_event',{p_listing_id:id,p_kind:kind,p_visitor:abracaVisitorId()||null}).then(()=>{},()=>{});}catch(_){}}
+/* 02/11/2026 (Anthony : « 40 c'est sûrement moi ») : abracadeal.fr/?moi=1 sur un appareil = cet appareil n'est plus compté
+   dans les statistiques (visites, vues, numéros), même déconnecté ; ?moi=0 pour annuler. */
+(function(){try{const v=new URLSearchParams(location.search).get('moi');if(v==='1'){localStorage.setItem('abraca_not_counted','1');setTimeout(()=>{try{toast('Cet appareil n’est plus compté dans les statistiques');}catch(_){}},1500);}else if(v==='0'){localStorage.removeItem('abraca_not_counted');}}catch(_){}})();
+function abracaNotCounted(){try{return localStorage.getItem('abraca_not_counted')==='1';}catch(_){return false;}}
+function trackListingEvent(id,kind){try{if(!sb||!id||abracaNotCounted())return;sb.rpc('track_listing_event',{p_listing_id:id,p_kind:kind,p_visitor:abracaVisitorId()||null}).then(()=>{},()=>{});}catch(_){}}
 window.trackListingEvent=trackListingEvent;
 /* 02/11/2026 (Claude) : compteur de visiteurs du site (1 fois par visiteur, page et jour), avec la provenance
    (Google, Facebook, direct…), pour le tableau de bord admin. Les administrateurs ne sont pas comptés. */
 function abracaVisitSource(){try{const q=new URLSearchParams(location.search);if(/mail/i.test(q.get('utm_medium')||q.get('utm_source')||''))return'email';
   const h=(document.referrer?new URL(document.referrer).hostname:'').replace(/^www\./,'');if(!h||/(^|\.)abracadeal\.(fr|com)$/.test(h))return'direct';
   if(/google\./.test(h))return'google';if(/bing\.|duckduckgo|qwant|ecosia|yahoo/.test(h))return'bing';if(/facebook|fb\.|messenger/.test(h))return'facebook';if(/instagram/.test(h))return'instagram';return'autre_site';}catch(_){return'direct';}}
-function trackSiteVisit(page){try{if(!sb||document.documentElement.classList.contains('abraca-embed'))return;const day=new Date().toISOString().slice(0,10),k='abraca_visit_'+page+'_'+day;
+function trackSiteVisit(page){try{if(!sb||abracaNotCounted()||document.documentElement.classList.contains('abraca-embed'))return;const day=new Date().toISOString().slice(0,10),k='abraca_visit_'+page+'_'+day;
   try{if(localStorage.getItem(k))return;localStorage.setItem(k,'1');}catch(_){}
   sb.rpc('track_site_visit',{p_visitor:abracaVisitorId()||null,p_page:page,p_source:abracaVisitSource(),p_mobile:matchMedia('(max-width:760px),(pointer:coarse)').matches}).then(()=>{},()=>{});}catch(_){}}
 window.trackSiteVisit=trackSiteVisit;

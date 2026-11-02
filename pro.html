@@ -242,10 +242,10 @@ async function init(){
 })();
 // 01/11/2026 (Anthony) : compteur de visites du showroom (même identifiant anonyme que les annonces ; 1 fois par jour)
   // 02/11/2026 (Claude) : visite du showroom comptée aussi dans les visiteurs du site (tableau de bord admin).
-  try{const day=new Date().toISOString().slice(0,10),k='abraca_visit_showroom_'+day;if(!localStorage.getItem(k)){localStorage.setItem(k,'1');let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}
+  try{const day=new Date().toISOString().slice(0,10),k='abraca_visit_showroom_'+day;if(localStorage.getItem('abraca_not_counted')!=='1'&&!localStorage.getItem(k)){localStorage.setItem(k,'1');let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}
     const h=(document.referrer?new URL(document.referrer).hostname:'').replace(/^www\./,'');const src=!h||/abracadeal\.(fr|com)$/.test(h)?'direct':/google\./.test(h)?'google':/bing\.|duckduckgo|qwant|ecosia|yahoo/.test(h)?'bing':/facebook|fb\./.test(h)?'facebook':/instagram/.test(h)?'instagram':'autre_site';
     sb.rpc('track_site_visit',{p_visitor:v,p_page:'showroom',p_source:src,p_mobile:matchMedia('(max-width:760px),(pointer:coarse)').matches}).then(()=>{},()=>{});}}catch(_){}
-  if(!(currentUser&&currentUser.id===id))try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
+  if(!(currentUser&&currentUser.id===id)&&localStorage.getItem('abraca_not_counted')!=='1')try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
   // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/lifecars) affichée dans la barre d'adresse.
   if(showroom?.slug&&/\/pro\.html$/i.test(location.pathname)){try{history.replaceState(null,'','/'+showroom.slug);}catch(_){}}
 }
