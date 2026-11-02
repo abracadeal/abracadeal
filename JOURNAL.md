@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : quels logiciels utilisent les prospects (stratégie « par logiciel »)
+- 10 138 prospects ont un site, 1 335 seulement avaient été vérifiés. Échantillon de 600 sites jamais vérifiés (300 agences, 300 garages), page d'accueil lue et logiciel reconnu à ses traces (table temporaire `tmp_platform_sample`).
+- Agences (300) : Orpi 22 %, La Boîte Immo 16 %, Apimo 5 %, Immo-facile 3 %, Twimmo 2 %, Netty 1 %, Adapt'immo — soit ~50 % sur des logiciels que le robot lit déjà ; WordPress 11 %, inconnu 22 %, site en erreur 10 %, vraie protection anti-robots 2 %.
+- Garages (300) : très éparpillé. Sites constructeur Stellantis (Peugeot…) 11 %, autres constructeurs 4 %, Leboncoin seulement 5 %, Motoconcess 4 %, Dealer K 4 %, Annonces-Automobile 3 % (comme Life Cars), Autobiz 2 %, Starterre 2 %, Spider VO 1 % ; WordPress 21 %, inconnu 28 % (beaucoup de garages d'entretien sans stock d'occasion).
+- Remarque : l'ancien contrôle de site classait « protection anti-robots » les pages avec un simple reCAPTCHA de formulaire de contact (397 agences marquées ainsi) : à revérifier.
+
 ### 02/11/2026 — Claude : complexeautomobile réparé, robot (véhicules, photos, diagnostic)
 - complexeautomobile (WordPress, thème Motors) : pour les véhicules, le robot ne lisait que les 6 000 premiers caractères de la page (le menu) → texte autour du titre lu aussi ; année « 2 010 » comprise. 17 véhicules, 16 complets.
 - Photos : image d'attente du thème Motors (`plchldr350.png`) et photos iPhone HEIC (non affichées par Chrome / Firefox) écartées.
