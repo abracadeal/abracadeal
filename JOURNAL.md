@@ -18,6 +18,16 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : vérification des villes sur tous les sites (Anthony : « bien vérifier les villes, très important ») (pro-stock-sync v227–v231)
+- Liste officielle des communes (geo.api.gouv.fr, ~35 000 communes avec codes postaux et position) téléchargée une fois par instance (`commune-lookup.ts`).
+- Chaque ville lue est vérifiée : nom exact d'une commune, ou début du nom (« Bordeaux Caudéran » → Bordeaux, « Paris 15e » → Paris). Immobilier : une ville qui n'est pas une commune est retirée puis cherchée dans le titre, la description, le lien, le code postal.
+- Communes homonymes : la plus proche de l'agence est retenue (« Saint-André » 66 au lieu de La Réunion pour Laroca ; « Saint-Gilles » 50 au lieu du Gard pour Lecoeur). Position de l'agence = adresse du pro, sinon adresse du site, sinon point médian des annonces (ou département le plus fréquent).
+- Ville repérée dans un texte : à 100 km au plus de l'agence (« Fleurie 69820 », « La Rochelle » ne sont plus pris pour des annonces de Caen). Ville du site à plus de 150 km : remplacée par la commune du titre (« Le Vigean », quartier d'Eysines, n'est plus la commune du Cantal) ou signalée.
+- Ville du titre prioritaire quand la ville lue n'apparaît ni dans le titre ni dans la description (elle venait d'une autre annonce de la page).
+- Code postal vérifié contre la commune et remplacé s'il ne lui appartient pas.
+- Chaque correction est écrite sur la fiche dans l'aperçu de la page de test (« Ville corrigée d'après le titre… », « Ville de l'agence : à vérifier », « Ville éloignée de l'agence : à vérifier »). Le test à blanc donne `quality.villes` (liste des villes, corrections, fiches sans ville).
+- Tests : Laroca 50/50 villes du 66 ; Dolce Immo 20/20 ; agence-bordeaux plus de « Saint-Michel 02830 » / « Le Vigean 15200 » / « Saint-Nicolas 62223 » ; rmcars93 inchangé (Noisy-le-Grand) ; Lecoeur : les fonds de commerce dont l'agence cache la commune restent « ville manquante » (rien d'inventé).
+
 ### 02/11/2026 — Claude : Laroca « 586 annonces », Dolce Immo photos / vendus (pro-stock-sync v223–v224)
 - Laroca (« c sûr ça ? ») : le site compte 202 biens (somme des compteurs par ville). Le chiffre « annonces sur le site » de la lecture par étapes comptait toutes les pages découvertes (pages de ville, fiches vendues…) → il compte maintenant les biens lus + ceux qui restent à lire.
 - Dolce Immo (Jalis, « 8 photos sur le site, 3 chez nous ») : la fiche montre 3 photos en tête puis la galerie complète plus bas (`section-gallery2`) ; le robot s'arrêtait à la première galerie. Toutes les galeries d'une fiche sont maintenant réunies (règle générale). 3 → 7,6 photos par bien.
