@@ -3675,7 +3675,8 @@ function resetSearchFilters({keepMode=false}={}){
   clearImmoNearbyFilter();
   activeCategory=''; activeVehicleSubcategory='';
   syncFilterCategory('','');
-  if($('#sortAds')) $('#sortAds').value='random';
+  if($('#sortAds')) $('#sortAds').value='newest';
+  sortChosenByUser=false;
   refreshFilterCount();
   if(!keepMode){onlyMine=false;moderationMode=false;favoritesMode=false;}
 }
@@ -3831,7 +3832,8 @@ function filteredAds(){
     if(q){const sc=aiOn?aiSearch.scores.get(a.id):undefined;if(textOk)relevance.set(a.id,2+(sc||0));else if(sc!==undefined&&sc>=aiSearch.cut){textOk=true;relevance.set(a.id,sc);}}
     return textOk&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
   });
-  const sort=$('#sortAds')?.value||'random';
+  const sortRaw=$('#sortAds')?.value||'newest';
+  const sort=(sortRaw==='newest'&&!sortChosenByUser)?'random':sortRaw;
   /* 02/11/2026 (Anthony : « il faut que les annonces tournent aléatoirement ») : tri par défaut « Au hasard » — un ordre
      différent à chaque visite (graine tirée au chargement de la page, stable pendant la visite pour que la liste ne
      saute pas à chaque redessin). Recherche, « Mes annonces », favoris, modération : plus récentes d'abord. */
@@ -3882,6 +3884,9 @@ function filteredAds(){
 }
 // Évite qu'un même vendeur occupe tout le haut de la liste (ex : import de stock d'un garage).
 // Au plus `maxRun` annonces d'affilée du même vendeur ; les suivantes sont décalées plus bas, jamais retirées.
+/* 02/11/2026 (Anthony : « enlève la touche au hasard ») : pas d'option visible ; l'ordre est au hasard tant que la personne
+   n'a pas choisi elle-même un tri (« Plus récentes » choisi exprès = vraiment les plus récentes). */
+var sortChosenByUser=false;
 const CATALOG_SHUFFLE_SEED=Math.floor(Math.random()*4294967296)>>>0;
 const catalogShuffleCache=new Map();
 function catalogShuffleKey(id){let v=catalogShuffleCache.get(id);if(v!==undefined)return v;v=(2166136261^CATALOG_SHUFFLE_SEED)>>>0;const q=String(id);for(let i=0;i<q.length;i++){v^=q.charCodeAt(i);v=Math.imul(v,16777619)>>>0;}v^=v>>>13;v=Math.imul(v,1274126177)>>>0;v^=v>>>16;catalogShuffleCache.set(id,v>>>0);return v>>>0;}
@@ -5798,7 +5803,7 @@ $('#filterImmoRadius')?.addEventListener('change',()=>{if(Number($('#filterImmoR
 $('#immoNearbyFilterBtn')?.addEventListener('click',activateImmoNearbyFilter);
 $('#searchCity')?.addEventListener('input',()=>{if(immoNearbyFilterState.active)clearImmoNearbyFilter();});
 $('#searchCity')?.addEventListener('change',()=>{if(Number($('#filterImmoRadius')?.value||0))refreshImmoRadiusState();refreshFilterCount();});
-$('#sortAds')?.addEventListener('change',renderAds);
+$('#sortAds')?.addEventListener('change',()=>{sortChosenByUser=true;renderAds();});
 $('#resetFilters')?.addEventListener('click',()=>{
   /* Fix 16/10/2026 : sur mobile, « Réinitialiser les filtres » ferme le panneau
      et ramène à l'accueil (même comportement que le logo). Desktop inchangé. */
