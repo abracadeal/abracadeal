@@ -3856,7 +3856,7 @@ function filteredAds(){
       const bp=(b.price===null||b.price==='')?-1:Number(b.price);
       return bp-ap;
     }
-    if(q&&aiOn&&sort==='newest'){const ra=relevance.get(a.id)||0,rb=relevance.get(b.id)||0;if(ra!==rb)return rb-ra;}
+    if(q&&aiOn&&(sort==='newest'||sort==='random')){const ra=relevance.get(a.id)||0,rb=relevance.get(b.id)||0;if(ra!==rb)return rb-ra;}
     return new Date(b.created_at||0)-new Date(a.created_at||0);
   });
   if(!moderationMode && !onlyMine && !favoritesMode && (sort==='newest'||sort==='random') && !q){
