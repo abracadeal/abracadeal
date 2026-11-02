@@ -513,10 +513,14 @@ async function readSpiderVo(start:URL,html:string){
  const entries=[...links.entries()].slice(0,300);const rows:any[]=[];let i=0;
  // Les sites Spider VO limitent les lectures rapprochées : 2 fiches à la fois, et une fiche incomplète est relue après une pause.
  const sleep=(ms:number)=>new Promise(r=>setTimeout(r,ms));
- await Promise.all(Array.from({length:2},async()=>{while(i<entries.length){const[vid,url]=entries[i++];let o:any=null;
+ /* 02/11/2026 (WeeCars Angers 127 véhicules : synchro coupée deux fois par la limite de durée) : 3 fiches à la fois, et arrêt propre après 80 s
+    (lecture partielle → aucune annonce retirée ; la suite est lue au passage suivant, les fiches déjà importées sont mises à jour) */
+ const t0sv=Date.now();let cut=false;
+ await Promise.all(Array.from({length:3},async()=>{while(i<entries.length){if(Date.now()-t0sv>80000){cut=true;break;}const[vid,url]=entries[i++];let o:any=null;
   for(let attempt=0;attempt<3;attempt++){try{if(attempt)await sleep(1200*attempt);const{text}=await fetchSiteHtml(new URL(url));o=parseSpiderVoDetail(text,url,vid);if(o.titre&&o.photos&&o.prix)break;}catch{o=o||null;}}
-  if(o?._svo_sold)continue;rows.push(o?.titre?o:{reference:vid,url});await sleep(250);}}));
+  if(o?._svo_sold)continue;rows.push(o?.titre?o:{reference:vid,url});await sleep(150);}}));
  if(agencyCity){(rows as any).siteLocation={city:agencyCity,postal:''};(rows as any).siteForce=true;}
+ if(cut)(rows as any).partial=true;
  (rows as any).total=total||links.size;if(total>links.size){(rows as any).partial=true;if(links.size>=300)(rows as any).capped=true;}
  return rows;
 }
