@@ -118,6 +118,40 @@ CITY_TEXT = {
     "marseille": "Marseille et ses arrondissements, ainsi que les communes voisines des Bouches-du-Rhône.",
 }
 MIN_LISTINGS_FOR_CITY = 3  # une ville hors liste ci-dessus obtient sa page dès 3 annonces en ligne
+# 03/11/2026 (Claude, demande d'Anthony « faire venir des acheteurs par Google ») : les gens cherchent « voiture occasion Angers »,
+# pas « Les Ponts-de-Cé ». Une page de grande ville regroupe aussi les annonces des communes autour (même agglomération),
+# en plus des pages de chaque commune. Communes par nom (comme city_key) ou codes postaux (préfixes).
+AGGLOS = {
+    "angers": ("Angers", ["Angers", "Les Ponts-de-Cé", "Avrillé", "Beaucouzé", "Bouchemaine", "Écouflant", "Montreuil-Juigné",
+                          "Mûrs-Erigné", "Saint-Barthélemy-d'Anjou", "Sainte-Gemmes-sur-Loire", "Trélazé", "Verrières-en-Anjou",
+                          "Loire-Authion", "Longuenée-en-Anjou", "Saint-Léger-de-Linières", "Cantenay-Épinard", "Briollay",
+                          "Savennières", "Saint-Lambert-la-Potherie", "Feneu", "Écuillé", "Soulaire-et-Bourg"], [],
+               "Angers et son agglomération (Les Ponts-de-Cé, Trélazé, Avrillé, Saint-Barthélemy-d’Anjou, Beaucouzé), en Maine-et-Loire."),
+    "paris": ("Paris", ["Paris"], ["75", "92", "93", "94"],
+              "Paris et la petite couronne (Hauts-de-Seine, Seine-Saint-Denis, Val-de-Marne)."),
+    "cannes": ("Cannes", ["Cannes", "Le Cannet", "Mandelieu-la-Napoule", "Mougins", "Théoule-sur-Mer", "Vallauris"], [],
+               CITY_TEXT["cannes"]),
+    "nice": ("Nice", ["Nice", "Saint-Laurent-du-Var", "Cagnes-sur-Mer", "Villefranche-sur-Mer", "La Trinité", "Saint-André-de-la-Roche",
+                      "Carros", "Vence", "Beaulieu-sur-Mer", "Èze"], [], CITY_TEXT["nice"]),
+    "antibes": ("Antibes", ["Antibes", "Juan-les-Pins", "Biot", "Valbonne", "Villeneuve-Loubet", "Vallauris"], [],
+                "Antibes Juan-les-Pins et ses environs (Biot, Valbonne Sophia-Antipolis, Villeneuve-Loubet), sur la Côte d’Azur."),
+    "marseille": ("Marseille", ["Marseille", "Aubagne", "Allauch", "Plan-de-Cuques", "Septèmes-les-Vallons", "Les Pennes-Mirabeau",
+                                "Marignane", "Cassis"], ["130"], CITY_TEXT["marseille"]),
+    "perpignan": ("Perpignan", ["Perpignan", "Cabestany", "Canet-en-Roussillon", "Saint-Estève", "Bompas", "Rivesaltes", "Toulouges",
+                                "Le Soler", "Pia", "Saint-Cyprien", "Saleilles", "Le Barcarès"], [],
+                  "Perpignan et ses environs (Cabestany, Canet-en-Roussillon, Saint-Estève, Rivesaltes), dans les Pyrénées-Orientales."),
+    "lyon": ("Lyon", ["Lyon", "Villeurbanne", "Vénissieux", "Caluire-et-Cuire", "Bron", "Vaulx-en-Velin", "Saint-Priest", "Oullins"], ["6900"],
+             "Lyon et la métropole de Lyon (Villeurbanne, Vénissieux, Caluire, Bron)."),
+    "bordeaux": ("Bordeaux", ["Bordeaux", "Mérignac", "Pessac", "Talence", "Bègles", "Le Bouscat", "Villenave-d'Ornon", "Cenon", "Lormont"], [],
+                 "Bordeaux et sa métropole (Mérignac, Pessac, Talence, Bègles)."),
+    "toulouse": ("Toulouse", ["Toulouse", "Blagnac", "Colomiers", "Tournefeuille", "Balma", "L'Union", "Ramonville-Saint-Agne", "Muret"], [],
+                 "Toulouse et son agglomération (Blagnac, Colomiers, Tournefeuille, Balma)."),
+    "nantes": ("Nantes", ["Nantes", "Saint-Herblain", "Rezé", "Saint-Sébastien-sur-Loire", "Orvault", "Vertou", "Carquefou"], [],
+               "Nantes et sa métropole (Saint-Herblain, Rezé, Orvault, Vertou)."),
+    "lille": ("Lille", ["Lille", "Roubaix", "Tourcoing", "Villeneuve-d'Ascq", "Marcq-en-Barœul", "Lambersart", "La Madeleine"], [],
+              "Lille et la métropole lilloise (Roubaix, Tourcoing, Villeneuve-d’Ascq)."),
+}
+MIN_LISTINGS_FOR_AGGLO = 3
 RESERVED_SLUGS = {h[0] for h in HUB_CATEGORIES}
 
 
@@ -746,6 +780,16 @@ def build_hubs(items):
     cat_info = {h[0]: h for h in HUB_CATEGORIES}
     by_cat = {h[0]: [it for it in items if h[0] in it["cats"]] for h in HUB_CATEGORIES}
     by_city = {k: [it for it in items if it["city_key"] == k] for k in cities}
+    # Agglomérations : la page de la grande ville reprend aussi les annonces des communes voisines.
+    agglo_text = {}
+    for k, (aname, members, prefixes, atext) in AGGLOS.items():
+        keys = {city_key(m) for m in members}
+        its = [it for it in items if it["city_key"] in keys or
+               any(str(it["listing"].get("postal_code") or "").startswith(px) for px in prefixes)]
+        if len(its) >= MIN_LISTINGS_FOR_AGGLO or k in CORE_CITIES:
+            cities[k] = aname
+            by_city[k] = its
+            agglo_text[k] = atext
     cats = [h[0] for h in HUB_CATEGORIES if h[0] in CORE_CATEGORIES or by_cat[h[0]]]
 
     pages = {}
@@ -778,7 +822,7 @@ def build_hubs(items):
         its = by_city[k]
         if not its and k not in CORE_CITIES:
             continue
-        ctext = CITY_TEXT.get(k, f"{cname} et ses environs.")
+        ctext = agglo_text.get(k) or CITY_TEXT.get(k, f"{cname} et ses environs.")
         cat_links = [(f"{cat_info[c][1]} à {cname}", hub_url(c, k)) for c in cats
                      if (c in CORE_CATEGORIES and k in CORE_CITIES) or any(c in it["cats"] for it in its)]
         pages[k] = (hub_page(f"Petites annonces à {cname} : auto, moto, immobilier | Abracadeal",
