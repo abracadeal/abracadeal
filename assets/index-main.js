@@ -3698,10 +3698,32 @@ function keywordMatches(hay,tokens){
     return h.words.some(w=>w.startsWith(st)||(Math.abs(w.length-st.length)<=tol&&kwDistance(st,w,tol)<=tol));
   });
 }
+/* 02/11/2026 (Anthony : « vraie recherche IA, gratuite ») : recherche par le sens (fonction ai-search, modèle gte-small
+   inclus dans Supabase). Les mots-clés restent prioritaires ; l'IA ajoute les annonces proches par le sens, classées
+   par pertinence. Les filtres (prix, km, ville…) restent exacts. Si l'IA ne répond pas, la recherche par mots-clés suffit. */
+const aiSearch={q:'',scores:new Map(),cut:1,asked:'',seq:0};
+function requestAiSearch(q){
+  if(!q||q.length<2||aiSearch.asked===q||IMPORT_PREVIEW)return;
+  aiSearch.asked=q;const seq=++aiSearch.seq;
+  const ctl=typeof AbortController!=='undefined'?new AbortController():null;const timer=setTimeout(()=>{try{ctl&&ctl.abort();}catch(_){}} ,5000);
+  fetch(SUPABASE_URL+'/functions/v1/ai-search',{method:'POST',headers:{apikey:SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({q,limit:80}),signal:ctl?.signal})
+    .then(r=>r.ok?r.json():null).then(d=>{
+      if(seq!==aiSearch.seq||!d||!Array.isArray(d.results))return;
+      const rows=d.results.filter(r=>r&&r.id&&typeof r.score==='number');
+      const best=rows.length?rows[0].score:0;
+      aiSearch.q=q;aiSearch.scores=new Map(rows.map(r=>[r.id,r.score]));
+      aiSearch.cut=Math.max(AI_SEARCH_MIN_SCORE,best-AI_SEARCH_SPREAD);
+      if(($('#searchQuery')?.value||'').trim().toLowerCase()===q){try{renderAds();}catch(e){console.error(e);}}
+    }).catch(()=>{}).finally(()=>clearTimeout(timer));
+}
+const AI_SEARCH_MIN_SCORE=0.82, AI_SEARCH_SPREAD=0.04;
 function filteredAds(){
   const q=$('#searchQuery').value.trim().toLowerCase();
   const qTokens=kwTokens(q);
   const reference=listingReferenceQuery(q);
+  if(q&&!reference)requestAiSearch(q);
+  const aiOn=!!q&&!reference&&aiSearch.q===q;
+  const relevance=new Map();
   const city=$('#searchCity').value.trim().toLowerCase();
   const minPrice=Number($('#filterPriceMin')?.value||0);
   const maxPriceRaw=$('#filterPriceMax')?.value||'';
@@ -3772,7 +3794,9 @@ function filteredAds(){
     const immoRadiusOk=!immoOnly||!immoRadiusActive||(immoRadiusState.ready&&Number(immoRadiusState.distances.get(a.id))<=immoRadius);
     const immoNearbyOk=!immoOnly||!immoNearbyFilterState.active||(immoNearbyFilterState.ready&&Number(immoNearbyFilterState.distances.get(a.id))<=immoNearbyFilterState.radius);
     const cityOk=(!city)||(immoOnly&&immoRadiusActive?immoRadiusOk:locationHay.includes(city));
-    return (!q||keywordMatches(hay,qTokens))&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
+    let textOk=!q||keywordMatches(hay,qTokens);
+    if(q){const sc=aiOn?aiSearch.scores.get(a.id):undefined;if(textOk)relevance.set(a.id,2+(sc||0));else if(sc!==undefined&&sc>=aiSearch.cut){textOk=true;relevance.set(a.id,sc);}}
+    return textOk&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
   });
   const sort=$('#sortAds')?.value||'newest';
   ads.sort((a,b)=>{
@@ -3794,6 +3818,7 @@ function filteredAds(){
       const bp=(b.price===null||b.price==='')?-1:Number(b.price);
       return bp-ap;
     }
+    if(q&&aiOn&&sort==='newest'){const ra=relevance.get(a.id)||0,rb=relevance.get(b.id)||0;if(ra!==rb)return rb-ra;}
     return new Date(b.created_at||0)-new Date(a.created_at||0);
   });
   if(!moderationMode && !onlyMine && !favoritesMode && sort==='newest' && !q){
