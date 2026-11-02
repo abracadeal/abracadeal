@@ -41,5 +41,13 @@ jobs:
           git config user.name "abracadeal-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -q -m "Pages SEO : mise a jour automatique"
-          for i in 1 2 3; do git pull --rebase -q origin main && git push -q origin main && exit 0; sleep 5; done
+          CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          for i in 1 2 3; do
+            if git pull --rebase -q origin main && git push -q origin main; then
+              # Moteurs IndexNow (Bing…) prévenus des pages nouvelles ou modifiées, 1 min après la mise en ligne
+              sleep 60; echo "$CHANGED" | python scripts/indexnow.py || true
+              exit 0
+            fi
+            sleep 5
+          done
           exit 1
