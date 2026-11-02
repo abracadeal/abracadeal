@@ -3103,7 +3103,7 @@ function cleanDescription(a){
     .replace(/^\[ABRACA_SOURCE:[^\]]+\]\s*/gm,'')
     .trim();
 }
-function vehicleSubLabel(v){ return v===EQUIPMENT_ALL?'Vélos, équipements & pièces':subcategoryLabel('vehicules',v); }
+function vehicleSubLabel(v){ return v===EQUIPMENT_ALL?'Équipements & pièces':subcategoryLabel('vehicules',v); }
 /* 02/11/2026 (Anthony) : la catégorie Véhicules ne montre que des véhicules.
    Équipements et pièces restent rangés en base sous « vehicules » mais forment leur propre rubrique
    (sous-catégorie virtuelle « equipements » = toutes les sous-catégories d'équipement + pièces). */
@@ -3556,7 +3556,7 @@ function updateFilterSubcategories(keepValue=''){
   const opt=([v,l])=>`<option value="${v}">${esc(l)}</option>`;
   if(category==='vehicules'){
     const veh=items.filter(([v])=>!NON_VEHICLE_TYPES.includes(v)),eq=items.filter(([v])=>NON_VEHICLE_TYPES.includes(v));
-    select.innerHTML='<option value="">Tous les véhicules</option><optgroup label="Véhicules">'+veh.map(opt).join('')+'</optgroup><optgroup label="Vélos, équipements & pièces">'+opt([EQUIPMENT_ALL,'Tout (vélos, équipements & pièces)'])+eq.map(opt).join('')+'</optgroup>';
+    select.innerHTML='<option value="">Tous les véhicules</option><optgroup label="Véhicules">'+veh.map(opt).join('')+'</optgroup><optgroup label="Équipements & pièces">'+opt([EQUIPMENT_ALL,'Tous les équipements & pièces'])+eq.map(opt).join('')+'</optgroup>';
   }else select.innerHTML='<option value="">Toutes</option>'+items.map(opt).join('');
   select.disabled=!category||!items.length;
   if(keepValue && (items.some(([v])=>v===keepValue)||(category==='vehicules'&&keepValue===EQUIPMENT_ALL))) select.value=keepValue;
@@ -3928,7 +3928,7 @@ const HOME_GROUPS=[
   {key:'vehicules',title:'Auto & Moto',icon:'<path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><circle cx="7" cy="17" r="2"/><path d="M9 17h6"/><circle cx="17" cy="17" r="2"/>',test:a=>a.category==='vehicules'&&!isVehicleEquipmentListing(a),limit:8},
   {key:'immobilier',title:'Immobilier',icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.2V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.2"/>',test:a=>a.category==='immobilier',limit:8},
   /* 02/11/2026 (Anthony) : casques, blousons, pièces… ne se mélangent plus aux voitures dans « Auto & Moto » */
-  {key:'vehicules',sub:EQUIPMENT_ALL,title:'Vélos, équipements & pièces',icon:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',test:a=>a.category==='vehicules',limit:8},
+  {key:'vehicules',sub:EQUIPMENT_ALL,title:'Équipements & pièces',icon:'<path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>',test:a=>a.category==='vehicules',limit:8},
   {key:'',all:true,title:'Toutes les annonces',icon:'<path d="M6 7h12l-1 13a1 1 0 0 1-1 1H8a1 1 0 0 1-1-1z"/><path d="M9 7V5a3 3 0 0 1 6 0v2"/>',test:()=>true,limit:Infinity}
 ];
 function isHomeDefaultView(){

@@ -78,7 +78,7 @@ window.addEventListener('load', abracadealForceTopOnReload);
 
 <link rel="stylesheet" href="assets/banner-live-20260920.css?v=20261005-1">
 
-<link rel="stylesheet" href="assets/index-overrides.css?v=20261027-dash-btn2">
+<link rel="stylesheet" href="assets/index-overrides.css?v=20261102-vehmenu">
 
 
 
@@ -210,26 +210,28 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
       </div>
       <div class="desktop-nav-item">
         <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="">Véhicules</a>
-        <div class="desktop-submenu" aria-label="Sous-catégories Véhicules">
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="">Tous les véhicules</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="voitures">Voitures</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="motos">Motos / Scooters</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="utilitaires">Utilitaires</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="caravaning">Caravaning</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="nautisme">Nautisme</a>
-        </div>
-      </div>
-      <div class="desktop-nav-item">
-        <a class="desktop-category-link category-link" href="#resultats" data-category="vehicules" data-sub="equipements">Vélos &amp; équipements</a>
-        <div class="desktop-submenu" aria-label="Sous-catégories Vélos, équipements et pièces">
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipements">Tout voir</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="velos">Vélos</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-auto">Équipement auto</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-moto">Équipement moto</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-caravaning">Équipement caravaning</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-nautisme">Équipement nautisme</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-velo">Équipement vélo</a>
-          <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="pieces-detachees">Pièces détachées</a>
+        <!-- 02/11/2026 (Anthony) : un seul menu Véhicules ; « Véhicules » n'affiche que des véhicules, les équipements et pièces ont leur colonne dans le même menu -->
+        <div class="desktop-submenu desktop-submenu-split" aria-label="Sous-catégories Véhicules, équipements et pièces">
+          <div class="submenu-col">
+            <span class="submenu-heading">Véhicules</span>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="">Tous les véhicules</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="voitures">Voitures</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="motos">Motos / Scooters</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="utilitaires">Utilitaires</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="caravaning">Caravaning</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="nautisme">Nautisme</a>
+          </div>
+          <div class="submenu-col">
+            <span class="submenu-heading">Équipements &amp; pièces</span>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipements">Tous les équipements &amp; pièces</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-auto">Équipement auto</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-moto">Équipement moto</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-caravaning">Équipement caravaning</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-nautisme">Équipement nautisme</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="velos">Vélos</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="equipement-velo">Équipement vélo</a>
+            <a class="desktop-subcategory-link category-link" href="#resultats" data-category="vehicules" data-sub="pieces-detachees">Pièces détachées</a>
+          </div>
         </div>
       </div>
       <div class="desktop-nav-item">
@@ -1809,7 +1811,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js"></script>
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
 <script src="assets/card-photo-fit-20261101.js?v=5" defer></script>
-<script src="assets/index-main.js?v=20261102-photos30"></script>
+<script src="assets/index-main.js?v=20261102-vehmenu"></script>
 <script src="assets/social-login-20261018.js?v=8"></script>
 <script src="assets/description-helper-20261013.js?v=3" defer></script>
 <script src="assets/publish-more-details-20261026.js?v=3" defer></script>

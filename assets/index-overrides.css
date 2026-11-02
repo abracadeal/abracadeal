@@ -1912,3 +1912,12 @@ header .header-vacances-btn,header .abraca-vacances-top{display:none!important}
     display:inline-flex!important;align-items:center!important;justify-content:center!important;flex:1 1 0!important;min-width:0!important;
   }
 }
+
+/* 02/11/2026 (Anthony) : menu Véhicules en deux colonnes (Véhicules | Équipements & pièces) */
+@media(min-width:761px){
+  header .desktop-submenu.desktop-submenu-split{flex-direction:row!important;gap:6px!important;max-width:min(520px,calc(100vw - 24px))!important;left:0!important;transform:translate(0,8px)!important}
+  header .desktop-nav-item:hover>.desktop-submenu.desktop-submenu-split,header .desktop-nav-item:focus-within>.desktop-submenu.desktop-submenu-split,header .desktop-nav-item.menu-open>.desktop-submenu.desktop-submenu-split{transform:translate(0,0)!important}
+  header .desktop-submenu-split .submenu-col{display:flex;flex-direction:column;gap:2px;min-width:200px}
+  header .desktop-submenu-split .submenu-col+.submenu-col{border-left:1px solid rgba(255,255,255,.09);padding-left:6px}
+  header .desktop-submenu-split .submenu-heading{padding:6px 10px 4px;font-size:10px;font-weight:850;letter-spacing:.06em;text-transform:uppercase;color:#e8bd54}
+}

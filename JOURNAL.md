@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : un seul menu Véhicules (Anthony : « j'aime pas Vélo & équipement, quand on clique sur Véhicules ça doit mettre les véhicules pas les équipements »)
+- `index.html` : l'entrée séparée « Vélos & équipements » de la barre du haut est supprimée ; le menu Véhicules a deux colonnes : « Véhicules » (Tous les véhicules, Voitures, Motos / Scooters, Utilitaires, Caravaning, Nautisme) et « Équipements & pièces » (Tous les équipements & pièces, équipement auto / moto / caravaning / nautisme, Vélos, équipement vélo, pièces détachées). Style `desktop-submenu-split` dans `index-overrides.css` (`20261102-vehmenu`).
+- Un clic sur « Véhicules » (ou « Tous les véhicules ») n'affiche que des véhicules : règle `vehicleSubMatches` déjà en place, inchangée. Libellés « Vélos, équipements & pièces » → « Équipements & pièces » (filtre, rubrique de l'accueil).
+
 ### 02/11/2026 — Claude : mise en page des cartes de modération (Anthony : « refais une bonne mise en page »)
 - `assets/moderation.js` / `moderation.css` (version `20261102-layout`) : « Voir l'annonce complète », Valider / Refuser / Supprimer regroupés dans un pied de carte (`.card-foot`) collé en bas → boutons alignés d'une carte à l'autre, sur toute la largeur. « Signaler à Pharos » n'est plus un gros bouton qui dépasse de la carte : lien discret en bas à droite (action grave et rare, confirmation inchangée). Vérifié en capture bureau et mobile.
 
