@@ -3889,8 +3889,10 @@ function renderRecentViewed(){
 function renderRecentSearchSuggestions(){
   const sec=$('#recentSearchSection'),grid=$('#recentSearchGrid');if(!sec||!grid)return;
   const searches=readLocalList(RECENT_SEARCH_KEY).slice(0,5);if(!searches.length){sec.classList.add('hidden');grid.innerHTML='';return}
-  const score=a=>{let n=0;const hay=`${a.title||''} ${cleanDescription(a)} ${a.city||''} ${a.postal_code||''} ${a.vehicle_make||''} ${a.vehicle_model||''} ${vehicleMetaSearchText(a)} ${realEstateMetaSearchText(a)}`.toLowerCase();for(const r of searches){if(r.q&&hay.includes(String(r.q).toLowerCase()))n+=4;if(r.city&&hay.includes(String(r.city).toLowerCase()))n+=3;if(r.cat&&a.category===r.cat)n+=2;}return n};
-  const items=(allAds||[]).filter(a=>a.status==='active').map(a=>({a,s:score(a)})).filter(x=>x.s>0).sort((x,y)=>y.s-x.s).slice(0,8).map(x=>x.a);
+  const score=a=>{let n=0;const hay=`${a.title||''} ${cleanDescription(a)} ${a.city||''} ${a.postal_code||''} ${a.vehicle_make||''} ${a.vehicle_model||''} ${vehicleMetaSearchText(a)} ${realEstateMetaSearchText(a)}`.toLowerCase();for(const r of searches){if(r.q&&keywordMatches(hay,kwTokens(String(r.q))))n+=4;if(r.city&&hay.includes(String(r.city).toLowerCase()))n+=3;if(r.cat&&a.category===r.cat)n+=2;}return n};
+  /* 02/11/2026 (Anthony : « limite en double ») : les annonces déjà dans « Récemment consultées » ne sont pas reproposées ici. */
+  const liveIds=new Set((allAds||[]).map(a=>a.id));const seen=new Set(readLocalList(RECENT_VIEWED_KEY).filter(id=>liveIds.has(id)).slice(0,8));
+  const items=(allAds||[]).filter(a=>a.status==='active'&&!seen.has(a.id)).map(a=>({a,s:score(a)})).filter(x=>x.s>0).sort((x,y)=>y.s-x.s).slice(0,8).map(x=>x.a);
   if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}grid.innerHTML=items.map(a=>personalizedCard(a)).join('');sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 function haversineKm(a,b){const R=6371,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),la1=toRad(a.lat),la2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
