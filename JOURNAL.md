@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Tri « Au hasard » retiré du menu (ordre aléatoire gardé)
+- Demande d'Anthony : « enlève la touche au hasard ».
+- `index.html` : option retirée (menu : Plus récentes, Prix croissant, Prix décroissant). `index-main.js` (v=20261102-sans-bouton-hasard) : l'ordre reste aléatoire tant que la personne n'a pas choisi un tri elle-même (`sortChosenByUser`, remis à zéro avec les filtres) ; choisir « Plus récentes » donne vraiment les plus récentes. Testé : 3 visites → 3 ordres différents.
+
 ### 02/11/2026 — Claude — Vignettes nettes (petit côté 720 px) en ligne
 - Remarque d'Anthony sur les vignettes 640 px : « elles font dégrader les photos ». La vignette rogne la photo en carré : c'est le petit côté qui compte (640 px de large = 480 px de haut, agrandi à l'écran).
 - `generate-listing-thumbs` v8 : petit côté 720 px (grand côté 1200 max), JPEG 80 ; les 156 refaites (moyenne 133 Ko) ; cron temporaire `abracadeal-thumbs-720-tmp` supprimé ; `thumbUrl` `?o=5` (index-main.js v=20261102-vignettes-720).
