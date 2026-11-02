@@ -3273,9 +3273,16 @@ document.addEventListener('click',e=>{const pop=document.getElementById('globalS
 window.addEventListener('resize',closeShareMenu);window.addEventListener('scroll',closeShareMenu,true);
 
 const favoriteCountCache=new Map();
+/* 02/11/2026 (Anthony : « trop lent sur mobile ») : 600+ appels get_listing_favorite_count par visite (un par vignette,
+   répété à chaque redessin). Le catalogue fournit maintenant favorite_count (primeFavoriteCounts) et un même compteur
+   n'est jamais demandé deux fois en même temps. */
+const favoriteCountLoads=new Map();
+function primeFavoriteCounts(list){try{(list||[]).forEach(a=>{if(a&&a.id&&typeof a.favorite_count==='number')favoriteCountCache.set(a.id,a.favorite_count);});}catch(_){}}
 async function getListingFavoriteCount(id,force=false){
   if(!force&&favoriteCountCache.has(id))return favoriteCountCache.get(id);
-  try{const {data,error}=await sb.rpc('get_listing_favorite_count',{p_listing_id:id});if(error)throw error;const n=Number(data||0);favoriteCountCache.set(id,n);return n}catch(e){console.warn('Compteur de favoris indisponible',e);return 0}
+  if(!force&&favoriteCountLoads.has(id))return favoriteCountLoads.get(id);
+  const p=(async()=>{try{const {data,error}=await sb.rpc('get_listing_favorite_count',{p_listing_id:id});if(error)throw error;const n=Number(data||0);favoriteCountCache.set(id,n);return n}catch(e){console.warn('Compteur de favoris indisponible',e);return 0}finally{favoriteCountLoads.delete(id);}})();
+  favoriteCountLoads.set(id,p);return p;
 }
 function paintFavoriteCount(id,n){
   document.querySelectorAll('[data-fav-count-id]').forEach(el=>{if(el.dataset.favCountId===id)el.textContent=n>0?String(n):''});
@@ -3461,7 +3468,7 @@ function fetchPublicCatalog(){
   const rpc=()=>Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
   const pre=window.__abracaCatalogPrefetch;window.__abracaCatalogPrefetch=null;
   const p=pre?Promise.resolve(pre).then(d=>Array.isArray(d)?{data:d,error:null}:rpc()).catch(()=>rpc()):rpc();
-  return p.then(r=>{if(r&&!r.error&&Array.isArray(r.data)&&r.data.length&&r.data[0]&&'description_cut' in r.data[0])writeCatalogCache(r.data);return r;});
+  return p.then(r=>{if(r&&!r.error&&Array.isArray(r.data)){primeFavoriteCounts(r.data);if(r.data.length&&r.data[0]&&'description_cut' in r.data[0])writeCatalogCache(r.data);}return r;});
 }
 let catalogCacheTried=false;
 const fullListingLoads=new Map();
@@ -3489,6 +3496,7 @@ function getPublicCatalog(){
     catalogCacheTried=true;
     const cached=readCatalogCache();
     if(cached){
+      primeFavoriteCounts(cached);
       publicCatalogAt=now;
       const fresh=Promise.resolve(fetchPublicCatalog()).catch(error=>({data:null,error}));
       fresh.then(r=>{if(r&&!r.error&&Array.isArray(r.data)){publicCatalogPromise=Promise.resolve(r);publicCatalogAt=performance.now();
@@ -4548,7 +4556,7 @@ window.openAd=id=>{
   const gallery=photos.length
     ?`<div class="detail-gallery">
         <div class="detail-main-wrap" onclick="openPhotoLightboxFromCurrent()" role="button" tabindex="0" aria-label="Agrandir la photo">
-          <img class="detail-main-photo" id="detailMainPhoto" onload="refreshDetailWatermark()" src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title)}" onclick="event.stopPropagation();openPhotoLightboxFromCurrent()">
+          <img class="detail-main-photo" id="detailMainPhoto" fetchpriority="high" onload="refreshDetailWatermark()" src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title)}" onclick="event.stopPropagation();openPhotoLightboxFromCurrent()">
           <div class="detail-photo-tools" onclick="event.stopPropagation()">
             <button type="button" class="detail-photo-tool" data-share-listing="${a.id}" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg><span>Partager</span></button>
             <button type="button" id="detailFavoriteBtn-${a.id}" data-favorite-id="${a.id}" class="detail-photo-tool heart ${favoriteIds.has(a.id)?'active':''}" aria-label="${favoriteIds.has(a.id)?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${favoriteIds.has(a.id)?'♥':'♡'}</span><span class="fav-count" id="detailFavoriteCount-${a.id}" data-fav-count-id="${a.id}"></span></button>
@@ -4557,7 +4565,7 @@ window.openAd=id=>{
           <span class="photo-watermark${abracaWmOverlay(a)}" id="detailPhotoWatermark">Abracadeal</span><div class="detail-photo-count" id="detailPhotoCount">1 / ${photos.length}</div>
         </div>
         ${photos.length>1?`<div class="detail-thumbs">
-          ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})"><img src="${photoUrl(p.storage_path)}" alt="Photo ${i+1}"></button>`).join('')}
+          ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})">${i<4?`<img src="${photoUrl(p.storage_path)}" alt="Photo ${i+1}" decoding="async">`:`<img data-strip-src="${photoUrl(p.storage_path)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Photo ${i+1}" decoding="async">`}</button>`).join('')}
         </div>`:''}
       </div>`
     :`<div class="detail-gallery"><div class="detail-main-wrap"><img class="detail-main-photo abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal"></div></div>`;
@@ -4852,6 +4860,19 @@ async function renderDetailRecommendations(a){
   }
 }
 
+/* 02/11/2026 (Anthony : « la fiche met du temps ») : la bande de miniatures de la fiche chargeait toutes les photos
+   en pleine taille d'un coup (souvent 20+ photos lues sur le site du pro). Les 4 premières tout de suite, les autres
+   quand la bande défile jusqu'à elles. */
+function hydrateDetailStrip(){
+  const strip=document.querySelector('#detailModal .detail-thumbs');if(!strip)return;
+  const imgs=[...strip.querySelectorAll('img[data-strip-src]:not([data-strip-obs])')];if(!imgs.length)return;imgs.forEach(i=>i.dataset.stripObs='1');
+  const load=img=>{if(img.dataset.stripSrc){img.src=img.dataset.stripSrc;delete img.dataset.stripSrc;}};
+  if(!('IntersectionObserver' in window)){imgs.forEach(load);return;}
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){load(e.target);io.unobserve(e.target);}}),{root:strip,rootMargin:'0px 300px 0px 300px'});
+  imgs.forEach(i=>io.observe(i));
+}
+let detailStripQueued=false;
+new MutationObserver(()=>{if(detailStripQueued)return;detailStripQueued=true;requestAnimationFrame(()=>{detailStripQueued=false;if(document.querySelector('#detailModal .detail-thumbs img[data-strip-src]:not([data-strip-obs])'))hydrateDetailStrip();});}).observe(document.getElementById('detailModal')||document.documentElement,{childList:true,subtree:true});
 window.changeDetailPhoto=(direction)=>{const thumbs=[...document.querySelectorAll('.detail-thumbs button')];if(thumbs.length<2)return;const active=thumbs.findIndex(b=>b.classList.contains('active'));const next=(Math.max(0,active)+direction+thumbs.length)%thumbs.length;thumbs[next].click();};
 window.selectDetailPhoto=(button,url,index,total)=>{
   const main=document.getElementById('detailMainPhoto');
@@ -4930,7 +4951,7 @@ window.renderPhotoLightbox=()=>{
   document.getElementById('photoLightboxTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomPrice').textContent=listing.price;
-  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${u}" alt="Photo ${i+1}"></button>`).join('');
+  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${u}" alt="Photo ${i+1}" loading="lazy" decoding="async"></button>`).join('');
   document.querySelectorAll('.photo-lightbox-nav').forEach(x=>x.style.display=urls.length>1?'block':'none');
   const c=document.getElementById('photoLightboxContact');
   const canContact=!!listing.id && (!currentUser || listing.owner_id!==currentUser.id);

@@ -18,6 +18,19 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Réglage général (« règle bien tout le site »)
+- Audit sur téléphone simulé (iPhone 13, Playwright) avec le vrai catalogue (156 annonces), réponses Supabase simulées.
+- **Trouvé : 624 appels `get_listing_favorite_count` à chaque ouverture de l'accueil** (un par vignette, répété à chaque redessin, sans dédoublonnage). Corrigé : `public_catalog()` renvoie `favorite_count` (migration `public_catalog_favorite_count`), le site remplit le cache avec (`primeFavoriteCounts`) et ne demande jamais deux fois le même compteur en même temps. 624 → 0 appel ; annonces affichées en ~1 s au lieu de 2,6 s (en local).
+- **Fiche : toutes les photos (souvent 20+, en pleine taille, lues chez le pro) chargées d'un coup par la bande de miniatures.** Corrigé : 4 tout de suite, les autres quand la bande défile (`hydrateDetailStrip`) ; photo principale en priorité haute ; miniatures de la galerie plein écran en chargement différé. 18 → 6 photos à l'ouverture.
+- **supabase-js chargé depuis jsdelivr (version « @2 » non figée, redirection) sur 28 pages** (showroom, vacances, admin…) → `/assets/supabase-js-2.118.0.js` (même version, servie par le site).
+- Vérifié : recherche « c63 », fiche → texte complet, showroom → fiche préchargée (2e ouverture ~0,1-0,2 s), 5 autres pages sans erreur.
+- `index-main.js` v=20261102-reglages.
+
+### 02/11/2026 — Claude — Base : sauvegarde avant allègement
+- Demande d'Anthony : alléger la base (203 Mo ; limite de l'offre gratuite 500 Mo). Gros postes : `private.prospect_leads` 88 Mo (233 754 lignes), `net._http_response` 47 Mo (réponses web gardées 6 h, dont mes pages de test de cet après-midi).
+- Sauvegarde faite (fonction `prospect-backup`, lecture seule) : les 212 856 entreprises sans site ni e-mail (`guess_failed`, `no_site`) → bucket privé `backups`, 8 fichiers `prospect_leads_sans_site_2026-11-02_partNN.jsonl.gz` (13 Mo).
+- Fait avec l'accord d'Anthony (« vas-y la base ») : `truncate net._http_response`, suppression des 212 856 lignes, `vacuum full private.prospect_leads` → 20 898 lignes (6 Mo). Base : 203 Mo → 74 Mo.
+
 ### 02/11/2026 — Claude — Vignettes 640 px en ligne
 - Les 156 miniatures refaites en 640 px / JPEG 78 (moyenne 70 Ko au lieu de ~130 Ko) ; cron temporaire `abracadeal-thumbs-640-tmp` supprimé. `thumbUrl` : `?o=4` (index-main.js v=20261102-vignettes-640).
 - Copie des autres photos (2 819 sur 3 034 encore lues sur les sites des pros, surtout spidervo) : refusée par Anthony (stockage gratuit limité à 1 Go, gain faible au premier affichage).
