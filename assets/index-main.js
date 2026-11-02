@@ -3936,7 +3936,7 @@ function groupHomeAds(ads){
   return out;
 }
 function homeGroupHeaderHtml(h){
-  const more=h.key&&h.total>h.shown?`<button type="button" class="home-group-more" onclick="navigateCatalogue('${h.key}','${h.sub||''}','#resultats')">Voir les ${h.total} annonces</button>`:'';
+  const more=h.key&&h.total>h.shown?`<button type="button" class="home-group-more" onclick="navigateCatalogue('${h.key}','${h.sub||''}','#resultats')"><span class="hgm-long">Voir les ${h.total} annonces</span><span class="hgm-short">Tout voir (${h.total})</span></button>`:'';
   return `<div class="home-group-head${h.first?' first':''}"><h3><span class="home-group-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${h.icon||''}</svg></span>${esc(h.title)}</h3>${more}</div>`;
 }
 function renderAds(){

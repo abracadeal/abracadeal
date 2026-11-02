@@ -2058,3 +2058,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Vitrine pro : tri par prix uniquement
 - Demande d'Anthony : trop de filtres dans le showroom, garder seulement croissant / décroissant.
 - `pro.html` : recherche modèle et filtres (marque, budget, carburant, boîte, km, année) retirés. Il reste une ligne « N véhicules » + menu « Trier par prix » (Prix croissant / Prix décroissant). Par défaut : les plus récentes d'abord.
+
+### 02/11/2026 — Claude — Accueil : bouton « Voir les N annonces » qui débordait sur mobile
+- Signalé par Anthony (capture iPhone, rubrique « Vélos, équipements & pièces »).
+- `index-core.css` v=20261102-rubriques : le titre peut passer sur 2 lignes, le bouton ne rétrécit plus ; sur mobile (≤ 620 px) bouton plus compact « Tout voir (N) ». Desktop inchangé. `index-main.js` v=20261102-rubriques.

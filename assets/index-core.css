@@ -4444,3 +4444,15 @@ header #flowErrorsBtn{
 .notice-actions .btn.ghost{background:#fff;color:#5b2a78;border:1px solid #d9c6e6;box-shadow:none}
 .notice-actions .btn.ghost.danger{color:#c0262d;border-color:#f0b7b9}
 .notice-actions .btn:disabled{opacity:.6;cursor:wait}
+
+/* 02/11/2026 : le bouton « Voir les N annonces » débordait sur mobile (titre long « Vélos, équipements & pièces ») */
+.home-group-head h3{min-width:0;flex:1 1 auto}
+.home-group-more{flex:0 0 auto}
+.home-group-more .hgm-short{display:none}
+@media(max-width:620px){
+  .home-group-head{gap:8px}
+  .home-group-head h3{font-size:1rem;line-height:1.2;gap:8px}
+  .home-group-more{padding:7px 12px;font-size:.82rem}
+  .home-group-more .hgm-long{display:none}
+  .home-group-more .hgm-short{display:inline}
+}
