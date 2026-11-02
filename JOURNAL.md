@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : Cosmopolitan Real Estate (réparation refaite)
+- Anthony : « soi-disant réparé ». L'aperçu montrait « Trouver un bien », « Cosmopolitan Real Estate » (pages de liste lues comme des biens) et des photos cassées.
+- `smart-reader.ts` : quand au moins 2 fiches d'un même niveau finissent par un numéro (`/immobilier-…-313.html`), les pages de ce niveau sans numéro et au nom de liste (`/acheter-…`, `/liste-biens-…`, `/vente-…`) sont des listes. Résultat : 6 biens réels sur 6 (Nice, 1 à Antibes d'après la fiche), DPE sur 4.
+- Photos : le site n'a pas de https valide, ses photos `http://` sont bloquées par les navigateurs sur abracadeal.fr. `moderate-listing/import-images.ts` : toute photo en `http://` est copiée chez nous (pas seulement la 1re). L'aperçu de la page Imports affiche « Photo en http… copiée chez nous à la publication » au lieu d'une image cassée.
+
 ### 02/11/2026 — Claude : Cimalpes Courchevel (réparation refaite)
 - Anthony : « soi-disant réparé ». La 1re réparation lisait en fait 7 biens de l'Alpe d'Huez : la page « à propos » de l'agence (`/fr/a-propos/agence-courchevel-1850/`) n'a que le menu du réseau, et ses liens étaient gardés comme « fiches de l'agence ».
 - `index.ts` : page d'agence de type à propos / agence-<ville> sans fiche de sa ville → le robot part de la liste du site qui porte le nom de la ville (`/fr/immobilier-courchevel/`, la vente plutôt que la location saisonnière en immobilier).

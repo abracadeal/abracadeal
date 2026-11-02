@@ -42,7 +42,9 @@ export async function stageImportedImages(admin:any,listing:any,photos:any[]){
  const first=[...photos].sort((a,b)=>(Number(a.position)||0)-(Number(b.position)||0))[0];
  for(const photo of photos){
   if(!/^https?:\/\//i.test(photo.storage_path))continue;
-  if(photo!==first)continue;
+  // 02/11/2026 (Cosmopolitan Real Estate : site sans https valide) : une photo en http:// est bloquée par les navigateurs sur
+  // abracadeal.fr (https) ; elle est donc copiée chez nous comme la 1re.
+  if(photo!==first&&!/^http:\/\//i.test(photo.storage_path))continue;
   const image=await remoteImage(photo.storage_path);
   const path=listing.owner_id+'/'+listing.id+'/'+crypto.randomUUID()+'.'+image.ext;
   fail(await admin.storage.from('listing-images-pending').upload(path,image.bytes,{contentType:image.type,upsert:false}));
