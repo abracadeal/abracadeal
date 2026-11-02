@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : référencement, contrôle (Anthony : « viens on fait le référencement »)
+- Vérifié : 53 annonces dans `sitemap-annonces.xml`, page garage WeeCars dans `sitemap-pros.xml` ; pages d'annonce avec titre, description, adresse canonique, `index,follow`, données structurées Car/Product + fil d'Ariane ; page garage « WeeCars Angers – Garage à … : 24 véhicules d'occasion ». IndexNow actif : 2 + 70 + 70 + 17 pages signalées aujourd'hui (réponse 200).
+- Corrigé : noms de villes « Les Ponts-De-Cé » / « Les Ponts De Ce » (`.title()` Python, ville de la fiche pro en majuscules) → `french_city()` (« Les Ponts-de-Cé ») dans `build_share_pages.py` et `build_pro_pages.py`, la ville correctement écrite dans les annonces étant préférée.
+
 ### 02/11/2026 — Claude : un seul menu Véhicules (Anthony : « j'aime pas Vélo & équipement, quand on clique sur Véhicules ça doit mettre les véhicules pas les équipements »)
 - `index.html` : l'entrée séparée « Vélos & équipements » de la barre du haut est supprimée ; le menu Véhicules a deux colonnes : « Véhicules » (Tous les véhicules, Voitures, Motos / Scooters, Utilitaires, Caravaning, Nautisme) et « Équipements & pièces » (Tous les équipements & pièces, équipement auto / moto / caravaning / nautisme, Vélos, équipement vélo, pièces détachées). Style `desktop-submenu-split` dans `index-overrides.css` (`20261102-vehmenu`).
 - Un clic sur « Véhicules » (ou « Tous les véhicules ») n'affiche que des véhicules : règle `vehicleSubMatches` déjà en place, inchangée. Libellés « Vélos, équipements & pièces » → « Équipements & pièces » (filtre, rubrique de l'accueil).

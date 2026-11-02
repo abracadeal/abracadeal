@@ -115,6 +115,20 @@ MIN_LISTINGS_FOR_CITY = 3  # une ville hors liste ci-dessus obtient sa page dès
 RESERVED_SLUGS = {h[0] for h in HUB_CATEGORIES}
 
 
+
+def french_city(name):
+    """02/11/2026 (référencement) : « Les Ponts-De-Cé » → « Les Ponts-de-Cé » (petits mots en minuscules, comme les noms officiels)."""
+    small = {"de", "du", "des", "la", "le", "les", "sur", "sous", "en", "lès", "lez", "aux", "au", "et", "d", "l"}
+    parts = re.split(r"([\s\-'’])", name.strip())
+    out, first = [], True
+    for p in parts:
+        if not p or re.fullmatch(r"[\s\-'’]", p):
+            out.append(p); continue
+        low = p.lower()
+        out.append(low if (not first and low in small) else low[:1].upper() + low[1:])
+        first = False
+    return "".join(out)
+
 def fetch(url, headers=None):
     req = urllib.request.Request(url, headers={"User-Agent": "abracadeal-share-pages", **(headers or {})})
     with urllib.request.urlopen(req, timeout=60) as r:
@@ -696,7 +710,7 @@ def build_hubs(items):
     cities = dict(CORE_CITIES)
     for k, n in counts.items():
         if n >= MIN_LISTINGS_FOR_CITY and k not in cities:
-            cities[k] = max(names[k].items(), key=lambda kv: (kv[1], kv[0]))[0].title()
+            cities[k] = french_city(max(names[k].items(), key=lambda kv: (kv[1], kv[0]))[0])
 
     cat_info = {h[0]: h for h in HUB_CATEGORIES}
     by_cat = {h[0]: [it for it in items if h[0] in it["cats"]] for h in HUB_CATEGORIES}

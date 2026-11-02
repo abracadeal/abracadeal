@@ -18,6 +18,8 @@ Aucune coordonnée (téléphone, e-mail) n'est publiée.
 Test hors ligne : ABRACA_PRO_FIXTURE=fichier.json python scripts/build_pro_pages.py
   ({"listings": [... avec owner_id], "pros": {"<owner_id>": {"company_name", "company_city", "display_name", "description"}}})
 """
+import re
+import unicodedata
 import collections
 import datetime
 import html
@@ -50,6 +52,20 @@ KINDS = {
 SHOWROOM = f"{SUPABASE_URL}/storage/v1/object/public/pro-showroom/"
 e = lambda s: html.escape(str(s or ""), quote=True)
 
+
+
+def french_city(name):
+    """02/11/2026 (référencement) : « Les Ponts-De-Cé » → « Les Ponts-de-Cé » (petits mots en minuscules, comme les noms officiels)."""
+    small = {"de", "du", "des", "la", "le", "les", "sur", "sous", "en", "lès", "lez", "aux", "au", "et", "d", "l"}
+    parts = re.split(r"([\s\-'’])", name.strip())
+    out, first = [], True
+    for p in parts:
+        if not p or re.fullmatch(r"[\s\-'’]", p):
+            out.append(p); continue
+        low = p.lower()
+        out.append(low if (not first and low in small) else low[:1].upper() + low[1:])
+        first = False
+    return "".join(out)
 
 def rest(path, params):
     return json.loads(fetch(f"{SUPABASE_URL}/rest/v1/{path}?{urllib.parse.urlencode(params)}", {"apikey": SUPABASE_KEY}))
@@ -112,10 +128,17 @@ def nice_name(p):
 
 def city_of(p, listings):
     cities = collections.Counter((l.get("city") or "").strip() for l in listings if (l.get("city") or "").strip())
+    # 02/11/2026 : ville de la fiche pro en majuscules sans accents (« LES PONTS DE CE ») → la même ville écrite
+    # correctement dans les annonces (« Les Ponts-de-Cé ») si elle existe.
+    norm = lambda x: re.sub(r"[^a-z]", "", unicodedata.normalize("NFD", x.lower()).encode("ascii", "ignore").decode())
     if p.get("company_city"):
-        return p["company_city"].strip().title() if p["company_city"].isupper() else p["company_city"].strip()
+        cc = p["company_city"].strip()
+        for c, _ in cities.most_common():
+            if norm(c) == norm(cc):
+                return french_city(c)
+        return french_city(cc) if cc.isupper() else cc
     if cities:
-        return cities.most_common(1)[0][0]
+        return french_city(cities.most_common(1)[0][0])
     return (p.get("city") or "").strip()
 
 
