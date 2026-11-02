@@ -1205,7 +1205,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      payload.mileage=null;payload.fuel=null;payload.transmission=null;payload.crit_air=null;
     }
     const {last_synced_at:ignoredTimestamp,...contentPayload}=payload;
-    const includedPhotos=r.photos.slice(0,Math.max(1,Math.min(45,Number(existing?.photo_limit||15))));
+    const includedPhotos=r.photos.slice(0,Math.max(1,Math.min(45,Number(existing?.photo_limit||30))));
     // 30/10/2026 : un lien photo signé (Supabase …/object/sign/…?token=) change à chaque lecture : on compare le chemin sans le jeton,
     // sinon l'annonce serait réécrite et remodérée toutes les 3 h.
     const signature=await sha256(JSON.stringify({content:contentPayload,photos:includedPhotos.map((u:string)=>String(u).replace(/(\/storage\/v1\/object\/sign\/[^?#]+)\?token=[^#]*/,'$1'))}));
@@ -1226,7 +1226,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      listing=must(await admin.from('listings').update(payload).eq('id',existing.id).select('id,photo_limit').single());
      updated++;
     }else{
-     payload.photo_limit=15;
+     payload.photo_limit=30; /* 02/11/2026 : 30 photos pour tous les pros */
      listing=must(await admin.from('listings').insert(payload).select('id,photo_limit').single());
      created++;
     }
@@ -1237,15 +1237,15 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
      must(await admin.from('listing_photos').delete().eq('listing_id',listingId));
      if(oldStored.length){for(const b of ['listing-images','listing-images-pending'])await admin.storage.from(b).remove(oldStored).catch(()=>{});}
      // Read the actual entitlement after database triggers; never enlarge an existing photo cap.
-     const allowedLimit=Math.max(1,Math.min(45,Number(listing.photo_limit||15)));
+     const allowedLimit=Math.max(1,Math.min(45,Number(listing.photo_limit||30)));
      if(r.photos.length>allowedLimit)photoTruncated++;
      const photoRows=r.photos.slice(0,allowedLimit).map((u:string,i:number)=>({listing_id:listingId,storage_path:u,position:i+1}));
      must(await admin.from('listing_photos').insert(photoRows));
     }
     const importedPhotos=must(await admin.from('listing_photos').select('id').eq('listing_id',listingId))||[];
     // Reuse the signature computed before the update; database-enforced photo caps may be smaller.
-    const persistedSignature=includedPhotos.length===Math.min(r.photos.length,Number(listing.photo_limit||15))
-      ?signature:await sha256(JSON.stringify({content:contentPayload,photos:r.photos.slice(0,Number(listing.photo_limit||15))}));
+    const persistedSignature=includedPhotos.length===Math.min(r.photos.length,Number(listing.photo_limit||30))
+      ?signature:await sha256(JSON.stringify({content:contentPayload,photos:r.photos.slice(0,Number(listing.photo_limit||30))}));
     must(await admin.from('listing_moderation').upsert({listing_id:listingId,stock_import_signature:persistedSignature,
      stock_import_photo_ids:importedPhotos.map((p:any)=>p.id).sort()},{onConflict:'listing_id'}));
     // The shared function downloads external photos into private storage, hashes them,

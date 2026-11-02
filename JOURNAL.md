@@ -2119,3 +2119,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Ajout (demande d'Anthony « une vue client plutôt ») : `demo/infinity/client.html` = vue acheteur, avec le vrai look du site (en-tête, bannière, cartes d'annonces, fiche annonce, barre du bas), 154 biens, tri par prix, encart « Vos biens sur Abracadeal, sans rien ressaisir ». Lien à envoyer : https://abracadeal.fr/demo/infinity/client.html?k=OuXQwIhe4ushx2pP
 - pro-stock-sync : l'aperçu de lecture à blanc donne aussi DPE (`d`) et GES (`g`) ; avec `preview_limit` > 6 : chambres, honoraires, charges annuelles, description et jusqu'à 15 photos (pour les démos).
 - Démo Infinity (vue client) complétée, demande d'Anthony « y'a pas les DPE / comme en vrai » : relecture complète du site (173 biens), cartes avec badge DPE comme sur le site, fiche avec toutes les photos (galerie, ~9 par bien), Diagnostics (échelles DPE et GES du site), chambres, charges annuelles, honoraires et description complète. 115 biens sur 172 ont un DPE sur leur site (les autres : terrains, commerces, biens sans DPE affiché → « DPE non communiqué sur l'annonce d'origine »).
+
+### 02/11/2026 — Claude — 30 photos pour tous les pros
+- Décision d'Anthony : 30 photos par annonce pour tous les pros (formule 100 et sur devis : 45). Particuliers et Vacances inchangés.
+- Cause : les annonces WeeCars avaient été créées à 15 photos puis passées à 30 → la synchro de 12 h 52 a tout réécrit (590 photos) et remis les 24 annonces en vérification admin.
+- Base (migration `pro_photos_min_30`) : formules pro passées de 15 à 30 photos (pro_20, high-tech, maison, mode, emploi) ; `abraca_founder_photo_cap` = minimum 30 pour toute annonce de pro hors Vacances, avec ou sans formule ; annonces de pros déjà en ligne mises à jour.
+- pro-stock-sync : une annonce importée est créée directement à 30 photos (plus de passage 15 → 30 qui réécrit tout à la synchro suivante).
+- Site : `index-main.js` v=20261102-photos30 (dépôt d'annonce d'un pro = 30 photos, 45 en formule 100) ; FAQ mise à jour.
