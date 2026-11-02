@@ -23,6 +23,9 @@
 .fgrid .f span{font-size:12px;font-weight:800;color:#6f5a78;text-transform:uppercase;letter-spacing:.03em}
 .fgrid select{width:100%;min-height:44px;border:1px solid #ddd0e1;border-radius:12px;padding:0 10px;background:#fff;font-size:15px;color:#28172f}
 .tools .count{margin-top:12px;color:#5b4565;font-size:14px}
+.tools.sortbar{display:flex!important;align-items:center;justify-content:space-between;gap:12px}
+.tools.sortbar .count{margin:0}
+.tools.sortbar select{width:auto;min-width:170px;min-height:42px;border:1px solid #ddd0e1;border-radius:12px;padding:0 10px;background:#fff;font-size:15px;color:#28172f}
 .tools .count button{border:0;background:none;color:#6d2b88;font-weight:800;text-decoration:underline;cursor:pointer;padding:0;font-size:14px}
 .specs{font-size:13px;color:#6f5a78;margin-top:2px}
 @media(max-width:900px){.fgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
@@ -116,48 +119,24 @@ function setTab(tab){
   document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
   if(tab==='ads')renderAds();else if(tab==='about')renderAbout();else renderReviews();
 }
-/* 02/11/2026 (Anthony) : vrais filtres dans la vitrine — marque, budget, carburant, boîte, kilométrage, année (véhicules) ;
-   chaque filtre n'apparaît que s'il sert (au moins 2 choix dans le stock du pro). */
+/* 02/11/2026 (Anthony) : trop de filtres dans la vitrine — on garde seulement le tri par prix (croissant / décroissant).
+   Par défaut : annonces les plus récentes d'abord. */
 const nice=v=>{v=String(v||'').trim();return v?v.charAt(0).toUpperCase()+v.slice(1).toLowerCase():''};
-const brand=v=>String(v||'').trim().toUpperCase();
 const fmtN=n=>Number(n).toLocaleString('fr-FR');
-function steps(vals,list){const min=Math.min(...vals),max=Math.max(...vals);return list.filter((x,i)=>x>=min&&(x<max||(i>0&&list[i-1]<max)));}
-function sel(id,label,opts){return '<label class="f"><span>'+label+'</span><select id="'+id+'"><option value="">Tous</option>'+opts.map(o=>'<option value="'+esc(o[0])+'">'+esc(o[1])+'</option>').join('')+'</select></label>';}
 let isVeh=false;
 function applyFilters(){
-  const g=id=>document.getElementById(id)?.value||'';
-  const q=g('stockSearch').trim().toLowerCase(),mk=g('fMake'),pmax=Number(g('fPrice'))||0,fu=g('fFuel'),tr=g('fGear'),kmax=Number(g('fKm'))||0,ymin=Number(g('fYear'))||0,sort=g('stockSort')||'recent';
-  filtered=listings.filter(l=>(!q||(l.title||'').toLowerCase().includes(q))
-    &&(!mk||brand(l.vehicle_make)===mk)&&(!pmax||Number(l.price)<=pmax)&&(!fu||nice(l.fuel)===fu)&&(!tr||nice(l.transmission)===tr)
-    &&(!kmax||(l.mileage!=null&&Number(l.mileage)<=kmax))&&(!ymin||(l.vehicle_year!=null&&Number(l.vehicle_year)>=ymin)));
+  const sort=document.getElementById('stockSort')?.value||'';
   const num=(v,d)=>v==null||v===''?d:Number(v);
-  filtered.sort((a,b)=>sort==='price-asc'?num(a.price,Infinity)-num(b.price,Infinity):sort==='price-desc'?num(b.price,-Infinity)-num(a.price,-Infinity)
-    :sort==='km-asc'?num(a.mileage,Infinity)-num(b.mileage,Infinity):sort==='year-desc'?num(b.vehicle_year,-Infinity)-num(a.vehicle_year,-Infinity):new Date(b.created_at)-new Date(a.created_at));
-  const active=[mk,pmax,fu,tr,kmax,ymin,q].filter(Boolean).length;
-  const c=document.getElementById('stockCount');
-  if(c)c.innerHTML='<b>'+filtered.length+'</b> '+(isVeh?'véhicule':'annonce')+(filtered.length>1?'s':'')+(active?' · <button type="button" id="fReset">Effacer les filtres</button>':'');
-  document.getElementById('fReset')?.addEventListener('click',()=>{document.querySelectorAll('.tools select,.tools input').forEach(e=>{e.value=e.id==='stockSort'?'recent':''});applyFilters();});
+  filtered=[...listings].sort((a,b)=>sort==='price-asc'?num(a.price,Infinity)-num(b.price,Infinity):sort==='price-desc'?num(b.price,-Infinity)-num(a.price,-Infinity):new Date(b.created_at)-new Date(a.created_at));
   shown=24;renderCards();
 }
 function renderAds(){
   const pane=document.getElementById('pane');
   isVeh=listings.filter(l=>l.category==='vehicules').length>listings.length/2;
-  const uniq=f=>[...new Set(listings.map(f).filter(Boolean))];
-  const prices=listings.map(l=>Number(l.price)).filter(n=>n>0),kms=listings.map(l=>l.mileage==null?NaN:Number(l.mileage)).filter(n=>n>=0),years=listings.map(l=>Number(l.vehicle_year)).filter(n=>n>1900);
-  let f='';
-  if(isVeh){const makes=uniq(l=>brand(l.vehicle_make)).sort();if(makes.length>1)f+=sel('fMake','Marque',makes.map(m=>[m,m]));}
-  if(prices.length>1){const ps=steps(prices,[5000,7500,10000,12500,15000,20000,25000,30000,40000,50000,75000,100000,150000,250000,500000,1000000]);if(ps.length>1)f+=sel('fPrice','Budget max',ps.map(x=>[x,fmtN(x)+' €']));}
-  if(isVeh){
-    const fuels=uniq(l=>nice(l.fuel)).sort();if(fuels.length>1)f+=sel('fFuel','Carburant',fuels.map(x=>[x,x]));
-    const gears=uniq(l=>nice(l.transmission)).sort();if(gears.length>1)f+=sel('fGear','Boîte',gears.map(x=>[x,x]));
-    if(kms.length>1){const ks=steps(kms,[10000,30000,50000,75000,100000,125000,150000,200000]);if(ks.length>1)f+=sel('fKm','Km max',ks.map(x=>[x,fmtN(x)+' km']));}
-    if(years.length>1){const min=Math.min(...years),max=Math.max(...years);if(max>min){const opts=[];for(let y=max-1;y>=min;y--)opts.push([y,'Depuis '+y]);f+=sel('fYear','Année',opts);}}
-  }
-  const sortOpts='<option value="recent">Plus récentes</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option>'+(isVeh?'<option value="km-asc">Moins de kilomètres</option><option value="year-desc">Année la plus récente</option>':'');
-  pane.innerHTML=(listings.length>3?'<div class="tools"><input id="stockSearch" type="search" placeholder="'+(isVeh?'Rechercher un modèle (ex. Golf, 308…)':'Rechercher dans ce stock')+'"><div class="fgrid">'+f+'<label class="f"><span>Trier</span><select id="stockSort">'+sortOpts+'</select></label></div><div class="count" id="stockCount"></div></div>':'')+'<div id="stockResults"></div>';
-  document.querySelectorAll('.tools select').forEach(e=>e.addEventListener('change',applyFilters));
-  document.getElementById('stockSearch')?.addEventListener('input',applyFilters);
-  filtered=[...listings];applyFilters();
+  const n=listings.length,label=(isVeh?'véhicule':'annonce')+(n>1?'s':'');
+  pane.innerHTML=(n>1?'<div class="tools sortbar"><div class="count"><b>'+n+'</b> '+label+'</div><select id="stockSort" aria-label="Trier par prix"><option value="">Trier par prix</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
+  document.getElementById('stockSort')?.addEventListener('change',applyFilters);
+  applyFilters();
 }
 function bindGate(root){root?.querySelectorAll('[data-gate]').forEach(a=>a.onclick=e=>{e.preventDefault();location.href='/?compte='+a.dataset.gate+'&retour='+encodeURIComponent(location.pathname+location.search);});}
 function renderCards(){

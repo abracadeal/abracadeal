@@ -2054,3 +2054,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Demande d'Anthony : même les vélos doivent sortir de Véhicules.
 - `index-main.js` v=20261102-sans-velos : `NON_VEHICLE_TYPES` = vélos + équipements + pièces. Véhicules = voitures, motos, utilitaires, caravaning, nautisme. La rubrique devient « Vélos, équipements & pièces » (accueil, filtre, onglet desktop « Vélos & équipements »).
 - Recherche IA (v=20261102-velos) : vélo, VTT, VAE, BMX → sous-catégorie Vélos.
+
+### 02/11/2026 — Claude — Vitrine pro : tri par prix uniquement
+- Demande d'Anthony : trop de filtres dans le showroom, garder seulement croissant / décroissant.
+- `pro.html` : recherche modèle et filtres (marque, budget, carburant, boîte, km, année) retirés. Il reste une ligne « N véhicules » + menu « Trier par prix » (Prix croissant / Prix décroissant). Par défaut : les plus récentes d'abord.
