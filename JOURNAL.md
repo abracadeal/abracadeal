@@ -2083,3 +2083,8 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `index-app.js` v=20261102-fondateur2 : encadré du pro = « Offre : Fondateur Abracadeal ».
 - `process-pro-transactional-emails` (déployée v9) : plus de « Fondateur n°X » dans les mails (sujet et texte). Mail de bienvenue Fondateur aligné sur la règle du 29/10 : « Annonces illimitées pendant 12 mois » au lieu de « Jusqu'à 50 annonces » ; phrase « dès 20 annonces passez à 50 » retirée.
 - Le numéro reste visible côté admin.
+
+### 02/11/2026 — Claude — Showroom vu par son propriétaire
+- `pro.html` : quand le pro regarde sa propre page, plus de « S'abonner » ni « Contacter » (il ne peut pas s'abonner à lui-même) → bouton « Modifier ma page » (vers /?espace=pro) + « Partager », et un bandeau « C'est votre page : vos clients la voient exactement comme ça. »
+- Ses propres visites ne sont plus comptées dans les vues du showroom.
+- Côté espace Pro d'un Fondateur, les seuls éléments payants visibles sont les options de visibilité (Boosts, Options).
