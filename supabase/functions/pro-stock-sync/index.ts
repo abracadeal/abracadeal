@@ -1178,6 +1178,18 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     if(r.category==='immobilier')description+=`[ABRACA_IMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;
     else if(Object.keys(meta).length)description+=`[ABRACA_VMETA:${encodeURIComponent(JSON.stringify(meta))}]\n`;
     description+=r.description||'';
+    /* 02/11/2026 (WeeCars Angers) : la base refuse plus de 5 000 caractères (listings_description_check).
+       Les longues listes d'équipements (encodées en %XX) faisaient échouer 14 annonces sur 24.
+       On raccourcit d'abord le texte libre, puis la liste d'équipements, sans jamais toucher aux balises de référence. */
+    if(description.length>5000){
+     const head=(m:any)=>`[ABRACA_SUB:${r.sub||''}]\n[ABRACA_REF:${r.ref}]\n[ABRACA_SOURCE:${source}]\n`+(r.category==='immobilier'?`[ABRACA_IMETA:${encodeURIComponent(JSON.stringify(m))}]\n`:(Object.keys(m).length?`[ABRACA_VMETA:${encodeURIComponent(JSON.stringify(m))}]\n`:''));
+     const m2:any={...meta};let h=head(m2);
+     if(Array.isArray(m2.equipment)){while(h.length>3500&&m2.equipment.length){m2.equipment=m2.equipment.slice(0,Math.floor(m2.equipment.length*0.8));if(!m2.equipment.length)delete m2.equipment;h=head(m2);}}
+     for(const k of ['history','maintenance','warranty','technicalInspection']){if(h.length<=3500)break;if(typeof m2[k]==='string'&&m2[k].length>200){m2[k]=m2[k].slice(0,200);h=head(m2);}}
+     const room=Math.max(0,5000-h.length);let txt=String(r.description||'');
+     if(txt.length>room){txt=txt.slice(0,Math.max(0,room-1)).replace(/\s+\S*$/,'')+'…';if(txt.length>room)txt=txt.slice(0,room);}
+     description=(h+txt).slice(0,5000);
+    }
     const payload:any={owner_id:feed.owner_id,category:r.category,title:r.title,description,price:r.price,city:r.city,postal_code:r.postal||null,seller_type:'professionnel',source,external_id:r.ref,external_url:r.externalUrl||feed.feed_url||null,last_synced_at:new Date().toISOString(),show_phone:r.showPhone};
     if(r.category==='vehicules'){
      payload.item_condition=r.condition||null;payload.vehicle_make=r.make||null;payload.vehicle_model=r.model||null;
@@ -1234,7 +1246,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     // The shared function downloads external photos into private storage, hashes them,
     // scans text + every photo with OpenAI, and alone publishes approved content.
     if(Date.now()-t0<60000){await moderateListingInternal(listingId);moderated++;}else deferred++;
-   }catch(e){console.error(e);errors++;failures.push(e instanceof Error?e.message:String(e));}
+   }catch(e){console.error(e);errors++;failures.push(e instanceof Error?e.message:(e&&typeof e==='object'&&'message' in e)?`${String((e as any).message)}${(e as any).code?` (${(e as any).code})`:''}`:String(e));}
   }
   for(const ref of (rawRows as any).cycleSeen||[])if(typeof ref==='string')seen.add(ref);
   const mode=modeOverride||feed.sync_mode;
