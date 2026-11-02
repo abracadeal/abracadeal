@@ -484,7 +484,10 @@ function parseSpiderVoDetail(html:string,url:string,vid:string){
 async function readSpiderVo(start:URL,html:string){
  const siteId=html.match(/href="(?:https?:\/\/[^"\/]+)?\/(\d+)\/vehicules\/?"/i)?.[1]||html.match(/,svoc(\d+)\.html/i)?.[1];
  if(!siteId)throw Error('Site Spider VO reconnu, mais la page des véhicules est introuvable.');
- const listUrl=new URL(`/${siteId}/vehicules/`,start);
+ /* 02/11/2026 (WeeCars Angers) : sur un site multi-agences, l'adresse donnée est la liste filtrée d'une agence
+    (/319/vehicules/?stock=993). Elle était remplacée par /319/vehicules/ → stock NATIONAL importé sous le nom de l'agence.
+    On garde désormais l'adresse donnée (avec son filtre) quand c'est déjà une page « vehicules ». */
+ const listUrl=/\/\d+\/vehicules\/?$/i.test(start.pathname)?new URL(start.toString()):new URL(`/${siteId}/vehicules/`,start);
  const{text:list,url:lu}=await fetchSiteHtml(listUrl).catch(e=>{throw Error(`Liste des véhicules illisible : ${e instanceof Error?e.message:String(e)}`);});
  const links=new Map<string,string>();
  for(const m of list.matchAll(/href="([^"]*,svoc\d+\.html\?vid=(\d+))"/gi)){if(links.has(m[2]))continue;try{const u=new URL(decodeEntities(m[1]),lu);if(u.hostname.replace(/^www\./,'')===lu.hostname.replace(/^www\./,''))links.set(m[2],u.toString());}catch{}}

@@ -1986,3 +1986,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - **Cause :** contrainte `listings_description_check` (5 000 caractères max). Les fiches WeeCars ont de très longues listes d'équipements, stockées encodées (`%XX`) dans `[ABRACA_VMETA:…]` + le texte du garage → plus de 5 000 caractères. L'admin affichait seulement « [object Object] ».
 - **Corrigé (`pro-stock-sync`) :** si le texte dépasse 5 000 caractères, la liste d'équipements est raccourcie (balises de référence intactes), puis le texte libre est coupé proprement avec « … ». Les erreurs de la base s'affichent maintenant en clair (message + code) au lieu de « [object Object] ».
 - Test : fiche de 16 680 caractères → 4 999, métadonnées toujours lisibles.
+
+### 02/11/2026 — Claude — Spider VO : le filtre d'agence (`?stock=`) était ignoré
+- **Constat (WeeCars Angers) :** `readSpiderVo` reconstruisait la liste en `/319/vehicules/` et perdait `?stock=993` → les 24 premiers véhicules du stock **national** WeeCars étaient importés sous le compte d'Angers (photos `stock_1296`, `stock_1684`, `stock_954`… aucune `stock_993` ; un GLC de Bry-sur-Marne dans l'aperçu).
+- **Corrigé :** si l'adresse donnée est déjà une page `/<n°>/vehicules/`, elle est lue telle quelle, avec son filtre. Les autres sites Spider VO (adresse d'accueil) ne changent pas.
+- **Nettoyage :** les 10 annonces créées par erreur (3 en ligne, 7 en attente) passées en `archived` / `import_removed`.
+- **Attention :** la note du 31/10 (« filtre `stock=` bien appliqué ») concernait le site WeeCars lui-même, pas notre lecteur. Toutes les agences Weecars de la prospection sont concernées : à relire avec ce correctif avant tout import.
