@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : WeeCars Angers, stock complet en ligne (127 véhicules)
+- Anthony : « mets-les maintenant ». Synchro lancée à la main (`sync_all`) : 24 → 127 annonces en ligne, toutes passées par la modération automatique.
+- Les deux premiers passages ont été coupés par la limite de durée de la fonction (503) après ~57 puis ~56 créations ; rien de perdu (les fiches déjà créées sont mises à jour). `readSpiderVo` : 3 fiches à la fois, et arrêt propre après 80 s (lecture partielle → aucun retrait, la suite au passage suivant). Dernier passage complet : 127 lus, 14 créés, 112 inchangés.
+
 ### 02/11/2026 — Claude : WeeCars dans toute la France, Spider VO lu en entier
 - Anthony : « mettre d'autres WeeCars dans les 4 coins de la France ». 40 agences WeeCars dans les prospects, dont une vingtaine pointaient vers le stock d'Angers (`?stock=993`). Le site WeeCars liste 36 agences avec leur numéro de stock → 30 adresses de prospects corrigées ; 5 agences absentes de la liste (Lille Est, Lille Ouest, Narbonne, La Rochelle, Charleville-Mézières) : adresse retirée, note ajoutée.
 - Spider VO (`readSpiderVo`) : la liste n'affiche que 24 véhicules, la suite est chargée par `/xhr_ws.php?xhr_func=svositec_aj002` avec le cookie de session « svo » → toutes les pages lues (jusqu'à 300). WeeCars Brest 24 → 138, WeeCars Angers 24 → 127, Ventury 24 → 46.
