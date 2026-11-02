@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "9"  # à incrémenter pour forcer la régénération de toutes les pages
+VERSION = "10"  # à incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -309,9 +309,27 @@ def specs_of(listing, meta):
     return rows
 
 
+def readable_title(t):
+    """02/11/2026 (référencement) : titre tout en majuscules (« PEUGEOT 5008 1.5 BLUEHDI 130 ACTIVE BUSINESS ») → lisible
+    dans Google (« Peugeot 5008 1.5 Bluehdi 130 Active Business »). Les sigles courts et les mots avec chiffres restent tels quels."""
+    letters = [c for c in t if c.isalpha()]
+    if not letters or sum(c.isupper() for c in letters) / len(letters) < 0.8:
+        return t
+    def w(x):
+        core = re.sub(r"[^A-Za-zÀ-ÖØ-öø-ÿ]", "", x)
+        if len(core) <= 3 or any(c.isdigit() for c in x):
+            return x
+        return "-".join(p[:1].upper() + p[1:].lower() for p in x.split("-"))
+    return " ".join(w(x) for x in t.split(" "))
+
+
+VEHICLE_EQUIP_SUBS = {"velos", "equipement-auto", "equipement-moto", "equipement-caravaning", "equipement-nautisme",
+                      "equipement-velo", "pieces-detachees", "equipements"}
+
+
 def seo_title(listing, meta):
     """Titre Google : titre du vendeur + infos clés absentes du titre (marque, modèle, version, année, km)."""
-    title = (listing.get("title") or "Annonce").strip()
+    title = readable_title((listing.get("title") or "Annonce").strip())
     low = title.lower()
     extra = []
     vm = meta["vmeta"] or {}
@@ -324,6 +342,9 @@ def seo_title(listing, meta):
     im = meta["imeta"] or {}
     if listing.get("category") == "immobilier" and im.get("surface") and "m²" not in low and "m2" not in low:
         extra.append(f"{im['surface']} m²")
+    # 02/11/2026 (référencement) : les acheteurs cherchent « peugeot 5008 occasion » → le mot est ajouté aux véhicules.
+    if listing.get("category") == "vehicules" and (meta.get("sub") or "") not in VEHICLE_EQUIP_SUBS and "occasion" not in low and not re.search(r"\bneu(f|ve)s?\b", low):
+        extra.append("occasion")
     head = " ".join([title] + extra)
     price = money(listing.get("price"))
     if price and listing.get("category") == "vacances":

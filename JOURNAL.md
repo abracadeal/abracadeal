@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : référencement, titres Google des annonces
+- `build_share_pages.py` (VERSION 10) : titre de page (celui que Google affiche) lisible quand le vendeur écrit tout en majuscules (« PEUGEOT 5008 1.5 BLUEHDI… » → « Peugeot 5008 1.5 Bluehdi… », sigles courts et mots avec chiffres inchangés) ; « occasion » ajouté aux véhicules (pas aux équipements / pièces, ni aux véhicules neufs) car c'est ce que tapent les acheteurs. Ex. : « Audi A4 Avant 2.0 40 TDI 190 S-Line S-Tronic BVA 2018 occasion – 24 490 € – Les Ponts-de-Cé (49) | Abracadeal ». Le titre affiché sur la fiche reste celui du vendeur.
+
 ### 02/11/2026 — Claude : bug « je clique sur la voiture et j'ai un casque » (agrandissement des photos)
 - Cause (`assets/index-main.js`, dessin de la liste des annonces) : à chaque vignette dessinée, `currentDetailPhotoUrls` / `currentDetailListing` (photos de la fiche ouverte) étaient écrasés par ceux de la vignette. Si la liste se redessinait pendant qu'une fiche était ouverte (chargement des annonces, fiche ouverte depuis un showroom ou un lien partagé), « Agrandir » montrait les photos et le titre de la dernière annonce de la liste (ici un casque). Lignes retirées ; seule l'ouverture d'une fiche les remplit. Version `20261102-lightboxfix`.
 
