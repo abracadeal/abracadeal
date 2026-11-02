@@ -1975,3 +1975,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
   - Tâche planifiée `abracadeal-pro-monthly-report` : le 1er du mois à 7 h 37 UTC. Premier envoi : 1er novembre (bilan d'octobre).
   - Testé dans une transaction annulée : « Votre bilan d’octobre », puces correctes, accords singulier/pluriel.
 - **Site (`index-main.js?v=20261029-partages`) :** chaque partage (WhatsApp, Facebook, SMS, copier le lien, partage du téléphone) est compté.
+
+### 02/11/2026 — Claude — WeeCars Angers a répondu « OK »
+- Réponse d'Olivier Martin (gérant, olivier.martin@weecars.fr, 07 69 62 95 55) le 02/11 à 7 h 42 au mail « site testé » du 31/10.
+- **Corrigé (base) :** `stock_page_url` du prospect passait par la page agence (`/319/agence/?agence_id=993`), dont l'aperçu mélangeait des véhicules d'autres agences Weecars (photos `stock_1726`, `stock_954`, `stock_1022`, `stock_1171` ; 1 seul `stock_993` sur 6). Remplacé par la page stock de l'agence : `https://www.weecars.fr/319/vehicules/?stock=993`. **À l'import, utiliser cette adresse, pas la page agence.**
+- SIRET trouvé (annuaire de franchises, non officiel) : 894 261 478 00024 — à confirmer par « Vérifier » (registre officiel) dans l'admin.
+- Reste à faire par Anthony (admin connecté) : « Créer le compte et importer le stock », vérifier l'import (24 véhicules attendus, photos sans logo d'un autre site), activer, puis envoyer le mail de bienvenue.
