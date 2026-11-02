@@ -516,7 +516,8 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
       // Fiches liées depuis une page de l'agence elle-même (ex. /agences/auxerre-centre/2 → /vente/2-auxerre/…) : ce sont ses biens,
       // même si leur adresse n'est pas sous celle de l'agence. Ailleurs, seules les fiches sous le chemin de l'agence sont gardées.
       const ownPage=!!scope&&!isMap&&inScope(page.toString());
-      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(ownPage||inScope(u)))};
+      /* 02/11/2026 (Cimalpes) : si la page de l'agence a ses propres fiches sous son chemin, les autres liens sont le menu du réseau (autres stations) */const own3=ownPage&&found.details.filter(u=>same(u)&&inScope(u)).length<3;
+      return {lists:[...found.lists.filter(inScope),...xmlLists].filter(same),details:found.details.filter(u=>same(u)&&(own3||inScope(u)))};
     },async(html,url)=>{
       let row:any=null;if(ldParse)row=ldParse(html,url);if(row?._sold)return row;
       const sd=smartDetail(html,url,sector);if(row&&!sd&&String(row.photos||'').split('|').filter(Boolean).length<=3){const ph=smartPhotos(html,url);if(ph.length>String(row.photos||'').split('|').filter(Boolean).length)row.photos=ph.join('|');}if(!row)row=sd;else if(sd){/* 01/11/2026 (Anthony, BH Car : photos d'autres véhicules ajoutées à la fin) : la liste des données structurées est celle du véhicule ; les photos de la page (qui comprennent les « véhicules similaires ») ne servent que si elle en a 3 ou moins. */if(String(row.photos||'').split('|').filter(Boolean).length<=3&&String(sd.photos||'').split('|').length>String(row.photos||'').split('|').length)row.photos=sd.photos;for(const k of Object.keys(sd))if(row[k]==null||row[k]==='')row[k]=sd[k];if(String(sd.description||'').length>String(row.description||'').length*1.5)row.description=sd.description;}
@@ -525,8 +526,8 @@ export async function readSmartSite(origin:URL,homeHtml:string,sector:string,fet
   }
   const t0=Date.now();const host=origin.hostname.replace(/^www\./,'');
   const seenPages=new Set<string>();const detailQ:string[]=[];const listQ:string[]=[];const rows:any[]=[];const refs=new Set<string>();
-  const fromOwn=new Set<string>();
-  const take=(html:string,page:URL,own=false)=>{const {details,lists}=smartLinks(html,page,host);for(const d of details){if(own)fromOwn.add(d);if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);}for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
+  const fromOwn=new Set<string>();const scope0=extraStarts[0]?new URL(extraStarts[0]).pathname.replace(/\/+$/,'').replace(/\/\d{1,3}$/,''):'';
+  const take=(html:string,page:URL,own=false)=>{const {details,lists}=smartLinks(html,page,host);/* 02/11/2026 (Cimalpes) : page d'agence avec ses fiches sous son chemin → le reste est le menu du réseau */if(own&&scope0&&details.filter(d=>{try{return new URL(d).pathname.startsWith(scope0+'/');}catch{return false;}}).length>=3)own=false;for(const d of details){if(own)fromOwn.add(d);if(!seenPages.has(d)&&!detailQ.includes(d))detailQ.push(d);}for(const l of lists)if(!seenPages.has(l)&&!listQ.includes(l)&&listQ.length<60)listQ.push(l);};
   take(homeHtml,origin,true);seenPages.add(origin.toString());smartHooks.trace(origin.toString(),'smart home len='+homeHtml.length+' details='+detailQ.length+' lists='+listQ.length+' memory=0');
   for(const s of extraStarts)if(!listQ.includes(s))listQ.unshift(s);
   let pages=0;let misses=0;
