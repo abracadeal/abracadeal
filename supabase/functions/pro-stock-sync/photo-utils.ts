@@ -4,7 +4,8 @@ export function isPlaceholderPhoto(raw:string,depth=0):boolean{
  try{
   const u=new URL(raw);let path=u.pathname;try{path=decodeURIComponent(path);}catch{}
   const name=(path.split('/').pop()||'').toLowerCase().replace(/\.(?:jpe?g|png|webp|avif|gif|svg)$/,'').replace(/[-_]\d{1,4}x\d{1,4}$/,'');
-  if(/^(?:placeholder(?:[-_]image)?|default(?:[-_](?:image|photo|picture))?|(?:image|photo|picture)[-_]default|no[-_]?(?:photo|image|picture)(?:[-_]available)?|sans[-_]?(?:photo|image)|(?:photo|image)[-_](?:absente?|indisponible|a[-_]venir)|loading|loader|blank|transparent|spacer|pixel)(?:[-_]\d+)?$/.test(name))return true;
+  if(/^(?:placeholder(?:[-_]image)?|default(?:[-_](?:image|photo|picture))?|(?:image|photo|picture)[-_]default|no[-_]?(?:photo|image|picture)(?:[-_]available)?|sans[-_]?(?:photo|image)|(?:photo|image)[-_](?:absente?|indisponible|a[-_]venir)|loading|loader|blank|transparent|spacer|pixel|plchldr)(?:[-_]?\d+)?$/.test(name))return true;/* 02/11/2026 : thème WordPress Motors « plchldr350.png » (complexeautomobile) */
+  if(/\.hei[cf]$/i.test(path))return true;/* photos iPhone HEIC : non affichées par Chrome / Firefox */
   if(/\/(?:placeholders?|no[-_]?(?:image|photo))\//i.test(path))return true;
   if(depth<2)for(const key of ['url','src','image','file']){const value=u.searchParams.get(key);if(value&&isPlaceholderPhoto(new URL(value,u).href,depth+1))return true;}
  }catch{}
