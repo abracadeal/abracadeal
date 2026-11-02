@@ -18,6 +18,15 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : test des logiciels immobiliers (La Boîte Immo, Orpi, Apimo) et corrections
+- La Boîte Immo : 10/10 agences lues, toutes les fiches complètes, sans doublon. Orpi : 8/8. Apimo : 8/12 au départ → 11/12 (Dana : site trop lent au moment du test).
+- Villes :
+  - anciennes communes fusionnées reconnues (Hauteville-Lompnes, Bellegarde-sur-Valserine…) : 2 501 communes déléguées / associées ajoutées à `commune_ref` (`alias_of`), avec la position et les codes postaux de la commune actuelle ;
+  - l'ancienne correction `correctCityPostal` (API de l'État, commune la plus peuplée) écrasait les bons codes postaux des homonymes (« Montréal 32250 » → 11290, Aude) : elle s'efface quand la liste officielle est chargée ;
+  - « secteur / à proximité de / proche de / entre / à 10 min de X » dans un titre ne remplace plus la ville du site (« SECTEUR CONDOM » pour un bien à Moncrabeau) ;
+  - agence sans code postal sur ses fiches : située par les villes au nom unique ; ville lue dans le texte à 80 km au plus (« à 1 h de Lyon ») ; œ / æ (« Niederroedern »).
+- Apimo : fiches « /fr/propriété/<n°> » (avec accents, sans « vente+… ») reconnues, liste lue même sans module « listing », biens liés depuis l'accueil (Gambetta 50, Agence Longchamp 97, Agence du Village La Roquette 5).
+
 ### 02/11/2026 — Claude : quels logiciels utilisent les prospects (stratégie « par logiciel »)
 - 10 138 prospects ont un site, 1 335 seulement avaient été vérifiés. Échantillon de 600 sites jamais vérifiés (300 agences, 300 garages), page d'accueil lue et logiciel reconnu à ses traces (table temporaire `tmp_platform_sample`).
 - Agences (300) : Orpi 22 %, La Boîte Immo 16 %, Apimo 5 %, Immo-facile 3 %, Twimmo 2 %, Netty 1 %, Adapt'immo — soit ~50 % sur des logiciels que le robot lit déjà ; WordPress 11 %, inconnu 22 %, site en erreur 10 %, vraie protection anti-robots 2 %.
