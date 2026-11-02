@@ -17,7 +17,7 @@ const LIST_PATH=/(acheter|achat|vente|vendre-|a-vendre|louer|location|annonce|bi
 const IMG_BAD=/(logo|icon|sprite|avatar|favicon|placeholder|blank|pixel|spacer|flag|drapeau|banner|banniere|picto|badge|marker|loader|loading|social|facebook|instagram|whatsapp|twitter|linkedin|youtube|qrcode|partners?\/|partenaires?\/|modules\/|[\/_-](?:dpe|ges)[\/_.-]|etiquette[-_]?energ|watermark|default(?!\/)|no[-_]?photo|noimage|thumb_?nail_?small)/i;
 
 function pathPattern(u:URL){return u.pathname.split('/').filter(Boolean).map(s=>/\d{3,}/.test(s)?(s.replace(/\d+/g,'#').length>12?'*#':'#'):(s.split('-').length>=4?'*':s)).join('/');}
-function isDetailish(u:URL){const segs=u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);const last=segs[segs.length-1]||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product|cle|idann|id_annonce|idbien|reference)=/i.test(u.search)
+function isDetailish(u:URL){const segs=u.pathname.replace(/\/+$/,'').split('/').filter(Boolean);const last=segs[segs.length-1]||'';return /\d{3,}/.test(last)||last.split('-').length>=4||/[?&](id|ref|annonce|bien|vehicule|product|cle|idann|id_annonce|idbien|reference|post_detail|detail|property|listing)=/i.test(u.search)
   /* 02/11/2026 (Régie Conseil : « /nos-annonces/ventes/lyon/appartement/13/ » ; Crefimo / Adapt'immo : « detail.htm?cle=920125671 ») */
   ||(segs.length>=4&&/^\d{1,6}$/.test(last)&&LIST_PATH.test(segs[0])&&!/^(?:page|p|pg)$/i.test(segs[segs.length-2]||''));}
 
@@ -263,7 +263,7 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
   if(!(prix>=50&&prix<100000000)&&!(base.hostname.replace(/^www\./,'')==='msmotors.fr'&&/^\/vehicules\/[^/]+\/?$/.test(base.pathname)))return null;
   const refM=base.pathname.match(/(\d{4,})(?!.*\d{4,})/);
   /* 02/11/2026 (Crefimo : toutes les fiches « detail.htm?cle=… » avaient la référence « detail.htm » → fusionnées en une seule) */
-  const qRef=[...base.searchParams.entries()].find(([k,v])=>/^(?:cle|id|ref|reference|idann|id_annonce|idbien|annonce|bien)$/i.test(k)&&/\d{2,}/.test(v))?.[1];
+  const qRef=[...base.searchParams.entries()].find(([k,v])=>/^(?:cle|id|ref|reference|idann|id_annonce|idbien|annonce|bien|post_detail|detail|property|listing)$/i.test(k)&&/\d{2,}/.test(v))?.[1];
   const reference=(refM?.[1]||qRef||jsonVal(region,['itemId','reference'])||base.pathname.replace(/\/+$/,'').split('/').pop()||'').slice(0,80);
   const ogs=[...metaAll(headHtml,'og:image'),...metaAll(headHtml,'og:image:url')];for(let i=0;i<45;i++){const v=metaAll(headHtml,'og:image_'+i)[0];if(!v)break;ogs.push(v);}
   let photos=pickPhotos(region,base,ogs,refM?.[1]||'');
@@ -384,6 +384,14 @@ function smartDetailRaw(rawHtml:string,pageUrl:string,sector:string){
       const at=(v:number,t:number[])=>{const i=t.findIndex(x=>v<=x);return i<0?6:i;};
       if(vD||vG){const iE=vD?at(Number(vD),[70,110,180,250,330,420]):-1,iG=vG?at(Number(vG),[6,10,29,49,69,99]):-1;
         if(!o.ges&&iG>=0)o.ges='ABCDEFG'[iG];if(!o.dpe&&iE>=0)o.dpe='ABCDEFG'[Math.max(iE,iG)];if(vD&&!o.consommation_energie)o.consommation_energie=vD;}
+    }
+    // 02/11/2026 (Crefimo / Adapt'immo) : étiquettes « outil.adaptimmo.com/dpe/image/…_nrj_…?consommation=281 » et « …_ges_…?consommation=65 ».
+    // DPE d'avant juillet 2021 (prix des énergies « indexés au 15/08/2015 ») : anciens seuils, classe énergie seule ; sinon seuils 2021, la moins bonne des deux.
+    if(!o.dpe||!o.ges){
+      const vD=rawHtml.match(/\/dpe\/image\/[^"']*?_nrj_[^"']*?[?&]consommation=(\d{1,4})/i)?.[1],vG=rawHtml.match(/\/dpe\/image\/[^"']*?_ges_[^"']*?[?&]consommation=(\d{1,4})/i)?.[1];
+      if(vD||vG){const old=/index[ée]e?s? au [0-9\/ ]*20(?:0\d|1\d|20)\b/i.test(text);const at=(v:number,t:number[])=>{const i=t.findIndex(x=>v<=x);return i<0?6:i;};
+        const iE=vD?at(Number(vD),old?[50,90,150,230,330,450]:[70,110,180,250,330,420]):-1,iG=vG?at(Number(vG),old?[5,10,20,35,55,80]:[6,10,29,49,69,99]):-1;
+        if(!o.ges&&iG>=0)o.ges='ABCDEFG'[iG];if(!o.dpe&&iE>=0)o.dpe='ABCDEFG'[old?iE:Math.max(iE,iG)];if(vD&&!o.consommation_energie)o.consommation_energie=vD;}
     }
     // 01/11/2026 (contrôle automatique, Calliope) : échelle A→G avec un curseur portant la valeur du bien
     // (<div class="dpe_target">…123</div>) : classe déduite de la valeur avec les seuils du DPE 2021.
