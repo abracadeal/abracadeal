@@ -118,6 +118,10 @@ details.fold[open]{padding-bottom:14px}
 
  <div class="reqs" id="reqs"><div class="empty">Chargement…</div></div>
  </details>
+ <details class="fold" id="fold-pros"><summary><span>Pros connectés</span> <span class="fold-n" data-count="pros"></span></summary>
+
+ <div class="reqs" id="pros"><div class="empty">Chargement…</div></div>
+ </details>
  <details class="fold" id="fold-onb"><summary><span>Inscrire un garage qui a dit oui</span></summary>
 
  <form class="onb" id="onbForm" autocomplete="off">
@@ -230,8 +234,9 @@ async function loadReqs(){
  if(error){E('reqs').innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
  // 30/10/2026 (Anthony) : une demande refusée sort de la liste.
  REQS=(data||[]).filter(r=>r.review_status!=='rejected');
- if(!REQS.length){E('reqs').innerHTML='<div class="empty">Aucune demande pour l\'instant. Elles arriveront ici quand un pro donnera l\'adresse de son site à l\'inscription.</div>';return}
- E('reqs').innerHTML=REQS.map((r,i)=>{
+ // 02/11/2026 (Anthony : « la demande est close, pourquoi elle est encore là ? ») : « Demandes » = seulement celles
+ // en attente ; un pro déjà activé (ou mis en pause) passe dans « Pros connectés ».
+ const card=(r,i)=>{
   const st=r.review_status==='pending'?['pending','En attente']:r.review_status==='rejected'?['rej','Refusé']:r.active?['on','Actif']:['off','En pause'];
   const acts=[];
   acts.push('<button class="sbtn" data-a="preview" data-i="'+i+'">Aperçu</button>');
@@ -247,7 +252,10 @@ async function loadReqs(){
    '<span>Dernière synchro : <b>'+dt(r.last_run_at)+'</b> · En ligne : <b>'+(r.listings_online||0)+'</b> · En vérification : <b>'+(r.listings_pending||0)+'</b></span></div>'+
    (r.last_error?'<div class="warn">'+esc(r.last_error)+'</div>':'')+
    '<div class="acts">'+acts.join('')+'</div></div>';
- }).join('');
+ };
+ const wait=REQS.map((r,i)=>r.review_status==='pending'?card(r,i):'').join(''),on=REQS.map((r,i)=>r.review_status!=='pending'?card(r,i):'').join('');
+ E('reqs').innerHTML=wait||'<div class="empty">Aucune demande en attente. Elles arriveront ici quand un pro donnera l\'adresse de son site à l\'inscription.</div>';
+ E('pros').innerHTML=on||'<div class="empty">Aucun pro connecté pour l\'instant.</div>';
 }
 async function act(a,i,btn){
  const r=REQS[i];if(!r)return;
@@ -488,7 +496,7 @@ async function validateSite(){
 }
 E('siteValidate').onclick=validateSite;
 
-E('reqs').addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b)act(b.dataset.a,Number(b.dataset.i),b)});
+['reqs','pros'].forEach(id=>E(id).addEventListener('click',e=>{const b=e.target.closest('button[data-a]');if(b)act(b.dataset.a,Number(b.dataset.i),b)}));
 E('grid').addEventListener('click',e=>{const c=e.target.closest('.car[data-i]');if(c)openCar(Number(c.dataset.i))});
 E('db').addEventListener('click',e=>{const t=e.target.closest('.thumbs img');if(!t)return;E('bigimg').src=t.src;E('db').querySelectorAll('.thumbs img').forEach(x=>x.classList.toggle('on',x===t))});
 E('dx').addEventListener('click',()=>E('dlg').close());

@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : page Imports de sites, « Demandes » ne garde que l'attente
+- `admin-test-import.html` : « Demandes » n'affiche plus que les demandes en attente. Les pros déjà activés ou en pause (ex. WeeCars Angers) passent dans un nouveau bloc replié « Pros connectés », avec les mêmes boutons (Aperçu, Synchroniser, Pause).
+
 ### 02/11/2026 — Claude : nom officiel des villes (tirets)
 - `pro-stock-sync` : une ville reconnue dans la liste officielle prend toujours son nom officiel. Avant, « Mouans Sartoux » (Life Cars) restait sans tiret, car la comparaison ignorait tirets et accents → maintenant « Mouans-Sartoux ».
 
