@@ -57,10 +57,16 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "8"  # à incrémenter pour forcer la régénération de toutes les pages
-FIELDS = ("id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
+VERSION = "9"  # à incrémenter pour forcer la régénération de toutes les pages
+FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
+# 02/11/2026 (référencement) : page publique du pro (garage/…, immo/…) créée par build_pro_pages.py → liée depuis chacune de ses annonces.
+try:
+    with open(os.path.join(BASE, "pro-pages.json"), encoding="utf-8") as _f:
+        PRO_PAGES = {k: v for k, v in json.load(_f).items() if isinstance(v, dict) and v.get("active") and v.get("path")}
+except Exception:
+    PRO_PAGES = {}
 MARKER = re.compile(r"^\[ABRACA_([A-Z_]+):([^\]]*)\]\s*", re.M)
 
 # Pages catégories : (slug d'URL, nom, nom au pluriel pour les phrases, filtre, texte d'introduction)
@@ -596,6 +602,9 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     og_desc = " · ".join(x for x in (place, cat, "Abracadeal") if x)
     image = f"{page_url}apercu.jpg"
     seller = "Professionnel" if listing.get("seller_type") == "professionnel" else "Particulier"
+    pro = PRO_PAGES.get(str(listing.get("owner_id") or "")) if listing.get("seller_type") == "professionnel" else None
+    pro_link = (f'<p class="where">Vendu par <a href="/{e(pro["path"])}/">{e(pro.get("name") or "ce professionnel")}</a>'
+                f'{" · voir ses " + str(int(pro["count"])) + " annonces" if int(pro.get("count") or 0) > 1 else ""}</p>') if pro else ""
     lazy = ' loading="lazy"'
     gallery = "".join(f'<img src="{e(u)}" alt="{e(title)} – photo {i + 1}"{lazy if i else ""} width="800" height="600">'
                       for i, u in enumerate(photos))
@@ -639,6 +648,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
 <h1>{e(title)}</h1>
 {f'<p class="price">{e(price)}</p>' if price else ''}
 {f'<p class="where">📍 {e(place)}</p>' if place else ''}
+{pro_link}
 <a class="cta" href="{e(app_url)}" rel="nofollow">Contacter le vendeur sur Abracadeal</a>
 {f'<section class="card"><h2>Caractéristiques</h2><table>{rows}</table></section>' if rows else ''}
 {f'<section class="card"><h2>Description</h2><div class="desc">{e(text)}</div></section>' if text else ''}
@@ -936,7 +946,7 @@ def main():
         sim_sig = [(s["listing"]["id"], s["listing"].get("title"), s["listing"].get("price"), s["listing"].get("city"), s["photos"][:1])
                    for s in similar]
         payload = {k: v for k, v in listing.items() if k not in ("listing_photos", "updated_at", "expires_at")}
-        sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref, sim_sig], sort_keys=True, default=str).encode()).hexdigest()[:16]
+        sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref, sim_sig, PRO_PAGES.get(str(listing.get("owner_id") or ""))], sort_keys=True, default=str).encode()).hexdigest()[:16]
         img_sig = hashlib.sha256(src.encode()).hexdigest()[:16]
         index = os.path.join(folder, "index.html")
         if os.path.exists(index) and f"<!-- sig:{sig} -->" in open(index, encoding="utf-8").read():

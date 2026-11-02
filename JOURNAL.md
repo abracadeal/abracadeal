@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : référencement, maillage interne
+- Pied de page de l'accueil : liens vers « Voitures d'occasion » (/annonces/voitures-occasion/), « Voitures par marque et budget » (/auto/) et « Garages sur Abracadeal » (/garage/) — l'accueil est la page la plus forte du site, ses liens font découvrir ces pages à Google.
+- Pages publiques d'annonce (`build_share_pages.py`, VERSION 9) : annonce d'un pro qui a sa page publique (pro-pages.json) → « Vendu par WeeCars Angers · voir ses 24 annonces » vers /garage/<nom-ville>/. Chaque annonce renforce ainsi la page du garage, et la page du garage mène à toutes ses annonces. `owner_id` ajouté aux champs lus. Testé hors ligne (fixture).
+
 ### 02/11/2026 — Claude : annonce ouverte par-dessus le showroom (Anthony : « y a un passage quand même sur la page d'accueil »)
 - `pro.html` : un clic sur une annonce du showroom ouvre la fiche dans une fenêtre intégrée par-dessus le showroom (`/?annonce=<id>&embed=1`), sans quitter la page ; retour du navigateur / Échap / croix de la fiche → retour au showroom. Ctrl / Cmd / clic molette : nouvel onglet comme avant.
 - `index.html` (+ `index-main.js` `20261102-embed`) : en mode intégré (`?embed=1` dans une fenêtre intégrée), en-tête, page d'accueil, pied de page et barre mobile masqués, fond transparent : on ne voit que la fiche, le showroom flouté derrière. La fiche prévient le showroom quand elle est affichée (fin du « Chargement ») et quand elle est fermée. Le retour par `&retour=` reste en secours pour les liens ouverts autrement.
