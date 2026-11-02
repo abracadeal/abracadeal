@@ -8,8 +8,9 @@ import { Image } from "https://deno.land/x/imagescript@1.3.0/mod.ts";
 const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!, { auth: { persistSession: false } });
 const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "Content-Type": "application/json" } });
 // 02/11/2026 (Anthony : « qualité bof ») : 480 px / qualité 70 → 900 px / qualité 82 (net sur écran de téléphone).
-// 02/11/2026 (Anthony : « trop lent sur mobile ») : 900 px / 82 → 640 px / 78 (environ 2 fois plus léger, encore net sur téléphone).
-const MAX_SIDE = 640;
+// 02/11/2026 (Anthony : « trop lent sur mobile ») : 900 px / 82 → 640 px / 78 ; puis (« ça dégrade les photos ») : la vignette
+// rogne la photo en carré, c'est le PETIT côté qui compte → petit côté 720 px (grand côté 1200 max), qualité 80.
+const MAX_SIDE = 1200, SHORT_SIDE = 720;
 
 // 01/11/2026 (Anthony : vignettes de travers) : les photos de téléphone sont souvent enregistrées couchées avec une
 // étiquette EXIF « Orientation » ; le navigateur les redresse, mais la miniature les gardait couchées (et rognées).
@@ -92,11 +93,12 @@ Deno.serve(async (req) => {
       const bytes = new Uint8Array(await file.arrayBuffer());
       let img = await Image.decode(bytes);
       img = orient(img, exifOrientation(bytes));
-      if (img.width > MAX_SIDE || img.height > MAX_SIDE) {
-        if (img.width >= img.height) img.resize(MAX_SIDE, Image.RESIZE_AUTO);
-        else img.resize(Image.RESIZE_AUTO, MAX_SIDE);
+      {
+        const short = Math.min(img.width, img.height), long = Math.max(img.width, img.height);
+        const k = Math.min(1, SHORT_SIDE / short, MAX_SIDE / long);
+        if (k < 1) img.resize(Math.max(1, Math.round(img.width * k)), Math.max(1, Math.round(img.height * k)));
       }
-      const jpeg = await img.encodeJPEG(78);
+      const jpeg = await img.encodeJPEG(80);
       const { error: uErr } = await admin.storage.from("listing-thumbs").upload(path, jpeg, { upsert: true, contentType: "image/jpeg", cacheControl: "31536000" });
       if (uErr) throw uErr;
       await admin.rpc("thumbs_mark", { p_path: path, p_error: null });
