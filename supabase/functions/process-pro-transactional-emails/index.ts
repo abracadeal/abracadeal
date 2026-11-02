@@ -42,6 +42,7 @@ const toText = (title: string, paragraphs: string[], bullets: string[] = [], aud
 function build(type: string, p: any) {
   const formule = `${esc(p.listing_limit)} annonces`;
   const photos = p.photo_limit ? `${esc(p.photo_limit)} photos par annonce` : "";
+  // 02/11/2026 (Anthony) : le numéro de Fondateur reste interne (admin), jamais affiché au pro.
   const founder = p.founder_number != null && p.status === "trialing";
   // 26/10/2026 : message ponctuel rédigé à la main (payload : subject, title, paras[], bullets[]), texte déjà en HTML sûr.
   if (type === "custom_message") {
@@ -63,7 +64,7 @@ function build(type: string, p: any) {
   if (type === "founder_onboarding") {
     const title = "Bienvenue sur Abracadeal";
     const paras = [
-      `Merci pour votre inscription${p.founder_number != null ? ` : vous êtes <strong>Fondateur n°${esc(p.founder_number)}</strong>` : ""} !`,
+      `Merci pour votre inscription${p.founder_number != null ? ` : vous êtes <strong>Fondateur Abracadeal</strong>` : ""} !`,
       `Abracadeal est un site de petites annonces <strong>toutes catégories</strong>. Contrairement aux sites spécialisés, il attire aussi ceux qui cherchent un logement, un téléphone ou un meuble : vos annonces profitent de <strong>tout le trafic du site</strong>.`,
       `Pour en profiter au plus vite, mettez votre stock en ligne depuis votre Espace Pro :`,
     ];
@@ -95,13 +96,13 @@ function build(type: string, p: any) {
     if (founder) {
       const title = "Bienvenue parmi les Fondateurs Abracadeal";
       const paras = [
-        `Votre inscription est confirmée : vous êtes <strong>Fondateur n°${esc(p.founder_number)}</strong> avec la formule <strong>${formule}</strong>.`,
+        `Votre inscription est confirmée : vous êtes <strong>Fondateur Abracadeal</strong> : <strong>annonces illimitées</strong> pendant 12 mois.`,
         `Vos annonces sont publiées <strong>gratuitement jusqu’au ${dateFr(p.free_until)}</strong>. Aucune carte bancaire n’est demandée : pour continuer ensuite au tarif public de ${euros(p.amount_cents)} HT par mois, il suffira d’ajouter un moyen de paiement depuis « Mon compte » avant cette date (nous vous le rappellerons 30, 7 et 3 jours avant). Sinon, vos annonces seront simplement mises en pause, sans aucun prélèvement.`,
-        `L’offre est réservée aux professionnels actifs : sans annonce en ligne pendant 60 jours, la place Fondateur est libérée. Dès vos 20 annonces en ligne, vous pouvez passer gratuitement à la formule 50 annonces.`,
+        `L’offre est réservée aux professionnels actifs : sans annonce en ligne pendant 60 jours, la place Fondateur est libérée.`,
         `Vous pouvez résilier en un clic depuis « Mon compte ». Une résiliation pendant la période gratuite arrête l’abonnement immédiatement, sans aucun prélèvement, et fait perdre définitivement le statut Fondateur.`,
       ];
-      const bullets = [`Jusqu’à ${formule} actives`, photos, "Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Modifications incluses"].filter(Boolean);
-      return { subject: `Bienvenue, Fondateur n°${p.founder_number} — vos 12 mois offerts commencent`, title, paras, bullets };
+      const bullets = ["Annonces illimitées pendant 12 mois", photos, "Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Modifications incluses"].filter(Boolean); // 29/10/2026 : plus de plafond Fondateur
+      return { subject: `Bienvenue, Fondateur Abracadeal — vos 12 mois offerts commencent`, title, paras, bullets };
     }
     const title = "Votre abonnement Abracadeal Pro est actif";
     const paras = [

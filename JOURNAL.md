@@ -2077,3 +2077,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `index-app.js` v=20261102-fondateur : encadré « Mon abonnement Pro » d'un Fondateur = badge « Fondateur », Offre Fondateur n°X, Annonces illimitées, Gratuit jusqu'au …, « Aucun prélèvement pendant vos 12 mois ». Plus de « Jusqu'à 50 annonces » ni de bouton « Changer de formule » (portail Stripe avec les tarifs). « Résilier » reste.
 - `admin-account-layout` v=9 : tuile « Formules » (page tarifs) → « Mon offre » (renvoie à l'encadré Fondateur) pour un Fondateur en période gratuite.
 - Les Boosts payants restent visibles (règle : boosts / visibilité payants pour tous).
+
+### 02/11/2026 — Claude — Numéro de Fondateur réservé à l'admin
+- Demande d'Anthony : « Fondateur n°2 » ne doit pas être montré au pro (utile pour nous seulement).
+- `index-app.js` v=20261102-fondateur2 : encadré du pro = « Offre : Fondateur Abracadeal ».
+- `process-pro-transactional-emails` (déployée v9) : plus de « Fondateur n°X » dans les mails (sujet et texte). Mail de bienvenue Fondateur aligné sur la règle du 29/10 : « Annonces illimitées pendant 12 mois » au lieu de « Jusqu'à 50 annonces » ; phrase « dès 20 annonces passez à 50 » retirée.
+- Le numéro reste visible côté admin.

@@ -762,7 +762,7 @@ document.addEventListener('DOMContentLoaded',()=>{
       }
       if(details){
         details.innerHTML=(founderFree?[
-          ['Offre','Fondateur n°'+data.founder_number],
+          ['Offre','Fondateur Abracadeal'], /* numéro de Fondateur : réservé à l'admin */
           ['Annonces','Illimitées'],
           ['Gratuit jusqu’au',fmtDate(accessEnd)]
         ]:[
