@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : IndexNow (Anthony : « les annonces de Life Cars demain peuvent être référencées rapidement ? »)
+- Déjà en place : pages publiques d'annonce `annonce/<id>/`, page du garage `garage/<nom-ville>/` et sitemaps régénérés toutes les 10 min (workflow `share-pages.yml`) ; Google les découvre par `sitemap.xml` (robots.txt + Search Console), à son rythme.
+- Ajouté : clé IndexNow (`77a5c8f13f1d3e45b629794c4a227124.txt` à la racine) et `scripts/indexnow.py`, lancé par le workflow 1 min après chaque mise en ligne automatique : les pages nouvelles ou modifiées (annonces, pros, catégories, auto) sont signalées tout de suite à Bing / Yandex / Seznam / Naver (Bing alimente aussi ChatGPT et Copilot). Un échec ne bloque jamais la publication.
+- Google ne lit pas IndexNow : pour accélérer, « Inspection de l'URL » → « Demander l'indexation » dans la Search Console (page du garage + quelques annonces, quota d'une dizaine par jour).
+
 ### 02/11/2026 — Claude : vérification des villes sur tous les sites (Anthony : « bien vérifier les villes, très important ») (pro-stock-sync v227–v231)
 - Liste officielle des communes (geo.api.gouv.fr, ~35 000 communes avec codes postaux et position) téléchargée une fois par instance (`commune-lookup.ts`).
 - Chaque ville lue est vérifiée : nom exact d'une commune, ou début du nom (« Bordeaux Caudéran » → Bordeaux, « Paris 15e » → Paris). Immobilier : une ville qui n'est pas une commune est retirée puis cherchée dans le titre, la description, le lien, le code postal.
