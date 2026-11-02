@@ -1,0 +1,9 @@
+-- 02/11/2026 — Claude — Accueil allégé (appliqué en direct : migrations public_catalog_rpc, catalog_desc_precomputed).
+-- private.url_decode / private.url_encode / private.catalog_meta_line : retire « equipment » de la balise [ABRACA_VMETA].
+-- private.catalog_description(text) : balises [ABRACA_*] gardées + 600 premiers caractères du texte.
+-- private.catalog_description_cut(text) : vrai si le texte a été coupé ou les équipements retirés.
+-- listings.catalog_desc / catalog_desc_cut : calculés par le déclencheur listings_catalog_desc (insert / update of description).
+-- public.public_catalog() (security definer, anon + authenticated) : annonces en ligne, publiques, hors révisions,
+--   mêmes colonnes que l'ancienne requête de l'accueil, description courte, photos {storage_path, position[, storage_bucket]} (30 max).
+-- Côté site : fetchPublicCatalog() l'appelle (repli sur l'ancienne requête) ; ensureFullListing() recharge le texte complet
+--   à l'ouverture d'une fiche et avant toute modification.

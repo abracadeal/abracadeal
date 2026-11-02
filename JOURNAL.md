@@ -18,6 +18,14 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Accueil allégé + recherche de sites la nuit
+- Demande d'Anthony : recherche de sites la nuit, site le plus rapide possible (« quand il y aura plusieurs pros ça va être compliqué »).
+- Cron `abracadeal-prospect-site-precheck` et `abracadeal-prospect-preview-fill` : de 6h-17h/20h UTC à 22h-5h UTC (23h-6h à Paris).
+- Accueil (`index-main.js` v=20261102-catalogue-leger) : le catalogue vient de `public_catalog()` (voir `supabase/2026-11-02-public-catalog.sql`) : 1,38 Mo → 0,76 Mo pour 156 annonces. La liste d'équipements des véhicules (400 Ko) et le texte au-delà de 600 caractères ne sont plus chargés sur l'accueil ; la fiche et le formulaire de modification rechargent la description complète (jamais d'enregistrement de la version courte). Repli automatique sur l'ancienne requête si la fonction échoue.
+- Limite connue : une recherche sur un équipement (« toit ouvrant ») ne trouve plus l'annonce depuis l'accueil.
+- Remplissage initial de `catalog_desc` : `updated_at` des 156 annonces en ligne mis à l'heure du remplissage (non affiché).
+- Prochaine étape pour des milliers d'annonces : chargement par pages côté serveur.
+
 ### 02/11/2026 — Claude — Site lent : base de données saturée
 - Remarque d'Anthony : « le site est très trop lent ».
 - Cause trouvée : les files d'attente de la prospection (`prospect_crawler_next`, `domain_guess_next`, `promote_annuaire_leads`) relisaient toute la table `private.prospect_leads` (233 000 lignes, 87 Mo, aucun index) à chaque appel : 1,2 à 2,5 s par appel, des milliers d'appels. Sur la petite base (60 connexions), ces lectures occupaient le disque et les connexions → erreurs « Too many connections » et pages lentes pour les visiteurs. Mes tests avec `pg_sleep` (30 s chacun) ont aggravé la situation : abandonnés.
