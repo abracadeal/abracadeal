@@ -2040,3 +2040,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Remarque d'Anthony : qualité des miniatures « bof ».
 - `generate-listing-thumbs` : miniatures 900 px / JPEG 82 (au lieu de 480 px / 70). Toutes les miniatures refaites (`private.listing_photo_thumbs` vidé) ; adresse `?o=3` côté site pour ne pas garder les anciennes en cache.
 - `thumb-fit-20261009.js` v5 et `card-photo-fit-20261101.js` v5 : une photo en largeur (voitures) remplit la vignette, centrée, au lieu d'être réduite sur fond flou (seuil 15 % → 45 % de photo coupée). Photos prises en hauteur : toujours entières sur fond flou (règle du 01/11 inchangée).
+
+### 02/11/2026 — Claude — Catégorie Véhicules : uniquement des véhicules
+- Demande d'Anthony : dans la catégorie Véhicules, que des véhicules, ni équipement ni pièce.
+- `index-main.js` (v=20261102-vehicules-seuls) : « Véhicules » (sans sous-catégorie) exclut tous les équipements **et les pièces détachées** (`EQUIPMENT_TYPES`). Nouvelle sous-catégorie virtuelle `equipements` = tous les équipements + pièces. Les annonces restent en base sous `vehicules` (rien à migrer).
+- Correctif : l'accueil « Auto & Moto » laissait passer les pièces détachées (test `/^equipement/`) ; la rubrique « Équipements & pièces » a maintenant son bouton « Voir les N annonces ».
+- Filtres : sous-catégorie en deux groupes (Véhicules / Équipements & pièces) ; km, année, carburant masqués pour les équipements.
+- Menu desktop : nouvel onglet « Équipements » (auto, moto, caravaning, nautisme, vélo, pièces) ; le sous-menu Véhicules ne liste plus que des véhicules.
+- `description-helper-20261013.js` v=3 : retrait du regroupement Auto/Moto + équipements (18/10).
+- Recherche IA (`smart-search` v=20261102-equipements) : casque, blouson, pièces, pneus, jantes… → « Équipements & pièces », jamais Véhicules.
