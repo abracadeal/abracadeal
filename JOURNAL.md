@@ -1995,3 +1995,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ### 02/11/2026 — Claude — Titres de plus de 100 caractères coupés à l'import
 - WeeCars Angers : un Transporter refusé par `listings_title_check` (100 max). `pro-stock-sync` coupe désormais le titre proprement avec « … ».
+
+### 02/11/2026 — Claude — Modération : la limite OpenAI (HTTP 429) bloquait la validation
+- WeeCars Angers (24 voitures, ~30 photos chacune) : la version gratuite d'OpenAI Moderation renvoyait 429 → annonces bloquées « Analyse de sécurité indisponible » et bouton « Valider » de l'admin en échec (il passe aussi par l'analyse).
+- `moderate-listing/safety.ts` : en cas de 429, attente (Retry-After ou 1,5 s × essai) puis nouvel essai, 4 fois max ; 2 photos à la fois au lieu de 4 ; délai total 90 s au lieu de 65 s. L'analyse reste obligatoire.

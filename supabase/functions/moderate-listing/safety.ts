@@ -35,13 +35,23 @@ export async function scanSafety(admin:any,listing:any,photos:any[],fetcher=fetc
   inputs.push([{type:'image_url',image_url:{url}}]);
  }
  const flags=new Set<string>();
- const deadline=AbortSignal.timeout(65000);
- for(let i=0;i<inputs.length;i+=4){
- await Promise.all(inputs.slice(i,i+4).map(async input=>{
-  const response=await fetcher('https://api.openai.com/v1/moderations',{
-   method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
-   body:JSON.stringify({model:MODEL,input}),signal:AbortSignal.any([deadline,AbortSignal.timeout(20000)])
-  });
+ const deadline=AbortSignal.timeout(90000);
+ for(let i=0;i<inputs.length;i+=2){
+ await Promise.all(inputs.slice(i,i+2).map(async input=>{
+  /* 02/11/2026 (WeeCars Angers, 24 voitures × ~30 photos) : la version gratuite d'OpenAI limite le débit (HTTP 429).
+     On patiente puis on réessaie (jusqu'à 4 fois) au lieu d'abandonner l'analyse et de bloquer la validation. */
+  let response:Response;
+  for(let attempt=0;;attempt++){
+   response=await fetcher('https://api.openai.com/v1/moderations',{
+    method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json'},
+    body:JSON.stringify({model:MODEL,input}),signal:AbortSignal.any([deadline,AbortSignal.timeout(20000)])
+   });
+   if(response.status!==429||attempt>=4)break;
+   await response.body?.cancel().catch(()=>{});
+   const ra=Number(response.headers.get('retry-after'));
+   const wait=Math.min(10000,Number.isFinite(ra)&&ra>0?ra*1000:1500*(attempt+1))+Math.floor(Math.random()*400);
+   await new Promise(r=>setTimeout(r,wait));
+  }
   if(!response.ok){const err=await response.json().catch(()=>({}));throw new Error(`OpenAI Moderation HTTP ${response.status} (${input[0].type}, ${err?.error?.code||err?.error?.type||'API error'})`);}
   const data=await response.json();
   const result=data.results?.[0];
