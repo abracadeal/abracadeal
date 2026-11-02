@@ -21,6 +21,11 @@ const $=s=>document.querySelector(s);
 const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set(),photoUrls:new Map(),reports:new Map()};
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+/* 03/11/2026 (Anthony : « fais le mieux ») : titre lisible (comme sur le site) + titre d'origine en petit s'il est différent,
+   pour modérer ce que le vendeur a vraiment écrit tout en lisant facilement. */
+function modTitle(a){const raw=String(a.title||'Annonce');const d=a.description||'';const veh=a.category==='vehicules'&&!/^\[ABRACA_EQUIP:/m.test(d)&&!/^\[ABRACA_SUB:(equipement|pieces-detachees|velos)/m.test(d);
+  const nice=veh&&window.displayVehicleTitle?window.displayVehicleTitle(raw):raw;
+  return esc(nice)+(nice!==raw?'<small style="display:block;font-weight:400;font-size:.72em;opacity:.65;margin-top:2px">Écrit par le vendeur : '+esc(raw)+'</small>':'');}
 function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €'}
 function cat(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Annonce'}
 function ago(v){if(!v)return'';const d=Date.now()-new Date(v).getTime(),h=Math.floor(d/3600000);if(h<1)return"À l'instant";if(h<24)return'Il y a '+h+' h';const j=Math.floor(h/24);return'Il y a '+j+' j'}
@@ -82,7 +87,7 @@ function card(a){
     (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
       '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
-      '<div class="info"><div class="rowtop"><h2 class="title">'+esc(a.title||'Annonce')+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
+      '<div class="info"><div class="rowtop"><h2 class="title">'+modTitle(a)+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
       '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
       (a.listing_reference?'<div class="meta">Référence : '+esc(a.listing_reference)+'</div>':'')+
       '<div class="price">'+esc(money(a.price))+'</div>'+
@@ -142,7 +147,7 @@ function openPreview(id){
     gallery+
     '<div class="preview-content">'+
       '<div class="preview-kicker">'+esc(cat(a.category))+' · '+esc(a.seller_type==='professionnel'?'Professionnel':'Particulier')+'</div>'+
-      '<h2 class="preview-title">'+esc(a.title||'Annonce')+'</h2>'+
+      '<h2 class="preview-title">'+modTitle(a)+'</h2>'+
       '<div class="preview-price">'+esc(money(a.price))+'</div>'+
       '<div class="preview-location">📍 '+esc(a.city||'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
       (specs.length?'<section class="preview-section"><h3>Informations de l’annonce</h3><div class="preview-spec-grid">'+specs.map(x=>'<div class="preview-spec"><span>'+esc(x[0])+'</span><strong>'+esc(x[1])+'</strong></div>').join('')+'</div></section>':'')+

@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — Modération : titre lisible + titre d'origine
+- Anthony : « fais le mieux ». `moderation.html` charge `vehicle-title-20261103.js` ; `moderation.js` (v=20261103-titres) : `modTitle` — titre de véhicule mis en forme comme sur le site, et en dessous, en petit, « Écrit par le vendeur : … » quand l'original est différent (liste et aperçu). Les contrôles automatiques lisent toujours l'original ; aucune annonce n'est modifiée ni remise en modération.
+
 ### 03/11/2026 (nuit) — Claude — Titres propres aussi dans les pages Google
 - Question d'Anthony : « les titres avec les mises à jour, ça va être comment ? » → le formatage est fait à l'affichage, donc chaque synchronisation (nouvelles annonces, titres modifiés chez le pro) est mise en forme automatiquement, rien à refaire. Mais les pages Google (annonce/…, annonces/…) gardaient l'ancien formatage (« DS DS 7 Crossback 2.0 Bluehdi »).
 - `scripts/build_share_pages.py` : `display_title` / `vehicle_title`, même dictionnaire que le site (lu dans assets/vehicle-title-20261103.js, une seule source) → titre Google, nom du produit (données structurées), titre de page, cartes des pages catégories/villes, fil d'Ariane. Véhicules seulement (équipements, pièces, vélos et autres rubriques : inchangé).
