@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Prospection : mail « votre stock est prêt, regardez » + bouton « Je publie »
+- Anthony : « fais comme si c'était ton site ». Constat : 521 pros contactés, 31 clics, 0 inscription → changer le message avant d'envoyer plus.
+- Quota remis à 25/jour/boîte relances comprises (migration `prospect_claim_shared_quota_preview_first`), premiers mails d'abord aux prospects dont l'aperçu est prêt (363 prêts : 334 agences, 29 garages).
+- `prospect-mailer` v15 : si l'aperçu a ≥ 3 annonces → objet « {{societe}} : vos N véhicules/biens sont déjà prêts sur Abracadeal », mail court avec le lien personnel vers l'aperçu et « Je publie » ; relance assortie seulement si le 1er mail était celui-là (`mail_kind`). Sinon anciens mails inchangés.
+- `pro-fondateur.html?r=…` : sous l'aperçu, formulaire « Je publie » (SIRET + e-mail + téléphone facultatif + case d'accord) → `prospect_accept` (contrôle du SIRET, lien personnel obligatoire, 3 envois max) → `private.prospect_acceptances` (+ `siren_matches` si le SIREN du prospect est connu), relance arrêtée, ligne `accept` dans `prospection_logs`. **Rien n'est publié automatiquement** : l'import se lance ensuite (accord + SIRET = règle d'Anthony respectée). Testé sur iPhone simulé (SIRET faux refusé, accord enregistré).
+- Tâche de surveillance des mails : ajoute les accords « Je publie » à son compte rendu.
+
 ### 02/11/2026 — Claude — Prospection : relances en plus des premiers mails
 - État constaté : 521 entreprises contactées (52 sur 3 jours), 874 mails dont 320 relances, 31 clics, 0 inscription ; aperçus prêts pour 531 prospects (470 avec ≥ 5 annonces), mais seuls 85 des 521 contactés en avaient un à l'envoi.
 - Demande d'Anthony : garder les relances automatiques, mais « envoyer en plus du prospect ». Avant, le quota de chaque boîte (25/jour) était partagé moitié-moitié entre premiers mails et relances.
