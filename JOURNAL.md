@@ -2106,3 +2106,6 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Corrigé dans la base : 8 prospects avec une adresse qui n'est pas celle du pro passés en `error` (« à remplacer avant tout envoi ») : SKH Global Motors (railway), Angers Auto Prestige (ovhcloud), Škoda Avignon (strikingly), Giro Bike (dcinformatique.ovh), Courtassur (ionos), European Riviera Properties (apiwork), Meca Racing 01 (webador), Seyssinet Alpes Auto (faute de frappe dans le domaine).
 - `prospect-mailer` v14 : plus aucun envoi (1er mail ni relance) vers une adresse d'hébergeur / créateur de site / logiciel (railway, ovh, ionos, wix, strikingly, webador, apimo/apiwork, annonces-automobile, ubiflow…).
 - Le reste : WeeCars a bien répondu « ok » (déjà traité) ; Agencia désinscrit (« STOP ») et bien en opposition ; aucun rebond nouveau à part ceux déjà gérés automatiquement ; rapports DMARC habituels.
+
+### 02/11/2026 — Claude — pro-stock-sync : aperçu complet en lecture à blanc
+- `auto_review_dry` accepte `preview_limit` (max 300, défaut 6 inchangé) pour récupérer toutes les fiches d'un site avec photo, sans rien enregistrer — utilisé pour l'aperçu de l'agence Infinity Group Immo.
