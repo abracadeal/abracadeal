@@ -4,7 +4,7 @@ function privateIP(ip:string){
  const a=ip.split('.').map(Number);
  return a[0]===0||a[0]===10||a[0]===127||a[0]>=224||(a[0]===169&&a[1]===254)||(a[0]===172&&a[1]>=16&&a[1]<=31)||(a[0]===192&&a[1]===168)||(a[0]===100&&a[1]>=64&&a[1]<=127);
 }
-async function remoteImage(raw:string){
+export async function remoteImage(raw:string){
  let url=new URL(raw);
  for(let redirects=0;redirects<=4;redirects++){
   if(!['http:','https:'].includes(url.protocol)||url.username||url.password||(url.port&&!['80','443'].includes(url.port)))throw Error('URL de photo non autorisée');
@@ -34,9 +34,15 @@ async function remoteImage(raw:string){
  }
  throw Error('Trop de redirections pour la photo');
 }
+// 02/11/2026 (Anthony : place de stockage ; « si on a un aperçu pour chaque site testé, c'est que ça fonctionne ») :
+// seule la 1re photo d'une annonce importée est copiée chez nous (vignettes, aperçu WhatsApp/Facebook, Google Images) ;
+// les suivantes restent affichées depuis le site du pro (vérifiées par la modération sans être stockées, mises à jour
+// par la synchro). Avant : 1 471 photos copiées pour un seul garage de 48 véhicules.
 export async function stageImportedImages(admin:any,listing:any,photos:any[]){
+ const first=[...photos].sort((a,b)=>(Number(a.position)||0)-(Number(b.position)||0))[0];
  for(const photo of photos){
   if(!/^https?:\/\//i.test(photo.storage_path))continue;
+  if(photo!==first)continue;
   const image=await remoteImage(photo.storage_path);
   const path=listing.owner_id+'/'+listing.id+'/'+crypto.randomUUID()+'.'+image.ext;
   fail(await admin.storage.from('listing-images-pending').upload(path,image.bytes,{contentType:image.type,upsert:false}));

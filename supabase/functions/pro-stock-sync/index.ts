@@ -1211,7 +1211,9 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     const listingId=listing.id;
     await upsertContact(feed.owner_id,listingId,r);
     if(r.photos.length){
+     /* 02/11/2026 : photos remplacées par la synchro → leurs fichiers stockés chez nous sont supprimés (ils restaient sans annonce) */const oldStored=(must(await admin.from('listing_photos').select('storage_path').eq('listing_id',listingId))||[]).map((p:any)=>String(p.storage_path)).filter((x:string)=>x&&!/^https?:\/\//i.test(x));
      must(await admin.from('listing_photos').delete().eq('listing_id',listingId));
+     if(oldStored.length){for(const b of ['listing-images','listing-images-pending'])await admin.storage.from(b).remove(oldStored).catch(()=>{});}
      // Read the actual entitlement after database triggers; never enlarge an existing photo cap.
      const allowedLimit=Math.max(1,Math.min(45,Number(listing.photo_limit||15)));
      if(r.photos.length>allowedLimit)photoTruncated++;

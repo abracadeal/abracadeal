@@ -30,7 +30,7 @@ let profile=null,showroom=null,listings=[],reviews=[],filtered=[],shown=24,curre
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const money=v=>v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €';
 const showroomUrl=path=>path?sb.storage.from('pro-showroom').getPublicUrl(path).data?.publicUrl||'':'';
-const photoUrl=path=>path?sb.storage.from('listing-images').getPublicUrl(path).data?.publicUrl||'':'';
+const photoUrl=path=>!path?'':/^https?:\/\//i.test(String(path))?String(path):sb.storage.from('listing-images').getPublicUrl(path).data?.publicUrl||'';/* 02/11/2026 : photos d'annonces importées affichées depuis le site du pro */
 const initials=name=>String(name||'PRO').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'PRO';
 const catLabel=v=>({vehicules:'Auto / Moto',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Autres';
 

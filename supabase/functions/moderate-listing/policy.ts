@@ -12,7 +12,7 @@ export function prohibitedTerms(listing:any){
 export async function hashPhotos(admin:any,photos:any[]){
  let reused=0;
  for(const p of photos){
-  if(/^https?:\/\//i.test(p.storage_path))throw Error('Photo externe non importée');
+  if(/^https?:\/\//i.test(p.storage_path))continue;/* 02/11/2026 : photo affichée depuis le site du pro (non stockée) */
   const {data,error}=await admin.storage.from(p.storage_bucket).download(p.storage_path);
   if(error||!data)throw error||Error('Photo inaccessible pour empreinte');
   const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await data.arrayBuffer()))).map(b=>b.toString(16).padStart(2,'0')).join('');

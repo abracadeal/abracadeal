@@ -32,7 +32,7 @@ Deno.serve(async req=>{
   if(!r.price_only&&r.copy_photos){
    const {data:photos,error:e}=await admin.from('listing_photos').select('*').eq('listing_id',body.listing_id).order('position');if(e)throw e;
    for(const p of photos||[]){
-    if(/^https?:/.test(p.storage_path))throw new Error('Photo externe : import requis');
+    /* 02/11/2026 : photos d'annonces importées affichées depuis le site du pro (non stockées) : reprises telles quelles */if(/^https?:/.test(p.storage_path)){const ext=await admin.from('listing_photos').insert({listing_id:r.listing_id,storage_path:p.storage_path,storage_bucket:'listing-images',position:p.position});if(ext.error)throw ext.error;continue;}
     const {data:bytes,error:read}=await admin.storage.from(p.storage_bucket).download(p.storage_path);if(read)throw read;
     const path=a.user.id+'/'+r.listing_id+'/'+crypto.randomUUID()+'.webp';
     const uploaded=await admin.storage.from('listing-images-pending').upload(path,bytes,{contentType:bytes.type||'image/webp'});if(uploaded.error)throw uploaded.error;

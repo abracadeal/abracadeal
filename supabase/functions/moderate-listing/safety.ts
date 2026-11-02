@@ -1,10 +1,11 @@
+import {remoteImage} from './import-images.ts';
 export const MODEL='omni-moderation-latest';
 const must=(r:any)=>{if(r.error)throw r.error;return r.data;};
 export function snapshot(listing:any,photos:any[]){
  return {text:`${listing.title||''}\n${listing.description||''}`,photos:[...photos].sort((a,b)=>a.id.localeCompare(b.id)).map(p=>({id:p.id,path:p.storage_path}))};
 }
 export async function getPhotos(admin:any,id:string){
- return must(await admin.from('listing_photos').select('id,storage_path,storage_bucket').eq('listing_id',id))||[];
+ return must(await admin.from('listing_photos').select('id,storage_path,storage_bucket,position').eq('listing_id',id))||[];
 }
 export async function quarantine(admin:any,photos:any[]){
  for(const p of photos){
@@ -22,7 +23,11 @@ export async function scanSafety(admin:any,listing:any,photos:any[],fetcher=fetc
  const inputs:any[][]=[[{type:'text',text:`${listing.title||''}\n${listing.description||''}`}]];
  for(const p of photos){
   let url=p.storage_path;
-  if(!/^https?:\/\//i.test(url)){
+  if(/^https?:\/\//i.test(url)){
+   // Photo affichée depuis le site du pro : téléchargée pour l'analyse (contrôles d'adresse et de taille), jamais stockée.
+   const img=await remoteImage(url);let bin='';for(let i=0;i<img.bytes.length;i+=32768)bin+=String.fromCharCode(...img.bytes.subarray(i,i+32768));
+   url=`data:${img.type};base64,${btoa(bin)}`;
+  }else{
    const signed=must(await admin.storage.from(p.storage_bucket).createSignedUrl(p.storage_path,120));
    if(!signed?.signedUrl)throw new Error('Photo inaccessible');
    url=signed.signedUrl;
