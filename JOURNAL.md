@@ -18,6 +18,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 03/11/2026 (nuit) — Claude — Titres propres aussi dans les pages Google
+- Question d'Anthony : « les titres avec les mises à jour, ça va être comment ? » → le formatage est fait à l'affichage, donc chaque synchronisation (nouvelles annonces, titres modifiés chez le pro) est mise en forme automatiquement, rien à refaire. Mais les pages Google (annonce/…, annonces/…) gardaient l'ancien formatage (« DS DS 7 Crossback 2.0 Bluehdi »).
+- `scripts/build_share_pages.py` : `display_title` / `vehicle_title`, même dictionnaire que le site (lu dans assets/vehicle-title-20261103.js, une seule source) → titre Google, nom du produit (données structurées), titre de page, cartes des pages catégories/villes, fil d'Ariane. Véhicules seulement (équipements, pièces, vélos et autres rubriques : inchangé).
+
 ### 03/11/2026 (nuit) — Claude — Titres de véhicules propres + showroom sans « 0 abonné / Aucun avis »
 - Revue visuelle (iPhone et ordinateur, vrai catalogue) : mise en page propre, mais titres de voitures « amateurs » (« Mini mini 2.0 205 cooper s jcw », « Ds ds 7 », « RENAULT TWINGO Twingo III », « Bmw serie 1 116d dkg f40 m sport »).
 - Nouveau `assets/vehicle-title-20261103.js` (chargé par index.html et pro.html) : `displayVehicleTitle` — marques (BMW, DS, MG, Citroën…), sigles (TDI, TSI, BlueHDi, dCi, BVA, DSG, 4Matic, xDrive, AMG, JCW…), codes (A3, X1, GLA, F40, 116d), chiffres romains (III, VII), mots répétés supprimés, casse déjà travaillée conservée. **Affichage seulement** (cartes, fiche, en-tête, annonces liées, showroom) ; les annonces ne sont pas modifiées. Testé sur les 127 titres WeeCars.

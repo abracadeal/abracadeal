@@ -357,13 +357,68 @@ def readable_title(t):
     return " ".join(w(x) for x in t.split(" "))
 
 
+def _load_vehicle_words():
+    """03/11/2026 : même dictionnaire que le site (assets/vehicle-title-20261103.js), une seule source."""
+    try:
+        js = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "assets", "vehicle-title-20261103.js"), encoding="utf-8").read()
+        body = re.search(r"const VEH_WORDS=\{(.*?)\};", js, re.S).group(1)
+        return {(a or b): c for a, b, c in re.findall(r"(?:'([^']+)'|([A-Za-zÀ-ÿ0-9&-]+)):'([^']*)'", body)}
+    except Exception:
+        return {}
+
+
+VEH_WORDS = _load_vehicle_words()
+
+
+def _veh_word(w, first):
+    low = w.lower()
+    if low in VEH_WORDS:
+        v = VEH_WORDS[low]
+        return v[:1].upper() + v[1:] if first and re.match(r"^[a-zà]", v) else v
+    if re.fullmatch(r"(ii|iii|iv|vi|vii|viii)", w, re.I):
+        return w.upper()
+    if re.fullmatch(r"(bva|bvm|eat|edc|dsg)\d{1,2}", w, re.I):
+        return w.upper()
+    if re.fullmatch(r"[a-z]{1,2}\d{1,3}[a-z]?", w, re.I):
+        return w.upper()
+    if re.fullmatch(r"\d+[a-z]{1,2}", w, re.I):
+        return low
+    if re.search(r"\d", w):
+        return w
+    letters = re.sub(r"[^A-Za-zÀ-ÖØ-öø-ÿ]", "", w)
+    if letters and not (letters == letters.upper() or letters == letters.lower()):
+        return w
+    return re.sub(r"(^|[-'’])([a-zà-öø-ÿ])", lambda m: m.group(1) + m.group(2).upper(), low)
+
+
+def vehicle_title(t):
+    """03/11/2026 : « DS DS 7 Crossback 2.0 BLUEHDI 180 » → « DS 7 Crossback 2.0 BlueHDi 180 » (comme sur le site)."""
+    out = []
+    for i, p in enumerate(str(t or "").split()):
+        w = _veh_word(p, i == 0)
+        if out and out[-1].lower() == w.lower() and re.search(r"[a-z]", w, re.I):
+            continue
+        out.append(w)
+    return " ".join(out)
+
+
+def display_title(listing):
+    t = (listing.get("title") or "Annonce").strip()
+    desc = listing.get("description") or ""
+    sub = (re.search(r"^\[ABRACA_SUB:([^\]]+)\]", desc, re.M) or [None, ""])[1]
+    if listing.get("category") == "vehicules" and VEH_WORDS and not re.search(r"^\[ABRACA_EQUIP:", desc, re.M) \
+            and not str(sub).startswith("equipement") and sub not in ("pieces-detachees", "velos"):
+        return vehicle_title(t)
+    return readable_title(t)
+
+
 VEHICLE_EQUIP_SUBS = {"velos", "equipement-auto", "equipement-moto", "equipement-caravaning", "equipement-nautisme",
                       "equipement-velo", "pieces-detachees", "equipements"}
 
 
 def seo_title(listing, meta):
     """Titre Google : titre du vendeur + infos clés absentes du titre (marque, modèle, version, année, km)."""
-    title = readable_title((listing.get("title") or "Annonce").strip())
+    title = display_title(listing)
     low = title.lower()
     extra = []
     vm = meta["vmeta"] or {}
@@ -457,7 +512,7 @@ def json_ld(listing, meta, photos, page_url, desc, crumbs):
     offer["itemCondition"] = "https://schema.org/NewCondition" if cond.startswith("neuf") else "https://schema.org/UsedCondition"
     if listing.get("city"):
         offer["areaServed"] = {"@type": "City", "name": listing["city"]}
-    data = {"@context": "https://schema.org", "@type": "Product", "name": (listing.get("title") or "Annonce").strip(),
+    data = {"@context": "https://schema.org", "@type": "Product", "name": display_title(listing),
             "description": desc[:5000], "url": page_url, "sku": listing["id"], "offers": offer}
     if photos:
         data["image"] = photos
@@ -633,7 +688,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     lid = listing["id"]
     e = lambda s: html.escape(str(s), quote=True)
     text, meta = parse_description(listing.get("description"))
-    title = (listing.get("title") or "Annonce").strip()
+    title = display_title(listing)
     price = money(listing.get("price"))
     if price and listing.get("category") == "vacances":
         price += " / nuit"
@@ -728,7 +783,7 @@ def listing_card(item):
     if price and l.get("category") == "vacances":
         price += " / nuit"
     img = photos[0] if photos else DEFAULT_PHOTO
-    title = (l.get("title") or "Annonce").strip()
+    title = display_title(l)
     return (f'<li><a href="/annonce/{e(l["id"])}/"><img src="{e(img)}" alt="{e(title)}" loading="lazy" width="400" height="300">'
             f'<span class="t">{e(title)}</span>{f"<span class=p>{e(price)}</span>" if price else ""}'
             f'<span class="c">{e(l.get("city") or "")}</span></a></li>')
@@ -856,7 +911,7 @@ def build_hubs(items):
                 crumbs.append((cities[it["city_key"]], hub_url(main_cat, it["city_key"])))
         elif it["city_key"] in pages and it["city_key"] in cities:
             crumbs.append((f"Annonces à {cities[it['city_key']]}", hub_url(None, it["city_key"])))
-        crumbs.append(((l.get("title") or "Annonce").strip(), f"{SITE}/annonce/{l['id']}/"))
+        crumbs.append((display_title(l), f"{SITE}/annonce/{l['id']}/"))
         it["crumbs"] = crumbs
     return pages
 
