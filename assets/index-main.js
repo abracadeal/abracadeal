@@ -3672,18 +3672,26 @@ const kwHayCache=new Map();
 function kwPrepareHay(hay){
   let h=kwHayCache.get(hay);
   if(h)return h;
-  const text=kwFold(hay);
-  h={text,words:[...new Set(text.split(' ').filter(Boolean).map(kwStem))]};
+  const text=kwFold(hay),glued=kwGlue(text);
+  h={text:glued===text?text:text+' '+glued,words:[...new Set((text+' '+glued).split(' ').filter(Boolean).map(kwStem))]};
   if(kwHayCache.size>5000)kwHayCache.clear();
   kwHayCache.set(hay,h);
   return h;
 }
-function kwTokens(q){return kwFold(q).split(' ').filter(t=>t&&!KW_STOPWORDS.has(t));}
+/* 02/11/2026 (Anthony : « c63 ne trouve rien, c 63 trouve des vans et une Alfa ») : lettres + chiffres collés
+   (« c 63 » = « c63 », « a 3 » = « a3 », « x 5 » = « x5 ») dans la recherche comme dans les annonces ; un mot court
+   ou avec des chiffres doit être un mot entier de l'annonce (« 63 » ne trouve plus « 63000 », « c » ne trouve plus tout). */
+function kwGlue(t){return String(t||'').replace(/\b([a-z]{1,3}) (?=\d{1,4}[a-z]{0,3}\b)/g,'$1');}
+function kwTokens(q){return kwGlue(kwFold(q)).split(' ').filter(t=>t&&!KW_STOPWORDS.has(t));}
 function keywordMatches(hay,tokens){
   if(!tokens.length)return true;
   const h=kwPrepareHay(hay);
   return tokens.every(t=>{
     const st=kwStem(t);
+    if(/\d/.test(t)||t.length<=2){
+      if(/^\d+$/.test(t))return h.words.includes(t);
+      return h.words.some(w=>w===st||w===t||(t.length>=3&&/[a-z]/.test(t)&&w.startsWith(st)));
+    }
     if(h.text.includes(t)||h.text.includes(st))return true;
     if(st.length<4)return false;
     const tol=st.length>=8?2:1;

@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Recherche : « c63 » / « c 63 »
+- Remarque d'Anthony : « c63 » ne trouvait rien ; « c 63 » trouvait les deux C 63 AMG mais aussi 2 vans et une Alfa Romeo.
+- Cause : « c63 » n'apparaît pas tel quel (« C 63 AMG ») ; et chaque mot était cherché comme un morceau de texte (« c » partout, « 63 » dans 63000, 163…).
+- `index-main.js` (v=20261102-recherche-c63) : lettres + chiffres collés des deux côtés (`kwGlue` : « c 63 » = « c63 », « a 3 » = « a3 ») ; un mot de 1-2 lettres ou avec des chiffres doit correspondre à un mot entier (« c63 » trouve aussi « C 63S »). Testé : c63, c 63, 63, a3, x5, 208, 2020, classe c (sans les Classe V), 220 d, bequile, 3 pieces.
+
 ### 02/11/2026 — Claude — Accueil allégé + recherche de sites la nuit
 - Demande d'Anthony : recherche de sites la nuit, site le plus rapide possible (« quand il y aura plusieurs pros ça va être compliqué »).
 - Cron `abracadeal-prospect-site-precheck` et `abracadeal-prospect-preview-fill` : de 6h-17h/20h UTC à 22h-5h UTC (23h-6h à Paris).
