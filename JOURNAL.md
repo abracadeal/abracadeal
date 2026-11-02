@@ -2016,3 +2016,7 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 ### 02/11/2026 — Claude — Bannière WeeCars Angers
 - Image fournie par Anthony (logo WeeCars, fond bleu) : `assets/pro-banners/weecars-angers.jpg`, copiée dans le stockage `pro-showroom` et posée en `banner_path` de la vitrine (signature-motors-group-weecars).
 - Fonction ponctuelle `admin-set-showroom-banner-once` (clé interne obligatoire, source limitée au dépôt GitHub) : réutilisable pour poser la bannière d'un autre pro.
+
+### 02/11/2026 — Claude — WeeCars Angers : nom affiché et adresse courte
+- Nom affiché : « WeeCars Angers » (raison sociale SIGNATURE MOTORS GROUP (WEECARS) conservée dans `pro_verifications`).
+- Adresse : abracadeal.fr/weecars-angers. L'ancienne (signature-motors-group-weecars), envoyée dans le mail de bienvenue, fonctionne toujours : nouvelle colonne `pro_showrooms.old_slugs`, lue par `pro_slug_resolve` (`supabase/2026-11-02-pro-old-slugs.sql`, appliqué).
