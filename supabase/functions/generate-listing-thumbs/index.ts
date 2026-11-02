@@ -107,5 +107,13 @@ Deno.serve(async (req) => {
     const { error: rErr } = await admin.storage.from("listing-thumbs").remove(paths);
     if (!rErr) { for (const p of paths) await admin.rpc("thumbs_forget", { p_path: p }); removed = paths.length; }
   }
-  return json({ ok: true, done: done.length, failed, removed });
+  // 02/11/2026 (Anthony : « 271 photos ») : copies « en attente » restées après publication (chaque photo stockée deux fois).
+  let pendingRemoved = 0;
+  const { data: dups } = await admin.rpc("pending_photo_duplicates", { p_limit: 100 });
+  const dupPaths = ((dups || []) as { name: string }[]).map((d) => String(d.name));
+  if (dupPaths.length) {
+    const { error: pErr } = await admin.storage.from("listing-images-pending").remove(dupPaths);
+    if (!pErr) pendingRemoved = dupPaths.length;
+  }
+  return json({ ok: true, done: done.length, failed, removed, pending_removed: pendingRemoved });
 });

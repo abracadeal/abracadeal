@@ -31,3 +31,19 @@ as $$
        ) f where f.storage_path = t.storage_path)
    limit greatest(1, least(p_limit, 200))
 $$;
+
+-- 02/11/2026 (Anthony : « 271 photos, j'y crois pas ») : copies en attente restées après publication (stockage x2),
+-- supprimées par generate-listing-thumbs. La mise en quarantaine recopie la photo publiée si besoin.
+create or replace function public.pending_photo_duplicates(p_limit integer)
+ returns table(name text) language sql stable security definer set search_path to ''
+as $$
+  select o.name from storage.objects o
+   where o.bucket_id = 'listing-images-pending'
+     and o.name not like 'retention-evidence/%'
+     and o.created_at < now() - interval '10 minutes'
+     and exists (select 1 from storage.objects p where p.bucket_id = 'listing-images' and p.name = o.name)
+     and not exists (select 1 from public.listing_photos lp where lp.storage_path = o.name and lp.storage_bucket = 'listing-images-pending')
+   limit greatest(1, least(p_limit, 200))
+$$;
+revoke all on function public.pending_photo_duplicates(integer) from public, anon, authenticated;
+grant execute on function public.pending_photo_duplicates(integer) to service_role;
