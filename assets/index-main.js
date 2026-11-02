@@ -3448,12 +3448,22 @@ let catalogLoadedOnce=false;
 // 02/11/2026 (Anthony : « le site est très trop lent ») : catalogue allégé via public_catalog() — description courte
 // (balises [ABRACA_*] gardées, sans la liste d'équipements, texte coupé à 600 caractères) ; la fiche et la modification
 // rechargent le texte complet (ensureFullListing). Si la fonction échoue, ancienne requête complète.
+// 02/11/2026 (Anthony : « premier affichage lent sur mobile ») : (1) le catalogue est demandé dès le début de la page
+// (window.__abracaCatalogPrefetch, index.html) ; (2) le dernier catalogue reçu est gardé sur le téléphone (12 h) et affiché
+// tout de suite à la visite suivante, puis remplacé par le catalogue à jour dès qu'il arrive (une à deux secondes).
+const CATALOG_CACHE_KEY='abraca_catalog_v1',CATALOG_CACHE_MAX_MS=12*3600e3;
+function readCatalogCache(){try{const c=JSON.parse(localStorage.getItem(CATALOG_CACHE_KEY)||'null');if(c&&Array.isArray(c.d)&&c.d.length&&Date.now()-Number(c.t||0)<CATALOG_CACHE_MAX_MS)return c.d;}catch(_){}return null;}
+function writeCatalogCache(d){try{if(!Array.isArray(d)||!d.length)return;const v=JSON.stringify({t:Date.now(),d});if(v.length<3e6)localStorage.setItem(CATALOG_CACHE_KEY,v);else localStorage.removeItem(CATALOG_CACHE_KEY);}catch(_){try{localStorage.removeItem(CATALOG_CACHE_KEY);}catch(__){}}}
 function fetchPublicCatalog(){
   const full=()=>sb.from('listings').select(PUBLIC_CATALOG_SELECT)
     .is('revision_of',null).eq('status','active').eq('visibility_scope','public')
     .order('created_at',{ascending:false});
-  return Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
+  const rpc=()=>Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
+  const pre=window.__abracaCatalogPrefetch;window.__abracaCatalogPrefetch=null;
+  const p=pre?Promise.resolve(pre).then(d=>Array.isArray(d)?{data:d,error:null}:rpc()).catch(()=>rpc()):rpc();
+  return p.then(r=>{if(r&&!r.error&&Array.isArray(r.data)&&r.data.length&&r.data[0]&&'description_cut' in r.data[0])writeCatalogCache(r.data);return r;});
 }
+let catalogCacheTried=false;
 const fullListingLoads=new Map();
 function ensureFullListing(a){
   if(!a||!a.description_cut||!a.id)return Promise.resolve(true);
@@ -3475,6 +3485,18 @@ function getPublicCatalog(){
   const now=performance.now();
   const startup=now<PUBLIC_CATALOG_STARTUP_MS;
   if(startup && publicCatalogPromise && now-publicCatalogAt<PUBLIC_CATALOG_STARTUP_MS) return publicCatalogPromise;
+  if(startup&&!catalogCacheTried&&!ABRACA_EMBED&&!IMPORT_PREVIEW){
+    catalogCacheTried=true;
+    const cached=readCatalogCache();
+    if(cached){
+      publicCatalogAt=now;
+      const fresh=Promise.resolve(fetchPublicCatalog()).catch(error=>({data:null,error}));
+      fresh.then(r=>{if(r&&!r.error&&Array.isArray(r.data)){publicCatalogPromise=Promise.resolve(r);publicCatalogAt=performance.now();
+        if(!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});}});
+      publicCatalogPromise=Promise.resolve({data:cached,error:null});
+      return publicCatalogPromise;
+    }
+  }
   publicCatalogAt=now;
   publicCatalogPromise=Promise.resolve(fetchPublicCatalog()).catch(error=>({data:null,error}));
   if(!startup){const p=publicCatalogPromise;setTimeout(()=>{if(publicCatalogPromise===p)publicCatalogPromise=null;},0);}

@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Premier affichage plus rapide sur mobile
+- Remarque d'Anthony : c'est le premier affichage qui est lent sur mobile.
+- `index.html` : le catalogue (`public_catalog`) est demandé dès le début de la page, en parallèle des styles et scripts (`window.__abracaCatalogPrefetch`, sauf fiche intégrée / lien d'annonce / aperçu) ; supabase-js servi depuis le site (`assets/supabase-js-2.118.0.js`, plus de connexion à jsdelivr) ; polices Google chargées sans bloquer l'affichage.
+- `index-main.js` (v=20261102-demarrage-rapide) : le dernier catalogue reçu est gardé sur l'appareil 12 h (`abraca_catalog_v1`, < 3 Mo) et affiché immédiatement à la visite suivante, puis remplacé par le catalogue à jour dès son arrivée.
+- Testé (Playwright, réponses simulées) : 1 seul appel catalogue (préchargé), annonces affichées dès 300 ms à la 2e visite, fiche → texte complet rechargé, aucune erreur.
+
 ### 02/11/2026 — Claude — Accueil : plus de doublons entre « D'après vos recherches » et « Récemment consultées »
 - Remarque d'Anthony (capture) : les mêmes C 63 dans les deux rubriques.
 - `index-main.js` (v=20261102-sans-doublon) : « D'après vos recherches récentes » exclut les annonces déjà affichées dans « Récemment consultées » (rubrique cachée s'il ne reste rien) ; les recherches passées utilisent la même recherche par mots-clés que le site (« c63 » = « c 63 »).
