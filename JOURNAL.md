@@ -18,6 +18,12 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Showroom (mobile) : la flèche « Retour » de la fiche renvoyait sur l'accueil
+- Remarque d'Anthony : sur mobile, en sortant d'une annonce ouverte depuis le showroom, on arrivait sur la page principale.
+- Cause : la barre du haut et la barre du bas du showroom (app-shell, z-index 2147482000/2147482001) passaient AU-DESSUS de la fenêtre de la fiche (z-index 99999). Toucher « Retour » en haut de la fiche touchait en réalité le logo Abracadeal du showroom → accueil (et en bas, la barre du showroom recouvrait « Voir le numéro » / « Message »).
+- `pro.html` : fenêtre de la fiche (préchargée ou non) en z-index 2147483600, au-dessus des barres.
+- Testé (iPhone simulé) : flèche Retour, retour du navigateur, 3 ouvertures de suite → on reste sur /weecars-angers.
+
 ### 02/11/2026 — Claude — Annonces dans un ordre aléatoire
 - Demande d'Anthony : « il faut que les annonces tournent aléatoirement ».
 - `index.html` : nouveau tri « Au hasard », par défaut (« Plus récentes », « Prix croissant/décroissant » toujours au choix). `index-main.js` (v=20261102-hasard) : ordre tiré au hasard à chaque visite (graine au chargement, stable pendant la visite : la liste ne saute pas à chaque redessin). Toujours au plus 2 annonces d'affilée du même vendeur ; annonces boostées toujours en positions 1, 4, 7. Recherche par mots-clés, « Mes annonces », favoris et modération : plus récentes d'abord.
