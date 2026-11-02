@@ -38,7 +38,13 @@ export async function setNear(city:string,postal:string,rows:any[]=[]){
   for(const r of rows.slice(0,400)){const cp=String(r?.code_postal??r?.cp??'').trim();if(!/^\d{5}$/.test(cp))continue;
     const v=String(r?.ville??r?.city??'');const m=v?(l.byName.get(norm(v))||[]).find(x=>x.cps.includes(cp)):undefined;if(m?.lat){pts.push(m);continue;}
     const byCp=(l.byCp.get(cp)||[]).sort((a,b)=>b.pop-a.pop)[0];if(byCp?.lat)cpPts.push(byCp);}
-  const use=pts.length>=2?pts:cpPts.length>=2?cpPts:[];if(!use.length)return;
+  let use=pts.length>=2?pts:cpPts.length>=2?cpPts:[];
+  if(!use.length){/* codes inconnus (Lecoeur : codes INSEE) : département le plus fréquent, autour de sa plus grande commune */
+    const dep=new Map<string,number>();for(const r of rows.slice(0,400)){const cp=String(r?.code_postal??r?.cp??'').trim();if(/^\d{5}$/.test(cp))dep.set(cp.slice(0,2),(dep.get(cp.slice(0,2))||0)+1);}
+    const top=[...dep.entries()].sort((a,b)=>b[1]-a[1])[0];
+    if(top&&top[1]>=2){let big:Commune|null=null;for(const [cp,arr] of l.byCp)if(cp.startsWith(top[0]))for(const c of arr)if(!big||c.pop>big.pop)big=c;if(big?.lat)use=[big];}
+  }
+  if(!use.length)return;
   const med=(a:number[])=>{const s=[...a].sort((x,y)=>x-y);return s[Math.floor(s.length/2)];};
   NEAR={lat:med(use.map(p=>p.lat)),lon:med(use.map(p=>p.lon))};
 }
