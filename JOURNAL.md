@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : bug « je clique sur la voiture et j'ai un casque » (agrandissement des photos)
+- Cause (`assets/index-main.js`, dessin de la liste des annonces) : à chaque vignette dessinée, `currentDetailPhotoUrls` / `currentDetailListing` (photos de la fiche ouverte) étaient écrasés par ceux de la vignette. Si la liste se redessinait pendant qu'une fiche était ouverte (chargement des annonces, fiche ouverte depuis un showroom ou un lien partagé), « Agrandir » montrait les photos et le titre de la dernière annonce de la liste (ici un casque). Lignes retirées ; seule l'ouverture d'une fiche les remplit. Version `20261102-lightboxfix`.
+
 ### 02/11/2026 — Claude : référencement, maillage interne
 - Pied de page de l'accueil : liens vers « Voitures d'occasion » (/annonces/voitures-occasion/), « Voitures par marque et budget » (/auto/) et « Garages sur Abracadeal » (/garage/) — l'accueil est la page la plus forte du site, ses liens font découvrir ces pages à Google.
 - Pages publiques d'annonce (`build_share_pages.py`, VERSION 9) : annonce d'un pro qui a sa page publique (pro-pages.json) → « Vendu par WeeCars Angers · voir ses 24 annonces » vers /garage/<nom-ville>/. Chaque annonce renforce ainsi la page du garage, et la page du garage mène à toutes ses annonces. `owner_id` ajouté aux champs lus. Testé hors ligne (fixture).

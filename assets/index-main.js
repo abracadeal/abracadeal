@@ -4035,8 +4035,9 @@ function renderAds(){
   grid.innerHTML=ads.map(a=>{
     if(a.__homeHeader) return homeGroupHeaderHtml(a);
     const photos=visiblePhotosFor(a);
-  window.currentDetailPhotoUrls=photos.map(p=>photoUrl(p.storage_path));
-  window.currentDetailListing={id:a.id,owner_id:a.owner_id,title:a.title||'Annonce',price:money(a.price),show_phone:!!a.show_phone,imported:!!abracaWmOverlay(a)};
+    /* 02/11/2026 (Anthony : « je clique sur la voiture et j'ai un casque qui apparaît ») : la liste des vignettes ne doit jamais
+       remplacer les photos de la fiche ouverte (avant : chaque vignette écrasait currentDetailPhotoUrls → l'agrandissement montrait
+       les photos de la dernière annonce de la liste dès que la liste se redessinait). */
     const photoUrls=photos.map(p=>photoUrl(p.storage_path));
     const img=photoUrls.length?`<img class="ad-photo-img" ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img class="ad-photo-img abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal">`;
     const carouselHtml=photoUrls.length>1?`<button type="button" class="carousel-arrow carousel-prev" aria-label="Photo précédente" onclick="event.stopPropagation();carouselStep(this.parentElement,-1)">‹</button><button type="button" class="carousel-arrow carousel-next" aria-label="Photo suivante" onclick="event.stopPropagation();carouselStep(this.parentElement,1)">›</button>`:'';
