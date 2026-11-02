@@ -18,6 +18,13 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : photos importées affichées depuis le site du pro (Anthony : « si on a un aperçu pour chaque site testé, c'est que ça fonctionne »)
+- `moderate-listing` v29 (`import-images.ts`) : seule la 1re photo d'une annonce importée est copiée chez nous (vignettes, aperçu WhatsApp/Facebook, Google Images) ; les suivantes restent des liens vers le site du pro. Life Cars : ~48 photos stockées au lieu de 1 471 (~8 Mo au lieu de ~240 Mo).
+- Modération inchangée sur le fond : chaque photo externe est téléchargée (contrôles d'adresse et 5 Mo max) puis envoyée à l'analyse en base64, jamais stockée (`safety.ts`). Empreinte anti-réutilisation seulement pour les photos stockées (`policy.ts`).
+- `pro-stock-sync` v232 : quand la synchro remplace les photos d'une annonce, les fichiers des anciennes photos stockées sont supprimés (ils restaient sans annonce).
+- `prepare-listing-edit` v4 : modifier une annonce importée reprend ses photos externes telles quelles (avant : erreur « Photo externe : import requis »). `pro.html` affiche les photos externes.
+- Fonctions passées en déploiement « version figée par commit » (moderate-listing, prepare-listing-edit). Santé + sonde de modération OK après déploiement. **À vérifier à l'import Life Cars** : 1re annonce publiée avec 1 photo stockée + photos externes, modération OK.
+
 ### 02/11/2026 — Claude : place des photos (Anthony : « on peut encore compresser, la qualité était top »)
 - Constat : photos importées copiées telles quelles (pas de recompression) ; vignettes 480 px JPEG 70 générées pour **toutes** les photos alors que les cartes n'affichent que la 1re.
 - Changé (`supabase/2026-11-02-thumbs-first-photo-only.sql`) : miniatures seulement pour la 1re photo de chaque annonce ; les autres sont supprimées par le ménage de `generate-listing-thumbs`.
