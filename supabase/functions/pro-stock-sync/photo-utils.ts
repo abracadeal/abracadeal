@@ -7,14 +7,16 @@ export function isPlaceholderPhoto(raw:string,depth=0):boolean{
   if(/^(?:placeholder(?:[-_]image)?|default(?:[-_](?:image|photo|picture))?|(?:image|photo|picture)[-_]default|no[-_]?(?:photo|image|picture)(?:[-_]available)?|sans[-_]?(?:photo|image)|(?:photo|image)[-_](?:absente?|indisponible|a[-_]venir)|loading|loader|blank|transparent|spacer|pixel|plchldr)(?:[-_]?\d+)?$/.test(name))return true;/* 02/11/2026 : thème WordPress Motors « plchldr350.png » (complexeautomobile) */
   if(/\.hei[cf]$/i.test(path))return true;/* photos iPhone HEIC : non affichées par Chrome / Firefox */
   if(/\/(?:placeholders?|no[-_]?(?:image|photo))\//i.test(path))return true;
+  /* 02/11/2026 (monagenceautomobile : logo du site pris pour une photo) */if(/^logo(?:[-_.]|$)|[-_]logo$/.test(name)||/\/assets?\/(?:img|images?)\/logo/i.test(path))return true;
   if(depth<2)for(const key of ['url','src','image','file']){const value=u.searchParams.get(key);if(value&&isPlaceholderPhoto(new URL(value,u).href,depth+1))return true;}
  }catch{}
  return false;
 }
 const SIZE_Q=/^(w|h|width|height|q|quality|fit|crop|resize|size|format|fm|auto|dpr|scale|mode|rs|ver|version|cache|itok|sw|sh)$/i;
+const CACHE_Q=/^(v|t|ts|timestamp|_|cb|rev|updated|modified)$/i;/* 02/11/2026 (monagenceautomobile : 1re photo en double, « ….jpg » et « ….jpg?v=1792136499 ») */
 const SIZE_WORD='thumb|thumbs|thumbnail|thumbnails|small|medium|large|big|ibig|intermediate|mini|xl|xxl|hd|full|original|orig|sm|md|lg|xs|preview|zoom|max|min|resized|crop|cropped|moyenne|moyen|petite|petit|grande|grand|vignette|miniature';/* 01/11/2026 : Twimmo « -photo-moyenne » / « -photo-hd » */
 export function photoKey(u:string){
- try{const x=new URL(u);const keep=[...x.searchParams.entries()].filter(([k])=>!SIZE_Q.test(k)).map(([k,v])=>k+'='+v).sort().join('&');
+ try{const x=new URL(u);const isFile=/\.(?:jpe?g|png|webp|avif|gif)$/i.test(x.pathname);const keep=[...x.searchParams.entries()].filter(([k])=>!SIZE_Q.test(k)&&!(isFile&&CACHE_Q.test(k))).map(([k,v])=>k+'='+v).sort().join('&');
   let p=decodeURIComponent(x.pathname).toLowerCase();
   p=p.replace(new RegExp(`/(?:${SIZE_WORD}|\\d{2,4}x\\d{2,4}|[wh]_?\\d{2,4}|c_[a-z]+|q_\\d+|f_auto|q_auto)(?=/)`,'g'),'/')
      .replace(/[-_]\d{2,4}x\d{2,4}(?=\.[a-z0-9]{3,4}$)/,'')
