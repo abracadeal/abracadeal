@@ -3103,6 +3103,8 @@ function cleanDescription(a){
     .replace(/^\[ABRACA_SOURCE:[^\]]+\]\s*/gm,'')
     .trim();
 }
+/* 02/11/2026 : « LES PONTS-DE-CE » → « Les Ponts-de-Ce » (ville en majuscules dans la fiche pro) */
+function prettyCity(c){c=String(c||'').trim();if(!c||c!==c.toUpperCase())return c;const small=new Set(['de','du','des','la','le','les','sur','sous','en','lès','aux','au','et']);let first=true;return c.toLowerCase().split(/([\s\-'’])/).map(w=>{if(!w||/^[\s\-'’]$/.test(w))return w;const r=!first&&small.has(w)?w:w.charAt(0).toUpperCase()+w.slice(1);first=false;return r;}).join('');}
 function vehicleSubLabel(v){ return v===EQUIPMENT_ALL?'Équipements & pièces':subcategoryLabel('vehicules',v); }
 /* 02/11/2026 (Anthony) : la catégorie Véhicules ne montre que des véhicules.
    Équipements et pièces restent rangés en base sous « vehicules » mais forment leur propre rubrique
@@ -4582,7 +4584,7 @@ window.openAd=id=>{
                 <p>${esc(a.city)}</p>
                 <div class="seller-rating-line"><span class="stars">☆☆☆☆☆</span><span class="rating-muted">Chargement des avis…</span></div>
               </div>
-              ${a.seller_type==='professionnel'?`<a class="btn primary seller-showroom-btn" id="sellerShowroom-${a.id}" href="pro.html?id=${encodeURIComponent(a.owner_id)}" target="_blank" rel="noopener" style="display:flex;justify-content:center;text-decoration:none;margin:10px 0 6px">Voir le showroom</a>`:''}
+              ${a.seller_type==='professionnel'?`<a class="seller-showroom-btn" id="sellerShowroom-${a.id}" href="pro.html?id=${encodeURIComponent(a.owner_id)}" target="_blank" rel="noopener"><span class="ssb-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.6 4h14.8L21 9.5"/><path d="M3 9.5a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12.3V20h14v-7.7"/><path d="M10 20v-4.5h4V20"/></svg></span><span class="ssb-txt"><strong>Voir le showroom</strong><small id="sellerShowroomSub-${a.id}">Tout le stock du vendeur</small></span><span class="ssb-arrow" aria-hidden="true">›</span></a>`:''}
               <button type="button" class="seller-profile-link" onclick="closeModal('detailModal');openSellerProfile('${a.owner_id}')">Voir le profil et les avis</button>
 
               <div class="seller-contact">
@@ -5232,10 +5234,14 @@ async function hydrateSellerCard(sellerId,listingId){
     }
   }catch(_){}
   const isPro=profile?.account_type==='professionnel',showUrl='pro.html?id='+encodeURIComponent(sellerId);
-  const btn=document.getElementById(`sellerShowroom-${listingId}`);if(btn&&isPro&&profile?.display_name)btn.textContent='Voir le showroom '+profile.display_name;
+  /* 02/11/2026 (Anthony : « le bouton voir le showroom, mieux que ça ») : titre court sur une ligne, nombre d'annonces du pro en dessous */
+  const subEl=document.getElementById(`sellerShowroomSub-${listingId}`);
+  if(subEl&&isPro){const who=profile?.display_name||'ce professionnel';subEl.textContent='Tout son stock en ligne';
+    sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',sellerId).eq('status','active').eq('visibility_scope','public')
+      .then(({count})=>{const el=document.getElementById(`sellerShowroomSub-${listingId}`);if(el&&Number.isFinite(count)&&count>1)el.textContent=`${count} annonces en ligne`;}).catch(()=>{});}
   host.innerHTML=`
     <h3>${isPro?`<a href="${showUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" title="Voir le showroom">${esc(profile?.display_name||'Vendeur professionnel')} ›</a>`:esc(profile?.display_name || 'Vendeur particulier')}</h3>
-    <p>${esc(profile?.city||'')}</p>
+    <p>${esc(prettyCity(profile?.city||''))}</p>
     <div class="seller-rating-line">
       <span class="stars">${starsText(avg)}</span>
       <strong>${list.length?avg.toFixed(1).replace('.',','):'—'}</strong>

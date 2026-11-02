@@ -18,6 +18,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude : bouton « Voir le showroom » de la fiche annonce (Anthony : « mieux que ça »)
+- `assets/index-main.js` + `index-overrides.css` (`20261102-showroombtn`) : bouton sur une seule ligne « Voir le showroom » avec icône boutique, sous-titre « 24 annonces en ligne » (nombre réel des annonces du pro), flèche ; dégradé violet → rose, plus de texte « Voir le showroom WeeCars Angers » coupé sur deux lignes. Ville du pro en majuscules (« LES PONTS-DE-CE ») affichée en minuscules accentuées comme saisie (`prettyCity`).
+
 ### 02/11/2026 — Claude : référencement, contrôle (Anthony : « viens on fait le référencement »)
 - Vérifié : 53 annonces dans `sitemap-annonces.xml`, page garage WeeCars dans `sitemap-pros.xml` ; pages d'annonce avec titre, description, adresse canonique, `index,follow`, données structurées Car/Product + fil d'Ariane ; page garage « WeeCars Angers – Garage à … : 24 véhicules d'occasion ». IndexNow actif : 2 + 70 + 70 + 17 pages signalées aujourd'hui (réponse 200).
 - Corrigé : noms de villes « Les Ponts-De-Cé » / « Les Ponts De Ce » (`.title()` Python, ville de la fiche pro en majuscules) → `french_city()` (« Les Ponts-de-Cé ») dans `build_share_pages.py` et `build_pro_pages.py`, la ville correctement écrite dans les annonces étant préférée.
