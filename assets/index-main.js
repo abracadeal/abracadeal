@@ -3493,7 +3493,10 @@ function showImportPreviewBanner(){
   // 31/10/2026 (Anthony) : « Quitter l’aperçu » revient sur la page de test (ferme l’onglet ouvert par le test, sinon y retourne).
   b.querySelector('#importPreviewQuit').addEventListener('click',e=>{if(window.opener&&!window.opener.closed){e.preventDefault();try{window.opener.focus();}catch(_){}window.close();}});
 }
+// 02/11/2026 : fiche intégrée au showroom (?embed=1) : pas de catalogue (rien à afficher derrière la fiche).
+const ABRACA_EMBED=document.documentElement.classList.contains('abraca-embed');
 async function loadAds(){
+  if(ABRACA_EMBED&&!IMPORT_PREVIEW){catalogLoadedOnce=true;return;}
   if(IMPORT_PREVIEW){allAds=IMPORT_PREVIEW.ads;catalogLoadedOnce=true;IMPORT_PREVIEW.ads.forEach(a=>{try{detailAdsCache.set(a.id,a);}catch(_){}});renderAds();showImportPreviewBanner();return;}
   const sequence=++adsLoadSequence;
   const viewerId=currentUser?.id;
@@ -6029,12 +6032,23 @@ function scrollToUrlCatalogue(){
 if(sb){
   // 18/10/2026 : affichage plus rapide sur mobile — le catalogue public s'affiche dès qu'il arrive,
   // sans attendre la vérification du compte ; il est ensuite rafraîchi normalement.
-  try{Promise.resolve(getPublicCatalog()).then(()=>{if(!catalogLoadedOnce&&!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});});}catch(_){}
+  if(!ABRACA_EMBED)try{Promise.resolve(getPublicCatalog()).then(()=>{if(!catalogLoadedOnce&&!onlyMine&&!favoritesMode&&!moderationMode)loadAds().catch(()=>{});});}catch(_){}
   try{applyUrlCatalogueFilters();}catch(_){}
   // 02/11/2026 (Anthony : « quand on clique sur une annonce dans le showroom, ça met du temps ») : lien direct vers une
   // annonce (?annonce=…, showroom, partage) → la fiche est lue seule et ouverte tout de suite, sans attendre le compte,
   // les favoris et tout le catalogue. Une fois le compte vérifié, la fiche est redessinée (boutons du propriétaire, favori).
   let fastSharedId=null;
+  // 02/11/2026 : le showroom garde une fiche préchargée (?embed=1) et lui demande d'ouvrir l'annonce cliquée : instantané.
+  if(ABRACA_EMBED)window.addEventListener('message',e=>{
+    if(e.origin===location.origin&&e.data&&e.data.type==='abraca-close-annonce'){try{if(document.getElementById('detailModal')?.classList.contains('open'))closeModal('detailModal');}catch(_){}return;}
+    if(e.origin!==location.origin||!e.data||e.data.type!=='abraca-open-annonce'||!e.data.id)return;
+    const id=String(e.data.id);
+    const go=()=>{sharedListingHandled=true;try{window.openAd(id);}catch(err){console.error(err);}};
+    if(detailAdsCache.get(id)||allAds.find(x=>x.id===id)){go();return;}
+    Promise.resolve(sb.from('listings').select(PUBLIC_CATALOG_SELECT).eq('id',id).eq('status','active').eq('visibility_scope','public').maybeSingle())
+      .then(({data})=>{if(data){detailAdsCache.set(id,data);go();}else{toast('Cette annonce n’est plus en ligne');try{window.parent.postMessage({type:'abraca-annonce-close'},location.origin);}catch(_){}}})
+      .catch(()=>{try{window.parent.postMessage({type:'abraca-annonce-close'},location.origin);}catch(_){}});
+  });
   try{const pq=new URLSearchParams(location.search);const fid=pq.get('annonce');
     if(fid&&!pq.get('admin_preview')&&!IMPORT_PREVIEW){
       Promise.resolve(sb.from('listings').select(PUBLIC_CATALOG_SELECT).eq('id',fid).eq('status','active').eq('visibility_scope','public').maybeSingle())

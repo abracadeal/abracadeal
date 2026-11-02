@@ -189,22 +189,54 @@ async function init(){
   // 02/11/2026 (Anthony : « un passage sur la page d'accueil quand on clique sur une annonce ») : la fiche s'ouvre par-dessus
 // le showroom, dans une fenêtre intégrée (accueil caché). Clic molette / Ctrl / Cmd : nouvel onglet comme avant.
 (function(){
-  let wrap=null,opened=false;
-  function closeAd(fromHistory){if(!wrap)return;wrap.remove();wrap=null;document.body.style.overflow='';if(opened&&!fromHistory){opened=false;history.back();}opened=false;}
-  function openAd(id,href){
-    if(wrap)closeAd(true);
-    wrap=document.createElement('div');wrap.id='adFrameWrap';
-    wrap.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,4,18,.55)';
-    wrap.innerHTML='<div style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:600 14px system-ui">Chargement de l’annonce…</div>';
-    const f=document.createElement('iframe');f.src='/?annonce='+encodeURIComponent(id)+'&embed=1';f.title='Annonce';f.setAttribute('allowtransparency','true');
+  // 02/11/2026 (Anthony : « ça met du temps ») : une fiche est préchargée en arrière-plan (/?embed=1, sans catalogue) ;
+  // au clic, on lui demande d'ouvrir l'annonce → affichage immédiat. Si elle n'est pas encore prête : ancienne méthode.
+  let wrap=null,opened=false,pre=null,preReady=false,usingPre=false;
+  const LOADING='<div class="adf-loading" style="position:absolute;inset:0;display:grid;place-items:center;color:#fff;font:600 14px system-ui">Chargement de l’annonce…</div>';
+  function preload(){
+    if(pre)return;
+    pre=document.createElement('div');pre.id='adFramePre';
+    pre.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,4,18,.55);display:none';
+    const f=document.createElement('iframe');f.src='/?embed=1';f.title='Annonce';f.setAttribute('allowtransparency','true');f.setAttribute('aria-hidden','true');
     f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;opacity:0;transition:opacity .15s';
-    f.onload=()=>{f.style.opacity='1';};setTimeout(()=>{f.style.opacity='1';},4000);
-    wrap.appendChild(f);document.body.appendChild(wrap);document.body.style.overflow='hidden';
+    f.onload=()=>{preReady=true;};
+    pre.appendChild(f);document.body.appendChild(pre);
+  }
+  function hidePre(){if(!pre)return;pre.style.display='none';const f=pre.querySelector('iframe');if(f){f.style.opacity='0';f.setAttribute('aria-hidden','true');}pre.querySelector('.adf-loading')?.remove();}
+  function closeAd(fromHistory){
+    if(!wrap&&!usingPre)return;
+    if(usingPre){hidePre();try{pre.querySelector('iframe').contentWindow.postMessage({type:'abraca-close-annonce'},location.origin);}catch(_){}usingPre=false;}
+    if(wrap){wrap.remove();wrap=null;}
+    document.body.style.overflow='';if(opened&&!fromHistory){opened=false;history.back();}opened=false;
+  }
+  function openAd(id,href){
+    if(wrap||usingPre)closeAd(true);
+    if(pre&&preReady){
+      usingPre=true;pre.style.display='block';pre.style.background='rgba(10,4,18,.55)';pre.insertAdjacentHTML('afterbegin',LOADING);
+      const f=pre.querySelector('iframe');f.removeAttribute('aria-hidden');
+      try{f.contentWindow.postMessage({type:'abraca-open-annonce',id},location.origin);}catch(_){}
+      setTimeout(()=>{if(usingPre)f.style.opacity='1';},4000);
+    }else{
+      wrap=document.createElement('div');wrap.id='adFrameWrap';
+      wrap.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(10,4,18,.55)';
+      wrap.innerHTML=LOADING;
+      const f=document.createElement('iframe');f.src='/?annonce='+encodeURIComponent(id)+'&embed=1';f.title='Annonce';f.setAttribute('allowtransparency','true');
+      f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:0;background:transparent;opacity:0;transition:opacity .15s';
+      f.onload=()=>{f.style.opacity='1';};setTimeout(()=>{f.style.opacity='1';},4000);
+      wrap.appendChild(f);document.body.appendChild(wrap);
+    }
+    document.body.style.overflow='hidden';
     history.pushState({adFrame:id},'',location.pathname+location.search+'#annonce-'+id);opened=true;
   }
-  window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data)return;if(e.data.type==='abraca-annonce-close')closeAd(false);else if(e.data.type==='abraca-annonce-ready'&&wrap){wrap.style.background='transparent';const l=wrap.firstElementChild;if(l&&l.tagName!=='IFRAME')l.remove();}});
-  window.addEventListener('popstate',()=>{if(wrap)closeAd(true);});
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&wrap)closeAd(false);});
+  window.addEventListener('message',e=>{if(e.origin!==location.origin||!e.data)return;
+    if(e.data.type==='abraca-annonce-close'){if(wrap||usingPre)closeAd(false);}
+    else if(e.data.type==='abraca-annonce-ready'){
+      const box=usingPre?pre:wrap;if(!box)return;box.style.background='transparent';box.querySelector('.adf-loading')?.remove();const f=box.querySelector('iframe');if(f)f.style.opacity='1';}
+  });
+  window.addEventListener('popstate',()=>{if(wrap||usingPre)closeAd(true);});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&(wrap||usingPre))closeAd(false);});
+  const startPre=()=>{try{preload();}catch(_){}};
+  if('requestIdleCallback' in window)requestIdleCallback(startPre,{timeout:2500});else setTimeout(startPre,1200);
   document.addEventListener('click',e=>{const a=e.target.closest&&e.target.closest('a.ad');if(!a||e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
     const id=new URL(a.href,location.href).searchParams.get('annonce');if(!id)return;e.preventDefault();openAd(id,a.href);});
 })();

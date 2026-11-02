@@ -18,6 +18,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 
 ## Entrées
 
+### 02/11/2026 — Claude — Showroom : fiche préchargée
+- Retour d'Anthony après l'ouverture rapide : « bof ». Le gros du délai restait le chargement de toute la page du site (HTML, scripts, styles) dans la fenêtre de la fiche à chaque clic.
+- `pro.html` : une fenêtre de fiche (`/?embed=1`) est préchargée en arrière-plan dès que le showroom est affiché ; au clic, le showroom lui demande d'ouvrir l'annonce (`abraca-open-annonce`) → plus de rechargement de page. Fermeture / retour / Échap : la fenêtre est cachée et gardée pour l'annonce suivante (`abraca-close-annonce`). Si elle n'est pas encore prête : ancienne méthode.
+- `index-main.js` (v=20261102-fiche-prechargee) : en mode intégré, le catalogue n'est plus chargé du tout (rien n'est affiché derrière la fiche).
+
 ### 02/11/2026 — Claude — Showroom : fiche ouverte plus vite
 - Remarque d'Anthony : cliquer sur une annonce dans le showroom « met du temps ».
 - Cause : la fiche (index.html?annonce=…&embed=1) attendait, l'un après l'autre, la vérification du compte, les favoris et tout le catalogue avant de s'ouvrir.
