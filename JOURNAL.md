@@ -2378,3 +2378,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Correctif : `SHOW_COUNT = false` → aucun nombre dans les mails (aperçu et standard) : « vos véhicules », « vos biens ».
 - Déployé : prospect-mailer v16, figé au commit 6e3dc4d.
 - Reste à faire : vérifier que le robot lit TOUT le stock pour ces plateformes (l'import utilise le même lecteur) et ne réafficher un nombre que s'il est garanti (total affiché par le site = annonces lues).
+
+### 03/11/2026 — Claude — Envoi en pause, aperçus faux supprimés, nombre d'annonces « garanti »
+- Demande d'Anthony : « arrête les mails et répare tout ça ». Les écritures en base via le connecteur Supabase demandent une confirmation qui ne s'affiche pas chez Anthony (ni téléphone ni ordi) → SQL lancé par Anthony dans le SQL Editor (`supabase/2026-11-03-prospect-previews-count-sure.sql`).
+- Envoi arrêté : `PAUSE_SENDING = true` dans prospect-mailer (v17/v18) + `sending_enabled = false`. Aucun mail depuis 11:40 UTC.
+- Trouvé : aperçus faits avec l'ancien robot (avant v276, 02/11 18:53 UTC) — Weecars Amiens (a cliqué) et Toulon, qui ont reçu le mail aperçu, montraient des voitures d'autres agences Weecars. 528 aperçus anciens supprimés ; prospect_preview_fill les refait la nuit (sent d'abord).
+- `prospect_previews.count_sure` : vrai seulement si le site affiche lui-même son total (site_count) et que le robot l'a lu (à 10 % près au-dessus), sans lecture partielle. Spider VO, AJP, Kermarrec exposent ce total. Mails et page aperçu n'affichent un nombre que si count_sure.
+- pro-stock-sync v277 (f1f61fe), prospect-mailer v18 (f1f61fe, toujours en pause). Page Fondateurs : pas de nombre non garanti, « 12 mois offerts ».
+- Pour relancer l'envoi : PAUSE_SENDING = false + redéployer, et `update private.prospect_mailer_settings set sending_enabled = true` (pas le bouton FEU VERT, qui remet aussi en « ready » les prospects en pause).
