@@ -119,31 +119,27 @@ function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
 
-Je me permets de vous redonner le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix.
+Je vous redonne le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal.
 
-Voir l'aperçu : https://abracadeal.fr/pro-fondateur.html
+https://abracadeal.fr/pro-fondateur.html
 
-Si cela vous convient, un clic sur « Je publie » et votre SIRET suffisent. Les 12 premiers mois sont offerts, sans carte bancaire : si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic sans rien payer.
+« Je publie » et votre SIRET, c'est tout. 12 mois offerts : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
 
-Anthony
-Fondateur d'Abracadeal
+Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
   return { subject, body:
 `Bonjour,
 
-Nous avons préparé la page de {{societe}} sur Abracadeal : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, ${plural ? "repris" : "repris"} depuis votre site.
+Nous avons préparé la page de {{societe}} sur Abracadeal : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, repris depuis votre site.
 
-Regardez à quoi elle ressemble (aperçu privé, rien n'est publié) :
+Aperçu privé (rien n'est publié) :
 https://abracadeal.fr/pro-fondateur.html
 
-Si elle vous plaît, cliquez sur « Je publie » et indiquez votre SIRET : vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site (nouveautés, prix, ventes).
+Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
-C'est donnant-donnant : votre stock rend Abracadeal plus utile aux acheteurs, et ces acheteurs vous contactent directement. Les 12 premiers mois sont offerts, sans carte bancaire et sans engagement. Notre pari : que vous restiez parce que ça marche. Sinon, vous arrêtez en un clic, sans rien payer.
+C'est donnant-donnant : 12 mois offerts, sans carte bancaire. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
 
-L'offre est réservée aux 500 premiers professionnels, avec des places réparties par région.
-
-Anthony
-Fondateur d'Abracadeal
+Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
 async function previewCount(prospectId: string): Promise<number> {
