@@ -83,7 +83,7 @@ function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B
 // que la 1re page ou les derniers biens d'un site (Weecars 24, Junot 20, AJP 23, Citya 11…). Tant que le nombre n'est pas
 // garanti, AUCUN nombre dans les mails : « vos véhicules », « vos biens ». Garanti = prospect_previews.count_sure (le site affiche
 // lui-même son total et le robot l'a lu en entier) ; sinon on passe 0 = pas de nombre.
-const PAUSE_SENDING = true; // 03/11/2026 : envoi arrêté par Anthony le temps de réparer le robot
+const PAUSE_SENDING = false; // 03/11/2026 : pause du code levée ; l'envoi reste coupé par sending_enabled = false jusqu'à la relance par Anthony
 function stockPhrase(category: string, n: number | null | undefined) {
   const k = Math.max(0, Number(n || 0));
   const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
