@@ -3405,6 +3405,13 @@ async function invokeFresh(name,opts){
   let res=await sb.functions.invoke(name,opts);
   const st=res?.error?.context?.status;
   if(st===401){try{await sb.auth.refreshSession();}catch(_){}res=await sb.functions.invoke(name,opts);}
+  /* 03/11/2026 (Anthony : « Edge Function returned a non-2xx status code » en voulant valider) : session fermée
+     (15 min d'inactivité en admin, ou déconnexion) → message clair et écran de connexion, au lieu du message technique. */
+  if(res?.error?.context?.status===401){
+    res={data:null,error:Object.assign(new Error('Ta session a expiré : reconnecte-toi, puis réessaie.'),{status:401})};
+    try{await sb.auth.signOut({scope:'local'});}catch(_){}
+    try{await refreshAuth();}catch(_){}
+  }
   return res;
 }
 async function requestAutomaticModeration(listingId){
