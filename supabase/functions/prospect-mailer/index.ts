@@ -119,7 +119,7 @@ function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
 
-Je vous redonne le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal.
+Je vous redonne le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal, le nouveau site de petites annonces.
 
 https://abracadeal.fr/pro-fondateur.html
 
@@ -130,7 +130,7 @@ abracadeal.fr – {{expediteur}}` };
   return { subject, body:
 `Bonjour,
 
-Nous avons préparé la page de {{societe}} sur Abracadeal : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, repris depuis votre site.
+Abracadeal est un nouveau site de petites annonces, partout en France. Nous avons préparé la page de {{societe}} : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, repris depuis votre site.
 
 Aperçu privé (rien n'est publié) :
 https://abracadeal.fr/pro-fondateur.html
