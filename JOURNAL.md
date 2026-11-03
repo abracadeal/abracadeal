@@ -2386,3 +2386,10 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - `prospect_previews.count_sure` : vrai seulement si le site affiche lui-même son total (site_count) et que le robot l'a lu (à 10 % près au-dessus), sans lecture partielle. Spider VO, AJP, Kermarrec exposent ce total. Mails et page aperçu n'affichent un nombre que si count_sure.
 - pro-stock-sync v277 (f1f61fe), prospect-mailer v18 (f1f61fe, toujours en pause). Page Fondateurs : pas de nombre non garanti, « 12 mois offerts ».
 - Pour relancer l'envoi : PAUSE_SENDING = false + redéployer, et `update private.prospect_mailer_settings set sending_enabled = true` (pas le bouton FEU VERT, qui remet aussi en « ready » les prospects en pause).
+
+### 03/11/2026 (après-midi) — Claude — Aperçus refaits de jour, tri qualité, envoi relancé
+- Demande d'Anthony : refaire les aperçus tout de suite. Cron `abracadeal-prospect-preview-fill` passé à `*/2 * * * *` (TEMPORAIRE : remettre `2-59/4 22-23,0-4 * * *` quand les prospects sent/ready sont refaits).
+- Contrôle des premiers aperçus : Ligier Store montrait « Aixam - Coupé S8 (vendu) » → robot (normalizeRows) écarte « (vendu) », « - VENDU », « (réservée) » en fin de titre ; aperçu Ligier vidé. EMJ : 1 ligne = nom du garage. T2P : 6 × « Cental--> ». Wiroth : maison « à vendre » 1 450 € (location).
+- Tri qualité commun page + mail (`goodRows` / `goodPreviewRows`) : titres vides/répétés écartés, vente immo < 5 000 € écartée, ≥ 3 annonces et ≥ 3 titres différents sinon pas d'aperçu ; loyers « / mois » sur la page.
+- pro-stock-sync v278 (657c55e), prospect-mailer v20 (d52bc13). Envoi relancé par Anthony (SQL Editor) à 12:48 UTC ; 1ers envois aperçu EWIGO Valence et Ardesia contrôlés OK.
+- Connecteur Supabase : certaines écritures (DELETE, parfois UPDATE) demandent une confirmation qui ne s'affiche pas chez Anthony → lui passer le SQL.
