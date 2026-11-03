@@ -2393,3 +2393,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Tri qualité commun page + mail (`goodRows` / `goodPreviewRows`) : titres vides/répétés écartés, vente immo < 5 000 € écartée, ≥ 3 annonces et ≥ 3 titres différents sinon pas d'aperçu ; loyers « / mois » sur la page.
 - pro-stock-sync v278 (657c55e), prospect-mailer v20 (d52bc13). Envoi relancé par Anthony (SQL Editor) à 12:48 UTC ; 1ers envois aperçu EWIGO Valence et Ardesia contrôlés OK.
 - Connecteur Supabase : certaines écritures (DELETE, parfois UPDATE) demandent une confirmation qui ne s'affiche pas chez Anthony → lui passer le SQL.
+
+### 03/11/2026 — Claude — Référencement : grande ville dans les titres, flux produits ChatGPT
+- Demande d'Anthony (« quand on tape le modèle ça doit tomber sur nous ») : pages annonces d'une commune d'agglomération → titre « … – Les Ponts-de-Cé, Angers (49) », description « …, près d'Angers » (`near_city` sur AGGLOS). VERSION 11 → toutes les pages refaites.
+- Demande d'Anthony (« être proposé par ChatGPT ») : `scripts/build_chatgpt_feed.py` → `feeds/chatgpt-products.jsonl` (spec OpenAI Commerce « Products » : 9 champs obligatoires, price « 19990.00 EUR », condition used/new, recherche seulement, pas de paiement dans ChatGPT). Généré à chaque passage du workflow share-pages. 150 produits au 03/11 (127 WeeCars Angers). Écartés : immobilier/vacances/emploi/services, sans prix, sans photo, sans marque (la marque est obligatoire, pas de valeur inventée). Téléphones et e-mails retirés des descriptions.
+- Programme marchands OpenAI : ouvert aux États-Unis seulement (03/11/2026), liste d'attente via chatgpt.com/merchants — formulaire à remplir par Anthony (nom, LinkedIn, e-mail pro). Petites annonces / occasion : ni acceptées ni exclues par OpenAI.
+- Vignettes : photo affichée en fondu une fois entièrement chargée (index-main.js v=20261103-photos). Les vignettes pèsent ~125 Ko (720 px, JPEG 80) : à alléger si Anthony valide.
