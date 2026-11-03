@@ -14,6 +14,8 @@ async function invokeFresh(name,opts){
   let res=await sb.functions.invoke(name,opts);
   const st=res?.error?.context?.status;
   if(st===401){try{await sb.auth.refreshSession();}catch(_){}res=await sb.functions.invoke(name,opts);}
+  /* 03/11/2026 : session fermée (inactivité / déconnexion) → message clair au lieu de « non-2xx status code » */
+  if(res?.error?.context?.status===401)res={data:null,error:Object.assign(new Error('Ta session a expiré : reconnecte-toi (recharge la page), puis réessaie.'),{status:401})};
   return res;
 }
 
