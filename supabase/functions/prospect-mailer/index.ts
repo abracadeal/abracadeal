@@ -79,8 +79,12 @@ async function smtp(c: Creds, mail?: { to: string; data: string }) {
 
 function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B?${b64(s)}?=`; }
 // v7 29/10/2026 : {{annonces}} = résultat du test du site du prospect (« vos 52 biens peuvent être », « votre véhicule peut être »).
+// v16 03/11/2026 (Anthony : « il faut que le nombre soit sûr, pas 24 alors qu'il y en a 127 ») : le robot ne lit souvent
+// que la 1re page ou les derniers biens d'un site (Weecars 24, Junot 20, AJP 23, Citya 11…). Tant que le nombre n'est pas
+// garanti, AUCUN nombre dans les mails : « vos véhicules », « vos biens ».
+const SHOW_COUNT = false;
 function stockPhrase(category: string, n: number | null | undefined) {
-  const k = Math.max(0, Number(n || 0));
+  const k = SHOW_COUNT ? Math.max(0, Number(n || 0)) : 0;
   const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
   if (k === 0) return `vos ${noun[1]} peuvent être`;
   if (k === 1) return `votre ${noun[0]} peut être`;
@@ -111,10 +115,11 @@ type Tpl = { subject: string; body: string };
 // bouton « Je publie » (accord + SIRET) sur la page. Rien n'est publié sans cet accord.
 function apercuNoun(category: string, n: number) {
   const w = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
+  if (!SHOW_COUNT) return `vos ${w[1]}`;
   return n > 1 ? `vos ${n} ${w[1]}` : `votre ${w[0]}`;
 }
 function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
-  const vos = apercuNoun(category, n), plural = n > 1;
+  const vos = apercuNoun(category, n), plural = !SHOW_COUNT || n > 1;
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
