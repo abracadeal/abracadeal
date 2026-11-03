@@ -184,9 +184,13 @@ function thumbUrl(path){
   // 01/11/2026 : ?o=2 = miniatures refaites avec la bonne orientation (les anciennes restaient en cache 1 an).
   return data?.publicUrl?data.publicUrl+'?o=5':photoUrl(path); /* 02/11/2026 : ?o=3 = miniatures refaites en meilleure qualité ; ?o=4 = 640 px ; ?o=5 = petit côté 720 px (nettes en vignette carrée) */
 }
+// 03/11/2026 (Anthony : « ça fait souvent les photos qui chargent pas entières ») : la vignette reste invisible (fond de la carte)
+// jusqu'à ce qu'elle soit entièrement chargée, puis apparaît en fondu — plus de photo à moitié dessinée.
+try{document.head.insertAdjacentHTML('beforeend','<style id="abracaThumbFade">img[data-fade]{opacity:0;transition:opacity .25s ease}img[data-fade].is-loaded{opacity:1}</style>')}catch(_){}
 function thumbImgAttrs(path){
   const full=photoUrl(path), t=thumbUrl(path);
-  return t===full?`src="${esc(full)}"`:`src="${esc(t)}" data-full="${esc(full)}" onerror="this.onerror=null;this.src=this.dataset.full"`;
+  const fade=`data-fade onload="this.classList.add('is-loaded')"`;
+  return t===full?`src="${esc(full)}" ${fade}`:`src="${esc(t)}" data-full="${esc(full)}" ${fade} onerror="this.onerror=null;this.src=this.dataset.full"`;
 }
 function normalizeType(v){return String(v||'').toLowerCase().startsWith('pro')?'professionnel':'particulier'}
 
