@@ -2370,3 +2370,11 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Base (migration `pro_photos_min_30`) : formules pro passées de 15 à 30 photos (pro_20, high-tech, maison, mode, emploi) ; `abraca_founder_photo_cap` = minimum 30 pour toute annonce de pro hors Vacances, avec ou sans formule ; annonces de pros déjà en ligne mises à jour.
 - pro-stock-sync : une annonce importée est créée directement à 30 photos (plus de passage 15 → 30 qui réécrit tout à la synchro suivante).
 - Site : `index-main.js` v=20261102-photos30 (dépôt d'annonce d'un pro = 30 photos, 45 en formule 100) ; FAQ mise à jour.
+
+### 03/11/2026 — Claude — prospect-mailer v16 : mail aperçu raccourci, plus de nombre d'annonces non garanti
+- Demande d'Anthony (concurrent myfr.ai reçu) : se démarquer, pas trop long, expliquer que c'est donnant-donnant et « qu'ils resteront parce que ça marche ».
+- Mail aperçu : 1 phrase de présentation d'Abracadeal, aperçu privé, « Je publie » + SIRET, « 12 mois offerts, sans carte bancaire ; si ça vous amène des clients vous restez, sinon vous arrêtez en un clic ». Signé « Anthony, fondateur d'Abracadeal ». Corrige l'ancien « gratuit pour les professionnels » (l'offre Fondateurs = 12 mois offerts).
+- Problème signalé par Anthony : « 24 alors qu'il y en a 127 ». Cause : `prospect_previews.count` / `site_check_count` = annonces lues par le robot, souvent 1re page ou « derniers biens » (Weecars 24, Junot 20, AJP 23, Citya 11, Kermarrec 25…). Mails partis avec un mauvais nombre (ex. Weecars Amiens « 23 » le 03/11).
+- Correctif : `SHOW_COUNT = false` → aucun nombre dans les mails (aperçu et standard) : « vos véhicules », « vos biens ».
+- Déployé : prospect-mailer v16, figé au commit 6e3dc4d.
+- Reste à faire : vérifier que le robot lit TOUT le stock pour ces plateformes (l'import utilise le même lecteur) et ne réafficher un nombre que s'il est garanti (total affiché par le site = annonces lues).
