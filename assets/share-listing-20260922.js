@@ -48,6 +48,7 @@
   const SUPABASE_URL='https://jplzvxmpbpjssyinozap.supabase.co';
   const SUPABASE_KEY='sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF';
   const LAST_ACTIVITY_KEY='abracadeal:last-auth-activity';
+  const AUTH_KEY='sb-jplzvxmpbpjssyinozap-auth-token';
   const USER_TIMEOUT=30*60*1000;
   const ADMIN_TIMEOUT=15*60*1000;
   const CHECK_EVERY=30*1000;
@@ -78,6 +79,10 @@
     try{localStorage.removeItem(LAST_ACTIVITY_KEY);}catch(_){}
     try{sessionStorage.removeItem(LAST_ACTIVITY_KEY);}catch(_){}
     try{await sessionClient.auth.signOut({scope:'local'});}catch(_){}
+    /* 03/11/2026 (Anthony : « pourtant j'étais connecté ») : l'appli garde aussi une copie de la session dans
+       sessionStorage ; sans ce ménage, après rechargement elle affichait encore le compte avec une session fermée. */
+    try{localStorage.removeItem(AUTH_KEY);}catch(_){}
+    try{sessionStorage.removeItem(AUTH_KEY);}catch(_){}
     try{sessionStorage.setItem('abracadeal:session-expired','1');}catch(_){}
     location.replace(location.pathname+location.search);
   }
@@ -105,7 +110,12 @@
   function init(){
     if(!window.supabase?.createClient)return;
     sessionClient=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY,{
-      auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}
+      /* 03/11/2026 : lecture seule de la session de l'appli (même stockage), sans rafraîchir le jeton lui-même :
+         deux clients qui rafraîchissent le même jeton se le volent (« refresh token not found »). */
+      auth:{persistSession:true,autoRefreshToken:false,detectSessionInUrl:false,storageKey:AUTH_KEY,
+            storage:{getItem:k=>{try{return localStorage.getItem(k)||sessionStorage.getItem(k)}catch(_){return null}},
+                     setItem:(k,v)=>{try{localStorage.setItem(k,v)}catch(_){}try{sessionStorage.setItem(k,v)}catch(_){}},
+                     removeItem:k=>{try{localStorage.removeItem(k)}catch(_){}try{sessionStorage.removeItem(k)}catch(_){}}}}
     });
 
     ['pointerdown','keydown','touchstart','scroll'].forEach(eventName=>{
