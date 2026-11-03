@@ -416,6 +416,21 @@ VEHICLE_EQUIP_SUBS = {"velos", "equipement-auto", "equipement-moto", "equipement
                       "equipement-velo", "pieces-detachees", "equipements"}
 
 
+def near_city(listing):
+    """03/11/2026 (Anthony : « quand on tape le modèle + Angers ça doit tomber sur nous ») : commune d'une agglomération
+    (Les Ponts-de-Cé) → nom de la grande ville (Angers), ajouté au titre et à la description Google."""
+    ck = city_key(listing.get("city"))
+    pc = str(listing.get("postal_code") or "")
+    for k, (aname, members, prefixes, _t) in AGGLOS.items():
+        if ck and ck != k and (ck in {city_key(m) for m in members} or any(pc.startswith(px) for px in prefixes)):
+            return aname
+    return ""
+
+
+def pres_de(name):
+    return ("près d’" if name[:1].lower() in "aeiouyhâéèêîôû" else "près de ") + name
+
+
 def seo_title(listing, meta):
     """Titre Google : titre du vendeur + infos clés absentes du titre (marque, modèle, version, année, km)."""
     title = display_title(listing)
@@ -440,7 +455,8 @@ def seo_title(listing, meta):
         price += " / nuit"
     city = listing.get("city") or ""
     dep = (listing.get("postal_code") or "")[:2]
-    where = f"{city} ({dep})" if city and dep else city
+    near = near_city(listing)
+    where = f"{city}, {near} ({dep})" if city and near and dep else (f"{city} ({dep})" if city and dep else city)
     parts = [head]
     if price:
         parts.append(price)
@@ -695,6 +711,8 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     place = listing.get("city") or ""
     if place and listing.get("postal_code"):
         place += f" ({listing['postal_code']})"
+    if place and near_city(listing):
+        place += ", " + pres_de(near_city(listing))
     cat = CATEGORIES.get(listing.get("category"), "Annonces")
     page_url = f"{SITE}/annonce/{lid}/"
     app_url = f"{SITE}/?annonce={urllib.parse.quote(lid)}"
