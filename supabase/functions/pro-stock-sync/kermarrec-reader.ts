@@ -54,5 +54,5 @@ export async function readKermarrec(start:URL,home:string,fetchHtml:Fetcher,memo
   const entries=[...details.entries()];const ids=new Map(entries.map(([id,u])=>[String(u),id]));
   // 01/11/2026 : lecture des fiches par étapes mémorisée.
   const rows:any=await eachDetailResumable('kermarrec-v1:'+start.pathname,entries.map(e=>String(e[1])),async url=>{const{text}=await fetchHtml(new URL(url));return parseKermarrecDetail(text,url)||{reference:ids.get(url),url};},memory);partial=partial||rows.partial;
-  (rows as any).partial=partial;(rows as any).total=total||details.size;(rows as any).stats={pages,details:details.size,read:rows.length};return rows;
+  (rows as any).partial=partial;(rows as any).total=total||details.size;if(total)(rows as any).siteCount=total;(rows as any).stats={pages,details:details.size,read:rows.length};return rows;
 }

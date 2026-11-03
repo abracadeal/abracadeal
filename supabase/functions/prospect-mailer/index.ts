@@ -81,11 +81,11 @@ function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B
 // v7 29/10/2026 : {{annonces}} = résultat du test du site du prospect (« vos 52 biens peuvent être », « votre véhicule peut être »).
 // v16 03/11/2026 (Anthony : « il faut que le nombre soit sûr, pas 24 alors qu'il y en a 127 ») : le robot ne lit souvent
 // que la 1re page ou les derniers biens d'un site (Weecars 24, Junot 20, AJP 23, Citya 11…). Tant que le nombre n'est pas
-// garanti, AUCUN nombre dans les mails : « vos véhicules », « vos biens ».
-const SHOW_COUNT = false;
+// garanti, AUCUN nombre dans les mails : « vos véhicules », « vos biens ». Garanti = prospect_previews.count_sure (le site affiche
+// lui-même son total et le robot l'a lu en entier) ; sinon on passe 0 = pas de nombre.
 const PAUSE_SENDING = true; // 03/11/2026 : envoi arrêté par Anthony le temps de réparer le robot
 function stockPhrase(category: string, n: number | null | undefined) {
-  const k = SHOW_COUNT ? Math.max(0, Number(n || 0)) : 0;
+  const k = Math.max(0, Number(n || 0));
   const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
   if (k === 0) return `vos ${noun[1]} peuvent être`;
   if (k === 1) return `votre ${noun[0]} peut être`;
@@ -116,11 +116,11 @@ type Tpl = { subject: string; body: string };
 // bouton « Je publie » (accord + SIRET) sur la page. Rien n'est publié sans cet accord.
 function apercuNoun(category: string, n: number) {
   const w = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
-  if (!SHOW_COUNT) return `vos ${w[1]}`;
+  if (!(n > 0)) return `vos ${w[1]}`;
   return n > 1 ? `vos ${n} ${w[1]}` : `votre ${w[0]}`;
 }
 function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
-  const vos = apercuNoun(category, n), plural = !SHOW_COUNT || n > 1;
+  const vos = apercuNoun(category, n), plural = n !== 1;
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
@@ -148,13 +148,13 @@ C'est donnant-donnant : 12 mois offerts, sans carte bancaire. Si ça vous amène
 Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
-async function previewCount(prospectId: string): Promise<number> {
+async function previewInfo(prospectId: string): Promise<{ n: number; sure: boolean }> {
   try {
-    const { data } = await admin.from("prospect_previews").select("count,rows").eq("prospect_id", prospectId).maybeSingle();
-    if (!data) return 0;
+    const { data } = await admin.from("prospect_previews").select("count,count_sure,rows").eq("prospect_id", prospectId).maybeSingle();
+    if (!data) return { n: 0, sure: false };
     const n = Number(data.count || 0) || (Array.isArray(data.rows) ? data.rows.length : 0);
-    return Array.isArray(data.rows) && data.rows.length >= 3 ? n : 0;
-  } catch { return 0; }
+    return Array.isArray(data.rows) && data.rows.length >= 3 ? { n, sure: data.count_sure === true && n > 0 } : { n: 0, sure: false };
+  } catch { return { n: 0, sure: false }; }
 }
 // kind : "" (site lu), "manuel" (vend sur Leboncoin), "normal" (site qui bloque les robots).
 async function templates(category: string, followup: boolean, variant: string, kind: boolean | string = ""): Promise<Tpl> {
@@ -365,7 +365,7 @@ Deno.serve(async (req) => {
       const tpl = await templates(String(body.category || "Garage / concession auto"), !!body.followup, body.variant === "B" ? "B" : "A", body.manual ? "manuel" : (body.normal ? "normal" : ""));
       const to = String(user.email || "");
       const cat = String(body.category || "Garage / concession auto");
-      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null, stockPhrase(cat, 24));
+      const { data } = await buildMail(c, to, "Votre société (TEST)", null, tpl, null, stockPhrase(cat, 0));
       await smtp(c, { to, data });
       return json({ ok: true, message: `Message de test envoyé à ${to} depuis ${c.email}.` });
     } catch (e) {
@@ -406,12 +406,12 @@ Deno.serve(async (req) => {
         const tested = row?.site_check_status === "ok" && Number(row?.site_check_count || 0) > 0;
         // v15 : aperçu prêt → mail « regardez » (et sa relance). Pour une relance, seulement si le 1er mail était déjà le mail aperçu
         // (même objet dans le même fil) : sinon on garde la relance d'origine.
-        const nPrev = await previewCount(j.id);
+        const pv = await previewInfo(j.id), nPrev = pv.n, shown = pv.sure ? pv.n : 0;
         const firstWasApercu = followup ? row?.mail_kind === "apercu" : true;
         const useApercu = nPrev >= 3 && firstWasApercu;
-        const tpl = useApercu ? apercuTemplates(j.category || "", nPrev, followup)
+        const tpl = useApercu ? apercuTemplates(j.category || "", shown, followup)
           : await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
-        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", row?.site_check_count));
+        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", shown));
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
         else {

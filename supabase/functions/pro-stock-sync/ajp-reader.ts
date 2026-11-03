@@ -42,5 +42,5 @@ export async function readAjpAgency(start:URL,home:string,fetchHtml:Fetcher,memo
  const failures:string[]=[];let sold=0;const details=[...entries.entries()];const idOf=new Map(details.map(([id,u])=>[String(u),id]));
  // 01/11/2026 : lecture des fiches par étapes mémorisée.
  const rows:any=await eachDetailResumable('ajp-v1:'+start.pathname,details.map(d=>String(d[1])),async l=>{const id=idOf.get(l)!;const html=(await fetchHtml(new URL(l))).text;const row=parseAjpDetail(html,l);if(row)return row;if(ajpProperties(html).some(x=>String(x.id)===id&&/vendu|loué|retiré/i.test(x.status||''))){sold++;return null;}failures.push(l);partial=true;return{reference:id,url:l};},memory);partial=partial||rows.partial;
- (rows as any).partial=partial;(rows as any).total=total;(rows as any).stats={pages,details:entries.size,read:rows.length,sold,failures,agency_id:agencyId};return rows;
+ (rows as any).partial=partial;(rows as any).total=total;if(total&&!partial)(rows as any).siteCount=total;(rows as any).stats={pages,details:entries.size,read:rows.length,sold,failures,agency_id:agencyId};return rows;
 }

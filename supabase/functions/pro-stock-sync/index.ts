@@ -521,7 +521,7 @@ async function readSpiderVo(start:URL,html:string){
   if(o?._svo_sold)continue;rows.push(o?.titre?o:{reference:vid,url});await sleep(150);}}));
  if(agencyCity){(rows as any).siteLocation={city:agencyCity,postal:''};(rows as any).siteForce=true;}
  if(cut)(rows as any).partial=true;
- (rows as any).total=total||links.size;if(total>links.size){(rows as any).partial=true;if(links.size>=300)(rows as any).capped=true;}
+ (rows as any).total=total||links.size;if(total)(rows as any).siteCount=total;/* total affiché par le site (col_found) */if(total>links.size){(rows as any).partial=true;if(links.size>=300)(rows as any).capped=true;}
  return rows;
 }
 async function readAaSite(origin:URL){
@@ -1371,6 +1371,9 @@ async function notifyAdminsSite(feed:any,kind:'approved'|'pending',info:any){
   await fetch('https://api.resend.com/emails',{method:'POST',headers:{Authorization:`Bearer ${key}`,'Content-Type':'application/json','Idempotency-Key':`site-${kind}-${feed.id}`},body:JSON.stringify({from:'Abracadeal <contact@abracadeal.fr>',to:tos,subject,html:`<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;line-height:1.5"><p>Bonjour Anthony,</p>${head}${body}<p>Abracadeal</p></div>`})});
  }catch(e){console.error('notifyAdminsSite',e);}
 }
+/* 03/11/2026 (Anthony : « il faut que le nombre soit sûr, pas 24 alors qu'il y en a 127 ») : nombre garanti seulement si le site
+   affiche lui-même son total (site_count), que le robot a lu ce nombre d'annonces (à 10 % près au-dessus), sans lecture partielle. */
+function countSure(r:any){const sc=Number(r?.site_count||0),rd=Number(r?.read||0);return !!r?.ok&&!r?.partial&&sc>0&&rd>=sc&&rd<=Math.ceil(sc*1.1)+1;/* lus ≈ affichés : un « 5 véhicules en vedette » sur l'accueil ne passe pas pour le total */}
 async function autoReviewSite(feed:any,dryRun=false){
  const mark=async(reason:string,platform:string|null)=>{if(dryRun)return{ok:false,auto_review:'pending',reason,platform};if(!feed.last_run_at)await notifyAdminsSite(feed,'pending',{reason});await admin.from('pro_stock_feeds').update({...(platform?{site_platform:platform}:{}),last_run_at:new Date().toISOString(),last_error:'Validation manuelle nécessaire : '+reason,updated_at:new Date().toISOString()}).eq('id',feed.id).eq('review_status','pending');return{ok:false,feed_id:feed.id,auto_review:'pending',reason};};
  let rows:any[];try{rows=await readFeed(feed,!dryRun);}catch(e){return mark(e instanceof Error?e.message:String(e),(e as any)?.platform||null);}
@@ -1405,8 +1408,8 @@ if(body?.action==='debug_detail'){if(!await cronOk(req))return json({error:'Acc�
    const job=(cands||[]).find((c:any)=>!have.has(c.id)&&/^https?:\/\//i.test(String(c.source_url||'')));if(!job)return json({ok:true,filled:0,left:0});
    const sector=job.category==='Agence immobilière'?'immobilier':'vehicules';let r:any;
    try{r=await autoReviewSite({id:null,feed_url:String(job.source_url),format:'auto',sector,owner_id:null},true);}catch(e){r={ok:false};}
-   const rows=Array.isArray(r?.preview)?r.preview:[];
-   await admin.from('prospect_previews').upsert({prospect_id:job.id,rows,count:Number(r?.total_on_site||r?.complete||rows.length)||rows.length,updated_at:new Date().toISOString()});
+   const rows=Array.isArray(r?.preview)?r.preview:[];const sure=countSure(r);
+   await admin.from('prospect_previews').upsert({prospect_id:job.id,rows,count:sure?Number(r.site_count):(Number(r?.total_on_site||r?.complete||rows.length)||rows.length),count_sure:sure,updated_at:new Date().toISOString()});
    return json({ok:true,filled:rows.length?1:0,company:job.company,rows:rows.length});}
 if(body?.action==='prospect_precheck'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
    // 29/10/2026 (Anthony) : avant le 1er mail, on teste le site du prospect. Lisible → mail avec le nombre d'annonces ; illisible → pas de mail, signalé à l'admin.
@@ -1416,7 +1419,7 @@ if(body?.action==='prospect_precheck'){if(!await cronOk(req))return json({error:
    const n=Number(r?.total_on_site||r?.complete||0);const ok=!!r?.ok&&Number(r?.complete||0)>=1;
    // Pas lisible : lien vers une boutique Leboncoin sur son site → mail « publiez vous-même » (29/10/2026).
    if(!ok){try{const{text}=await fetchSiteHtml(new URL(String(job.url)));if(/href=["'][^"']*leboncoin\.fr\/(?:boutique|pro|ad\/|annonces\/|profile|profil)/i.test(text))r={...r,reason:'LEBONCOIN: '+String(r?.reason||'')};}catch{}}
-   if(ok&&Array.isArray(r?.preview)&&r.preview.length){try{await admin.from('prospect_previews').upsert({prospect_id:job.id,rows:r.preview,count:n||r.preview.length,updated_at:new Date().toISOString()});}catch{}}
+   if(ok&&Array.isArray(r?.preview)&&r.preview.length){const sure=countSure(r);try{await admin.from('prospect_previews').upsert({prospect_id:job.id,rows:r.preview,count:sure?Number(r.site_count):(n||r.preview.length),count_sure:sure,updated_at:new Date().toISOString()});}catch{}}
    await admin.rpc('prospect_precheck_done',{p_id:job.id,p_ok:ok,p_count:ok?n:null,p_platform:r?.platform||null,p_reason:ok?null:String(r?.reason||'illisible')});
    return json({ok:true,checked:1,company:job.company,readable:ok,count:n,platform:r?.platform||null});}
   if(body?.action==='unreadable_digest'){if(!await cronOk(req))return json({error:'Accès cron refusé'},403);
