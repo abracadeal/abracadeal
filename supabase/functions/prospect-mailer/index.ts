@@ -148,12 +148,26 @@ C'est donnant-donnant : 12 mois offerts, sans carte bancaire. Si ça vous amène
 Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
-async function previewInfo(prospectId: string): Promise<{ n: number; sure: boolean }> {
+// 03/11/2026 : même tri que la page pro-fondateur.html (goodRows) — un aperçu « Cental--> » ×6 ou une maison « vendue » 1 450 €
+// ne doit jamais partir. Moins de 3 annonces correctes (ou moins de 3 titres différents) → pas de mail aperçu.
+function goodPreviewRows(rows: any[], immo: boolean) {
+  const seen: Record<string, number> = {};
+  return (rows || []).filter((a: any) => {
+    const t = String(a?.t || "").trim();
+    if (t.length < 8 || /-->|<|^\W*$/.test(t) || !/[A-Za-zÀ-ÿ]{3}/.test(t)) return false;
+    const k = t.toLowerCase(); seen[k] = (seen[k] || 0) + 1; if (seen[k] > 2) return false;
+    if (immo && a?.sub !== "location" && Number(a?.p) > 0 && Number(a?.p) < 5000) return false;
+    return true;
+  });
+}
+async function previewInfo(prospectId: string, category = ""): Promise<{ n: number; sure: boolean }> {
   try {
     const { data } = await admin.from("prospect_previews").select("count,count_sure,rows").eq("prospect_id", prospectId).maybeSingle();
     if (!data) return { n: 0, sure: false };
-    const n = Number(data.count || 0) || (Array.isArray(data.rows) ? data.rows.length : 0);
-    return Array.isArray(data.rows) && data.rows.length >= 3 ? { n, sure: data.count_sure === true && n > 0 } : { n: 0, sure: false };
+    const good = goodPreviewRows(Array.isArray(data.rows) ? data.rows : [], category === "Agence immobilière");
+    if (good.length < 3 || new Set(good.map((a: any) => String(a.t).toLowerCase())).size < 3) return { n: 0, sure: false };
+    const n = Number(data.count || 0) || good.length;
+    return { n, sure: data.count_sure === true && n > 0 };
   } catch { return { n: 0, sure: false }; }
 }
 // kind : "" (site lu), "manuel" (vend sur Leboncoin), "normal" (site qui bloque les robots).
@@ -406,7 +420,7 @@ Deno.serve(async (req) => {
         const tested = row?.site_check_status === "ok" && Number(row?.site_check_count || 0) > 0;
         // v15 : aperçu prêt → mail « regardez » (et sa relance). Pour une relance, seulement si le 1er mail était déjà le mail aperçu
         // (même objet dans le même fil) : sinon on garde la relance d'origine.
-        const pv = await previewInfo(j.id), nPrev = pv.n, shown = pv.sure ? pv.n : 0;
+        const pv = await previewInfo(j.id, j.category || ""), nPrev = pv.n, shown = pv.sure ? pv.n : 0;
         const firstWasApercu = followup ? row?.mail_kind === "apercu" : true;
         const useApercu = nPrev >= 3 && firstWasApercu;
         const tpl = useApercu ? apercuTemplates(j.category || "", shown, followup)
