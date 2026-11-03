@@ -83,6 +83,7 @@ function encHeader(s: string) { return /^[\x20-\x7e]*$/.test(s) ? s : `=?UTF-8?B
 // que la 1re page ou les derniers biens d'un site (Weecars 24, Junot 20, AJP 23, Citya 11…). Tant que le nombre n'est pas
 // garanti, AUCUN nombre dans les mails : « vos véhicules », « vos biens ».
 const SHOW_COUNT = false;
+const PAUSE_SENDING = true; // 03/11/2026 : envoi arrêté par Anthony le temps de réparer le robot
 function stockPhrase(category: string, n: number | null | undefined) {
   const k = SHOW_COUNT ? Math.max(0, Number(n || 0)) : 0;
   const noun = category === "Agence immobilière" ? ["bien", "biens"] : category === "Concession moto" ? ["moto", "motos"] : ["véhicule", "véhicules"];
@@ -384,6 +385,9 @@ Deno.serve(async (req) => {
 
   if (action === "run") {
     if (!req.headers.get("x-internal-key") || req.headers.get("x-internal-key") !== await secret("prospect_crawler_internal")) return json({ error: "Non autorisé" }, 401);
+    // 03/11/2026 (Anthony : « arrête les mails et répare tout ça ») : pause dans le code, AVANT toute réservation de prospect.
+    // Pour relancer : PAUSE_SENDING = false, pousser, redéployer.
+    if (PAUSE_SENDING) return json({ ok: true, sent: 0, paused: true });
     const { data: jobs, error } = await admin.rpc("prospect_mailer_claim");
     if (error) return json({ error: error.message }, 500);
     const list = (jobs || []) as { id: string; email: string; company: string; mailbox: string; category: string | null; kind?: string; in_reply_to?: string | null }[];
