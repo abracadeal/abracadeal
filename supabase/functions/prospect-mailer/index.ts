@@ -123,9 +123,10 @@ Je me permets de vous redonner le lien : ${vos} ${plural ? "attendent" : "attend
 
 Voir l'aperçu : https://abracadeal.fr/pro-fondateur.html
 
-Si cela vous convient, un clic sur « Je publie » et votre SIRET suffisent. Gratuit, sans carte bancaire, sans engagement.
+Si cela vous convient, un clic sur « Je publie » et votre SIRET suffisent. Les 12 premiers mois sont offerts, sans carte bancaire : si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic sans rien payer.
 
-Le Service Pros Abracadeal
+Anthony
+Fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
   return { subject, body:
 `Bonjour,
@@ -137,9 +138,12 @@ https://abracadeal.fr/pro-fondateur.html
 
 Si elle vous plaît, cliquez sur « Je publie » et indiquez votre SIRET : vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site (nouveautés, prix, ventes).
 
-Abracadeal est un nouveau site d'annonces, gratuit pour les professionnels. Sans carte bancaire, sans engagement.
+C'est donnant-donnant : votre stock rend Abracadeal plus utile aux acheteurs, et ces acheteurs vous contactent directement. Les 12 premiers mois sont offerts, sans carte bancaire et sans engagement. Notre pari : que vous restiez parce que ça marche. Sinon, vous arrêtez en un clic, sans rien payer.
 
-Le Service Pros Abracadeal
+L'offre est réservée aux 500 premiers professionnels, avec des places réparties par région.
+
+Anthony
+Fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
 async function previewCount(prospectId: string): Promise<number> {
