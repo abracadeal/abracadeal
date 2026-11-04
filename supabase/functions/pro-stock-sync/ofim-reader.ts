@@ -48,6 +48,11 @@ export function parseOfimDetail(html:string,url:string){
   if(head===head.toUpperCase()&&/[A-Z]{4}/.test(head))head=head.charAt(0)+head.slice(1).toLowerCase();
   if(head.length>=10){const typ=type||'Bien';const t=(new RegExp('^'+typ.split(' ')[0],'i').test(head)?head:`${typ} : ${head}`);r.titre=t.length>110?t.slice(0,107).replace(/\s+\S*$/,'')+'…':t;}
   else if(type&&r.ville)r.titre=`${type} – ${r.ville}`;
+  // Photos : toute la galerie de la fiche (liens « data-lightbox », grand format /media/l-resize/<n°>/…), dans l'ordre du site.
+  // Les « annonces similaires » (/media/sm/…) ne sont jamais prises.
+  {const big=[...new Set([...html.matchAll(/https:\/\/www\.ofim\.fr\/media\/l-resize\/\d+\/[^"'\s)]+\.(?:jpe?g|png|webp)/gi)].map(m=>m[0]))];
+   const mid=big.length?[]:[...new Set([...html.matchAll(/https:\/\/www\.ofim\.fr\/media\/m\/\d+\/[^"'\s)]+\.(?:jpe?g|png|webp)/gi)].map(m=>m[0]))];
+   const ph=big.length?big:mid;if(ph.length)r.photos=ph.slice(0,30).join('|');}
   if(r.description)r.description=String(r.description).replace(/^\s*Voir les autres annonces qui peuvent vous int[ée]resser\s*/i,'');
   return r;
 }
@@ -57,7 +62,7 @@ export async function readOfimAgency(url:URL,fetchHtml:Fetcher,memory?:CrawlMemo
   // Adresses exactes des listes « Vente » et « Location » de l'agence, prises sur sa page.
   const starts=[...new Set([...text.matchAll(/href="(https:\/\/www\.ofim\.fr\/liste-(\d+)-(10|30)-(?:Vente|Location)-agence-[^"#?]+\.html)"/gi)].filter(m=>m[2]===ag).map(m=>m[1]))];
   if(!starts.length)throw Error('Listes de biens de l’agence OFIM introuvables.');
-  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v4:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
+  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v5:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
   // Total affiché par le site sur la page de l'agence (« 27 annonces immobilières de vente, achat et location »).
   const total=Number(text.match(/(\d+)\s+annonces immobili[eè]res de vente/i)?.[1]||0);if(total)(rows as any).siteCount=total;
   return rows;
