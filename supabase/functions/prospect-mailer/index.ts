@@ -152,7 +152,7 @@ abracadeal.fr – {{expediteur}}` };
 // ne doit jamais partir. Moins de 3 annonces correctes (ou moins de 3 titres différents) → pas de mail aperçu.
 const PV_NOT_AD = /^agence\b|\b\d+\s+annonces?\b|annonces immobili|nos agences|qui sommes|contactez/i;
 const PV_NOT_AD_URL = /agence-immobiliere-de|\/agences?(\/|\.html|$)|\/contact|\/blog\//i;
-const PV_BAD_PHOTO = /coeur|heart|icon|picto|logo|sprite|placeholder|no[-_]?(photo|image)|\.svg(\?|$)/i;
+const PV_BAD_PHOTO = /(?:^|\/)(?:coeurs?|hearts?)[_-][^\/]*\.(?:png|gif|svg)|\/(?:icons?|pictos?|logos?|sprites?)[\/_.-]|placeholder|no[-_]?(photo|image)|\.svg(\?|$)/i;
 const PV_PART = /(^|[^a-zà-ÿ])(selle|r[ée]servoir|car[ée]nage|garde[- ]?boue|pneus?|jantes?|casques?|blousons?|gants|r[ée]troviseurs?|phares?|filtres?|plaquettes?|batterie|accessoires?|huile|bottes|silencieux|guidon|leviers?|pi[eè]ces? d[ée]tach[ée]es)([^a-zà-ÿ]|$)/i;
 function goodPreviewRows(rows: any[], immo: boolean) {
   const seen: Record<string, number> = {};
