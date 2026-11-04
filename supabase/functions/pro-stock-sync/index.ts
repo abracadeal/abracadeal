@@ -32,6 +32,7 @@ import { isEwigoSite, readEwigoAgency } from "./ewigo-reader.ts";
 import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
 import { cityaAgencyId, readCityaAgency, cityaNdfAgency, readCityaNdfAgency } from "./citya-reader.ts";
 import { isCimmAgency, readCimmAgency } from "./cimm-reader.ts";
+import { ofimAgencyId, readOfimAgency } from "./ofim-reader.ts";
 import { isLaResidenceAgency, readLaResidenceAgency, isLaFrancaiseAgency, readLaFrancaiseAgency, isBhCarSite, readBhCarAgency } from "./network-agency-readers.ts";
 import { fillEnergyFromImages } from "./energy-image.ts";
 import { cpu, cpuReset } from "./cpu-meter.ts";
@@ -1033,6 +1034,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isEspacesAtypiquesAgency(url)){const rows=await readEspacesAtypiquesAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='Espaces Atypiques (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isGuyHoquetAgency(url)){const rows=await readGuyHoquetAgency(url,fetchSiteHtml);(rows as any).platform='Guy Hoquet (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isCimmAgency(url)){const rows=await readCimmAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='Cimm Immobilier (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
+  /* 04/11/2026 (Ofim Saint-Gilles : pages d'agences lues comme des biens) */if(ofimAgencyId(url)){const rows=await readOfimAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='OFIM (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isBhCarSite(url)){const rows=await readBhCarAgency(url,fetchSiteHtml,ldVehicle,crawlMemory(feed,persistCrawl));(rows as any).platform='BH Car (véhicules de l\'agence)';(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   if(isLaResidenceAgency(url)){const rows=await readLaResidenceAgency(url,fetchSiteHtml,ldImmo,crawlMemory(feed,persistCrawl));(rows as any).platform='La Résidence (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isLaFrancaiseAgency(url)){const rows=await readLaFrancaiseAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='La Française Immobilière (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
@@ -1110,6 +1112,7 @@ async function readFeed(feed:any,persistCrawl=false){
     else if(isEspacesAtypiquesAgency(url)){rows=await readEspacesAtypiquesAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Espaces Atypiques (biens de l\'agence)';feed.sector='immobilier';}
     else if(isGuyHoquetAgency(url)){rows=await readGuyHoquetAgency(url,fetchSiteHtml);platform='Guy Hoquet (biens de l\'agence)';feed.sector='immobilier';}
     else if(isCimmAgency(url)){rows=await readCimmAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='Cimm Immobilier (biens de l\'agence)';feed.sector='immobilier';}
+    else if(ofimAgencyId(url)){rows=await readOfimAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='OFIM (biens de l\'agence)';feed.sector='immobilier';}
     else if(isBhCarSite(url)){rows=await readBhCarAgency(url,fetchSiteHtml,ldVehicle,crawlMemory(feed,persistCrawl));platform='BH Car (véhicules de l\'agence)';feed.sector='vehicules';}
     else if(isLaResidenceAgency(url)){rows=await readLaResidenceAgency(url,fetchSiteHtml,ldImmo,crawlMemory(feed,persistCrawl));platform='La Résidence (biens de l\'agence)';feed.sector='immobilier';}
     else if(isLaFrancaiseAgency(url)){rows=await readLaFrancaiseAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));platform='La Française Immobilière (biens de l\'agence)';feed.sector='immobilier';}
