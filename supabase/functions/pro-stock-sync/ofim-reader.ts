@@ -13,13 +13,38 @@ export function ofimLinks(html:string,url:URL,ag:string){
   const details=[...new Set([...html.matchAll(FICHE)].map(m=>m[1]))];
   return{lists,details};
 }
+// Commune officielle d'après la ville écrite dans l'adresse de la fiche (/<n°>/Vente-<Type>-<VILLE>-ile-de-la-Reunion-…).
+// Sans cela « PORT » devenait Port (Ain) et « SAINT-GILLES-LES-HAUTS » Saint-Denis.
+const REUNION:[RegExp,string,string][]=[
+  [/^SAINT-GILLES-LES-HAUTS$/,'Saint-Paul','97435'],[/^(SAINT-GILLES(-LES-BAINS)?|HERMITAGE|L-HERMITAGE|BOUCAN-CANOT|SALINE(-LES-BAINS)?|LA-SALINE(-LES-BAINS)?)$/,'Saint-Paul','97434'],
+  [/^(SAINT-PAUL|PLATEAU-CAILLOUX|GUILLAUME|BOIS-DE-NEFLES-SAINT-PAUL)$/,'Saint-Paul','97460'],[/^(LE-)?PORT$/,'Le Port','97420'],[/^(LA-)?POSSESSION$/,'La Possession','97419'],
+  [/^SAINT-LEU$/,'Saint-Leu','97436'],[/^(L-)?ETANG-SALE(-LES-HAUTS|-LES-BAINS)?$/,"L'Étang-Salé",'97427'],[/^(LES-)?AVIRONS$/,'Les Avirons','97425'],
+  [/^SAINT-LOUIS|^RIVIERE-SAINT-LOUIS$/,'Saint-Louis','97450'],[/^(SAINT-PIERRE|RAVINE-DES-CABRIS)$/,'Saint-Pierre','97410'],[/^(LE-)?TAMPON$/,'Le Tampon','97430'],
+  [/^SAINT-JOSEPH$/,'Saint-Joseph','97480'],[/^PETITE-ILE$/,'Petite-Île','97429'],[/^SAINT-PHILIPPE$/,'Saint-Philippe','97442'],[/^ENTRE-DEUX$/,'Entre-Deux','97414'],
+  [/^(SAINT-DENIS|MONTAGNE|LA-MONTAGNE)$/,'Saint-Denis','97400'],[/^SAINTE-CLOTILDE$/,'Saint-Denis','97490'],[/^SAINTE-MARIE$/,'Sainte-Marie','97438'],
+  [/^SAINTE-SUZANNE$/,'Sainte-Suzanne','97441'],[/^SAINT-ANDRE$/,'Saint-André','97440'],[/^SAINT-BENOIT$/,'Saint-Benoît','97470'],[/^BRAS-PANON$/,'Bras-Panon','97412'],
+  [/^SAINTE-ROSE$/,'Sainte-Rose','97439'],[/^SALAZIE$/,'Salazie','97433'],[/^CILAOS$/,'Cilaos','97413'],[/^(LA-)?PLAINE-DES-PALMISTES$/,'La Plaine-des-Palmistes','97431'],
+  [/^TROIS-BASSINS$/,'Trois-Bassins','97426'],
+];
+const TYPES='Fonds-de-commerce|Licence-4|Local-commercial|Locaux-commerciaux|Entrepot|Bureau|Appartement|Maison|Villa|Terrain|Immeuble|Parking|Studio';
 export function parseOfimDetail(html:string,url:string){
   const r:any=smartDetail(html,url,'immobilier');if(!r)return null;
-  r.reference=new URL(url).pathname.match(/^\/(\d+)\//)?.[1]||r.reference;
-  // Titre de la page sans le prix : « Vente Studio / F1 SAINT GILLES LES BAINS – 220 432 € » → « Studio / F1 – Saint Gilles Les Bains ».
-  const t=(html.match(/<title>([^<]+)<\/title>/i)?.[1]||'').split(/\s+[–-]\s+[\d\s  .,]+€/)[0].trim();
-  const m=t.match(/^(Vente|Location)\s+(.+?)\s+([A-ZÀ-Ý' -]{3,})$/);
-  if(m){const city=m[3].toLowerCase().replace(/(^|[\s'-])(\p{L})/gu,(_:string,a:string,b:string)=>a+b.toUpperCase());r.titre=`${m[2]} – ${city}`;r.transaction=m[1].toLowerCase();}
+  const path=new URL(url).pathname;
+  r.reference=path.match(/^\/(\d+)\//)?.[1]||r.reference;
+  const pm=path.match(new RegExp(`^/\\d+/(Vente|Location)-(${TYPES}|[A-Za-z-]+?)-([A-Z][A-Z-]+?)-ile-de-la-Reunion-(.*)\\.html$`));
+  // Ville : celle écrite dans l'adresse de la fiche, avec sa commune et son code postal officiels.
+  if(pm){const town=pm[3];const hit=REUNION.find(([re])=>re.test(town));if(hit){r.ville=hit[1];r.code_postal=hit[2];}r.transaction=pm[1].toLowerCase();}
+  // Type : « Licence 4 » et « Fonds de commerce » ne sont pas des appartements.
+  const type=(html.match(/<title>\s*(?:Vente|Location)\s+(.+?)\s+[A-ZÀ-Ý' -]{3,}\s+[–-]/)?.[1]||pm?.[2]?.replace(/-/g,' ')||'').trim();
+  if(/fonds de commerce|licence/i.test(type))r.type_bien='fonds de commerce';else if(/local|locaux|entrep[oô]t|bureau/i.test(type))r.type_bien='local commercial';
+  // Titre : le type + l'accroche de l'annonce (« Salon de coiffure, esthétique, onglerie à l'Hermitage »), sans « A VENDRE » ni le prix.
+  let head=String(r.texte_page||'').split('\n')[0]||'';
+  if(!head||head.length<10)head=(pm?.[4]||'').replace(/-/g,' ');
+  head=head.replace(/^\s*(?:(?:a|à)\s+(?:vendre|louer|saisir)|location|cession|vente)\b\s*[:!-]?\s*/i,'').replace(/\s(?:a|à)\s+(?:vendre|louer)\b/gi,'')
+    .replace(/\s*(?:[-–,:]\s*|\s(?:pour|a|à)\s+)?(?<![A-Za-z0-9²])\d[\d\s  .,]*\s*(?:€|euros?)?(?:\s*(?:HT|TTC|FAI))?(?:\s*\/?\s*(?:par\s+)?mois)?\s*$/i,'').replace(/\s+/g,' ').trim();
+  if(head===head.toUpperCase()&&/[A-Z]{4}/.test(head))head=head.charAt(0)+head.slice(1).toLowerCase();
+  if(head.length>=10){const typ=type||'Bien';const t=(new RegExp('^'+typ.split(' ')[0],'i').test(head)?head:`${typ} : ${head}`);r.titre=t.length>110?t.slice(0,107).replace(/\s+\S*$/,'')+'…':t;}
+  else if(type&&r.ville)r.titre=`${type} – ${r.ville}`;
   if(r.description)r.description=String(r.description).replace(/^\s*Voir les autres annonces qui peuvent vous int[ée]resser\s*/i,'');
   return r;
 }
@@ -29,7 +54,7 @@ export async function readOfimAgency(url:URL,fetchHtml:Fetcher,memory?:CrawlMemo
   // Adresses exactes des listes « Vente » et « Location » de l'agence, prises sur sa page.
   const starts=[...new Set([...text.matchAll(/href="(https:\/\/www\.ofim\.fr\/liste-(\d+)-(10|30)-(?:Vente|Location)-agence-[^"#?]+\.html)"/gi)].filter(m=>m[2]===ag).map(m=>m[1]))];
   if(!starts.length)throw Error('Listes de biens de l’agence OFIM introuvables.');
-  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v1:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
+  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v2:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
   // Total affiché par le site sur la page de l'agence (« 27 annonces immobilières de vente, achat et location »).
   const total=Number(text.match(/(\d+)\s+annonces immobili[eè]res de vente/i)?.[1]||0);if(total)(rows as any).siteCount=total;
   return rows;
