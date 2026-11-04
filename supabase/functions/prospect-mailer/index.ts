@@ -157,6 +157,8 @@ function goodPreviewRows(rows: any[], immo: boolean) {
     if (t.length < 8 || /-->|<|^\W*$/.test(t) || !/[A-Za-zÀ-ÿ]{3}/.test(t)) return false;
     const k = t.toLowerCase(); seen[k] = (seen[k] || 0) + 1; if (seen[k] > 2) return false;
     if (immo && a?.sub !== "location" && Number(a?.p) > 0 && Number(a?.p) < 5000) return false;
+    // 04/11/2026 (Hélix Immobilier : articles de blog lus comme des biens) : un bien doit être nommé comme un bien.
+    if (immo && !/(^|[^a-zà-ÿ])(maison|appartement|appart|villa|studio|loft|duplex|triplex|terrain|parcelle|local|locaux|bureaux?|commerce|entrep[oô]t|immeuble|parking|garage|box|chalet|propri[ée]t[ée]|ferme|long[èe]re|mas|bastide|chambres?|pi[eè]ces?|[tfp][1-9]|m²|m2|cave|grange|moulin|ch[âa]teau|penthouse|plain-pied|rez-de-chauss[ée]e|r[ée]sidence|logement|viager|lot)([^a-zà-ÿ]|$)/i.test(t)) return false;
     return true;
   });
 }
