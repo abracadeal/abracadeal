@@ -2399,3 +2399,9 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Demande d'Anthony (« être proposé par ChatGPT ») : `scripts/build_chatgpt_feed.py` → `feeds/chatgpt-products.jsonl` (spec OpenAI Commerce « Products » : 9 champs obligatoires, price « 19990.00 EUR », condition used/new, recherche seulement, pas de paiement dans ChatGPT). Généré à chaque passage du workflow share-pages. 150 produits au 03/11 (127 WeeCars Angers). Écartés : immobilier/vacances/emploi/services, sans prix, sans photo, sans marque (la marque est obligatoire, pas de valeur inventée). Téléphones et e-mails retirés des descriptions.
 - Programme marchands OpenAI : ouvert aux États-Unis seulement (03/11/2026), liste d'attente via chatgpt.com/merchants — formulaire à remplir par Anthony (nom, LinkedIn, e-mail pro). Petites annonces / occasion : ni acceptées ni exclues par OpenAI.
 - Vignettes : photo affichée en fondu une fois entièrement chargée (index-main.js v=20261103-photos). Les vignettes pèsent ~125 Ko (720 px, JPEG 80) : à alléger si Anthony valide.
+
+### 04/11/2026 — Claude — Contrôle du matin
+- 434 aperçus refaits depuis le 03/11 12:22 UTC (17 count_sure) ; tous les prospects « sent » ont un aperçu ; 137 « ready » restent à faire (cron preview-fill toujours à */2, à remettre la nuit quand c'est fini).
+- Weecars Amiens/Toulon/Cannes/Aix/Niort/Saint-Orens : uniquement leurs photos stock_<id>. WeeCars Angers (client) : source_url = page agence → aperçu mélangé ; vidé + last_inbound_contact_at = now (plus de relance). À noter : 666 prospects actifs ont un stock_page_url ≠ source_url, le robot d'aperçu lit source_url.
+- Hélix Immobilier : articles de blog pris pour des biens → immo : titre doit nommer un bien (mail + page). prospect-mailer v21 (a6420b3).
+- Accord « Je publie » Ofim Immobilier (04/11 02:27 UTC) : SIRET 411 182 298 00058 non vérifié, e-mail perso gmail sans lien avec ofim.fr → signalé à Anthony, rien importé.
