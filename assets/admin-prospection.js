@@ -112,8 +112,33 @@ async function loadTracking(){
   $('trackGroups').innerHTML=keys.map((k,gi)=>{const g=groups.get(k),acc=g.filter(r=>r.account_at).length;return '<details class="dayg"'+(gi===0?' open':'')+'><summary><span>'+esc(dayLabel(k))+'</span><span class="dayn">'+g.length+' pro'+(g.length>1?'s':'')+(acc?' · <b class="ok">'+acc+' compte'+(acc>1?'s':'')+'</b>':'')+'</span></summary><div class="dayl">'+g.map(r=>'<div class="cl"><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b>'+(r.account_at?'<span class="pill ok">Compte créé</span>':'')+'</div><div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · '+(Number(r.click_count||0))+' clic'+(Number(r.click_count||0)>1?'s':'')+'</div><div class="clm">'+esc(r.email||'')+' · envoyé '+esc(fmtDate(r.sent_at))+(r.followup_sent_at?' · relance '+esc(fmtDate(r.followup_sent_at)):'')+'</div>'+(r.account_at&&r.account_email&&r.account_email.toLowerCase()!==String(r.email).toLowerCase()?'<div class="clm">Compte : '+esc(r.account_email)+'</div>':'')+'</div>').join('')+'</div></details>'}).join('');
 }
 
+// 04/11/2026 (Anthony) : les accords « Je publie » (pro qui a validé son aperçu + SIRET) s'affichent ici, en haut de la page.
+async function loadAcceptances(){
+  const {data,error}=await sb.rpc('admin_prospect_acceptances');
+  if(error){$('acceptList').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
+  const rows=data||[],todo=rows.filter(r=>!r.handled_at);
+  $('aCount').innerHTML=todo.length?'<b class="ok">'+todo.length+' à traiter</b>':'';
+  if(!rows.length){$('acceptList').innerHTML='<div class="small">Aucun accord pour l’instant.</div>';return}
+  const sirenTxt=r=>r.siren_matches===true?'<span class="pill ok">SIRET conforme</span>':r.siren_matches===false?'<span class="pill" style="color:#ffb7c0">SIRET ≠ SIREN connu ('+esc(r.known_siren)+')</span>':'<span class="pill">SIRET à vérifier</span>';
+  $('acceptList').innerHTML=rows.map(r=>'<div class="cl"'+(r.handled_at?' style="opacity:.55"':'')+'><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> '+sirenTxt(r)+(r.handled_at?' <span class="pill">Traité le '+esc(fmtDate(r.handled_at))+'</span>':'')+'</div>'+
+    '<div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · accord le '+esc(fmtDate(r.accepted_at))+'</div>'+
+    '<div class="clm">SIRET : <b>'+esc(r.siret)+'</b> · <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/'+encodeURIComponent(r.siret)+'" target="_blank" rel="noopener">vérifier sur l’annuaire</a></div>'+
+    '<div class="clm">E-mail donné : <a href="mailto:'+esc(r.email)+'">'+esc(r.email)+'</a>'+(r.prospect_email&&r.prospect_email.toLowerCase()!==String(r.email).toLowerCase()?' (mail prospecté : '+esc(r.prospect_email)+')':'')+(r.phone?' · Tél. : <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':'')+'</div>'+
+    (r.source_url?'<div class="clm">Site : <a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_url)+'</a></div>':'')+
+    (r.ref_code?'<div class="clm"><a href="pro-fondateur.html?r='+encodeURIComponent(r.ref_code)+'" target="_blank" rel="noopener">Voir son aperçu</a></div>':'')+
+    (r.handled_note?'<div class="clm">Note : '+esc(r.handled_note)+'</div>':'')+
+    '<div class="pra" style="margin-top:8px">'+(r.handled_at?'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',false)">Remettre à traiter</button>':'<button class="btn green" onclick="handleAcceptance('+Number(r.id)+',true)">Marquer comme traité</button>')+'</div></div>').join('');
+}
+async function handleAcceptance(id,handled){
+  let note=null;
+  if(handled){note=prompt('Note (facultatif) : ex. « import lancé », « SIRET faux, rappelé »');if(note===null)return}
+  const {data,error}=await sb.rpc('admin_prospect_acceptance_handle',{p_id:id,p_handled:handled,p_note:note});
+  if(error||data?.ok===false){alert('Erreur : '+(error?.message||data?.error));return}
+  await loadAcceptances();
+}
+
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='pSearch')renderProspects();});
-async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking()])}
+async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking(),loadAcceptances()])}
 
 async function markStop(id){
   if(!confirm('Ajouter ce prospect à la liste d’opposition ? Il ne sera plus envoyé.'))return;
