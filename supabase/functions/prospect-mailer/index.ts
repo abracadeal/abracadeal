@@ -150,6 +150,10 @@ abracadeal.fr – {{expediteur}}` };
 }
 // 03/11/2026 : même tri que la page pro-fondateur.html (goodRows) — un aperçu « Cental--> » ×6 ou une maison « vendue » 1 450 €
 // ne doit jamais partir. Moins de 3 annonces correctes (ou moins de 3 titres différents) → pas de mail aperçu.
+const PV_NOT_AD = /^agence\b|\b\d+\s+annonces?\b|annonces immobili|nos agences|qui sommes|contactez/i;
+const PV_NOT_AD_URL = /agence-immobiliere-de|\/agences?(\/|\.html|$)|\/contact|\/blog\//i;
+const PV_BAD_PHOTO = /coeur|heart|icon|picto|logo|sprite|placeholder|no[-_]?(photo|image)|\.svg(\?|$)/i;
+const PV_PART = /(^|[^a-zà-ÿ])(selle|r[ée]servoir|car[ée]nage|garde[- ]?boue|pneus?|jantes?|casques?|blousons?|gants|r[ée]troviseurs?|phares?|filtres?|plaquettes?|batterie|accessoires?|huile|bottes|silencieux|guidon|leviers?|pi[eè]ces? d[ée]tach[ée]es)([^a-zà-ÿ]|$)/i;
 function goodPreviewRows(rows: any[], immo: boolean) {
   const seen: Record<string, number> = {};
   return (rows || []).filter((a: any) => {
@@ -159,6 +163,13 @@ function goodPreviewRows(rows: any[], immo: boolean) {
     if (immo && a?.sub !== "location" && Number(a?.p) > 0 && Number(a?.p) < 5000) return false;
     // 04/11/2026 (Hélix Immobilier : articles de blog lus comme des biens) : un bien doit être nommé comme un bien.
     if (immo && !/(^|[^a-zà-ÿ])(maison|appartement|appart|villa|studio|loft|duplex|triplex|terrain|parcelle|local|locaux|bureaux?|commerce|entrep[oô]t|immeuble|parking|garage|box|chalet|propri[ée]t[ée]|ferme|long[èe]re|mas|bastide|chambres?|pi[eè]ces?|[tfp][1-9]|m²|m2|cave|grange|moulin|ch[âa]teau|penthouse|plain-pied|rez-de-chauss[ée]e|r[ée]sidence|logement|viager|lot)([^a-zà-ÿ]|$)/i.test(t)) return false;
+    // 04/11/2026 (Anthony : « compliqué de se permettre d'envoyer ça à des pros ») : Ofim (pages d'agences + icône cœur lues
+    // comme des biens), OAK GARAGE (pièces détachées à 39 € pour une concession moto). Pages d'agence / de liste, photos qui
+    // sont des icônes, et pour les véhicules : prix < 500 € ou pièces / accessoires → écartés.
+    if (PV_NOT_AD.test(t) || PV_NOT_AD_URL.test(String(a?.u || ""))) return false;
+    if (!a?.ph || PV_BAD_PHOTO.test(String(a.ph))) return false;
+    if (!immo && a?.sub !== "location" && Number(a?.p) > 0 && Number(a?.p) < 500) return false;
+    if (!immo && PV_PART.test(t)) return false;
     return true;
   });
 }
@@ -168,6 +179,8 @@ async function previewInfo(prospectId: string, category = ""): Promise<{ n: numb
     if (!data) return { n: 0, sure: false };
     const good = goodPreviewRows(Array.isArray(data.rows) ? data.rows : [], category === "Agence immobilière");
     if (good.length < 3 || new Set(good.map((a: any) => String(a.t).toLowerCase())).size < 3) return { n: 0, sure: false };
+    // 04/11/2026 : la même photo sur toutes les annonces = le robot a lu une icône ou un visuel du site, pas les vraies photos.
+    if (new Set(good.map((a: any) => String(a.ph))).size < 2) return { n: 0, sure: false };
     const n = Number(data.count || 0) || good.length;
     return { n, sure: data.count_sure === true && n > 0 };
   } catch { return { n: 0, sure: false }; }
