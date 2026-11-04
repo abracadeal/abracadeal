@@ -2,7 +2,7 @@
 // La page « Agence-immobiliere-de-<ville>-ag<n>.html » montre les autres agences du réseau et des « coups de cœur » d'autres
 // villes : le robot les prenait pour des biens (aperçu d'Ofim Saint-Gilles raté). Les biens de l'agence sont sur ses listes
 // « liste-<n>-30-Vente-… » et « liste-<n>-10-Location-… » (10 par page, ?start=10, 20…), chaque fiche est /<n° du bien>/….html.
-import { smartDetail } from './smart-reader.ts';
+import { smartDetail, sDecode } from './smart-reader.ts';
 import { crawlCatalogue, type CrawlMemory } from './resumable-crawl.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 export const ofimAgencyId=(url:URL)=>/^(?:www\.)?ofim\.fr$/i.test(url.hostname)?(url.pathname.match(/-ag(\d+)\.html$/i)?.[1]||url.pathname.match(/^\/liste-(\d+)-\d+-/i)?.[1]||null):null;
@@ -38,9 +38,12 @@ export function parseOfimDetail(html:string,url:string){
   const type=(html.match(/<title>\s*(?:Vente|Location)\s+(.+?)\s+[A-ZÀ-Ý' -]{3,}\s+[–-]/)?.[1]||pm?.[2]?.replace(/-/g,' ')||'').trim();
   if(/fonds de commerce|licence/i.test(type))r.type_bien='fonds de commerce';else if(/local|locaux|entrep[oô]t|bureau/i.test(type))r.type_bien='local commercial';
   // Titre : le type + l'accroche de l'annonce (« Salon de coiffure, esthétique, onglerie à l'Hermitage »), sans « A VENDRE » ni le prix.
-  let head=String(r.texte_page||'').split('\n')[0]||'';
+  // L'accroche est dans « og:title » (sinon le 2e titre de la fiche, sinon l'adresse de la fiche).
+  let head=sDecode(html.match(/<meta[^>]+property="og:title"[^>]+content="([^"]{10,250})"/i)?.[1]||html.match(/<meta[^>]+content="([^"]{10,250})"[^>]+property="og:title"/i)?.[1]||'');
+  if(!head||/r[ée]f\.\s*:/i.test(head))head=sDecode(([...html.matchAll(/<h[12][^>]*>([^<]{10,200})<\/h[12]>/gi)].map(m=>m[1]).find(x=>!/r[ée]f\.\s*:/i.test(x))||''));
   if(!head||head.length<10)head=(pm?.[4]||'').replace(/-/g,' ');
-  head=head.replace(/^\s*(?:(?:a|à)\s+(?:vendre|louer|saisir)|location|cession|vente)\b\s*[:!-]?\s*/i,'').replace(/\s(?:a|à)\s+(?:vendre|louer)\b/gi,'')
+  head=head.replace(/\s*&\s*/g,' & ').replace(/\s*[–—]\s*/g,' – ');
+  head=head.replace(/^\s*(?:(?:a|à)\s+(?:vendre|louer|saisir)|location|cession|vente)\b\s*[:!–-]?\s*/i,'').replace(/\s(?:a|à)\s+(?:vendre|louer)\b/gi,'')
     .replace(/\s*(?:[-–,:]\s*|\s(?:pour|a|à)\s+)?(?<![A-Za-z0-9²])\d[\d\s  .,]*\s*(?:€|euros?)?(?:\s*(?:HT|TTC|FAI))?(?:\s*\/?\s*(?:par\s+)?mois)?\s*$/i,'').replace(/\s+/g,' ').trim();
   if(head===head.toUpperCase()&&/[A-Z]{4}/.test(head))head=head.charAt(0)+head.slice(1).toLowerCase();
   if(head.length>=10){const typ=type||'Bien';const t=(new RegExp('^'+typ.split(' ')[0],'i').test(head)?head:`${typ} : ${head}`);r.titre=t.length>110?t.slice(0,107).replace(/\s+\S*$/,'')+'…':t;}
@@ -54,7 +57,7 @@ export async function readOfimAgency(url:URL,fetchHtml:Fetcher,memory?:CrawlMemo
   // Adresses exactes des listes « Vente » et « Location » de l'agence, prises sur sa page.
   const starts=[...new Set([...text.matchAll(/href="(https:\/\/www\.ofim\.fr\/liste-(\d+)-(10|30)-(?:Vente|Location)-agence-[^"#?]+\.html)"/gi)].filter(m=>m[2]===ag).map(m=>m[1]))];
   if(!starts.length)throw Error('Listes de biens de l’agence OFIM introuvables.');
-  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v2:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
+  const rows:any=await crawlCatalogue('https://www.ofim.fr/','ofim-v3:ag'+ag,starts,fetchHtml,(h,u)=>ofimLinks(h,u,ag),parseOfimDetail,memory,{maxDetails:120});
   // Total affiché par le site sur la page de l'agence (« 27 annonces immobilières de vente, achat et location »).
   const total=Number(text.match(/(\d+)\s+annonces immobili[eè]res de vente/i)?.[1]||0);if(total)(rows as any).siteCount=total;
   return rows;
