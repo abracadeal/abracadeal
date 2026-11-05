@@ -145,6 +145,8 @@ Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en li
 
 C'est donnant-donnant : 12 mois offerts, sans carte bancaire. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
 
+Vous payez déjà des milliers d'euros par an pour être visible ailleurs ? Gardez vos plateformes : Abracadeal vient en plus. Vous n'avez rien à perdre.
+
 Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
