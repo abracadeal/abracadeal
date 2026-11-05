@@ -15,7 +15,7 @@ const admin = createClient(SUPABASE_URL, SERVICE_ROLE, { auth: { persistSession:
 const cors = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-api-key, content-type",
-  "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
+  "Access-Control-Allow-Methods": "GET, PUT, POST, DELETE, OPTIONS",
 };
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), { status, headers: { ...cors, "Content-Type": "application/json; charset=utf-8" } });
@@ -129,13 +129,15 @@ Deno.serve(async (req) => {
     const parts = url.pathname.split("/").filter(Boolean);
     const at = parts.indexOf("partner-api");
     const path = (at >= 0 ? parts.slice(at + 1) : parts).map(decodeURIComponent);
+    // POST est accepté partout où PUT l'est (outils ou bibliothèques qui n'envoient pas de PUT).
+    const method = req.method === "POST" ? "PUT" : req.method;
     if (path[0] !== "v1") return fail(404, "not_found", "Version inconnue. Utilisez /v1/…");
 
     const partner = await partnerFrom(req);
     if (!partner) return fail(401, "unauthorized", "Clé API absente ou invalide (en-tête Authorization: Bearer <clé>).");
 
     // GET /v1/ping
-    if (path[1] === "ping" && path.length === 2 && req.method === "GET")
+    if (path[1] === "ping" && path.length === 2 && method === "GET")
       return json({ ok: true, partner: partner.name, sandbox: !!partner.sandbox, time: new Date().toISOString() });
 
     if (path[1] !== "agencies" || !path[2]) return fail(404, "not_found", "Route inconnue.");
@@ -143,7 +145,7 @@ Deno.serve(async (req) => {
     if (!ID_RE.test(agencyId)) return fail(400, "invalid_agency_id", "agency_id : 1 à 80 caractères parmi A-Z a-z 0-9 . _ : -");
 
     // PUT /v1/agencies/{agency_id} — l'agence a activé Abracadeal dans le logiciel de l'éditeur
-    if (path.length === 3 && req.method === "PUT") {
+    if (path.length === 3 && method === "PUT") {
       const b = await req.json().catch(() => null);
       if (!b || typeof b !== "object") return fail(400, "invalid_json", "Corps JSON attendu.");
       const siret = String(b.siret ?? "").replace(/\s/g, "");
@@ -175,7 +177,7 @@ Deno.serve(async (req) => {
     const ag = await activate(partner, ag0);
 
     // GET /v1/agencies/{agency_id}
-    if (path.length === 3 && req.method === "GET") {
+    if (path.length === 3 && method === "GET") {
       const ls = await listingsOf(ag);
       const counts: Record<string, number> = {};
       for (const l of ls) { const s = STATUS_FR[l.status] || l.status; counts[s] = (counts[s] || 0) + 1; }
@@ -183,7 +185,7 @@ Deno.serve(async (req) => {
     }
 
     // DELETE /v1/agencies/{agency_id} — l'agence a désactivé Abracadeal : tout est retiré
-    if (path.length === 3 && req.method === "DELETE") {
+    if (path.length === 3 && method === "DELETE") {
       let removed = 0;
       if (ag.feed_id && ag.owner_id) {
         await admin.from("pro_stock_feeds").update({ active: false, updated_at: new Date().toISOString() }).eq("id", ag.feed_id);
@@ -198,7 +200,7 @@ Deno.serve(async (req) => {
     if (path[3] !== "listings") return fail(404, "not_found", "Route inconnue.");
 
     // GET /v1/agencies/{agency_id}/listings
-    if (path.length === 4 && req.method === "GET") {
+    if (path.length === 4 && method === "GET") {
       const ls = await listingsOf(ag);
       return json({ ok: true, agency_id: agencyId, count: ls.length, listings: ls.map((l: any) => ({
         reference: l.external_id, status: STATUS_FR[l.status] || l.status, title: l.title, price: l.price,
@@ -209,7 +211,7 @@ Deno.serve(async (req) => {
     if (ag.status !== "active") return fail(409, "agency_" + ag.status, publicAgency(ag).status_detail, { agency: publicAgency(ag) });
 
     // PUT /v1/agencies/{agency_id}/listings — envoi d'annonces (mode « partial » : ajout/mise à jour ; « full » : stock complet)
-    if (path.length === 4 && req.method === "PUT") {
+    if (path.length === 4 && method === "PUT") {
       const b = await req.json().catch(() => null);
       const list = Array.isArray(b) ? b : b?.listings;
       if (!Array.isArray(list)) return fail(400, "invalid_json", "Corps attendu : { \"mode\": \"partial\" | \"full\", \"listings\": [ … ] }.");
@@ -237,7 +239,7 @@ Deno.serve(async (req) => {
     }
 
     // DELETE /v1/agencies/{agency_id}/listings/{reference}
-    if (path.length === 5 && req.method === "DELETE") {
+    if (path.length === 5 && method === "DELETE") {
       const ref = path[4];
       const r = must(await admin.from("listings").update({ status: "archived", last_synced_at: new Date().toISOString() })
         .eq("owner_id", ag.owner_id).eq("source", `feed:${ag.feed_id}`).eq("external_id", ref).in("status", ["active", "pending"]).select("id"));
