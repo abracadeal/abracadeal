@@ -61,7 +61,7 @@ async function adminEmails() {
 
 // Une agence sans compte Pro : Anthony est prévenu une fois (il crée le compte depuis l'admin, l'agence s'active ensuite toute seule).
 async function notifyPending(partner: any, ag: any) {
-  if (ag.admin_notified_at) return;
+  if (ag.admin_notified_at || partner.sandbox) return;
   const key = Deno.env.get("RESEND_API_KEY") || "";
   const tos = await adminEmails();
   if (!key || !tos.length) return;
