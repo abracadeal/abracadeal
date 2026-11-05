@@ -1,0 +1,20 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {avenueLinks,avenuePhotos,parse18Avenue,read18Avenue,is18Avenue} from '../supabase/functions/pro-stock-sync/18avenue-reader.ts';
+import {cpuReset} from '../supabase/functions/pro-stock-sync/cpu-meter.ts';
+const fixture=n=>fs.readFileSync(new URL('./fixtures/18avenue-'+n+'.html',import.meta.url),'utf8');
+const gallery=fixture('gallery'),source='https://www.18avenue.fr/pages/fiche.AC3.php?codann=';
+const sale=parse18Avenue(fixture('sale'),source+'8338&abraca_tx=VTE',gallery);
+assert.equal(sale.reference,'8338');assert.equal(sale.prix,'119000');assert.equal(sale.ville,'PARIS');assert.equal(sale.code_postal,'75018');assert.equal(sale.surface,12.5);assert.equal(sale.pieces,1);assert.equal(sale.etage,6);assert.equal(sale.dpe,'');assert.equal(sale.ges,'');assert.match(sale.description,/Sacré-Coeur/);assert.equal(sale.contact_telephone,'+33 1 42 55 46 06');assert.match(sale.contact_nom,/agence/);
+const business=parse18Avenue(fixture('business'),source+'8321&abraca_tx=VTE',gallery);
+assert.equal(business.prix,'55000');assert.match(business.description,/278.000/);assert.equal(business.surface,undefined);assert.equal(business.ville,'');assert.equal(business._keep_missing_city,true);assert.equal(business.photos.split('|').length,7);assert.equal(business.type_bien,'local commercial');
+const rent=parse18Avenue(fixture('rent'),source+'8150&abraca_tx=LOC',gallery);assert.equal(rent.prix,'110');assert.equal(rent.transaction,'location');assert.equal(rent.url,source+'8150');assert.match(rent.description,/Parking/);
+assert.equal(avenuePhotos(gallery+gallery+'<img src="https://www.18avenue.fr/bankimages/annonces/noIMG.jpg">').length,7);
+assert.deepEqual(avenueLinks(`<a href="../pages/fiche.AC3.php?codann=8338">A</a><script>window.open('../pages/fiche.AC3.php?codann=8338')</script>`,'VTE'),[source+'8338&abraca_tx=VTE']);
+assert.equal(is18Avenue(new URL('https://www.18avenue.fr/')),true);assert.equal(is18Avenue(new URL('https://example.com/18avenue.fr')),false);
+// 24 unique references require another pass; each gallery is fetched for its own reference.
+let state;const memory={load:async()=>state,save:async s=>{state=structuredClone(s)}};
+const fetched=[];const fetcher=async u=>{fetched.push(u.toString());assert.ok(!u.searchParams.has('abraca_tx'));return{url:u,text:u.pathname.includes('annonces.SS')?Array.from({length:12},(_,i)=>`<a href="fiche.AC3.php?codann=${(u.searchParams.get('VRS')==='LOC'?9000:8000)+i}">bien</a>`).join(''):u.pathname.includes('fiche.SS')?gallery:fixture('sale')};};
+cpuReset();let rows=await read18Avenue(new URL('https://www.18avenue.fr/'),fetcher,memory);assert.equal(rows.partial,true);assert.equal(rows.length,20);
+cpuReset();rows=await read18Avenue(new URL('https://www.18avenue.fr/'),fetcher,memory);assert.equal(rows.partial,false);assert.equal(rows.length,24);assert.equal(new Set(rows.map(r=>r.reference)).size,24);assert.equal(rows.filter(r=>r.transaction==='location').length,12);assert.ok(fetched.some(u=>u.includes('NbAnn=1000')));
+console.log('18 Avenue: separate sale/rent catalogues, resumable full stock, own reference/price/city/facts/description/agency phone, separate gallery, no placeholder or invented DPE OK');
