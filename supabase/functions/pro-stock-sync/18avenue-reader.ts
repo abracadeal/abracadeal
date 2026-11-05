@@ -18,16 +18,19 @@ export function parse18Avenue(html:string,url:string,gallery:string){
  const title=clean(imageTitle);if(!title)throw Error('Titre 18 Avenue absent : '+reference);
  const description=clean(own.match(/<span\b[^>]*class=["']?T123["']?[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'');
  const tx=u.searchParams.get('abraca_tx')==='LOC'?'location':'vente';u.searchParams.delete('abraca_tx');
- const p=clean(own),priceLabel=tx==='location'?/(?:Loyer(?:\s+(?:mensuel|charges comprises|CC|HC))?\s*:\s*)([\d .,]+)\s*€/i:/Prix de Vente\s*:\s*([\d .,]+)\s*€/i;
- const price=number(p.match(priceLabel)?.[1]||own.match(/<span\b[^>]*class="T243"[^>]*>\s*([\d .,]+)€/i)?.[1]||'');
+ const p=clean(own);
+ // The hidden financial tab sometimes contains an obsolete rent (8326: 193 €
+ // there, but 1 762 € on the advert). Read only the displayed price cartouche.
+ const price=number(own.match(/<span\b[^>]*class="T243"[^>]*>\s*([\d .,]+)€/i)?.[1]||'');
  if(!(price>0))throw Error('Prix 18 Avenue absent : '+reference);
  const cityBlock=own.split(/<!-- PARIS 18 -->/i)[1]?.split('</div>')[0]||'';
  const place=clean(cityBlock).match(/\b(\d{5})\s+([\p{L}][\p{L} '-]+)/u);
  const photos=avenuePhotos(gallery),photoCount=gallery.match(/\bNb\s*=\s*(\d+)/)?.[1];
  if(photoCount!=null&&photos.length!==Number(photoCount))throw Error('Galerie 18 Avenue incomplète : '+reference);
- const row:any={reference,url:u.toString(),titre:title,description,transaction:tx,prix:String(price),ville:place?.[2]?.trim()||'',code_postal:place?.[1]||'',photos:photos.join('|'),_keep_missing_city:true};
+ const row:any={reference,url:u.toString(),titre:title,description,transaction:tx,prix:String(price),ville:place?.[2]?.trim()||(/\bParis\b/i.test(title+' '+description)?'Paris':''),code_postal:place?.[1]||'',photos:photos.join('|'),_keep_missing_city:true};
+ row._source_city_missing=!row.ville;
  const value=(re:RegExp)=>{const v=p.match(re)?.[1];return v==null?undefined:number(v);};
- const type=p.match(/(?:^|\n)Type\s*:\s*([^\n]+)/i)?.[1];if(type)row.type_bien=type;else if(/fonds de commerce/i.test(title))row.type_bien='local commercial';
+ const type=p.match(/(?:^|\n)\s*Type\s*:\s*([^\n]+)/i)?.[1];if(type)row.type_bien=type;else if(/fonds de commerce/i.test(title))row.type_bien='local commercial';
  const headerFacts=clean(own.split(/<!-- M² \+ nB PIECES -->/i)[1]?.split(/<!-- PARIS 18 -->/i)[0]||'');
  const fields:any={surface:value(/Surface (?:Carrez|habitable)\s*:\s*([\d.,]+)/i)??(headerFacts.match(/([\d.,]+)\s*m²/i)?.[1]?number(headerFacts.match(/([\d.,]+)\s*m²/i)![1]):undefined),pieces:value(/NB pi[èe]ces\s*:\s*(\d+)/i),chambres:value(/NB chambres\s*:\s*(\d+)/i),etage:value(/(?:^|\n)Etage\s*:\s*(-?\d+)/i),nb_etages:value(/NB [ée]tages\s*:\s*(\d+)/i),annee_construction:value(/(?:Ann[ée]e construction|Construction)\s*:\s*(\d{4})/i)};
  for(const [k,v] of Object.entries(fields))if(v!=null&&Number.isFinite(v))row[k]=v;
@@ -48,7 +51,7 @@ export function parse18Avenue(html:string,url:string,gallery:string){
 export async function read18Avenue(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
  const source='https://www.18avenue.fr/',starts=['VTE','LOC'].map(tx=>`${source}pages/annonces.SS.php?ORG=ALL&VRS=${tx}&NbAnn=1000`);
  const fetcher=async(u:URL)=>{const v=new URL(u);v.searchParams.delete('abraca_tx');return fetchHtml(v);};
- const rows:any=await crawlCatalogue(source,'18avenue-v1',starts,fetcher,(h,u)=>{
+ const rows:any=await crawlCatalogue(source,'18avenue-v2',starts,fetcher,(h,u)=>{
   const tx=u.searchParams.get('VRS')||'VTE',details=avenueLinks(h,tx);
   if(!details.length&&!/aucun|pas de bien|0 bien/i.test(clean(h)))throw Error('Catalogue 18 Avenue vide sans total explicite');
   // The site's own NbAnn selector controls how many records are returned.
