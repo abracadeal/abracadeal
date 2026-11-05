@@ -11,8 +11,7 @@
   "path": "immo/test-api-agence-cannes",
   "name": "TEST API Agence",
   "city": "Cannes",
-  "count": 1,
-  "active": true,
-  "short": "test-api-agence"
+  "count": 0,
+  "active": false
  }
 }
