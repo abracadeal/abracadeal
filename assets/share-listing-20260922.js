@@ -19,9 +19,20 @@
     window.open('https://wa.me/?text='+encodeURIComponent(shareUrl(id)),'_blank','noopener');
   };
 
-  window.shareListingFacebook=id=>{
-    const url=encodeURIComponent(shareUrl(id));
-    window.open('https://www.facebook.com/sharer/sharer.php?u='+url,'_blank','noopener,width=700,height=600');
+  /* Fix 05/11/2026 : sur mobile, la fenêtre de partage Facebook restait sur une page blanche
+     après la publication (Facebook n'arrive pas à se refermer dans l'onglet ouvert par le site).
+     Sur téléphone/tablette on passe par la feuille de partage du système (Facebook y est proposé,
+     l'utilisateur reste sur Abracadeal) ; sur ordinateur, fenêtre Facebook classique. */
+  window.shareListingFacebook=async id=>{
+    const raw=shareUrl(id);
+    const touch=window.matchMedia&&matchMedia('(pointer:coarse)').matches;
+    if(touch&&navigator.share){
+      try{await navigator.share({url:raw});}
+      catch(e){if(e?.name!=='AbortError')console.warn(e);}
+      window.closeShareMenu?.();
+      return;
+    }
+    window.open('https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(raw),'_blank','noopener,width=700,height=600');
   };
 
   window.shareListingSms=id=>{
