@@ -28,7 +28,7 @@ th,td{border:1px solid #e7deec;padding:8px 10px;text-align:left;vertical-align:t
 <li>Vous déclarez l'agence (<code>PUT /v1/agencies/{agency_id}</code>) avec son SIRET.</li>
 <li>Vous envoyez ses annonces (<code>PUT /v1/agencies/{agency_id}/listings</code>). Elles sont contrôlées puis mises en ligne, et mises à jour à chaque envoi.</li>
 </ol>
-<div class="box"><strong>Compte Pro requis.</strong> Une agence n'est diffusée que si elle possède un compte Pro Abracadeal portant le même SIRET. Si ce n'est pas encore le cas, l'agence passe au statut <code>pending</code> : nous la contactons, et ses annonces sont acceptées automatiquement dès l'ouverture de son compte, sans action de votre part.</div>
+<div class="box"><strong>Aucune inscription à faire pour l'agence.</strong> Si elle n'a pas encore de compte Abracadeal, nous l'ouvrons automatiquement à partir de votre déclaration : SIRET contrôlé au registre officiel, puis e-mail à l'agence pour choisir son mot de passe. Il faut pour cela son <strong>e-mail</strong> et son <strong>téléphone</strong>. Si l'ouverture automatique n'est pas possible, l'agence passe au statut <code>pending</code> et nous la traitons rapidement ; ses annonces sont ensuite acceptées sans action de votre part.</div>
 
 <h2>Accès</h2>
 <p><strong>URL de base</strong></p>
@@ -68,11 +68,12 @@ th,td{border:1px solid #e7deec;padding:8px 10px;text-align:left;vertical-align:t
 <tr><td><code>name</code></td><td>oui</td><td>Nom commercial de l'agence.</td></tr>
 <tr><td><code>consent</code></td><td>oui</td><td><code>true</code> : l'agence a activé elle-même la diffusion sur Abracadeal dans votre logiciel.</td></tr>
 <tr><td><code>sector</code></td><td>non</td><td><code>immobilier</code> (par défaut) ou <code>vehicules</code>.</td></tr>
-<tr><td><code>email</code>, <code>phone</code>, <code>city</code>, <code>postal_code</code></td><td>non</td><td>Coordonnées, utilisées pour contacter l'agence si son compte n'existe pas encore.</td></tr>
+<tr><td><code>email</code>, <code>phone</code></td><td>recommandés</td><td>Indispensables pour ouvrir automatiquement le compte de l'agence. Le téléphone est celui affiché aux acheteurs.</td></tr>
+<tr><td><code>city</code>, <code>postal_code</code></td><td>non</td><td>Adresse de l'agence.</td></tr>
 </table></div>
 <p>Réponse (<code>201</code> à la création, <code>200</code> ensuite) :</p>
 <pre><code>{ "ok": true, "agency": { "agency_id": "AG-1234", "status": "active", "status_detail": "Annonces acceptées.", … } }</code></pre>
-<p>Statuts : <code>active</code> (annonces acceptées), <code>pending</code> (compte Pro en attente), <code>stopped</code> (diffusion arrêtée ; un nouveau <code>PUT</code> la relance).</p>
+<p>Statuts : <code>active</code> (annonces acceptées), <code>pending</code> (compte en cours d'ouverture par Abracadeal), <code>stopped</code> (diffusion arrêtée ; un nouveau <code>PUT</code> la relance).</p>
 
 <h2>Envoyer des annonces</h2>
 <pre><code>PUT /v1/agencies/AG-1234/listings
@@ -146,7 +147,7 @@ th,td{border:1px solid #e7deec;padding:8px 10px;text-align:left;vertical-align:t
 <tr><th>HTTP</th><th>Code</th><th>Signification</th></tr>
 <tr><td>401</td><td><code>unauthorized</code></td><td>Clé absente ou invalide.</td></tr>
 <tr><td>404</td><td><code>agency_not_found</code></td><td>Agence non déclarée.</td></tr>
-<tr><td>409</td><td><code>agency_pending</code></td><td>L'agence n'a pas encore de compte Pro : renvoyez plus tard.</td></tr>
+<tr><td>409</td><td><code>agency_pending</code></td><td>Compte de l'agence en cours d'ouverture : renvoyez plus tard.</td></tr>
 <tr><td>409</td><td><code>agency_stopped</code></td><td>Diffusion arrêtée par l'agence.</td></tr>
 <tr><td>413</td><td><code>too_many</code></td><td>Plus de 200 annonces dans l'appel.</td></tr>
 <tr><td>422</td><td><code>invalid_siret</code>, <code>consent_required</code>, <code>missing_reference</code>…</td><td>Données invalides (détail dans <code>message</code>).</td></tr>

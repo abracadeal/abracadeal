@@ -59,15 +59,16 @@ async function adminEmails() {
   return tos;
 }
 
-// Une agence sans compte Pro : Anthony est prévenu une fois (il crée le compte depuis l'admin, l'agence s'active ensuite toute seule).
-async function notifyPending(partner: any, ag: any) {
+// Compte Pro impossible à ouvrir automatiquement : Anthony est prévenu une fois, avec la raison.
+async function notifyPending(partner: any, ag: any, reason = "") {
   if (ag.admin_notified_at || partner.sandbox) return;
   const key = Deno.env.get("RESEND_API_KEY") || "";
   const tos = await adminEmails();
   if (!key || !tos.length) return;
   const esc = (v: unknown) => String(v ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]!));
   const html = `<div style="font-family:Arial,sans-serif;font-size:15px;color:#222;line-height:1.5"><p>Bonjour Anthony,</p>
-<p><b>${esc(ag.name)}</b> a activé Abracadeal dans <b>${esc(partner.name)}</b>, mais n'a pas encore de compte Pro.</p>
+<p><b>${esc(ag.name)}</b> a activé Abracadeal dans <b>${esc(partner.name)}</b>, mais son compte Pro n'a pas pu être ouvert automatiquement.</p>
+${reason ? `<p>Raison : ${esc(reason)}</p>` : ""}
 <p>SIRET : ${esc(ag.siret)}<br>E-mail : ${esc(ag.email)}<br>Téléphone : ${esc(ag.phone)}<br>Ville : ${esc(ag.postal_code)} ${esc(ag.city)}<br>Secteur : ${esc(ag.sector)}</p>
 <p>Crée son compte Pro avec ce SIRET depuis l'admin : ses annonces arriveront ensuite automatiquement.</p><p>Abracadeal</p></div>`;
   try {
@@ -80,14 +81,155 @@ async function notifyPending(partner: any, ag: any) {
   } catch (e) { console.error(e); }
 }
 
-// Passe l'agence en « active » dès qu'un compte Pro porte son SIRET, et lui crée son flux dans le moteur d'import.
+// ---- Ouverture automatique du compte Pro (05/11/2026, Anthony : « il faut obligatoirement qu'il ait un compte ? ça n'avance pas »).
+// Même circuit que l'inscription par l'admin (admin-onboard-pro) : SIRET contrôlé au registre officiel, compte Pro créé
+// (e-mail confirmé, CGU à accepter au 1er mot de passe), SIRET vérifié, offre Fondateur si une place est libre,
+// puis mail « choisissez votre mot de passe ». L'accord = l'agence a activé Abracadeal dans le logiciel de l'éditeur.
+const ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
+function classifySector(codeValue: unknown, labelValue: unknown) {
+  const code = String(codeValue ?? "").trim().toUpperCase().replace(/[\s.]/g, "");
+  const label = String(labelValue ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  if (code.startsWith("45") || /(automobile|vehicule|voiture|moto|motocycle|garage|concessionnaire)/.test(label)) return "vehicules";
+  if (code.startsWith("68") || /(immobilier|immobiliere|agence immobiliere|transaction immobiliere|administration de biens)/.test(label)) return "immobilier";
+  return "other";
+}
+async function lookupCompany(siret: string) {
+  const r = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(siret)}&page=1&per_page=1`, { headers: { Accept: "application/json", "User-Agent": "Abracadeal/1.0" }, signal: AbortSignal.timeout(15000) });
+  if (!r.ok) throw new Error("registre des entreprises indisponible");
+  const d = await r.json();
+  const c = Array.isArray(d?.results) ? d.results[0] : null;
+  if (!c) throw new Error("aucune entreprise trouvée pour ce SIRET au registre officiel");
+  const ets = [c?.siege, ...(Array.isArray(c?.matching_etablissements) ? c.matching_etablissements : [])].filter(Boolean);
+  const e = ets.find((x: any) => String(x?.siret || "") === siret);
+  if (!e) throw new Error("SIRET non confirmé par le registre officiel");
+  if ((c?.etat_administratif && String(c.etat_administratif).toUpperCase() !== "A") || (e?.etat_administratif && String(e.etat_administratif).toUpperCase() !== "A")) throw new Error("établissement indiqué comme fermé au registre");
+  const activityCode = String(e?.activite_principale || c?.siege?.activite_principale || c?.activite_principale || "").trim().toUpperCase();
+  const activityLabel = String(e?.libelle_activite_principale || c?.siege?.libelle_activite_principale || "").trim();
+  return {
+    siret, siren: String(c?.siren || siret.slice(0, 9)),
+    company_name: String(c?.nom_complet || c?.nom_raison_sociale || c?.nom_commercial || "Entreprise").trim(),
+    company_city: String(e?.libelle_commune || "").trim(), company_postal_code: String(e?.code_postal || "").trim(),
+    business_sector: classifySector(activityCode, activityLabel),
+  };
+}
+async function findUserByEmail(email: string) {
+  for (let page = 1; page <= 20; page++) {
+    const { data, error } = await admin.auth.admin.listUsers({ page, perPage: 1000 });
+    if (error) throw error;
+    const hit = (data?.users || []).find((u) => String(u.email || "").toLowerCase() === email);
+    if (hit) return hit;
+    if ((data?.users || []).length < 1000) return null;
+  }
+  return null;
+}
+async function callFunction(name: string, token: string, body: unknown) {
+  const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, { method: "POST", headers: { Authorization: `Bearer ${token}`, apikey: ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  return { ok: r.ok && d?.ok !== false, data: d };
+}
+function tempPassword() {
+  const b = new Uint8Array(24); crypto.getRandomValues(b);
+  return "Ab#" + Array.from(b).map((x) => x.toString(36).padStart(2, "0")).join("").slice(0, 30) + "9z";
+}
+async function sendWelcome(partner: any, userId: string, email: string, company: string, founder: boolean) {
+  const key = Deno.env.get("RESEND_API_KEY") || "";
+  if (!key) return;
+  const { data: link } = await admin.auth.admin.generateLink({ type: "recovery", email, options: { redirectTo: "https://abracadeal.fr/" } });
+  const url = link?.properties?.action_link;
+  if (!url) return;
+  const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#039;" }[c]!));
+  const paras = [
+    "Bonjour,",
+    `Vous avez activé la diffusion sur Abracadeal dans <strong>${esc(partner.name)}</strong>. Nous avons donc ouvert l’espace Pro de <strong>${esc(company)}</strong>.`,
+    "Vos annonces arrivent automatiquement depuis votre logiciel et se mettent à jour toutes seules : vous n’avez rien à ressaisir.",
+    "Pour accéder à votre espace (voir vos annonces, les mettre à la une, les partager), choisissez simplement votre mot de passe :",
+  ];
+  const bullets = [founder ? "Gratuit, sans carte bancaire" : "Aucune carte bancaire demandée", "Sans engagement", "Vos annonces visibles sur Google et partageables en un clic"];
+  const html = `<!doctype html><html lang="fr"><body style="margin:0;background:#f8f4fa;font-family:Arial,Helvetica,sans-serif;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f8f4fa;padding:24px 0;"><tr><td align="center">
+<table role="presentation" width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:16px;overflow:hidden;">
+<tr><td style="background:#1c0b2b;padding:20px 28px;color:#ffffff;font-size:20px;font-weight:bold;">Abracadeal</td></tr>
+<tr><td style="padding:28px;"><h1 style="margin:0 0 18px 0;font-size:21px;color:#4a1766;">Votre espace Pro Abracadeal est prêt</h1>
+${paras.map((x) => `<p style="margin:0 0 14px 0;line-height:1.55;color:#21132d;">${x}</p>`).join("")}
+<p style="margin:18px 0;"><a href="${esc(url)}" style="display:inline-block;background:#6f218c;color:#ffffff;text-decoration:none;font-weight:bold;padding:13px 24px;border-radius:10px;">Choisir mon mot de passe</a></p>
+<ul style="margin:0 0 16px 0;padding-left:20px;color:#21132d;line-height:1.6;">${bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>
+<p style="margin:0;line-height:1.5;color:#77677f;font-size:13px;">Si le bouton ne fonctionne plus : abracadeal.fr, « Se connecter », puis « Mot de passe oublié » avec cette adresse e-mail.</p></td></tr>
+<tr><td style="padding:16px 28px;background:#f3ecf6;color:#77677f;font-size:12px;line-height:1.5;">Le Service Pros Abracadeal · <a href="mailto:contact@abracadeal.fr" style="color:#6f218c;">contact@abracadeal.fr</a> · abracadeal.fr</td></tr>
+</table></td></tr></table></body></html>`;
+  const text = ["Votre espace Pro Abracadeal est prêt", "", ...paras.map((x) => x.replace(/<[^>]+>/g, "")), "", "Choisir mon mot de passe : " + url, "", ...bullets.map((b) => "- " + b)].join("\n");
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json", "Idempotency-Key": `partner-welcome-${userId}` },
+    body: JSON.stringify({ from: "Abracadeal <contact@abracadeal.fr>", to: [email], reply_to: "contact@abracadeal.fr", subject: "Votre espace Pro Abracadeal est prêt", html, text }),
+  }).catch((e) => console.error(e));
+}
+// Ouvre le compte Pro. Renvoie l'identifiant du compte, ou une raison (texte) si l'ouverture doit être faite à la main.
+async function openProAccount(partner: any, ag: any): Promise<{ userId?: string; reason?: string }> {
+  if (partner.sandbox) return { reason: "éditeur de test : pas d'ouverture de compte" };
+  const email = String(ag.email || "").trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return { reason: "e-mail de l'agence absent ou invalide" };
+  const { data: phone } = await admin.rpc("abracadeal_normalize_phone", { p_phone: String(ag.phone || "") });
+  if (!phone) return { reason: "téléphone de l'agence absent ou invalide" };
+  let company: any;
+  try { company = await lookupCompany(ag.siret); } catch (e) { return { reason: e instanceof Error ? e.message : String(e) }; }
+  if (company.business_sector !== "other" && company.business_sector !== ag.sector) return { reason: `activité du registre (${company.business_sector}) différente du secteur déclaré (${ag.sector})` };
+  const existing = await findUserByEmail(email);
+  if (existing) return { reason: "un compte Abracadeal existe déjà avec cet e-mail (sans ce SIRET)" };
+  const { data: phoneFree } = await admin.rpc("abracadeal_phone_available", { p_phone: phone, p_account_type: "professionnel" });
+  if (phoneFree === false) return { reason: "ce téléphone est déjà utilisé par un autre compte Pro" };
+  const password = tempPassword();
+  const nowIso = new Date().toISOString();
+  const { data: created, error: createErr } = await admin.auth.admin.createUser({
+    email, password, email_confirm: true,
+    user_metadata: {
+      display_name: ag.name || company.company_name, account_type: "professionnel", phone, pro_sector: ag.sector, city: company.company_city || ag.city || null,
+      company_registration: { company_name: company.company_name, siret: ag.siret, siren: company.siren, vat_status: "pending", vat_number: "", country: "FR", company_city: company.company_city, company_postal_code: company.company_postal_code },
+      partner_diffusion: { partner: partner.name, agency_id: ag.external_agency_id, consent: true, consented_at: ag.consent_at || nowIso },
+      onboarded_by_partner: partner.name, onboarded_at: nowIso, legal_pending: true,
+    },
+  });
+  if (createErr || !created?.user) return { reason: "création du compte impossible : " + (createErr?.message || "") };
+  const userId = created.user.id;
+  let founder = false;
+  try {
+    const pub = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+    const { data: sess } = await pub.auth.signInWithPassword({ email, password });
+    const token = sess?.session?.access_token;
+    if (token) {
+      const ver = await callFunction("verify-professional", token, { action: "verify", siret: ag.siret });
+      if (ver.ok && ver.data?.verified === true) {
+        const { data: open } = await admin.rpc("get_founder_offer_open");
+        if (open !== false) {
+          const sub = await callFunction("create-pro-subscription-order", token, { plan_code: "pro_50", expect_founder: true });
+          founder = !!(sub.ok && sub.data?.founder);
+          if (founder) await admin.from("pro_email_outbox").update({ available_at: new Date(Date.now() + 20 * 60e3).toISOString() }).eq("user_id", userId).eq("status", "pending");
+        }
+      }
+      try { await admin.auth.admin.signOut(token); } catch (_) { /* session temporaire */ }
+    }
+  } catch (e) { console.error(e); }
+  // Le SIRET doit être enregistré pour que l'agence soit reconnue ; sinon, vérification à la main.
+  const { data: pv } = await admin.from("pro_verifications").select("user_id").eq("user_id", userId).eq("siret", ag.siret).maybeSingle();
+  if (!pv) return { reason: "compte créé mais SIRET non vérifié automatiquement : à vérifier dans l'admin" };
+  await sendWelcome(partner, userId, email, ag.name || company.company_name, founder);
+  if (!founder) await notifyPending(partner, { ...ag, admin_notified_at: null }, "compte ouvert automatiquement, mais sans offre Fondateur (place indisponible) : ses annonces seront refusées sans abonnement");
+  return { userId };
+}
+
+// Passe l'agence en « active » : compte Pro existant avec ce SIRET, sinon ouvert automatiquement ; puis crée son flux dans le moteur d'import.
 async function activate(partner: any, ag: any) {
   if (ag.status === "stopped") return ag;
   if (ag.status === "active" && ag.feed_id && ag.feed_key) return ag;
-  const { data: pv } = await admin.from("pro_verifications").select("user_id").eq("siret", ag.siret).limit(1).maybeSingle();
-  if (!pv?.user_id) { await notifyPending(partner, ag); return ag; }
+  let { data: pv } = await admin.from("pro_verifications").select("user_id").eq("siret", ag.siret).limit(1).maybeSingle();
+  if (!pv?.user_id) {
+    // Une seule tentative automatique par agence : ensuite, c'est l'admin qui tranche (évite les comptes en double).
+    if (ag.admin_notified_at) return ag;
+    const res = await openProAccount(partner, ag);
+    if (!res.userId) { await notifyPending(partner, ag, res.reason); return ag; }
+    pv = { user_id: res.userId };
+  }
   const { data: prof } = await admin.from("profiles").select("account_type").eq("id", pv.user_id).maybeSingle();
-  if (prof?.account_type !== "professionnel") { await notifyPending(partner, ag); return ag; }
+  if (prof?.account_type !== "professionnel") { await notifyPending(partner, ag, "le compte portant ce SIRET n'est pas un compte Pro"); return ag; }
   const feedKey = randomKey("abf_");
   const now = new Date().toISOString();
   const feed = must(await admin.from("pro_stock_feeds").insert({
@@ -103,7 +245,7 @@ async function activate(partner: any, ag: any) {
 const publicAgency = (ag: any) => ({
   agency_id: ag.external_agency_id, siret: ag.siret, name: ag.name, sector: ag.sector, status: ag.status,
   status_detail: ag.status === "active" ? "Annonces acceptées."
-    : ag.status === "pending" ? "En attente : l'agence n'a pas encore de compte Pro Abracadeal avec ce SIRET. Nous la contactons ; les annonces seront acceptées dès l'ouverture du compte."
+    : ag.status === "pending" ? "En attente : le compte Pro de l'agence n'a pas pu être ouvert automatiquement (vérifiez e-mail, téléphone et SIRET). Abracadeal s'en occupe ; les annonces seront acceptées dès l'ouverture du compte."
     : "Diffusion arrêtée.",
   created_at: ag.created_at, updated_at: ag.updated_at,
 });
