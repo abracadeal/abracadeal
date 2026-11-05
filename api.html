@@ -1,0 +1,169 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>API partenaires — Abracadeal</title>
+<meta name="description" content="API REST d'Abracadeal pour les éditeurs de logiciels immobiliers et automobiles : diffusez gratuitement les annonces de vos clients sur Abracadeal.">
+<style>
+body{margin:0;background:#faf8fb;color:#2b2030;font-family:Arial,sans-serif;line-height:1.55}
+.wrap{max-width:900px;margin:40px auto;padding:0 16px 60px}
+h1{font-size:32px;margin:12px 0 8px}h2{margin:40px 0 10px;font-size:23px}h3{margin:26px 0 8px;font-size:18px}
+a{color:#5b2a86}.back{display:inline-block;margin-bottom:10px}
+.lead{font-size:18px}
+code{background:#f1ecf5;border-radius:4px;padding:1px 5px;font-size:14px}
+pre{background:#241a2b;color:#f3eef7;border-radius:10px;padding:16px;overflow-x:auto;font-size:13.5px;line-height:1.5}
+pre code{background:none;padding:0;color:inherit}
+.box{background:#fff;border:1px solid #e7deec;border-radius:12px;padding:16px 18px;margin:16px 0}
+.table{overflow-x:auto}table{border-collapse:collapse;width:100%;background:#fff;font-size:14.5px}
+th,td{border:1px solid #e7deec;padding:8px 10px;text-align:left;vertical-align:top}th{background:#f6f0fa}
+.m{font-family:monospace;font-weight:bold;white-space:nowrap}
+</style>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+<link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
+</head><body><main class="wrap"><a class="back" href="./">← Retour à Abracadeal</a>
+<h1>API partenaires</h1>
+<p class="lead">Éditeurs de logiciels immobiliers et automobiles : diffusez les annonces de vos clients sur Abracadeal, automatiquement. La diffusion est <strong>gratuite pour les agences et les garages</strong>.</p>
+<p>Version 1 — mise à jour le 5 novembre 2026. Contact technique : <a href="mailto:contact@abracadeal.fr">contact@abracadeal.fr</a></p>
+
+<h2>Principe</h2>
+<ol>
+<li>Votre client active Abracadeal dans votre logiciel. C'est son accord pour la diffusion.</li>
+<li>Vous déclarez l'agence (<code>PUT /v1/agencies/{agency_id}</code>) avec son SIRET.</li>
+<li>Vous envoyez ses annonces (<code>PUT /v1/agencies/{agency_id}/listings</code>). Elles sont contrôlées puis mises en ligne, et mises à jour à chaque envoi.</li>
+</ol>
+<div class="box"><strong>Compte Pro requis.</strong> Une agence n'est diffusée que si elle possède un compte Pro Abracadeal portant le même SIRET. Si ce n'est pas encore le cas, l'agence passe au statut <code>pending</code> : nous la contactons, et ses annonces sont acceptées automatiquement dès l'ouverture de son compte, sans action de votre part.</div>
+
+<h2>Accès</h2>
+<p><strong>URL de base</strong></p>
+<pre><code>https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/partner-api/v1</code></pre>
+<p><strong>Authentification</strong> : une clé par éditeur, fournie sur demande à <a href="mailto:contact@abracadeal.fr">contact@abracadeal.fr</a>, à envoyer dans chaque requête :</p>
+<pre><code>Authorization: Bearer abk_live_xxxxxxxxxxxxxxxx</code></pre>
+<p>Les échanges se font en JSON (UTF-8), en HTTPS uniquement. <code>POST</code> est accepté partout où <code>PUT</code> l'est. Une clé de test est disponible pour vos développements.</p>
+
+<h2>Les routes</h2>
+<div class="table"><table>
+<tr><th>Méthode</th><th>Route</th><th>Rôle</th></tr>
+<tr><td class="m">GET</td><td><code>/ping</code></td><td>Vérifie la clé.</td></tr>
+<tr><td class="m">PUT</td><td><code>/agencies/{agency_id}</code></td><td>Déclare ou met à jour une agence (activation par l'agence).</td></tr>
+<tr><td class="m">GET</td><td><code>/agencies/{agency_id}</code></td><td>Statut de l'agence et nombre d'annonces par statut.</td></tr>
+<tr><td class="m">DELETE</td><td><code>/agencies/{agency_id}</code></td><td>L'agence désactive Abracadeal : toutes ses annonces sont retirées.</td></tr>
+<tr><td class="m">PUT</td><td><code>/agencies/{agency_id}/listings</code></td><td>Envoie des annonces (ajout, mise à jour, ou stock complet).</td></tr>
+<tr><td class="m">GET</td><td><code>/agencies/{agency_id}/listings</code></td><td>Liste des annonces de l'agence, avec statut et lien public.</td></tr>
+<tr><td class="m">DELETE</td><td><code>/agencies/{agency_id}/listings/{reference}</code></td><td>Retire une annonce (vendue, louée, mandat terminé).</td></tr>
+</table></div>
+<p><code>agency_id</code> est votre identifiant de l'agence : 1 à 80 caractères parmi <code>A-Z a-z 0-9 . _ : -</code>.</p>
+
+<h2>Déclarer une agence</h2>
+<pre><code>PUT /v1/agencies/AG-1234
+{
+  "siret": "12345678900012",
+  "name": "Agence du Port",
+  "sector": "immobilier",
+  "email": "contact@agenceduport.fr",
+  "phone": "04 93 00 00 00",
+  "city": "Cannes",
+  "postal_code": "06400",
+  "consent": true
+}</code></pre>
+<div class="table"><table>
+<tr><th>Champ</th><th>Obligatoire</th><th>Description</th></tr>
+<tr><td><code>siret</code></td><td>oui</td><td>14 chiffres. Ne peut plus changer une fois l'agence diffusée.</td></tr>
+<tr><td><code>name</code></td><td>oui</td><td>Nom commercial de l'agence.</td></tr>
+<tr><td><code>consent</code></td><td>oui</td><td><code>true</code> : l'agence a activé elle-même la diffusion sur Abracadeal dans votre logiciel.</td></tr>
+<tr><td><code>sector</code></td><td>non</td><td><code>immobilier</code> (par défaut) ou <code>vehicules</code>.</td></tr>
+<tr><td><code>email</code>, <code>phone</code>, <code>city</code>, <code>postal_code</code></td><td>non</td><td>Coordonnées, utilisées pour contacter l'agence si son compte n'existe pas encore.</td></tr>
+</table></div>
+<p>Réponse (<code>201</code> à la création, <code>200</code> ensuite) :</p>
+<pre><code>{ "ok": true, "agency": { "agency_id": "AG-1234", "status": "active", "status_detail": "Annonces acceptées.", … } }</code></pre>
+<p>Statuts : <code>active</code> (annonces acceptées), <code>pending</code> (compte Pro en attente), <code>stopped</code> (diffusion arrêtée ; un nouveau <code>PUT</code> la relance).</p>
+
+<h2>Envoyer des annonces</h2>
+<pre><code>PUT /v1/agencies/AG-1234/listings
+{
+  "mode": "partial",
+  "listings": [
+    {
+      "reference": "MANDAT-0456",
+      "transaction": "vente",
+      "type_bien": "appartement",
+      "titre": "Appartement 3 pièces avec terrasse",
+      "description": "…",
+      "prix": 395000,
+      "surface": 68,
+      "pieces": 3,
+      "chambres": 2,
+      "ville": "Cannes",
+      "code_postal": "06400",
+      "dpe": "C",
+      "ges": "C",
+      "photos": ["https://…/1.jpg", "https://…/2.jpg"]
+    }
+  ]
+}</code></pre>
+<ul>
+<li><code>mode: "partial"</code> (par défaut) : les annonces envoyées sont créées ou mises à jour, les autres ne bougent pas. Retirez une annonce avec <code>DELETE …/listings/{reference}</code>.</li>
+<li><code>mode: "full"</code> : vous envoyez le stock complet ; les annonces absentes de l'envoi sont retirées.</li>
+<li>200 annonces maximum par appel. Une annonce identique à l'envoi précédent n'est pas retraitée.</li>
+<li><code>reference</code> est obligatoire : identifiant unique et stable du bien (numéro de mandat, de stock…). C'est lui qui relie vos mises à jour à l'annonce en ligne.</li>
+</ul>
+<p>Réponse :</p>
+<pre><code>{ "ok": true, "mode": "partial", "received": 1, "created": 1, "updated": 0,
+  "unchanged": 0, "removed": 0, "rejected": 0, "rejected_detail": null }</code></pre>
+<p>Une annonce incomplète (sans photo, sans ville, type non reconnu…) est refusée sans bloquer les autres ; la raison figure dans <code>rejected_detail</code>.</p>
+
+<h3>Champs immobilier</h3>
+<p>Les noms français ci-dessous sont recommandés ; les équivalents anglais courants sont aussi reconnus (<code>price</code>, <code>city</code>, <code>rooms</code>, <code>living_area</code>, <code>energy_class</code>…).</p>
+<div class="table"><table>
+<tr><th>Champ</th><th>Description</th></tr>
+<tr><td><code>reference</code> *</td><td>Identifiant unique et stable du bien.</td></tr>
+<tr><td><code>transaction</code> *</td><td><code>vente</code> ou <code>location</code>.</td></tr>
+<tr><td><code>type_bien</code> *</td><td>appartement, maison, terrain, local commercial, bureaux, parking…</td></tr>
+<tr><td><code>titre</code>, <code>description</code></td><td>Texte de l'annonce.</td></tr>
+<tr><td><code>prix</code> *</td><td>En euros. Loyer mensuel pour une location.</td></tr>
+<tr><td><code>ville</code> *, <code>code_postal</code></td><td>Commune du bien.</td></tr>
+<tr><td><code>surface</code>, <code>surface_terrain</code></td><td>En m².</td></tr>
+<tr><td><code>pieces</code>, <code>chambres</code>, <code>salles_de_bain</code>, <code>etage</code></td><td>Nombres.</td></tr>
+<tr><td><code>dpe</code>, <code>ges</code></td><td>Classes A à G (obligatoires pour les logements, selon la réglementation).</td></tr>
+<tr><td><code>honoraires</code>, <code>charges_mensuelles</code>, <code>charges_annuelles</code></td><td>Informations financières.</td></tr>
+<tr><td><code>photos</code> *</td><td>Liste d'URL publiques (45 maximum).</td></tr>
+<tr><td><code>url</code></td><td>Lien vers l'annonce sur le site de l'agence.</td></tr>
+</table></div>
+
+<h3>Champs véhicules</h3>
+<div class="table"><table>
+<tr><th>Champ</th><th>Description</th></tr>
+<tr><td><code>reference</code> *</td><td>Numéro de stock unique et stable.</td></tr>
+<tr><td><code>marque</code> *, <code>modele</code> *, <code>version</code></td><td>Identification du véhicule.</td></tr>
+<tr><td><code>prix</code> *</td><td>En euros TTC.</td></tr>
+<tr><td><code>annee</code>, <code>kilometrage</code></td><td>Nombres.</td></tr>
+<tr><td><code>carburant</code>, <code>boite</code></td><td>essence, diesel, hybride, électrique… ; manuelle, automatique.</td></tr>
+<tr><td><code>type</code></td><td>voiture (par défaut), moto, utilitaire, camping-car…</td></tr>
+<tr><td><code>ville</code>, <code>code_postal</code></td><td>Par défaut, l'adresse du garage.</td></tr>
+<tr><td><code>photos</code> *</td><td>Liste d'URL publiques (45 maximum).</td></tr>
+</table></div>
+<p>* champs nécessaires à la mise en ligne.</p>
+
+<h2>Erreurs</h2>
+<p>Toute erreur renvoie <code>{ "ok": false, "error": { "code": "…", "message": "…" } }</code>.</p>
+<div class="table"><table>
+<tr><th>HTTP</th><th>Code</th><th>Signification</th></tr>
+<tr><td>401</td><td><code>unauthorized</code></td><td>Clé absente ou invalide.</td></tr>
+<tr><td>404</td><td><code>agency_not_found</code></td><td>Agence non déclarée.</td></tr>
+<tr><td>409</td><td><code>agency_pending</code></td><td>L'agence n'a pas encore de compte Pro : renvoyez plus tard.</td></tr>
+<tr><td>409</td><td><code>agency_stopped</code></td><td>Diffusion arrêtée par l'agence.</td></tr>
+<tr><td>413</td><td><code>too_many</code></td><td>Plus de 200 annonces dans l'appel.</td></tr>
+<tr><td>422</td><td><code>invalid_siret</code>, <code>consent_required</code>, <code>missing_reference</code>…</td><td>Données invalides (détail dans <code>message</code>).</td></tr>
+<tr><td>502 / 500</td><td><code>import_failed</code>, <code>server_error</code></td><td>Problème temporaire : réessayez plus tard.</td></tr>
+</table></div>
+
+<h2>Exemple complet</h2>
+<pre><code>curl -X PUT "https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/partner-api/v1/agencies/AG-1234/listings" \
+  -H "Authorization: Bearer abk_live_xxxxxxxx" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"partial","listings":[{"reference":"MANDAT-0456","transaction":"vente","type_bien":"maison","prix":520000,"ville":"Mougins","surface":120,"pieces":5,"dpe":"B","ges":"B","photos":["https://exemple.fr/1.jpg"]}]}'</code></pre>
+
+<h2>Bon à savoir</h2>
+<ul>
+<li>Les annonces passent par nos contrôles automatiques (cohérence, photos, contenus interdits) avant publication, comme toute annonce d'Abracadeal. Voir les <a href="/regles-diffusion.html">règles de diffusion</a>.</li>
+<li>Les annonces restent la propriété de l'agence. Abracadeal ne les transmet à aucun autre site.</li>
+<li>Vous préférez un export existant (format SeLoger / Poliris par FTP, flux XML) ? Écrivez-nous : nous pouvons aussi le lire.</li>
+</ul>
+</main><script src="/assets/app-shell-20261018.js?v=6" defer></script>
+</body></html>

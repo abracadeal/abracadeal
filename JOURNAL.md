@@ -2452,3 +2452,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - 05/11/2026 (Claude) : pro-fondateur.html — textes publics (accroche + carte Fondateurs) passés à « gratuit pendant le lancement » ; les messages destinés aux Fondateurs déjà inscrits gardent les 12 mois.
 
 - 05/11/2026 (Claude) : « pendant le lancement » retiré aussi — mails et page Fondateurs disent simplement « Gratuit, sans carte bancaire, sans engagement » (jamais « gratuit à vie »). Si ça devient payant un jour : prévenir les pros à l avance.
+
+- 05/11/2026 (Claude) : API partenaires v1 pour les éditeurs (Septeo/Modelo, Apimo, La Boîte Immo…) — fonction partner-api + tables partner_api_clients / partner_agencies ; doc publique api.html. Les annonces passent par le moteur pro-stock-sync (clé de flux par agence). Agence diffusée seulement si compte Pro avec le même SIRET (sinon pending + mail admin). Testée de bout en bout puis nettoyée (restent 2 petites images de test orphelines dans le stockage, chemin a0a0a0a0-…c1a0/, à supprimer via l API Storage).
