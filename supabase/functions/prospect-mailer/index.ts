@@ -129,7 +129,7 @@ Je vous redonne le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur
 
 https://abracadeal.fr/pro-fondateur.html
 
-« Je publie » et votre SIRET, c'est tout. Gratuit pendant le lancement, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
+« Je publie » et votre SIRET, c'est tout. Gratuit, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
 
 Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
@@ -143,7 +143,7 @@ https://abracadeal.fr/pro-fondateur.html
 
 Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
-C'est donnant-donnant : gratuit pendant le lancement, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
+C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
 
 Vous payez déjà des milliers d'euros par an pour être visible ailleurs ? Gardez vos plateformes : Abracadeal vient en plus. Vous n'avez rien à perdre.
 

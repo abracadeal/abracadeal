@@ -2435,3 +2435,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - 05/11/2026 (Claude) : « 12 mois offerts » retiré des mails de prospection, remplacé par « gratuit pendant le lancement, sans carte bancaire, sans engagement » (modèles en base + mail aperçu). Les Fondateurs déjà inscrits gardent leurs 12 mois promis.
 
 - 05/11/2026 (Claude) : pro-fondateur.html — textes publics (accroche + carte Fondateurs) passés à « gratuit pendant le lancement » ; les messages destinés aux Fondateurs déjà inscrits gardent les 12 mois.
+
+- 05/11/2026 (Claude) : « pendant le lancement » retiré aussi — mails et page Fondateurs disent simplement « Gratuit, sans carte bancaire, sans engagement » (jamais « gratuit à vie »). Si ça devient payant un jour : prévenir les pros à l avance.
