@@ -65,7 +65,7 @@ function galleryPhotos(html:string){
  const out=new Map<string,string>();for(const m of html.matchAll(/(?:data-image-url|data-src|data-dm-image-path|src)="(https:[^"]+)"/gi))try{
   const u=new URL(decode(m[1]));if(!/(?:le-)?cdn\.website-editor\.net$/.test(u.hostname)||! /\.(?:jpe?g|png|webp)(?:$|\?)/i.test(u.toString())||/logo|placeholder|no[-_]?image|no[-_]?photo|icon/i.test(u.pathname))continue;
   // Confirmed category stock photographs reused across unrelated business adverts.
-  if(/\/(?:BAR(?:[ +_-]BRASSERIE)?|TABAC|PRESSE|PMU|PIZZERIA)(?:-[a-f0-9]{8})?(?:-\d+w)?\.(?:jpg|png|webp)$/i.test(decodeURIComponent(u.pathname)))continue;
+  if(/\/(?:BAR(?:[ +_-]BRASSERIE)?|TABAC|PRESSE|PMU|PIZZERIA|HOTEL|RESTAURATION[ +_-]RAPIDE|MURS[ +_-]COMMERCIAUX)(?:-[a-f0-9]{8})?(?:-\d+w)?\.(?:jpg|png|webp)$/i.test(decodeURIComponent(u.pathname)))continue;
   const k=u.pathname.replace('/opt/','/').replace(/-\d+w(\.[^.]+)$/,'$1');if(!out.has(k))out.set(k,u.toString());
  }catch{}return [...out.values()];
 }
@@ -84,7 +84,7 @@ async function locate(row:any){
 export async function readLecoeur(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
  const source='https://www.lecoeurtransactions.fr/',cache=new Map<string,any[]>();
  const parse=(h:string,u:string)=>{if(!cache.has(u))cache.set(u,parseLecoeurPage(h,u));return cache.get(u)!;};
- const bundles:any=await crawlCatalogue(source,'lecoeur-v2',[source],fetchHtml,(h,u)=>({lists:lecoeurLinks(h,u),details:parse(h,u.toString()).length?[u.toString()]:[]}),async(h,u)=>({reference:u,children:await Promise.all(parse(h,u).map(locate))}),memory,{maxDetails:8});
+ const bundles:any=await crawlCatalogue(source,'lecoeur-v3',[source],fetchHtml,(h,u)=>({lists:lecoeurLinks(h,u),details:parse(h,u.toString()).length?[u.toString()]:[]}),async(h,u)=>({reference:u,children:await Promise.all(parse(h,u).map(locate))}),memory,{maxDetails:8});
  const rows:any=bundles.flatMap((b:any)=>b.children||[]),seen=new Set<string>();const unique=rows.filter((r:any)=>{const k=[r.reference_source||r.reference,r.prix,r.description].join('|');if(seen.has(k))return false;seen.add(k);return true;});
  Object.assign(unique,{partial:bundles.partial,total:bundles.partial?null:unique.length,cycleStarted:bundles.cycleStarted,cycleSeen:bundles.stats.cycle_complete?unique.map((r:any)=>r.reference):[],stats:{...bundles.stats,source_rows:rows.length,duplicate_source_rows:rows.length-unique.length},platform:'Le Cœur (annonces séparées par bloc)',sector:'immobilier'});return unique;
 }
