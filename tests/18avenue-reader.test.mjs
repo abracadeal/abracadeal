@@ -14,6 +14,7 @@ const loft=parse18Avenue(fixture('loft'),source+'8326&abraca_tx=LOC',gallery);as
 const house=parse18Avenue(fixture('house'),source+'8334&abraca_tx=VTE',gallery);assert.match(house.type_bien,/maison/i);
 const local=parse18Avenue(fixture('local'),source+'8124&abraca_tx=VTE',gallery);assert.match(local.type_bien,/bureau/i);
 const mixed=parse18Avenue(fixture('mixed'),source+'8331&abraca_tx=VTE',gallery);assert.match(mixed.type_bien,/local commercial/i);
+assert.equal(house.surface,160);assert.equal(local.surface,150);assert.equal(mixed.surface,200);assert.equal(rent.surface,12);
 assert.equal(avenuePhotos(gallery+gallery+'<img src="https://www.18avenue.fr/bankimages/annonces/noIMG.jpg">').length,7);
 assert.deepEqual(avenueLinks(`<a href="../pages/fiche.AC3.php?codann=8338">A</a><script>window.open('../pages/fiche.AC3.php?codann=8338')</script>`,'VTE'),[source+'8338&abraca_tx=VTE']);
 assert.equal(is18Avenue(new URL('https://www.18avenue.fr/')),true);assert.equal(is18Avenue(new URL('https://example.com/18avenue.fr')),false);
