@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>ClicandSite — CRM prospects</title>
+<script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
+<style>
+/* 06/11/2026 (Claude) : CRM de prospection ClicandSite. Données dans le schéma clicandsite, séparé d'Abracadeal. Aucun envoi de mail depuis cette page. */
+:root{--bg:#F5F6FA;--paper:#fff;--ink:#12162B;--muted:#5C627A;--line:#E1E4EE;--brand:#2F45FF;--soft:#E8EBFF;--ok:#1E8E5A;--warn:#C47A00;--bad:#C0392B}
+@media (prefers-color-scheme:dark){:root{--bg:#0D1020;--paper:#151A30;--ink:#EEF0F8;--muted:#9AA1BC;--line:#262C47;--brand:#6A7BFF;--soft:#1E2550;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1200px;margin:0 auto;padding:20px max(14px,env(safe-area-inset-left,0px)) 60px max(14px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+h1{font-size:1.45rem;margin:0}
+h1 span{color:var(--brand)}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:9px 14px;font:600 .9rem inherit;cursor:pointer}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn:disabled{opacity:.5;cursor:default}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.card span{font-size:.82rem;color:var(--muted)}
+.card.hl{border-color:var(--brand);background:var(--soft)}
+.robot{display:flex;flex-wrap:wrap;align-items:center;gap:10px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.robot .st{font-weight:700}
+.robot details{width:100%}
+.robot summary{cursor:pointer;color:var(--muted);font-size:.88rem}
+.runs{font-size:.82rem;color:var(--muted);display:grid;gap:3px;margin-top:8px}
+.filters{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:8px;margin-bottom:12px}
+select,input,textarea{width:100%;font:inherit;padding:9px 10px;border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink);min-width:0}
+.count{color:var(--muted);font-size:.88rem;margin:0 0 10px}
+.list{display:grid;gap:8px}
+.p{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,2fr) 150px;gap:12px;align-items:start}
+.p h3{margin:0;font-size:1rem}
+.meta{font-size:.84rem;color:var(--muted)}
+.tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
+.tag{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
+.tag.aucun{background:#E7F7EE;color:var(--ok);border-color:#BFE7D0}
+.tag.date{background:#FFF3DC;color:var(--warn);border-color:#F2D9A6}
+.tag.moderne{background:#EEF0F5;color:var(--muted)}
+.tag.injoignable{background:#FDECEA;color:var(--bad);border-color:#F3C3BD}
+.score{font-weight:800;font-variant-numeric:tabular-nums}
+.contact a{color:var(--brand);word-break:break-all}
+.contact div{font-size:.88rem}
+.reasons{font-size:.8rem;color:var(--warn);margin-top:4px}
+.side{display:grid;gap:6px}
+.more{grid-column:1/-1;border-top:1px solid var(--line);padding-top:10px;display:grid;gap:8px}
+.hist{font-size:.82rem;color:var(--muted);display:grid;gap:2px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.msg{padding:14px;border-radius:12px;background:var(--paper);border:1px solid var(--line)}
+.pager{display:flex;gap:8px;justify-content:center;margin-top:14px}
+@media (max-width:860px){.filters{grid-template-columns:1fr 1fr}.p{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Clic<span>and</span>Site · CRM prospects</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn" id="exportBtn" type="button">Exporter (CSV)</button>
+      <button class="btn" type="button" onclick="location.href='admin-pilotage.html'">Admin Abracadeal</button>
+    </div>
+  </header>
+
+  <div id="gate" class="msg" hidden>Connectez-vous avec le compte administrateur sur <a href="index.html">abracadeal.fr</a>, puis revenez sur cette page.</div>
+
+  <div id="app" hidden>
+    <div class="cards" id="cards"></div>
+
+    <div class="robot">
+      <span>Robot de recherche : <span class="st" id="robotSt">…</span></span>
+      <button class="btn" id="robotToggle" type="button">…</button>
+      <button class="btn primary" id="robotRun" type="button">Lancer une recherche maintenant</button>
+      <span class="meta">Il cherche dans OpenStreetMap, ville par ville, et vérifie les sites. Il n'envoie aucun mail.</span>
+      <details><summary>Dernières recherches</summary><div class="runs" id="runs"></div></details>
+    </div>
+
+    <div class="filters">
+      <select id="fTrade"><option value="">Tous les métiers</option><option value="vtc">VTC</option><option value="restaurant">Restaurant</option><option value="garage">Garage / concession</option><option value="immobilier">Immobilier</option></select>
+      <select id="fSite"><option value="">Tous les sites</option><option value="aucun">Sans site</option><option value="date">Site daté</option><option value="injoignable">Site en panne</option><option value="moderne">Site moderne</option><option value="a_verifier">À vérifier</option></select>
+      <select id="fStatus"><option value="">Tous les statuts</option><option value="nouveau" selected>Nouveau</option><option value="a_contacter">À contacter</option><option value="contacte">Contacté</option><option value="interesse">Intéressé</option><option value="client">Client</option><option value="refus">Refus</option><option value="exclu">Exclu</option></select>
+      <input id="fQ" placeholder="Nom, ville, email…">
+      <select id="fContact"><option value="">Avec ou sans contact</option><option value="email">Avec email</option><option value="phone">Avec téléphone</option></select>
+      <button class="btn" id="refresh" type="button">Actualiser</button>
+    </div>
+    <p class="count" id="count"></p>
+    <div class="list" id="list"></div>
+    <div class="pager"><button class="btn" id="prev" type="button">Précédent</button><button class="btn" id="next" type="button">Suivant</button></div>
+  </div>
+</div>
+
+<script>
+const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const TRADE={vtc:'VTC',restaurant:'Restaurant',garage:'Garage / concession',immobilier:'Immobilier'};
+const SITE={aucun:'Sans site',date:'Site daté',moderne:'Site moderne',injoignable:'Site en panne',a_verifier:'À vérifier'};
+const STATUS={nouveau:'Nouveau',a_contacter:'À contacter',contacte:'Contacté',interesse:'Intéressé',client:'Client',refus:'Refus',exclu:'Exclu'};
+const PAGE=50; let offset=0, rows=[];
+
+async function stats(){
+  const {data,error}=await sb.rpc('cs_admin_stats'); if(error){alert(error.message);return;}
+  const s=data, bs=s.by_site||{}, st=s.by_status||{};
+  $('cards').innerHTML=[
+    ['Prospects trouvés',s.total],
+    ['À démarcher',s.targets,'hl'],
+    ['Sans site',bs.aucun||0],['Site daté',bs.date||0],
+    ['Avec email',s.with_email],
+    ['Contactés',(st.contacte||0)+(st.interesse||0)],
+    ['Clients',st.client||0]
+  ].map(([l,v,c])=>`<div class="card ${c||''}"><b>${v??0}</b><span>${l}</span></div>`).join('');
+  const on=s.robot&&s.robot.enabled;
+  $('robotSt').textContent=on?'en marche':'arrêté'; $('robotSt').style.color=on?'var(--ok)':'var(--bad)';
+  $('robotToggle').textContent=on?'Arrêter le robot':'Remettre en marche';
+  $('robotToggle').dataset.on=on?'1':'0';
+  $('runs').innerHTML=(s.runs||[]).map(r=>{
+    const d=new Date(r.at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+    return r.kind==='sites'?`<div>${d} · ${r.checked} sites vérifiés</div>`
+      :`<div>${d} · ${esc(TRADE[r.trade]||r.trade)} à ${esc(r.area)} · ${r.ok?`${r.found} trouvés, ${r.inserted} nouveaux`:'erreur : '+esc(r.error)}</div>`;
+  }).join('')||'<div>Aucune recherche pour le moment.</div>';
+}
+
+async function load(){
+  const q=$('fQ').value.trim();
+  const {data,error}=await sb.rpc('cs_admin_prospects',{p_trade:$('fTrade').value||null,p_status:$('fStatus').value||null,p_site:$('fSite').value||null,p_q:q||null,p_limit:500,p_offset:0});
+  if(error){$('list').innerHTML=`<div class="msg">${esc(error.message)}</div>`;return;}
+  const c=$('fContact').value;
+  rows=(data.rows||[]).filter(r=>!c||(c==='email'?r.email:r.phone));
+  if(offset>=rows.length) offset=0;
+  render();
+}
+
+function render(){
+  const page=rows.slice(offset,offset+PAGE);
+  $('count').textContent=rows.length+(rows.length>1?' prospects':' prospect')+(rows.length>PAGE?` · ${offset+1}–${Math.min(offset+PAGE,rows.length)}`:'');
+  $('prev').disabled=offset===0; $('next').disabled=offset+PAGE>=rows.length;
+  $('list').innerHTML=page.map(r=>{
+    const reasons=(r.site_signals&&r.site_signals.reasons)||[];
+    return `<article class="p" data-id="${r.id}">
+      <div>
+        <h3>${esc(r.name)}</h3>
+        <div class="meta">${esc(TRADE[r.trade])} · ${esc([r.address,r.postcode,r.city].filter(Boolean).join(', '))}</div>
+        <div class="tags"><span class="tag ${r.site_status}">${SITE[r.site_status]}</span><span class="tag">Score <span class="score">${r.score}</span></span></div>
+        ${reasons.length?`<div class="reasons">${reasons.map(esc).join(' · ')}</div>`:''}
+      </div>
+      <div class="contact">
+        ${r.email?`<div>✉ <span>${esc(r.email)}</span></div>`:'<div class="meta">Pas d\'email</div>'}
+        ${r.phone?`<div>☎ ${esc(r.phone)}</div>`:''}
+        ${r.website?`<div><a href="${esc(r.website)}" target="_blank" rel="noopener">${esc(r.website.replace(/^https?:\/\//,'').replace(/\/$/,''))}</a></div>`:''}
+        ${r.notes?`<div class="meta">Note : ${esc(r.notes)}</div>`:''}
+      </div>
+      <div class="side">
+        <select class="st" aria-label="Statut">${Object.entries(STATUS).map(([k,v])=>`<option value="${k}" ${k===r.status?'selected':''}>${v}</option>`).join('')}</select>
+        <button class="btn open" type="button">Détails</button>
+      </div>
+      <div class="more" hidden></div>
+    </article>`;}).join('')||'<div class="msg">Aucun prospect avec ces filtres. Le robot en ajoute au fil de la journée.</div>';
+}
+
+$('list').addEventListener('change',async e=>{
+  if(!e.target.classList.contains('st')) return;
+  const id=e.target.closest('.p').dataset.id;
+  const {error}=await sb.rpc('cs_admin_prospect_update',{p_id:id,p_status:e.target.value});
+  if(error) alert(error.message); else { const r=rows.find(x=>x.id===id); if(r) r.status=e.target.value; stats(); }
+});
+$('list').addEventListener('click',async e=>{
+  const card=e.target.closest('.p'); if(!card) return; const id=card.dataset.id; const more=card.querySelector('.more');
+  if(e.target.classList.contains('open')){
+    if(!more.hidden){more.hidden=true;return;}
+    const r=rows.find(x=>x.id===id);
+    const {data}=await sb.rpc('cs_admin_interactions',{p_id:id});
+    more.innerHTML=`<div class="row2"><input class="em" placeholder="Email" value="${esc(r.email||'')}"><input class="ph" placeholder="Téléphone" value="${esc(r.phone||'')}"></div>
+      <textarea class="nt" rows="2" placeholder="Note interne">${esc(r.notes||'')}</textarea>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn primary save" type="button">Enregistrer</button>
+      <select class="kind" style="width:auto"><option value="note">Note</option><option value="appel">Appel</option><option value="mail">Mail envoyé</option><option value="reponse">Réponse reçue</option></select>
+      <input class="hx" placeholder="Ajouter à l'historique…" style="flex:1;min-width:160px"><button class="btn addh" type="button">Ajouter</button></div>
+      <div class="hist">${(data||[]).map(h=>`<div>${new Date(h.at).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})} · ${esc(h.kind)} · ${esc(h.content)}</div>`).join('')||'Pas encore d\'historique.'}</div>`;
+    more.hidden=false;
+  }
+  if(e.target.classList.contains('save')){
+    const em=more.querySelector('.em').value.trim(), ph=more.querySelector('.ph').value.trim(), nt=more.querySelector('.nt').value;
+    const {error}=await sb.rpc('cs_admin_prospect_update',{p_id:id,p_notes:nt,p_email:em,p_phone:ph});
+    if(error) alert(error.message); else { e.target.textContent='Enregistré'; const r=rows.find(x=>x.id===id); Object.assign(r,{email:em||null,phone:ph||null,notes:nt}); }
+  }
+  if(e.target.classList.contains('addh')){
+    const t=more.querySelector('.hx').value.trim(); if(!t) return;
+    const {error}=await sb.rpc('cs_admin_add_note',{p_id:id,p_kind:more.querySelector('.kind').value,p_text:t});
+    if(error) alert(error.message); else { more.hidden=true; card.querySelector('.open').click(); }
+  }
+});
+
+['fTrade','fSite','fStatus','fContact'].forEach(id=>$(id).addEventListener('change',()=>{offset=0;load();}));
+let tq; $('fQ').addEventListener('input',()=>{clearTimeout(tq);tq=setTimeout(()=>{offset=0;load();},350);});
+$('refresh').addEventListener('click',()=>{stats();load();});
+$('prev').addEventListener('click',()=>{offset=Math.max(0,offset-PAGE);render();scrollTo(0,0);});
+$('next').addEventListener('click',()=>{offset+=PAGE;render();scrollTo(0,0);});
+$('robotToggle').addEventListener('click',async()=>{const on=$('robotToggle').dataset.on==='1';const {error}=await sb.rpc('cs_admin_robot',{p_enabled:!on});if(error)alert(error.message);stats();});
+$('robotRun').addEventListener('click',async()=>{const b=$('robotRun');b.disabled=true;b.textContent='Recherche lancée…';const {error}=await sb.rpc('cs_admin_robot',{p_run_now:true});if(error)alert(error.message);setTimeout(()=>{b.disabled=false;b.textContent='Lancer une recherche maintenant';stats();load();},60000);});
+$('exportBtn').addEventListener('click',()=>{
+  const cols=['name','trade','address','postcode','city','phone','email','website','site_status','score','status','notes'];
+  const csv=[cols.join(';')].concat(rows.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(';'))).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob(['﻿'+csv],{type:'text/csv'}));a.download='clicandsite-prospects.csv';a.click();
+});
+
+(async()=>{
+  const {data:{session}}=await sb.auth.getSession();
+  if(!session){$('gate').hidden=false;return;}
+  const {data:isAdmin}=await sb.rpc('is_admin');
+  if(!isAdmin){$('gate').hidden=false;$('gate').textContent='Cette page est réservée à l\'administrateur.';return;}
+  $('app').hidden=false; stats(); load();
+})();
+</script>
+</body>
+</html>
