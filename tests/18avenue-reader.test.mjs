@@ -11,6 +11,9 @@ const business=parse18Avenue(fixture('business'),source+'8321&abraca_tx=VTE',gal
 assert.equal(business.prix,'55000');assert.match(business.description,/278.000/);assert.equal(business.surface,undefined);assert.equal(business.ville,'');assert.equal(business._keep_missing_city,true);assert.equal(business.photos.split('|').length,7);assert.equal(business.type_bien,'local commercial');
 const rent=parse18Avenue(fixture('rent'),source+'8150&abraca_tx=LOC',gallery);assert.equal(rent.prix,'110');assert.equal(rent.transaction,'location');assert.equal(rent.url,source+'8150');assert.match(rent.description,/Parking/);
 const loft=parse18Avenue(fixture('loft'),source+'8326&abraca_tx=LOC',gallery);assert.equal(loft.prix,'1762');
+const house=parse18Avenue(fixture('house'),source+'8334&abraca_tx=VTE',gallery);assert.match(house.type_bien,/maison/i);
+const local=parse18Avenue(fixture('local'),source+'8124&abraca_tx=VTE',gallery);assert.match(local.type_bien,/bureau/i);
+const mixed=parse18Avenue(fixture('mixed'),source+'8331&abraca_tx=VTE',gallery);assert.match(mixed.type_bien,/local commercial/i);
 assert.equal(avenuePhotos(gallery+gallery+'<img src="https://www.18avenue.fr/bankimages/annonces/noIMG.jpg">').length,7);
 assert.deepEqual(avenueLinks(`<a href="../pages/fiche.AC3.php?codann=8338">A</a><script>window.open('../pages/fiche.AC3.php?codann=8338')</script>`,'VTE'),[source+'8338&abraca_tx=VTE']);
 assert.equal(is18Avenue(new URL('https://www.18avenue.fr/')),true);assert.equal(is18Avenue(new URL('https://example.com/18avenue.fr')),false);

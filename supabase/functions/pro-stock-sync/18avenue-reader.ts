@@ -30,7 +30,10 @@ export function parse18Avenue(html:string,url:string,gallery:string){
  const row:any={reference,url:u.toString(),titre:title,description,transaction:tx,prix:String(price),ville:place?.[2]?.trim()||(/\bParis\b/i.test(title+' '+description)?'Paris':''),code_postal:place?.[1]||'',photos:photos.join('|'),_keep_missing_city:true};
  row._source_city_missing=!row.ville;
  const value=(re:RegExp)=>{const v=p.match(re)?.[1];return v==null?undefined:number(v);};
- const type=p.match(/(?:^|\n)\s*Type\s*:\s*([^\n]+)/i)?.[1];if(type)row.type_bien=type;else if(/fonds de commerce/i.test(title))row.type_bien='local commercial';
+ const type=clean(own.match(/<b>\s*Type\s*<\/b>\s*<br\s*\/?>\s*([^<]+)/i)?.[1]||p.match(/(?:^|\n)\s*Type\s*:\s*([^\n]+)/i)?.[1]||'');
+ if(type)row.type_bien=type;
+ else if(/fonds de commerce/i.test(title))row.type_bien='local commercial';
+ else {const named=title.match(/\b(local commercial|bureau|maison|appartement|studio|studette|parking|box|terrain|immeuble)\b/i)?.[1]||description.slice(0,140).match(/\b(local commercial|bureau|atelier|loft|maison|appartement|studio)\b/i)?.[1];if(named)row.type_bien=/studette/i.test(named)?'appartement':/atelier/i.test(named)?'local commercial':named;}
  const headerFacts=clean(own.split(/<!-- M² \+ nB PIECES -->/i)[1]?.split(/<!-- PARIS 18 -->/i)[0]||'');
  const fields:any={surface:value(/Surface (?:Carrez|habitable)\s*:\s*([\d.,]+)/i)??(headerFacts.match(/([\d.,]+)\s*m²/i)?.[1]?number(headerFacts.match(/([\d.,]+)\s*m²/i)![1]):undefined),pieces:value(/NB pi[èe]ces\s*:\s*(\d+)/i),chambres:value(/NB chambres\s*:\s*(\d+)/i),etage:value(/(?:^|\n)Etage\s*:\s*(-?\d+)/i),nb_etages:value(/NB [ée]tages\s*:\s*(\d+)/i),annee_construction:value(/(?:Ann[ée]e construction|Construction)\s*:\s*(\d{4})/i)};
  for(const [k,v] of Object.entries(fields))if(v!=null&&Number.isFinite(v))row[k]=v;
@@ -51,7 +54,7 @@ export function parse18Avenue(html:string,url:string,gallery:string){
 export async function read18Avenue(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
  const source='https://www.18avenue.fr/',starts=['VTE','LOC'].map(tx=>`${source}pages/annonces.SS.php?ORG=ALL&VRS=${tx}&NbAnn=1000`);
  const fetcher=async(u:URL)=>{const v=new URL(u);v.searchParams.delete('abraca_tx');return fetchHtml(v);};
- const rows:any=await crawlCatalogue(source,'18avenue-v2',starts,fetcher,(h,u)=>{
+ const rows:any=await crawlCatalogue(source,'18avenue-v3',starts,fetcher,(h,u)=>{
   const tx=u.searchParams.get('VRS')||'VTE',details=avenueLinks(h,tx);
   if(!details.length&&!/aucun|pas de bien|0 bien/i.test(clean(h)))throw Error('Catalogue 18 Avenue vide sans total explicite');
   // The site's own NbAnn selector controls how many records are returned.
