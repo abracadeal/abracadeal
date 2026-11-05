@@ -2456,3 +2456,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - 05/11/2026 (Claude) : API partenaires v1 pour les éditeurs (Septeo/Modelo, Apimo, La Boîte Immo…) — fonction partner-api + tables partner_api_clients / partner_agencies ; doc publique api.html. Les annonces passent par le moteur pro-stock-sync (clé de flux par agence). Agence diffusée seulement si compte Pro avec le même SIRET (sinon pending + mail admin). Testée de bout en bout puis nettoyée (restent 2 petites images de test orphelines dans le stockage, chemin a0a0a0a0-…c1a0/, à supprimer via l API Storage).
 
 - 05/11/2026 (Claude) : partner-api — ouverture AUTOMATIQUE du compte Pro quand l agence n en a pas (même circuit que admin-onboard-pro : registre officiel, verify-professional, offre Fondateur pro_50, mail mot de passe). Une seule tentative ; en cas d échec, mail à Anthony avec la raison et statut pending.
+
+- 06/11/2026 (Claude) : demande d'Anthony — crédit discret « Site réalisé par ClicandSite » (lien https://clicandsite.fr/) ajouté à la ligne « © 2026 Abracadeal » du pied de page (index.html, vacances.html). Aucun nom de personne ajouté.
