@@ -1,7 +1,7 @@
 // Duda pages can contain many independent adverts, not one advert per URL.
 import {sDecode,smartDetail} from './smart-reader.ts';
 import {crawlCatalogue,type CrawlMemory} from './resumable-crawl.ts';
-import {validateCity,norm} from './commune-lookup.ts';
+import {validateCity,norm,homonyms} from './commune-lookup.ts';
 import {energyImageUrls} from './energy-image.ts';
 import {cpu} from './cpu-meter.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
@@ -77,12 +77,14 @@ export function lecoeurLinks(html:string,page:URL){
 }
 async function locate(row:any){
  for(const candidate of row._location_candidates||[]){const c=await validateCity(candidate);if(c&&norm(c.nom)===norm(candidate)){row.ville=c.nom;row.code_postal=c.cps.length===1?c.cps[0]:'';row._exact_source_city=c.nom;row._source_city_missing=false;break;}}
+ // A full, unambiguous commune in the property's own URL is also source data.
+ if(row._source_city_missing&&!row._source_specific_fields){const words=decodeURIComponent(new URL(row.url).pathname).split(/[^\p{L}]+/u).filter(Boolean);outer:for(let i=0;i<words.length;i++)for(let n=Math.min(5,words.length-i);n>=2;n--){const candidate=words.slice(i,i+n).join('-'),c=await validateCity(candidate);if(c&&norm(c.nom)===norm(candidate)&&await homonyms(c.nom)===1){row.ville=c.nom;row.code_postal=c.cps.length===1?c.cps[0]:'';row._exact_source_city=c.nom;row._source_city_missing=false;break outer;}}}
  delete row._location_candidates;return row;
 }
 export async function readLecoeur(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
  const source='https://www.lecoeurtransactions.fr/',cache=new Map<string,any[]>();
  const parse=(h:string,u:string)=>{if(!cache.has(u))cache.set(u,parseLecoeurPage(h,u));return cache.get(u)!;};
- const bundles:any=await crawlCatalogue(source,'lecoeur-v1',[source],fetchHtml,(h,u)=>({lists:lecoeurLinks(h,u),details:parse(h,u.toString()).length?[u.toString()]:[]}),async(h,u)=>({reference:u,children:await Promise.all(parse(h,u).map(locate))}),memory,{maxDetails:8});
+ const bundles:any=await crawlCatalogue(source,'lecoeur-v2',[source],fetchHtml,(h,u)=>({lists:lecoeurLinks(h,u),details:parse(h,u.toString()).length?[u.toString()]:[]}),async(h,u)=>({reference:u,children:await Promise.all(parse(h,u).map(locate))}),memory,{maxDetails:8});
  const rows:any=bundles.flatMap((b:any)=>b.children||[]),seen=new Set<string>();const unique=rows.filter((r:any)=>{const k=[r.reference_source||r.reference,r.prix,r.description].join('|');if(seen.has(k))return false;seen.add(k);return true;});
  Object.assign(unique,{partial:bundles.partial,total:bundles.partial?null:unique.length,cycleStarted:bundles.cycleStarted,cycleSeen:bundles.stats.cycle_complete?unique.map((r:any)=>r.reference):[],stats:{...bundles.stats,source_rows:rows.length,duplicate_source_rows:rows.length-unique.length},platform:'Le Cœur (annonces séparées par bloc)',sector:'immobilier'});return unique;
 }
