@@ -2431,3 +2431,5 @@ Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce d
 - Accord « Je publie » Ofim Immobilier (04/11 02:27 UTC) : SIRET 411 182 298 00058 non vérifié, e-mail perso gmail sans lien avec ofim.fr → signalé à Anthony, rien importé.
 
 - 05/11/2026 (Claude) : phrase ajoutée en fin des mails de prospection (aperçu + modèles auto/immo/moto/manuel/normal) : « Vous payez déjà des milliers d'euros par an pour être visible ailleurs ? Gardez vos plateformes : Abracadeal vient en plus. Vous n'avez rien à perdre. » ; 92 agences de réseaux/groupes immo mises en Phase 2 (petites agences indépendantes en priorité).
+
+- 05/11/2026 (Claude) : « 12 mois offerts » retiré des mails de prospection, remplacé par « gratuit pendant le lancement, sans carte bancaire, sans engagement » (modèles en base + mail aperçu). Les Fondateurs déjà inscrits gardent leurs 12 mois promis.
