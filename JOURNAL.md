@@ -1,3 +1,12 @@
+## 2026-11-06 fin d'après-midi — Déconnexion automatique fiable : plus de « Admin » affiché après inactivité (Claude)
+
+- Problème (Anthony) : après un moment sans utiliser le site, la page affichait encore le compte Admin au lieu d'un visiteur non connecté.
+- Cause (logs Auth Supabase) : le contrôle d'inactivité de `share-listing-20260922.js` créait un 2e client Supabase. Au retour sur la page, les deux clients rafraîchissaient le même jeton dans la même seconde (`token_revoked` + `token_refreshed`), puis la déconnexion effaçait la session et le client principal la réécrivait juste après → rechargement en Admin.
+- Correctif : nouveau `assets/session-guard-20261106.js`, chargé AVANT supabase-js, sans aucun client Supabase ni appel réseau pour décider. Contrôle synchrone au chargement, au retour d'arrière-plan (capture `visibilitychange`/`pageshow`/`focus`, avant le rafraîchissement du jeton) et toutes les 30 s ; délai dépassé → session effacée du stockage (+ fermeture côté serveur si le jeton est encore valable), puis la page repart en visiteur. Mêmes délais qu'avant : 15 min Admin, 30 min Particulier/Pro, l'activité réelle remet le compteur à zéro.
+- `index-main.js` informe la garde : rôle (admin ou non) au chargement du profil, connexion (`SIGNED_IN`), déconnexion. Ancien module retiré de `share-listing-20260922.js`.
+- Garde ajoutée aussi sur `moderation.html`, `moderateur.html`, `pro-pro.html` et les pages `admin-*.html` (qui gardaient la session sans limite). `admin-clicandsite.html` n'utilise pas supabase-js : non concerné.
+- Tests simulés : admin 16 min → déconnecté ; admin 10 min → gardé ; retour d'arrière-plan après 40 min → déconnecté + rechargement ; particulier 20 min → gardé.
+
 ## 2026-11-06 après-midi — Sitea / ICS : lecture complète vérifiée en production (ChatGPT)
 
 - Départ : main `54ece4563d88050eaafeadb390f1780374c48c82`, fonction réellement déployée `pro-stock-sync` v301, code épinglé sur `cdabfd7e359fd00e1d2325fc95a85e69faa2d640`. Aucun écart du code de la fonction avec main. Le Cœur `/maison` reste HTTP 404 ; Bergé LP1657 publie toujours seulement un retour à la ligne dans Détails : blocages précédents inchangés, pas de faux done ni de répétition de leur lecture complète.

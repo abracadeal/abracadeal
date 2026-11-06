@@ -305,6 +305,7 @@ async function applyAuthSession(session,{preserveEditing=true}={}){
     if(error)console.warn('Profil non chargé',error);
     currentProfile=data||null;
     if(!currentProfile?.is_admin)moderationMode=false;
+    if(currentProfile)try{window.abracaSessionGuard?.setRole(currentProfile.is_admin===true);}catch(_){}
   }else{
     moderationMode=false;
   }
@@ -815,6 +816,7 @@ async function signOutUser(closeAccountModal=false){
   if(!sb) return;
   const {error}=await sb.auth.signOut({scope:'local'});
   if(error){toast(error.message);return;}
+  try{window.abracaSessionGuard?.signedOut();}catch(_){}
   currentUser=null;
   currentProfile=null;
   onlyMine=false;
@@ -6243,6 +6245,9 @@ if(sb){
 
   sb.auth.onAuthStateChange((event,session)=>{
     passwordRecovery.handleAuth(event,session);
+    // 06/11/2026 : vraie connexion = départ du compteur d'inactivité ; session fermée = l'interface repasse en visiteur.
+    if(event==='SIGNED_IN'&&session&&!currentUser)try{window.abracaSessionGuard?.signedIn();}catch(_){}
+    if(event==='SIGNED_OUT')try{window.abracaSessionGuard?.signedOut();}catch(_){}
     // 01/11/2026 : retour au showroom après inscription / connexion (valable 2 jours, ex. après confirmation de l'e-mail)
     if(event==='SIGNED_IN'&&session){try{const r=JSON.parse(localStorage.getItem('abracaReturnTo')||'null');if(r&&r.u&&Date.now()-r.t<2*86400e3&&!/[?&]type=recovery/.test(location.hash+location.search)){localStorage.removeItem('abracaReturnTo');setTimeout(()=>{location.href=r.u;},700);}else if(r)localStorage.removeItem('abracaReturnTo');}catch(_){}}
 
