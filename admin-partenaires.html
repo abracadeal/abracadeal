@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>API partenaires — Admin Abracadeal</title>
+<script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
+<style>
+/* 06/11/2026 (Claude, demande d'Anthony) : suivi de l'API partenaires (éditeurs de logiciels).
+   Éditeurs branchés, clés (affichées une seule fois), agences reçues et leur statut. */
+:root{--bg:#F5F6FA;--paper:#fff;--ink:#12162B;--muted:#5C627A;--line:#E1E4EE;--brand:#6B2FD6;--soft:#EFE8FF;--ok:#1E8E5A;--warn:#C47A00;--bad:#C0392B}
+@media (prefers-color-scheme:dark){:root{--bg:#0F0B1E;--paper:#1A1430;--ink:#F0EDF8;--muted:#A69FBF;--line:#2E2548;--brand:#9B6BFF;--soft:#2A1F4D;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:20px max(14px,env(safe-area-inset-left,0px)) 60px max(14px,env(safe-area-inset-right,0px))}
+header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px;margin-bottom:18px}
+h1{font-size:1.45rem;margin:0}
+h2{font-size:1.1rem;margin:24px 0 10px}
+.btn{border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:10px;padding:9px 14px;font:600 .9rem inherit;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.primary{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.small{padding:6px 10px;font-size:.82rem}
+.btn:disabled{opacity:.5;cursor:default}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.card b{display:block;font-size:1.5rem;font-variant-numeric:tabular-nums}
+.card span{font-size:.82rem;color:var(--muted)}
+.card.hl{border-color:var(--brand);background:var(--soft)}
+.list{display:grid;gap:8px}
+.item{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}
+.item h3{margin:0;font-size:1rem}
+.meta{font-size:.84rem;color:var(--muted)}
+.actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.tag{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);background:var(--bg);margin-left:6px;vertical-align:middle}
+.tag.active{background:#E7F7EE;color:var(--ok);border-color:#BFE7D0}
+.tag.pending{background:#FFF3DC;color:var(--warn);border-color:#F2D9A6}
+.tag.stopped,.tag.off{background:#FDECEA;color:var(--bad);border-color:#F3C3BD}
+.tag.test{background:var(--soft);color:var(--brand);border-color:var(--brand)}
+.msg{padding:14px;border-radius:12px;background:var(--paper);border:1px solid var(--line);color:var(--muted)}
+form.new{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:14px;display:grid;grid-template-columns:1.2fr 1.2fr auto auto;gap:8px;align-items:center}
+input{width:100%;font:inherit;padding:9px 10px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--ink);min-width:0}
+label.chk{display:flex;gap:6px;align-items:center;font-size:.88rem;white-space:nowrap}
+label.chk input{width:auto}
+.keybox{margin-top:10px;padding:14px;border-radius:12px;border:2px solid var(--brand);background:var(--soft)}
+.keybox code{display:block;word-break:break-all;font-size:.95rem;margin:8px 0;padding:10px;border-radius:8px;background:var(--paper)}
+.filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.filters select{font:inherit;padding:8px 10px;border-radius:9px;border:1px solid var(--line);background:var(--paper);color:var(--ink)}
+@media (max-width:760px){form.new{grid-template-columns:1fr}.item{grid-template-columns:1fr}.actions{justify-content:flex-start}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>API partenaires</h1>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <a class="btn" href="api.html" target="_blank" rel="noopener">Documentation publique</a>
+      <a class="btn" href="index.html#admin">← Admin</a>
+    </div>
+  </header>
+
+  <div id="gate" class="msg" hidden>Connecte-toi avec le compte administrateur sur <a href="index.html">abracadeal.fr</a>, puis reviens sur cette page.</div>
+  <div id="loading" class="msg">Chargement…</div>
+
+  <div id="app" hidden>
+    <div class="cards" id="cards"></div>
+
+    <h2>Éditeurs de logiciels</h2>
+    <p class="meta">Chaque éditeur (Apimo, La Boîte Immo, Modelo…) reçoit une clé pour envoyer les annonces de ses agences. La clé n'est affichée qu'une seule fois : copie-la et envoie-la à l'éditeur.</p>
+    <form class="new" id="newForm">
+      <input id="nName" placeholder="Nom de l'éditeur (ex. Apimo)" required>
+      <input id="nEmail" type="email" placeholder="E-mail technique de l'éditeur">
+      <label class="chk"><input type="checkbox" id="nTest"> Clé de test</label>
+      <button class="btn primary" type="submit">Créer la clé</button>
+    </form>
+    <div id="keyBox"></div>
+    <div class="list" id="clients" style="margin-top:10px"></div>
+
+    <h2>Agences reçues</h2>
+    <div class="filters">
+      <select id="fStatus"><option value="">Tous les statuts</option><option value="active">Diffusées</option><option value="pending">En attente</option><option value="stopped">Arrêtées</option></select>
+      <select id="fPartner"><option value="">Tous les éditeurs</option></select>
+      <button class="btn small" id="refresh" type="button">Actualiser</button>
+    </div>
+    <div class="list" id="agencies"></div>
+  </div>
+</div>
+<script>
+const sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=d=>d?new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'}):'jamais';
+const ST={active:'Diffusée',pending:'En attente',stopped:'Arrêtée'};
+const SECT={vehicules:'Véhicules',immobilier:'Immobilier',other:'Autre'};
+let data={clients:[],agencies:[]};
+
+async function load(){
+  const {data:d,error}=await sb.rpc('admin_partner_overview');
+  $('loading').hidden=true;
+  if(error){ if(/Administrator|42501/i.test(error.message+error.code)){$('gate').hidden=false;return;} $('loading').hidden=false;$('loading').textContent='Erreur : '+error.message;return; }
+  data=d||data; $('app').hidden=false; render();
+}
+
+function render(){
+  const c=data.clients, a=data.agencies;
+  $('cards').innerHTML=[
+    ['Éditeurs branchés',c.filter(x=>x.active&&!x.sandbox).length,'hl'],
+    ['Agences diffusées',a.filter(x=>x.status==='active'&&!x.sandbox).length],
+    ['Agences en attente',a.filter(x=>x.status==='pending'&&!x.sandbox).length],
+    ['Annonces en ligne',a.filter(x=>!x.sandbox).reduce((s,x)=>s+(x.listings||0),0)]
+  ].map(([l,v,k])=>`<div class="card ${k||''}"><b>${v}</b><span>${l}</span></div>`).join('');
+
+  $('clients').innerHTML=c.length?c.map(x=>`<div class="item">
+    <div><h3>${esc(x.name)}${x.sandbox?'<span class="tag test">Test</span>':''}<span class="tag ${x.active?'active':'off'}">${x.active?'Active':'Coupée'}</span></h3>
+    <div class="meta">${esc(x.contact_email||'pas d’e-mail')} · clé ${esc(x.key_prefix||'')}… · ${x.agencies} agence${x.agencies>1?'s':''} (${x.agencies_active} diffusée${x.agencies_active>1?'s':''})</div>
+    <div class="meta">Créée le ${fmt(x.created_at)} · dernier appel : ${fmt(x.last_used_at)}</div></div>
+    <div class="actions"><button class="btn small" data-regen="${x.id}">Nouvelle clé</button><button class="btn small" data-toggle="${x.id}" data-on="${x.active?1:0}">${x.active?'Couper':'Réactiver'}</button></div>
+  </div>`).join(''):'<div class="msg">Aucun éditeur branché pour le moment. Crée une clé quand un éditeur accepte de diffuser sur Abracadeal.</div>';
+
+  const sel=$('fPartner'), cur=sel.value;
+  sel.innerHTML='<option value="">Tous les éditeurs</option>'+c.map(x=>`<option value="${esc(x.name)}">${esc(x.name)}</option>`).join(''); sel.value=cur;
+  const fs=$('fStatus').value, fp=sel.value;
+  const list=a.filter(x=>(!fs||x.status===fs)&&(!fp||x.partner===fp));
+  $('agencies').innerHTML=list.length?list.map(x=>`<div class="item"><div>
+    <h3>${esc(x.name)}<span class="tag ${esc(x.status)}">${esc(ST[x.status]||x.status)}</span>${x.sandbox?'<span class="tag test">Test</span>':''}</h3>
+    <div class="meta">${esc(x.partner)} · ${esc(SECT[x.sector]||x.sector||'')} · ${esc([x.postal_code,x.city].filter(Boolean).join(' '))} · SIRET ${esc(x.siret)}</div>
+    <div class="meta">${esc(x.email||'')}${x.phone?' · '+esc(x.phone):''} · ${x.listings} annonce${x.listings>1?'s':''} en ligne · mise à jour ${fmt(x.updated_at)}</div>
+    ${x.status==='pending'?'<div class="meta" style="color:var(--warn)">Compte Pro pas encore ouvert : crée-le avec ce SIRET depuis l’admin, les annonces arriveront ensuite toutes seules.</div>':''}
+  </div></div>`).join(''):'<div class="msg">Aucune agence reçue pour le moment.</div>';
+}
+
+function showKey(name,key){
+  $('keyBox').innerHTML=`<div class="keybox"><b>Clé de ${esc(name)}</b> — copie-la maintenant, elle ne sera plus affichée.
+  <code id="kv">${esc(key)}</code><button class="btn small primary" type="button" id="kcopy">Copier la clé</button> <button class="btn small" type="button" id="kclose">J’ai copié</button></div>`;
+  $('kcopy').onclick=async()=>{try{await navigator.clipboard.writeText(key);$('kcopy').textContent='Copiée';}catch{prompt('Copie cette clé :',key);}};
+  $('kclose').onclick=()=>{$('keyBox').innerHTML='';};
+}
+
+$('newForm').addEventListener('submit',async e=>{
+  e.preventDefault();
+  const name=$('nName').value.trim(); if(!name)return;
+  const {data:r,error}=await sb.rpc('admin_partner_create',{p_name:name,p_email:$('nEmail').value.trim(),p_sandbox:$('nTest').checked});
+  if(error){alert(error.message);return;}
+  $('newForm').reset(); showKey(r.name,r.key); load();
+});
+document.addEventListener('click',async e=>{
+  const g=e.target.closest('[data-regen]'), t=e.target.closest('[data-toggle]');
+  if(g){
+    if(!confirm('Créer une nouvelle clé ? L’ancienne cessera de marcher tout de suite : l’éditeur devra mettre la nouvelle.'))return;
+    const {data:r,error}=await sb.rpc('admin_partner_regenerate',{p_id:g.dataset.regen}); if(error){alert(error.message);return;}
+    const c=data.clients.find(x=>x.id===g.dataset.regen); showKey(c?c.name:'l’éditeur',r.key); window.scrollTo({top:$('keyBox').offsetTop-80,behavior:'smooth'});
+  }
+  if(t){
+    const on=t.dataset.on==='1';
+    if(on&&!confirm('Couper la clé de cet éditeur ? Il ne pourra plus envoyer d’annonces (celles déjà en ligne restent).'))return;
+    const {error}=await sb.rpc('admin_partner_set_active',{p_id:t.dataset.toggle,p_active:!on}); if(error){alert(error.message);return;}
+    load();
+  }
+});
+$('fStatus').onchange=render; $('fPartner').onchange=render; $('refresh').onclick=load;
+
+(async()=>{const {data:{session}}=await sb.auth.getSession(); if(!session){$('loading').hidden=true;$('gate').hidden=false;return;} load();})();
+</script>
+<script src="/assets/app-shell-20261018.js?v=6" defer></script>
+</body>
+</html>

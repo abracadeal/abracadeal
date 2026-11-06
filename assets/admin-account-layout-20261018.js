@@ -108,6 +108,8 @@
     grid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
     grid.appendChild(tile('Finances', 'finance', null, 'admin-pilotage.html'));
     grid.appendChild(tile('Prospection', 'prospect', null, 'admin-prospection.html'));
+    /* 06/11/2026 : API partenaires (éditeurs de logiciels, clés, agences reçues) */
+    grid.appendChild(tile('API partenaires', 'upload', null, 'admin-partenaires.html'));
     /* 28/10/2026 : imports depuis les sites des pros (demandes à valider, aperçu, activation) */
     var imp = tile('Imports sites', 'flux', null, 'admin-test-import.html');
     var impBadge = document.createElement('span'); impBadge.className = 'aal-badge'; impBadge.hidden = true; imp.appendChild(impBadge);
