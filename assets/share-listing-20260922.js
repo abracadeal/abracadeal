@@ -7,7 +7,35 @@
      On partage desormais une page de partage hebergee sur abracadeal.fr. */
   // Page de partage avec la photo de l'annonce (generee par .github/workflows/share-pages.yml) ;
   // si elle n'existe pas encore, 404.html redirige vers la fiche.
-  const shareUrl=id=>'https://abracadeal.fr/annonce/'+encodeURIComponent(id)+'/';
+  const pageUrl=id=>'https://abracadeal.fr/annonce/'+encodeURIComponent(id)+'/';
+  /* Fix 06/11/2026 : partage Facebook qui « ne se fait pas » sur une annonce récente.
+     La page /annonce/<id>/ n'est générée que par la tâche automatique (toutes les ~10 min,
+     souvent bien plus tard en pratique). Avant ça, l'adresse renvoie une erreur 404 :
+     un humain est redirigé vers la fiche, mais le robot de Facebook refuse un lien en 404
+     (pas d'aperçu, publication impossible). On vérifie donc à l'avance si la page existe
+     (dès l'ouverture d'une fiche, du menu de partage ou de l'écran « annonce en ligne ») ;
+     tant qu'elle n'existe pas, on partage l'adresse directe de la fiche, qui répond toujours. */
+  const pageState={};
+  const checkPage=id=>{
+    if(!id||pageState[id]==='ok'||pageState[id]==='pending')return;
+    pageState[id]='pending';
+    fetch('/annonce/'+encodeURIComponent(id)+'/',{method:'HEAD',cache:'no-store'})
+      .then(r=>{pageState[id]=r.ok?'ok':'missing';})
+      .catch(()=>{pageState[id]='missing';});
+  };
+  window.abracaWarmShareUrl=checkPage;
+  const shareUrl=id=>{
+    if(pageState[id]==='ok')return pageUrl(id);
+    checkPage(id);
+    return 'https://abracadeal.fr/?annonce='+encodeURIComponent(id);
+  };
+  const warmWrap=name=>{
+    const fn=window[name];
+    if(typeof fn!=='function'||fn.__abracaWarm)return;
+    const w=function(id){try{checkPage(String(id||''));}catch(e){}return fn.apply(this,arguments);};
+    w.__abracaWarm=true;window[name]=w;
+  };
+  ['openAd','shareListingSmart','showPublishShareScreen'].forEach(warmWrap);
 
   window.copyListingLink=async id=>{
     const url=shareUrl(id);
