@@ -134,7 +134,7 @@ function closeModal(id){
   const el=document.getElementById(id);
   if(!el) return;
   /* 02/11/2026 (Anthony : « dans le showroom, on clique sur une annonce et ça nous emmène sur le site principal ») :
-     annonce ouverte depuis un showroom (…?annonce=<id>&retour=/lifecars) → en la fermant on revient au showroom. */
+     annonce ouverte depuis un showroom (…?annonce=<id>&retour=/weecars-angers) → en la fermant on revient au showroom. */
   /* Seulement quand la fiche est vraiment fermée : si une autre fenêtre s'ouvre juste après (connexion pour envoyer un message,
      profil du vendeur…), on reste sur place. */
   if(id==='detailModal'&&document.documentElement.classList.contains('abraca-embed')){

@@ -248,7 +248,7 @@ async function init(){
     const h=(document.referrer?new URL(document.referrer).hostname:'').replace(/^www\./,'');const src=!h||/abracadeal\.(fr|com)$/.test(h)?'direct':/google\./.test(h)?'google':/bing\.|duckduckgo|qwant|ecosia|yahoo/.test(h)?'bing':/facebook|fb\./.test(h)?'facebook':/instagram/.test(h)?'instagram':'autre_site';
     sb.rpc('track_site_visit',{p_visitor:v,p_page:'showroom',p_source:src,p_mobile:matchMedia('(max-width:760px),(pointer:coarse)').matches}).then(()=>{},()=>{});}}catch(_){}
   if(!(currentUser&&currentUser.id===id)&&localStorage.getItem('abraca_not_counted')!=='1')try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
-  // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/lifecars) affichée dans la barre d'adresse.
+  // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/weecars-angers) affichée dans la barre d'adresse.
   if(showroom?.slug&&/\/pro\.html$/i.test(location.pathname)){try{history.replaceState(null,'','/'+showroom.slug);}catch(_){}}
 }
 init().catch(err=>{console.error(err);fail()});
