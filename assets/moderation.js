@@ -20,7 +20,7 @@ async function invokeFresh(name,opts){
 }
 
 const $=s=>document.querySelector(s);
-const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set(),photoUrls:new Map(),reports:new Map()};
+const state={tab:'pending',rows:[],mods:new Map(),profiles:new Map(),busy:false,selected:new Set(),photoUrls:new Map(),reports:new Map(),inflight:new Set()};
 
 function esc(s=''){return String(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
 /* 03/11/2026 (Anthony : « fais le mieux ») : titre lisible (comme sur le site) + titre d'origine en petit s'il est différent,
@@ -85,7 +85,7 @@ function card(a){
     : validated
       ? '<div class="history-actions"><button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button></div>'
       : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
-  return '<article class="card">'+
+  return '<article class="card" data-card-id="'+esc(a.id)+'">'+
     (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
       '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
@@ -295,6 +295,7 @@ async function load(){
   try{
     await loadReports();
     let rows=state.tab==='reference'?await referenceRows():state.tab==='pending'?await pendingRows():state.tab==='validated'?await validatedRows():state.tab==='reported'?await reportedRows():await rejectedRows();
+    rows=rows.filter(r=>!state.inflight.has(r.id));
     state.rows=rows;
     state.selected.clear();
     updateBulkUI();
@@ -385,33 +386,61 @@ document.addEventListener('click',async e=>{
   if(action==='reject'&&!confirm('Refuser cette annonce ?'))return;
   if(action==='delete'&&!confirm('Supprimer cette annonce du site ?'))return;
   if(action==='dismiss'&&!confirm('Retirer cette annonce de la liste Validées ? Elle restera publiée sur le site.'))return;
+  /* 06/11/2026 (Anthony : « ça met énormément de temps quand je valide ») : la validation côté serveur
+     (photos, contrôles) prend 2 à 12 s, puis toute la liste était rechargée. Désormais l'annonce sort de la
+     liste dès le clic, le serveur termine en arrière-plan et on peut enchaîner ; en cas d'échec elle revient. */
+  if(['validate','reject','delete','dismiss'].includes(action)){
+    if(state.inflight.has(id))return;
+    state.inflight.add(id);
+    closePreview();
+    const el=document.querySelector('[data-card-id="'+CSS.escape(id)+'"]');
+    if(el)el.style.display='none';
+    state.selected.delete(id);
+    const idx=state.rows.indexOf(a);if(idx>=0)state.rows.splice(idx,1);
+    showRemaining();updateBulkUI();
+    runAction(action,id).then(msg=>toast(msg)).catch(err=>{
+      console.error(err);
+      if(el)el.style.display='';
+      if(!state.rows.includes(a))state.rows.splice(Math.max(0,idx),0,a);
+      showRemaining();updateBulkUI();
+      toast((err&&err.message)||'Action impossible');
+    }).finally(()=>{state.inflight.delete(id);scheduleCounts();});
+    return;
+  }
   setBusy(true);
   try{
-    if(action==='validate'){
-      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'validate'}});
-      if(!error&&data?.status!=='active'&&data?.revision!==true)throw Error(data?.ai_error||'Annonce non validée');
-      if(error)throw error;toast(data?.revision?'Modification validée. Application après paiement.':'Annonce validée');
-    }else if(action==='pharos'){
-      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'pharos'}});
-      if(error||!data?.ok)throw error||Error('Action Pharos impossible');
-      if(pharosWindow){pharosWindow.opener=null;pharosWindow.location='https://www.internet-signalement.gouv.fr/';}
-      toast('Photos supprimées, compte banni. Envoyez le signalement sur Pharos.');
-    }else if(action==='reject'){
-      const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'rejected'});
-      if(error)throw error;toast('Annonce refusée');
-    }else if(action==='delete'){
-      await removeListing(id);toast('Annonce supprimée');
-    }else if(action==='dismiss'){
-      const {error}=await sb.rpc('dismiss_validated_from_moderation',{p_listing_id:id});
-      if(error)throw error;
-      toast('Annonce retirée de la liste Validées');
-    }
+    await runAction(action,id,pharosWindow);
     closePreview();
     setBusy(false);
     await load();
   }catch(err){if(pharosWindow)pharosWindow.close();console.error(err);toast(err.message||'Action impossible');}
   finally{setBusy(false)}
 });
+function showRemaining(){const n=state.rows.length;setStatus(n+' annonce'+(n>1?'s':'')+(state.tab==='pending'?' à traiter':''));if(!n&&!$('#list .card:not([style*="none"])'))$('#list').insertAdjacentHTML('beforeend','<div class="empty">Aucune annonce dans cette section.</div>');}
+function scheduleCounts(){clearTimeout(scheduleCounts.t);scheduleCounts.t=setTimeout(()=>{if(!state.inflight.size)refreshCounts().catch(console.warn);},800);}
+async function runAction(action,id,pharosWindow){
+    if(action==='validate'){
+      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'validate'}});
+      if(error)throw error;
+      if(data?.status!=='active'&&data?.revision!==true)throw Error(data?.ai_error||data?.error||'Annonce non validée');
+      return data?.revision?'Modification validée. Application après paiement.':'Annonce validée';
+    }else if(action==='pharos'){
+      const {data,error}=await invokeFresh('moderate-listing',{body:{listing_id:id,action:'pharos'}});
+      if(error||!data?.ok)throw error||Error('Action Pharos impossible');
+      if(pharosWindow){pharosWindow.opener=null;pharosWindow.location='https://www.internet-signalement.gouv.fr/';}
+      toast('Photos supprimées, compte banni. Envoyez le signalement sur Pharos.');
+      return '';
+    }else if(action==='reject'){
+      const {error}=await sb.rpc('moderate_listing',{p_listing_id:id,p_status:'rejected'});
+      if(error)throw error;return 'Annonce refusée';
+    }else if(action==='delete'){
+      await removeListing(id);return 'Annonce supprimée';
+    }else if(action==='dismiss'){
+      const {error}=await sb.rpc('dismiss_validated_from_moderation',{p_listing_id:id});
+      if(error)throw error;
+      return 'Annonce retirée de la liste Validées';
+    }
+}
 
 async function boot(){
   const {data:{session}}=await sb.auth.getSession();

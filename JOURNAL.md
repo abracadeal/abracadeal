@@ -1,3 +1,8 @@
+## 2026-11-06 soir — Modération : validation instantanée (Claude)
+
+- Anthony : valider une annonce prend énormément de temps. Mesuré : `moderate-listing` action validate = 2 à 12 s (re-stage des photos importées, hash anti-réutilisation, analyse IA pour les particuliers, déplacement des photos), puis `load()` rechargeait toute la liste.
+- `assets/moderation.js` : Valider / Refuser / Supprimer / Retirer de la liste sont optimistes — l'annonce sort de la liste au clic, l'appel serveur se termine en arrière-plan (plusieurs en parallèle possibles), toast du résultat ; en cas d'échec l'annonce revient dans la liste avec le message d'erreur. Compteurs rafraîchis une fois les actions terminées. Une annonce encore en cours de traitement n'est pas réaffichée si on change d'onglet. Aucun contrôle de sécurité serveur supprimé. Pharos inchangé.
+
 ## 2026-11-06 soir (suite 3) — Mails de prospection : ouverture clarifiée (Claude)
 
 - Anthony : commencer par « Passerelles… » laissait croire qu'Abracadeal est la passerelle ; le coût se compte en centaines voire milliers d'euros par mois, pas par an.
