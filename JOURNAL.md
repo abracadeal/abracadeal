@@ -1,3 +1,11 @@
+## 2026-11-06 — Bergé : lecteur Softr public et pagination mémorisée (ChatGPT)
+
+- Départ : main `8eca1d02`, fonction réellement déployée v292 épinglée sur `38c069a66b29d35b3a3e3e60ed345c84c4d8e7c1` ; aucun écart du code de la fonction avec main. Lecture à blanc 222268 : 0 annonce, lecteur générique insuffisant.
+- Nouveau lecteur limité à berge.fr : blocs publics Softr utilisés par le site, filtres serveur conservés, aucun accès direct à Airtable. Deux catalogues publics (86 ventes, 278 locations), curseurs suivis jusqu’au bout, 364 record IDs distincts observés le 06/11 ; pas de faux total déclaré par le site. Reprise persistée `berge-v1` et acquittement du cycle ajoutés.
+- Fiche propre à chaque record ID et sa configuration conditionnelle vente/location ; blocs « biens similaires » exclus. Prix affiché et unité mensuelle contrôlés, HT/HC conservés, surface publiée, description entière, caractéristiques et DPE/GES publiés seulement. Galeries par identifiant de pièce jointe, doublons exacts de métadonnées éliminés ; jamais les images de démonstration Softr. Téléphone public libellé « agence », aucun contact interne Airtable utilisé ni attribution à un conseiller.
+- Validation locale : catalogue public complet 364/364 distincts ; premier passage réel 12 fiches, aucune erreur, 352 restantes ; exemple VP1767 Cagnes-sur-Mer 855 000 €, 11 photos. Test fixture LP1778 19 979 €/mois HT HC et 1370 m² ; reprise simulée 25 fiches en 3 passages, répétition inter-catalogue dédupliquée, curseur invalide bloquant. Régressions reprise, dédoublonnage, Orpi Business, 18 Avenue, Kombishop, Le Cœur et bundle esbuild réussis.
+- Production : validation à blanc après déploiement à consigner. Demande `05bc612f-7a79-4b82-8149-f6f6af3c35d0` maintenue en attente tant que le cycle complet n’est pas contrôlé. Aucun import, publication, activation de flux, mail, validation visuelle ou changement de prospect.
+
 # Journal de travail Abracadeal
 
 Journal partagé entre Claude et ChatGPT, qui travaillent tous les deux sur ce dépôt et sur la base Supabase (projet `jplzvxmpbpjssyinozap`). Anthony répartit les tâches.

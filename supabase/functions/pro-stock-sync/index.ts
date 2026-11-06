@@ -18,6 +18,7 @@ import { readSmartSite, sDecode, smartDetail, smartLinks, smartHooks, lastRefusa
 import { is18Avenue, read18Avenue } from './18avenue-reader.ts';
 import { isKombishop, readKombishop } from './kombishop-reader.ts';
 import { isLecoeur, readLecoeur } from './lecoeur-reader.ts';
+import { isBerge, readBerge } from './berge-reader.ts';
 import { readKermarrec } from "./kermarrec-reader.ts";
 import { isApimoModules, readApimoModules } from "./apimo-reader.ts";
 import { readJunot } from "./junot-reader.ts";
@@ -1036,6 +1037,7 @@ async function readFeed(feed:any,persistCrawl=false){
   let url:URL;
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
+  if(isBerge(url)){feed.sector='immobilier';return readBerge(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isLecoeur(url)){feed.sector='immobilier';return readLecoeur(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isKombishop(url)){feed.sector='vehicules';return readKombishop(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(is18Avenue(url)){feed.sector='immobilier';return read18Avenue(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
@@ -1341,7 +1343,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$)/.test(cp.data.state.scope||'')){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v1$)/.test(cp.data.state.scope||'')){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }

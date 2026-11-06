@@ -1,0 +1,95 @@
+{
+  "id": "recEYzisHc36RCfn3",
+  "fields": {
+    "Référence Netty": "LP1778",
+    "Commune - Softr": "Villeneuve-Loubet",
+    "Désignation": "À louer - Villeneuve-Loubet – Bureaux de 1 028 à 1 370 m² surfaces évolutives",
+    "Type d'offre": "Location",
+    "Type de bien": "Bureau",
+    "Surface - Softr": "1370 m²",
+    "Prix / Loc ou Vente": "19 979 € / mois HT HC",
+    "Photo de mise en avant": [
+      {
+        "id": "att6DdcPbVNSdzApY",
+        "width": 3344,
+        "height": 2508,
+        "filename": "twins-1_00017.jpg",
+        "size": 3986990,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/att6DdcPbVNSdzApY"
+      }
+    ],
+    "Photos Local": [
+      {
+        "id": "attlHJaUHVGhUR8nG",
+        "width": 2896,
+        "height": 2172,
+        "filename": "twins-1_00005.jpg",
+        "size": 3019173,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attlHJaUHVGhUR8nG"
+      },
+      {
+        "id": "attMvjuU249562bCg",
+        "width": 2896,
+        "height": 2172,
+        "filename": "twins-1_00007.jpg",
+        "size": 2478189,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attMvjuU249562bCg"
+      },
+      {
+        "id": "attVsy98KYrNYgxtn",
+        "width": 2896,
+        "height": 2172,
+        "filename": "twins-1_00011.jpg",
+        "size": 3248296,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attVsy98KYrNYgxtn"
+      },
+      {
+        "id": "attZ86bZqIB3kooP0",
+        "width": 2896,
+        "height": 2172,
+        "filename": "twins-1_00013.jpg",
+        "size": 3042990,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attZ86bZqIB3kooP0"
+      },
+      {
+        "id": "attF5tIzNjyCe9ioW",
+        "width": 2896,
+        "height": 2172,
+        "filename": "twins-1_00016.jpg",
+        "size": 1838135,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attF5tIzNjyCe9ioW"
+      },
+      {
+        "id": "attev0JkDA07e3QJy",
+        "width": 3344,
+        "height": 2508,
+        "filename": "twins-1_00023.jpg",
+        "size": 3898090,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/attev0JkDA07e3QJy"
+      },
+      {
+        "id": "att066CXcSMCCMZ7I",
+        "width": 3344,
+        "height": 2508,
+        "filename": "twins-1_00024.jpg",
+        "size": 3020098,
+        "type": "image/jpeg",
+        "url": "https://v5.airtableusercontent.com/test/att066CXcSMCCMZ7I"
+      }
+    ],
+    "Détails": "Implantez votre siège social ou vos services administratifs à Villeneuve-Loubet.\n\nDans un ensemble immobilier offrant une réelle souplesse d'implantation, découvrez des bureaux en très bon état, avec surfaces disponibles à partir de 107 m² jusqu'à 1370 m².\n\nLa configuration permet d'envisager une occupation indépendante ou un regroupement des surfaces, jusqu'à 3533 m² selon votre organisation.\n\nUn emplacement particulièrement intéressant pour vos déplacements : accès rapide à l'A8 vers Nice, l'Italie et Aix-en-Provence, à proximité de l'aéroport international Nice Côte d'Azur.\n\nStationnements en sous-sol sécurisé disponibles en supplément.\n\nPour découvrir les surfaces et étudier les possibilités de votre implantation, contactez nous dès maintenant !\n",
+    "Occupation": "Loué",
+    "Ascenseur": "Oui",
+    "Parking": "Privé",
+    "Conforme PMR": "Oui",
+    "Date de disponibilité": "2027-04-01",
+    "Code postal": "06270"
+  }
+}
