@@ -21,9 +21,9 @@
     var box=el('div','background:#fff;color:#1d1530;max-width:460px;width:100%;border-radius:16px;padding:22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.3);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif');
     var h=el('h2','margin:0 0 10px;font-size:19px;color:#3b1d7a','Vos annonces sont en ligne sur Abracadeal');h.id='abcSiteTitle';
     var n=Number(info.online)||0;
-    var p1=el('p','margin:0 0 10px',(n>0?n+' véhicule'+(n>1?'s':'')+' de ':'Les annonces de ')+host(info.url)+' '+(n>1?'ont été repris':'a été repris')+' sur votre page Abracadeal. Elles sont tenues à jour automatiquement (prix, photos, ventes) : vous n’avez rien à saisir.');
+    var p1=el('p','margin:0 0 10px;color:#1d1530!important',(n>0?n+' véhicule'+(n>1?'s':'')+' de ':'Les annonces de ')+host(info.url)+' '+(n>1?'ont été repris':'a été repris')+' sur votre page Abracadeal. Elles sont tenues à jour automatiquement (prix, photos, ventes) : vous n’avez rien à saisir.');
     if(n===0)p1.textContent='Les annonces de '+host(info.url)+' sont reprises sur votre page Abracadeal et tenues à jour automatiquement (prix, photos, ventes) : vous n’avez rien à saisir.';
-    var p2=el('p','margin:0 0 16px;font-weight:700','Confirmez-vous que nous diffusions les annonces de votre site ?');
+    var p2=el('p','margin:0 0 16px;font-weight:700;color:#1d1530!important','Confirmez-vous que nous diffusions les annonces de votre site ?');
     var status=el('p','margin:0 0 10px;min-height:1em;font-size:13px;color:#b42318');status.setAttribute('aria-live','polite');
     var ok=el('button','display:block;width:100%;border:0;border-radius:12px;padding:13px;background:#6d3fd6;color:#fff;font-weight:700;font-size:15px;cursor:pointer;margin-bottom:8px','Oui, je confirme');ok.type='button';
     var no=el('button','display:block;width:100%;border:1px solid #d0c6e6;border-radius:12px;padding:11px;background:#fff;color:#5a4a7a;font-size:14px;cursor:pointer','Non, retirer mes annonces');no.type='button';
@@ -34,7 +34,7 @@
         if(r.error)throw r.error;
         box.innerHTML='';
         box.appendChild(el('h2','margin:0 0 10px;font-size:19px;color:#3b1d7a',accept?'Merci, c’est confirmé !':'C’est noté'));
-        box.appendChild(el('p','margin:0 0 16px',accept?'Vos annonces restent en ligne et se mettent à jour toutes seules depuis votre site.':'Vos annonces reprises depuis votre site ont été retirées. Vous pouvez toujours publier vous-même depuis votre espace Pro.'));
+        box.appendChild(el('p','margin:0 0 16px;color:#1d1530!important',accept?'Vos annonces restent en ligne et se mettent à jour toutes seules depuis votre site.':'Vos annonces reprises depuis votre site ont été retirées. Vous pouvez toujours publier vous-même depuis votre espace Pro.'));
         var close=el('button','display:block;width:100%;border:0;border-radius:12px;padding:12px;background:#6d3fd6;color:#fff;font-weight:700;cursor:pointer','Fermer');close.type='button';
         close.onclick=function(){back.remove();if(!accept)location.reload();};
         box.appendChild(close);close.focus();

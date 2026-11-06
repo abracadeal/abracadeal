@@ -17,8 +17,8 @@
     var ico=el('div','width:56px;height:56px;margin:0 auto 10px;border-radius:50%;background:linear-gradient(135deg,#b62fd8,#ff3d9a);display:grid;place-items:center');
     ico.innerHTML='<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg>';
     var h=el('h2','margin:0 0 10px;font-size:20px;color:#3b1d7a','Merci de votre confiance !');h.id='abcGiftTitle';
-    var p1=el('p','margin:0 0 10px','Pour vous remercier, Abracadeal vous offre '+n+' mise'+(n>1?'s':'')+' « À la une » de '+d+' jours.');
-    var p2=el('p','margin:0 0 16px;color:#5a4a7a;font-size:14px','Dans « Mes annonces », touchez « Booster » sur le véhicule de votre choix : il passe en tête du site pendant '+d+' jours. Les '+d+' jours démarrent seulement quand vous l’utilisez.');
+    var p1=el('p','margin:0 0 10px;color:#1d1530!important;font-weight:600','Pour vous remercier, Abracadeal vous offre '+n+' mise'+(n>1?'s':'')+' « À la une » de '+d+' jours.');
+    var p2=el('p','margin:0 0 16px;color:#5a4a7a!important;font-size:14px','Dans « Mes annonces », touchez « Booster » sur le véhicule de votre choix : il passe en tête du site pendant '+d+' jours. Les '+d+' jours démarrent seulement quand vous l’utilisez.');
     var ok=el('button','display:block;width:100%;border:0;border-radius:12px;padding:13px;background:#6d3fd6;color:#fff;font-weight:700;font-size:15px;cursor:pointer','J’ai compris');ok.type='button';
     ok.onclick=function(){ok.disabled=true;cli().rpc('ack_my_boost_gift').then(function(){back.remove();}).catch(function(){back.remove();});};
     box.appendChild(ico);box.appendChild(h);box.appendChild(p1);box.appendChild(p2);box.appendChild(ok);
