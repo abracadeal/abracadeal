@@ -21,5 +21,13 @@
   "count": 27,
   "active": true,
   "short": "auto-negoce-bordeaux-33"
+ },
+ "eb9ad657-664b-457a-b4c1-1fd85f5c4737": {
+  "path": "garage/weecars-brest-brest",
+  "name": "Weecars Brest",
+  "city": "Brest",
+  "count": 22,
+  "active": true,
+  "short": "weecarsbrest"
  }
 }

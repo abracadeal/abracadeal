@@ -4,6 +4,7 @@
   <url><loc>https://abracadeal.fr/auto/alfa-romeo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/alfa-romeo/stelvio/</loc></url>
   <url><loc>https://abracadeal.fr/auto/audi/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/audi/a1/</loc></url>
   <url><loc>https://abracadeal.fr/auto/audi/a3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/audi/a4/</loc></url>
   <url><loc>https://abracadeal.fr/auto/audi/a6/</loc></url>
@@ -15,6 +16,7 @@
   <url><loc>https://abracadeal.fr/auto/bmw/serie-1/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-4/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/serie-6/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-7/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/x1/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/x3/</loc></url>
@@ -30,9 +32,12 @@
   <url><loc>https://abracadeal.fr/auto/cupra/</loc></url>
   <url><loc>https://abracadeal.fr/auto/cupra/formentor/</loc></url>
   <url><loc>https://abracadeal.fr/auto/dacia/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/dacia/dokker/</loc></url>
   <url><loc>https://abracadeal.fr/auto/dacia/duster/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/dacia/spring/</loc></url>
   <url><loc>https://abracadeal.fr/auto/diesel/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ds/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/ds/ds-3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ds/ds-7/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ds/ds-7-crossback/</loc></url>
   <url><loc>https://abracadeal.fr/auto/electrique/</loc></url>
@@ -54,6 +59,7 @@
   <url><loc>https://abracadeal.fr/auto/jaguar/xe/</loc></url>
   <url><loc>https://abracadeal.fr/auto/kia/</loc></url>
   <url><loc>https://abracadeal.fr/auto/kia/rio/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/kia/sportage/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/discovery/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/range-rover-velar/</loc></url>
@@ -64,6 +70,7 @@
   <url><loc>https://abracadeal.fr/auto/mercedes/classe-a/</loc></url>
   <url><loc>https://abracadeal.fr/auto/mercedes/classe-b/</loc></url>
   <url><loc>https://abracadeal.fr/auto/mercedes/classe-c/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/mercedes/classe-e/</loc></url>
   <url><loc>https://abracadeal.fr/auto/mercedes/classe-v/</loc></url>
   <url><loc>https://abracadeal.fr/auto/mercedes/gla/</loc></url>
   <url><loc>https://abracadeal.fr/auto/mercedes/glb/</loc></url>
@@ -86,10 +93,13 @@
   <url><loc>https://abracadeal.fr/auto/peugeot/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/108/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/2008/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/207/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/208/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/3008/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/308/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/5008/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/508/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/expert/</loc></url>
   <url><loc>https://abracadeal.fr/auto/porsche/</loc></url>
   <url><loc>https://abracadeal.fr/auto/porsche/boxster/</loc></url>
   <url><loc>https://abracadeal.fr/auto/porsche/cayenne/</loc></url>
@@ -113,6 +123,8 @@
   <url><loc>https://abracadeal.fr/auto/suzuki/</loc></url>
   <url><loc>https://abracadeal.fr/auto/suzuki/celerio/</loc></url>
   <url><loc>https://abracadeal.fr/auto/suzuki/sx4-s-cross/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/tesla/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/tesla/model-y/</loc></url>
   <url><loc>https://abracadeal.fr/auto/toyota/</loc></url>
   <url><loc>https://abracadeal.fr/auto/toyota/aygo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/</loc></url>
