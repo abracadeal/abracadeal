@@ -1,3 +1,8 @@
+## 2026-11-06 18h20 — Modération : allègement pour éviter une nouvelle saturation (Claude)
+
+- Après la tempête de liens signés, la base Supabase (plan gratuit) ne répondait plus (timeouts de connexion, 25 % d'erreurs 5xx API + Storage d'après les advisors santé) ; Anthony ne pouvait plus se déconnecter/reconnecter. Redémarrage du projet demandé à Anthony depuis le tableau de bord.
+- Prévention dans `assets/moderation.js` : la liste ne prépare plus que la 1re photo de chaque annonce (les autres sont chargées à l'ouverture de l'aperçu), et les vignettes sont en `loading="lazy"`. L'onglet « À modérer » contient les annonces auto-publiées à revérifier (≈ 350 WeeCars × ~30 photos) : avant, toutes leurs photos étaient traitées à chaque chargement.
+
 ## 2026-11-06 18h — Site très lent : tempête de liens signés photos (Claude)
 
 - Constat (edge_logs, 15 min) : ~10 000 requêtes `storage/v1/object/sign/listing-images*` venant de 2 navigateurs admin (Mac + iPhone) sur abracadeal.fr, avec des 429 (trop de requêtes) et des 544 (délai dépassé) ; la base elle-même ne répondait plus (timeout SQL). Tout le site ralenti.

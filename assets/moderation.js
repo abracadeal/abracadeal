@@ -88,7 +88,7 @@ function card(a){
   return '<article class="card" data-card-id="'+esc(a.id)+'">'+
     (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
-      '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
+      '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'loading="lazy" decoding="async" src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
       '<div class="info"><div class="rowtop"><h2 class="title">'+modTitle(a)+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
       '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
       (a.listing_reference?'<div class="meta">Référence : '+esc(a.listing_reference)+'</div>':'')+
@@ -133,9 +133,11 @@ function closePreview(){
   $('#previewBody').innerHTML='';
   $('#previewActions').innerHTML='';
 }
-function openPreview(id){
+async function openPreview(id){
   const a=state.rows.find(x=>x.id===id);
   if(!a)return;
+  try{await loadPhotoUrls([a],true);}catch(e){console.warn(e);}
+  if(!state.rows.includes(a))return;
   const modal=$('#previewModal');
   const photos=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));
   const gallery=photos.length
@@ -228,9 +230,11 @@ async function rejectedRows(){
    chargement (des milliers avec les stocks importés) saturait le stockage. Photos publiques : lien public direct ;
    photos privées (en attente) : liens demandés par lots de 100, gardés 50 min d'un chargement à l'autre. */
 const signedCache=new Map();
-async function loadPhotoUrls(rows){
+// Liste : seulement la 1re photo de chaque annonce ; la fiche (aperçu) charge les autres à l'ouverture.
+async function loadPhotoUrls(rows,all=false){
   const now=Date.now(),todo=new Map();
-  for(const p of rows.flatMap(a=>a.listing_photos||[])){
+  const pick=a=>{const ph=[...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0));return all?ph:ph.slice(0,1);};
+  for(const p of rows.flatMap(pick)){
     const path=p.storage_path;if(!path)continue;
     if(/^https?:\/\//i.test(path)){state.photoUrls.set(path,path);continue;}
     const bucket=p.storage_bucket||'listing-images';
