@@ -179,9 +179,9 @@
         <div class="note">Obligatoire pour un compte professionnel · contrôlé dans le registre officiel des entreprises.</div>
         <label for="socialSector">Domaine professionnel</label>
         <select class="input" id="socialSector"><option value="">Choisir mon domaine</option><option value="vehicules">Véhicules — Auto & Moto</option><option value="immobilier">Immobilier</option><option value="hightech">High-tech</option><option value="maison">Maison & Déco</option><option value="mode">Mode</option><option value="emploi">Emploi</option><option value="services">Services & Artisans</option></select>
-        <label for="socialSiteUrl">Adresse de votre site <span style="font-weight:400;opacity:.75">(facultatif)</span></label>
+        <div style="font-weight:700;margin-top:12px">Avez-vous un site internet où sont publiées vos annonces ?</div><div style="display:flex;gap:18px;margin:6px 0 4px"><label class="check" style="margin:0"><input type="radio" name="socialHasSite" value="yes"> Oui</label><label class="check" style="margin:0"><input type="radio" name="socialHasSite" value="no"> Non</label></div><div id="socialSiteFields" style="display:none"><label for="socialSiteUrl">Adresse de votre site</label>
         <input class="input" id="socialSiteUrl" type="text" inputmode="url" autocomplete="url" autocapitalize="none" spellcheck="false" maxlength="300" placeholder="www.mon-garage.fr">
-        <label class="check" style="margin-top:10px"><input type="checkbox" id="socialSiteConsent">J’autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour (prix, photos, ventes).</label>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="socialSiteConsent">J’autorise Abracadeal à reprendre et diffuser automatiquement les annonces publiées sur mon site, et à les tenir à jour (prix, photos, ventes).</label></div>
       </div>`:''}
       <label for="socialName">Nom public / pseudo</label>
       <input class="input" id="socialName" required maxlength="80" autocomplete="nickname">
@@ -197,6 +197,10 @@
         <button class="btn primary" type="submit">Valider</button>
       </div></form>`;
     document.body.append(d);
+    d.querySelectorAll('input[name=socialHasSite]').forEach(r=>r.addEventListener('change',()=>{const f=d.querySelector('#socialSiteFields');if(f)f.style.display=d.querySelector('input[name=socialHasSite]:checked')?.value==='yes'?'':'none';}));
+    // Pro arrivé par le lien de son mail avec un site déjà testé : « Oui » + adresse pré-remplis (la case reste à cocher).
+    try{const ref=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');if(ref&&/^[a-z0-9]{8}$/.test(ref.code)&&Date.now()-Number(ref.at||0)<90*864e5&&window.supabase){
+      window.supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF',{auth:{persistSession:false,autoRefreshToken:false,detectSessionInUrl:false}}).rpc('prospect_signup_site',{p_ref:ref.code}).then(({data})=>{if(!data)return;const y=d.querySelector('input[name=socialHasSite][value=yes]');const u=d.querySelector('#socialSiteUrl');if(y&&!d.querySelector('input[name=socialHasSite]:checked')){y.checked=true;y.dispatchEvent(new Event('change'));}if(u&&!u.value.trim())u.value=data;});}}catch(_){}
     d.querySelectorAll('input[name=socialType]').forEach(r=>r.addEventListener('change',()=>{
       const pro=d.querySelector('input[name=socialType]:checked')?.value==='professionnel';
       const box=d.querySelector('.social-pro-fields');if(box)box.hidden=!pro;
@@ -243,10 +247,17 @@
         if(!sector){status.textContent='Choisissez votre domaine professionnel.';d.querySelector('#socialSector')?.focus();return;}
       }
       // 30/10/2026 : comme l'inscription Pro classique, reprise des annonces du site du pro (case à cocher).
-      const siteUrl=type==='professionnel'&&needType?String(d.querySelector('#socialSiteUrl')?.value||'').trim():'';
+      const hasSite=d.querySelector('input[name="socialHasSite"]:checked')?.value||'';
+      const siteUrl=type==='professionnel'&&needType&&hasSite==='yes'?String(d.querySelector('#socialSiteUrl')?.value||'').trim():'';
       const siteConsent=!!d.querySelector('#socialSiteConsent')?.checked;
       if(siteUrl&&!/^(https?:\/\/)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/\S*)?$/i.test(siteUrl)){status.textContent='L’adresse du site ne semble pas valide (exemple : www.mon-garage.fr).';d.querySelector('#socialSiteUrl')?.focus();return;}
       if(siteUrl&&/^(https?:\/\/)?([^\/]*\.)?(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|logic-immo|pap|ouestfrance-(?:auto|immo)|largus|vinted|facebook|instagram|tiktok)\./i.test(siteUrl)){status.textContent='Indiquez l’adresse de votre propre site, pas celle d’un site d’annonces ou d’un réseau social.';d.querySelector('#socialSiteUrl')?.focus();return;}
+      // 06/11/2026 (Anthony) : un pro qui a un site doit le dire et cocher l'autorisation dès l'inscription.
+      if(type==='professionnel'&&needType){
+        if(!hasSite){status.textContent='Indiquez si vous avez un site internet où sont publiées vos annonces.';return;}
+        if(hasSite==='yes'&&!siteUrl){status.textContent='Indiquez l’adresse de votre site.';d.querySelector('#socialSiteUrl')?.focus();return;}
+        if(hasSite==='yes'&&!siteConsent){status.textContent='Cochez la case d’autorisation : c’est elle qui permet de mettre vos annonces en ligne automatiquement.';return;}
+      }
       if(siteUrl&&!siteConsent){status.textContent='Cochez la case d’autorisation pour que nous reprenions les annonces de votre site (ou laissez l’adresse vide).';return;}
       const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
       btn.disabled=true;btn.textContent='Enregistrement…';

@@ -420,6 +420,11 @@ function syncCompanyFields(prefix){
   $('#'+prefix+'Vat').disabled=!needsVat;
   $('#'+prefix+'Vat').required=needsVat;
 }
+function syncSignupHasSite(){
+  const yes=document.querySelector('input[name="signupHasSite"]:checked')?.value==='yes';
+  $('#signupSiteFields')?.classList.toggle('hidden',!yes);
+}
+document.addEventListener('change',e=>{if(e.target&&e.target.name==='signupHasSite')syncSignupHasSite();});
 function syncSignupCompany(){
   const pro=$('#signupType').value==='professionnel';
   $('#signupCompanyFields').classList.toggle('hidden',!pro);
@@ -443,6 +448,7 @@ async function prefillProspectSite(){
     const input=$('#signupSiteUrl'),box=$('#signupSiteBox'),consent=$('#signupSiteConsent');
     if(!input||!box)return;
     if(!input.value.trim())input.value=url;
+    const yesRadio=document.querySelector('input[name="signupHasSite"][value="yes"]');if(yesRadio&&!document.querySelector('input[name="signupHasSite"]:checked')){yesRadio.checked=true;syncSignupHasSite();}
     if(!$('#signupSiteReady')){
       const msg=document.createElement('p');
       msg.id='signupSiteReady';
@@ -451,7 +457,7 @@ async function prefillProspectSite(){
       box.insertBefore(msg,box.firstChild);
     }
     box.style.cssText+=';border:2px solid #6d3fd6;border-radius:12px;padding:12px';
-    const lab=box.querySelector('label[for="signupSiteUrl"] span');if(lab)lab.textContent='(déjà rempli pour vous)';
+    const lab=box.querySelector('label[for="signupSiteUrl"]');if(lab&&!/rempli/.test(lab.textContent))lab.textContent+=' (déjà rempli pour vous)';
     if(consent){const l=consent.closest('label');if(l)l.style.fontWeight='700';}
   }catch(e){console.warn('Pré-remplissage du site',e);}
 }
@@ -727,11 +733,18 @@ $('#signupForm').addEventListener('submit',async e=>{
   try{
     if(type==='professionnel'&&!proSector){status.textContent='Choisis ton domaine professionnel.';return;}
     // 28/10/2026 : adresse du site du pro + autorisation de reprise automatique des annonces (facultatif).
-    const siteUrl=type==='professionnel'?String($('#signupSiteUrl')?.value||'').trim():'';
+    const siteUrl=type==='professionnel'&&document.querySelector('input[name="signupHasSite"]:checked')?.value==='yes'?String($('#signupSiteUrl')?.value||'').trim():'';
     const siteConsent=!!$('#signupSiteConsent')?.checked;
     if(siteUrl&&!/^(https?:\/\/)?[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(\/\S*)?$/i.test(siteUrl)){status.textContent='L’adresse du site ne semble pas valide (exemple : www.mon-garage.fr).';$('#signupSiteUrl').focus();return;}
     if(siteUrl&&/^(https?:\/\/)?([^\/]*\.)?(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|logic-immo|pap|ouestfrance-(?:auto|immo)|largus|vinted|facebook|instagram|tiktok)\./i.test(siteUrl)){status.textContent='Les sites d’annonces (leboncoin, La Centrale, SeLoger…) et les réseaux sociaux ne fonctionnent pas : indique l’adresse de ton propre site, ou laisse ce champ vide et, après l’inscription, depuis ton espace Pro : branche le flux ou l’API de ton logiciel, importe un fichier (CSV ou Excel) ou saisis tes annonces.';$('#signupSiteUrl').focus();return;}
-    if(siteUrl&&!siteConsent){status.textContent='Coche la case d’autorisation pour que nous puissions reprendre les annonces de ton site (ou laisse l’adresse vide).';$('#signupSiteConsent').focus();return;}
+    // 06/11/2026 (Anthony) : un pro qui a un site doit le dire et cocher l'autorisation dès l'inscription.
+    if(type==='professionnel'){
+      const hasSite=document.querySelector('input[name="signupHasSite"]:checked')?.value||'';
+      if(!hasSite){status.textContent='Indique si tu as un site internet où sont publiées tes annonces.';document.querySelector('input[name="signupHasSite"]')?.focus();return;}
+      if(hasSite==='yes'&&!siteUrl){status.textContent='Indique l’adresse de ton site.';$('#signupSiteUrl').focus();return;}
+      if(hasSite==='yes'&&!siteConsent){status.textContent='Coche la case d’autorisation : c’est elle qui permet de mettre tes annonces en ligne automatiquement.';$('#signupSiteConsent').focus();return;}
+    }
+    if(siteUrl&&!siteConsent){status.textContent='Coche la case d’autorisation pour que nous puissions reprendre les annonces de ton site.';$('#signupSiteConsent').focus();return;}
     const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
     const phoneCheck=await abracaPhoneAvailable(rawPhone,type);
     if(!phoneCheck.ok){
