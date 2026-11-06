@@ -47,6 +47,10 @@ export function parseBerge(record:any,url:string){
  const lines=['Prix affiché : '+priceText];
  for(const key of ['État intérieur','Hauteur sous-plafond','Disponibilité','Date de disponibilité','Occupation','Stationnement','Parking','Sanitaire','Ascenseur','Conforme ERP','Conforme PMR','Extraction','Type de bail','Durée du Bail','Dépôt de garantie','Charges annuelles','Taxe Foncières','Honoraires Preneur','Prix Location annuel','Prix / m2','Prix cession droit au bail','Prix FAI','Honoraires à charge','Honoraires vente HT',"Location - Droit d'entrée FAI","Prix Droit d'entrée"])if(f[key]!=null&&clean(f[key]))lines.push(key+' : '+clean(f[key]));
  row.description+='\n\n'+lines.join('\n');
+ for(const [source,target] of [['Charges annuelles','charges_annuelles'],['Taxe Foncières','taxe_fonciere'],['Dépôt de garantie','depot_garantie']])if(f[source]!=null&&clean(f[source])!==''){const value=numeric(f[source]);if(Number.isFinite(value)&&value>=0)row[target]=value;}
+ if(f['État intérieur'])row.etat_bien=clean(f['État intérieur']);
+ if(/^\d{4}-\d{2}-\d{2}$/.test(String(f['Date de disponibilité']||'')))row.disponible_le=f['Date de disponibilité'];
+ const fees=['Honoraires à charge','Honoraires vente HT','Honoraires Preneur'].filter(k=>f[k]!=null&&clean(f[k])).map(k=>k+' : '+clean(f[k]));if(fees.length)row.honoraires=fees.join(' ; ');
  for(const [key,target] of [['DPE','dpe'],['GES','ges']]){const raw=clean(f[key]),v=raw.toUpperCase();if(/^[A-G]$/.test(v))row[target]=v;else if(/NON SOUMIS|EXEMPT/i.test(v))row[target]='NON SOUMIS';else try{const image=new URL(raw);if(image.protocol==='https:'&&/^(?:i\.)?goopics\.net$|^(?:v\d+\.)?airtableusercontent\.com$|^(?:www\.)?berge\.fr$/.test(image.hostname))row[target+'_image']=image.toString();}catch{}}
  // No advisor is named by the current public blocks. Do not assign the agency
  // telephone to a person or expose internal Airtable mandate/contact fields.

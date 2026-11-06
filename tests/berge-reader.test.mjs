@@ -8,6 +8,7 @@ assert.notEqual(bergeIdentity({externalUrl:url,ref:'VF100'}),bergeIdentity({exte
 assert.equal(bergeIdentity({externalUrl:'https://example.org',ref:'VF100'}),null);
 const diagnostic=parseBerge({...fixture,fields:{...fixture.fields,DPE:'https://i.goopics.net/14pcoe.png'}},url);assert.equal(diagnostic.dpe_image,'https://i.goopics.net/14pcoe.png');assert.equal(diagnostic.dpe,undefined);
 assert.equal(row.prix,'19979');assert.equal(row.surface,1370);assert.equal(row.ville,'Villeneuve-Loubet');
+const financial=parseBerge({...fixture,fields:{...fixture.fields,'Charges annuelles':6500,'Taxe Foncières':6097,'Dépôt de garantie':'2 mois'}},url);assert.equal(financial.charges_annuelles,6500);assert.equal(financial.taxe_fonciere,6097);assert.equal(financial.depot_garantie,undefined);
 assert.equal(row.transaction,'location');assert.equal(row.photos.split('|').length,8);
 assert.match(row.description,/HT HC/);assert.match(row.description,/Occupation : Loué/);
 assert.equal(row.contact_nom,undefined);assert.equal(row.chambres,undefined);
