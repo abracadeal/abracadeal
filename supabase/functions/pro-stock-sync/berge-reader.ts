@@ -2,13 +2,14 @@
 // Never query Airtable directly, replace those filters, or read the similar-property block.
 import {crawlCatalogue,type CrawlMemory} from './resumable-crawl.ts';
 import {sDecode} from './smart-reader.ts';
+import {cpu} from './cpu-meter.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const ORIGIN='https://www.berge.fr';
 const CATALOGUES=['/nos-biens-a-la-vente','/nos-biens-a-la-location'];
 export const isBerge=(u:URL)=>/^(?:www\.)?berge\.fr$/i.test(u.hostname);
 const clean=(v:any)=>sDecode(String(v??'').replace(/<br\s*\/?>|<\/(?:p|div|li)>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').trim();
 const numeric=(v:any)=>Number(String(v??'').replace(/[ \u00a0\u202f]/g,'').replace(',','.'));
-export function bergeConfig(html:string){
+export function bergeConfig(html:string){const t0=performance.now();try{
  const start=html.indexOf('var softrBlocks = ');if(start<0)throw Error('Configuration publique Bergé absente');
  // JSON.parse, never evaluate the site's JavaScript.
  const tail=html.slice(start+18),end=tail.indexOf(';\n');
@@ -16,8 +17,10 @@ export function bergeConfig(html:string){
  const app=html.match(/appId:\s*"([\w-]+)"/)?.[1],page=html.match(/pageId:\s*"([\w-]+)"/)?.[1];
  if(!app||!page||!Array.isArray(blocks))throw Error('Identifiants publics Bergé absents');
  return {app,page,blocks};
+ }finally{cpu.ms+=performance.now()-t0;}
 }
-function mappedFields(block:any){const found=new Set<string>();const visit=(x:any)=>{if(!x||typeof x!=='object')return;if(typeof x.mappedTo==='string'&&x.mappedTo)found.add(x.mappedTo);for(const v of Object.values(x))if(typeof v==='object')visit(v);};visit(block.elements);return found;}
+const fieldCache=new WeakMap<object,Set<string>>();
+function mappedFields(block:any){const cached=fieldCache.get(block);if(cached)return cached;const found=new Set<string>();const visit=(x:any)=>{if(!x||typeof x!=='object')return;if(typeof x.mappedTo==='string'&&x.mappedTo)found.add(x.mappedTo);for(const v of Object.values(x))if(typeof v==='object')visit(v);};const t0=performance.now();visit(block.elements);cpu.ms+=performance.now()-t0;fieldCache.set(block,found);return found;}
 export function bergePage(data:any){
  if(!Array.isArray(data?.records)||!(data.offset==null||typeof data.offset==='string'))throw Error('Page publique Bergé invalide');
  const ids=new Set<string>();for(const r of data.records){if(!/^rec[A-Za-z0-9]+$/.test(r.id)||!r.fields||ids.has(r.id))throw Error('Identité Bergé invalide ou répétée');ids.add(r.id);}
@@ -57,7 +60,7 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const ds=block.collection?.dataSource;if(ds?.type!=='AIRTABLE'||!ds.id)throw Error('Source publique Bergé modifiée');
   const endpoint=`${ORIGIN}/v1/datasource/airtable/${config.app}/${config.page}/${block.id}/${ds.id}/data${id?'/'+id:''}`;
   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Block-Name':block.name,'X-Block-Version':block.version},body:JSON.stringify({options:{cellFormat:'json',timeZone:'UTC',userLocale:'en-US'},pageContext:null,filterCriteria:{},...(!id?{pagingOption:{count:100,offset:offset||null},sortingOption:{sortingField:'Date de création',sortType:'DESC'}}:{})}),signal:AbortSignal.timeout(25000)});
-  if(!response.ok)throw Error('API publique Bergé HTTP '+response.status);return bergePage(await response.json());
+  if(!response.ok)throw Error('API publique Bergé HTTP '+response.status);const text=await response.text(),t0=performance.now();try{return bergePage(JSON.parse(text));}finally{cpu.ms+=performance.now()-t0;}
  }
  const rows:any=await crawlCatalogue(ORIGIN+'/','berge-v1',CATALOGUES.map(p=>ORIGIN+p),async u=>{try{
   if(CATALOGUES.includes(u.pathname)){
@@ -77,6 +80,6 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const values=await Promise.all(selected.map(block=>data(detailConfig!,block,id)));
   const fields:any={};for(let i=0;i<selected.length;i++){const value=values[i];if(value.records.length!==1||value.records[0].id!==id)throw Error('Fiche publique Bergé absente : '+id);const own=value.records[0].fields;for(const key of mappedFields(selected[i]))if(own[key]!=null)fields[key]=own[key];if(own['Désignation'])fields['Désignation']=own['Désignation'];const postal=String(own['SEO:Title']||'').match(/\((\d{5})\)/)?.[1];if(postal)fields['Code postal']=postal;}
   return {text:JSON.stringify({id,fields}),url:u};
- }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v1'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:24});
+ }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v1'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:12});
  rows.platform='Bergé (catalogues publics Softr)';rows.sector='immobilier';return rows;
 }

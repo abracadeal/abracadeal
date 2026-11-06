@@ -25,10 +25,10 @@ globalThis.fetch=async(raw,options)=>{
   // One sale catalogue has two cursor pages. Rental repeats a public ID;
   // identity remains the record, rather than a photo or a guessed city.
   const ids=rent?['rec0']:body.pagingOption.offset?Array.from({length:12},(_,i)=>'rec'+(i+13)):Array.from({length:13},(_,i)=>'rec'+i);
-  return {ok:true,json:async()=>({records:ids.map(id=>({id,fields:{}})),offset:!rent&&!body.pagingOption.offset?'next':null})};
+  return {ok:true,text:async()=>JSON.stringify({records:ids.map(id=>({id,fields:{}})),offset:!rent&&!body.pagingOption.offset?'next':null})};
  }
  const id=u.pathname.split('/').at(-1);
- return {ok:true,json:async()=>({records:[{id,fields:{...fixture.fields,'Référence Netty':id}}],offset:null})};
+ return {ok:true,text:async()=>JSON.stringify({records:[{id,fields:{...fixture.fields,'Référence Netty':id}}],offset:null})};
 };
 try{
  const fetchHtml=async u=>({url:u,text:u.pathname==='/'?'tel:0493995252':u.pathname==='/mandat-details'?html('detail',[block('detail')]):html(u.pathname.endsWith('vente')?'sale':'rent',[block('list','list17')])});
