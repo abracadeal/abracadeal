@@ -7,6 +7,7 @@ type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const ORIGIN='https://www.berge.fr';
 const CATALOGUES=['/nos-biens-a-la-vente','/nos-biens-a-la-location'];
 export const isBerge=(u:URL)=>/^(?:www\.)?berge\.fr$/i.test(u.hostname);
+export function bergeIdentity(row:any){try{return isBerge(new URL(row.externalUrl))&&row.ref?'berge|'+row.ref:null;}catch{return null;}}
 const clean=(v:any)=>sDecode(String(v??'').replace(/<br\s*\/?>|<\/(?:p|div|li)>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').trim();
 const numeric=(v:any)=>Number(String(v??'').replace(/[ \u00a0\u202f]/g,'').replace(',','.'));
 export function bergeConfig(html:string){const t0=performance.now();try{
@@ -46,7 +47,7 @@ export function parseBerge(record:any,url:string){
  const lines=['Prix affiché : '+priceText];
  for(const key of ['État intérieur','Hauteur sous-plafond','Disponibilité','Date de disponibilité','Occupation','Stationnement','Parking','Sanitaire','Ascenseur','Conforme ERP','Conforme PMR','Extraction','Type de bail','Durée du Bail','Dépôt de garantie','Charges annuelles','Taxe Foncières','Honoraires Preneur','Prix Location annuel','Prix / m2','Prix cession droit au bail','Prix FAI','Honoraires à charge','Honoraires vente HT',"Location - Droit d'entrée FAI","Prix Droit d'entrée"])if(f[key]!=null&&clean(f[key]))lines.push(key+' : '+clean(f[key]));
  row.description+='\n\n'+lines.join('\n');
- for(const [key,target] of [['DPE','dpe'],['GES','ges']]){const v=clean(f[key]).toUpperCase();if(/^[A-G]$/.test(v))row[target]=v;else if(/NON SOUMIS|EXEMPT/i.test(v))row[target]='NON SOUMIS';}
+ for(const [key,target] of [['DPE','dpe'],['GES','ges']]){const raw=clean(f[key]),v=raw.toUpperCase();if(/^[A-G]$/.test(v))row[target]=v;else if(/NON SOUMIS|EXEMPT/i.test(v))row[target]='NON SOUMIS';else try{const image=new URL(raw);if(image.protocol==='https:'&&/^(?:i\.)?goopics\.net$|^(?:v\d+\.)?airtableusercontent\.com$|^(?:www\.)?berge\.fr$/.test(image.hostname))row[target+'_image']=image.toString();}catch{}}
  // No advisor is named by the current public blocks. Do not assign the agency
  // telephone to a person or expose internal Airtable mandate/contact fields.
  return row;
@@ -62,7 +63,7 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Block-Name':block.name,'X-Block-Version':block.version},body:JSON.stringify({options:{cellFormat:'json',timeZone:'UTC',userLocale:'en-US'},pageContext:null,filterCriteria:{},...(!id?{pagingOption:{count:100,offset:offset||null},sortingOption:{sortingField:'Date de création',sortType:'DESC'}}:{})}),signal:AbortSignal.timeout(25000)});
   if(!response.ok)throw Error('API publique Bergé HTTP '+response.status);const text=await response.text(),t0=performance.now();try{return bergePage(JSON.parse(text));}finally{cpu.ms+=performance.now()-t0;}
  }
- const rows:any=await crawlCatalogue(ORIGIN+'/','berge-v1',CATALOGUES.map(p=>ORIGIN+p),async u=>{try{
+ const rows:any=await crawlCatalogue(ORIGIN+'/','berge-v2',CATALOGUES.map(p=>ORIGIN+p),async u=>{try{
   if(CATALOGUES.includes(u.pathname)){
    const config=configs.get(u.pathname)!,blocks=config.blocks.filter(b=>b.name==='list17'&&b.collection?.dataSource?.isComplete);
    if(blocks.length!==1)throw Error('Catalogue Bergé ambigu');
@@ -80,6 +81,6 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const values=await Promise.all(selected.map(block=>data(detailConfig!,block,id)));
   const fields:any={};for(let i=0;i<selected.length;i++){const value=values[i];if(value.records.length!==1||value.records[0].id!==id)throw Error('Fiche publique Bergé absente : '+id);const own=value.records[0].fields;for(const key of mappedFields(selected[i]))if(own[key]!=null)fields[key]=own[key];if(own['Désignation'])fields['Désignation']=own['Désignation'];const postal=String(own['SEO:Title']||'').match(/\((\d{5})\)/)?.[1];if(postal)fields['Code postal']=postal;}
   return {text:JSON.stringify({id,fields}),url:u};
- }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v1'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:12});
+ }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:12});
  rows.platform='Bergé (catalogues publics Softr)';rows.sector='immobilier';return rows;
 }
