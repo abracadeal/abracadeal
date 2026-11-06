@@ -1,12 +1,13 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {bergeConfig,bergePage,parseBerge,readBerge,bergeIdentity} from '../supabase/functions/pro-stock-sync/berge-reader.ts';
+import {bergeConfig,bergePage,parseBerge,readBerge,bergeIdentity,bergeDiagnosticImages} from '../supabase/functions/pro-stock-sync/berge-reader.ts';
 const fixture=JSON.parse(fs.readFileSync(new URL('./fixtures/berge/lp1778.json',import.meta.url)));
 const url='https://www.berge.fr/mandat-details?recordId='+fixture.id;
 const row=parseBerge(fixture,url);
 assert.notEqual(bergeIdentity({externalUrl:url,ref:'VF100'}),bergeIdentity({externalUrl:url,ref:'VF088'}));
 assert.equal(bergeIdentity({externalUrl:'https://example.org',ref:'VF100'}),null);
 const diagnostic=parseBerge({...fixture,fields:{...fixture.fields,DPE:'https://i.goopics.net/14pcoe.png'}},url);assert.equal(diagnostic.dpe_image,'https://i.goopics.net/14pcoe.png');assert.equal(diagnostic.dpe,undefined);
+assert.deepEqual(bergeDiagnosticImages(diagnostic),['https://i.goopics.net/14pcoe.png']);assert.deepEqual(bergeDiagnosticImages({...diagnostic,url:'https://example.org/'}),[]);
 assert.equal(row.prix,'19979');assert.equal(row.surface,1370);assert.equal(row.ville,'Villeneuve-Loubet');
 const financial=parseBerge({...fixture,fields:{...fixture.fields,'Charges annuelles':6500,'Taxe Foncières':6097,'Dépôt de garantie':'2 mois'}},url);assert.equal(financial.charges_annuelles,6500);assert.equal(financial.taxe_fonciere,6097);assert.equal(financial.depot_garantie,undefined);
 assert.equal(row.transaction,'location');assert.equal(row.photos.split('|').length,8);

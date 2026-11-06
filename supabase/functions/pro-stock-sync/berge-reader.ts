@@ -8,6 +8,7 @@ const ORIGIN='https://www.berge.fr';
 const CATALOGUES=['/nos-biens-a-la-vente','/nos-biens-a-la-location'];
 export const isBerge=(u:URL)=>/^(?:www\.)?berge\.fr$/i.test(u.hostname);
 export function bergeIdentity(row:any){try{return isBerge(new URL(row.externalUrl))&&row.ref?'berge|'+row.ref:null;}catch{return null;}}
+export function bergeDiagnosticImages(raw:any):string[]{try{return isBerge(new URL(raw.url||raw.external_url||raw.listing_url))?[raw.dpe_image,raw.ges_image].filter(x=>typeof x==='string'):[];}catch{return [];}}
 const clean=(v:any)=>sDecode(String(v??'').replace(/<br\s*\/?>|<\/(?:p|div|li)>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').trim();
 const numeric=(v:any)=>Number(String(v??'').replace(/[ \u00a0\u202f]/g,'').replace(',','.'));
 export function bergeConfig(html:string){const t0=performance.now();try{
@@ -86,5 +87,6 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const fields:any={};for(let i=0;i<selected.length;i++){const value=values[i];if(value.records.length!==1||value.records[0].id!==id)throw Error('Fiche publique Bergé absente : '+id);const own=value.records[0].fields;for(const key of mappedFields(selected[i]))if(own[key]!=null)fields[key]=own[key];if(own['Désignation'])fields['Désignation']=own['Désignation'];const postal=String(own['SEO:Title']||'').match(/\((\d{5})\)/)?.[1];if(postal)fields['Code postal']=postal;}
   return {text:JSON.stringify({id,fields}),url:u};
  }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:4});
+ rows.total+=new Set((rows.stats?.failed||[]).filter((u:string)=>u.startsWith(ORIGIN+'/mandat-details?recordId='))).size;
  rows.platform='Bergé (catalogues publics Softr)';rows.sector='immobilier';return rows;
 }
