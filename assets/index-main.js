@@ -161,11 +161,31 @@ function catLabel(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vac
 // Fix 21/09/2026 : image de fallback Abracadeal pour les annonces sans photo (demande interne).
 // Purement visuel cote frontend : ne touche jamais listing_photos, ni les limites/packs de photos.
 const privatePhotoUrls=new Map();
+/* 06/11/2026 (Anthony : « le site est très lent ») : un lien signé était redemandé pour CHAQUE photo privée à
+   CHAQUE rechargement du catalogue, une requête par photo (≈10 000 en 15 min, stockage Supabase saturé : 429/544).
+   Désormais : lien gardé 50 min (valable 1 h), demandé par lots de 100 en une seule requête, et seulement pour
+   les photos qui n'en ont pas encore. */
+const privatePhotoSignedAt=new Map();
+const PRIVATE_SIGN_TTL=3600,PRIVATE_SIGN_REUSE=50*60*1000;
+let privateSignInflight=null;
 async function hydratePrivatePhotos(rows){
- await Promise.all(rows.flatMap(a=>a.listing_photos||[]).filter(p=>p.storage_bucket==='listing-images-pending').map(async p=>{
- const {data}=await sb.storage.from('listing-images-pending').createSignedUrl(p.storage_path,600);
- privatePhotoUrls.set(p.storage_path,data?.signedUrl||'');
- }));
+ const now=Date.now();
+ const paths=[...new Set((rows||[]).flatMap(a=>a.listing_photos||[]).filter(p=>p&&p.storage_bucket==='listing-images-pending'&&p.storage_path)
+   .map(p=>p.storage_path))].filter(path=>!(privatePhotoUrls.get(path)&&now-(privatePhotoSignedAt.get(path)||0)<PRIVATE_SIGN_REUSE));
+ if(!paths.length||!sb)return;
+ if(privateSignInflight){try{await privateSignInflight;}catch(_){}return hydratePrivatePhotos(rows);}
+ privateSignInflight=(async()=>{
+  for(let i=0;i<paths.length;i+=100){
+   const chunk=paths.slice(i,i+100);
+   try{
+    const {data,error}=await sb.storage.from('listing-images-pending').createSignedUrls(chunk,PRIVATE_SIGN_TTL);
+    if(error)throw error;
+    const t=Date.now();
+    (data||[]).forEach(r=>{if(r&&r.path&&r.signedUrl){privatePhotoUrls.set(r.path,r.signedUrl);privatePhotoSignedAt.set(r.path,t);}});
+   }catch(err){console.warn('Liens des photos privées indisponibles',err);break;}
+  }
+ })();
+ try{await privateSignInflight;}finally{privateSignInflight=null;}
 }
 const ABRACA_DEFAULT_LISTING_PHOTO = 'assets/default-listing-photo-20260921.jpg';
 function photoUrl(path){

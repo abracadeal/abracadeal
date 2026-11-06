@@ -224,13 +224,31 @@ async function rejectedRows(){
   if(error)throw error;return data||[];
 }
 
+/* 06/11/2026 (site très lent) : une requête de lien signé par photo, pour toutes les annonces de l'onglet, à chaque
+   chargement (des milliers avec les stocks importés) saturait le stockage. Photos publiques : lien public direct ;
+   photos privées (en attente) : liens demandés par lots de 100, gardés 50 min d'un chargement à l'autre. */
+const signedCache=new Map();
 async function loadPhotoUrls(rows){
-  state.photoUrls.clear();
-  await Promise.all(rows.flatMap(a=>a.listing_photos||[]).map(async p=>{
-    if(/^https?:\/\//i.test(p.storage_path)){state.photoUrls.set(p.storage_path,p.storage_path);return;}
-    const {data,error}=await sb.storage.from(p.storage_bucket||'listing-images').createSignedUrl(p.storage_path,600);
-    if(!error&&data?.signedUrl)state.photoUrls.set(p.storage_path,data.signedUrl);
-  }));
+  const now=Date.now(),todo=new Map();
+  for(const p of rows.flatMap(a=>a.listing_photos||[])){
+    const path=p.storage_path;if(!path)continue;
+    if(/^https?:\/\//i.test(path)){state.photoUrls.set(path,path);continue;}
+    const bucket=p.storage_bucket||'listing-images';
+    if(bucket==='listing-images'){state.photoUrls.set(path,sb.storage.from(bucket).getPublicUrl(path).data?.publicUrl||'');continue;}
+    const c=signedCache.get(bucket+'|'+path);
+    if(c&&now-c.t<50*60*1000){state.photoUrls.set(path,c.url);continue;}
+    if(!todo.has(bucket))todo.set(bucket,new Set());
+    todo.get(bucket).add(path);
+  }
+  for(const[bucket,set]of todo){
+    const list=[...set];
+    for(let i=0;i<list.length;i+=100){
+      const {data,error}=await sb.storage.from(bucket).createSignedUrls(list.slice(i,i+100),3600);
+      if(error){console.warn('Liens photos indisponibles',error);break;}
+      const t=Date.now();
+      (data||[]).forEach(r=>{if(r?.path&&r.signedUrl){state.photoUrls.set(r.path,r.signedUrl);signedCache.set(bucket+'|'+r.path,{url:r.signedUrl,t});}});
+    }
+  }
 }
 async function loadReports(){
   const {data,error}=await sb.from('reports').select('listing_id,reporter_id,status');

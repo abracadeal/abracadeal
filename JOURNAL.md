@@ -1,3 +1,9 @@
+## 2026-11-06 18h — Site très lent : tempête de liens signés photos (Claude)
+
+- Constat (edge_logs, 15 min) : ~10 000 requêtes `storage/v1/object/sign/listing-images*` venant de 2 navigateurs admin (Mac + iPhone) sur abracadeal.fr, avec des 429 (trop de requêtes) et des 544 (délai dépassé) ; la base elle-même ne répondait plus (timeout SQL). Tout le site ralenti.
+- Causes : `hydratePrivatePhotos` (index-main.js) redemandait un lien signé pour CHAQUE photo du bucket `listing-images-pending`, une requête par photo, à CHAQUE `loadAds()` ; `loadPhotoUrls` (moderation.js) signait une par une toutes les photos de toutes les annonces de l'onglet (y compris le bucket public `listing-images`, inutile) à chaque chargement — des milliers avec les stocks WeeCars. Liens neufs à chaque fois = pas de cache navigateur non plus.
+- Correctifs : liens signés demandés par lots de 100 (`createSignedUrls`), valables 1 h et réutilisés 50 min, seulement pour les photos qui n'en ont pas ; une seule demande à la fois (index). Modération : bucket public servi par lien public direct, sans signature.
+
 ## 2026-11-06 soir — Modération : validation instantanée (Claude)
 
 - Anthony : valider une annonce prend énormément de temps. Mesuré : `moderate-listing` action validate = 2 à 12 s (re-stage des photos importées, hash anti-réutilisation, analyse IA pour les particuliers, déplacement des photos), puis `load()` rechargeait toute la liste.
