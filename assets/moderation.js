@@ -32,6 +32,15 @@ function money(v){return v===null||v===''?'Prix non renseigné':Number(v).toLoca
 function cat(v){return ({vehicules:'Véhicules',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Annonce'}
 function ago(v){if(!v)return'';const d=Date.now()-new Date(v).getTime(),h=Math.floor(d/3600000);if(h<1)return"À l'instant";if(h<24)return'Il y a '+h+' h';const j=Math.floor(h/24);return'Il y a '+j+' j'}
 function photoUrl(path){return state.photoUrls.get(path)||'assets/default-listing-photo-20260921.jpg'}
+/* 06/11/2026 : vignette de la liste = miniature (bucket public listing-thumbs, quelques dizaines de Ko) au lieu de la
+   photo d'origine ; la photo d'origine n'est chargée qu'à l'ouverture de l'aperçu. */
+function thumbOf(path){
+  if(!path)return photoUrl(path);
+  const full=photoUrl(path);
+  if(/^https?:\/\//i.test(path)||!/\/listing-images\//.test(full))return full;
+  const t=sb.storage.from('listing-thumbs').getPublicUrl(path).data?.publicUrl;
+  return t?t+'?o=5':full;
+}
 function firstPhoto(a){return [...(a.listing_photos||[])].sort((x,y)=>(x.position||0)-(y.position||0))[0]?.storage_path||''}
 function toast(t){const el=$('#toast');el.textContent=t;el.classList.add('show');clearTimeout(toast.t);toast.t=setTimeout(()=>el.classList.remove('show'),2600)}
 function setStatus(t){$('#status').textContent=t}
@@ -77,7 +86,7 @@ function card(a){
   const pending=state.tab==='pending'||(state.tab==='reference'&&(a.status==='pending'||isSecondCheck(a)||needsEditReview(a)));
   const red=state.mods.get(a.id)?.risk_level==='red';
   const validated=state.tab==='validated';
-  const p=photoUrl(firstPhoto(a));
+  const p=thumbOf(firstPhoto(a));
   const statusChip=(state.tab==='reference'?'<span class="chip gray">'+esc(({pending:'À modérer',active:'En ligne',hidden:'Masquée',rejected:'Refusée',archived:'Archivée',sold:'Vendue'})[a.status]||a.status)+'</span>':'')+(a.revision_of?'<span class="chip orange">Modification proposée · ancienne version conservée</span>':'')+(pending&&needsEditReview(a)?'<span class="chip orange">✎ Annonce modifiée · à revalider</span>':'')+(pending&&isSecondCheck(a)?'<span class="chip live">Déjà en ligne · à revérifier</span>':validated?'<span class="chip green">✓ Validée</span>':state.tab==='rejected'?'<span class="chip red">✕ Refusée</span>':'');
   const preview='<div class="preview-row"><button class="preview-link" type="button" data-preview-id="'+a.id+'">Voir l’annonce complète</button></div>';
   const actions=pending
@@ -88,7 +97,7 @@ function card(a){
   return '<article class="card" data-card-id="'+esc(a.id)+'">'+
     (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
-      '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'loading="lazy" decoding="async" src="'+esc(p)+'" alt="" onerror="this.src=\'assets/default-listing-photo-20260921.jpg\'">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
+      '<div class="photo"><img '+(red?'class="sensitive-photo" data-reveal-photo tabindex="0" role="button" aria-label="Afficher cette photo sensible" ':'')+'loading="lazy" decoding="async" src="'+esc(p)+'" data-full="'+esc(photoUrl(firstPhoto(a)))+'" alt="" onerror="if(this.dataset.full&&this.src!==this.dataset.full){this.src=this.dataset.full}else{this.onerror=null;this.src=\'assets/default-listing-photo-20260921.jpg\'}">'+(a.seller_type==='professionnel'?'<span class="pro">PRO</span>':'')+'</div>'+
       '<div class="info"><div class="rowtop"><h2 class="title">'+modTitle(a)+'</h2><span class="when">'+esc(ago(a.created_at))+'</span></div>'+
       '<div class="meta">'+esc(cat(a.category))+(a.city?' · '+esc(a.city):'')+(a.postal_code?' ('+esc(a.postal_code)+')':'')+'</div>'+
       (a.listing_reference?'<div class="meta">Référence : '+esc(a.listing_reference)+'</div>':'')+

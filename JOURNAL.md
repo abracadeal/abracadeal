@@ -1,3 +1,9 @@
+## 2026-11-06 18h45 — Après redémarrage Supabase : vignettes légères en modération (Claude)
+
+- Anthony a redémarré le projet Supabase à 18h35 ; base de nouveau OK (~150 ms, 0 erreur, plus de rafale de liens signés).
+- Consommation des dernières 24 h (edge_logs) : photos via liens signés 1,16 Go (modération, photos d'origine sans cache), miniatures publiques 565 Mo, photos publiques 186 Mo, API ~1 Mo. Quota sortant du plan gratuit : 4,34 / 5 Go ce mois-ci.
+- `assets/moderation.js` : la vignette de la liste utilise la miniature `listing-thumbs` (?o=5), repli automatique sur la photo d'origine si la miniature n'existe pas, puis sur l'image par défaut. Photo d'origine seulement dans l'aperçu.
+
 ## 2026-11-06 18h20 — Modération : allègement pour éviter une nouvelle saturation (Claude)
 
 - Après la tempête de liens signés, la base Supabase (plan gratuit) ne répondait plus (timeouts de connexion, 25 % d'erreurs 5xx API + Storage d'après les advisors santé) ; Anthony ne pouvait plus se déconnecter/reconnecter. Redémarrage du projet demandé à Anthony depuis le tableau de bord.
