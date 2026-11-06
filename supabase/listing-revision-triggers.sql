@@ -172,6 +172,12 @@ begin
   if public.is_admin() then
     return coalesce(new,old);
   end if;
+  -- 06/11/2026 : photos ajoutées / remplacées par nos robots (import du stock d'un pro, miniatures) = pas une modification
+  -- faite par le vendeur → pas de remise en modération. Le vendeur qui change lui-même ses photos reste contrôlé.
+  if tg_table_name='listing_photos' and coalesce(auth.role(),'')='service_role'
+     and exists (select 1 from public.listings l where l.id=coalesce(new.listing_id,old.listing_id) and l.source like 'feed:%') then
+    return coalesce(new,old);
+  end if;
   if tg_op='UPDATE' then
     if tg_table_name='listing_photos' then
       if new.listing_id is not distinct from old.listing_id
