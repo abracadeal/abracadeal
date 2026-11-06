@@ -1,3 +1,8 @@
+## 2026-11-06 soir (suite 3) — Mails de prospection : ouverture clarifiée (Claude)
+
+- Anthony : commencer par « Passerelles… » laissait croire qu'Abracadeal est la passerelle ; le coût se compte en centaines voire milliers d'euros par mois, pas par an.
+- Nouvelle ouverture (mails « site lu » A/B + aperçu) : « Aujourd'hui, pour diffuser vos annonces, vous payez des intermédiaires : passerelles, logiciels de multidiffusion, plateformes d'annonces. Au total, cela vous coûte des centaines, voire des milliers d'euros par mois. » puis « Avec Abracadeal, plus besoin d'intermédiaire : nous reprenons vos annonces directement depuis votre site, gratuitement. Juste vous et nous. » Objets : A « {{societe}} : diffusez vos annonces sans payer d'intermédiaire », B « {{societe}} – vos annonces en ligne sans intermédiaire, gratuitement ».
+
 ## 2026-11-06 soir (suite 2) — Mails de prospection : « sans passerelle ni intermédiaire » en tête (Claude)
 
 - Anthony : message pas assez mis en avant. Mails « site lu » (Agence immo, Garage, Moto, A et B) réécrits : le paragraphe sur les passerelles / intermédiaires ouvre le mail juste après « Bonjour », objet A « {{societe}} : vos annonces sur Abracadeal, sans passerelle ni intermédiaire », objet B « {{societe}} – vos annonces sans passerelle ni intermédiaire » ; fin « Économisez tout ça et faites d'Abracadeal votre partenaire officiel ». Mail aperçu : même paragraphe en tête (objet inchangé). prospect-mailer redéployé.
