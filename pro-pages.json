@@ -13,5 +13,13 @@
   "city": "Cannes",
   "count": 0,
   "active": false
+ },
+ "c177abd7-174a-454e-aa56-2fc940d63837": {
+  "path": "garage/auto-negoce-bordeaux-33-artigues-pres-bordeaux",
+  "name": "Auto Negoce Bordeaux 33",
+  "city": "Artigues-Près-Bordeaux",
+  "count": 27,
+  "active": true,
+  "short": "auto-negoce-bordeaux-33"
  }
 }

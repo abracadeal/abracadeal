@@ -20,7 +20,10 @@
   <url><loc>https://abracadeal.fr/auto/bmw/x3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/z4/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/citroen/c1/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c3/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/citroen/c4/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/citroen/c4-cactus/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c4-picasso/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/jumpy/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/spacetourer/</loc></url>
@@ -34,10 +37,13 @@
   <url><loc>https://abracadeal.fr/auto/ds/ds-7-crossback/</loc></url>
   <url><loc>https://abracadeal.fr/auto/electrique/</loc></url>
   <url><loc>https://abracadeal.fr/auto/essence/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/fiat/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/fiat/500/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/fiesta/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/focus/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/mach-e/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/ford/puma/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/ranger/</loc></url>
   <url><loc>https://abracadeal.fr/auto/hybride/</loc></url>
   <url><loc>https://abracadeal.fr/auto/hyundai/</loc></url>
@@ -46,6 +52,8 @@
   <url><loc>https://abracadeal.fr/auto/jaguar/</loc></url>
   <url><loc>https://abracadeal.fr/auto/jaguar/f-pace/</loc></url>
   <url><loc>https://abracadeal.fr/auto/jaguar/xe/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/kia/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/kia/rio/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/discovery/</loc></url>
   <url><loc>https://abracadeal.fr/auto/land-rover/range-rover-velar/</loc></url>
@@ -77,6 +85,8 @@
   <url><loc>https://abracadeal.fr/auto/opel/crossland/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/108/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/2008/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/208/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/3008/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/5008/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/508/</loc></url>
@@ -88,7 +98,9 @@
   <url><loc>https://abracadeal.fr/auto/renault/clio/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/kangoo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/megane/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/renault/renault-5-e-tech/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/scenic/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/renault/trafic/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/twingo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/seat/</loc></url>
   <url><loc>https://abracadeal.fr/auto/seat/arona/</loc></url>
@@ -101,11 +113,15 @@
   <url><loc>https://abracadeal.fr/auto/suzuki/</loc></url>
   <url><loc>https://abracadeal.fr/auto/suzuki/celerio/</loc></url>
   <url><loc>https://abracadeal.fr/auto/suzuki/sx4-s-cross/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/toyota/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/toyota/aygo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/california/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/golf/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/multivan/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/volkswagen/passat-cc/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/polo/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/volkswagen/t-roc/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/taigo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/tayron/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/tiguan/</loc></url>
