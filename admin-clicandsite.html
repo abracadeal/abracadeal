@@ -36,6 +36,7 @@ select,input,textarea{width:100%;font:inherit;padding:9px 10px;border-radius:9px
 .p{background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;grid-template-columns:minmax(0,2.2fr) minmax(0,2fr) 150px;gap:12px;align-items:start}
 .p h3{margin:0;font-size:1rem}
 .meta{font-size:.84rem;color:var(--muted)}
+.addr{text-transform:capitalize}
 .tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:6px}
 .tag{font-size:.72rem;font-weight:700;padding:3px 8px;border-radius:999px;background:var(--bg);border:1px solid var(--line);color:var(--muted)}
 .tag.aucun{background:#E7F7EE;color:var(--ok);border-color:#BFE7D0}
@@ -74,7 +75,7 @@ select,input,textarea{width:100%;font:inherit;padding:9px 10px;border-radius:9px
       <span>Robot de recherche : <span class="st" id="robotSt">…</span></span>
       <button class="btn" id="robotToggle" type="button">…</button>
       <button class="btn primary" id="robotRun" type="button">Lancer une recherche maintenant</button>
-      <span class="meta">Il cherche dans OpenStreetMap, ville par ville, et vérifie les sites. Il n'envoie aucun mail.</span>
+      <span class="meta">Toutes les 10 minutes, il cherche dans l'annuaire officiel des entreprises, code postal par code postal, retrouve les sites et les vérifie. Il n'envoie aucun mail.</span>
       <details><summary>Dernières recherches</summary><div class="runs" id="runs"></div></details>
     </div>
 
@@ -142,7 +143,7 @@ function render(){
     return `<article class="p" data-id="${r.id}">
       <div>
         <h3>${esc(r.name)}</h3>
-        <div class="meta">${esc(TRADE[r.trade])} · ${esc([r.address,r.postcode,r.city].filter(Boolean).join(', '))}</div>
+        <div class="meta">${esc(TRADE[r.trade])} · <span class="addr">${esc((r.address||'').toLowerCase())}</span>${r.address?', ':''}${esc([r.postcode,r.city].filter(Boolean).join(' '))}</div>
         <div class="tags"><span class="tag ${r.site_status}">${SITE[r.site_status]}</span><span class="tag">Score <span class="score">${r.score}</span></span></div>
         ${reasons.length?`<div class="reasons">${reasons.map(esc).join(' · ')}</div>`:''}
       </div>
