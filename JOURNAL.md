@@ -1,3 +1,9 @@
+## 2026-11-06 soir — Mails de prospection : « sans passerelle, juste vous et nous » (Claude)
+
+- Demande d'Anthony après la réponse d'Hektor (La Boîte Immo), qui veut facturer une passerelle d'export par agence et par mois + frais de mise en service : refusé, on reprend les annonces depuis les sites des agences.
+- Phrase « Vous payez déjà des milliers d'euros… Gardez vos plateformes » remplacée dans les mails des pros dont le site est lu : « Vous payez déjà des milliers d'euros par an en plateformes et en passerelles pour diffuser vos annonces ? Abracadeal reprend vos annonces directement depuis votre site, sans passerelle et sans frais : pas d'intermédiaire, juste vous et nous. Gardez vos plateformes, Abracadeal vient en plus. »
+- Modèles en base `private.prospect_mailer_settings` : Agence immobilière, Concession moto, Garage / concession auto (variantes A et B). Mail « aperçu » dans `prospect-mailer/index.ts`, fonction redéployée sur ce commit. Modèles « manuel » et « normal » (site non lu) inchangés.
+
 ## 2026-11-06 soir — Annonces reprises : plus de prix/kilométrage contradictoire dans le texte (Claude)
 
 - Signalé par Anthony : BMW C600 Sport (WeeCars Brest) affichée 4 390 € mais « Prix : 3 890 € » dans la description.

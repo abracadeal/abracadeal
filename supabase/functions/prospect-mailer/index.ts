@@ -145,7 +145,7 @@ Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en li
 
 C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
 
-Vous payez déjà des milliers d'euros par an pour être visible ailleurs ? Gardez vos plateformes : Abracadeal vient en plus. Vous n'avez rien à perdre.
+Vous payez déjà des milliers d'euros par an en plateformes et en passerelles pour diffuser vos annonces ? Abracadeal reprend vos annonces directement depuis votre site, sans passerelle et sans frais : pas d'intermédiaire, juste vous et nous. Gardez vos plateformes, Abracadeal vient en plus.
 
 Anthony, fondateur d'Abracadeal
 abracadeal.fr – {{expediteur}}` };
