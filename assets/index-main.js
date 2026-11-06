@@ -1,3 +1,11 @@
+// 06/11/2026 (Anthony) : carburant court dans les vignettes (« HYBRIDE RECHARGEABLE ESSENCE » cassait la vignette).
+function cardFuelLabel(v){const t=String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+  if(/rechargeable|plug|phev/.test(t))return 'Hybride rech.';
+  if(/hybrid/.test(t)||(/(essence|diesel)/.test(t)&&/electr/.test(t)))return 'Hybride';
+  if(/electr/.test(t))return 'Électrique';
+  if(/diesel|gazole/.test(t))return 'Diesel';
+  if(/essence/.test(t))return 'Essence';
+  return String(v||'').length>14?String(v).slice(0,13)+'.':String(v||'');}
 
 const recoveryArrival = new URLSearchParams(location.hash.slice(1));
 const recoveryArrivalError = recoveryArrival.has('error') || recoveryArrival.has('error_code');
@@ -4084,7 +4092,7 @@ function renderHomeFeatured(){
         <div class="home-featured-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
-        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(a.fuel):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
+        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(cardFuelLabel(a.fuel)):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
         <div class="home-featured-city"><svg class="ad-city-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
@@ -4270,7 +4278,7 @@ function renderAds(){
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
-        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(a.fuel):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
+        ${(a.category==='vehicules'&&(a.vehicle_year||a.mileage||a.fuel||a.transmission))?`<div class="ad-specs ad-specs-line">${[a.vehicle_year?esc(a.vehicle_year):'',(a.mileage!==null&&a.mileage!==undefined&&a.mileage!=='')?Number(a.mileage).toLocaleString('fr-FR')+'\u00a0km':'',a.fuel?esc(cardFuelLabel(a.fuel)):'',a.transmission?esc(a.transmission):''].filter(Boolean).map(x=>`<span class="ad-spec">${x}</span>`).join('<span class="ad-spec-sep"> · </span>')}</div>`:''}
         <div class="ad-city"><svg class="ad-city-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
