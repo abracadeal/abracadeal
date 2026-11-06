@@ -1,3 +1,9 @@
+## 2026-11-06 soir — Annonces reprises : plus de prix/kilométrage contradictoire dans le texte (Claude)
+
+- Signalé par Anthony : BMW C600 Sport (WeeCars Brest) affichée 4 390 € mais « Prix : 3 890 € » dans la description.
+- Vérifié sur la fiche source weecars.fr (vid=3461981) : la source se contredit elle-même — prix officiel 4 390 € TTC (bouton Réserver), texte libre du garage « Prix : 3 890 € » et « Kilométrage : 32 800 km » pour 33 900 km. Le lecteur recopiait fidèlement. Seule annonce avec un prix contradictoire ; 9 annonces avec un kilométrage du texte différent (écarts d'arrondi le plus souvent).
+- Correctif à l'affichage, sans toucher aux données ni à `pro-stock-sync` (pas de faux « modifications » à chaque synchro) : pour le stock repris (`[ABRACA_SOURCE:`), une ligne « Prix : … € » ou « Kilométrage : … km » du texte libre qui contredit le prix / kilométrage de l'annonce n'est plus affichée (avec l'émoji isolé juste avant). Fiche annonce du site (`dropImportedContradictions` dans index-main.js) + pages publiques Google et flux IA (`parse_description` dans scripts/build_share_pages.py, utilisé aussi par build_chatgpt_feed.py). Page de modération inchangée (l'admin voit le texte d'origine).
+
 ## 2026-11-06 fin d'après-midi — Déconnexion automatique fiable : plus de « Admin » affiché après inactivité (Claude)
 
 - Problème (Anthony) : après un moment sans utiliser le site, la page affichait encore le compte Admin au lieu d'un visiteur non connecté.

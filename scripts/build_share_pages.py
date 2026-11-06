@@ -239,7 +239,7 @@ def number(v):
         return ""
 
 
-def parse_description(raw):
+def parse_description(raw, listing=None):
     """Sépare le texte libre des marqueurs internes ([ABRACA_SUB:...], [ABRACA_VMETA:...], ...)."""
     meta = {"sub": "", "equip": "", "vmeta": {}, "imeta": {}}
     for kind, value in MARKER.findall(raw or ""):
@@ -253,7 +253,32 @@ def parse_description(raw):
             except Exception:
                 pass
     text = MARKER.sub("", raw or "").strip()
+    if listing is not None and re.search(r"^\[ABRACA_SOURCE:", raw or "", re.M):
+        text = drop_imported_contradictions(text, listing)
     return text, meta
+
+
+def drop_imported_contradictions(text, listing):
+    """06/11/2026 : stock repris du site d'un pro — ne pas publier une ligne « Prix : … » / « Kilométrage : … »
+    du texte libre qui contredit le prix / le kilométrage officiels de l'annonce (ex. BMW C600 4 390 € / 3 890 €)."""
+    def num(v):
+        d = re.sub(r"[^0-9]", "", str(v or ""))
+        return int(d) if d and int(d) > 0 else None
+    try:
+        price = num(round(float(listing.get("price") or 0)))
+    except Exception:
+        price = None
+    km = num(listing.get("mileage"))
+    out = []
+    for line in text.split("\n"):
+        p = re.match(r"^[\W_]*(?:prix|tarif)[^:\d\n]{0,15}:?\s*(\d[\d \u00a0\u202f.]{0,10})\s*(?:€|eur)", line, re.I)
+        k = re.match(r"^[\W_]*kilom[ée]trage[^:\d\n]{0,10}:?\s*(\d[\d \u00a0\u202f.]{0,10})\s*km", line, re.I)
+        if (p and price and num(p.group(1)) != price) or (k and km and num(k.group(1)) != km):
+            while out and not re.search(r"[^\W_]", out[-1]):
+                out.pop()
+            continue
+        out.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
 
 
 def photo_urls(listing):
@@ -703,7 +728,7 @@ def read_snapshot(index):
 def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     lid = listing["id"]
     e = lambda s: html.escape(str(s), quote=True)
-    text, meta = parse_description(listing.get("description"))
+    text, meta = parse_description(listing.get("description"), listing)
     title = display_title(listing)
     price = money(listing.get("price"))
     if price and listing.get("category") == "vacances":
@@ -1061,7 +1086,7 @@ def main():
         lid = str(listing["id"])
         if not re.fullmatch(r"[0-9a-fA-F-]{36}", lid):
             continue
-        text, meta = parse_description(listing.get("description"))
+        text, meta = parse_description(listing.get("description"), listing)
         items.append({"listing": listing, "meta": meta, "photos": photo_urls(listing)})
 
     pages = build_hubs(items)

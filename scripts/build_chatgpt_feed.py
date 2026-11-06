@@ -56,7 +56,7 @@ def row(listing):
         return None
     if price <= 0:
         return None
-    text, meta = parse_description(listing.get("description"))
+    text, meta = parse_description(listing.get("description"), listing)
     # Pas de téléphone ni d'e-mail dans le flux (annonces de particuliers) : la prise de contact se fait sur Abracadeal.
     desc = re.sub(r"[\w.+-]+@[\w-]+\.[\w.-]+", "", " ".join(text.split()))
     desc = re.sub(r"(?:(?:\+|00)33\s?|0)[1-9](?:[\s.-]?\d{2}){4}", "", desc)

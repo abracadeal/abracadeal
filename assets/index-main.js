@@ -3164,6 +3164,23 @@ function cleanDescription(a){
     .replace(/^\[ABRACA_SOURCE:[^\]]+\]\s*/gm,'')
     .trim();
 }
+/* 06/11/2026 (Anthony : BMW C600, 4 390 € affiché mais « Prix : 3 890 € » dans le texte) : dans le stock repris
+   du site d'un pro, le texte libre recopié peut contredire ses propres chiffres officiels. On n'affiche pas une
+   ligne « Prix : … » ou « Kilométrage : … » qui contredit le prix / le kilométrage de l'annonce. */
+function dropImportedContradictions(text,a){
+  if(!text||!/^\[ABRACA_SOURCE:/m.test(a?.description||''))return text;
+  const num=v=>{const n=Number(String(v||'').replace(/[^0-9]/g,''));return n>0?n:null;};
+  const price=num(Math.round(Number(a.price)||0)),km=num(a.mileage);
+  const lines=text.split('\n'),out=[];
+  for(const line of lines){
+    const p=line.match(/^[^\p{L}\d]*(?:prix|tarif)[^:\d\n]{0,15}:?\s*([\d][\d \u00a0\u202f.]{0,10})\s*(?:€|eur)/iu);
+    const k=line.match(/^[^\p{L}\d]*kilom[ée]trage[^:\d\n]{0,10}:?\s*([\d][\d \u00a0\u202f.]{0,10})\s*km/iu);
+    const bad=(p&&price&&num(p[1])!==price)||(k&&km&&num(k[1])!==km);
+    if(bad){while(out.length&&!/[\p{L}\d]/u.test(out[out.length-1]))out.pop();continue;}
+    out.push(line);
+  }
+  return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
+}
 /* 02/11/2026 : « LES PONTS-DE-CE » → « Les Ponts-de-Ce » (ville en majuscules dans la fiche pro) */
 function prettyCity(c){c=String(c||'').trim();if(!c||c!==c.toUpperCase())return c;const small=new Set(['de','du','des','la','le','les','sur','sous','en','lès','aux','au','et']);let first=true;return c.toLowerCase().split(/([\s\-'’])/).map(w=>{if(!w||/^[\s\-'’]$/.test(w))return w;const r=!first&&small.has(w)?w:w.charAt(0).toUpperCase()+w.slice(1);first=false;return r;}).join('');}
 function vehicleSubLabel(v){ return v===EQUIPMENT_ALL?'Équipements & pièces':subcategoryLabel('vehicules',v); }
@@ -4750,7 +4767,7 @@ window.openAd=id=>{
 
           <section class="detail-section">
             <h3>Description</h3>
-            <div class="detail-description">${esc(cleanDescription(a))}</div>
+            <div class="detail-description">${esc(dropImportedContradictions(cleanDescription(a),a))}</div>
             ${/^feed:/.test(String(a.source||''))?`<p class="note" style="margin:10px 0 0;font-size:12.5px">Malgré notre vigilance, des erreurs ou des oublis peuvent se glisser dans cette annonce : seules les informations confirmées par le professionnel font foi. Vérifiez-les avec lui avant tout engagement.</p>`:''}
           </section>
 
