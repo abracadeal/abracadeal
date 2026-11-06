@@ -14,6 +14,7 @@
   <url><loc>https://abracadeal.fr/auto/bmw/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/i3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-1/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/serie-2/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-3/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-4/</loc></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-6/</loc></url>
@@ -24,6 +25,7 @@
   <url><loc>https://abracadeal.fr/auto/citroen/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c1/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c3/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/citroen/c3-aircross/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c4/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c4-cactus/</loc></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c4-picasso/</loc></url>
@@ -52,6 +54,7 @@
   <url><loc>https://abracadeal.fr/auto/ford/puma/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/ranger/</loc></url>
   <url><loc>https://abracadeal.fr/auto/ford/transit-connect-tourneo-connect/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/ford/transit-custom/</loc></url>
   <url><loc>https://abracadeal.fr/auto/honda/</loc></url>
   <url><loc>https://abracadeal.fr/auto/honda/civic/</loc></url>
   <url><loc>https://abracadeal.fr/auto/hybride/</loc></url>
@@ -93,10 +96,12 @@
   <url><loc>https://abracadeal.fr/auto/moins-de-5000-euros/</loc></url>
   <url><loc>https://abracadeal.fr/auto/nissan/</loc></url>
   <url><loc>https://abracadeal.fr/auto/nissan/navara/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/nissan/nv300/</loc></url>
   <url><loc>https://abracadeal.fr/auto/opel/</loc></url>
   <url><loc>https://abracadeal.fr/auto/opel/astra/</loc></url>
   <url><loc>https://abracadeal.fr/auto/opel/corsa/</loc></url>
   <url><loc>https://abracadeal.fr/auto/opel/crossland/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/opel/mokka/</loc></url>
   <url><loc>https://abracadeal.fr/auto/opel/movano/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/</loc></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/108/</loc></url>
@@ -115,6 +120,7 @@
   <url><loc>https://abracadeal.fr/auto/renault/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/arkana/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/clio/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/renault/kadjar/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/kangoo/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/megane/</loc></url>
   <url><loc>https://abracadeal.fr/auto/renault/rafale/</loc></url>
@@ -150,5 +156,6 @@
   <url><loc>https://abracadeal.fr/auto/volkswagen/tayron/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/tiguan/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/tiguan-allspace/</loc></url>
+  <url><loc>https://abracadeal.fr/auto/volkswagen/touran/</loc></url>
   <url><loc>https://abracadeal.fr/auto/volkswagen/transporter/</loc></url>
 </urlset>
