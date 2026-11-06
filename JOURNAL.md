@@ -1,3 +1,9 @@
+## 2026-11-06 soir (suite) — Mails de prospection : accent sur les intermédiaires + « partenaire officiel » (Claude)
+
+- Demande d'Anthony : insister sur les passerelles / intermédiaires payants entre le pro et ses annonces, et finir par « Économisez tout ça et faites d'Abracadeal votre partenaire officiel ».
+- Paragraphe des mails « site lu » (Agence immo, Garage, Moto, A et B) et du mail aperçu : « Passerelles, logiciels de multidiffusion, intermédiaires : chacun se fait payer entre vous et vos annonces, souvent des milliers d'euros par an. Avec Abracadeal, il n'y en a aucun : nous reprenons vos annonces directement depuis votre site, sans passerelle et sans frais. Juste vous et nous. » puis « Économisez tout ça et faites d'Abracadeal votre partenaire officiel. »
+- « Gardez vos plateformes, Abracadeal vient en plus » retiré de ces mails (contradictoire avec « économisez tout ça »). prospect-mailer redéployé sur ce commit.
+
 ## 2026-11-06 soir — Mails de prospection : « sans passerelle, juste vous et nous » (Claude)
 
 - Demande d'Anthony après la réponse d'Hektor (La Boîte Immo), qui veut facturer une passerelle d'export par agence et par mois + frais de mise en service : refusé, on reprend les annonces depuis les sites des agences.
