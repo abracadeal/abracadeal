@@ -427,6 +427,33 @@ function syncSignupCompany(){
   const founderPanel=$('#signupFounderOffer');
   if(founderPanel) founderPanel.classList.toggle('hidden',!pro);
   syncCompanyFields('signup');
+  if(pro)prefillProspectSite();
+}
+// 06/11/2026 : pro arrivé par le lien de son mail de prospection et dont le site a déjà été testé :
+// l'adresse est pré-remplie et la case d'autorisation mise en évidence (elle reste à cocher par le pro).
+let prospectSitePrefilled=false;
+async function prefillProspectSite(){
+  if(prospectSitePrefilled||!sb)return;
+  prospectSitePrefilled=true;
+  try{
+    const ref=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');
+    if(!(ref&&/^[a-z0-9]{8}$/.test(ref.code)&&Date.now()-Number(ref.at||0)<90*864e5))return;
+    const {data:url,error}=await sb.rpc('prospect_signup_site',{p_ref:ref.code});
+    if(error||!url)return;
+    const input=$('#signupSiteUrl'),box=$('#signupSiteBox'),consent=$('#signupSiteConsent');
+    if(!input||!box)return;
+    if(!input.value.trim())input.value=url;
+    if(!$('#signupSiteReady')){
+      const msg=document.createElement('p');
+      msg.id='signupSiteReady';
+      msg.style.cssText='margin:0 0 10px;padding:10px 12px;border-radius:10px;background:#efe7ff;color:#3b1d7a;font-weight:700;line-height:1.4';
+      msg.textContent='Vos véhicules sont prêts à être mis en ligne : cochez la case ci-dessous et ils seront sur Abracadeal aujourd’hui, sans rien saisir.';
+      box.insertBefore(msg,box.firstChild);
+    }
+    box.style.cssText+=';border:2px solid #6d3fd6;border-radius:12px;padding:12px';
+    const lab=box.querySelector('label[for="signupSiteUrl"] span');if(lab)lab.textContent='(déjà rempli pour vous)';
+    if(consent){const l=consent.closest('label');if(l)l.style.fontWeight='700';}
+  }catch(e){console.warn('Pré-remplissage du site',e);}
 }
 async function requestCompanyCheck(action,siret){
   if(!sb) throw new Error('Service indisponible. Recharge la page.');

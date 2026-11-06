@@ -2489,3 +2489,5 @@
 ## 06/11/2026 — ClicandSite sort d'Abracadeal
 - Le CRM et le robot de prospection ClicandSite ont été déplacés dans leur propre projet Supabase (compte contact@clicandsite.fr) ; espace admin sur https://clicandsite.fr/admin/.
 - Côté Abracadeal : tâche planifiée `clicandsite-prospect-finder` supprimée, robot arrêté, fonction neutralisée (réponse 410), page `admin-clicandsite.html` remplacée par une redirection. Le schéma `clicandsite` reste en place en sauvegarde, à supprimer plus tard.
+
+- 06/11/2026 (Claude) : WeeCars Brest (BREIZH MOTOR 29) et WeeCars Bordeaux Est (AUTO NEGOCE BORDEAUX 33) inscrits seuls via le lien du mail sans cocher la reprise du site — SIRET vérifiés au registre (actifs, 45.11Z) et ajoutés à pro_verifications ; reprise de leur stock WeeCars créée sur décision d'Anthony (inscription via lien de prospection + SIRET = feu vert). Formulaire d'inscription Pro : nouvelle RPC `prospect_signup_site(ref)` (anon, ne renvoie que l'adresse d'un site testé « ok ») → adresse pré-remplie et case d'autorisation mise en évidence (toujours à cocher par le pro ; adresse remplie sans case = blocage avec message).
