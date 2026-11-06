@@ -37,7 +37,7 @@ globalThis.fetch=async(raw,options)=>{
 try{
  const fetchHtml=async u=>({url:u,text:u.pathname==='/'?'tel:0493995252':u.pathname==='/mandat-details'?html('detail',[block('detail')]):html(u.pathname.endsWith('vente')?'sale':'rent',[block('list','list17')])});
  const memory={load:async()=>saved,save:async state=>{saved=structuredClone(state)}};
- let result;for(let i=0;i<3;i++){result=await readBerge(new URL('https://www.berge.fr'),fetchHtml,memory);if(i===0)assert.equal(result.partial,true);}
+ let result;for(let i=0;i<7;i++){result=await readBerge(new URL('https://www.berge.fr'),fetchHtml,memory);if(i===0)assert.equal(result.partial,true);}
  assert.equal(result[0].contact_nom,'Bergé Immobilier (agence)');assert.equal(result[0].contact_telephone,'0493995252');
  assert.equal(result.length,25);assert.equal(result.partial,false);assert.equal(result.stats.remaining,0);
  assert.equal(saved.discovered.length,25);assert.equal(result.filter(r=>r.reference==='rec0').length,1);
