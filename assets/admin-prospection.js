@@ -143,10 +143,11 @@ async function loadOptOuts(){
   if(error){$('stopList').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
   const rows=data||[];
   $('stopCount').textContent=rows.length?rows.length+' pro'+(rows.length>1?'s':''):'';
-  $('stopList').innerHTML=rows.length?rows.map(r=>'<div class="cl"><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> <span class="pill opted_out">STOP</span></div>'+
-    '<div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · depuis le '+esc(fmtDate(r.opted_out_at||r.updated_at))+'</div>'+
-    '<div class="clm">'+esc(r.email||'')+'</div>'+
-    '<div class="pra" style="margin-top:8px"><button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button></div></div>').join(''):'<div class="small">Personne ne s’est désinscrit.</div>';
+  $('stopList').innerHTML=rows.length?rows.map(r=>`<details class="pr"><summary><span class="prn">${esc(r.company||'Sans nom')}</span><span class="pill opted_out">STOP</span></summary><div class="prb">
+    <div><span>E-mail</span>${esc(r.email||'—')}</div><div><span>Métier</span>${esc(r.category||'—')}</div><div><span>Ville</span>${esc(r.city||'—')}</div>
+    <div><span>Depuis le</span>${esc(fmtDate(r.opted_out_at||r.updated_at))}</div>
+    <div class="pra"><button class="btn" onclick="restoreProspect('${r.id}')">Réactiver</button></div>
+  </div></details>`).join(''):'<div class="small">Personne ne s’est désinscrit.</div>';
 }
 
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='pSearch')renderProspects();});
