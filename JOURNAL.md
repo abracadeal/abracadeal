@@ -2567,3 +2567,5 @@
 - 06/11/2026 (Claude) : 10e rond « Tout voir » (toutes les annonces) sur l'accueil pour combler le trou — mobile 5 + 5, ordinateur 10 sur une ligne.
 
 - 06/11/2026 (Claude) : rond « Tout voir » affiché seulement sur mobile (ordinateur : 9 ronds sur une ligne, pas de trou).
+
+- 06/11/2026 (Claude) : 5 jetons « À la une 7 jours » offerts à WeeCars Angers / Brest / Bordeaux Est (pro_boost_wallet + pro_boost_admin_grants). Prévenus à leur prochaine connexion : colonnes pro_boost_admin_grants.notify_pro / seen_at, RPC get_my_boost_gift() / ack_my_boost_gift(), fenêtre assets/boost-gift-20261106.js (index, pro, pro-pro, pro-fondateur ; attend la fenêtre de confirmation du site). Pas de mail pour l'instant (décision Anthony) : mail seulement s'ils ne se connectent pas pendant un moment.
