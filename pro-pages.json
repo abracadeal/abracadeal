@@ -18,7 +18,7 @@
   "path": "garage/auto-negoce-bordeaux-33-artigues-pres-bordeaux",
   "name": "WeeCars Bordeaux Est",
   "city": "Artigues-Près-Bordeaux",
-  "count": 87,
+  "count": 89,
   "active": true,
   "short": "weecars-bordeaux-est"
  },
@@ -26,7 +26,7 @@
   "path": "garage/weecars-brest-brest",
   "name": "WeeCars Brest",
   "city": "Brest",
-  "count": 141,
+  "count": 142,
   "active": true,
   "short": "weecars-brest"
  }
