@@ -36,7 +36,13 @@
     <div class="metric"><span>Prospects</span><strong id="mTotal">0</strong></div>
     <div class="metric"><span>En attente (pause + prêts)</span><strong id="mReady">0</strong></div>
     <div class="metric"><span>Envoyés aujourd’hui</span><strong id="mToday">0</strong></div>
-    <div class="metric"><span>STOP / opposition</span><strong id="mStop">0</strong></div>
+    <div class="metric" style="cursor:pointer" onclick="document.getElementById('stopCard').scrollIntoView({behavior:'smooth'})"><span>STOP / opposition</span><strong id="mStop">0</strong></div>
+  </section>
+
+  <section class="card" id="stopCard">
+    <h2>Ne veulent plus de mails <span class="dayn" id="stopCount"></span></h2>
+    <p class="small">Les pros qui ont cliqué sur « se désinscrire » ou que tu as mis en STOP. Le robot ne leur envoie plus rien, ni premier mail ni relance.</p>
+    <div id="stopList" class="plist"><div class="small">Chargement…</div></div>
   </section>
 
   <section class="card" id="acceptCard">
@@ -170,7 +176,7 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261104-accords"></script>
+<script src="assets/admin-prospection.js?v=20261106-stop"></script>
 <script src="/assets/app-shell-20261018.js?v=6" defer></script>
 </body>
 </html>

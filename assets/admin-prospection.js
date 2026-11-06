@@ -137,8 +137,20 @@ async function handleAcceptance(id,handled){
   await loadAcceptances();
 }
 
+// 06/11/2026 (Anthony) : liste visible des pros qui ne veulent plus de mails (désinscription ou STOP manuel).
+async function loadOptOuts(){
+  const {data,error}=await sb.from('prospection_prospects').select('id,company,email,category,city,status,opted_out_at,updated_at').or('status.eq.opted_out,opted_out_at.not.is.null').order('opted_out_at',{ascending:false,nullsFirst:false}).limit(500);
+  if(error){$('stopList').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
+  const rows=data||[];
+  $('stopCount').textContent=rows.length?rows.length+' pro'+(rows.length>1?'s':''):'';
+  $('stopList').innerHTML=rows.length?rows.map(r=>'<div class="cl"><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> <span class="pill opted_out">STOP</span></div>'+
+    '<div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · depuis le '+esc(fmtDate(r.opted_out_at||r.updated_at))+'</div>'+
+    '<div class="clm">'+esc(r.email||'')+'</div>'+
+    '<div class="pra" style="margin-top:8px"><button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button></div></div>').join(''):'<div class="small">Personne ne s’est désinscrit.</div>';
+}
+
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='pSearch')renderProspects();});
-async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking(),loadAcceptances()])}
+async function refresh(){await Promise.all([loadMetrics(),loadProspects(),loadMailer(),loadTracking(),loadAcceptances(),loadOptOuts()])}
 
 async function markStop(id){
   if(!confirm('Ajouter ce prospect à la liste d’opposition ? Il ne sera plus envoyé.'))return;
@@ -147,7 +159,7 @@ async function markStop(id){
   await refresh();
 }
 async function restoreProspect(id){
-  if(!confirm('Réactiver ce prospect ?'))return;
+  if(!confirm('Réactiver ce prospect ? Il a demandé à ne plus recevoir de mails : ne le réactive que s’il te l’a redemandé.'))return;
   const {error}=await sb.from('prospection_prospects').update({status:'ready',opted_out_at:null,updated_at:new Date().toISOString()}).eq('id',id);
   if(!error)await logAction(id,'reactivated','Prospect réactivé manuellement');
   await refresh();
