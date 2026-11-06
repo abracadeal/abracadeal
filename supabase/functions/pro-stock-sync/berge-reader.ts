@@ -70,14 +70,22 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const response=await fetch(endpoint,{method:'POST',headers:{'Content-Type':'application/json','X-Block-Name':block.name,'X-Block-Version':block.version},body:JSON.stringify({options:{cellFormat:'json',timeZone:'UTC',userLocale:'en-US'},pageContext:null,filterCriteria:{},...(!id?{pagingOption:{count:100,offset:offset||null},sortingOption:{sortingField:'Date de création',sortType:'DESC'}}:{})}),signal:AbortSignal.timeout(25000)});
   if(!response.ok)throw Error('API publique Bergé HTTP '+response.status);const text=await response.text(),t0=performance.now();try{return bergePage(JSON.parse(text));}finally{cpu.ms+=performance.now()-t0;}
  }
+ const cataloguePages=new Map<string,any>(),catalogueRecords=new Map<string,any>();
+ for(const path of CATALOGUES){
+  const config=configs.get(path)!,blocks=config.blocks.filter(b=>b.name==='list17'&&b.collection?.dataSource?.isComplete);
+  if(blocks.length!==1)throw Error('Catalogue Bergé ambigu');
+  let offset:string|undefined;const cursors=new Set<string>();
+  do{const u=new URL(path,ORIGIN);if(offset)u.searchParams.set('abraca_offset',offset);
+   const value=await data(config,blocks[0],undefined,offset);cataloguePages.set(u.toString(),value);
+   for(const record of value.records){const prior=catalogueRecords.get(record.id);if(prior&&JSON.stringify(prior.fields)!==JSON.stringify(record.fields))throw Error('Métadonnées Bergé contradictoires');catalogueRecords.set(record.id,record);}
+   offset=value.offset||undefined;if(offset){if(cursors.has(offset))throw Error('Boucle de pagination Bergé');cursors.add(offset);}
+  }while(offset);
+ }
+ const sourceLocation=(row:any)=>{const id=new URL(row.url).searchParams.get('recordId'),record=catalogueRecords.get(id);if(!record)throw Error('Le catalogue Bergé a changé : recommencer le cycle');
+  row.ville=clean(record.fields['Commune - Softr']);row.code_postal=clean(record.fields['Code postal']);row._exact_source_city=row.ville;row._source_city_missing=!row.ville;return row;
+ };
  const rows:any=await crawlCatalogue(ORIGIN+'/','berge-v2',CATALOGUES.map(p=>ORIGIN+p),async u=>{try{
-  if(CATALOGUES.includes(u.pathname)){
-   const config=configs.get(u.pathname)!,blocks=config.blocks.filter(b=>b.name==='list17'&&b.collection?.dataSource?.isComplete);
-   if(blocks.length!==1)throw Error('Catalogue Bergé ambigu');
-   const value=await data(config,blocks[0],undefined,u.searchParams.get('abraca_offset')||undefined);
-   if(value.offset&&value.offset===u.searchParams.get('abraca_offset'))throw Error('Curseur Bergé immobile');
-   return {text:JSON.stringify(value),url:u};
-  }
+  if(CATALOGUES.includes(u.pathname)){const value=cataloguePages.get(u.toString());if(!value)throw Error('Page Bergé absente du catalogue public courant');return {text:JSON.stringify(value),url:u};}
   const id=u.searchParams.get('recordId');if(u.pathname!=='/mandat-details'||!id||!/^rec[A-Za-z0-9]+$/.test(id))throw Error('Fiche Bergé hors périmètre');
   const page=await fetchHtml(u);if(!isBerge(page.url))throw Error('Fiche Bergé redirigée');
   const detailConfig=bergeConfig(page.text);
@@ -88,7 +96,8 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const values=await Promise.all(selected.map(block=>data(detailConfig!,block,id)));
   const fields:any={};for(let i=0;i<selected.length;i++){const value=values[i];if(value.records.length!==1||value.records[0].id!==id)throw Error('Fiche publique Bergé absente : '+id);const own=value.records[0].fields;for(const key of mappedFields(selected[i]))if(own[key]!=null)fields[key]=own[key];if(own['Désignation'])fields['Désignation']=own['Désignation'];const postal=String(own['SEO:Title']||'').match(/\((\d{5})\)/)?.[1];if(postal)fields['Code postal']=postal;}
   return {text:JSON.stringify({id,fields}),url:u};
- }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=checkpoint;return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails});
+ }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=sourceLocation(parseBerge(JSON.parse(html),url));if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=checkpoint;return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails,expectedTotal:catalogueRecords.size});
+ for(const row of rows)sourceLocation(row);
  rows.total+=new Set((rows.stats?.failed||[]).filter((u:string)=>u.startsWith(ORIGIN+'/mandat-details?recordId='))).size;
  rows.platform='Bergé (catalogues publics Softr)';rows.sector='immobilier';return rows;
 }

@@ -30,7 +30,7 @@ globalThis.fetch=async(raw,options)=>{
   // One sale catalogue has two cursor pages. Rental repeats a public ID;
   // identity remains the record, rather than a photo or a guessed city.
   const ids=rent?['rec0']:body.pagingOption.offset?Array.from({length:12},(_,i)=>'rec'+(i+13)):Array.from({length:13},(_,i)=>'rec'+i);
-  return {ok:true,text:async()=>JSON.stringify({records:ids.map(id=>({id,fields:{}})),offset:!rent&&!body.pagingOption.offset?'next':null})};
+  return {ok:true,text:async()=>JSON.stringify({records:ids.map(id=>({id,fields:{'Commune - Softr':'Sophia Antipolis','Code postal':'06560'}})),offset:!rent&&!body.pagingOption.offset?'next':null})};
  }
  const id=u.pathname.split('/').at(-1);
  return {ok:true,text:async()=>JSON.stringify({records:[{id,fields:{...fixture.fields,'Référence Netty':id}}],offset:null})};
@@ -39,6 +39,7 @@ try{
  const fetchHtml=async u=>({url:u,text:u.pathname==='/'?'tel:0493995252':u.pathname==='/mandat-details'?html('detail',[block('detail')]):html(u.pathname.endsWith('vente')?'sale':'rent',[block('list','list17')])});
  const memory={load:async()=>saved,save:async state=>{saved=structuredClone(state)}};
  let result;for(let i=0;i<7;i++){result=await readBerge(new URL('https://www.berge.fr'),fetchHtml,memory);if(i===0)assert.equal(result.partial,true);}
+ assert.equal(result[0].ville,'Sophia Antipolis');assert.equal(result[0]._exact_source_city,'Sophia Antipolis');assert.equal(result[0].code_postal,'06560');
  assert.equal(result[0].contact_nom,'Bergé Immobilier (agence)');assert.equal(result[0].contact_telephone,'0493995252');
  assert.equal(result.length,25);assert.equal(result.partial,false);assert.equal(result.stats.remaining,0);
  assert.equal(saved.discovered.length,25);assert.equal(result.filter(r=>r.reference==='rec0').length,1);
