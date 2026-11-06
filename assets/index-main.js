@@ -6317,9 +6317,9 @@ if(sb){
   console.error('Supabase JS ne s’est pas chargé.');
 }
 // Vérification automatique des nouveaux messages sans recharger la page.
-// 4 secondes : suffisamment réactif pour la V1 sans modifier Supabase.
+// 07/11/2026 : 4 s → 15 s et « Mes annonces » 30 s → 3 min (plan gratuit Supabase : requêtes, journaux et photos rechargées). Rafraîchi aussi au retour sur l'onglet.
 let lastMineAutoRefresh=Date.now();
-setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine&&Date.now()-lastMineAutoRefresh>=30000){lastMineAutoRefresh=Date.now();loadAds();}}},4000);
+setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine&&Date.now()-lastMineAutoRefresh>=180000){lastMineAutoRefresh=Date.now();loadAds();}}},15000);
 
 // Rafraîchit aussi immédiatement quand l'utilisateur revient sur l'onglet / la fenêtre.
 document.addEventListener('visibilitychange',()=>{
