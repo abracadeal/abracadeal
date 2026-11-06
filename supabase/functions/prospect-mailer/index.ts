@@ -136,6 +136,10 @@ abracadeal.fr – {{expediteur}}` };
   return { subject, body:
 `Bonjour,
 
+Passerelles, logiciels de multidiffusion, intermédiaires : chacun se fait payer entre vous et vos annonces, souvent des milliers d'euros par an.
+
+Avec Abracadeal, il n'y en a aucun. Nous reprenons vos annonces directement depuis votre site, sans passerelle et sans frais. Juste vous et nous.
+
 Abracadeal est un nouveau site de petites annonces, partout en France. Nous avons préparé la page de {{societe}} : ${vos}, avec ${plural ? "leurs" : "ses"} photos et ${plural ? "leurs" : "son"} prix, repris depuis votre site.
 
 Aperçu privé (rien n'est publié) :
@@ -144,8 +148,6 @@ https://abracadeal.fr/pro-fondateur.html
 Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
 C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
-
-Passerelles, logiciels de multidiffusion, intermédiaires : chacun se fait payer entre vous et vos annonces, souvent des milliers d'euros par an. Avec Abracadeal, il n'y en a aucun : nous reprenons vos annonces directement depuis votre site, sans passerelle et sans frais. Juste vous et nous.
 
 Économisez tout ça et faites d'Abracadeal votre partenaire officiel.
 

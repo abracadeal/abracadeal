@@ -1,3 +1,7 @@
+## 2026-11-06 soir (suite 2) — Mails de prospection : « sans passerelle ni intermédiaire » en tête (Claude)
+
+- Anthony : message pas assez mis en avant. Mails « site lu » (Agence immo, Garage, Moto, A et B) réécrits : le paragraphe sur les passerelles / intermédiaires ouvre le mail juste après « Bonjour », objet A « {{societe}} : vos annonces sur Abracadeal, sans passerelle ni intermédiaire », objet B « {{societe}} – vos annonces sans passerelle ni intermédiaire » ; fin « Économisez tout ça et faites d'Abracadeal votre partenaire officiel ». Mail aperçu : même paragraphe en tête (objet inchangé). prospect-mailer redéployé.
+
 ## 2026-11-06 soir (suite) — Mails de prospection : accent sur les intermédiaires + « partenaire officiel » (Claude)
 
 - Demande d'Anthony : insister sur les passerelles / intermédiaires payants entre le pro et ses annonces, et finir par « Économisez tout ça et faites d'Abracadeal votre partenaire officiel ».
