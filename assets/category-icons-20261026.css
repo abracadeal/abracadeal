@@ -141,7 +141,7 @@ html body .card-photo-actions .share-action{order:0!important}
   #publishModal .form-grid>.form-row:has(#immoLots),#publishModal .form-grid>.form-row:has(#immoAnnualCharges){grid-column:auto}
 }
 
-/* 06/11/2026 (Anthony) : ronds « Motos & scooters » et « Tout voir » ajoutés (10 ronds) — ordinateur sur une ligne, mobile 5 + 5. */
-@media (min-width:761px){html body #annonces .categories{grid-template-columns:repeat(10,minmax(0,1fr))!important;max-width:1180px}}
+/* 06/11/2026 (Anthony) : ronds « Motos & scooters » et « Tout voir » ajoutés — mobile 5 + 5 ; « Tout voir » seulement sur mobile (ordinateur : 9 ronds sur une ligne). */
+@media (min-width:761px){html body #annonces .categories{grid-template-columns:repeat(9,minmax(0,1fr))!important;max-width:1080px}html body #annonces .cat.cat-show-all{display:none!important}}
 @media (max-width:760px){html body #annonces .categories{display:grid!important;grid-template-columns:repeat(5,minmax(0,1fr))!important;gap:10px 4px!important;overflow:visible!important}
   html body #annonces .cat h3{font-size:.72rem!important;line-height:1.15!important}}

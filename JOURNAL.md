@@ -2565,3 +2565,5 @@
 - 06/11/2026 (Claude) : Life Cars passé en REFUS (décision d'Anthony) — colonne prospection_prospects.founder_refused_at + SIREN 918130592 + segment exclu_admin ; private.founder_optout_conflict compte aussi les refus → pas d'offre Fondateurs s'il s'inscrit (même e-mail, SIREN ou domaine lifecars.fr), tarif public direct. Démo demo/life-cars supprimée, adresse lifecars.fr retirée du pré-remplissage de admin-test-import.html (champ vide), exemples « /lifecars » remplacés par « /weecars-angers » dans les commentaires.
 
 - 06/11/2026 (Claude) : 10e rond « Tout voir » (toutes les annonces) sur l'accueil pour combler le trou — mobile 5 + 5, ordinateur 10 sur une ligne.
+
+- 06/11/2026 (Claude) : rond « Tout voir » affiché seulement sur mobile (ordinateur : 9 ronds sur une ligne, pas de trou).
