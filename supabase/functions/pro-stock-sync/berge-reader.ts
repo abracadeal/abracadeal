@@ -58,6 +58,8 @@ export function parseBerge(record:any,url:string){
  return row;
 }
 export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
+ const checkpoint=memory?await memory.load():null;
+ const maxDetails=Object.keys(checkpoint?.rows||{}).length>=300?1:4;
  const configs=new Map<string,ReturnType<typeof bergeConfig>>();
  const home=await fetchHtml(new URL(ORIGIN));if(!isBerge(home.url))throw Error('Accueil Bergé redirigé');
  let agencyPhone=home.text.match(/tel:((?:\+33|0)[1-9][0-9]{8})/)?.[1]||'';
@@ -86,7 +88,7 @@ export async function readBerge(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   const values=await Promise.all(selected.map(block=>data(detailConfig!,block,id)));
   const fields:any={};for(let i=0;i<selected.length;i++){const value=values[i];if(value.records.length!==1||value.records[0].id!==id)throw Error('Fiche publique Bergé absente : '+id);const own=value.records[0].fields;for(const key of mappedFields(selected[i]))if(own[key]!=null)fields[key]=own[key];if(own['Désignation'])fields['Désignation']=own['Désignation'];const postal=String(own['SEO:Title']||'').match(/\((\d{5})\)/)?.[1];if(postal)fields['Code postal']=postal;}
   return {text:JSON.stringify({id,fields}),url:u};
- }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=await memory.load();return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails:4});
+ }catch(e){console.warn('Lecture publique Bergé',u.pathname,String(e));throw e;}},(html,u)=>{const value=bergePage(JSON.parse(html));const next=new URL(u);if(value.offset)next.searchParams.set('abraca_offset',value.offset);return {lists:value.offset?[next.toString()]:[],details:value.records.map((r:any)=>ORIGIN+'/mandat-details?recordId='+r.id)};},(html,url)=>{const row=parseBerge(JSON.parse(html),url);if(agencyPhone){row.contact_nom='Bergé Immobilier (agence)';row.contact_telephone=agencyPhone;}return row;},memory?{load:async()=>{const state=checkpoint;return state?.scope==='berge-v2'&&Date.now()-Date.parse(state.started)>45*60e3?null:state;},save:state=>memory.save(state)}:undefined,{maxDetails});
  rows.total+=new Set((rows.stats?.failed||[]).filter((u:string)=>u.startsWith(ORIGIN+'/mandat-details?recordId='))).size;
  rows.platform='Bergé (catalogues publics Softr)';rows.sector='immobilier';return rows;
 }
