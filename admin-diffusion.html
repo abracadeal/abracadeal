@@ -1,0 +1,87 @@
+<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Abracadeal — Passerelle de diffusion</title>
+<script src="assets/session-guard-20261106.js?v=1"></script>
+<script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
+<link rel="stylesheet" href="assets/moderation.css?v=20261008-retention">
+<link rel="stylesheet" href="/assets/app-shell-20261018.css?v=5">
+<style>
+/* 07/11/2026 (Claude, demande d'Anthony) : passerelle Abracadeal — gestion des sites vers lesquels le stock des pros est diffusé. */
+main{padding-bottom:48px}
+.intro{max-width:72ch;opacity:.85}
+.portals{display:grid;gap:14px;margin-top:18px}
+.p{padding:18px;border:1px solid #493052;border-radius:16px}
+.p h2{margin:0 0 4px;font-size:1.15rem;display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.pill{font-size:.72rem;font-weight:700;padding:3px 9px;border-radius:999px;border:1px solid #684272}
+.pill.active{background:#1d5a3a;border-color:#1d5a3a;color:#fff}
+.stats{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.88rem;opacity:.85;margin:6px 0 12px}
+.row{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+label{display:grid;gap:5px;font-size:.85rem}
+input,select,textarea,button{font:inherit;padding:9px 10px;border-radius:8px}
+textarea{min-height:60px}
+.acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+button{cursor:pointer}
+.feed{margin-top:12px;padding:12px;border:1px dashed #684272;border-radius:10px;font-size:.86rem;overflow-wrap:anywhere}
+.feed code{user-select:all;display:block;margin:6px 0}
+.pros{font-size:.84rem;opacity:.8;margin-top:6px}
+@media (max-width:720px){.row{grid-template-columns:1fr}}
+</style>
+</head><body><header class="topbar"><div class="shell toprow"><a class="brand" href="index.html">Abracadeal</a><a href="moderation.html">← Modération</a></div></header>
+<main class="shell">
+<h1>Passerelle de diffusion</h1>
+<p class="intro">Les pros cochent dans « Diffuser mes annonces » (page <a href="diffusion.html">diffusion.html</a>) les sites où ils veulent être diffusés. Ici, pour chaque site : son statut, le format du flux et le lien à lui transmettre. Un site ne reçoit des annonces que s'il est « En cours d'ouverture » ou « Actif » et qu'un lien de flux a été créé. Le lien n'est affiché qu'une fois : en recréer un coupe l'ancien.</p>
+<p id="status" role="status">Vérification de votre accès…</p>
+<div id="app" hidden><div class="portals" id="list"></div></div>
+</main>
+<script>
+(function(){
+  var sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+  var FEED='https://jplzvxmpbpjssyinozap.supabase.co/functions/v1/syndication-feed';
+  var $=function(s,r){return (r||document).querySelector(s);};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var STL={prospect:'À contacter',negotiating:'En cours d’ouverture',active:'Actif',paused:'En pause (masqué aux pros)'};
+  var FMT={'abracadeal-xml':'XML Abracadeal (complet)','trovit':'XML Trovit (agrégateurs)','json':'JSON'};
+  var date=function(v){return v?new Date(v).toLocaleString('fr-FR'):'jamais';};
+  function opt(map,cur){return Object.keys(map).map(function(k){return '<option value="'+k+'"'+(k===cur?' selected':'')+'>'+map[k]+'</option>';}).join('');}
+  function card(p){
+    return '<section class="p" data-code="'+esc(p.code)+'"><h2>'+esc(p.name)+' <span class="pill'+(p.status==='active'?' active':'')+'">'+esc(STL[p.status]||p.status)+'</span>'+(p.website?' <a href="'+esc(p.website)+'" target="_blank" rel="noopener" style="font-size:.85rem">site ↗</a>':'')+'</h2>'+
+      '<div class="stats"><span>'+(+p.pros||0)+' pro(s) inscrit(s)</span><span>'+(+p.listings||0)+' annonce(s) dans le flux</span><span>Univers : '+esc((p.categories||[]).join(', '))+'</span><span>Dernière lecture du flux : '+esc(date(p.last_fetch))+'</span><span>Lectures sur 7 jours : '+(+p.fetches_7d||0)+'</span></div>'+
+      '<div class="row"><label>Statut<select data-f="status">'+opt(STL,p.status)+'</select></label><label>Format du flux<select data-f="format">'+opt(FMT,p.format)+'</select></label><label>Contact chez ce site<input data-f="contact" value="'+esc(p.contact)+'" placeholder="Nom, e-mail…"></label></div>'+
+      '<label style="margin-top:10px">Notes internes<textarea data-f="notes">'+esc(p.notes)+'</textarea></label>'+
+      '<div class="acts"><button type="button" data-a="save">Enregistrer</button><button type="button" data-a="token">'+(p.has_token?'Recréer le lien du flux':'Créer le lien du flux')+'</button></div>'+
+      (p.has_token?'<p class="pros">Lien créé le '+esc(date(p.token_created_at))+'.</p>':'')+
+      ((p.pro_names||[]).length?'<p class="pros">Pros : '+esc(p.pro_names.join(', '))+'</p>':'')+
+      '<div class="feed" hidden></div></section>';
+  }
+  async function load(){
+    var r=await sb.rpc('admin_syndication_overview');
+    if(r.error){$('#status').textContent=/refus/i.test(r.error.message)?'Accès réservé aux administrateurs.':'Erreur : '+r.error.message;return;}
+    $('#status').hidden=true;$('#app').hidden=false;
+    $('#list').innerHTML=(r.data||[]).map(card).join('');
+  }
+  document.addEventListener('click',async function(e){
+    var b=e.target.closest('button[data-a]');if(!b)return;
+    var s=b.closest('section.p'),code=s.dataset.code;
+    var v=function(f){return $('[data-f="'+f+'"]',s).value;};
+    b.disabled=true;
+    if(b.dataset.a==='save'){
+      var r=await sb.rpc('admin_syndication_update',{p_code:code,p_status:v('status'),p_contact:v('contact'),p_notes:v('notes'),p_format:v('format')});
+      b.disabled=false;
+      if(r.error){alertBox(s,'Erreur : '+r.error.message);return;}
+      await load();
+    }else{
+      var t=await sb.rpc('admin_syndication_new_token',{p_code:code});
+      b.disabled=false;
+      if(t.error){alertBox(s,'Erreur : '+t.error.message);return;}
+      var base=FEED+'?portal='+encodeURIComponent(code)+'&token='+t.data;
+      var f=v('format');
+      var links='<b>Lien du flux à transmettre à ce site</b> (affiché une seule fois, copiez-le) :<code>'+esc(base)+'</code>';
+      if(f==='trovit')links+='Flux immobilier : <code>'+esc(base+'&vertical=immobilier')+'</code>';
+      links+='Autres formats possibles : <code>'+esc(base+'&format=abracadeal-xml')+'</code><code>'+esc(base+'&format=json')+'</code>';
+      var box=$('.feed',s);box.innerHTML=links;box.hidden=false;
+    }
+  });
+  function alertBox(s,m){var box=$('.feed',s);box.textContent=m;box.hidden=false;}
+  load();
+})();
+</script>
+<script src="/assets/app-shell-20261018.js?v=6" defer></script>
+</body></html>

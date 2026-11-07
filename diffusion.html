@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Diffuser mes annonces · Abracadeal Pro</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#1b0d2d">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+<script src="/assets/supabase-js-2.118.0.js"></script>
+<script src="/assets/admin-auth.js?v=1"></script>
+<style>
+/* 07/11/2026 (Claude, demande d'Anthony) : passerelle Abracadeal — le pro choisit sur quels autres sites ses annonces sont diffusées. */
+*{box-sizing:border-box}
+body{margin:0;background:#f6f2f7;color:#28172f;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+a{color:inherit}
+.top{background:#1b0d2d;color:#fff}
+.topin{max-width:980px;margin:auto;padding:14px max(18px,env(safe-area-inset-right,0px)) 14px max(18px,env(safe-area-inset-left,0px));display:flex;justify-content:space-between;align-items:center;gap:12px}
+.brand{font-weight:900;font-size:22px;text-decoration:none}
+.back{color:#fff;text-decoration:none;font-weight:700;font-size:.95rem}
+.wrap{max-width:980px;margin:26px auto 60px;padding:0 max(18px,env(safe-area-inset-right,0px)) 0 max(18px,env(safe-area-inset-left,0px))}
+h1{font-size:clamp(1.6rem,4.5vw,2.2rem);margin:0 0 8px;color:#2a0f3a;text-wrap:balance}
+.lead{color:#5f4c68;max-width:62ch;margin:0 0 22px}
+.box{background:#fff;border:1px solid #eadfed;border-radius:20px;padding:18px 20px;box-shadow:0 12px 34px #2d123b10}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:0 0 22px}
+.how div{background:#faf5fc;border:1px solid #eadfed;border-radius:16px;padding:14px}
+.how b{display:block;color:#451657;margin-bottom:4px}
+.how span{font-size:.92rem;color:#5f4c68}
+h2{font-size:1.15rem;margin:26px 0 10px;color:#2a0f3a}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.portal{display:grid;grid-template-columns:1fr auto;gap:6px 14px;align-items:start;background:#fff;border:1px solid #eadfed;border-radius:18px;padding:16px 18px}
+.portal h3{margin:0;font-size:1.05rem;color:#2a0f3a}
+.portal p{margin:0;font-size:.9rem;color:#5f4c68;grid-column:1}
+.meta{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:6px 10px;font-size:.8rem;color:#7b6684;margin-top:4px}
+.badge{display:inline-block;font-size:.72rem;font-weight:700;letter-spacing:.03em;padding:3px 9px;border-radius:999px;background:#f1e8f5;color:#5b2675}
+.badge.on{background:#e3f6ea;color:#1d6a3e}
+.badge.soon{background:#fff3d9;color:#8a5a00}
+.switch{position:relative;width:52px;height:30px;flex:none}
+.switch input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.switch span{position:absolute;inset:0;border-radius:999px;background:#d9cddf;transition:background .2s}
+.switch span::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px #0003;transition:transform .2s}
+.switch input:checked+span{background:#6f2b91}
+.switch input:checked+span::after{transform:translateX(22px)}
+.switch input:focus-visible+span{outline:2px solid #6f2b91;outline-offset:2px}
+.note{font-size:.86rem;color:#7b6684;margin-top:18px}
+.msg{padding:14px 16px;border-radius:14px;background:#faf5fc;border:1px solid #eadfed}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:11px 18px;border-radius:12px;background:#6f2b91;color:#fff;font-weight:700;text-decoration:none;border:0;cursor:pointer;font:inherit}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:#1b0d2d;color:#fff;padding:11px 16px;border-radius:12px;font-size:.92rem;opacity:0;transition:opacity .2s;pointer-events:none;max-width:calc(100% - 32px)}
+.toast.show{opacity:1}
+@media (max-width:720px){.how,.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header class="top"><div class="topin"><a class="brand" href="/">Abracadeal</a><a class="back" href="/">← Retour au site</a></div></header>
+<main class="wrap">
+  <h1>Diffuser mes annonces ailleurs</h1>
+  <p class="lead">Vos annonces sont sur Abracadeal. Cochez les autres sites où vous voulez aussi les voir : Abracadeal les leur envoie et les tient à jour pour vous. Pas de logiciel de multidiffusion à payer, pas de double saisie.</p>
+  <div class="how">
+    <div><b>1. Vous cochez</b><span>Les sites qui vous intéressent, quand vous voulez.</span></div>
+    <div><b>2. On envoie</b><span>Vos annonces actives partent avec photos, prix et caractéristiques.</span></div>
+    <div><b>3. Tout se met à jour</b><span>Vendu, prix changé, photo ajoutée : c'est répercuté automatiquement.</span></div>
+  </div>
+  <div id="state" class="msg" role="status">Chargement…</div>
+  <div id="app" hidden>
+    <h2>Sites de diffusion</h2>
+    <div class="grid" id="list"></div>
+    <p class="note">« Bientôt » : nous ouvrons l'accès avec ce site. Cochez-le dès maintenant, vos annonces y partiront dès que la connexion sera active, sans rien refaire. Vous pouvez décocher à tout moment : vos annonces sont alors retirées du flux envoyé à ce site lors de sa prochaine mise à jour.</p>
+  </div>
+</main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+(function(){
+  var sb=supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+  var $=function(s){return document.querySelector(s);};
+  var esc=function(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var CAT={vehicules:'Véhicules',immobilier:'Immobilier'};
+  var ST={active:['on','Actif'],negotiating:['soon','Bientôt'],prospect:['soon','Bientôt']};
+  var tt;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('show');},2600);}
+  function render(rows){
+    var html=rows.map(function(p){
+      var st=ST[p.status]||['','—'];
+      var cats=(p.categories||[]).map(function(c){return CAT[c]||c;}).join(' · ');
+      var n=+p.eligible||0;
+      return '<div class="portal"><div><h3>'+esc(p.name)+' <span class="badge '+st[0]+'">'+st[1]+'</span></h3></div>'+
+        '<label class="switch" title="Diffuser sur '+esc(p.name)+'"><input type="checkbox" data-code="'+esc(p.code)+'" aria-label="Diffuser mes annonces sur '+esc(p.name)+'"'+(p.enabled?' checked':'')+'><span></span></label>'+
+        '<p>'+esc(p.note||'')+'</p>'+
+        '<div class="meta"><span>'+esc(cats)+'</span><span>'+n+' annonce'+(n>1?'s':'')+' concernée'+(n>1?'s':'')+'</span>'++'</div></div>';
+    }).join('');
+    $('#list').innerHTML=html||'<div class="msg">Aucun site de diffusion pour le moment.</div>';
+  }
+  async function load(){
+    var s=(await sb.auth.getSession()).data.session;
+    if(!s){$('#state').innerHTML='Connectez-vous à votre compte pro pour choisir où diffuser vos annonces. <a class="btn" style="margin-left:8px" href="/">Se connecter</a>';return;}
+    var r=await sb.rpc('my_syndication');
+    if(r.error){$('#state').textContent='Impossible de charger les sites de diffusion pour le moment. Réessayez dans un instant.';return;}
+    var prof=await sb.from('profiles').select('account_type').eq('id',s.user.id).maybeSingle();
+    if(prof.data&&prof.data.account_type!=='professionnel'){$('#state').textContent='La diffusion sur d’autres sites est réservée aux comptes professionnels.';return;}
+    $('#state').hidden=true;$('#app').hidden=false;render(r.data||[]);
+  }
+  document.addEventListener('change',async function(e){
+    var i=e.target.closest('input[data-code]');if(!i)return;
+    i.disabled=true;
+    var r=await sb.rpc('set_my_syndication',{p_portal:i.dataset.code,p_enabled:i.checked});
+    i.disabled=false;
+    if(r.error){i.checked=!i.checked;toast(r.error.message||'Enregistrement impossible');return;}
+    toast(i.checked?'C’est noté : vos annonces seront diffusées sur ce site.':'Diffusion arrêtée sur ce site.');
+  });
+  load();
+})();
+</script>
+</body>
+</html>
