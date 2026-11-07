@@ -2599,10 +2599,18 @@ window.openAdminEditAd=function(id,ownerEdit=false){
     sn.style.cssText='background:#fff4e0;color:#5a3a00;border:1px solid #f1d39a;font-weight:600;font-size:12.5px;padding:10px 12px;border-radius:10px;line-height:1.45;margin:0 0 10px';
     sn.textContent=ownerEdit
       ?'Cette annonce est reprise automatiquement depuis votre site. Vous pouvez la modifier ici, mais faites la modification en priorité sur votre site principal : sinon, à la prochaine mise à jour (environ toutes les 3 heures), l’annonce reviendra comme avant.'
-      :'Annonce reprise du site du pro : une modification faite ici sera écrasée à la prochaine synchro (≈ 3 h). Pour une correction qui reste : Administration → Imports sites → la fiche → Modifier.';
+      :'Annonce reprise du site du pro : tes modifications sont gardées et réappliquées à chaque synchronisation de son stock.';
     $('#publishForm').prepend(sn);
   }
   editFormBaseline=editFormState();
+  /* 07/11/2026 (Anthony : une maison classée « appartement » par le site du pro) : en admin, la modification d'une
+     annonce importée est aussi enregistrée comme correction du stock (pro_stock_overrides, clé site + référence),
+     pour que la synchro suivante ne la remette pas comme avant. */
+  window.__feedEdit=null;
+  if(!ownerEdit&&currentProfile?.is_admin===true&&String(a.source||'').startsWith('feed:')&&a.external_id){
+    let host='';try{host=new URL(String(a.external_url||'')).hostname.replace(/^www\./,'').toLowerCase();}catch{}
+    if(host)window.__feedEdit={id,host,ref:String(a.external_id),base:feedOverrideValues()};
+  }
   openModal('publishModal');
 };
 
@@ -2861,6 +2869,16 @@ $('#publishForm').addEventListener('submit',async e=>{
       if(currentProfile?.is_admin!==true) editQuery=editQuery.eq('owner_id',currentUser.id);
       const {error}=await editQuery;
       if(error) throw error;
+      const fe=window.__feedEdit;
+      if(fe&&fe.id===editingId){
+        const now=feedOverrideValues(),fields={};
+        for(const k of Object.keys(now)){if(now[k]!==''&&now[k]!==(fe.base[k]??''))fields[k]=now[k];}
+        if(Object.keys(fields).length){
+          const {error:ovErr}=await sb.rpc('admin_set_stock_override',{p_host:fe.host,p_ref:fe.ref,p_fields:fields});
+          if(ovErr)toast('Annonce enregistrée, mais la correction ne sera pas gardée à la prochaine synchro : '+ovErr.message);
+        }
+        window.__feedEdit=null;
+      }
 
       if(editPhotosChanged()){
         if(status) status.textContent='Envoi des photos…';
@@ -2982,6 +3000,20 @@ function realEstateMetaOf(a){
   const m=(a?.description||'').match(/^\[ABRACA_IMETA:([^\]]+)\]/m);
   if(!m)return {};
   try{return compactRealEstateMeta(JSON.parse(decodeURIComponent(m[1])))}catch{return {}}
+}
+// 07/11/2026 : valeurs du formulaire dans le vocabulaire du stock importé (mêmes clés que la correction depuis Imports sites).
+function feedOverrideValues(){
+  const v=id=>String(document.getElementById(id)?.value??'').trim();
+  const o={titre:v('adTitle'),prix:v('adPrice'),ville:v('adCity'),code_postal:v('adPostalCode'),description:v('adDescription')};
+  const cat=v('adCategory');
+  if(cat==='immobilier'){
+    const m={'vente-maison':['vente','maison'],'vente-appartement':['vente','appartement'],'vente-terrain':['vente','terrain'],'vente-batiment':['vente','batiment'],'location':['location',''],'parking-garage':['','parking'],'bureaux-commerces':['','bureau']}[v('vehicleSubcategory')];
+    o.transaction=m?m[0]:'';o.type_bien=m?m[1]:'';
+    Object.assign(o,{surface:v('immoSurface'),surface_terrain:v('immoLandSurface'),pieces:v('immoRooms'),chambres:v('immoBedrooms'),salles_de_bain:v('immoBathrooms'),dpe:v('immoDpe'),ges:v('immoGes')});
+  }else if(cat==='vehicules'){
+    Object.assign(o,{marque:v('vehicleMake'),modele:v('vehicleModel'),annee:v('vehicleYear'),kilometrage:v('vehicleMileage'),carburant:v('vehicleFuel'),boite:v('vehicleTransmission')});
+  }
+  return o;
 }
 function realEstateMetaFromForm(){
   const val=id=>document.getElementById(id)?.value?.trim?.()||'';
