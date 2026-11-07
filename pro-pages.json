@@ -11,9 +11,8 @@
   "path": "immo/sophie-folley-immobilier-salies-de-bearn",
   "name": "Sophie Folley Immobilier",
   "city": "Salies-de-Béarn",
-  "count": 74,
-  "active": true,
-  "short": "sophie-folley-immobilier"
+  "count": 0,
+  "active": false
  },
  "a0a0a0a0-0000-4000-8000-00000000c1a0": {
   "path": "immo/test-api-agence-cannes",
