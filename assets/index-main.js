@@ -207,7 +207,11 @@ function photoUrl(path){
 // 18/10/2026 : miniatures des vignettes (bucket public « listing-thumbs », générées côté serveur par
 // generate-listing-thumbs). Si la miniature n'existe pas encore, l'image d'origine est chargée à la place.
 function thumbUrl(path){
-  if(!path||privatePhotoUrls.has(path)||/^https?:\/\//i.test(String(path))||!sb) return photoUrl(path);
+  /* 08/11/2026 (PageSpeed : 2,8 Mo d'images en trop) : photos reprises du site d'un pro = images d'origine en pleine taille.
+     En vignette, elles passent par un redimensionneur d'images public (wsrv.nl, WebP 720 px, mis en cache) ;
+     si il ne répond pas, la photo d'origine est chargée à la place (onerror de thumbImgAttrs). */
+  if(path&&!privatePhotoUrls.has(path)&&/^https?:\/\//i.test(String(path)))return 'https://wsrv.nl/?url='+encodeURIComponent(String(path))+'&w=720&h=720&fit=inside&we&output=webp&q=78';
+  if(!path||privatePhotoUrls.has(path)||!sb) return photoUrl(path);
   const {data}=sb.storage.from('listing-thumbs').getPublicUrl(path);
   // 01/11/2026 : ?o=2 = miniatures refaites avec la bonne orientation (les anciennes restaient en cache 1 an).
   return data?.publicUrl?data.publicUrl+'?o=5':photoUrl(path); /* 02/11/2026 : ?o=3 = miniatures refaites en meilleure qualité ; ?o=4 = 640 px ; ?o=5 = petit côté 720 px (nettes en vignette carrée) */
