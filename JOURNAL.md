@@ -1,3 +1,15 @@
+## 2026-11-07/08 — Sophie Folley, modération, contacts agents, SEO immobilier, vitesse (Claude)
+
+- **Styles regroupés (à lire avant de toucher au CSS de l'accueil)** : les feuilles de l'en-tête d'`index.html` sont rangées, dans leur ordre exact, dans `<template id="abraca-css-sources">` (inerte) et servies en un seul fichier `assets/abraca-head.min.css` (`<link id="abraca-css-bundle">`). On modifie toujours les fichiers `assets/*.css` d'origine (ou les `<style>` du template) ; le workflow `css-bundle.yml` relance `scripts/build_css_bundle.py` à chaque push. Une nouvelle feuille ajoutée HORS du template se charge normalement, à part. Rendu vérifié identique au pixel (mobile/tablette/desktop).
+- Vitesse : vignettes des photos importées (URL externes) via `wsrv.nl` (WebP 720 px, repli sur l'original), bannière d'accueil en `fetchpriority=high`.
+- `moderate-listing` v33 (commit c42bcfb) : l'admin peut « Valider quand même » une annonce refusée par les mots interdits ; « moment de détente » toléré en immobilier/vacances.
+- `pro-stock-sync` v312 (commit 715de7f) : lecteur Apimo — surfaces pièce par pièce (`roomAreas`) et proximités (`nearby`) dans IMETA, affichées dans « Les informations clés » ; carte conseiller sans lien « équipe » lue (nom, portable, e-mail → `listing_contacts.agent_email`).
+- Contacts : `get_listing_contact_details` (portable conseiller + numéro agence + e-mail conseiller, connectés uniquement) ; `profiles.contact_email` + `set_my_contact_email` / `admin_set_contact_email` (encadré dans l'espace pro), `process-message-email-alerts` v7 l'utilise. ATTENTION : toute modification de `listing_contacts` par un utilisateur remet les annonces en modération (`abraca_requeue_for_related_edit`) — passer par `abraca.revision_write` comme `private.abraca_write_contact_email`. `agent_email` est ignoré par ce contrôle.
+- Correctif : `private.listings_normalize_fuel` et `private.listings_catalog_desc` passées en SECURITY DEFINER (« permission denied for schema private » à chaque modification d'annonce).
+- `admin-onboard-pro` (verify_jwt désactivé, auth vérifiée dans le code) : action `showroom` (logo/bannière auto, ou `logo_url`/`banner_url` imposés), logo dans un bloc « logo », images octet-stream reconnues.
+- SEO : pages Maisons/Appartements/Terrains à vendre, Locations, et par département (≥ 5 annonces) dans `build_share_pages.py` ; lien `/immo/` en pied de page.
+- Admin : correction d'une annonce importée enregistrée aussi dans `pro_stock_overrides` (gardée à la synchro) ; résumé « inscrire un pro » effacé après succès ; filtres de l'accueil avec bouton « Voir les N annonces ».
+
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)
 
 - Départ : main récupéré `497822c33d4f584b74ec704c894645149d2d8580`, JOURNAL et guide APPRENDRE-AU-ROBOT lus. Version réellement déployée v304 épinglée sur `9d43dfd228225a7c447e04b6b5f83db73464ae34`, sans écart de fonction avec main. Travail isolé dans un worktree ; ancien répertoire de travail laissé intact. Les commits concurrents de SEO sur main ont été conservés, publication par mise à jour non forcée avec SHA attendu.
