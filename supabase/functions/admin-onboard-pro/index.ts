@@ -127,10 +127,19 @@ async function fetchImage(url: string) {
   try {
     const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 (compatible; Abracadeal/1.0)", Accept: "image/*" }, signal: AbortSignal.timeout(12000) });
     if (!r.ok) return null;
-    const type = (r.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
-    if (!/^image\/(png|jpe?g|webp|gif)$/.test(type)) { await r.body?.cancel(); return null; }
+    let type = (r.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+    // 07/11/2026 (Sophie Folley) : certains hébergeurs (CloudFront/S3) servent les images en « application/octet-stream » → type reconnu d'après les octets.
+    const generic = /^(application\/octet-stream|binary\/octet-stream|application\/binary|)$/.test(type);
+    if (!generic && !/^image\/(png|jpe?g|webp|gif)$/.test(type)) { await r.body?.cancel(); return null; }
     const b = new Uint8Array(await r.arrayBuffer());
     if (b.length < 800 || b.length > 4_000_000) return null;
+    if (generic) {
+      if (b[0] === 0xff && b[1] === 0xd8 && b[2] === 0xff) type = "image/jpeg";
+      else if (b[0] === 0x89 && b[1] === 0x50 && b[2] === 0x4e && b[3] === 0x47) type = "image/png";
+      else if (b[0] === 0x47 && b[1] === 0x49 && b[2] === 0x46) type = "image/gif";
+      else if (b[0] === 0x52 && b[1] === 0x49 && b[2] === 0x46 && b[3] === 0x46 && b[8] === 0x57 && b[9] === 0x45 && b[10] === 0x42 && b[11] === 0x50) type = "image/webp";
+      else return null;
+    }
     return { bytes: b, type, ext: type === "image/jpeg" || type === "image/jpg" ? "jpg" : type.split("/")[1] };
   } catch { return null; }
 }
