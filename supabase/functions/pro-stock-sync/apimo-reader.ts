@@ -79,7 +79,15 @@ export function parseApimoDetail(raw:string,url:string){
   const diagnosticPair=description.split('\n').map(line=>line.trim()).map(line=>line.match(/^DPE\s*:?\s*([A-G])(?:\s*\(\s*([0-9]{1,4}(?:[.,][0-9]+)?)\s*\))?\s*(?:\/|[eE][tT])\s*([A-G])(?:\s*\(\s*[0-9]{1,3}(?:[.,][0-9]+)?\s*\))?\s*[.;]?$/)).find(Boolean);
   if(diagnosticPair){if(!o.dpe)o.dpe=diagnosticPair[1];if(!o.ges)o.ges=diagnosticPair[3];if(!o.consommation_energie&&diagnosticPair[2])o.consommation_energie=num(diagnosticPair[2]);}
   // Mentions textuelles utiles (charges, copropriété, coûts…) ; pas de lecture des biens similaires.
-  o.texte_page+='\n'+text(diag.replace(/<img\b[^>]*>/gi,''));return o;
+  o.texte_page+='\n'+text(diag.replace(/<img\b[^>]*>/gi,''));
+  // 07/11/2026 (Anthony, Sophie Folley) : « Surfaces » pièce par pièce et « Proximités » de la fiche, recopiées telles quelles
+  // à la fin de la description (rien d'inventé : seulement les lignes « libellé + valeur » publiées par l'agence).
+  const lines=(block:string)=>[...block.matchAll(/<li\b[^>]*>((?:(?!<\/li>)[\s\S])*?)<span[^>]*>((?:(?!<\/li>)[\s\S])*?)<\/span>\s*<\/li>/gi)].map(m=>[text(m[1]).replace(/\s+/g,' ').trim(),text(m[2]).replace(/\s+/g,' ').trim()]).filter(([l,v])=>l&&v&&l.length<60&&v.length<40);
+  const rooms=lines(surfaceBlock).map(([l,v])=>'• '+l.replace(/^1\s+/,'')+' : '+v);
+  const near=lines(module('property-info-template-8')).map(([l,v])=>'• '+l+' : '+v);
+  const extra=[rooms.length?'Surfaces :\n'+rooms.join('\n'):'',near.length?'Proximités :\n'+near.join('\n'):''].filter(Boolean).join('\n\n');
+  if(extra&&!o.description.includes(extra))o.description=o.description.trim()+'\n\n'+extra;
+  return o;
 }
 export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory,fallback?:(html:string,url:string)=>any){
   if(/\/propriete\/[^/]+\+\d+\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
