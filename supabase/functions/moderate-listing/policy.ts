@@ -5,7 +5,11 @@ export function prohibitedTerms(listing:any){
  for(const [label,regex] of [
   ['rencontre',/\brencontres?\b/],['escort',/\bescorts?\b/],
   ['accompagnement',/\baccompagnements?\b/],['moment de détente',/\bmoments?\s+de\s+detente\b/]
- ] as Array<[string,RegExp]>)if(regex.test(text))found.push(label);
+ ] as Array<[string,RegExp]>){
+  /* 07/11/2026 : « moment de détente » est courant dans l'immobilier et les locations de vacances (jardin, piscine…). */
+  if(label==='moment de détente'&&['immobilier','vacances'].includes(String(listing.category||'')))continue;
+  if(regex.test(text))found.push(label);
+ }
  if(/\bmassages?\b/.test(text)&&(listing.seller_type!=='professionnel'||/\b(?:non[-\s]+professionnel(?:le)?|amateur(?:e)?)\b/.test(text)))found.push('massage non professionnel');
  return found;
 }

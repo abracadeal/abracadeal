@@ -93,7 +93,9 @@ function card(a){
     ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider</button><button class="action no" data-action="reject" data-id="'+a.id+'">✕ Refuser</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
     : validated
       ? '<div class="history-actions"><button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button></div>'
-      : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
+      : state.tab==='rejected'
+        ? '<div class="actions"><button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider quand même</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>'
+        : '<div class="history-actions"><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button></div>';
   return '<article class="card" data-card-id="'+esc(a.id)+'">'+
     (!pending&&state.tab!=='reference'?'<label class="card-select"><input type="checkbox" data-select-id="'+esc(a.id)+'" '+(state.selected.has(a.id)?'checked':'')+'> Sélectionner</label>':'')+
     '<div class="card-main">'+
@@ -177,6 +179,9 @@ async function openPreview(id){
   }else if(state.tab==='validated'){
     $('#previewActions').innerHTML='<button class="action delete" data-action="dismiss" data-id="'+a.id+'">Supprimer de la liste</button>';
     $('#previewActions').style.gridTemplateColumns='1fr';
+  }else if(state.tab==='rejected'){
+    $('#previewActions').innerHTML='<button class="action ok" data-action="validate" data-id="'+a.id+'">✓ Valider quand même</button><button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
+    $('#previewActions').style.gridTemplateColumns='repeat(2,minmax(0,1fr))';
   }else{
     $('#previewActions').innerHTML='<button class="action delete" data-action="delete" data-id="'+a.id+'">Supprimer</button>';
     $('#previewActions').style.gridTemplateColumns='1fr';

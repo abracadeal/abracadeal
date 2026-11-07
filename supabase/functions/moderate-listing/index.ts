@@ -82,8 +82,17 @@ Deno.serve(async(req)=>{
       await enforce(admin,listing,'Reprise de la suppression des photos et suspension du compte');
       return json({ok:true,status:'rejected',safety_blocked:true});
     }
+    /* 07/11/2026 (Anthony) : l'admin peut valider une annonce refusée par les mots interdits (faux positif,
+       ex. « moment de détente » dans une maison). Les blocages de sécurité (safety_blocked) restent définitifs,
+       et toutes les autres vérifications (photos, analyse, republication) sont refaites normalement. */
+    const adminOverride=action==='validate'&&isAdmin;
+    if(adminOverride&&listing.status==='rejected'){
+      const {data:re,error:reErr}=await admin.from('listings').update({status:'pending'}).eq('id',listing.id).eq('updated_at',listing.updated_at).select('status,updated_at').single();
+      if(reErr||!re)throw reErr||new Error('Annonce modifiée : recommencer');
+      listing.status=re.status;listing.updated_at=re.updated_at;
+    }
     if(!['pending','active'].includes(listing.status))return json({error:'Annonce non éligible à la publication'},409);
-    const banned=prohibitedTerms(listing);
+    const banned=adminOverride?[]:prohibitedTerms(listing);
     if(banned.length){
       const reason='Offre interdite par les règles de diffusion : '+banned.join(', ');
       const {data:rows,error}=await admin.from('listings').update({status:'rejected'}).eq('id',listing.id).eq('updated_at',listing.updated_at).select('id');
