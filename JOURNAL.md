@@ -1,3 +1,11 @@
+## 2026-11-07 — Claude — Mail à Anthony à chaque accord « Je publie »
+
+- Demande d'Anthony : « faudrait que je reçoive un mail quand une bonne nouvelle comme ça arrive » (accord de Sophie Folley Immobilier).
+- Nouvelle fonction `prospect-accept-notify` v1 (verify_jwt off, clé interne `prospect_crawler_internal`) : pour chaque ligne de `private.prospect_acceptances` sans `notified_at`, mail Resend depuis contact@abracadeal.fr vers abracadeal@gmail.com (entreprise, catégorie, site, SIRET + concordance SIREN, e-mail donné, boîte d'envoi, lien vers Imports sites) puis `notified_at` rempli. Pas de téléphone dans le mail. Aucun import, compte ni mail au prospect.
+- Base (`supabase/2026-11-07-prospect-accept-notify.sql`, migration `prospect_accept_notify`) : colonne `notified_at`, RPC `prospect_accepts_to_notify` / `prospect_accept_mark_notified` (service_role seulement), cron `abracadeal-prospect-accept-notify` toutes les 5 min, tous les jours, qui n'appelle la fonction que s'il reste un accord non signalé. Ofim (04/11) marqué signalé sans mail.
+- Testé en réel : mail « Bonne nouvelle : Sophie Folley Immobilier dit « Je publie » » reçu dans la boîte principale de abracadeal@gmail.com à 21 h 52.
+- Constaté au passage : 50 premiers mails de prospection partis le samedi 07/11 (9 h–17 h 20), alors que l'envoi devait être en semaine seulement. Non corrigé, à décider avec Anthony.
+
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)
 
 - Départ : main récupéré `497822c33d4f584b74ec704c894645149d2d8580`, JOURNAL et guide APPRENDRE-AU-ROBOT lus. Version réellement déployée v304 épinglée sur `9d43dfd228225a7c447e04b6b5f83db73464ae34`, sans écart de fonction avec main. Travail isolé dans un worktree ; ancien répertoire de travail laissé intact. Les commits concurrents de SEO sur main ont été conservés, publication par mise à jour non forcée avec SHA attendu.
