@@ -87,6 +87,20 @@ HUB_CATEGORIES = [
      lambda l, m: l.get("category") == "vehicules",
      "Toutes les annonces de véhicules : voitures, motos, utilitaires, camping-cars et caravanes, "
      "vendus par des particuliers et des professionnels."),
+    # 07/11/2026 (Claude, référencement immobilier) : les gens cherchent « maison à vendre + ville / département ».
+    ("maisons-a-vendre", "Maisons à vendre", "maisons à vendre",
+     lambda l, m: l.get("category") == "immobilier" and m["sub"] == "vente-maison",
+     "Maisons, villas, fermes et propriétés à vendre, avec surface, terrain, nombre de pièces, DPE et photos, "
+     "publiées par des agences immobilières et des particuliers."),
+    ("appartements-a-vendre", "Appartements à vendre", "appartements à vendre",
+     lambda l, m: l.get("category") == "immobilier" and m["sub"] == "vente-appartement",
+     "Studios, T2, T3 et grands appartements à vendre, avec surface, étage, charges, DPE et photos."),
+    ("terrains-a-vendre", "Terrains à vendre", "terrains à vendre",
+     lambda l, m: l.get("category") == "immobilier" and m["sub"] == "vente-terrain",
+     "Terrains constructibles, agricoles et de loisirs à vendre, avec surface et localisation."),
+    ("locations-immobilieres", "Locations immobilières", "logements à louer",
+     lambda l, m: l.get("category") == "immobilier" and m["sub"] == "location",
+     "Appartements et maisons à louer à l’année, avec loyer, charges, surface et photos."),
     ("immobilier", "Immobilier", "annonces immobilières",
      lambda l, m: l.get("category") == "immobilier",
      "Appartements, maisons, terrains et locaux : annonces immobilières à la vente et à la location, "
@@ -152,6 +166,41 @@ AGGLOS = {
               "Lille et la métropole lilloise (Roubaix, Tourcoing, Villeneuve-d’Ascq)."),
 }
 MIN_LISTINGS_FOR_AGGLO = 3
+# 07/11/2026 (Claude, référencement) : page par département dès 5 annonces (ex. agence du Béarn avec des biens dans 40 villages).
+MIN_LISTINGS_FOR_DEPT = 5
+DEPTS = {
+    "01": ("Ain", "dans l’Ain"), "02": ("Aisne", "dans l’Aisne"), "03": ("Allier", "dans l’Allier"),
+    "04": ("Alpes-de-Haute-Provence", "dans les Alpes-de-Haute-Provence"), "05": ("Hautes-Alpes", "dans les Hautes-Alpes"),
+    "06": ("Alpes-Maritimes", "dans les Alpes-Maritimes"), "07": ("Ardèche", "en Ardèche"), "08": ("Ardennes", "dans les Ardennes"),
+    "09": ("Ariège", "en Ariège"), "10": ("Aube", "dans l’Aube"), "11": ("Aude", "dans l’Aude"), "12": ("Aveyron", "en Aveyron"),
+    "13": ("Bouches-du-Rhône", "dans les Bouches-du-Rhône"), "14": ("Calvados", "dans le Calvados"), "15": ("Cantal", "dans le Cantal"),
+    "16": ("Charente", "en Charente"), "17": ("Charente-Maritime", "en Charente-Maritime"), "18": ("Cher", "dans le Cher"),
+    "19": ("Corrèze", "en Corrèze"), "21": ("Côte-d’Or", "en Côte-d’Or"), "22": ("Côtes-d’Armor", "dans les Côtes-d’Armor"),
+    "23": ("Creuse", "dans la Creuse"), "24": ("Dordogne", "en Dordogne"), "25": ("Doubs", "dans le Doubs"), "26": ("Drôme", "dans la Drôme"),
+    "27": ("Eure", "dans l’Eure"), "28": ("Eure-et-Loir", "en Eure-et-Loir"), "29": ("Finistère", "dans le Finistère"),
+    "30": ("Gard", "dans le Gard"), "31": ("Haute-Garonne", "en Haute-Garonne"), "32": ("Gers", "dans le Gers"), "33": ("Gironde", "en Gironde"),
+    "34": ("Hérault", "dans l’Hérault"), "35": ("Ille-et-Vilaine", "en Ille-et-Vilaine"), "36": ("Indre", "dans l’Indre"),
+    "37": ("Indre-et-Loire", "en Indre-et-Loire"), "38": ("Isère", "en Isère"), "39": ("Jura", "dans le Jura"), "40": ("Landes", "dans les Landes"),
+    "41": ("Loir-et-Cher", "dans le Loir-et-Cher"), "42": ("Loire", "dans la Loire"), "43": ("Haute-Loire", "en Haute-Loire"),
+    "44": ("Loire-Atlantique", "en Loire-Atlantique"), "45": ("Loiret", "dans le Loiret"), "46": ("Lot", "dans le Lot"),
+    "47": ("Lot-et-Garonne", "dans le Lot-et-Garonne"), "48": ("Lozère", "en Lozère"), "49": ("Maine-et-Loire", "en Maine-et-Loire"),
+    "50": ("Manche", "dans la Manche"), "51": ("Marne", "dans la Marne"), "52": ("Haute-Marne", "en Haute-Marne"),
+    "53": ("Mayenne", "en Mayenne"), "54": ("Meurthe-et-Moselle", "en Meurthe-et-Moselle"), "55": ("Meuse", "dans la Meuse"),
+    "56": ("Morbihan", "dans le Morbihan"), "57": ("Moselle", "en Moselle"), "58": ("Nièvre", "dans la Nièvre"), "59": ("Nord", "dans le Nord"),
+    "60": ("Oise", "dans l’Oise"), "61": ("Orne", "dans l’Orne"), "62": ("Pas-de-Calais", "dans le Pas-de-Calais"),
+    "63": ("Puy-de-Dôme", "dans le Puy-de-Dôme"), "64": ("Pyrénées-Atlantiques", "dans les Pyrénées-Atlantiques"),
+    "65": ("Hautes-Pyrénées", "dans les Hautes-Pyrénées"), "66": ("Pyrénées-Orientales", "dans les Pyrénées-Orientales"),
+    "67": ("Bas-Rhin", "dans le Bas-Rhin"), "68": ("Haut-Rhin", "dans le Haut-Rhin"), "69": ("Rhône", "dans le Rhône"),
+    "70": ("Haute-Saône", "en Haute-Saône"), "71": ("Saône-et-Loire", "en Saône-et-Loire"), "72": ("Sarthe", "dans la Sarthe"),
+    "73": ("Savoie", "en Savoie"), "74": ("Haute-Savoie", "en Haute-Savoie"), "76": ("Seine-Maritime", "en Seine-Maritime"),
+    "77": ("Seine-et-Marne", "en Seine-et-Marne"), "78": ("Yvelines", "dans les Yvelines"), "79": ("Deux-Sèvres", "dans les Deux-Sèvres"),
+    "80": ("Somme", "dans la Somme"), "81": ("Tarn", "dans le Tarn"), "82": ("Tarn-et-Garonne", "dans le Tarn-et-Garonne"),
+    "83": ("Var", "dans le Var"), "84": ("Vaucluse", "dans le Vaucluse"), "85": ("Vendée", "en Vendée"), "86": ("Vienne", "dans la Vienne"),
+    "87": ("Haute-Vienne", "en Haute-Vienne"), "88": ("Vosges", "dans les Vosges"), "89": ("Yonne", "dans l’Yonne"),
+    "90": ("Territoire de Belfort", "dans le Territoire de Belfort"), "91": ("Essonne", "dans l’Essonne"),
+    "92": ("Hauts-de-Seine", "dans les Hauts-de-Seine"), "93": ("Seine-Saint-Denis", "en Seine-Saint-Denis"),
+    "94": ("Val-de-Marne", "dans le Val-de-Marne"), "95": ("Val-d’Oise", "dans le Val-d’Oise"),
+}
 RESERVED_SLUGS = {h[0] for h in HUB_CATEGORIES}
 
 
@@ -613,7 +662,9 @@ HUMAN_LINKS = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.user
 # (même affichage que le menu Catégories) ; les robots lisent la page statique.
 HUB_TO_APP = {"voitures-occasion": ("vehicules", "voitures"), "motos": ("vehicules", "motos"),
               "utilitaires": ("vehicules", "utilitaires"), "vehicules": ("vehicules", ""),
-              "immobilier": ("immobilier", ""), "high-tech": ("hightech", ""), "maison": ("maison", ""),
+              "immobilier": ("immobilier", ""), "maisons-a-vendre": ("immobilier", "vente-maison"),
+              "appartements-a-vendre": ("immobilier", "vente-appartement"), "terrains-a-vendre": ("immobilier", "vente-terrain"),
+              "locations-immobilieres": ("immobilier", "location"), "high-tech": ("hightech", ""), "maison": ("maison", ""),
               "mode": ("mode", ""), "emploi": ("emploi", ""), "services": ("services", "")}
 
 
@@ -888,12 +939,27 @@ def build_hubs(items):
             cities[k] = aname
             by_city[k] = its
             agglo_text[k] = atext
+    # Départements (hors Paris, déjà regroupé) : « Immobilier dans les Pyrénées-Atlantiques », « Maisons à vendre en Gironde »…
+    loc = {}
+    for code, (dname, dphrase) in DEPTS.items():
+        if code == "75":
+            continue
+        k = city_key(dname)
+        if not k or k in cities or k in RESERVED_SLUGS:
+            continue
+        its = [it for it in items if str(it["listing"].get("postal_code") or "").strip()[:2] == code]
+        if len(its) >= MIN_LISTINGS_FOR_DEPT:
+            cities[k] = f"{dname} ({code})"
+            by_city[k] = its
+            loc[k] = dphrase
+            agglo_text[k] = f"{dphrase[0].upper()}{dphrase[1:]} ({code}), dans toutes les communes du département."
+    at = lambda k: loc.get(k) or f"à {cities[k]}"
     cats = [h[0] for h in HUB_CATEGORIES if h[0] in CORE_CATEGORIES or by_cat[h[0]]]
 
     pages = {}
     home = ("Accueil", SITE + "/")
     root = ("Toutes les annonces", hub_url())
-    city_links = lambda cat=None: [(f"{cat_info[cat][1]} à {cities[k]}" if cat else f"Annonces à {cities[k]}",
+    city_links = lambda cat=None: [(f"{cat_info[cat][1]} {at(k)}" if cat else f"Annonces {at(k)}",
                                     hub_url(cat, k)) for k in sorted(cities, key=lambda k: cities[k])
                                    if (not cat and (k in CORE_CITIES or by_city[k])) or
                                    (cat and (cat in CORE_CATEGORIES and k in CORE_CITIES or any(cat in it["cats"] for it in by_city[k])))]
@@ -917,31 +983,33 @@ def build_hubs(items):
 
     # Villes et catégorie + ville
     for k, cname in cities.items():
+        A = at(k)
+        app_city = None if k in loc else cname
         its = by_city[k]
         if not its and k not in CORE_CITIES:
             continue
         ctext = agglo_text.get(k) or CITY_TEXT.get(k, f"{cname} et ses environs.")
-        cat_links = [(f"{cat_info[c][1]} à {cname}", hub_url(c, k)) for c in cats
+        cat_links = [(f"{cat_info[c][1]} {A}", hub_url(c, k)) for c in cats
                      if (c in CORE_CATEGORIES and k in CORE_CITIES) or any(c in it["cats"] for it in its)]
-        pages[k] = (hub_page(f"Petites annonces à {cname} : auto, moto, immobilier | Abracadeal",
-                             f"Petites annonces à {cname}",
-                             f"Achetez et vendez près de chez vous : toutes les petites annonces publiées à {ctext}",
-                             f"Petites annonces à {cname} : {len(its)} annonce{'s' if len(its) > 1 else ''} de particuliers et de professionnels "
+        pages[k] = (hub_page(f"Petites annonces {A} : auto, moto, immobilier | Abracadeal",
+                             f"Petites annonces {A}",
+                             (f"Achetez et vendez près de chez vous : toutes les petites annonces publiées {A}, dans toutes les communes du département." if k in loc else f"Achetez et vendez près de chez vous : toutes les petites annonces publiées à {ctext}"),
+                             f"Petites annonces {A} : {len(its)} annonce{'s' if len(its) > 1 else ''} de particuliers et de professionnels "
                              f"(voitures, motos, immobilier, high-tech...) sur Abracadeal.",
-                             hub_url(None, k), [home, root, (f"Annonces à {cname}", hub_url(None, k))], its,
-                             f"Rubriques à {cname}", cat_links, redirect=app_target(None, cname)), bool(its))
+                             hub_url(None, k), [home, root, (f"Annonces {A}", hub_url(None, k))], its,
+                             f"Rubriques {A}", cat_links, redirect=app_target(None, app_city)), bool(its))
         for c in cats:
             sub = [it for it in its if c in it["cats"]]
             if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
                 continue
             slug, name, plural, _, intro = cat_info[c]
             pages[f"{c}/{k}"] = (hub_page(
-                f"{name} à {cname} | Abracadeal", f"{name} à {cname}",
-                f"Les {plural} à {ctext} {intro}",
-                f"{name} à {cname} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural} publiée{'s' if len(sub) > 1 else ''} "
+                f"{name} {A} | Abracadeal", f"{name} {A}",
+                f"Les {plural} {A}, dans toutes les communes du département. {intro}" if k in loc else f"Les {plural} à {ctext} {intro}",
+                f"{name} {A} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural} publiée{'s' if len(sub) > 1 else ''} "
                 f"par des particuliers et des professionnels sur Abracadeal.",
                 hub_url(c, k), [home, root, (name, hub_url(c)), (cname, hub_url(c, k))], sub,
-                f"Autres rubriques à {cname}", [(n, u) for n, u in cat_links if u != hub_url(c, k)], redirect=app_target(c, cname)), bool(sub))
+                f"Autres rubriques {A}", [(n, u) for n, u in cat_links if u != hub_url(c, k)], redirect=app_target(c, app_city)), bool(sub))
 
     # Fil d'Ariane de chaque annonce : catégorie la plus précise, puis ville si elle a sa page
     for it in items:
