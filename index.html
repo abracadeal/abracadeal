@@ -586,6 +586,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
       </div>
 
       <div class="filters-panel hidden" id="filtersPanel">
+        <button class="filters-close" id="closeFilters" type="button" aria-label="Fermer les filtres">×</button>
         <div class="filters-grid">
           <div class="filter-field">
             <label>Catégorie</label>
@@ -660,7 +661,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
             <div class="immo-filter-shortcuts"><button class="immo-nearby-filter-btn" id="immoNearbyFilterBtn" type="button">📍 Voir les biens autour de moi</button><span class="immo-filter-hint">Pour un rayon autour d’une ville, renseignez d’abord « Ville ou code postal » en haut de la page.</span></div>
           </div>
         </div>
-        <div class="filters-actions"><button class="filter-reset" id="resetFilters" type="button">Réinitialiser les filtres</button><button class="btn ghost" id="createAlertBtn" type="button">🔔 Créer une alerte avec ces critères</button></div>
+        <div class="filters-actions"><button class="filter-reset" id="resetFilters" type="button">Réinitialiser</button><button class="btn ghost" id="createAlertBtn" type="button">🔔 Créer une alerte</button><button id="applyFilters" type="button">Voir les annonces</button></div>
       </div>
 
       <div class="ads-grid" id="adsGrid" aria-busy="true"><div class="ad-card ad-skeleton" aria-hidden="true"><div class="ad-photo"></div><div class="ad-body"><span></span><span></span><span></span></div></div><div class="ad-card ad-skeleton" aria-hidden="true"><div class="ad-photo"></div><div class="ad-body"><span></span><span></span><span></span></div></div><div class="ad-card ad-skeleton" aria-hidden="true"><div class="ad-photo"></div><div class="ad-body"><span></span><span></span><span></span></div></div><div class="ad-card ad-skeleton" aria-hidden="true"><div class="ad-photo"></div><div class="ad-body"><span></span><span></span><span></span></div></div></div>
@@ -1970,5 +1971,7 @@ document.addEventListener('DOMContentLoaded',function(){
 <!-- <script src="assets/space-switch-20261018.js?v=1" defer></script> -->
 <script src="assets/lightbox-zoom-20261101.js?v=1"></script>
 <script src="assets/admin-edit-20261101.js?v=4"></script>
+<link rel="stylesheet" href="assets/filters-apply-20261107.css?v=1">
+<script src="assets/filters-apply-20261107.js?v=1"></script>
 </body>
 </html>

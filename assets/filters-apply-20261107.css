@@ -1,0 +1,13 @@
+/* 07/11/2026 : panneau de filtres — « Voir les annonces » en bouton principal, alerte en secondaire */
+.filters-panel{position:relative}
+.filters-panel .filters-grid{margin-top:34px}
+.filters-panel .filters-close{position:absolute;top:8px;right:8px;width:34px;height:34px;border-radius:50%;border:1px solid #d9cce0;background:#fff;color:#654d6d;font-size:20px;line-height:1;font-weight:800;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.filters-actions{display:flex!important;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:9px}
+.filters-actions #createAlertBtn{background:#fff!important;color:#7a2fa0!important;border:1px solid #d9cce0!important;box-shadow:none!important;font-weight:700!important}
+.filters-actions #createAlertBtn:hover{background:#f7f0fb!important}
+.filters-actions #applyFilters{background:linear-gradient(135deg,#e52c9c,#aa28cc);color:#fff;border:1px solid #d83cae;border-radius:10px;padding:10px 16px;font-weight:800;box-shadow:0 5px 16px rgba(183,39,151,.24);cursor:pointer}
+@media(max-width:760px){
+  .filters-actions{justify-content:stretch}
+  .filters-actions #applyFilters{order:-1;flex:1 1 100%;min-height:46px;font-size:15px}
+  .filters-actions .filter-reset,.filters-actions #createAlertBtn{flex:1 1 0;min-width:0;font-size:12.5px!important;padding:9px 8px!important}
+}
