@@ -213,6 +213,25 @@ async function showroomAction(b: any) {
   if (!/^[0-9a-f-]{36}$/i.test(userId)) return json({ error: "user_id invalide" }, 400);
   if (!/^https?:\/\//i.test(site)) site = "https://" + site;
   try { new URL(site); } catch { return json({ error: "Adresse du site invalide" }, 400); }
+  // 07/11/2026 : l'admin peut imposer un logo ou une bannière précis (adresse d'image), qui remplace l'actuel.
+  const forced: Record<string, string> = {};
+  for (const [key, col] of [["logo_url", "logo_path"], ["banner_url", "banner_path"]] as const) {
+    const u = String(b?.[key] || "").trim();
+    if (!u) continue;
+    if (!/^https:\/\//i.test(u)) return json({ error: key + " invalide" }, 400);
+    const img = await fetchImage(u);
+    if (!img) return json({ error: "Image illisible : " + u }, 400);
+    const path = `${userId}/${col === "logo_path" ? "logo" : "banner"}-${Date.now()}.${img.ext}`;
+    const { error } = await admin.storage.from("pro-showroom").upload(path, img.bytes, { contentType: img.type, upsert: false, cacheControl: "3600" });
+    if (error) return json({ error: error.message }, 500);
+    forced[col] = path;
+  }
+  if (Object.keys(forced).length) {
+    const { data: cur } = await admin.from("pro_showrooms").select("description,banner_path,logo_path").eq("user_id", userId).maybeSingle();
+    const { error } = await admin.from("pro_showrooms").upsert({ user_id: userId, description: cur?.description ?? null, banner_path: cur?.banner_path ?? null, logo_path: cur?.logo_path ?? null, ...forced, updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+    if (error) return json({ error: error.message }, 500);
+    return json({ ok: true, forced });
+  }
   const v = await autofillShowroom(userId, site);
   return json({ ok: true, showroom: v, note: showroomNote(v) });
 }
