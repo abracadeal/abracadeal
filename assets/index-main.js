@@ -4797,6 +4797,7 @@ window.openAd=id=>{
             <div class="detail-specs">
               ${specs.map(([label,value])=>`<div class="detail-spec"><span><i class="dm-spec-icon">${dmSpecIcon(label)}</i>${esc(label)}</span><b>${esc(value)}</b></div>`).join('')}
             </div>
+            ${(()=>{/* 07/11/2026 (Anthony) : surfaces pièce par pièce et proximités, publiées par l'agence */const m=a.category==='immobilier'?realEstateMetaOf(a):{};const blk=(t,list)=>Array.isArray(list)&&list.length?`<div class="detail-immo-equipment-block"><h4 class="detail-immo-equipment-title">${t}</h4><div class="detail-specs">${list.map(x=>{const i=String(x).lastIndexOf(' : ');return `<div class="detail-spec"><span>${esc(i>0?String(x).slice(0,i):String(x))}</span><b>${esc(i>0?String(x).slice(i+3):'')}</b></div>`;}).join('')}</div></div>`:'';return blk('Surfaces',m.roomAreas)+blk('Proximités',m.nearby);})()}
             ${a.category==='immobilier'&&listingEquipmentOf(a).length?`
               <div class="detail-immo-equipment-block">
                 <h4 class="detail-immo-equipment-title">Équipements & prestations</h4>

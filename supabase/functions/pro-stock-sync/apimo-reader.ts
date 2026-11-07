@@ -91,10 +91,11 @@ export function parseApimoDetail(raw:string,url:string){
   // 07/11/2026 (Anthony, Sophie Folley) : « Surfaces » pièce par pièce et « Proximités » de la fiche, recopiées telles quelles
   // à la fin de la description (rien d'inventé : seulement les lignes « libellé + valeur » publiées par l'agence).
   const sectionLines=(block:string)=>[...block.matchAll(/<li\b[^>]*>((?:(?!<\/li>)[\s\S])*?)<span[^>]*>((?:(?!<\/li>)[\s\S])*?)<\/span>\s*<\/li>/gi)].map(m=>[text(m[1]).replace(/\s+/g,' ').trim(),text(m[2]).replace(/\s+/g,' ').trim()]).filter(([l,v])=>l&&v&&l.length<60&&v.length<40);
-  const roomLines=sectionLines(surfaceBlock).map(([l,v])=>'• '+l.replace(/^1\s+/,'')+' : '+v);
-  const nearLines=sectionLines(module('property-info-template-8')).map(([l,v])=>'• '+l+' : '+v);
-  const sectionExtra=[roomLines.length?'Surfaces :\n'+roomLines.join('\n'):'',nearLines.length?'Proximités :\n'+nearLines.join('\n'):''].filter(Boolean).join('\n\n');
-  if(sectionExtra&&!o.description.includes(sectionExtra))o.description=o.description.trim()+'\n\n'+sectionExtra;
+  // (Anthony : « c'est dans les informations clés normalement ») → champs dédiés, affichés dans « Les informations clés », pas dans la description.
+  const roomLines=sectionLines(surfaceBlock).map(([l,v])=>l.replace(/^1\s+/,'')+' : '+v);
+  const nearLines=sectionLines(module('property-info-template-8')).map(([l,v])=>l+' : '+v);
+  if(roomLines.length)o.surfaces_pieces=roomLines.join('\n');
+  if(nearLines.length)o.proximites=nearLines.join('\n');
   return o;
 }
 export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory,fallback?:(html:string,url:string)=>any){
