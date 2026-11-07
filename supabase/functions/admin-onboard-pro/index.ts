@@ -6,6 +6,7 @@
 //            SIRET vérifié, offre Fondateur activée si une place est disponible, demande d'import du site créée.
 //            L'activation + la synchro du site sont faites ensuite par la page admin (admin_review_site_import + pro-stock-sync).
 //            01/11/2026 : vitrine (logo, bannière, présentation) remplie depuis le site du pro, sans rien inventer.
+//  - showroom {user_id,site_url}                      → (07/11/2026) relance la récupération logo / bannière / présentation (ne remplace rien de déjà rempli).
 //  - welcome {user_id,online,pending}                 → mail « vos annonces sont en ligne » avec le lien pour choisir le mot de passe.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
@@ -157,6 +158,8 @@ async function autofillShowroom(userId: string, site: string) {
       let sc = 0;
       if (/logo/i.test(file)) sc += 3;
       if (/\balt=["'][^"']*logo|\b(?:class|id)=["'][^"']*logo/i.test(tag)) sc += 3;
+      // 07/11/2026 (Sophie Folley) : logo dans un bloc « module-logo » (classe sur le conteneur, pas sur l'image)
+      else if (/\b(?:class|id)=["'][^"']*logo[^"']*["'][^<]*>\s*(?:<a\b[^>]*>\s*)?$/i.test(html.slice(Math.max(0, (m.index || 0) - 300), (m.index || 0) + (m[0].length - tag.length)))) sc += 3;
       if ((m.index || 0) < headerEnd) sc += 2;
       const href = (link.match(/\bhref=["']([^"']+)["']/i) || [])[1];
       if (href && homeHref(href)) sc += 2;
@@ -164,7 +167,13 @@ async function autofillShowroom(userId: string, site: string) {
     }
     // bannière (image de partage) et présentation
     const og = metaContent(html, "og:image") || metaContent(html, "twitter:image");
-    const bannerUrl = og ? abs(og) : "";
+    // 07/11/2026 : pas d'image de partage → 1re image du diaporama / bandeau d'accueil du site.
+    let hero = "";
+    if (!og) {
+      const hi = html.search(/\bclass=["'][^"']*(?:slider|hero|banner|bandeau|carousel|diaporama)/i);
+      if (hi > 0) hero = (html.slice(hi, hi + 3000).match(/\b(?:data-image-url|data-src|data-lazy-src|src)=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)["']/i) || [])[1] || "";
+    }
+    const bannerUrl = og ? abs(og) : hero ? abs(hero) : "";
     let desc = metaContent(html, "og:description") || metaContent(html, "description");
     desc = desc.replace(/\s+/g, " ").trim().slice(0, 1000);
     const upd: Record<string, unknown> = {};
@@ -189,10 +198,29 @@ async function autofillShowroom(userId: string, site: string) {
 const showroomNote = (v: { logo: boolean; banner: boolean; description: boolean }) =>
   `Vitrine remplie depuis le site : logo ${v.logo ? "✓" : "— (non trouvé)"}, bannière ${v.banner ? "✓" : "— (non trouvée)"}, présentation ${v.description ? "✓" : "— (non trouvée)"}. Modifiable ensuite par le pro ou par l’admin.`;
 
+async function showroomAction(b: any) {
+  const userId = String(b?.user_id || "");
+  let site = String(b?.site_url || "").trim();
+  if (!/^[0-9a-f-]{36}$/i.test(userId)) return json({ error: "user_id invalide" }, 400);
+  if (!/^https?:\/\//i.test(site)) site = "https://" + site;
+  try { new URL(site); } catch { return json({ error: "Adresse du site invalide" }, 400); }
+  const v = await autofillShowroom(userId, site);
+  return json({ ok: true, showroom: v, note: showroomNote(v) });
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   if (req.method !== "POST") return json({ error: "Méthode non autorisée" }, 405);
   try {
+    // 07/11/2026 : appel interne (clé de service Abracadeal) autorisé uniquement pour « showroom ».
+    const internalKey = req.headers.get("x-internal-moderation-key") || "";
+    if (internalKey) {
+      const { data: secret } = await admin.from("integration_secrets").select("secret_value").eq("name", "pro_stock_moderation_internal").maybeSingle();
+      if (!secret?.secret_value || secret.secret_value !== internalKey) return json({ error: "Clé interne invalide" }, 403);
+      const b = await req.json().catch(() => ({}));
+      if (String(b?.action || "") !== "showroom") return json({ error: "Action interne non autorisée" }, 403);
+      return await showroomAction(b);
+    }
     const auth = req.headers.get("Authorization") || "";
     if (!auth) return json({ error: "Connexion requise" }, 401);
     const caller = createClient(SUPABASE_URL, ANON_KEY, { global: { headers: { Authorization: auth } }, auth: { persistSession: false } });
@@ -204,6 +232,8 @@ Deno.serve(async (req) => {
 
     const body = await req.json().catch(() => ({}));
     const action = String(body?.action || "");
+
+    if (action === "showroom") return await showroomAction(body);
 
     if (action === "lookup") {
       const siret = String(body?.siret || "").replace(/\D/g, "");
