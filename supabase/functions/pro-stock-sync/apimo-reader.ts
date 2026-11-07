@@ -50,6 +50,12 @@ export function parseApimoDetail(raw:string,url:string){
   if(advisorName)o.contact_nom=text(advisorName).replace(/\s+/g,' ').trim();
   if(!advisorName&&/\buser-template-5\b/.test(advisorModule)){const name=advisorModule.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i)?.[1];if(name)o.contact_nom=text(name).replace(/\s+/g,' ').trim();}
   if(advisorPhone)o.contact_telephone=sDecode(advisorPhone).trim();
+  // 07/11/2026 (Anthony, Sophie Folley : un agent différent par bien) : carte conseiller sans lien vers une page « équipe »
+  // (<h3>Prénom NOM <em>Agent Commercial</em></h3> + portable). Uniquement s'il n'y a qu'UNE carte dans le module de la fiche.
+  if(!o.contact_nom){const cards=[...advisorModule.matchAll(/<li\b[^>]*>((?:(?!<\/li>)[\s\S])*)<\/li>/gi)].map(m=>m[1]).filter(c=>/<h3\b/i.test(c));
+    if(cards.length===1){const c=cards[0];const name=text((c.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i)?.[1]||'').replace(/<em\b[\s\S]*?<\/em>/gi,'')).replace(/\s+/g,' ').trim();
+      const tel=c.match(/class="mobile"[\s\S]*?href="tel:([^"]+)"/i)?.[1]||c.match(/href="tel:([^"]+)"/i)?.[1];
+      if(name&&name.length<60){o.contact_nom=name;if(tel&&!o.contact_telephone)o.contact_telephone=sDecode(tel).trim();}}}
   const all=text(summary);
   // 01/11/2026 (Anthony, Croisette : 1490 m² de terrain affichés comme surface habitable, appartements sans surface) :
   // 1) « Surface / Surface habitable / totale / Superficie / Carrez » du sommaire ; 2) floorSize des données structurées de la fiche ;
