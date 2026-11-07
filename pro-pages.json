@@ -7,6 +7,14 @@
   "active": true,
   "short": "weecars-angers"
  },
+ "90c40fb7-ae19-4a67-9451-9aec4a3e4ac8": {
+  "path": "immo/sophie-folley-immobilier-salies-de-bearn",
+  "name": "Sophie Folley Immobilier",
+  "city": "Salies-de-Bearn",
+  "count": 8,
+  "active": true,
+  "short": "sophie-folley-immobilier"
+ },
  "a0a0a0a0-0000-4000-8000-00000000c1a0": {
   "path": "immo/test-api-agence-cannes",
   "name": "TEST API Agence",
