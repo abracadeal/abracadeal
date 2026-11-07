@@ -1467,6 +1467,12 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           <h3>Mon espace professionnel</h3>
           <div style="margin:12px 0 18px;padding:15px;border:1px solid #e8d8ee;border-radius:14px;background:#faf5fc"><strong style="display:block;color:#451657;margin-bottom:6px">Tendances du marché</strong><p class="note">Découvrez les recherches enregistrées par les acheteurs, regroupées anonymement.</p><a class="btn primary" href="vendeur-tendances.html" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;text-align:center">Voir les tendances →</a></div>
           <dl id="companySummary" class="profile-summary"></dl>
+          <div id="proContactEmailBox" style="margin:14px 0 18px;padding:15px;border:1px solid #e8d8ee;border-radius:14px;background:#faf5fc">
+            <label for="proContactEmail" style="display:block;color:#451657;font-weight:800;margin-bottom:6px">E-mail de contact de mes annonces</label>
+            <p class="note" style="margin:0 0 10px;color:#5b4466">Les messages des acheteurs vous sont signalés à cette adresse. Votre e-mail de connexion (<span id="proLoginEmail"></span>) ne change pas.</p>
+            <div style="display:flex;gap:8px;flex-wrap:wrap"><input class="input" id="proContactEmail" type="email" inputmode="email" autocapitalize="none" placeholder="contact@votre-agence.fr" style="flex:1 1 220px;min-width:0"><button class="btn primary" id="proContactEmailSave" type="button">Enregistrer</button></div>
+            <p class="note" id="proContactEmailStatus" style="margin:8px 0 0;color:#5b4466" aria-live="polite"></p>
+          </div>
 <div id="proBillingPanel" class="pro-billing-panel hidden" aria-live="polite">
   <div class="pro-billing-head">
     <div>
@@ -1832,7 +1838,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <script src="assets/option-consent.js?v=20261008-pay-loading2"></script>
 <script src="assets/card-photo-fit-20261101.js?v=5" defer></script>
 <script src="assets/vehicle-title-20261103.js?v=1"></script>
-<script src="assets/index-main.js?v=20261107-feed-edit"></script>
+<script src="assets/index-main.js?v=20261107-contact-email"></script>
 <script src="assets/veh-sub-chips-20261106.js?v=1" defer></script>
 <script src="assets/social-login-20261018.js?v=20261106-site"></script>
 <script src="assets/description-helper-20261013.js?v=3" defer></script>
@@ -1973,5 +1979,6 @@ document.addEventListener('DOMContentLoaded',function(){
 <script src="assets/admin-edit-20261101.js?v=4"></script>
 <link rel="stylesheet" href="assets/filters-apply-20261107.css?v=1">
 <script src="assets/filters-apply-20261107.js?v=1"></script>
+<script src="assets/pro-contact-email-20261107.js?v=1"></script>
 </body>
 </html>

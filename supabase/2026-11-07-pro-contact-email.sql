@@ -1,0 +1,5 @@
+-- 07/11/2026 (Claude) : e-mail de contact des annonces distinct de l'e-mail de connexion.
+-- Appliqué via migration « pro_contact_email » : profiles.contact_email, trigger a0_profile_contact_email sur listing_contacts,
+-- set_my_contact_email(p_email) (pro connecté), admin_set_contact_email(p_user,p_email) (admin).
+-- Les fiches listing_contacts sont mises à jour avec abraca.revision_write pour ne PAS remettre tout le stock en modération.
+-- Alerte e-mail des nouveaux messages (process-message-email-alerts v7) : envoyée à contact_email s'il existe.

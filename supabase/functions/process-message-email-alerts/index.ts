@@ -60,6 +60,13 @@ Deno.serve(async () => {
       const { data: userData, error: userError } =
         await supabase.auth.admin.getUserById(alert.recipient_id);
       if (userError || !userData?.user?.email) continue;
+      // 07/11/2026 : un pro peut choisir une autre adresse pour recevoir les messages de ses annonces (profiles.contact_email).
+      const { data: recipientProfile } = await supabase
+        .from("profiles")
+        .select("contact_email")
+        .eq("id", alert.recipient_id)
+        .maybeSingle();
+      const recipientEmail = recipientProfile?.contact_email || userData.user.email;
 
       // Si le destinataire est actif sur Abracadeal, on garde l'alerte en attente.
       // Elle sera envoyée plus tard uniquement si le message reste non lu après son départ.
@@ -126,7 +133,7 @@ Deno.serve(async () => {
         },
         body: JSON.stringify({
           from: FROM_EMAIL,
-          to: [userData.user.email],
+          to: [recipientEmail],
           subject,
           html
         })

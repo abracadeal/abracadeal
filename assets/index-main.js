@@ -543,6 +543,7 @@ function renderCompanyAccount(){
   $('#companySummary').innerHTML=rows.map(([label,value])=>`<div><dt>${esc(label)}</dt><dd>${esc(value||'À compléter')}</dd></div>`).join('');
   setTimeout(()=>window.loadProBillingPanel?.(),0);
   if(pro)setTimeout(()=>loadProShowroomData(false),0);
+  if(pro)setTimeout(()=>window.fillProContactEmail?.(),0);
 
 }
 $('#signupType').addEventListener('change',syncSignupCompany);
