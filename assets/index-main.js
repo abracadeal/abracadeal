@@ -5527,6 +5527,10 @@ async function hydrateSellerCard(sellerId,listingId){
   if(subEl&&isPro){const who=profile?.display_name||'ce professionnel';subEl.textContent='Tout son stock en ligne';
     sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',sellerId).eq('status','active').eq('visibility_scope','public')
       .then(({count})=>{const el=document.getElementById(`sellerShowroomSub-${listingId}`);if(el&&Number.isFinite(count)&&count>1)el.textContent=`${count} annonces en ligne`;}).catch(()=>{});}
+  /* 07/11/2026 (Anthony) : logo du pro à la place de l'icône boutique sur « Voir le showroom » (icône gardée s'il n'a pas de logo) */
+  if(isPro){sb.from('pro_showrooms').select('logo_path').eq('user_id',sellerId).maybeSingle().then(({data:sr})=>{
+    const u=sr?.logo_path?showroomAssetUrl(sr.logo_path):'';const ico=document.querySelector(`#sellerShowroom-${CSS.escape(listingId)} .ssb-ico`);if(!u||!ico)return;
+    const img=new Image();img.alt='';img.onload=()=>{ico.classList.add('ssb-ico-logo');ico.replaceChildren(img);};img.src=u;}).catch(()=>{});}
   host.innerHTML=`
     <h3>${isPro?`<a href="${showUrl}" target="_blank" rel="noopener" style="color:inherit;text-decoration:none" title="Voir le showroom">${esc(profile?.display_name||'Vendeur professionnel')} ›</a>`:esc(profile?.display_name || 'Vendeur particulier')}</h3>
     <p>${esc(prettyCity(profile?.city||''))}</p>
