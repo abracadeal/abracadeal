@@ -17,7 +17,13 @@ export function atelierRetroCatalogue(html:string){
  const seen=new Set<string>();for(const item of gallery.items){if(!/^[0-9a-f-]{36}$/i.test(item.itemId)||seen.has(item.itemId)||item.isSecure!==false)throw Error('Identité ou accès public Wix non confirmé');seen.add(item.itemId);}
  return gallery.items;
 }
-export const atelierRetroUnavailable=(item:any)=>/\b(?:v[ée]hicule neuf|voiture neuve|0\s*km|en commande|stock usine)\b/i.test(clean(item.metaData?.title))||/^(?:bient[ôo]t|[àa] venir|prochainement|en arrivage|vendue?s?|r[ée]serv[ée]e?s?)(?=[\s:!.,-]|$)/i.test(clean(item.metaData?.title))||/\b(?:v[ée]hicule (?:vendu|r[ée]serv[ée])|sous r[ée]servation)\b/i.test(clean(item.metaData?.description));
+export const atelierRetroUnavailable=(item:any)=>{
+ const title=clean(item.metaData?.title),body=clean(item.metaData?.description);
+ return /\b(?:v[ée]hicule neuf|voiture neuve|0\s*km|en commande|stock usine)\b/i.test(title)
+  ||/^(?:bient[ôo]t|[àa] venir|prochainement|en arrivage)(?=[\s:!.,-]|$)/i.test(title)
+  ||/(?:^|[-–—(\[|])\s*(?:vendue?s?|r[ée]serv[ée]e?s?)(?=[\s)!.,\]|-]|$)(?!\s+(?:avec|par)\b)/i.test(title)
+  ||/\b(?:v[ée]hicule (?:vendu|r[ée]serv[ée])|sous r[ée]servation)\b(?!\s+avec\b)/i.test(body);
+};
 export function parseAtelierRetro(item:any,contact:{phone:string,city:string,postal:string}){
  if(atelierRetroUnavailable(item))return {_sold:1,reference:item.itemId};
  const title=clean(item.metaData?.title),description=clean(item.metaData?.description);if(!title)throw Error('Titre du véhicule absent');

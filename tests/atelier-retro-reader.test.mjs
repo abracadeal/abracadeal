@@ -15,6 +15,9 @@ const mercedes=parseAtelierRetro(byTitle('mercedes'),contact);assert.equal(merce
 const range=parseAtelierRetro(byTitle('range rover'),contact);assert.equal(range.prix,'13600');assert.equal(range.kilometrage,'139600');assert.equal(range.annee,'2016');assert.equal(range.mise_en_circulation,'05/2016');assert.equal(range.boite,'automatique');
 assert.equal(parseAtelierRetro(byTitle('bientôt'),contact)._sold,1);
 assert.equal(atelierRetroUnavailable({metaData:{title:'Véhicule neuf – 0 km'}}),true);
+assert.equal(atelierRetroUnavailable({metaData:{title:'VOLVO C70 – VENDUE'}}),true);
+assert.equal(atelierRetroUnavailable({metaData:{title:'Peugeot 403 (réservée)'}}),true);
+assert.equal(atelierRetroUnavailable({metaData:{title:'Voiture classique',description:'Véhicule vendu avec une garantie de 12 mois'}}),false);
 assert.equal(atelierRetroUnavailable({metaData:{title:'Voiture classique',description:'Distribution neuve et crémaillère neuve'}}),false);
 for(const row of [volvo,jeep,porsche,peugeot,jaguar,range,mercedes]){assert.equal(row.photos.split('|').length,1);assert.equal(row.contact_telephone,'+33687326527');assert.equal(row.ville,'Béziers');assert.match(row.url,/#item-wrapper-/);}
 const changed=html.replace('"totalItemsCount": 8','"totalItemsCount": 9');assert.throws(()=>atelierRetroCatalogue(changed),/partielle/);
