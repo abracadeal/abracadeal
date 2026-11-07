@@ -55,7 +55,9 @@ export function parseApimoDetail(raw:string,url:string){
   if(!o.contact_nom){const cards=[...advisorModule.matchAll(/<li\b[^>]*>((?:(?!<\/li>)[\s\S])*)<\/li>/gi)].map(m=>m[1]).filter(c=>/<h3\b/i.test(c));
     if(cards.length===1){const c=cards[0];const name=text((c.match(/<h3\b[^>]*>([\s\S]*?)<\/h3>/i)?.[1]||'').replace(/<em\b[\s\S]*?<\/em>/gi,'')).replace(/\s+/g,' ').trim();
       const tel=c.match(/class="mobile"[\s\S]*?href="tel:([^"]+)"/i)?.[1]||c.match(/href="tel:([^"]+)"/i)?.[1];
-      if(name&&name.length<60){o.contact_nom=name;if(tel&&!o.contact_telephone)o.contact_telephone=sDecode(tel).trim();}}}
+      const mail=c.match(/href="mailto:([^"?]+)/i)?.[1];
+      if(name&&name.length<60){o.contact_nom=name;if(tel&&!o.contact_telephone)o.contact_telephone=sDecode(tel).trim();if(mail)o.contact_mail_conseiller=sDecode(mail).trim();}}}
+  if(o.contact_nom&&!o.contact_mail_conseiller){const mail=advisor.match(/href="mailto:([^"?]+)/i)?.[1];if(mail)o.contact_mail_conseiller=sDecode(mail).trim();}
   const all=text(summary);
   // 01/11/2026 (Anthony, Croisette : 1490 m² de terrain affichés comme surface habitable, appartements sans surface) :
   // 1) « Surface / Surface habitable / totale / Superficie / Carrez » du sommaire ; 2) floorSize des données structurées de la fiche ;

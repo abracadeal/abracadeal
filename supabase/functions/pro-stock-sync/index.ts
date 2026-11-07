@@ -251,11 +251,12 @@ function listingAdvisor(raw:any){
  const o=normalizeRaw(raw);const name=first(o,['contact_nom','contact_name','agent_name','advisor_name','conseiller_nom','negociateur_nom']).replace(/\s+/g,' ').trim();
  const v=first(o,['contact_telephone','contact_phone','agent_phone','advisor_phone','conseiller_telephone','negociateur_telephone']);
  const phone=String(v||'').replace(/^tel:/i,'').replace(/[\s().-]/g,'');
- return {name,phone:/^(?:\+|00)?[0-9]{8,15}$/.test(phone)?phone:''};
+ const mail=String(first(o,['contact_mail_conseiller','agent_email','advisor_email','conseiller_email','negociateur_email'])||'').trim().toLowerCase();
+ return {name,phone:/^(?:\+|00)?[0-9]{8,15}$/.test(phone)?phone:'',email:/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(mail)?mail:''};
 }
 function attachListingAdvisor(r:any,raw:any){
  const c=listingAdvisor(raw);if(!c.name&&!c.phone)return;
- r.contactName=c.name;r.contactPhone=c.phone;
+ r.contactName=c.name;r.contactPhone=c.phone;r.contactEmail=c.email;/* 07/11/2026 : e-mail de l'agent, réservé aux membres connectés (listing_contacts.agent_email) */
  // 29/10/2026 (Anthony) : ni le nom ni le numéro dans la description. Le nom s'affiche à côté des boutons de contact (IMETA contactName),
  // le numéro reste derrière « Voir le numéro » (membres connectés, listing_contacts.phone).
 }
@@ -1217,7 +1218,7 @@ async function readFeed(feed:any,persistCrawl=false){
 }
 async function moderationSecret(){const{data}=await admin.from('integration_secrets').select('secret_value').eq('name','pro_stock_moderation_internal').maybeSingle();return String(data?.secret_value||'');}
 async function moderateListingInternal(listingId:string){const secret=await moderationSecret();if(!secret)throw new Error('Secret de modération interne absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({listing_id:listingId}),signal:AbortSignal.timeout(90000)});const body=await r.json().catch(()=>({}));if(!r.ok||!body?.ok||!body?.ai_checked)throw new Error(body?.ai_error||body?.error||`Modération incomplète (${r.status})`);return body;}
-async function upsertContact(ownerId:string,listingId:string,row?:any){const [{data:p},{data:u}]=await Promise.all([admin.from('profiles').select('phone').eq('id',ownerId).maybeSingle(),admin.auth.admin.getUserById(ownerId)]);await admin.from('listing_contacts').upsert({listing_id:listingId,owner_id:ownerId,phone:row?.contactPhone||p?.phone||null,contact_email:u?.user?.email||null},{onConflict:'listing_id'});}
+async function upsertContact(ownerId:string,listingId:string,row?:any){const [{data:p},{data:u}]=await Promise.all([admin.from('profiles').select('phone').eq('id',ownerId).maybeSingle(),admin.auth.admin.getUserById(ownerId)]);await admin.from('listing_contacts').upsert({listing_id:listingId,owner_id:ownerId,phone:row?.contactPhone||p?.phone||null,contact_email:u?.user?.email||null,agent_email:row?.contactEmail||null},{onConflict:'listing_id'});}
 // 30/10/2026 : on garde aussi vente / location et le type de bien lus sur le site (sinon une location de parking ou de bureau
 // était devinée d'après le texte, et un local à vendre dont la description parle de « loyer » s'affichait « / mois »).
 function immoMeta(r:any){const keys=['transaction','propertyType','contactName','surface','landSurface','rooms','bedrooms','bathrooms','floor','totalFloors','furnished','yearBuilt','propertyCondition','heating','orientation','neighborhood','dpe','ges','energyConsumption','dpeDate','energyCostMin','energyCostMax','coownership','lots','annualCharges','propertyTax','fees','rentCharges','deposit','mandate','procedure','availableDate','features'];const m:any={};for(const k of keys){const v=r[k];if(v!==null&&v!==undefined&&v!==''&&(!Array.isArray(v)||v.length))m[k]=v;}return m;}

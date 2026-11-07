@@ -5450,7 +5450,9 @@ window.startMessageForListing=async(listingId)=>{
 window.viewListingPhone=async(listingId)=>{
   trackListingEvent(listingId,'phone');/* 01/11/2026 : compteur « Voir le numéro » */
   if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
-  const {data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId});
+  /* 07/11/2026 (Anthony) : annonce d'agence avec un agent → portable de l'agent + numéro de l'agence + e-mail de l'agent (connectés uniquement) */
+  let details=null;{const r=await sb.rpc('get_listing_contact_details',{p_listing_id:listingId});if(!r.error)details=r.data||{};else if(!/function|schema cache/i.test(r.error.message||'')){toast(r.error.message||'Impossible d’afficher le numéro');return;}}
+  let data,error;if(details){data=details.phone||null;}else{({data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId}));}
   if(error){toast(error.message||'Impossible d’afficher le numéro');return;}
   const host=document.getElementById(`phoneContact-${listingId}`);
   if(!data){
@@ -5459,7 +5461,8 @@ window.viewListingPhone=async(listingId)=>{
     toast('Aucun numéro affiché par le vendeur');
     return;
   }
-  if(host) host.innerHTML=`<a class="btn ghost" href="tel:${esc(data)}" onclick="trackListingEvent('${esc(listingId)}','call')">📞 ${esc(data)}</a><div class="contact-login-note">Dites au vendeur que vous l’appelez de la part d’<strong>Abracadeal</strong>.</div>`;
+  const extra=details?.agency_phone||details?.agent_email;
+  if(host) host.innerHTML=`<a class="btn ghost" href="tel:${esc(data)}" onclick="trackListingEvent('${esc(listingId)}','call')">📞 ${extra?'Conseiller · ':''}${esc(data)}</a>${details?.agency_phone?`<a class="btn ghost" style="margin-top:8px" href="tel:${esc(details.agency_phone)}" onclick="trackListingEvent('${esc(listingId)}','call')">📞 Agence · ${esc(details.agency_phone)}</a>`:''}${details?.agent_email?`<a class="btn ghost" style="margin-top:8px;word-break:break-all" href="mailto:${esc(details.agent_email)}">✉️ ${esc(details.agent_email)}</a>`:''}<div class="contact-login-note">Dites au vendeur que vous l’appelez de la part d’<strong>Abracadeal</strong>.</div>`;
   const barBtn=document.getElementById(`dmPhoneBtn-${listingId}`);
   if(barBtn) barBtn.outerHTML=`<a class="dm-action dm-action-ghost" id="dmPhoneBtn-${esc(listingId)}" href="tel:${esc(data)}" onclick="trackListingEvent('${esc(listingId)}','call')">${esc(data)}</a>`;
 };
