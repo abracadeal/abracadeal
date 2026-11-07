@@ -10,7 +10,7 @@ const base='http://www.coteimmobilier.net/fr/detail.htm?cle=';
 const apt=await parseI3v(offline(load('910166694')),base+'910166694&monnaie=2');
 assert.equal(apt.prix,'137000.00');assert.equal(apt.surface,29);assert.equal(apt.pieces,1);assert.equal(apt.chambres,undefined);assert.equal(apt.ville,'Ollainville');assert.equal(apt.code_postal,'91340');assert.equal(apt.charges_annuelles,1050);assert.equal(apt.nombre_lots,46);assert.match(apt.description,/29.82 m²/);assert.equal(apt.photos.split('|').length,10);assert.equal(apt.contact_telephone,'01 64 58 57 00');assert.match(apt.contact_nom,/3 VALLEES/);
 const direct=await parseI3v(offline(load('910165568')),base+'910165568&monnaie=2');assert.equal(direct.contact_telephone,'06 73 73 86 85');assert.equal(direct.contact_nom,'');
-const workshop=await parseI3v(offline(load('910166760')),base+'910166760&monnaie=2');assert.equal(workshop.surface,100);assert.equal(workshop.surface_terrain,395);assert.equal(workshop.pieces,undefined);
+const workshop=await parseI3v(offline(load('910166760')),base+'910166760&monnaie=2');assert.equal(workshop.type_bien,'local professionnel (atelier)');assert.equal(workshop.surface,100);assert.equal(workshop.surface_terrain,395);assert.equal(workshop.pieces,undefined);
 await assert.rejects(()=>parseI3v(load('910166694'),base+'910166760&monnaie=2'),/Identité/);
 assert.throws(()=>i3vLinks('<div>1 bien(s) trouvé(s)</div><a href="http://www.coteimmobilier.net/fr/detail.htm?cle=910126694">X</a>'),/hors agence/);
 assert.equal(i3vIdentity({externalUrl:base+'910166694',ref:'910166694'}),'i3v|910166694');assert.equal(i3vIdentity({externalUrl:'https://example.org',ref:'910166694'}),null);

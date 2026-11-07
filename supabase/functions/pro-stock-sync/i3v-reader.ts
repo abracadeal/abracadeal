@@ -26,12 +26,15 @@ export async function parseI3v(html:string,url:string){
  const description=clean(html.match(/class="detail-bien-desc-content clearfix"[^>]*>\s*<p>([\s\S]*?)<\/p>/i)?.[1]||'');
  if(!description)throw Error('Description I3V absente');
  const city=String(ld.address?.addressLocality||''),postal=String(ld.address?.postalCode||''),type=clean(html.match(/<h1 class="detail-bien-type">([\s\S]*?)<\/h1>/i)?.[1]||'');
- const row:any={reference:id,url,titre:type+' '+city,type_bien:type,prix:ld.offers.price,transaction:'vente',ville:city,code_postal:postal,description,_exact_source_city:city,_source_specific_fields:true};
+ const row:any={reference:id,url,titre:type+' '+city,type_bien:/^atelier$/i.test(type)?'local professionnel (atelier)':type,prix:ld.offers.price,transaction:'vente',ville:city,code_postal:postal,description,_exact_source_city:city,_source_specific_fields:true};
  if(!type||!city)throw Error('Type/ville I3V absent');
  // Use the visible property's specs, never the hidden default/NC values or
  // the agency/seller address. Description remains literal if figures differ.
  const specs=html.match(/class="detail-bien-specs">([\s\S]*?)<\/ul>/i)?.[1]||'';
  for(const [icon,key] of [['surface','surface'],['piece','pieces'],['chambre','chambres'],['terrain','surface_terrain']]){const value=clean(specs.match(new RegExp('class="ico-'+icon+'"[^>]*>[\\s\\S]*?<\\/span>\\s*([\\s\\S]*?)<\\/li>','i'))?.[1]||'').match(/^([\d., ]+)/)?.[1];if(value&&Number(value.replace(/ /g,'').replace(',','.'))>0)row[key]=Number(value.replace(/ /g,'').replace(',','.'));}
+ if(Number(ld.numberOfBathroomsTotal)>0)row.salles_de_bain=Number(ld.numberOfBathroomsTotal);
+ const carrez=description.match(/Surface CARREZ\s*:\s*([\d.,]+)/i)?.[1];if(carrez)row.surface_carrez=Number(carrez.replace(',','.'));
+ const energyCosts=clean(html.match(/class="detail-bien-dpe clearfix">([\s\S]*?)<!-- Affichage du detail des pièces -->/i)?.[1]||'').match(/entre\s+([\d., ]+)€\s+et\s+([\d., ]+)€/i);if(energyCosts){row.cout_energie_min=Number(energyCosts[1].replace(/ /g,'').replace(',','.'));row.cout_energie_max=Number(energyCosts[2].replace(/ /g,'').replace(',','.'));}
  if(/^\d{4}$/.test(ld.yearBuilt||'')&&Number(ld.yearBuilt)>1700)row.annee_construction=Number(ld.yearBuilt);
  const photos=new Map<string,string>();for(const m of html.matchAll(/<img\b[^>]*>/gi)){if(!/class="photo-slideshow photo-big"/.test(m[0]))continue;const src=m[0].match(/(?:data-src|src)="([^"]+)"/)?.[1];if(!src)continue;const image=new URL(sDecode(src));if(image.hostname!=='assets.adaptimmo.com'||!image.pathname.startsWith('/photos-biens/91016/'+id+'_')||isPlaceholderPhoto(image.toString()))continue;if(!photos.has(image.pathname))photos.set(image.pathname,image.toString());}
  row.photos=[...photos.values()].join('|');
@@ -62,6 +65,6 @@ export async function readI3v(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
   counts.push(own.size);for(const d of own)ids.add(d);
  }
  const digest=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode([...ids].sort().join('|'))))].map(x=>x.toString(16).padStart(2,'0')).join('');
- const rows:any=await eachDetailResumable('i3v-v1:'+digest,[...ids],async url=>{const page=await fetchHtml(new URL(url));if(page.url.hostname!=='www.coteimmobilier.net')throw Error('Fiche I3V redirigée');return parseI3v(page.text,url);},memory,4);
+ const rows:any=await eachDetailResumable('i3v-v2:'+digest,[...ids],async url=>{const page=await fetchHtml(new URL(url));if(page.url.hostname!=='www.coteimmobilier.net')throw Error('Fiche I3V redirigée');return parseI3v(page.text,url);},memory,4);
  rows.total=ids.size;rows.platform='I3V (Adaptimmo, agence 91016)';rows.sector='immobilier';rows.stats={...rows.stats,expected_total:ids.size,sale_total:counts[0],rental_total:counts[1]};return rows;
 }
