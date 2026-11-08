@@ -4080,10 +4080,14 @@ function rememberSearch(){
 }
 // Les photos envoyées depuis le site ont « Abracadeal » incrusté à l'envoi (compressImage). Celles des flux Pro
 // (import automatique) ne passent pas par là : on affiche alors le filigrane en surimpression.
+/* 08/11/2026 (PageSpeed « navigation agentique » / accessibilité) : la carte n'est plus déclarée comme un lien
+   (elle contient des boutons : favori, flèches photo…). Le titre devient un vrai lien vers l'annonce : lecteurs d'écran,
+   assistants IA et Google le suivent ; un clic ouvre la fiche comme avant (toute la carte reste cliquable). */
+function cardTitleLink(a){const t=adSeoTitle(a);if(/^<a\b/.test(t))return t;/* annonces publiques : adSeoTitle donne déjà le lien /annonce/<id>/ */const id=String(a?.id||'');return `<a class="card-title-link" href="/?annonce=${encodeURIComponent(id)}" style="color:inherit;text-decoration:none" onclick="if(!(event.ctrlKey||event.metaKey||event.shiftKey||event.button===1)){event.preventDefault();event.stopPropagation();openAd('${esc(id)}')}">${t}</a>`;}
 function abracaWmOverlay(a){return String(a?.source||'').startsWith('feed:')?' photo-watermark--overlay':'';}
 function personalizedCard(a,extra=''){
   const photos=visiblePhotosFor(a);const pic=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
-  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${adSeoTitle(a)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
+  return `<article class="personalized-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')"><div class="personalized-photo">${pic}<div class="card-top-badges">${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div><div class="personalized-body"><div class="personalized-meta">${esc(catLabel(a.category))} · ${esc(a.city||'')}</div><h3 class="personalized-title">${cardTitleLink(a)}</h3><div class="personalized-price">${cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}${extra}</div></article>`;
 }
 function renderRecentViewed(){
   const sec=$('#recentViewedSection'),grid=$('#recentViewedGrid');if(!sec||!grid)return;
@@ -4135,11 +4139,11 @@ function renderHomeFeatured(){
     const photos=visiblePhotosFor(a);
     const img=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
-    return `<article class="home-featured-card" onclick="openAd('${a.id}')" role="link" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openAd('${a.id}')}">
+    return `<article class="home-featured-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')">
       <div class="home-featured-photo">${img}<div class="card-top-badges"><span class="featured-badge">À LA UNE</span>${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${listingCardActions(a)}</div>
       <div class="home-featured-body">
         <div class="home-featured-meta">${esc(category)}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''} · ${a.seller_type==='professionnel'?'Pro':'Particulier'}</div>
-        <h3 class="home-featured-title">${adSeoTitle(a)}</h3>
+        <h3 class="home-featured-title">${cardTitleLink(a)}</h3>
         <div class="home-featured-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}
@@ -4318,14 +4322,14 @@ function renderAds(){
       ?`<button class="mini-btn" onclick="approveAd('${a.id}')">Accepter</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`
       :(needsSecondCheck?`<button class="mini-btn" onclick="validateAutoPublishedAd('${a.id}')">✓ Vérifiée, garder en ligne</button><button class="mini-btn danger" onclick="rejectAd('${a.id}')">Refuser</button>`:'');
     const featured=listingIsFeatured(a);
-    return `<article class="ad-card ${a.category==='immobilier'?'immo-card':''} ${featured?'featured-card':''}" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')" role="link" tabindex="0" onkeydown="if((event.key==='Enter'||event.key===' ')&&!event.target.closest('button,a')){event.preventDefault();openAd('${a.id}')}">
+    return `<article class="ad-card ${a.category==='immobilier'?'immo-card':''} ${featured?'featured-card':''}" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')">
       <div class="ad-photo"${photoAttrs}>${img}${carouselHtml}<div class="card-top-badges">${featured?`<span class="featured-badge">À LA UNE</span>`:''}${a.seller_type==='professionnel'?`<span class="pro-card-badge">PRO</span>`:''}</div>${!moderationMode?listingCardActions(a):''}</div>
       <div class="ad-body">
         ${moderationRiskHTML(a)}
         ${statusBadge}
         ${secondCheckBadge}
         ${(moderationMode||onlyMine)?`<div class="ad-meta">${esc(vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category))}${equipmentTypeOf(a)?' · '+esc(equipmentTypeOf(a)):''}</div>`:''}
-        <h3 class="ad-title">${adSeoTitle(a)}</h3>
+        <h3 class="ad-title">${cardTitleLink(a)}</h3>
         <div class="ad-price">${a.category==='immobilier'?realEstateCardPriceHtml(a):cataloguePrice(a)}</div>${a.loa&&a.loa_monthly?`<div class="loa-detail">LOA dès ${Number(a.loa_monthly).toLocaleString('fr-FR')} €/mois</div>`:''}
         ${a.category==='immobilier'?realEstateCardSpecsHtml(a):''}
         ${a.category==='immobilier'&&realEstateMetaOf(a).neighborhood?`<div class="immo-card-location-extra">${esc(realEstateMetaOf(a).neighborhood)}</div>`:''}

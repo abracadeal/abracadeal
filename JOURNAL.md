@@ -24,6 +24,7 @@
   - Le préchargement du catalogue (`window.__abracaStartCatalog`) démarre après l'affichage de la bannière (petit script juste après l'`<img>` de la bannière), et index-main.js le lance lui-même s'il n'est pas encore parti.
   - Mesuré en 4G lente + CPU ×4 : premier affichage 1,68 → 1,42 s, premières annonces 1,84 → 1,48 s.
 - `public_catalog` allégé : `private.catalog_meta_line` retire aussi de l'IMETA `roomAreas`, `nearby`, `contactName` et `fees`, et `catalog_description_cut` passe à vrai pour ces annonces, pour que la fiche recharge la description complète. Recalcul fait sans déclencher les triggers (`session_replication_role=replica`).
+- Cartes d'annonces (accueil, « À la une », suggestions) : plus de `role="link"` / `tabindex` sur l'`<article>`, qui contenait des boutons (favori, flèches photo). Le titre est le vrai lien : `cardTitleLink()`, qui reprend le lien `/annonce/<id>/` d'`adSeoTitle()` ou, pour une annonce non publique, `/?annonce=<id>`. Toute la carte reste cliquable comme avant.
 - Note LCP mobile : la valeur PageSpeed (~5,9 s) est une simulation. Mesuré en 4G lente + CPU ×4, la bannière s'affiche vers 1,6 s. Retarder les scripts après `load` gagnerait ~1,5 s au score mais fait apparaître les annonces plus tard avec des sauts de mise en page (CLS) : écarté.
 
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)
