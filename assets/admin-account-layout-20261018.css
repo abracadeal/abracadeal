@@ -113,3 +113,7 @@ html body .admin-stats .aal-subtitle,html body #adminStatsPanel .aal-subtitle,ht
 #loggedInAccount.aal-is-admin .aal-mine .account-shortcuts>:not(#accountMessagesBtn):not(.aal-infos){display:none!important}
 #loggedInAccount.aal-is-admin .aal-admin .aal-grid{grid-template-columns:1fr!important}
 #loggedInAccount.aal-is-admin .aal-mine .account-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#7b27a0,#e2459f)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(150,40,140,.28)!important;text-decoration:none}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-ico{width:26px;height:26px;padding:9px;box-sizing:content-box;border-radius:14px;background:rgba(255,255,255,.18);color:#fff!important}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-tile-label{display:flex;flex-direction:column;gap:3px;font-size:1rem!important;font-weight:900;color:#fff}
+#loggedInAccount.abraca-admin-layout .aal-home-sub{font-size:.78rem;font-weight:600;opacity:.92}

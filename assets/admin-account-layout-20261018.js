@@ -102,8 +102,8 @@
     var admin = section('Administration', 'aal-admin');
     var grid = document.createElement('div'); grid.className = 'aal-grid';
     /* 08/11/2026 : nouvel espace admin (tout en un, à jour en continu) en tête */
-    var home = tile('Espace admin', 'finance', null, 'admin.html'); home.classList.add('aal-import');
-    var hsub = document.createElement('span'); hsub.className = 'aal-import-sub'; hsub.textContent = 'À traiter, pros, prospection, trafic, argent, technique';
+    var home = tile('Ouvrir l’espace admin', 'moderate', null, 'admin.html'); home.classList.add('aal-home');
+    var hsub = document.createElement('span'); hsub.className = 'aal-home-sub'; hsub.textContent = 'À traiter, pros, prospection, trafic, argent, technique';
     home.querySelector('.aal-tile-label').appendChild(hsub); home.classList.add('aal-keep'); grid.appendChild(home);
     var mod = tile('Modérer', 'moderate', clickOf('#accountModerationBtn'));
     var badge = document.createElement('span'); badge.className = 'aal-badge'; badge.hidden = true; mod.appendChild(badge);
