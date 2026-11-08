@@ -5,7 +5,7 @@
   body.abs-on .abs-hide{display:none!important}
 
   .abs-bar{position:fixed;z-index:2147482000;left:0;right:0;top:0;height:calc(56px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 6px 0;box-sizing:border-box;
-    display:grid;grid-template-columns:48px minmax(0,1fr) 48px;align-items:center;
+    display:grid;grid-template-columns:104px minmax(0,1fr) 104px;align-items:center;
     background:rgba(27,13,45,.94);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);
     color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;transition:box-shadow .2s ease}
   .abs-bar.abs-scrolled{box-shadow:0 6px 22px rgba(12,3,24,.28)}
@@ -76,4 +76,10 @@
   body.abs-admin th,body.abs-admin td{white-space:nowrap;font-size:13px!important;padding:9px 10px!important;color:var(--aa-ink)!important;border-color:var(--aa-line)!important}
   body.abs-admin th{background:#2a1a36!important;color:#fff!important}
   body.abs-admin pre,body.abs-admin code{background:#0f0a14!important;color:#eadcf3!important;border-radius:10px}
+}
+/* 08/11/2026 (Anthony : « les boutons retour sont affreux ») : pastille « ‹ Retour » */
+@media (max-width:760px){
+  .abs-back{width:auto!important;height:38px!important;margin-left:6px!important;padding:0 14px 0 8px!important;gap:4px;border-radius:999px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.18)!important;font:700 15px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;justify-self:start}
+  .abs-back svg{width:20px!important;height:20px!important}
+  .abs-back:hover{background:rgba(255,255,255,.2)!important}
 }

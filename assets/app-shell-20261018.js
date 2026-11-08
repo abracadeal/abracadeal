@@ -86,7 +86,7 @@
     /* Barre */
     var bar = el('header', 'abs-bar');
     bar.setAttribute('role', 'banner');
-    var back = el('button', 'abs-back', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg>');
+    var back = el('button', 'abs-back', '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 5l-7 7 7 7"/></svg><span class="abs-back-label">Retour</span>'); /* 08/11/2026 : bouton « Retour » en pastille lisible */
     back.type = 'button'; back.setAttribute('aria-label', 'Retour');
     back.addEventListener('click', goBack);
     var title = el('div', 'abs-title'); title.textContent = cleanTitle();
