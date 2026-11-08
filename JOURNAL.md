@@ -1,3 +1,7 @@
+## 2026-11-08 — Accueil : « Récemment consultées » retirée (Claude)
+
+- Décision d'Anthony : une seule rangée personnalisée sur l'accueil, on garde « D'après vos recherches récentes ». `renderRecentViewed()` masque la section et sort (code gardé). `index-main.js?v=20261108-recent`.
+
 ## 2026-11-08 — Plus de prix affichés aux Fondateurs (Claude)
 
 - Décision d'Anthony (08/11) : on ne parle plus de prix aux Fondateurs. `pro-fondateur.html` (partie connectée) : carte Fondateurs → note « Offre Fondateurs » sans « puis X € HT / mois à partir du 13e mois » ; confirmation de changement de formule d'un Fondateur → « gratuit jusqu’à la fin de vos 12 mois » sans montant. Mails de prospection (aucun prix ni nombre d'annonces) et mails Fondateurs (`process-pro-transactional-emails`) déjà conformes. Grille des autres formules inchangée.

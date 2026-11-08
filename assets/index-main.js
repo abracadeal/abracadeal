@@ -4091,6 +4091,8 @@ function personalizedCard(a,extra=''){
 }
 function renderRecentViewed(){
   const sec=$('#recentViewedSection'),grid=$('#recentViewedGrid');if(!sec||!grid)return;
+  // 08/11/2026 (Anthony) : une seule rangée personnalisée sur l'accueil — on garde « D'après vos recherches récentes ». Code conservé pour plus tard.
+  sec.classList.add('hidden');grid.innerHTML='';return;
   const ids=readLocalList(RECENT_VIEWED_KEY);const byId=new Map((allAds||[]).map(a=>[a.id,a]));const items=ids.map(id=>byId.get(id)).filter(Boolean).slice(0,8);
   if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}grid.innerHTML=items.map(a=>personalizedCard(a)).join('');sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
