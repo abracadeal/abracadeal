@@ -8,30 +8,34 @@
   --ah-card:#24123b;--ah-card2:#2c1648;--ah-line:rgba(255,255,255,.09)
 }
 html{background:#160922!important}
-body{background:#160922!important;color:#f4eefb!important;font-family:'DM Sans',system-ui,-apple-system,sans-serif!important}
-body button,body input,body select,body textarea{font-family:'DM Sans',system-ui,-apple-system,sans-serif}
-body h1{font-family:Fraunces,Georgia,serif!important;font-weight:700!important;letter-spacing:0!important;color:#fff!important}
-body h2,body h3{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:0}
-body h2{color:#fff}
+html:root body.abs-admin{--aa-card:#24123b;--aa-card2:#2c1648;--aa-line:rgba(255,255,255,.09);--aa-sub:#b9a8c9;--aa-ink:#f4eefb;--aa-bg:#160922;--aa-accent:#ec409d}
+html:root body.abs-admin h1,html:root body.abs-admin h2,html:root body.abs-admin h3{font-family:Fraunces,Georgia,serif!important;letter-spacing:0!important}
+html:root body.abs-admin th{background:#2c1648!important}
+html:root body.abs-admin input:not([type=checkbox]):not([type=radio]),html:root body.abs-admin select,html:root body.abs-admin textarea{background:#1d0e30!important}
+html:root body{background:#160922!important;color:#f4eefb!important;font-family:'DM Sans',system-ui,-apple-system,sans-serif!important}
+html:root body button,html:root body input,html:root body select,html:root body textarea{font-family:'DM Sans',system-ui,-apple-system,sans-serif}
+html:root body h1{font-family:Fraunces,Georgia,serif!important;font-weight:700!important;letter-spacing:0!important;color:#fff!important}
+html:root body h2,html:root body h3{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:0}
+html:root body h2{color:#fff}
 /* Cartes, encadrés, blocs repliables */
-body .card,body .panel,body section.card,body .metric,body details.card,body details.fold,body .box,body .tile,body main>section{
+html:root body .card,html:root body .panel,html:root body section.card,html:root body .metric,html:root body details.card,html:root body details.fold,html:root body .box,html:root body .tile,html:root body main>section{
   background:var(--ah-card)!important;border:1px solid var(--ah-line)!important;border-radius:16px!important;box-shadow:none!important}
-body .metric span,body .metric small,body .metric label{text-transform:none!important;letter-spacing:0!important;color:var(--muted)!important;font-weight:600!important}
-body .metric strong{font-family:'DM Sans',sans-serif}
-body summary{cursor:pointer}
+html:root body .metric span,html:root body .metric small,html:root body .metric label{text-transform:none!important;letter-spacing:0!important;color:var(--muted)!important;font-weight:600!important}
+html:root body .metric strong{font-family:'DM Sans',sans-serif}
+html:root body summary{cursor:pointer}
 /* Champs */
-body input[type=text],body input[type=search],body input[type=email],body input[type=number],body input[type=url],body input[type=tel],body input:not([type]),body select,body textarea{
+html:root body input[type=text],html:root body input[type=search],html:root body input[type=email],html:root body input[type=number],html:root body input[type=url],html:root body input[type=tel],html:root body input:not([type]),html:root body select,html:root body textarea{
   background:#1d0e30!important;color:#f4eefb!important;border:1px solid var(--ah-line)!important;border-radius:12px!important}
-body input:focus,body select:focus,body textarea:focus{border-color:#ec409d!important;outline:none!important;box-shadow:0 0 0 3px rgba(236,64,157,.15)!important}
+html:root body input:focus,html:root body select:focus,html:root body textarea:focus{border-color:#ec409d!important;outline:none!important;box-shadow:0 0 0 3px rgba(236,64,157,.15)!important}
 /* Boutons */
-body .btn,body button.btn,body a.btn{border-radius:12px!important;font-weight:700!important}
-body .btn.primary,body .btn-primary,body button.primary{background:linear-gradient(135deg,#ec409d,#ff69bd)!important;color:#fff!important;border-color:transparent!important}
+html:root body .btn,html:root body button.btn,html:root body a.btn{border-radius:12px!important;font-weight:700!important}
+html:root body .btn.primary,html:root body .btn-primary,html:root body button.primary{background:linear-gradient(135deg,#ec409d,#ff69bd)!important;color:#fff!important;border-color:transparent!important}
 /* Tableaux */
-body table{border-collapse:collapse}
-body th{color:var(--muted)!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important}
-body td,body th{border-color:var(--ah-line)!important}
+html:root body table{border-collapse:collapse}
+html:root body th{color:var(--muted)!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important}
+html:root body td,html:root body th{border-color:var(--ah-line)!important}
 /* Anciens en-têtes de page : même fond que l'admin */
-body .top,body .topbar{background:rgba(22,9,34,.94)!important;border-bottom:1px solid var(--ah-line)!important}
-body .muted,body .sub{color:var(--muted)!important}
+html:root body .top,html:root body .topbar{background:rgba(22,9,34,.94)!important;border-bottom:1px solid var(--ah-line)!important}
+html:root body .muted,html:root body .sub{color:var(--muted)!important}
 /* Ancienne page Finances (admin-pilotage) */
-body main>section h2{margin-top:0}
+html:root body main>section h2{margin-top:0}

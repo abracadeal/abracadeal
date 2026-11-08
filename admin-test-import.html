@@ -558,6 +558,6 @@ init();
 document.addEventListener('error',ev=>{const im=ev.target;if(!(im instanceof HTMLImageElement)||im.dataset.httpNote||!/^http:\/\//i.test(im.getAttribute('src')||''))return;im.dataset.httpNote='1';const n=document.createElement('div');n.textContent='Photo en http (site sans https) : invisible ici, copiée chez nous à la publication';n.style.cssText='position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-size:12px;color:#cbb6dd';im.style.visibility='hidden';const box=im.parentElement;if(box){if(getComputedStyle(box).position==='static')box.style.position='relative';box.appendChild(n);}},true);
 (function(){document.querySelectorAll('.fold-n[data-count]').forEach(n=>{const box=document.getElementById(n.dataset.count);if(!box)return;const upd=()=>{const c=box.querySelectorAll('.req').length;n.textContent=c?String(c):'';};new MutationObserver(upd).observe(box,{childList:true});upd();});})();
 </script>
-<link rel="stylesheet" href="assets/admin-theme-20261108.css?v=1">
+<link rel="stylesheet" href="assets/admin-theme-20261108.css?v=2">
 <script src="assets/admin-subnav-20261108.js?v=2" defer></script>
 </body></html>
