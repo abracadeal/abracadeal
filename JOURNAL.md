@@ -1,3 +1,8 @@
+## 2026-11-08 — Annonces synchronisées : plus de limite de temps (Claude)
+
+- Décision d'Anthony : les annonces reprises par flux (`source like 'feed:%'`) n'expirent plus ; la limite de 60 jours reste pour les annonces saisies à la main. `set_pro_listing_expiry` met `expires_at`/`expiry_reminder_sent_at` à null pour les annonces de flux (trigger étendu à `source`, `expires_at`). 438 annonces actives passées sans expiration (aucune remodération : seule la date change ; 5 À la une intactes). Plus aucun mail « votre annonce expire » pour elles.
+- À surveiller : si un flux s'arrête, ses annonces restent en ligne → l'onglet Technique de `admin.html` signale les flux en erreur.
+
 ## 2026-11-08 — Nouvel espace admin `admin.html` (Claude)
 
 - Demande d'Anthony : admin propre, rubriques cohérentes, chiffres toujours à jour. `admin.html` + `assets/admin-home-20261108.{js,css}` : 6 onglets (Aujourd'hui = à traiter + chiffres du jour + derniers pros ; Pros ; Prospection ; Trafic ; Argent ; Technique + outils). Un appel `admin_overview()` (SECURITY DEFINER, is_admin) + `admin_traffic_stats`, `admin_prospect_tracking`, `admin_search_popularity`, `admin_storage_usage`. Actualisation toutes les 30 s (page visible), au retour sur l'onglet/l'appli et via le bouton « À jour ».
