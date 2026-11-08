@@ -4504,7 +4504,7 @@ header #flowErrorsBtn{
 /* 08/11/2026 (Anthony : « réduire la taille de la bannière… sur desktop ») : sur ordinateur seulement, bannière plus basse,
    image entière et centrée (les côtés prennent la couleur du fond de l'image). Le téléphone ne change pas. */
 @media(min-width:761px){
-  .hero .banner-frame.banner-main-live{background:linear-gradient(90deg,#180229,#1f0437 50%,#160226)!important;border-radius:22px;overflow:hidden!important;max-height:none!important}
+  .hero .banner-frame.banner-main-live{background:radial-gradient(ellipse at center,#1f0437 0%,#170228 55%,transparent 100%)!important;border-radius:0;overflow:hidden!important;max-height:none!important;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
   .hero .banner-frame.banner-main-live .banner-main-image{width:auto!important;max-width:100%!important;height:230px!important;max-height:230px!important;object-fit:contain!important;margin:0 auto!important}
 }
 /* 08/11/2026 (Anthony : « le bandeau Fondateur est gros aussi ») : bandeau plus fin sur ordinateur (69 px -> environ 44 px). */
