@@ -17,6 +17,7 @@
 - `thumbImgAttrs()` (index-main.js) génère maintenant `srcset` 360w / 720w via wsrv.nl (WebP, `fit=outside`, petit côté = largeur) avec `sizes="auto, (max-width: 760px) 50vw, 320px"`.
 - Secours en cas d'erreur, géré par le filet photo d'index-app.js (`mark()`) : il retire le `srcset`, puis essaie `data-full` (miniature stockée), puis `data-full2` (photo d'origine), puis la photo Abracadeal par défaut. Testé avec chaque source en panne.
 - Ne pas remettre d'`onerror` inline sur ces images : il doublerait le filet et sauterait une étape.
+- Sauts de mise en page (CLS 0,088 depuis le passage des scripts en `defer`) corrigés : le bandeau Fondateurs mobile est affiché par un petit script juste après `#founderTopbar` (visiteur sans session), et la ligne `#abracaSmartSearchInfo` est maintenant écrite dans index.html (smart-search la réutilise). Résultat mesuré : plus aucun saut.
 - Note LCP mobile : la valeur PageSpeed (~5,9 s) est une simulation. Mesuré en 4G lente + CPU ×4, la bannière s'affiche vers 1,6 s. Retarder les scripts après `load` gagnerait ~1,5 s au score mais fait apparaître les annonces plus tard avec des sauts de mise en page (CLS) : écarté.
 
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)

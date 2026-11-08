@@ -61,12 +61,12 @@ function init(){
  const query=$('searchQuery'),search=$('searchBtn');
  if(!query||!search||search.dataset.smartSearchAuto)return;
  search.dataset.smartSearchAuto='1';
- const info=document.createElement('div');
+ // 08/11/2026 : la ligne d'info est déjà dans index.html (place réservée = la page ne « saute » plus à l'arrivée du script).
+ const info=$('abracaSmartSearchInfo')||document.createElement('div');
  info.id='abracaSmartSearchInfo';
  info.setAttribute('role','status');
  info.style.cssText='font-size:12px;margin-top:5px;min-height:16px;color:inherit';
- const host=query.closest('.search-card');
- host?.insertAdjacentElement('afterend',info);
+ if(!info.isConnected){const host=query.closest('.search-card');host?.insertAdjacentElement('afterend',info);}
  // Capture phase: reset + interprétation avant le gestionnaire de recherche principal.
  // Entrée déclenche déjà search.click() dans le gestionnaire du site.
  search.addEventListener('click',()=>{

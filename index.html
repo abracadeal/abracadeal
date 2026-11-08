@@ -409,6 +409,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
       <button type="button" class="founder-topbar-cta" onclick="openModal('founderOfferModal')">Devenir Fondateur</button>
     </div>
   </div>
+<script>/* 08/11/2026 : bandeau Fondateurs affiché dès le premier affichage pour les visiteurs sans session (évite que la page « saute » de 49 px quand les scripts arrivent ; index-main.js le retire ensuite si un compte est connecté). */try{var k='sb-jplzvxmpbpjssyinozap-auth-token';if(!localStorage.getItem(k)&&!sessionStorage.getItem(k))document.getElementById('founderTopbar').classList.add('show-mobile')}catch(_){}</script>
   <section class="hero-shell">
     <div class="hero container">
       <div class="banner-frame banner-main-live">
@@ -421,7 +422,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
           <input class="field" id="searchQuery" type="text" placeholder="Rechercher" aria-label="Rechercher une annonce">
           <input id="searchCity" type="hidden" value="">
           <button class="search-btn" id="searchBtn" type="button">Rechercher</button>
-        </div>
+        </div><div id="abracaSmartSearchInfo" role="status" style="font-size:12px;margin-top:5px;min-height:16px;color:inherit"></div>
         <button type="button" class="search-filters-link" id="heroFiltersBtn">☰ Filtres</button>
       </div>
       <div class="hero-trust-line" aria-label="Nos engagements"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Annonces modérées</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Dépôt gratuit</span><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>Contact direct</span></div>
@@ -2001,7 +2002,7 @@ document.addEventListener('DOMContentLoaded',function(){
 
 
 
-<script src="assets/smart-search-20260924.js?v=20261102-sans-ia" defer></script>
+<script src="assets/smart-search-20260924.js?v=20261108-cls" defer></script>
 <script src="assets/share-listing-20260922.js?v=20261106-fb" defer></script>
 <script src="assets/thumb-fit-20261009.js?v=5" defer></script>
 <script src="assets/install-app-20261018.js?v=6" defer></script>
