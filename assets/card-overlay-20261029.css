@@ -80,3 +80,12 @@ html body .detail-photo-count,html body #detailModal .detail-photo-count{right:a
 .photo-fit{position:relative;overflow:hidden;isolation:isolate;background:#140a1c!important}
 .photo-fit::before{content:"";position:absolute;inset:-24px;background:var(--photo-bg) center/cover no-repeat;filter:blur(18px) brightness(.62) saturate(1.1);z-index:-1;pointer-events:none}
 .photo-fit>img,html body main#top #resultats .ad-card .ad-photo.photo-fit img{object-fit:contain!important;background:transparent!important}
+
+/* 08/11/2026 (Anthony : « ça clignote encore un peu » sur « À la une », mobile) : les cartes à la une ont un halo doré animé
+   et un badge doré animé, posés sur la photo et son fond flou. Sur iPhone, chaque image de l'animation redessinait aussi la
+   photo (et son flou) → léger scintillement. La zone photo, son fond flou et le badge ont maintenant chacun leur propre calque :
+   l'animation continue, mais la photo n'est plus redessinée. */
+.ad-photo,.home-featured-photo,.personalized-photo{transform:translateZ(0);-webkit-transform:translateZ(0);contain:paint;-webkit-backface-visibility:hidden;backface-visibility:hidden}
+.ad-photo>img,.home-featured-photo>img,.personalized-photo>img{-webkit-backface-visibility:hidden;backface-visibility:hidden;transform:translateZ(0)}
+.photo-fit::before{transform:translateZ(0);will-change:transform}
+.featured-badge{will-change:background-position,filter;transform:translateZ(0)}
