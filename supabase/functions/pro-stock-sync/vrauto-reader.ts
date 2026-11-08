@@ -40,7 +40,12 @@ export function vrAutoRow(r:any,script:string,contact:{name:string,phone:string,
  if(r.premiereMain===true)row.historique=[row.historique,'Première main'].filter(Boolean).join('|');
  return row;
 }
-export async function readVrAuto(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory){
+export async function vrAutoDedupe(row:any,digest:(u:string)=>Promise<string|null>){
+ const seen=new Set<string>(),photos:string[]=[];
+ for(const u of row.photos.split('|')){const hash=await digest(u);if(!hash)throw Error('Photo VR Auto inaccessible : '+u);if(!seen.has(hash)){seen.add(hash);photos.push(u);}}
+ return {...row,photos:photos.join('|')};
+}
+export async function readVrAuto(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory,digest?:(u:string)=>Promise<string|null>){
  const home=await fetchHtml(new URL(BASE+'/')),catalogue=await fetchHtml(new URL(BASE+'/vehicules'));
  if(!isVrAuto(home.url)||!isVrAuto(catalogue.url))throw Error('VR Auto redirigé hors du site');
  const ld=JSON.parse(home.text.match(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/i)?.[1]||'null');
@@ -50,6 +55,6 @@ export async function readVrAuto(_url:URL,fetchHtml:Fetcher,memory?:CrawlMemory)
  const data=await fetchHtml(dataUrl);if(!isVrAuto(data.url))throw Error('Données VR Auto redirigées');const records=vrAutoData(data.text),rows=new Map<string,any>();
  for(const r of records){const row=vrAutoRow(r,data.text,contact);if(row)rows.set(row.url,row);}
  const hash=[...new Uint8Array(await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify([...rows.values()]))))].map(x=>x.toString(16).padStart(2,'0')).join('');
- const out:any=await eachDetailResumable('vrauto-v1:'+hash,[...rows.keys()],async u=>rows.get(u),memory,8);
+ const out:any=await eachDetailResumable('vrauto-v2:'+hash,[...rows.keys()],async u=>digest?vrAutoDedupe(rows.get(u),digest):rows.get(u),memory,4);
  out.total=rows.size;out.platform='VR Auto (catalogue public du showroom)';out.sector='vehicules';out.stats={...out.stats,expected_total:rows.size,published_records:records.length,excluded:records.length-rows.size};return out;
 }

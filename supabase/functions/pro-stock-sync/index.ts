@@ -1043,7 +1043,7 @@ async function readFeed(feed:any,persistCrawl=false){
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
   if(isAtelierRetro(url)){feed.sector='vehicules';return readAtelierRetro(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
-  if(isVrAuto(url)){feed.sector='vehicules';return readVrAuto(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
+  if(isVrAuto(url)){feed.sector='vehicules';return readVrAuto(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isI3v(url)){feed.sector='immobilier';return readI3v(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isSitea(url)){feed.sector='immobilier';return readSitea(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isBerge(url)){feed.sector='immobilier';return readBerge(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
@@ -1354,7 +1354,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v1:|atelier-retro-v1:)/.test(cp.data.state.scope||'')){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v2:|atelier-retro-v1:)/.test(cp.data.state.scope||'')){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }

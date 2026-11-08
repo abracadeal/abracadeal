@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';import fs from 'node:fs';
-import {vrAutoData,vrAutoDescription,vrAutoRow,vrAutoIdentity,readVrAuto} from '../supabase/functions/pro-stock-sync/vrauto-reader.ts';import {cpuReset} from '../supabase/functions/pro-stock-sync/cpu-meter.ts';
+import {vrAutoData,vrAutoDescription,vrAutoRow,vrAutoIdentity,vrAutoDedupe,readVrAuto} from '../supabase/functions/pro-stock-sync/vrauto-reader.ts';import {cpuReset} from '../supabase/functions/pro-stock-sync/cpu-meter.ts';
 const load=n=>fs.readFileSync(new URL('./fixtures/vrauto/'+n,import.meta.url),'utf8');const data=load('catalogue.js'),records=vrAutoData(data),c={name:'VR Auto',phone:'+33678312183',city:'Vaulx-en-Velin',postal:'69120'};
 assert.equal(records.length,3);assert.equal(vrAutoData(data.replace('];',',\n];')).length,3);assert.throws(()=>vrAutoData('window.VEHICULES=[process.exit()];'));assert.throws(()=>vrAutoData('window.VEHICULES='+JSON.stringify([records[0],records[0]])+';'),/Identité/);
 const row=vrAutoRow(records[0],data,c);assert.equal(row.reference,records[0].id);assert.equal(row.prix,8990);assert.equal(row.kilometrage,132000);assert.equal(row.mise_en_circulation,'12/2014');assert.equal(row.places,undefined);assert.equal(row.portes,undefined);assert.equal(row.sellerie,undefined);assert.equal(row.equipements,undefined);assert.match(row.description,/Volkswagen Golf 1.4 TSI 125ch de 2014, 132\s000 km, Essence/);assert.match(row.description,/garantie 6 à 12 mois/);assert.equal(row.photos.split('|').length,15);
@@ -9,6 +9,8 @@ const duplicate=vrAutoRow({...records[0],photos:[...records[0].photos,records[0]
 // replay and invalidation after a source price/ID change, including completed cache.
 const many=Array.from({length:35},(_,i)=>({...records[0],id:'vro-test'+i}));let script=data.replace(data.slice(data.indexOf('['),data.indexOf('];')+1),JSON.stringify(many)),state,result;
 const mem={load:async()=>state,save:async s=>state=structuredClone(s)};const get=async u=>({url:u,text:u.pathname.includes('data.js')?script:u.pathname==='/vehicules'?load('stock.html'):load('home.html')});
-for(let p=0;p<5;p++){cpuReset();result=await readVrAuto(new URL('https://garagevrauto.fr'),get,mem);if(p===0)assert.equal(result.length,8);}
-assert.equal(result.length,35);assert.equal(result.partial,false);assert.equal(result.total,35);many[0].prix=9999;script=script.replace('"prix":8990','"prix":9999');cpuReset();result=await readVrAuto(new URL('https://garagevrauto.fr'),get,mem);assert.equal(result.length,8);assert.equal(result[0].prix,9999);assert.equal(result.partial,true);
-console.log('VR Auto: literal safety, complete array, scoped IDs, own gallery, absent defaults, published description, availability, 5-pass resume and source invalidation OK');
+for(let p=0;p<9;p++){cpuReset();result=await readVrAuto(new URL('https://garagevrauto.fr'),get,mem);if(p===0)assert.equal(result.length,4);}
+assert.equal(result.length,35);assert.equal(result.partial,false);assert.equal(result.total,35);many[0].prix=9999;script=script.replace('"prix":8990','"prix":9999');cpuReset();result=await readVrAuto(new URL('https://garagevrauto.fr'),get,mem);assert.equal(result.length,4);assert.equal(result[0].prix,9999);assert.equal(result.partial,true);
+console.log('VR Auto: literal safety, complete array, scoped IDs, own gallery, absent defaults, published description, availability, 9-pass resume and source invalidation OK');
+
+const pixels=await vrAutoDedupe({photos:'https://a/1.jpg|https://a/2.jpg|https://a/3.jpg'},async u=>u.endsWith('3.jpg')?'second-image':'same-image');assert.equal(pixels.photos,'https://a/1.jpg|https://a/3.jpg');await assert.rejects(()=>vrAutoDedupe({photos:'https://a/blocked.jpg'},async()=>null),/inaccessible/);
