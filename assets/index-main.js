@@ -583,9 +583,12 @@ document.getElementById('editCompanyBtn')?.addEventListener('click',async()=>{
   document.getElementById('companyForm')?.classList.remove('hidden');
   document.getElementById('editCompanyBtn')?.classList.add('hidden');
   const status=document.getElementById('companySaveStatus');if(status)status.textContent='Chargement de votre showroom…';
-  await loadProShowroomData(true);
-  if(status)status.textContent='';
-  document.getElementById('accountCompanyDescription')?.focus();
+  // 08/11/2026 : le chargement ne doit plus rester bloqué sur « Chargement… » en cas d'erreur.
+  try{await loadProShowroomData(true);if(status)status.textContent='';}
+  catch(err){console.warn('Showroom',err);if(status)status.textContent='Impossible de charger votre showroom pour le moment. Réessayez dans un instant.';}
+  const live=document.querySelector('#companyForm .pro-showroom-live')||document.getElementById('companyForm');
+  live?.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>document.getElementById('accountCompanyDescription')?.focus({preventScroll:true}),500);
 });
 document.getElementById('cancelCompanyBtn')?.addEventListener('click',()=>{renderCompanyAccount();document.getElementById('editCompanyBtn')?.focus()});
 document.getElementById('companyForm')?.addEventListener('submit',saveProShowroom);
@@ -6772,7 +6775,7 @@ function refreshProShowroomPreview(){
   const mine=(allAds||[]).filter(a=>a.owner_id===currentUser?.id&&a.status==='active'&&a.visibility_scope!=='pro');
   const ac=document.getElementById('proShowroomAdsCount'),at=document.getElementById('proShowroomAdsTitle'),box=document.getElementById('proShowroomAdsPreview');
   if(ac)ac.textContent='('+mine.length+')';if(at)at.textContent=mine.length+' annonce'+(mine.length>1?'s':'')+' en ligne';
-  if(box)box.innerHTML=mine.length?mine.slice(0,6).map(a=>'<div class="pro-showroom-mini-ad"><b>'+esc(a.title||'Annonce')+'</b><span>'+esc(a.city||'')+(a.price?' · '+formatPrice(a.price):'')+'</span></div>').join(''):'<div class="note">Aucune annonce active pour le moment.</div>';
+  if(box)box.innerHTML=mine.length?mine.slice(0,6).map(a=>'<div class="pro-showroom-mini-ad"><b>'+esc(a.title||'Annonce')+'</b><span>'+esc(a.city||'')+(a.price?' · '+money(a.price):'')+'</span></div>').join(''):'<div class="note">Aucune annonce active pour le moment.</div>';
 }
 document.getElementById('proBannerChangeBtn')?.addEventListener('click',e=>{e.stopPropagation();document.getElementById('accountCompanyBanner')?.click()});
 document.getElementById('proShowroomCoverLive')?.addEventListener('click',()=>document.getElementById('accountCompanyBanner')?.click());

@@ -117,3 +117,7 @@ html body .admin-stats .aal-subtitle,html body #adminStatsPanel .aal-subtitle,ht
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-ico{width:26px;height:26px;padding:9px;box-sizing:content-box;border-radius:14px;background:rgba(255,255,255,.18);color:#fff!important}
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-tile-label{display:flex;flex-direction:column;gap:3px;font-size:1rem!important;font-weight:900;color:#fff}
 #loggedInAccount.abraca-admin-layout .aal-home-sub{font-size:.78rem;font-weight:600;opacity:.92}
+
+/* 08/11/2026 : mise en évidence de la rubrique visée par une tuile (Mes infos) */
+@keyframes aalFlash{0%{box-shadow:0 0 0 0 rgba(219,39,119,.0)}25%{box-shadow:0 0 0 4px rgba(219,39,119,.45)}100%{box-shadow:0 0 0 0 rgba(219,39,119,0)}}
+.aal-flash{animation:aalFlash 1.5s ease;border-radius:16px}

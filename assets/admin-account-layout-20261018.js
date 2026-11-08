@@ -78,7 +78,12 @@
     imp.querySelector('.aal-tile-label').appendChild(isub);
     pgrid.appendChild(imp);
     pgrid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
-    pgrid.appendChild(tile('Ma vitrine', 'star', function () { var c = $('#companyAccountSection'); if (c) c.scrollIntoView({ behavior: 'smooth', block: 'start' }); }));
+    /* 08/11/2026 (Anthony : « Ma vitrine ne fonctionne pas ») : ouvre directement l'éditeur de la vitrine (aperçu en direct). */
+    pgrid.appendChild(tile('Ma vitrine', 'star', function () {
+      var e = $('#editCompanyBtn'), f = $('#companyForm');
+      if (f && !f.classList.contains('hidden')) { var l = f.querySelector('.pro-showroom-live') || f; l.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+      if (e) e.click();
+    }));
     var formulesTile = tile('Formules', 'finance', null, 'pro-fondateur.html');
     pgrid.appendChild(formulesTile);
     /* 02/11/2026 (Anthony) : un Fondateur en période gratuite ne voit pas les formules payantes —
@@ -185,7 +190,14 @@
         b.textContent = ''; b.appendChild(icon(m[1]));
         var t = document.createElement('span'); t.className = 'aal-tile-label'; t.textContent = m[2]; b.appendChild(t);
       });
-      var infos = tile('Mes infos', 'user', function () { var s = dash.querySelector('.profile-edit-box'); if (s) s.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+      /* 08/11/2026 : « Mes infos » visait une section masquée : on vise la vraie rubrique « Mes informations » et on la met en évidence. */
+      var infos = tile('Mes infos', 'user', function () {
+        var sum = $('#profileSummary'); var s = sum && sum.closest('section');
+        if (!s) return;
+        s.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        s.classList.remove('aal-flash'); void s.offsetWidth; s.classList.add('aal-flash');
+        setTimeout(function () { s.classList.remove('aal-flash'); }, 1600);
+      });
       infos.classList.add('aal-infos'); nav.appendChild(infos);
       /* Base de données après Mon espace */
       var db = $('#adminDatabasePanel');
