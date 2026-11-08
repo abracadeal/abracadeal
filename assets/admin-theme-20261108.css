@@ -39,3 +39,4 @@ html:root body .top,html:root body .topbar{background:rgba(22,9,34,.94)!importan
 html:root body .muted,html:root body .sub{color:var(--muted)!important}
 /* Ancienne page Finances (admin-pilotage) */
 html:root body main>section h2{margin-top:0}
+html:root body .grid .metric,html:root body .grid>div>.metric{background:none!important;border:0!important;border-radius:0!important;padding:2px 0 0!important}

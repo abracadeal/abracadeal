@@ -1,3 +1,7 @@
+## 2026-11-08 — Pages admin : même habillage que admin.html (Claude)
+
+- `assets/admin-theme-20261108.css` chargé en dernier sur les 10 pages admin (couleurs, DM Sans / Fraunces, cartes, champs, boutons, tableaux). Sélecteurs `html:root body …` pour passer devant le thème mobile `body.abs-admin` d'app-shell (dont il redéfinit les variables `--aa-*`). Ne touche pas la structure des pages.
+
 ## 2026-11-08 — Admin : outils toujours accessibles, sous-menus (Claude)
 
 - Demande d'Anthony : Modération & co trop cachés dans « Technique ». `assets/admin-subnav-20261108.js` : barre d'outils (Tableau de bord, Modération, Imports, Prospection, Annonces, Diffusion, API, Vacances, Entre Pro, Commerce, Données, Finances) avec pastilles (à modérer + signalements, imports, réponses OK), sous les onglets d'`admin.html` et en haut de toutes les pages admin. Réutilise le client Supabase de la page (jamais un 2e client : risques de déconnexion).
