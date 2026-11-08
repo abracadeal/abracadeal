@@ -4486,6 +4486,6 @@ header #flowErrorsBtn{
 
 /* 08/11/2026 (Anthony) : logo lampe + « Abracadeal » en haut à gauche, à la place du texte */
 .brand-logo-pic{display:block;line-height:0}
-.brand-logo-img{display:block;height:44px;width:auto;max-width:none}
+.brand-logo-img{display:block;height:36px;width:auto;max-width:none}
 .mobile-brand .brand-logo-img{height:34px}
 .desktop-brand{display:flex;align-items:center}
