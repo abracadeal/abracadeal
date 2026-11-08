@@ -723,11 +723,13 @@ function abracaNormalizePhone(value=''){
   if(/^\+[1-9]\d{7,14}$/.test(compact)) return compact;
   return null;
 }
-async function abracaPhoneAvailable(phone,accountType='particulier'){
+async function abracaPhoneAvailable(phone,accountType='particulier',email=''){
   const normalized=abracaNormalizePhone(phone);
   const type=['particulier','professionnel'].includes(accountType)?accountType:'particulier';
   if(!normalized) return {ok:false,normalized:null,message:'Indiquez un numéro de téléphone valide.'};
-  const {data,error}=await sb.rpc('abracadeal_phone_available',{p_phone:normalized,p_account_type:type});
+  // 08/11/2026 : l'e-mail permet aux comptes internes pré-autorisés (internal_account_invites) de réutiliser un numéro.
+  const args={p_phone:normalized,p_account_type:type}; if(email) args.p_email=email;
+  const {data,error}=await sb.rpc('abracadeal_phone_available',args);
   if(error) return {ok:false,normalized,message:'Impossible de vérifier le numéro pour le moment.'};
   if(!data) return {ok:false,normalized,message:'Ce numéro est déjà utilisé pour un compte '+(type==='professionnel'?'professionnel':'particulier')+'.'};
   return {ok:true,normalized,message:''};
@@ -804,7 +806,7 @@ $('#signupForm').addEventListener('submit',async e=>{
     }
     if(siteUrl&&!siteConsent){status.textContent='Coche la case d’autorisation pour que nous puissions reprendre les annonces de ton site.';$('#signupSiteConsent').focus();return;}
     const stock_site=siteUrl&&siteConsent?{url:siteUrl,consent:true,consented_at:new Date().toISOString()}:null;
-    const phoneCheck=await abracaPhoneAvailable(rawPhone,type);
+    const phoneCheck=await abracaPhoneAvailable(rawPhone,type,$('#signupEmail').value.trim());
     if(!phoneCheck.ok){
       status.textContent=phoneCheck.message;
       toast(phoneCheck.message);
