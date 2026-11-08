@@ -1448,6 +1448,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     // 08/11/2026 : les vignettes ont aussi un srcset (versions allégées) : on le retire, sinon le
     // navigateur ignorerait le nouveau src. Ordre de secours : miniature (data-full) -> originale (data-full2) -> photo Abracadeal.
     if(img.hasAttribute('srcset')) img.removeAttribute('srcset');
+    // 08/11/2026 : version allégée (wsrv) en échec/lente → retenue pour ne plus la redemander à chaque redessin des cartes.
+    if(img.dataset.light && !img.dataset.abracaTried1){try{(window.__abracaSlowImgs||(window.__abracaSlowImgs=new Set())).add(img.getAttribute('src'));}catch(_){}}
     if(img.dataset.full && img.getAttribute('src')!==img.dataset.full && !img.dataset.abracaTried1){
       img.dataset.abracaTried1='1';
       img.onerror=null;
@@ -1482,6 +1484,34 @@ document.addEventListener('DOMContentLoaded',()=>{
     sweep();
   }
   new MutationObserver(sweep).observe(document.documentElement,{childList:true,subtree:true});
+  /* 08/11/2026 (Anthony : vignettes vides) : la version allégée passe par un service externe (wsrv.nl). S'il tarde,
+     la vignette restait vide (invisible tant que pas chargée). Une vignette visible à l'écran qui n'est pas chargée
+     au bout de 2,5 s bascule sur la miniature stockée chez nous. */
+  if('IntersectionObserver' in window){
+    const watched=new WeakSet();
+    const io=new IntersectionObserver(function(entries){
+      entries.forEach(function(en){
+        const img=en.target;
+        if(!en.isIntersecting) return;
+        io.unobserve(img);
+        setTimeout(function(){
+          if(!img.isConnected || !img.dataset.light || img.dataset.abracaTried1) return;
+          if(img.complete && img.naturalWidth>0) return;
+          mark(img);
+        },2500);
+      });
+    });
+    const watch=function(){
+      document.querySelectorAll('img[data-light]').forEach(function(img){
+        if(watched.has(img)) return;
+        watched.add(img);
+        if(img.complete && img.naturalWidth>0) return;
+        io.observe(img);
+      });
+    };
+    watch();
+    new MutationObserver(watch).observe(document.documentElement,{childList:true,subtree:true});
+  }
 })();
 
 

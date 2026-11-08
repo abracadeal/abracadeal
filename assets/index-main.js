@@ -225,16 +225,28 @@ function abracaWsrv(u,w,fit){return 'https://wsrv.nl/?url='+encodeURIComponent(u
 // 03/11/2026 (Anthony : « ça fait souvent les photos qui chargent pas entières ») : la vignette reste invisible (fond de la carte)
 // jusqu'à ce qu'elle soit entièrement chargée, puis apparaît en fondu — plus de photo à moitié dessinée.
 try{document.head.insertAdjacentHTML('beforeend','<style id="abracaThumbFade">img[data-fade]{opacity:0;transition:opacity .25s ease}img[data-fade].is-loaded{opacity:1}</style>')}catch(_){}
+/* 08/11/2026 (Anthony : « la vignette saute comme si la photo clignote ») : les cartes sont redessinées plusieurs fois
+   (chargement, favoris, noms des pros…) et chaque nouvelle image repartait invisible puis réapparaissait en fondu.
+   Une photo déjà affichée une fois est maintenant remise directement, sans fondu. */
+window.__abracaShownImgs=window.__abracaShownImgs||new Set();
+window.__abracaSlowImgs=window.__abracaSlowImgs||new Set(); /* versions allégées (wsrv) en échec ou trop lentes : on ne les redemande plus */
 function thumbImgAttrs(path){
   const full=photoUrl(path), t=thumbUrl(path);
-  const fade=`data-fade onload="this.classList.add('is-loaded')"`;
-  if(t===full)return `src="${esc(full)}" ${fade}`;
   const ext=/^https?:\/\/wsrv\.nl\//.test(t);
   const base=ext?String(path):t;
-  const set=`${abracaWsrv(base,360)} 360w, ${abracaWsrv(base,720)} 720w`;
-  /* secours en cas d'erreur (géré par le filet photo d'index-app.js) : miniature stockée, puis photo d'origine */
+  const light=(t===full)?'':abracaWsrv(base,720);
+  const fadeFor=src=>window.__abracaShownImgs.has(src)
+    ?`onload="this.classList.add('is-loaded')"`
+    :`data-fade onload="this.classList.add('is-loaded');window.__abracaShownImgs.add(this.getAttribute('src'))"`;
+  if(!light)return `src="${esc(full)}" ${fadeFor(full)}`;
+  if(window.__abracaSlowImgs.has(light)){
+    const direct=ext?full:t;
+    return `src="${esc(direct)}" ${ext?'':`data-full="${esc(full)}"`} ${fadeFor(direct)}`;
+  }
+  const set=`${abracaWsrv(base,360)} 360w, ${light} 720w`;
+  /* secours en cas d'erreur ou de lenteur (géré par le filet photo d'index-app.js) : miniature stockée, puis photo d'origine */
   const back=ext?`data-full="${esc(full)}"`:`data-full="${esc(t)}" data-full2="${esc(full)}"`;
-  return `src="${esc(abracaWsrv(base,720))}" srcset="${esc(set)}" sizes="auto, (max-width: 760px) 50vw, 320px" ${back} ${fade}`;
+  return `src="${esc(light)}" data-light="1" srcset="${esc(set)}" sizes="auto, (max-width: 760px) 50vw, 320px" ${back} ${fadeFor(light)}`;
 }
 function normalizeType(v){return String(v||'').toLowerCase().startsWith('pro')?'professionnel':'particulier'}
 
