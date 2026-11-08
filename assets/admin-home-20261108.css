@@ -88,3 +88,8 @@ a{color:inherit}
 .ah-gauge{height:12px;border-radius:999px;background:rgba(255,255,255,.08);overflow:hidden}
 .ah-gauge i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--ok),#7fe0b0)}
 .ah-gauge.warn i{background:linear-gradient(90deg,var(--gold),var(--bad))}
+.ah-sub,.ah-chips{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin:12px 0 2px}
+.ah-sub::-webkit-scrollbar,.ah-chips::-webkit-scrollbar{display:none}
+.ah-sub button,.ah-chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--card);color:var(--ink);font:700 .8rem 'DM Sans',sans-serif;padding:7px 12px;border-radius:10px;cursor:pointer}
+.ah-sub button::before{content:'↓ ';color:var(--muted)}
+.ah-chips button.on{background:#fff;color:#1b0d2d}

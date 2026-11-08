@@ -12,7 +12,7 @@
 <script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
-<link rel="stylesheet" href="assets/admin-home-20261108.css?v=1">
+<link rel="stylesheet" href="assets/admin-home-20261108.css?v=2">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
@@ -34,6 +34,7 @@
     <button type="button" data-tab="money">Argent</button>
     <button type="button" data-tab="tech">Technique</button>
   </nav>
+  <div class="ah-wrap" id="ahTools"></div>
 </header>
 
 <main class="ah-wrap" id="ahMain">
@@ -50,6 +51,7 @@
 
   <section class="ah-panel" data-panel="pros" hidden>
     <div class="ah-kpis" id="ahProsKpis"></div>
+    <div class="ah-chips" id="ahProFilter"><button type="button" data-f="all" class="on">Tous</button><button type="button" data-f="stock">Avec annonces</button><button type="button" data-f="empty">Sans annonce</button><button type="button" data-f="une">À la une</button><button type="button" data-f="feedbad">Flux en erreur</button></div>
     <div class="ah-filter"><input id="ahProSearch" type="search" placeholder="Chercher un pro (nom, ville, e-mail)" autocomplete="off"></div>
     <div class="ah-list" id="ahPros"></div>
     <div class="ah-links"><a href="pro-pro.html">Entre Pro (Pro/Pro) ›</a><a href="admin-recherche.html">Chercher une annonce ›</a></div>
@@ -97,22 +99,10 @@
     <div class="ah-list" id="ahFeeds"></div>
     <h2>Stockage des photos</h2>
     <div class="ah-vat" id="ahStorage"></div>
-    <h2>Outils</h2>
-    <div class="ah-tools">
-      <a href="moderation.html">Modération</a>
-      <a href="admin-test-import.html">Imports de sites</a>
-      <a href="admin-partenaires.html">API partenaires</a>
-      <a href="admin-diffusion.html">Diffusion</a>
-      <a href="admin-recherche.html">Base des annonces</a>
-      <a href="pro-pro.html">Entre Pro (Pro/Pro)</a>
-      <a href="admin-vacances.html">Vacances</a>
-      <a href="admin-commerce.html">Offres commerce</a>
-      <a href="admin-retention.html">Conservation des données</a>
-      <a href="admin-pilotage.html">Ancien tableau Finances</a>
-    </div>
   </section>
 </main>
 
-<script src="assets/admin-home-20261108.js?v=2"></script>
+<script src="assets/admin-home-20261108.js?v=3"></script>
+<script src="assets/admin-subnav-20261108.js?v=2"></script>
 </body>
 </html>

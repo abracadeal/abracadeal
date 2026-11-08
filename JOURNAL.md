@@ -1,3 +1,8 @@
+## 2026-11-08 — Admin : outils toujours accessibles, sous-menus (Claude)
+
+- Demande d'Anthony : Modération & co trop cachés dans « Technique ». `assets/admin-subnav-20261108.js` : barre d'outils (Tableau de bord, Modération, Imports, Prospection, Annonces, Diffusion, API, Vacances, Entre Pro, Commerce, Données, Finances) avec pastilles (à modérer + signalements, imports, réponses OK), sous les onglets d'`admin.html` et en haut de toutes les pages admin. Réutilise le client Supabase de la page (jamais un 2e client : risques de déconnexion).
+- `admin.html` : sous-menu automatique par rubrique (un bouton par section, défilement), filtres Pros (Tous / Avec annonces / Sans annonce / À la une / Flux en erreur). Section « Outils » de Technique retirée (doublon de la barre).
+
 ## 2026-11-08 — Annonces synchronisées : plus de limite de temps (Claude)
 
 - Décision d'Anthony : les annonces reprises par flux (`source like 'feed:%'`) n'expirent plus ; la limite de 60 jours reste pour les annonces saisies à la main. `set_pro_listing_expiry` met `expires_at`/`expiry_reminder_sent_at` à null pour les annonces de flux (trigger étendu à `source`, `expires_at`). 438 annonces actives passées sans expiration (aucune remodération : seule la date change ; 5 À la une intactes). Plus aucun mail « votre annonce expire » pour elles.

@@ -6,6 +6,7 @@
 (function () {
   'use strict';
   var sb = window.supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co', 'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+  window.__abracaAdminSb = sb;
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   var nf = function (n) { return Number(n || 0).toLocaleString('fr-FR'); };
@@ -88,7 +89,15 @@
   function renderPros(d) {
     var pros = d.pros || [];
     var q = ($('ahProSearch').value || '').trim().toLowerCase();
-    var list = q ? pros.filter(function (p) { return [p.name, p.display_name, p.city, p.email].join(' ').toLowerCase().indexOf(q) >= 0; }) : pros;
+    var f = state.proFilter || 'all';
+    var feedBad = function (p) { return p.feed && p.feed.last_error && (!p.feed.last_success_at || Date.now() - new Date(p.feed.last_success_at) > 864e5); };
+    var list = pros.filter(function (p) {
+      if (f === 'stock' && !(Number(p.active_listings) > 0)) return false;
+      if (f === 'empty' && Number(p.active_listings) > 0) return false;
+      if (f === 'une' && !(Number(p.featured_now) > 0)) return false;
+      if (f === 'feedbad' && !feedBad(p)) return false;
+      return !q || [p.name, p.display_name, p.city, p.email].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
     var withStock = pros.filter(function (p) { return Number(p.active_listings) > 0; }).length;
     $('ahProsKpis').innerHTML = kpi('Pros inscrits', nf(pros.length)) + kpi('Avec annonces en ligne', nf(withStock), pros.length - withStock ? nf(pros.length - withStock) + ' sans annonce' : '') +
       kpi('Fondateurs', nf(pros.filter(function (p) { return p.founder; }).length)) +
@@ -210,6 +219,24 @@
     state.days = Number(b.dataset.days);
     document.querySelectorAll('#ahDays button').forEach(function (x) { x.classList.toggle('on', x === b); });
     loadTraffic();
+  });
+  $('ahProFilter').addEventListener('click', function (e) {
+    var b = e.target.closest('button[data-f]'); if (!b) return;
+    state.proFilter = b.dataset.f;
+    document.querySelectorAll('#ahProFilter button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    if (state.data) renderPros(state.data);
+  });
+  /* Sous-menu de chaque rubrique : une pastille par section (titres h2), un appui fait défiler jusqu'à la section. */
+  document.querySelectorAll('.ah-panel').forEach(function (panel) {
+    var hs = panel.querySelectorAll('h2'); if (hs.length < 2) return;
+    var nav = document.createElement('div'); nav.className = 'ah-sub';
+    hs.forEach(function (h, i) {
+      h.id = h.id || ('s-' + panel.dataset.panel + '-' + i);
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = h.textContent.replace(/\s*\(.*\)$/, '');
+      b.addEventListener('click', function () { var y = h.getBoundingClientRect().top + window.scrollY - document.querySelector('.ah-top').offsetHeight - 8; window.scrollTo({ top: y, behavior: 'smooth' }); });
+      nav.appendChild(b);
+    });
+    panel.insertBefore(nav, panel.firstChild);
   });
   $('ahProSearch').addEventListener('input', function () { if (state.data) renderPros(state.data); });
 
