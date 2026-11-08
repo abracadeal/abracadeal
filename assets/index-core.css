@@ -4467,3 +4467,19 @@ header #flowErrorsBtn{
 #publishModal .form-actions #publishSubmitBtn{flex:1 1 180px!important;max-width:320px}
 @media(max-width:520px){#publishModal .form-actions .btn{flex:1 1 0!important;padding:0 12px!important}#publishModal .form-actions #publishSubmitBtn{flex:1 1 100%!important;max-width:none;order:2}}
 .pub-free{color:#22162f}
+
+/* 08/11/2026 (Anthony : « boutons plus fins, ergonomiques ») : un seul style de bouton dans le compte et les formulaires —
+   même police, même taille de texte, même hauteur (44 px, confortable au doigt), bords fins. */
+#accountModal .btn,.form-actions .btn,#companyForm .btn,.pro-billing-actions .btn,.pro-dashboard-actions .btn{
+  font-family:inherit!important;font-size:15px!important;font-weight:700!important;line-height:1.1!important;letter-spacing:0!important;
+  min-height:44px!important;height:auto!important;padding:0 18px!important;border-radius:999px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px;white-space:nowrap;box-shadow:none!important}
+#accountModal .btn.ghost,.form-actions .btn.ghost,#companyForm .btn.ghost,.pro-billing-actions .btn.ghost,.pro-dashboard-actions .btn.ghost{
+  background:#fff!important;border:1px solid #e3d7ea!important;color:#3c1b64!important}
+#accountModal .btn.ghost:hover,.form-actions .btn.ghost:hover,#companyForm .btn.ghost:hover{background:#faf5fc!important;border-color:#cdb6da!important}
+#accountModal .btn.primary,.form-actions .btn.primary,#companyForm .btn.primary,.pro-billing-actions .btn.primary,.pro-dashboard-actions .btn.primary{
+  border:0!important;background:linear-gradient(90deg,#7c3aed,#db2777)!important;color:#fff!important}
+#accountModal .btn.primary:hover,.form-actions .btn.primary:hover{filter:brightness(1.06)}
+#accountModal .form-actions,#companyForm .form-actions{display:flex!important;flex-wrap:wrap!important;gap:8px!important;justify-content:flex-end!important;align-items:center!important}
+#publishModal .form-actions .btn{min-height:44px!important}
+@media(max-width:520px){#companyForm .form-actions .btn{flex:1 1 auto!important;padding:0 14px!important}}
