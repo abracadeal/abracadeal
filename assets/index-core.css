@@ -4507,3 +4507,11 @@ header #flowErrorsBtn{
   .hero .banner-frame.banner-main-live{background:linear-gradient(90deg,#180229,#1f0437 50%,#160226)!important;border-radius:22px;overflow:hidden!important;max-height:none!important}
   .hero .banner-frame.banner-main-live .banner-main-image{width:auto!important;max-width:100%!important;height:230px!important;max-height:230px!important;object-fit:contain!important;margin:0 auto!important}
 }
+/* 08/11/2026 (Anthony : « le bandeau Fondateur est gros aussi ») : bandeau plus fin sur ordinateur (69 px -> environ 44 px). */
+@media(min-width:761px){
+  .founder-topbar .founder-topbar-inner{padding-top:6px!important;padding-bottom:6px!important;min-height:0!important}
+  .founder-topbar .founder-topbar-text{font-size:14px!important;line-height:1.3!important}
+  .founder-topbar .founder-topbar-text strong{font-size:14px!important}
+  .founder-topbar .ft-limit{font-size:12px!important;padding:2px 8px!important}
+  .founder-topbar .founder-topbar-cta{font-size:14px!important;padding:6px 16px!important;min-height:0!important;height:auto!important}
+}
