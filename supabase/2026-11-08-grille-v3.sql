@@ -1,7 +1,7 @@
 -- 08/11/2026 (Anthony : « Oui on fait ces prix là ») — grille v3, prix HT.
 -- Auto/Moto/Immo : 5 annonces gratuites, 25 = 49 €, 50 = 89 €, 100 = 149 €/mois, au-delà sur devis.
 -- High-tech / Maison / Mode / Services : 10 annonces gratuites, 50 = 9,99 €, 200 = 24,99 €/mois ; annonce à l'unité 1,99 €.
--- Emploi : 1 offre gratuite, 4,99 € l'offre (30 j), illimité 29,99 €/mois. Vacances : 4,99 €/logement (formules 20/60 retirées).
+-- Emploi : 1 offre gratuite, 4,99 € l’offre (30 j), illimité 19,99 €/mois (29,99 € → 19,99 € le 08/11 soir). Vacances : 4,99 €/logement (formules 20/60 retirées).
 -- Packs ponctuels retirés. Options de visibilité inchangées. Fondateurs inchangés (gratuits).
 
 -- 1) Formules d'abonnement
