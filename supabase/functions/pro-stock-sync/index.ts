@@ -1220,6 +1220,22 @@ async function readFeed(feed:any,persistCrawl=false){
   const f=feed.format==='auto'?(ct.includes('json')||/^\s*[\[{]/.test(text)?'json':ct.includes('xml')||/^\s*</.test(text)?'xml':'csv'):feed.format;
   try{return f==='json'?parseJson(JSON.parse(text)):f==='xml'?parseXml(text):parseCsv(text);}catch(e){throw new Error(`Flux ${f.toUpperCase()} illisible : ${e instanceof Error?e.message:String(e)}`);}
 }
+
+// 08/11/2026 (Anthony : « si pas de modification, pas besoin de repasser en modération ») : même règle que private.normalize_fuel
+// (trigger sur listings). Sans elle, « Hybrid », « Electrique »… étaient réécrits par la base à chaque passage, l'annonce
+// paraissait modifiée et repartait en modération toutes les 3 h.
+function dbFuel(p:any):string|null{
+ if(p==null||String(p).trim()==='')return null;
+ const t=String(p).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+ if(/(rechargeable|plug|phev)/.test(t))return 'Hybride rechargeable';
+ if(/hybrid/.test(t)||(/(essence|diesel|gazole)/.test(t)&&/electr/.test(t)))return 'Hybride';
+ if(/electr/.test(t))return 'Électrique';
+ if(/(gpl|lpg)/.test(t))return 'GPL';
+ if(/(diesel|gazole|gasoil)/.test(t))return 'Diesel';
+ if(/(essence|petrol|gasoline|sp95|sp98|e85|ethanol)/.test(t))return 'Essence';
+ if(/autre/.test(t))return 'Autre';
+ return String(p).trim();
+}
 async function moderationSecret(){const{data}=await admin.from('integration_secrets').select('secret_value').eq('name','pro_stock_moderation_internal').maybeSingle();return String(data?.secret_value||'');}
 async function moderateListingInternal(listingId:string){const secret=await moderationSecret();if(!secret)throw new Error('Secret de modération interne absent');const r=await fetch(`${SUPABASE_URL}/functions/v1/moderate-listing`,{method:'POST',headers:{'Content-Type':'application/json','x-internal-moderation-key':secret},body:JSON.stringify({listing_id:listingId}),signal:AbortSignal.timeout(90000)});const body=await r.json().catch(()=>({}));if(!r.ok||!body?.ok||!body?.ai_checked)throw new Error(body?.ai_error||body?.error||`Modération incomplète (${r.status})`);return body;}
 async function upsertContact(ownerId:string,listingId:string,row?:any){const [{data:p},{data:u}]=await Promise.all([admin.from('profiles').select('phone').eq('id',ownerId).maybeSingle(),admin.auth.admin.getUserById(ownerId)]);await admin.from('listing_contacts').upsert({listing_id:listingId,owner_id:ownerId,phone:row?.contactPhone||p?.phone||null,contact_email:u?.user?.email||null,agent_email:row?.contactEmail||null},{onConflict:'listing_id'});}
@@ -1270,7 +1286,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     if(r.category==='vehicules'){
      payload.item_condition=r.condition||null;payload.vehicle_make=r.make||null;payload.vehicle_model=r.model||null;
      payload.vehicle_year=r.year==null?null:Math.round(r.year);payload.mileage=r.mileage==null?null:Math.round(r.mileage);
-     payload.fuel=r.fuel||null;payload.transmission=r.transmission||null;payload.crit_air=r.critAir||null;
+     payload.fuel=dbFuel(r.fuel);payload.transmission=r.transmission||null;payload.crit_air=r.critAir||null;
     }else{
      payload.item_condition=null;payload.vehicle_make=null;payload.vehicle_model=null;payload.vehicle_year=null;
      payload.mileage=null;payload.fuel=null;payload.transmission=null;payload.crit_air=null;
@@ -1475,7 +1491,8 @@ if(body?.action==='prospect_precheck'){if(!await cronOk(req))return json({error:
  // Sites lus page par page : toutes les 3 h environ (8 fois par jour) pour ne pas surcharger le site du garage.
  // 31/10/2026 (Anthony, Claude) : gros site en cours de lecture (tour en plusieurs passages pas fini) → on reprend à chaque passage du cron (~15 min)
  // au lieu d'attendre 3 h : un stock de 500 biens est complet en quelques heures au lieu de 2-3 jours.
- if(f.source_kind==='site'&&f.last_run_at&&Date.now()-new Date(f.last_run_at).getTime()<(crawlActive.has(f.id)?13:175)*60000)continue;
+ // 08/11/2026 (Anthony : « la synchro c'est trop souvent ») : sites relus toutes les 6 h (4 fois par jour) au lieu de 3 h.
+ if(f.source_kind==='site'&&f.last_run_at&&Date.now()-new Date(f.last_run_at).getTime()<(crawlActive.has(f.id)?13:355)*60000)continue;
  // Le reste passera au prochain passage du cron (toutes les 15 min), les plus anciens d'abord.
  if(Date.now()-start>40000){results.push({ok:false,feed_id:f.id,skipped:'reporté au prochain passage'});continue;}
  try{results.push(await sync(f,await readFeed(f,true)));}catch(e){const msg=e instanceof Error?e.message:String(e);await admin.from('pro_stock_feeds').update({...((e as any)?.platform?{site_platform:(e as any).platform}:{}),last_run_at:new Date().toISOString(),last_error:msg,updated_at:new Date().toISOString()}).eq('id',f.id);results.push({ok:false,feed_id:f.id,error:msg});}}return json({ok:true,auto_review:autoResults,results});}const user=await authUser(req);if(!user)return json({error:'Non authentifié'},401);const feedId=String(body?.feed_id||'');if(!feedId)return json({error:'feed_id manquant'},400);const{data:feed}=await admin.from('pro_stock_feeds').select('*').eq('id',feedId).maybeSingle();if(!feed)return json({error:'Flux introuvable'},404);const{data:profile}=await admin.from('profiles').select('is_admin').eq('id',user.id).maybeSingle();const isAdmin=!!profile?.is_admin;if(feed.owner_id!==user.id&&!isAdmin)return json({error:'Accès refusé'},403);
