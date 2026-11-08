@@ -4497,5 +4497,6 @@ header #flowErrorsBtn{
 @media(min-width:761px) and (max-width:1440px){
   .container.nav .desktop-category-nav{gap:4px!important}
   .container.nav .desktop-category-nav > * > a,.container.nav .desktop-category-nav > a{padding:0 11px!important}
-  .container.nav .abraca-publish-top:not(.hidden){padding:0 14px!important;font-size:14px!important}
+  /* le gros bouton « + Déposer une annonce » est juste en dessous : on retire le doublon de l'en-tête quand la place manque */
+  .container.nav .abraca-publish-top{display:none!important}
 }
