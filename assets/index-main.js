@@ -4056,40 +4056,53 @@ function shuffleCopy(items){
 }
 /* 08/11/2026 (Anthony : vignettes qui clignotent) : on ne remplace le contenu d'une grille que s'il a vraiment changé,
    sinon les images étaient recréées (et redessinées) à chaque appel pour rien. */
+const AB_PHOTO_BOX='.ad-photo,.home-featured-photo,.personalized-photo';
+function abSyncAttrs(o,n){
+  const box=o.matches&&o.matches(AB_PHOTO_BOX);
+  for(const a of [...o.attributes]){
+    if(!n.hasAttribute(a.name)&&!(box&&(a.name==='class'||a.name==='style')))o.removeAttribute(a.name);
+  }
+  for(const a of [...n.attributes]){
+    if(o.getAttribute(a.name)===a.value)continue;
+    if(box&&a.name==='class'){const keep=o.classList.contains('photo-fit');o.setAttribute('class',a.value);if(keep)o.classList.add('photo-fit');continue;}
+    if(box&&a.name==='style'){const bg=o.style.getPropertyValue('--photo-bg');o.setAttribute('style',a.value);if(bg)o.style.setProperty('--photo-bg',bg);continue;}
+    o.setAttribute(a.name,a.value);
+  }
+}
+function abMorph(o,n){
+  if(o.nodeType!==n.nodeType||o.nodeName!==n.nodeName){o.replaceWith(n);return;}
+  if(o.nodeType!==1){if(o.nodeValue!==n.nodeValue)o.nodeValue=n.nodeValue;return;}
+  if(o.nodeName==='IMG'){
+    const box=o.parentElement;
+    if(box&&box.matches(AB_PHOTO_BOX)){
+      const same=o.getAttribute('src')===n.getAttribute('src')||o.dataset.abOrig===n.getAttribute('src');
+      if(same&&(o.naturalWidth||!o.complete))return; /* même photo : on n'y touche pas */
+    }
+    o.replaceWith(n);return;
+  }
+  abSyncAttrs(o,n);
+  abMorphChildren(o,n);
+}
+function abMorphChildren(o,n){
+  const oc=[...o.childNodes],nc=[...n.childNodes];
+  for(let i=0;i<nc.length;i++){
+    if(i<oc.length)abMorph(oc[i],nc[i]);
+    else o.appendChild(nc[i]);
+  }
+  for(let i=nc.length;i<oc.length;i++)oc[i].remove();
+}
 function abSetHtml(el,html){
   if(!el)return;
   const sig=String(html).replace(/ data-fade onload="[^"]*"| onload="this\.classList\.add\('is-loaded'\)"/g,'');
   if(el.__abSig===sig&&el.firstChild&&el.firstChild===el.__abFirst&&el.childNodes.length===el.__abCount)return;
-  /* Contenu changé (ex. boutons admin/favoris qui arrivent après la connexion) : on reconstruit les cartes, mais les photos
-     déjà affichées sont reprises telles quelles (déjà chargées et cadrées) au lieu d'être rechargées → aucun clignotement. */
-  const PHOTO='.ad-photo,.home-featured-photo,.personalized-photo';
-  const old=new Map();
-  el.querySelectorAll('img').forEach(im=>{
-    const box=im.parentElement;
-    if(!box||!box.matches(PHOTO)||!im.complete||!im.naturalWidth)return;
-    const k=im.dataset.abSrc||im.getAttribute('src');
-    if(!old.has(k))old.set(k,im);
-  });
-  if(!old.size){el.innerHTML=html;}
+  /* Contenu changé (ex. boutons admin/favoris qui arrivent après la connexion) : on met à jour les cartes sur place
+     au lieu de tout recréer. Les photos déjà en place ne sont ni retirées ni rechargées (sur iPhone, une image retirée
+     puis remise se redessine : « elle s'affiche puis recharge »). */
+  if(!el.firstChild){el.innerHTML=html;}
   else{
     const tpl=document.createElement('template');
     tpl.innerHTML=html;
-    tpl.content.querySelectorAll('img').forEach(im=>{
-      const box=im.parentElement;
-      if(!box||!box.matches(PHOTO))return;
-      const prev=old.get(im.getAttribute('src'));
-      if(!prev)return;
-      old.delete(im.getAttribute('src'));
-      const pbox=prev.parentElement;
-      if(pbox){
-        if(pbox.classList.contains('photo-fit'))box.classList.add('photo-fit');
-        const bg=pbox.style.getPropertyValue('--photo-bg');if(bg)box.style.setProperty('--photo-bg',bg);
-        const wm=pbox.querySelector('.photo-watermark.hidden'),nwm=box.querySelector('.photo-watermark');
-        if(wm&&nwm)nwm.classList.add('hidden');
-      }
-      im.replaceWith(prev);
-    });
-    el.replaceChildren(tpl.content);
+    abMorphChildren(el,tpl.content);
   }
   el.__abSig=sig;el.__abFirst=el.firstChild;el.__abCount=el.childNodes.length;
 }

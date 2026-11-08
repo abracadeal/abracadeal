@@ -1448,6 +1448,7 @@ document.addEventListener('DOMContentLoaded',()=>{
     // 08/11/2026 : les vignettes ont aussi un srcset (versions allégées) : on le retire, sinon le
     // navigateur ignorerait le nouveau src. Ordre de secours : miniature (data-full) -> originale (data-full2) -> photo Abracadeal.
     if(img.hasAttribute('srcset')) img.removeAttribute('srcset');
+    if(!img.dataset.abOrig) img.dataset.abOrig=img.getAttribute('src')||'';
     // 08/11/2026 : version allégée (wsrv) en échec/lente → retenue pour ne plus la redemander à chaque redessin des cartes.
     if(img.dataset.light && !img.dataset.abracaTried1){try{(window.__abracaSlowImgs||(window.__abracaSlowImgs=new Set())).add(img.getAttribute('src'));}catch(_){}}
     if(img.dataset.full && img.getAttribute('src')!==img.dataset.full && !img.dataset.abracaTried1){
