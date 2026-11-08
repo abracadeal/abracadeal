@@ -4500,3 +4500,12 @@ header #flowErrorsBtn{
   /* le gros bouton « + Déposer une annonce » est juste en dessous : on retire le doublon de l'en-tête quand la place manque */
   .container.nav .abraca-publish-top{display:none!important}
 }
+
+/* 08/11/2026 (Anthony : « réduire la taille de la bannière ») : bannière d'accueil plus basse, rien n'est coupé
+   (image entière, centrée ; les côtés prennent la couleur du fond de l'image). */
+.hero .banner-frame.banner-main-live{background:linear-gradient(90deg,#180229,#1f0437 50%,#160226)!important;border-radius:22px;overflow:hidden!important;max-height:none!important}
+.hero .banner-frame.banner-main-live .banner-main-image{width:auto!important;max-width:100%!important;height:230px!important;max-height:230px!important;object-fit:contain!important;margin:0 auto!important}
+@media(max-width:760px){
+  .hero .banner-frame.banner-main-live{border-radius:16px}
+  .hero .banner-frame.banner-main-live .banner-main-image{height:118px!important;max-height:118px!important}
+}
