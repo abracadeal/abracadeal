@@ -3625,6 +3625,8 @@ function fetchPublicCatalog(){
     .is('revision_of',null).eq('status','active').eq('visibility_scope','public')
     .order('created_at',{ascending:false});
   const rpc=()=>Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
+  // 08/11/2026 : le préchargement démarre après l'affichage de la bannière ; s'il n'est pas encore parti, on le lance maintenant.
+  if(!window.__abracaCatalogPrefetch&&typeof window.__abracaStartCatalog==='function')window.__abracaStartCatalog();
   const pre=window.__abracaCatalogPrefetch;window.__abracaCatalogPrefetch=null;
   const p=pre?Promise.resolve(pre).then(d=>Array.isArray(d)?{data:d,error:null}:rpc()).catch(()=>rpc()):rpc();
   return p.then(r=>{if(r&&!r.error&&Array.isArray(r.data)){primeFavoriteCounts(r.data);if(r.data.length&&r.data[0]&&'description_cut' in r.data[0])writeCatalogCache(r.data);}return r;});

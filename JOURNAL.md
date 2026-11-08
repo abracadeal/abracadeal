@@ -18,6 +18,12 @@
 - Secours en cas d'erreur, géré par le filet photo d'index-app.js (`mark()`) : il retire le `srcset`, puis essaie `data-full` (miniature stockée), puis `data-full2` (photo d'origine), puis la photo Abracadeal par défaut. Testé avec chaque source en panne.
 - Ne pas remettre d'`onerror` inline sur ces images : il doublerait le filet et sauterait une étape.
 - Sauts de mise en page (CLS 0,088 depuis le passage des scripts en `defer`) corrigés : le bandeau Fondateurs mobile est affiché par un petit script juste après `#founderTopbar` (visiteur sans session), et la ligne `#abracaSmartSearchInfo` est maintenant écrite dans index.html (smart-search la réutilise). Résultat mesuré : plus aucun saut.
+- Chargement mobile (même nuit) :
+  - `assets/tablet-as-mobile-20261007.js` est maintenant **copié en ligne** dans le `<head>` d'index.html. Si ce fichier change, recopier son contenu à cet endroit.
+  - `back-gesture` est passé en `defer`, `founder-offer-state` en `async`.
+  - Le préchargement du catalogue (`window.__abracaStartCatalog`) démarre après l'affichage de la bannière (petit script juste après l'`<img>` de la bannière), et index-main.js le lance lui-même s'il n'est pas encore parti.
+  - Mesuré en 4G lente + CPU ×4 : premier affichage 1,68 → 1,42 s, premières annonces 1,84 → 1,48 s.
+- `public_catalog` allégé : `private.catalog_meta_line` retire aussi de l'IMETA `roomAreas`, `nearby`, `contactName` et `fees`, et `catalog_description_cut` passe à vrai pour ces annonces, pour que la fiche recharge la description complète. Recalcul fait sans déclencher les triggers (`session_replication_role=replica`).
 - Note LCP mobile : la valeur PageSpeed (~5,9 s) est une simulation. Mesuré en 4G lente + CPU ×4, la bannière s'affiche vers 1,6 s. Retarder les scripts après `load` gagnerait ~1,5 s au score mais fait apparaître les annonces plus tard avec des sauts de mise en page (CLS) : écarté.
 
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)
