@@ -1,0 +1,37 @@
+/* Abracadeal — habillage commun des pages admin (08/11/2026, demande d'Anthony : mêmes couleurs, polices et
+   cartes que le nouvel espace admin admin.html). Chargé en dernier sur chaque page admin : il ne change pas
+   la structure des pages, seulement leur apparence (variables de couleurs, polices, cartes, boutons, champs). */
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+:root{
+  --bg:#160922;--panel:#24123b;--panel2:#2c1648;--line:rgba(255,255,255,.09);--text:#f4eefb;--muted:#b9a8c9;
+  --purple:#8a2ca8;--pink:#ec409d;--gold:#f7bd4b;--green:#43ba80;--red:#f45b73;--orange:#f2ae58;
+  --ah-card:#24123b;--ah-card2:#2c1648;--ah-line:rgba(255,255,255,.09)
+}
+html{background:#160922!important}
+body{background:#160922!important;color:#f4eefb!important;font-family:'DM Sans',system-ui,-apple-system,sans-serif!important}
+body button,body input,body select,body textarea{font-family:'DM Sans',system-ui,-apple-system,sans-serif}
+body h1{font-family:Fraunces,Georgia,serif!important;font-weight:700!important;letter-spacing:0!important;color:#fff!important}
+body h2,body h3{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:0}
+body h2{color:#fff}
+/* Cartes, encadrés, blocs repliables */
+body .card,body .panel,body section.card,body .metric,body details.card,body details.fold,body .box,body .tile,body main>section{
+  background:var(--ah-card)!important;border:1px solid var(--ah-line)!important;border-radius:16px!important;box-shadow:none!important}
+body .metric span,body .metric small,body .metric label{text-transform:none!important;letter-spacing:0!important;color:var(--muted)!important;font-weight:600!important}
+body .metric strong{font-family:'DM Sans',sans-serif}
+body summary{cursor:pointer}
+/* Champs */
+body input[type=text],body input[type=search],body input[type=email],body input[type=number],body input[type=url],body input[type=tel],body input:not([type]),body select,body textarea{
+  background:#1d0e30!important;color:#f4eefb!important;border:1px solid var(--ah-line)!important;border-radius:12px!important}
+body input:focus,body select:focus,body textarea:focus{border-color:#ec409d!important;outline:none!important;box-shadow:0 0 0 3px rgba(236,64,157,.15)!important}
+/* Boutons */
+body .btn,body button.btn,body a.btn{border-radius:12px!important;font-weight:700!important}
+body .btn.primary,body .btn-primary,body button.primary{background:linear-gradient(135deg,#ec409d,#ff69bd)!important;color:#fff!important;border-color:transparent!important}
+/* Tableaux */
+body table{border-collapse:collapse}
+body th{color:var(--muted)!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important}
+body td,body th{border-color:var(--ah-line)!important}
+/* Anciens en-têtes de page : même fond que l'admin */
+body .top,body .topbar{background:rgba(22,9,34,.94)!important;border-bottom:1px solid var(--ah-line)!important}
+body .muted,body .sub{color:var(--muted)!important}
+/* Ancienne page Finances (admin-pilotage) */
+body main>section h2{margin-top:0}
