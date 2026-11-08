@@ -87,7 +87,8 @@ function build(type: string, p: any) {
     const title = "Vos 12 mois offerts sont terminés";
     const paras = [
       `Votre période gratuite Fondateur est arrivée à son terme et aucun moyen de paiement n’a été enregistré : <strong>vos annonces sont mises en pause</strong>. Elles ne sont plus visibles, mais elles ne sont pas supprimées.`,
-      `Pour les remettre en ligne, reprenez une formule depuis la page des tarifs professionnels (formule ${formule} : ${euros(p.amount_cents)} HT par mois, sans engagement). Vos annonces réapparaissent automatiquement dès l’activation.`,
+      // 08/11/2026 (Anthony) : pas de prix dans les mails aux Fondateurs.
+      `Pour les remettre en ligne, il vous suffit de choisir « Continuer avec nous » depuis votre Espace Pro. Vos annonces réapparaissent automatiquement dès l’activation.`,
       `Aucun prélèvement n’a été effectué.`,
     ];
     return { subject: "Vos annonces Abracadeal sont en pause", title, paras, bullets: [] as string[] };

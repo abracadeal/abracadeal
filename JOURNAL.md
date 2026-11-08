@@ -1,3 +1,10 @@
+## 2026-11-08 — Mails : aucun envoi inutile ou faux (Claude)
+
+- Prospection : un prospect déjà inscrit ne reçoit plus ni 1er mail ni relance, même inscrit avec une autre adresse (`prospect_is_registered`, utilisé 3 fois dans `prospect_mailer_claim`). Lien `prospection_prospects.account_user_id`, rempli automatiquement à la vérification pro (trigger `link_prospect_to_pro` : SIREN, e-mail, ou domaine propre à un seul prospect). Sophie Folley et WeeCars Angers reliés (ils auraient reçu une relance à la réactivation des relances). Suivi `admin_prospect_tracking` : même rapprochement.
+- Modèles de prospection « par défaut / manuel / normal » : « des milliers d'euros par an » → « des centaines, voire des milliers d'euros par mois » (décision 06/11).
+- `queue_pro_import_help` : plus de « jusqu'à 50 annonces » pour les Fondateurs (illimité, pas de chiffres).
+- `process-pro-transactional-emails` : fin des 12 mois Fondateur sans prix (« Continuer avec nous » depuis l'Espace Pro).
+
 ## 2026-11-08 — Accueil : « Récemment consultées » retirée (Claude)
 
 - Décision d'Anthony : une seule rangée personnalisée sur l'accueil, on garde « D'après vos recherches récentes ». `renderRecentViewed()` masque la section et sort (code gardé). `index-main.js?v=20261108-recent`.
