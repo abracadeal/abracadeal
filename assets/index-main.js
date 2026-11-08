@@ -2248,7 +2248,7 @@ function setPublishPhotoLimit(){
   renderSelectedPhotos();
 }
 
-// Formule 100 : 5 « À la une 7 jours » + 5 remontées offerts chaque mois (remis à zéro le 1er du mois).
+// 08/11/2026 : visibilité offerte chaque mois selon la formule (25 : 1+2, 50 : 2+3, 100 : 3+5), remise à zéro le 1er du mois.
 let proMonthlyAllowance=null;
 async function loadProMonthlyAllowance(){
   if(!sb||!currentUser||currentProfile?.account_type!=='professionnel'){proMonthlyAllowance=null;return null;}
@@ -2261,11 +2261,11 @@ async function loadProMonthlyAllowance(){
 }
 function proMonthlyErrorMessage(error){
   const raw=String(error?.message||error?.details||'');
-  if(raw.includes('no_monthly_featured_left'))return 'Vous avez utilisé vos 5 « À la une » offerts ce mois-ci.';
-  if(raw.includes('no_monthly_bump_left'))return 'Vous avez utilisé vos 5 remontées offertes ce mois-ci.';
+  if(raw.includes('no_monthly_featured_left'))return 'Vous avez utilisé vos « À la une » offerts ce mois-ci.';
+  if(raw.includes('no_monthly_bump_left'))return 'Vous avez utilisé vos remontées offertes ce mois-ci.';
   if(raw.includes('listing_already_featured'))return 'Cette annonce est déjà à la une.';
   if(raw.includes('listing_not_active'))return 'Seule une annonce en ligne peut être mise en avant.';
-  if(raw.includes('plan_100_required'))return 'Réservé à la formule 100 annonces.';
+  if(raw.includes('plan_100_required'))return 'Réservé aux abonnés Pro (formules 25, 50 et 100 annonces).';
   return error?.message||'Action impossible pour le moment.';
 }
 async function useProMonthlyAllowance(id,kind,btn){
@@ -4424,7 +4424,7 @@ function renderAds(){
         ${(moderationActions||(!moderationMode&&(canDelete||canUseProBoost)))?`<div class="ad-actions">
           ${moderationActions}
           ${(!moderationMode&&canUseProBoost)?(listingIsFeatured(a)?`<button class="mini-btn boost-btn boost-active" disabled>${currentProfile?.is_admin?'Boost actif · Admin':'Boost actif'}</button>`:`<button class="mini-btn boost-btn" onclick="event.stopPropagation();openPromotionForListing('${a.id}')">${currentProfile?.is_admin?'Booster · Admin':'Booster'}</button>`):''}
-          ${(!moderationMode&&proMonthlyAllowance?.eligible&&a.status==='active'&&a.seller_type==='professionnel'&&a.owner_id===currentUser?.id)?`${listingIsFeatured(a)?'':`<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.featured_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','featured',this)">⭐ À la une 7 j · offert (${Number(proMonthlyAllowance.featured_left||0)}/5)</button>`}<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.bumps_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','bump',this)">⬆️ Remonter · offert (${Number(proMonthlyAllowance.bumps_left||0)}/5)</button>`:''}
+          ${(!moderationMode&&proMonthlyAllowance?.eligible&&a.status==='active'&&a.seller_type==='professionnel'&&a.owner_id===currentUser?.id)?`${listingIsFeatured(a)?'':`<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.featured_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','featured',this)">⭐ À la une 7 j · offert (${Number(proMonthlyAllowance.featured_left||0)}/${Number(proMonthlyAllowance.featured_per_month||0)})</button>`}<button class="mini-btn pro-month-btn" ${Number(proMonthlyAllowance.bumps_left||0)>0?'':'disabled'} onclick="event.stopPropagation();useProMonthlyAllowance('${a.id}','bump',this)">⬆️ Remonter · offert (${Number(proMonthlyAllowance.bumps_left||0)}/${Number(proMonthlyAllowance.bumps_per_month||0)})</button>`:''}
           ${(!moderationMode&&canDelete&&a.owner_id===currentUser?.id&&canRenewPrivateListing(a))?`<button class="mini-btn" onclick="event.stopPropagation();renewPrivateListing('${a.id}',this)">Prolonger gratuitement · 60 jours</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin&&a.status==='active'&&!a.revision_of)?`<button class="mini-btn" onclick="event.stopPropagation();editAd('${a.id}')">Modifier</button>`:''}
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
