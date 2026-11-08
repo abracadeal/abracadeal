@@ -189,7 +189,7 @@ async function openProAccount(partner: any, ag: any): Promise<{ userId?: string;
   if (!phone) return { reason: "téléphone de l'agence absent ou invalide" };
   let company: any;
   try { company = await lookupCompany(ag.siret); } catch (e) { return { reason: e instanceof Error ? e.message : String(e) }; }
-  if (company.business_sector !== "other" && company.business_sector !== ag.sector) return { reason: `activité du registre (${company.business_sector}) différente du secteur déclaré (${ag.sector})` };
+  if (["vehicules", "immobilier"].includes(ag.sector) && company.business_sector !== "other" && company.business_sector !== ag.sector) return { reason: `activité du registre (${company.business_sector}) différente du secteur déclaré (${ag.sector})` };
   const existing = await findUserByEmail(email);
   if (existing) return { reason: "un compte Abracadeal existe déjà avec cet e-mail (sans ce SIRET)" };
   const { data: phoneFree } = await admin.rpc("abracadeal_phone_available", { p_phone: phone, p_account_type: "professionnel" });
@@ -311,10 +311,12 @@ Deno.serve(async (req) => {
       if (!b || typeof b !== "object") return fail(400, "invalid_json", "Corps JSON attendu.");
       const siret = String(b.siret ?? "").replace(/\s/g, "");
       const name = String(b.name ?? "").trim();
-      const sector = b.sector === "vehicules" ? "vehicules" : b.sector === "immobilier" || b.sector == null ? "immobilier" : "";
+      // 08/11/2026 : les éditeurs avec formule incluse (MyCreativeSite) diffusent aussi services et produits.
+      const GENERIC = ["services", "hightech", "maison", "mode"];
+      const sector = b.sector === "vehicules" ? "vehicules" : b.sector === "immobilier" || b.sector == null ? "immobilier" : (partner.grants_plan && GENERIC.includes(b.sector) ? b.sector : "");
       if (!validSiret(siret)) return fail(422, "invalid_siret", "SIRET invalide (14 chiffres).");
       if (!name) return fail(422, "missing_name", "Le nom de l'agence (name) est obligatoire.");
-      if (!sector) return fail(422, "invalid_sector", "sector : « immobilier » ou « vehicules ».");
+      if (!sector) return fail(422, "invalid_sector", partner.grants_plan ? "sector : immobilier, vehicules, services, hightech, maison ou mode." : "sector : « immobilier » ou « vehicules ».");
       if (b.consent !== true) return fail(422, "consent_required", "consent: true est obligatoire : l'agence doit avoir activé elle-même la diffusion sur Abracadeal.");
       const row = {
         partner_id: partner.id, external_agency_id: agencyId, siret, name: name.slice(0, 160), sector,
