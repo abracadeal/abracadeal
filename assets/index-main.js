@@ -221,6 +221,11 @@ function thumbUrl(path){
    (srcset : le navigateur prend la plus petite qui reste nette sur l'écran). Si le redimensionneur ne répond pas,
    la miniature habituelle est chargée (onerror). */
 /* fit=outside : le petit côté fait w px (les vignettes sont recadrées en carré, une photo en hauteur reste nette). */
+/* 08/11/2026 (quota Supabase dépassé : les grandes photos des fiches = 1,6 Go/jour) : la photo principale, l'agrandissement
+   et la bande de miniatures d'une fiche passent par le redimensionneur (WebP, 1600 px max pour la grande, 220 px pour la bande).
+   Qualité 85 pour rester net. Si wsrv ne répond pas → photo d'origine (data-full, filet photo d'index-app.js). Photos privées : inchangées. */
+function abracaDetailImg(path,w){const u=photoUrl(path);if(!u||privatePhotoUrls.has(path)||!/^https:\/\//i.test(u))return u;return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit=inside&we&output=webp&q='+(w>400?85:78);}
+function abracaDetailImgFromUrl(u,w){if(!u||!/^https:\/\//i.test(u)||/^https:\/\/wsrv\.nl\//.test(u)||/[?&]token=/.test(u))return u;return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit=inside&we&output=webp&q=85';}
 function abracaWsrv(u,w,fit){return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit='+(fit||'outside')+'&we&output=webp&q=76';}
 // 03/11/2026 (Anthony : « ça fait souvent les photos qui chargent pas entières ») : la vignette reste invisible (fond de la carte)
 // jusqu'à ce qu'elle soit entièrement chargée, puis apparaît en fondu — plus de photo à moitié dessinée.
@@ -4816,7 +4821,7 @@ window.openAd=id=>{
   const gallery=photos.length
     ?`<div class="detail-gallery">
         <div class="detail-main-wrap" onclick="openPhotoLightboxFromCurrent()" role="button" tabindex="0" aria-label="Agrandir la photo">
-          <img class="detail-main-photo" id="detailMainPhoto" fetchpriority="high" onload="refreshDetailWatermark()" src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title)}" onclick="event.stopPropagation();openPhotoLightboxFromCurrent()">
+          <img class="detail-main-photo" id="detailMainPhoto" fetchpriority="high" onload="refreshDetailWatermark()" src="${abracaDetailImg(photos[0].storage_path,1600)}" data-full="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title)}" onclick="event.stopPropagation();openPhotoLightboxFromCurrent()">
           <div class="detail-photo-tools" onclick="event.stopPropagation()">
             <button type="button" class="detail-photo-tool" data-share-listing="${a.id}" aria-label="Partager l’annonce" onclick="shareListingSmart('${a.id}',event)"><svg class="share-node-icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="18" cy="5" r="2.5"></circle><circle cx="6" cy="12" r="2.5"></circle><circle cx="18" cy="19" r="2.5"></circle><path d="M8.3 10.8 15.7 6.2M8.3 13.2l7.4 4.6"></path></svg><span>Partager</span></button>
             <button type="button" id="detailFavoriteBtn-${a.id}" data-favorite-id="${a.id}" class="detail-photo-tool heart ${favoriteIds.has(a.id)?'active':''}" aria-label="${favoriteIds.has(a.id)?'Retirer des favoris':'Ajouter aux favoris'}" onclick="toggleFavorite('${a.id}',event)"><span class="heart-icon">${favoriteIds.has(a.id)?'♥':'♡'}</span><span class="fav-count" id="detailFavoriteCount-${a.id}" data-fav-count-id="${a.id}"></span></button>
@@ -4825,7 +4830,7 @@ window.openAd=id=>{
           <span class="photo-watermark${abracaWmOverlay(a)}" id="detailPhotoWatermark">Abracadeal</span><div class="detail-photo-count" id="detailPhotoCount">1 / ${photos.length}</div>
         </div>
         ${photos.length>1?`<div class="detail-thumbs">
-          ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})">${i<4?`<img src="${photoUrl(p.storage_path)}" alt="Photo ${i+1}" decoding="async">`:`<img data-strip-src="${photoUrl(p.storage_path)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Photo ${i+1}" decoding="async">`}</button>`).join('')}
+          ${photos.map((p,i)=>`<button type="button" class="${i===0?'active':''}" onclick="selectDetailPhoto(this,'${photoUrl(p.storage_path)}',${i+1},${photos.length})">${i<4?`<img src="${abracaDetailImg(p.storage_path,220)}" data-full="${photoUrl(p.storage_path)}" alt="Photo ${i+1}" decoding="async">`:`<img data-strip-src="${abracaDetailImg(p.storage_path,220)}" data-full="${photoUrl(p.storage_path)}" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==" alt="Photo ${i+1}" decoding="async">`}</button>`).join('')}
         </div>`:''}
       </div>`
     :`<div class="detail-gallery"><div class="detail-main-wrap"><img class="detail-main-photo abraca-default-photo" src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal"></div></div>`;
@@ -5141,7 +5146,8 @@ window.selectDetailPhoto=(button,url,index,total)=>{
     /* Fix 21/09/2026 : reinitialise l'etat de secours a chaque changement de miniature, sinon
        une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher sur
        une autre photo cassee ensuite (le garde-fou anti-boucle restait arme). */
-    main.dataset.abracaFallback='';
+    main.dataset.abracaFallback='';delete main.dataset.abracaTried1;delete main.dataset.abracaTried2;delete main.dataset.abOrig;
+    main.dataset.full=url;url=abracaDetailImgFromUrl(url,1600);
     main.classList.remove('abraca-default-photo');
     const detailWm=document.getElementById('detailPhotoWatermark');
     if(detailWm)detailWm.classList.remove('hidden');
@@ -5190,7 +5196,7 @@ window.openPhotoLightboxFromCurrent=()=>{
   const main=document.getElementById('detailMainPhoto');
   let idx=0;
   if(main){
-    const current=main.getAttribute('src')||'';
+    const current=main.dataset.full||main.getAttribute('src')||'';
     const found=urls.findIndex(u=>u===current || decodeURI(u)===decodeURI(current));
     if(found>=0) idx=found;
   }
@@ -5207,12 +5213,12 @@ window.renderPhotoLightbox=()=>{
   if(!urls.length)return;
   photoLightboxIndex=(photoLightboxIndex+urls.length)%urls.length;
   const listing=window.currentDetailListing||{id:null,owner_id:null,title:'Annonce',price:'',show_phone:false};
-  const lightboxImg=document.getElementById('photoLightboxImg');lightboxImg.onload=refreshLightboxWatermark;lightboxImg.src=urls[photoLightboxIndex];if(lightboxImg.complete)setTimeout(refreshLightboxWatermark,0);
+  const lightboxImg=document.getElementById('photoLightboxImg');lightboxImg.onload=refreshLightboxWatermark;{const orig=urls[photoLightboxIndex];lightboxImg.onerror=function(){if(this.getAttribute('src')!==orig){this.onerror=null;this.src=orig;}};lightboxImg.src=abracaDetailImgFromUrl(orig,1600);}if(lightboxImg.complete)setTimeout(refreshLightboxWatermark,0);
   document.getElementById('photoLightboxCount').textContent=`${photoLightboxIndex+1}/${urls.length}`;
   document.getElementById('photoLightboxTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomPrice').textContent=listing.price;
-  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${u}" alt="Photo ${i+1}" loading="lazy" decoding="async"></button>`).join('');
+  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${abracaDetailImgFromUrl(u,220)}" onerror="if(this.getAttribute('src')!=='${u}'){this.onerror=null;this.src='${u}'}" alt="Photo ${i+1}" loading="lazy" decoding="async"></button>`).join('');
   document.querySelectorAll('.photo-lightbox-nav').forEach(x=>x.style.display=urls.length>1?'block':'none');
   const c=document.getElementById('photoLightboxContact');
   const canContact=!!listing.id && (!currentUser || listing.owner_id!==currentUser.id);
