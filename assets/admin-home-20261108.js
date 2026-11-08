@@ -189,7 +189,14 @@
   function renderStorage() {
     var s = state.storage; if (!s) { $('ahStorage').innerHTML = '<p class="ah-note">Chargement…</p>'; return; }
     var bytes = Number(s.total_bytes || 0), gb = 1024 * 1024 * 1024, pct = Math.min(100, 100 * bytes / gb);
-    $('ahStorage').innerHTML = '<div class="ah-gauge' + (pct >= 80 ? ' warn' : '') + '"><i style="width:' + pct.toFixed(1) + '%"></i></div><p>' + (bytes / 1048576).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo sur 1 Go (forfait gratuit) · ' + nf(s.file_count) + ' fichiers · ' + pct.toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %</p>';
+    $('ahStorage').innerHTML = '<div class="ah-gauge' + (pct >= 80 ? ' warn' : '') + '"><i style="width:' + pct.toFixed(1) + '%"></i></div><p>' + (bytes / 1048576).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo sur 1 Go (forfait gratuit) · ' + nf(s.file_count) + ' fichiers · ' + pct.toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' %</p>' + renderR2();
+  }
+  /* 08/11/2026 : les photos affichées sur le site sont servies par Cloudflare R2 (copie auto r2-sync toutes les 2 min). */
+  function renderR2() {
+    var r = state.r2; if (!r) return '<p class="ah-note">Cloudflare R2 : chargement…</p>';
+    var b = Number(r.bytes || 0), pct = Math.min(100, 100 * b / (10 * 1024 * 1024 * 1024)), pend = Number(r.pending || 0);
+    var last = r.last_sync ? new Date(r.last_sync).toLocaleString('fr-FR', { dateStyle: 'short', timeStyle: 'short' }) : 'jamais';
+    return '<p style="margin-top:14px"><strong>Cloudflare R2</strong> · photos affichées sur le site (affichage gratuit)</p><div class="ah-gauge' + (pct >= 80 ? ' warn' : '') + '"><i style="width:' + Math.max(0.5, pct).toFixed(1) + '%"></i></div><p>' + (b / 1048576).toLocaleString('fr-FR', { maximumFractionDigits: 1 }) + ' Mo sur 10 Go gratuits · ' + nf(r.files) + ' fichiers copiés · ' + (pend > 50 ? '<strong>' + nf(pend) + ' en attente, copie en retard</strong>' : (pend ? nf(pend) + ' en attente' : 'à jour')) + ' · dernière copie ' + last + '</p>';
   }
 
   function renderAll() {
@@ -213,6 +220,7 @@
     return sb.rpc('admin_prospect_tracking').then(function (r) { if (!r.error) { state.tracking = r.data; renderTracking(); } });
   }
   function loadStorage() {
+    sb.rpc('admin_r2_usage').then(function (r) { if (!r.error) { state.r2 = r.data; if (state.storage) renderStorage(); } });
     return sb.rpc('admin_storage_usage').then(function (r) { if (!r.error) { state.storage = r.data; renderStorage(); } });
   }
   $('ahDays').addEventListener('click', function (e) {
