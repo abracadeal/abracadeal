@@ -1,3 +1,8 @@
+## 2026-11-08 — Admin : refonte de la navigation (Claude)
+
+- Anthony : « trop de boutons, 2 rangées de catégories pas intuitif, refonte totale ». Une seule navigation : 5 rubriques (Accueil, Pros, Prospection, Stats = trafic + argent, Réglages). Sur téléphone : barre du bas façon application (icônes) ; sur ordinateur : onglets en haut. Barre d'outils et sous-menus supprimés ; les outils sont des lignes claires dans la rubrique qui les concerne (Modération + recherche d'annonce sur l'Accueil avec pastille, « Gérer la prospection » dans Prospection, Imports/Diffusion/API/Vacances/Commerce/Données dans Réglages). Anciennes ancres #traffic/#money → #stats.
+- Pages admin : plus de barre d'outils ; sur ordinateur un seul lien « ‹ Espace admin » (sur téléphone la flèche retour d'app-shell y mène déjà).
+
 ## 2026-11-08 — Pages admin : même habillage que admin.html (Claude)
 
 - `assets/admin-theme-20261108.css` chargé en dernier sur les 10 pages admin (couleurs, DM Sans / Fraunces, cartes, champs, boutons, tableaux). Sélecteurs `html:root body …` pour passer devant le thème mobile `body.abs-admin` d'app-shell (dont il redéfinit les variables `--aa-*`). Ne touche pas la structure des pages.

@@ -559,5 +559,5 @@ document.addEventListener('error',ev=>{const im=ev.target;if(!(im instanceof HTM
 (function(){document.querySelectorAll('.fold-n[data-count]').forEach(n=>{const box=document.getElementById(n.dataset.count);if(!box)return;const upd=()=>{const c=box.querySelectorAll('.req').length;n.textContent=c?String(c):'';};new MutationObserver(upd).observe(box,{childList:true});upd();});})();
 </script>
 <link rel="stylesheet" href="assets/admin-theme-20261108.css?v=3">
-<script src="assets/admin-subnav-20261108.js?v=2" defer></script>
+<script src="assets/admin-subnav-20261108.js?v=3" defer></script>
 </body></html>

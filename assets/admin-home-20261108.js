@@ -31,29 +31,30 @@
     document.querySelectorAll('.ah-panel').forEach(function (p) { p.classList.toggle('on', p.dataset.panel === tab); });
     try { history.replaceState(null, '', '#' + tab); } catch (_) {}
     window.scrollTo({ top: 0 });
-    if (tab === 'traffic' && !state.traffic) loadTraffic();
+    if (tab === 'stats' && !state.traffic) loadTraffic();
     if (tab === 'prospect' && !state.tracking) loadTracking();
     if (tab === 'tech' && !state.storage) loadStorage();
   }
-  window.addEventListener('hashchange', function () { var h = (location.hash || '').slice(1); if (h && h !== state.tab && document.querySelector('.ah-panel[data-panel="' + h + '"]')) showTab(h); });
+  window.addEventListener('hashchange', function () { var h = (location.hash || '').slice(1); h = ({ traffic: 'stats', money: 'stats' })[h] || h; if (h && h !== state.tab && document.querySelector('.ah-panel[data-panel="' + h + '"]')) showTab(h); });
   $('ahTabs').addEventListener('click', function (e) { var b = e.target.closest('button[data-tab]'); if (b) showTab(b.dataset.tab); });
 
   /* ---------- rendu ---------- */
   function renderToday(d) {
     var t = d.todo || {};
     var items = [
-      ['Annonces à modérer', t.moderation_pending, 'moderation.html', 'Elles ne sont pas en ligne tant qu’elles ne sont pas validées.'],
-      ['Annonces publiées automatiquement à revoir', t.auto_to_review, 'moderation.html', 'Déjà en ligne, contrôle a posteriori.'],
-      ['Signalements', t.reports_open, 'moderation.html', 'Annonces signalées par des visiteurs.'],
       ['Réponses « OK » de prospects', t.acceptances_pending, 'admin-prospection.html', 'Des pros ont répondu OK : créer leur espace.'],
       ['Imports de sites à valider', t.imports_pending, 'admin-test-import.html', 'Des pros attendent la mise en ligne de leur stock.'],
-      ['Flux en erreur', t.feeds_failing, '#tech', 'Stock d’un pro qui ne se met plus à jour.']
+      ['Flux en erreur', t.feeds_failing, '#tech', 'Le stock d’un pro ne se met plus à jour.']
     ];
     var todo = items.filter(function (x) { return Number(x[1]) > 0; });
-    $('ahTodoDot').hidden = !todo.length;
+    var modN = Number(t.moderation_pending || 0) + Number(t.reports_open || 0) + Number(t.auto_to_review || 0);
+    $('ahTodoDot').hidden = !(todo.length || modN);
+    var badge = function (id, n) { var el = $(id); if (!el) return; n = Number(n || 0); el.textContent = n > 99 ? '99+' : String(n); el.hidden = !n; };
+    badge('ahGoMod', Number(t.moderation_pending || 0) + Number(t.reports_open || 0) + Number(t.auto_to_review || 0));
+    badge('ahGoOk', t.acceptances_pending); badge('ahGoImp', t.imports_pending);
     $('ahTodo').innerHTML = todo.length ? todo.map(function (x) {
       return '<a class="ah-todo-item" href="' + x[2] + '"><b>' + nf(x[1]) + '</b><span><strong>' + esc(x[0]) + '</strong><small>' + esc(x[3]) + '</small></span><i>›</i></a>';
-    }).join('') : '<div class="ah-ok">✓ Rien à traiter pour le moment.</div>';
+    }).join('') : '<div class="ah-ok">✓ Rien d’urgent à traiter.</div>';
 
     var tech = d.tech || {}, pros = d.pros || [];
     var td = (state.todayTraffic && state.todayTraffic.days && state.todayTraffic.days[0]) || {};
@@ -89,7 +90,7 @@
   function renderPros(d) {
     var pros = d.pros || [];
     var q = ($('ahProSearch').value || '').trim().toLowerCase();
-    var f = state.proFilter || 'all';
+    var f = 'all';
     var feedBad = function (p) { return p.feed && p.feed.last_error && (!p.feed.last_success_at || Date.now() - new Date(p.feed.last_success_at) > 864e5); };
     var list = pros.filter(function (p) {
       if (f === 'stock' && !(Number(p.active_listings) > 0)) return false;
@@ -220,24 +221,6 @@
     document.querySelectorAll('#ahDays button').forEach(function (x) { x.classList.toggle('on', x === b); });
     loadTraffic();
   });
-  $('ahProFilter').addEventListener('click', function (e) {
-    var b = e.target.closest('button[data-f]'); if (!b) return;
-    state.proFilter = b.dataset.f;
-    document.querySelectorAll('#ahProFilter button').forEach(function (x) { x.classList.toggle('on', x === b); });
-    if (state.data) renderPros(state.data);
-  });
-  /* Sous-menu de chaque rubrique : une pastille par section (titres h2), un appui fait défiler jusqu'à la section. */
-  document.querySelectorAll('.ah-panel').forEach(function (panel) {
-    var hs = panel.querySelectorAll('h2'); if (hs.length < 2) return;
-    var nav = document.createElement('div'); nav.className = 'ah-sub';
-    hs.forEach(function (h, i) {
-      h.id = h.id || ('s-' + panel.dataset.panel + '-' + i);
-      var b = document.createElement('button'); b.type = 'button'; b.textContent = h.textContent.replace(/\s*\(.*\)$/, '');
-      b.addEventListener('click', function () { var y = h.getBoundingClientRect().top + window.scrollY - document.querySelector('.ah-top').offsetHeight - 8; window.scrollTo({ top: y, behavior: 'smooth' }); });
-      nav.appendChild(b);
-    });
-    panel.insertBefore(nav, panel.firstChild);
-  });
   $('ahProSearch').addEventListener('input', function () { if (state.data) renderPros(state.data); });
 
   function stamp() {
@@ -258,7 +241,7 @@
       document.querySelectorAll('.ah-panel').forEach(function (p) { p.hidden = false; });
       renderAll(); stamp();
       var extra = [loadTodayTraffic()];
-      if (state.traffic || state.tab === 'traffic') extra.push(loadTraffic());
+      if (state.traffic || state.tab === 'stats') extra.push(loadTraffic());
       if (state.tracking || state.tab === 'prospect') extra.push(loadTracking());
       if (state.tab === 'tech') extra.push(loadStorage());
       return Promise.all(extra);
@@ -284,7 +267,8 @@
     if (!pr.data || !pr.data.is_admin) { $('ahStatus').textContent = 'Accès réservé à l’administrateur.'; $('ahUpdated').textContent = '—'; return; }
     var h = (location.hash || '').slice(1);
     state.ready = true;
-    showTab(['today', 'pros', 'prospect', 'traffic', 'money', 'tech'].indexOf(h) >= 0 ? h : 'today');
+    var alias = { traffic: 'stats', money: 'stats' }; h = alias[h] || h;
+    showTab(['today', 'pros', 'prospect', 'stats', 'tech'].indexOf(h) >= 0 ? h : 'today');
     refresh(true);
   })();
 })();
