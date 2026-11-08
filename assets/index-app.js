@@ -1135,8 +1135,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       if(window.matchMedia('(max-width: 760px)').matches){
         syncAdminNav();
         const nav=navBtn();
-        if(nav&&nav.dataset.mobileAction==='admin')nav.click();else openModal('mobileAdminModal');
-      }else openModal('accountModal');
+        if(nav&&nav.dataset.mobileAction==='admin')nav.click();else location.href='admin.html';
+      }else location.href='admin.html'; // 08/11/2026 : l'espace admin est admin.html, sur ordinateur aussi
     };
     window.addEventListener('abracadeal:auth',()=>setTimeout(open,150));
     [300,1000,2500].forEach(t=>setTimeout(open,t));
