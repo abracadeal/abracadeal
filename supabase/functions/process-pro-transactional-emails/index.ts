@@ -97,9 +97,10 @@ function build(type: string, p: any) {
       const title = "Bienvenue parmi les Fondateurs Abracadeal";
       const paras = [
         `Votre inscription est confirmée : vous êtes <strong>Fondateur Abracadeal</strong> : <strong>annonces illimitées</strong> pendant 12 mois.`,
-        `Vos annonces sont publiées <strong>gratuitement jusqu’au ${dateFr(p.free_until)}</strong>. Aucune carte bancaire n’est demandée : pour continuer ensuite au tarif public de ${euros(p.amount_cents)} HT par mois, il suffira d’ajouter un moyen de paiement depuis « Mon compte » avant cette date (nous vous le rappellerons 30, 7 et 3 jours avant). Sinon, vos annonces seront simplement mises en pause, sans aucun prélèvement.`,
+        // 08/11/2026 (Anthony) : on ne parle plus de prix aux Fondateurs ; à l'approche de la fin, un bouton « continuer avec nous » sera proposé dans l'Espace Pro et par mail.
+        `Vos annonces sont publiées <strong>gratuitement jusqu’au ${dateFr(p.free_until)}</strong>, sans carte bancaire et sans aucun prélèvement. À l’approche de cette date, nous vous proposerons simplement de continuer avec nous depuis votre Espace Pro.`,
         `L’offre est réservée aux professionnels actifs : sans annonce en ligne pendant 60 jours, la place Fondateur est libérée.`,
-        `Vous pouvez résilier en un clic depuis « Mon compte ». Une résiliation pendant la période gratuite arrête l’abonnement immédiatement, sans aucun prélèvement, et fait perdre définitivement le statut Fondateur.`,
+        `Vous pouvez quitter l’offre à tout moment depuis « Mon compte » (le statut Fondateur est alors perdu définitivement).`,
       ];
       const bullets = ["Annonces illimitées pendant 12 mois", photos, "Import automatique de votre stock (flux ou fichier CSV, Excel, XML, JSON)", "Modifications incluses"].filter(Boolean); // 29/10/2026 : plus de plafond Fondateur
       return { subject: `Bienvenue, Fondateur Abracadeal — vos 12 mois offerts commencent`, title, paras, bullets };
