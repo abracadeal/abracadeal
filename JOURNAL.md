@@ -1,3 +1,8 @@
+## 2026-11-08 — Plus de prix affichés aux Fondateurs (Claude)
+
+- Décision d'Anthony (08/11) : on ne parle plus de prix aux Fondateurs. `pro-fondateur.html` (partie connectée) : carte Fondateurs → note « Offre Fondateurs » sans « puis X € HT / mois à partir du 13e mois » ; confirmation de changement de formule d'un Fondateur → « gratuit jusqu’à la fin de vos 12 mois » sans montant. Mails de prospection (aucun prix ni nombre d'annonces) et mails Fondateurs (`process-pro-transactional-emails`) déjà conformes. Grille des autres formules inchangée.
+- Données : 6 annonces Sophie Folley avaient un nombre de pièces absurde dans IMETA (surfaces de `roomAreas` concaténées, ex. 22018000) ; clé `rooms` retirée en base (description + catalog_desc). Le lecteur Apimo de `pro-stock-sync` n'est pas encore corrigé : la synchro de nuit peut les réintroduire.
+
 ## 2026-11-08 — Garage VR Auto : lecteur du showroom public (ChatGPT)
 
 - Départ : main récupéré `8e19427a`, puis derniers changements concurrents conservés jusqu’à `aa019988667b0388f1ba35ae6947cebaaa26a30e`. JOURNAL et guides APPRENDRE-AU-ROBOT / GROS-SITES lus. Version réellement déployée v312 ACTIVE épinglée sur `715de7f53b2bdc4331eaf9053a261ac01055d269`, code de fonction identique à main. Modifications de Claude (Apimo, contacts, IMETA, modération, CSS/vitesse/SEO) conservées. Travail isolé en worktree ; ancien répertoire non réinitialisé.
