@@ -2734,3 +2734,4 @@
   - Plus tard : domaine photos.abracadeal.fr (nécessite le DNS chez Cloudflare) au lieu de r2.dev.
 
 - 08/11/2026 (Claude) : mobile — « Ma page Pro » (tableau de bord Pro et bouton « Modifier ma page Pro ») ouvre le showroom en plein écran (≤ 760 px) : barre « Ma page Pro » + × en haut, bannière en 16/9, barre du bas masquée, boutons Voir / Enregistrer / Annuler collés en bas. Fermeture (×, Annuler, fermeture du compte) remet tout en place. Ordinateur inchangé. index-main.js ?v=20261108-showfs.
+- 08/11/2026 (Claude) : MyCreativeSite (contact@mycreativesite.fr, iDream Lab, secteur services) = compte maison gratuit (décision Anthony) : pro_subscriptions services_30, 30 annonces, status active, source internal_free, sans Stripe. Panneau « Mon abonnement Pro » : cas internal_free → badge « Gratuit », formule + « Gratuit, sans engagement », aucun bouton Stripe. index-app.js ?v=20261108-internal.

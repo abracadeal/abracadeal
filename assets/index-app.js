@@ -680,7 +680,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     pro_50:'Jusqu’à 50 annonces',
     pro_100:'Jusqu’à 100 annonces',
     pro_200:'Jusqu’à 200 annonces',
-    pro_250:'Plus de 100 annonces (sur devis)'
+    pro_250:'Plus de 100 annonces (sur devis)',
+    services_30:'Services — jusqu’à 30 annonces'
   };
   const statusLabels={
     trialing:'Période gratuite',
@@ -747,6 +748,15 @@ document.addEventListener('DOMContentLoaded',()=>{
       /* 02/11/2026 (Anthony) : un Fondateur en période gratuite n'a pas de plafond d'annonces —
          on n'affiche ni « Jusqu'à 50 annonces » ni rien qui ressemble à une annonce supplémentaire payante. */
       const founderFree=data.founder_number!=null&&data.status==='trialing'&&!cancelled;
+      /* 08/11/2026 (Anthony) : compte maison (ex. MyCreativeSite, iDream Lab) — gratuit, sans Stripe ni échéance. */
+      if(data.source==='internal_free'&&data.status==='active'){
+        if(intro)intro.textContent='Compte partenaire Abracadeal : aucune facturation.';
+        if(badge){badge.textContent='Gratuit';badge.className='pro-billing-status '+billingStatusClass(data);}
+        if(details)details.innerHTML=[['Formule',planLabels[data.plan_code]||data.plan_code||'—'],['Tarif','Gratuit, sans engagement']].map(([l,v])=>'<div class="pro-billing-detail"><span>'+esc(l)+'</span><strong>'+esc(v)+'</strong></div>').join('');
+        actions?.classList.add('hidden');
+        if(note)note.textContent='';
+        return data;
+      }
       const billingStart=data.billing_starts_at||data.free_until||null;
 
       if(intro){
