@@ -1,0 +1,16 @@
+
+/* 08/11/2026 (Anthony : « boutons plus fins, ergonomiques… mets ça partout ») : un seul style pour tous les boutons
+   « primary » et « ghost » du site — même police, même taille de texte, 44 px de haut, bords fins.
+   :not(.hidden) : un bouton masqué reste masqué. */
+.btn.primary:not(.hidden),.btn.ghost:not(.hidden),.btn.pro-billing-cancel:not(.hidden){
+  font-family:inherit!important;font-size:15px!important;font-weight:700!important;line-height:1.1!important;letter-spacing:0!important;
+  min-height:44px!important;height:auto!important;padding:0 18px!important;border-radius:999px!important;
+  display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px;box-shadow:none!important;text-decoration:none!important;box-sizing:border-box}
+.btn.ghost:not(.hidden){background:#fff!important;border:1px solid #e3d7ea!important;color:#3c1b64!important}
+.btn.ghost:not(.hidden):hover{background:#faf5fc!important;border-color:#cdb6da!important}
+.btn.primary:not(.hidden){border:0!important;background:linear-gradient(90deg,#7c3aed,#db2777)!important;color:#fff!important}
+.btn.primary:not(.hidden):hover{filter:brightness(1.06)}
+.btn.primary:disabled,.btn.ghost:disabled{opacity:.5;cursor:not-allowed}
+.btn.pro-billing-cancel:not(.hidden){background:#fff!important;border:1px solid #f1c4cf!important;color:#b4234a!important}
+.form-actions{flex-wrap:wrap;gap:8px}
+@media(max-width:520px){.form-actions .btn:not(.hidden){flex:1 1 auto!important;padding:0 14px!important}}
