@@ -2765,3 +2765,8 @@
 - MyCreativeSite : cs-abracadeal-sync v2, cs-checkout v4 (SIRET + adresse au paiement pour ces métiers).
 - Test bout en bout (site artisan temporaire) : 2 prestations créées en Services/artisans-travaux, résiliation → annonces archivées, agence arrêtée. Note : une ville à plus de 150 km de l'adresse du compte est remplacée par celle du compte (règle existante) — normal, chaque pro a son propre compte.
 - À supprimer (confirmation non donnée) : flux pro_stock_feeds 03161b59-…, agence partner_agencies be9ce81f-…, 2 annonces archivées de ce flux ; côté MyCreativeSite, site test-artisan-abraca (e355b10e-…) et ses lignes pro_profiles / abracadeal_sync.
+
+## 08/11/2026 (nuit) — MyCreativeSite : espace « Mes véhicules / Mes biens » (Claude, demande d'Anthony)
+- Espace client MyCreativeSite, nouvel onglet pour garages et agences : liste du stock (photo, prix, statut, ce qui manque), fiche complète par annonce (véhicule : marque, modèle, version, année, km, énergie, boîte, puissance, couleur, portes, Crit'Air, garantie… ; bien : surface, terrain, pièces, chambres, étage, DPE/GES lettres + valeurs, dépenses d'énergie, copropriété, honoraires, charges/dépôt en location), jusqu'à 30 photos, statut En vente / Réservé / Vendu (Sous compromis / Loué).
+- Données dans content.items[].sp ; cs-abracadeal-sync v3 envoie ces champs à partner-api → pro-stock-sync (alias existants). Vendu / Sous compromis / Loué = retiré d'Abracadeal.
+- Pack Auto & Immo : 99 €/mois + 490 € de mise en ligne (nouveau lien Stripe plink_1UZeOt…, ancien désactivé), CRM inclus, sans réservation en ligne.
