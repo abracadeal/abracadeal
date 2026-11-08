@@ -55,7 +55,7 @@
  }
  window.addEventListener('abracadeal:auth',refreshPendingCount);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')refreshPendingCount();});
- setInterval(refreshPendingCount,15000);
+ setInterval(()=>{if(document.visibilityState==='visible')refreshPendingCount();},60000); /* 08/11/2026 : 15 s → 60 s, onglet visible seulement (quota Supabase) */
  refreshPendingCount();
  async function load(){
   clearPrivate();userId=currentUser?.id||null;const v=version;

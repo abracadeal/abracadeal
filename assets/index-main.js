@@ -6450,7 +6450,7 @@ if(sb){
 // Vérification automatique des nouveaux messages sans recharger la page.
 // 07/11/2026 : 4 s → 15 s et « Mes annonces » 30 s → 3 min (plan gratuit Supabase : requêtes, journaux et photos rechargées). Rafraîchi aussi au retour sur l'onglet.
 let lastMineAutoRefresh=Date.now();
-setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine&&Date.now()-lastMineAutoRefresh>=180000){lastMineAutoRefresh=Date.now();loadAds();}}},15000);
+setInterval(()=>{if(currentUser && document.visibilityState==='visible'){refreshUnreadMessages();if(currentProfile?.is_admin)refreshFlowErrorsCount();if(onlyMine&&Date.now()-lastMineAutoRefresh>=180000){lastMineAutoRefresh=Date.now();loadAds();}}},60000); /* 08/11/2026 : 15 s → 60 s (quota Supabase : journaux et requêtes) ; les compteurs se mettent aussi à jour au retour sur l'onglet */
 
 // Rafraîchit aussi immédiatement quand l'utilisateur revient sur l'onglet / la fenêtre.
 document.addEventListener('visibilitychange',()=>{
