@@ -200,10 +200,13 @@ function photoUrl(path){
   if(!path) return '';
   if(privatePhotoUrls.has(path))return privatePhotoUrls.get(path);
   if(/^https?:\/\//i.test(String(path))) return String(path);
-  if(!sb) return '';
-  const {data}=sb.storage.from('listing-images').getPublicUrl(path);
-  return data?.publicUrl||'';
+  /* 08/11/2026 (quota Supabase) : photos publiques servies par Cloudflare R2 (copie faite par la fonction r2-sync, toutes les 2 min).
+     Si une photo n'y est pas encore (annonce publiée il y a moins de 2 min), le filet photo retombe sur Supabase (abracaR2Fallback). */
+  return ABRACA_R2+'listing-images/'+encodeURI(String(path));
 }
+const ABRACA_R2='https://pub-9747954003f04922a082752db15aeeed.r2.dev/';
+const ABRACA_SB_PUBLIC='https://jplzvxmpbpjssyinozap.supabase.co/storage/v1/object/public/';
+window.abracaR2Fallback=u=>{u=String(u||'');if(u.includes(ABRACA_R2))return u.split(ABRACA_R2).join(ABRACA_SB_PUBLIC);const e=encodeURIComponent(ABRACA_R2);return u.includes(e)?u.split(e).join(encodeURIComponent(ABRACA_SB_PUBLIC)):'';};
 // 18/10/2026 : miniatures des vignettes (bucket public « listing-thumbs », générées côté serveur par
 // generate-listing-thumbs). Si la miniature n'existe pas encore, l'image d'origine est chargée à la place.
 function thumbUrl(path){
@@ -212,7 +215,7 @@ function thumbUrl(path){
      si il ne répond pas, la photo d'origine est chargée à la place (onerror de thumbImgAttrs). */
   if(path&&!privatePhotoUrls.has(path)&&/^https?:\/\//i.test(String(path)))return abracaWsrv(String(path),720,'inside');
   if(!path||privatePhotoUrls.has(path)||!sb) return photoUrl(path);
-  const {data}=sb.storage.from('listing-thumbs').getPublicUrl(path);
+  const data={publicUrl:ABRACA_R2+'listing-thumbs/'+encodeURI(String(path))}; /* 08/11/2026 : R2 (voir photoUrl) */
   // 01/11/2026 : ?o=2 = miniatures refaites avec la bonne orientation (les anciennes restaient en cache 1 an).
   return data?.publicUrl?data.publicUrl+'?o=5':photoUrl(path); /* 02/11/2026 : ?o=3 = miniatures refaites en meilleure qualité ; ?o=4 = 640 px ; ?o=5 = petit côté 720 px (nettes en vignette carrée) */
 }
@@ -5146,7 +5149,7 @@ window.selectDetailPhoto=(button,url,index,total)=>{
     /* Fix 21/09/2026 : reinitialise l'etat de secours a chaque changement de miniature, sinon
        une photo cassee plus tot dans le carrousel empechait le fallback de se redeclencher sur
        une autre photo cassee ensuite (le garde-fou anti-boucle restait arme). */
-    main.dataset.abracaFallback='';delete main.dataset.abracaTried1;delete main.dataset.abracaTried2;delete main.dataset.abOrig;
+    main.dataset.abracaFallback='';delete main.dataset.abracaR2Tried;delete main.dataset.abracaTried1;delete main.dataset.abracaTried2;delete main.dataset.abOrig;
     main.dataset.full=url;url=abracaDetailImgFromUrl(url,1600);
     main.classList.remove('abraca-default-photo');
     const detailWm=document.getElementById('detailPhotoWatermark');
@@ -5213,12 +5216,12 @@ window.renderPhotoLightbox=()=>{
   if(!urls.length)return;
   photoLightboxIndex=(photoLightboxIndex+urls.length)%urls.length;
   const listing=window.currentDetailListing||{id:null,owner_id:null,title:'Annonce',price:'',show_phone:false};
-  const lightboxImg=document.getElementById('photoLightboxImg');lightboxImg.onload=refreshLightboxWatermark;{const orig=urls[photoLightboxIndex];lightboxImg.onerror=function(){if(this.getAttribute('src')!==orig){this.onerror=null;this.src=orig;}};lightboxImg.src=abracaDetailImgFromUrl(orig,1600);}if(lightboxImg.complete)setTimeout(refreshLightboxWatermark,0);
+  const lightboxImg=document.getElementById('photoLightboxImg');lightboxImg.onload=refreshLightboxWatermark;{const orig=urls[photoLightboxIndex];lightboxImg.onerror=function(){const c=this.getAttribute('src');if(c!==orig){this.src=orig;return;}const f=abracaR2Fallback(c);this.onerror=null;if(f)this.src=f;};lightboxImg.src=abracaDetailImgFromUrl(orig,1600);}if(lightboxImg.complete)setTimeout(refreshLightboxWatermark,0);
   document.getElementById('photoLightboxCount').textContent=`${photoLightboxIndex+1}/${urls.length}`;
   document.getElementById('photoLightboxTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomTitle').textContent=listing.title;
   document.getElementById('photoLightboxBottomPrice').textContent=listing.price;
-  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${abracaDetailImgFromUrl(u,220)}" onerror="if(this.getAttribute('src')!=='${u}'){this.onerror=null;this.src='${u}'}" alt="Photo ${i+1}" loading="lazy" decoding="async"></button>`).join('');
+  document.getElementById('photoLightboxThumbs').innerHTML=urls.map((u,i)=>`<button type="button" class="photo-lightbox-thumb ${i===photoLightboxIndex?'active':''}" onclick="photoLightboxIndex=${i};renderPhotoLightbox()"><img src="${abracaDetailImgFromUrl(u,220)}" onerror="if(this.getAttribute('src')!=='${u}'){this.src='${u}'}else{this.onerror=null;const f=abracaR2Fallback('${u}');if(f)this.src=f}" alt="Photo ${i+1}" loading="lazy" decoding="async"></button>`).join('');
   document.querySelectorAll('.photo-lightbox-nav').forEach(x=>x.style.display=urls.length>1?'block':'none');
   const c=document.getElementById('photoLightboxContact');
   const canContact=!!listing.id && (!currentUser || listing.owner_id!==currentUser.id);

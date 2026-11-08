@@ -1443,6 +1443,11 @@ document.addEventListener('DOMContentLoaded',()=>{
   function mark(img){
     if(!img || !img.matches || !img.matches(selector)) return;
     if(img.dataset.abracaFallback) return;
+    // 08/11/2026 : photo servie par Cloudflare R2 mais pas encore copiée → même photo depuis Supabase avant tout autre secours.
+    if(!img.dataset.abracaR2Tried && typeof window.abracaR2Fallback==='function'){
+      const f=window.abracaR2Fallback(img.getAttribute('src'));
+      if(f){img.dataset.abracaR2Tried='1';if(img.hasAttribute('srcset'))img.removeAttribute('srcset');img.src=f;return;}
+    }
     // 18/10/2026 : miniature pas encore générée -> on charge d'abord la photo d'origine (data-full),
     // la photo Abracadeal par défaut ne sert que si l'originale est elle aussi introuvable.
     // 08/11/2026 : les vignettes ont aussi un srcset (versions allégées) : on le retire, sinon le
