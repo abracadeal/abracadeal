@@ -94,7 +94,8 @@ export function parseApimoDetail(raw:string,url:string){
   // (Anthony : « c'est dans les informations clés normalement ») → champs dédiés, affichés dans « Les informations clés », pas dans la description.
   const roomLines=sectionLines(surfaceBlock).map(([l,v])=>l.replace(/^1\s+/,'')+' : '+v);
   const nearLines=sectionLines(module('property-info-template-8')).map(([l,v])=>l+' : '+v);
-  if(roomLines.length)o.surfaces_pieces=roomLines.join('\n');
+  // 08/11/2026 : clé sans « _pieces » final — first() lit aussi les clés « …_pieces », la liste des surfaces devenait le nombre de pièces (22018000).
+  if(roomLines.length)o.surfacespieces=roomLines.join('\n');
   if(nearLines.length)o.proximites=nearLines.join('\n');
   return o;
 }

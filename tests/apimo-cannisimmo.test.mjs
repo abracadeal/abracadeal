@@ -19,4 +19,6 @@ const rows=await readApimoModules(new URL('https://cannisimmo.com/fr/'),'<a href
  return {url:u,text:u.pathname.includes('/propriete/')?html:`<div data-module-id="1" class="module-listing"><a href="${new URL(url).pathname}">Bien</a>${u.search?'':'<a href="/fr/ventes?page=2">Suivant</a>'}</div>`};
 });
 assert.equal(rows.length,1);assert.equal(rows.partial,false);assert.equal(rows.stats.pages,2);assert.ok(visited.some(x=>x.endsWith('?page=2')));
+// 08/11/2026 : aucune clé « …_pieces » hors « pieces » (first() lit les suffixes : la liste des surfaces devenait le nombre de pièces, ex. 22018000 chez Sophie Folley).
+assert.ok(row.surfacespieces.includes('Chambre : 12 m²'));assert.deepEqual(Object.keys(row).filter(k=>k!=='pieces'&&/(^|_)(pieces|nb_pieces|nombre_pieces|rooms|room_count)$/.test(k)),[]);
 console.log('Cannisimmo: template 19, h3 title, matching listing JSON-LD, diagnostics, gallery and pagination OK');
