@@ -492,8 +492,12 @@ function syncCompanyFields(prefix){
 function syncSignupHasSite(){
   const yes=document.querySelector('input[name="signupHasSite"]:checked')?.value==='yes';
   $('#signupSiteFields')?.classList.toggle('hidden',!yes);
+  /* 08/11/2026 (Anthony) : pas de site → on présente notre partenaire MyCreativeSite (véhicules / immobilier). */
+  const no=document.querySelector('input[name="signupHasSite"]:checked')?.value==='no';
+  const sec=String(document.getElementById('signupSector')?.value||'');
+  document.getElementById('signupNoSiteHint')?.classList.toggle('hidden',!no||(sec&&!['vehicules','immobilier'].includes(sec)));
 }
-document.addEventListener('change',e=>{if(e.target&&e.target.name==='signupHasSite')syncSignupHasSite();});
+document.addEventListener('change',e=>{if(e.target&&(e.target.name==='signupHasSite'||e.target.id==='signupSector'))syncSignupHasSite();});
 function syncSignupCompany(){
   const pro=$('#signupType').value==='professionnel';
   $('#signupCompanyFields').classList.toggle('hidden',!pro);
