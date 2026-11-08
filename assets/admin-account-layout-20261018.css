@@ -104,3 +104,12 @@
 
 /* 30/10/2026 (Anthony) : intertitre « Abonnements Pro » du tableau de bord Admin invisible (blanc sur fond clair). */
 html body .admin-stats .aal-subtitle,html body #adminStatsPanel .aal-subtitle,html body .aal-subtitle{margin:14px 0 8px 2px!important;font-size:.72rem!important;font-weight:900!important;letter-spacing:.06em!important;text-transform:uppercase!important;color:#7a6a83!important}
+
+/* 08/11/2026 (Anthony, compte admin : « il y a des choses dont je n'ai pas besoin ») : tout l'administratif est dans
+   l'Espace admin (admin.html). Dans « Mon compte », l'admin ne garde que : Espace admin, Mes messages, Mes infos. */
+#loggedInAccount.aal-is-admin .aal-admin .aal-grid>:not(.aal-keep),
+#loggedInAccount.aal-is-admin #adminStatsPanel,
+#loggedInAccount.aal-is-admin #adminDatabasePanel,
+#loggedInAccount.aal-is-admin .aal-mine .account-shortcuts>:not(#accountMessagesBtn):not(.aal-infos){display:none!important}
+#loggedInAccount.aal-is-admin .aal-admin .aal-grid{grid-template-columns:1fr!important}
+#loggedInAccount.aal-is-admin .aal-mine .account-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important}

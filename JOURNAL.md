@@ -1,3 +1,7 @@
+## 2026-11-08 — « Mon compte » de l'admin allégé (Claude)
+
+- Compte admin (`.aal-is-admin`) : seule la tuile « Espace admin » reste dans Administration (les autres outils sont dans admin.html) ; Tableau de bord, Base de données, compteurs de formules masqués ; « Mon espace » réduit à Mes messages + Mes infos. CSS seulement (admin-account-layout css v8), rien supprimé pour les pros/particuliers.
+
 ## 2026-11-08 — Admin : refonte de la navigation (Claude)
 
 - Anthony : « trop de boutons, 2 rangées de catégories pas intuitif, refonte totale ». Une seule navigation : 5 rubriques (Accueil, Pros, Prospection, Stats = trafic + argent, Réglages). Sur téléphone : barre du bas façon application (icônes) ; sur ordinateur : onglets en haut. Barre d'outils et sous-menus supprimés ; les outils sont des lignes claires dans la rubrique qui les concerne (Modération + recherche d'annonce sur l'Accueil avec pastille, « Gérer la prospection » dans Prospection, Imports/Diffusion/API/Vacances/Commerce/Données dans Réglages). Anciennes ancres #traffic/#money → #stats.
