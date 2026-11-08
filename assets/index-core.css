@@ -4489,9 +4489,13 @@ header #flowErrorsBtn{
 .brand-logo-img{display:block;height:36px;width:auto;max-width:none}
 .mobile-brand .brand-logo-img{height:34px}
 .desktop-brand{display:flex;align-items:center}
-/* 08/11/2026 : en-tête ordinateur — les catégories ne passent plus sous « Publier une annonce » quand la place manque :
-   elles défilent horizontalement (sans barre visible), avec un fondu à droite. */
+/* 08/11/2026 : en-tête ordinateur — les catégories ne passent plus sous « Publier une annonce » quand la place manque. */
 @media(min-width:761px){
-  .container.nav .desktop-category-nav{min-width:0!important;overflow-x:auto!important;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:24px}
-  .container.nav .desktop-category-nav::-webkit-scrollbar{display:none}
+  .container.nav{grid-template-columns:auto minmax(0,1fr) auto!important}
+  .container.nav .desktop-category-nav{width:auto!important;max-width:100%!important;min-width:0!important;justify-content:center}
+}
+@media(min-width:761px) and (max-width:1440px){
+  .container.nav .desktop-category-nav{gap:4px!important}
+  .container.nav .desktop-category-nav > * > a,.container.nav .desktop-category-nav > a{padding:0 11px!important}
+  .container.nav .abraca-publish-top:not(.hidden){padding:0 14px!important;font-size:14px!important}
 }
