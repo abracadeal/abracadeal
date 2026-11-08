@@ -227,8 +227,11 @@ function thumbUrl(path){
 /* 08/11/2026 (quota Supabase dépassé : les grandes photos des fiches = 1,6 Go/jour) : la photo principale, l'agrandissement
    et la bande de miniatures d'une fiche passent par le redimensionneur (WebP, 1600 px max pour la grande, 220 px pour la bande).
    Qualité 85 pour rester net. Si wsrv ne répond pas → photo d'origine (data-full, filet photo d'index-app.js). Photos privées : inchangées. */
-function abracaDetailImg(path,w){const u=photoUrl(path);if(!u||privatePhotoUrls.has(path)||!/^https:\/\//i.test(u))return u;return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit=inside&we&output=webp&q='+(w>400?85:78);}
-function abracaDetailImgFromUrl(u,w){if(!u||!/^https:\/\//i.test(u)||/^https:\/\/wsrv\.nl\//.test(u)||/[?&]token=/.test(u))return u;return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit=inside&we&output=webp&q=85';}
+/* 08/11/2026 soir (Anthony : « la lecture des photos sur annonces est plus lente ») : depuis le passage sur R2 (sortie gratuite),
+   la grande photo est servie directement par R2 — le redimensionneur ajoutait 0,5 à 1,2 s au premier affichage pour
+   un gain quasi nul (≈ 330 Ko au lieu de 380). Les petites miniatures de la fiche prennent la vignette stockée (listing-thumbs). */
+function abracaDetailImg(path,w){return w>400?photoUrl(path):thumbUrl(path);}
+function abracaDetailImgFromUrl(u,w){u=String(u||'');if(w>400)return u;return u.includes(ABRACA_R2+'listing-images/')?u.replace(ABRACA_R2+'listing-images/',ABRACA_R2+'listing-thumbs/'):u;}
 function abracaWsrv(u,w,fit){return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit='+(fit||'outside')+'&we&output=webp&q=76';}
 // 03/11/2026 (Anthony : « ça fait souvent les photos qui chargent pas entières ») : la vignette reste invisible (fond de la carte)
 // jusqu'à ce qu'elle soit entièrement chargée, puis apparaît en fondu — plus de photo à moitié dessinée.
