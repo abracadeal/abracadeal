@@ -4489,3 +4489,9 @@ header #flowErrorsBtn{
 .brand-logo-img{display:block;height:36px;width:auto;max-width:none}
 .mobile-brand .brand-logo-img{height:34px}
 .desktop-brand{display:flex;align-items:center}
+/* 08/11/2026 : en-tête ordinateur — les catégories ne passent plus sous « Publier une annonce » quand la place manque :
+   elles défilent horizontalement (sans barre visible), avec un fondu à droite. */
+@media(min-width:761px){
+  .container.nav .desktop-category-nav{min-width:0!important;overflow-x:auto!important;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 28px),transparent);padding-right:24px}
+  .container.nav .desktop-category-nav::-webkit-scrollbar{display:none}
+}
