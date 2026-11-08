@@ -2770,3 +2770,10 @@
 - Espace client MyCreativeSite, nouvel onglet pour garages et agences : liste du stock (photo, prix, statut, ce qui manque), fiche complète par annonce (véhicule : marque, modèle, version, année, km, énergie, boîte, puissance, couleur, portes, Crit'Air, garantie… ; bien : surface, terrain, pièces, chambres, étage, DPE/GES lettres + valeurs, dépenses d'énergie, copropriété, honoraires, charges/dépôt en location), jusqu'à 30 photos, statut En vente / Réservé / Vendu (Sous compromis / Loué).
 - Données dans content.items[].sp ; cs-abracadeal-sync v3 envoie ces champs à partner-api → pro-stock-sync (alias existants). Vendu / Sous compromis / Loué = retiré d'Abracadeal.
 - Pack Auto & Immo : 99 €/mois + 490 € de mise en ligne (nouveau lien Stripe plink_1UZeOt…, ancien désactivé), CRM inclus, sans réservation en ligne.
+
+## 09/11/2026 (nuit) — MyCreativeSite : SEO des sites clients et hébergement (Claude, demande d'Anthony)
+- Constat : les sites clients étaient le modèle + contenu ajouté par le navigateur (Google voyait « Garage du Littoral », titre « Modèle… », noindex).
+- scripts/cs-build-site.mjs (repo clicandsite, servi sur mycreativesite.fr/scripts/) : génère le site en vraies pages HTML — contenu écrit dans la page, titre/description, canonical, Open Graph, JSON-LD (AutoDealer/AutoRepair/RealEstateAgent…, horaires, note Google), une page par véhicule (/vehicules/…, Car/Motorcycle + Offer) ou par bien (/biens/…, RealEstateListing), fil d'Ariane, sitemap.xml, robots.txt, CNAME. Annonces vendues/louées sans page.
+- Hébergement : GitHub Pages, un dépôt ClicandSite/site-<slug> par client ; workflow « Nouveau site client » (repo clicandsite) crée le dépôt et active Pages ; chaque site se régénère toutes les 15 min (scripts/client-site/site.yml). Prérequis : secret SITES_TOKEN (jeton GitHub d'Anthony) à créer une fois.
+- RPC publique cs_site_public_info(p_slug) (MyCreativeSite) ; cs-edit v15 garde les liens vers les pages d'annonces.
+- Concession auto et moto : modèle dédié (garage.html?concession=1), mis en avant sur l'accueil ; Pack renommé « Pack Auto, Moto & Immo » ; Abracadeal seulement dans les formules à 99 € (Boutique, Pack).
