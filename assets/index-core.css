@@ -4462,10 +4462,10 @@ header #flowErrorsBtn{
 #publishModal .form-actions{display:flex!important;flex-wrap:wrap!important;align-items:center!important;justify-content:flex-end!important;gap:10px!important;grid-template-columns:none!important}
 #publishModal .form-actions .publish-status{order:-1!important;flex:1 1 100%!important;margin:0!important;font-size:.9rem;font-weight:700;color:#6b5d72;text-align:left}
 #publishModal .form-actions .publish-status:empty{display:none!important}
-#publishModal .form-actions .btn{flex:0 0 auto!important;width:auto!important;min-height:48px!important;padding:0 20px!important;border-radius:999px!important;font-weight:800!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;margin:0!important;white-space:nowrap}
+#publishModal .form-actions .btn:not(.hidden){flex:0 0 auto!important;width:auto!important;min-height:48px!important;padding:0 20px!important;border-radius:999px!important;font-weight:800!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;margin:0!important;white-space:nowrap}
 #publishModal .form-actions .btn.ghost{background:#fff!important;border:1.5px solid #e3d7ea!important;color:#3c1b64!important}
 #publishModal .form-actions #publishSubmitBtn{flex:1 1 180px!important;max-width:320px}
-@media(max-width:520px){#publishModal .form-actions .btn{flex:1 1 0!important;padding:0 12px!important}#publishModal .form-actions #publishSubmitBtn{flex:1 1 100%!important;max-width:none;order:2}}
+@media(max-width:520px){#publishModal .form-actions .btn:not(.hidden){flex:1 1 0!important;padding:0 12px!important}#publishModal .form-actions #publishSubmitBtn{flex:1 1 100%!important;max-width:none;order:2}}
 .pub-free{color:#22162f}
 
 /* 08/11/2026 (Anthony : « boutons plus fins, ergonomiques… mets ça partout ») : un seul style pour tous les boutons
