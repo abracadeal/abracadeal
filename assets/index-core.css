@@ -4483,3 +4483,9 @@ header #flowErrorsBtn{
 .btn.pro-billing-cancel:not(.hidden){background:#fff!important;border:1px solid #f1c4cf!important;color:#b4234a!important}
 .form-actions{flex-wrap:wrap;gap:8px}
 @media(max-width:520px){.form-actions .btn:not(.hidden){flex:1 1 auto!important;padding:0 14px!important}}
+
+/* 08/11/2026 (Anthony) : logo lampe + « Abracadeal » en haut à gauche, à la place du texte */
+.brand-logo-pic{display:block;line-height:0}
+.brand-logo-img{display:block;height:44px;width:auto;max-width:none}
+.mobile-brand .brand-logo-img{height:34px}
+.desktop-brand{display:flex;align-items:center}
