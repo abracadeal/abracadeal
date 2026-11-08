@@ -10,6 +10,15 @@
 - SEO : pages Maisons/Appartements/Terrains à vendre, Locations, et par département (≥ 5 annonces) dans `build_share_pages.py` ; lien `/immo/` en pied de page.
 - Admin : correction d'une annonce importée enregistrée aussi dans `pro_stock_overrides` (gardée à la synchro) ; résumé « inscrire un pro » effacé après succès ; filtres de l'accueil avec bouton « Voir les N annonces ».
 
+
+## 08/11/2026 (nuit) — Claude : vignettes allégées (PageSpeed mobile)
+
+- Les miniatures stockées (bucket `listing-thumbs`) pèsent ~165 Ko en moyenne pour une vignette affichée sur ~190 px.
+- `thumbImgAttrs()` (index-main.js) génère maintenant `srcset` 360w / 720w via wsrv.nl (WebP, `fit=outside`, petit côté = largeur) avec `sizes="auto, (max-width: 760px) 50vw, 320px"`.
+- Secours en cas d'erreur, géré par le filet photo d'index-app.js (`mark()`) : il retire le `srcset`, puis essaie `data-full` (miniature stockée), puis `data-full2` (photo d'origine), puis la photo Abracadeal par défaut. Testé avec chaque source en panne.
+- Ne pas remettre d'`onerror` inline sur ces images : il doublerait le filet et sauterait une étape.
+- Note LCP mobile : la valeur PageSpeed (~5,9 s) est une simulation. Mesuré en 4G lente + CPU ×4, la bannière s'affiche vers 1,6 s. Retarder les scripts après `load` gagnerait ~1,5 s au score mais fait apparaître les annonces plus tard avec des sauts de mise en page (CLS) : écarté.
+
 ## 2026-11-07 — I3V : 13 fiches, deux pages et reprise validées en production (ChatGPT)
 
 - Départ : main récupéré `497822c33d4f584b74ec704c894645149d2d8580`, JOURNAL et guide APPRENDRE-AU-ROBOT lus. Version réellement déployée v304 épinglée sur `9d43dfd228225a7c447e04b6b5f83db73464ae34`, sans écart de fonction avec main. Travail isolé dans un worktree ; ancien répertoire de travail laissé intact. Les commits concurrents de SEO sur main ont été conservés, publication par mise à jour non forcée avec SHA attendu.

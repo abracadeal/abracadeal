@@ -210,19 +210,31 @@ function thumbUrl(path){
   /* 08/11/2026 (PageSpeed : 2,8 Mo d'images en trop) : photos reprises du site d'un pro = images d'origine en pleine taille.
      En vignette, elles passent par un redimensionneur d'images public (wsrv.nl, WebP 720 px, mis en cache) ;
      si il ne répond pas, la photo d'origine est chargée à la place (onerror de thumbImgAttrs). */
-  if(path&&!privatePhotoUrls.has(path)&&/^https?:\/\//i.test(String(path)))return 'https://wsrv.nl/?url='+encodeURIComponent(String(path))+'&w=720&h=720&fit=inside&we&output=webp&q=78';
+  if(path&&!privatePhotoUrls.has(path)&&/^https?:\/\//i.test(String(path)))return abracaWsrv(String(path),720,'inside');
   if(!path||privatePhotoUrls.has(path)||!sb) return photoUrl(path);
   const {data}=sb.storage.from('listing-thumbs').getPublicUrl(path);
   // 01/11/2026 : ?o=2 = miniatures refaites avec la bonne orientation (les anciennes restaient en cache 1 an).
   return data?.publicUrl?data.publicUrl+'?o=5':photoUrl(path); /* 02/11/2026 : ?o=3 = miniatures refaites en meilleure qualité ; ?o=4 = 640 px ; ?o=5 = petit côté 720 px (nettes en vignette carrée) */
 }
+/* 08/11/2026 (PageSpeed mobile : « Améliorer l'affichage des images ») : les miniatures stockées font ~165 Ko (JPEG 720 px)
+   alors qu'une vignette de carte s'affiche sur ~190 px. Les cartes reçoivent maintenant une version WebP 360 px ou 720 px
+   (srcset : le navigateur prend la plus petite qui reste nette sur l'écran). Si le redimensionneur ne répond pas,
+   la miniature habituelle est chargée (onerror). */
+/* fit=outside : le petit côté fait w px (les vignettes sont recadrées en carré, une photo en hauteur reste nette). */
+function abracaWsrv(u,w,fit){return 'https://wsrv.nl/?url='+encodeURIComponent(u)+'&w='+w+'&h='+w+'&fit='+(fit||'outside')+'&we&output=webp&q=76';}
 // 03/11/2026 (Anthony : « ça fait souvent les photos qui chargent pas entières ») : la vignette reste invisible (fond de la carte)
 // jusqu'à ce qu'elle soit entièrement chargée, puis apparaît en fondu — plus de photo à moitié dessinée.
 try{document.head.insertAdjacentHTML('beforeend','<style id="abracaThumbFade">img[data-fade]{opacity:0;transition:opacity .25s ease}img[data-fade].is-loaded{opacity:1}</style>')}catch(_){}
 function thumbImgAttrs(path){
   const full=photoUrl(path), t=thumbUrl(path);
   const fade=`data-fade onload="this.classList.add('is-loaded')"`;
-  return t===full?`src="${esc(full)}" ${fade}`:`src="${esc(t)}" data-full="${esc(full)}" ${fade} onerror="this.onerror=null;this.src=this.dataset.full"`;
+  if(t===full)return `src="${esc(full)}" ${fade}`;
+  const ext=/^https?:\/\/wsrv\.nl\//.test(t);
+  const base=ext?String(path):t;
+  const set=`${abracaWsrv(base,360)} 360w, ${abracaWsrv(base,720)} 720w`;
+  /* secours en cas d'erreur (géré par le filet photo d'index-app.js) : miniature stockée, puis photo d'origine */
+  const back=ext?`data-full="${esc(full)}"`:`data-full="${esc(t)}" data-full2="${esc(full)}"`;
+  return `src="${esc(abracaWsrv(base,720))}" srcset="${esc(set)}" sizes="auto, (max-width: 760px) 50vw, 320px" ${back} ${fade}`;
 }
 function normalizeType(v){return String(v||'').toLowerCase().startsWith('pro')?'professionnel':'particulier'}
 

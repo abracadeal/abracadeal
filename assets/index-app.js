@@ -1445,9 +1445,19 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(img.dataset.abracaFallback) return;
     // 18/10/2026 : miniature pas encore générée -> on charge d'abord la photo d'origine (data-full),
     // la photo Abracadeal par défaut ne sert que si l'originale est elle aussi introuvable.
-    if(img.dataset.full && img.getAttribute('src')!==img.dataset.full){
+    // 08/11/2026 : les vignettes ont aussi un srcset (versions allégées) : on le retire, sinon le
+    // navigateur ignorerait le nouveau src. Ordre de secours : miniature (data-full) -> originale (data-full2) -> photo Abracadeal.
+    if(img.hasAttribute('srcset')) img.removeAttribute('srcset');
+    if(img.dataset.full && img.getAttribute('src')!==img.dataset.full && !img.dataset.abracaTried1){
+      img.dataset.abracaTried1='1';
       img.onerror=null;
       img.src=img.dataset.full;
+      return;
+    }
+    if(img.dataset.full2 && img.getAttribute('src')!==img.dataset.full2 && !img.dataset.abracaTried2){
+      img.dataset.abracaTried2='1';
+      img.onerror=null;
+      img.src=img.dataset.full2;
       return;
     }
     img.dataset.abracaFallback='1';
