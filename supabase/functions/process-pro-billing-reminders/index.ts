@@ -171,33 +171,32 @@ Deno.serve(async (req) => {
       const amount = plan ? formatAmount(Number(plan.amount_cents || 0), String(plan.currency || "eur")) : "le tarif de votre formule";
       const dateText = formatDate(sub.billing_starts_at);
       const leadText = reminderType === "j30" ? "dans environ 30 jours" : (reminderType === "j7" ? "dans environ 7 jours" : "dans environ 3 jours");
+      // 08/11/2026 (Anthony) : les Fondateurs n'ont aucun moyen de paiement, donc aucun prélèvement possible.
+      // Mails seulement à l'approche de la fin des 12 mois (J-30, J-7, J-3) : pour continuer, passer à la formule ;
+      // sinon les annonces sont désactivées à la date de fin.
+      const planName = plan ? String(plan.label || "").split(" — ")[0] : "votre formule";
       const subject = noPm
-        ? (reminderType === "j30" ? "Vos 12 mois offerts se terminent dans 30 jours" : "Rappel : ajoutez un moyen de paiement pour garder vos annonces en ligne")
+        ? (reminderType === "j30" ? "Vos 12 mois gratuits sur Abracadeal se terminent bientôt" : "Rappel : continuez avec Abracadeal pour garder vos annonces en ligne")
         : (reminderType === "j7" ? "Rappel : votre abonnement Abracadeal Pro démarre dans 7 jours" : "Rappel : votre abonnement Abracadeal Pro démarre bientôt");
-
       const mainText = noPm
-        ? `Vos 12 mois offerts se terminent ${leadText}, le ${dateText}. Pour continuer ensuite au tarif de ${amount} HT/mois, ajoutez une carte bancaire ou un IBAN (prélèvement SEPA) depuis votre espace. Sans moyen de paiement à cette date, vos annonces seront mises en pause (elles ne sont pas supprimées) et aucun prélèvement ne sera effectué.`
+        ? `Vos 12 mois gratuits en tant que Fondateur se terminent ${leadText}, le ${dateText}. Merci de nous avoir fait confiance dès le lancement !\n\nSi vous souhaitez continuer avec nous, il vous suffit de passer à la formule ${planName} (${amount} HT/mois, sans engagement) depuis votre espace Pro, avant cette date.\n\nSans formule à cette date, vos annonces seront désactivées (elles ne sont pas supprimées : elles reviennent en ligne dès que vous passez à une formule). Aucun prélèvement ne sera effectué sans votre accord.`
         : `Vos 12 mois offerts arrivent à leur terme. La facturation de votre formule commencera ${leadText}, le ${dateText}, au tarif de ${amount} HT/mois.`;
       const mainHtml = noPm
-        ? `Vos 12 mois offerts se terminent <strong>${escapeHtml(leadText)}</strong>, le <strong>${escapeHtml(dateText)}</strong>. Pour continuer ensuite au tarif de <strong>${escapeHtml(amount)} HT/mois</strong>, ajoutez une carte bancaire ou un IBAN (prélèvement SEPA) depuis votre espace. Sans moyen de paiement à cette date, <strong>vos annonces seront mises en pause</strong> (elles ne sont pas supprimées) et aucun prélèvement ne sera effectué.`
-        : `Vos 12 mois offerts arrivent à leur terme. La facturation de votre formule commencera <strong>${escapeHtml(leadText)}</strong>, le <strong>${escapeHtml(dateText)}</strong>, au tarif de <strong>${escapeHtml(amount)} HT/mois</strong>.`;
-      const buttonLabel = noPm ? "Ajouter un moyen de paiement" : "Gérer mon abonnement";
+        ? `<p>Vos 12 mois gratuits en tant que Fondateur se terminent <strong>${escapeHtml(leadText)}</strong>, le <strong>${escapeHtml(dateText)}</strong>. Merci de nous avoir fait confiance dès le lancement !</p><p>Si vous souhaitez <strong>continuer avec nous</strong>, il vous suffit de passer à la formule <strong>${escapeHtml(planName)}</strong> (${escapeHtml(amount)} HT/mois, sans engagement) depuis votre espace Pro, avant cette date.</p><p>Sans formule à cette date, <strong>vos annonces seront désactivées</strong>. Elles ne sont pas supprimées : elles reviennent en ligne dès que vous passez à une formule. Aucun prélèvement ne sera effectué sans votre accord.</p>`
+        : `<p>Vos 12 mois offerts arrivent à leur terme. La facturation de votre formule commencera <strong>${escapeHtml(leadText)}</strong>, le <strong>${escapeHtml(dateText)}</strong>, au tarif de <strong>${escapeHtml(amount)} HT/mois</strong>.</p><p><strong>Aucun prélèvement n'est effectué avant cette date.</strong> Vous pouvez à tout moment changer de formule, mettre à jour votre moyen de paiement ou résilier.</p>`;
+      const buttonLabel = noPm ? "Continuer avec Abracadeal" : "Gérer mon abonnement";
 
-      const text = `Bonjour,\n\nPetit rappel concernant votre offre Fondateurs Abracadeal Pro.\n\n${mainText}\n\nAucun prélèvement n'est effectué avant cette date.\n\nAvant le début de la facturation, vous pouvez à tout moment :\n- changer de formule,\n- ${noPm ? "ajouter" : "mettre à jour"} votre moyen de paiement (carte bancaire ou prélèvement SEPA),\n- résilier votre abonnement.\n\n${buttonLabel} :\n${MANAGE_URL}\n\nRésilier directement :\n${CANCEL_URL}\n\nSi vous avez une question, répondez simplement à cet e-mail.\n\nBien cordialement,\nService Pros Abracadeal\ncontact@abracadeal.fr`;
+      const text = `Bonjour,\n\n${mainText}\n\n${buttonLabel} :\n${MANAGE_URL}\n${noPm ? "" : "\nRésilier directement :\n" + CANCEL_URL + "\n"}\nSi vous avez une question, répondez simplement à cet e-mail.\n\nBien cordialement,\nService Pros Abracadeal\ncontact@abracadeal.fr`;
 
       const html = `
 <div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;padding:28px;color:#1f2937;line-height:1.6">
   <div style="font-size:20px;font-weight:700;color:#2b1740;margin-bottom:20px">Abracadeal Pro</div>
   <p>Bonjour,</p>
-  <p>Petit rappel concernant votre <strong>offre Fondateurs Abracadeal Pro</strong>.</p>
-  <p>${mainHtml}</p>
-  <p><strong>Aucun prélèvement n'est effectué avant cette date.</strong></p>
-  <p>Avant le début de la facturation, vous pouvez à tout moment <strong>changer de formule, ${noPm ? "ajouter" : "mettre à jour"} votre moyen de paiement (carte bancaire ou prélèvement SEPA) ou résilier votre abonnement</strong>.</p>
+  ${mainHtml}
   <p style="margin:24px 0">
     <a href="${MANAGE_URL}" style="display:inline-block;padding:12px 18px;background:#6f2bd8;color:#fff;text-decoration:none;border-radius:10px;font-weight:700">${buttonLabel}</a>
   </p>
-  <p style="font-size:14px;color:#6b7280">Ce lien permet d'accéder à la gestion de votre formule et de votre moyen de paiement.</p>
-  <p><a href="${CANCEL_URL}" style="color:#7a2fd1;text-decoration:underline">Résilier mon abonnement</a></p>
+  ${noPm ? "" : `<p><a href="${CANCEL_URL}" style="color:#7a2fd1;text-decoration:underline">Résilier mon abonnement</a></p>`}
   <p>Si vous avez une question, répondez simplement à cet e-mail.</p>
   <p style="margin-top:24px">Bien cordialement,<br><strong>Service Pros Abracadeal</strong><br>contact@abracadeal.fr</p>
 </div>`;
