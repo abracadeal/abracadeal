@@ -51,6 +51,11 @@ let profile=null,showroom=null,listings=[],reviews=[],filtered=[],shown=24,curre
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const money=v=>v===null||v===''?'Prix non renseigné':Number(v).toLocaleString('fr-FR')+' €';
 const showroomUrl=path=>path?sb.storage.from('pro-showroom').getPublicUrl(path).data?.publicUrl||'':'';
+/* 08/11/2026 (Anthony : « les showroom aussi sont lents en photo ») : les cartes affichaient la photo d'origine en fond
+   (jusqu'à plusieurs Mo pour les photos reprises du site du pro). Maintenant : version allégée WebP 480 px (wsrv.nl, en cache),
+   tirée de la vignette stockée sur Cloudflare R2 ; si elle manque, wsrv renvoie la photo d'origine (paramètre default). */
+const R2='https://pub-9747954003f04922a082752db15aeeed.r2.dev/';
+const cardPhoto=path=>{if(!path)return '';const p=String(path),ext=/^https?:\/\//i.test(p);const src=ext?p:R2+'listing-thumbs/'+encodeURI(p)+'?o=5',back=ext?p:photoUrl(p);return 'https://wsrv.nl/?url='+encodeURIComponent(src)+'&w=480&h=480&fit=outside&we&output=webp&q=78&default='+encodeURIComponent(back);};
 const photoUrl=path=>!path?'':/^https?:\/\//i.test(String(path))?String(path):sb.storage.from('listing-images').getPublicUrl(path).data?.publicUrl||'';/* 02/11/2026 : photos d'annonces importées affichées depuis le site du pro */
 const initials=name=>String(name||'PRO').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'PRO';
 const catLabel=v=>({vehicules:'Auto / Moto',immobilier:'Immobilier',vacances:'Vacances',hightech:'High-tech',maison:'Maison',mode:'Mode',emploi:'Emploi',services:'Services',autres:'Autres'})[v]||v||'Autres';
@@ -152,7 +157,7 @@ function renderCards(){
   const host=document.getElementById('stockResults');if(!host)return;
   if(!filtered.length){host.innerHTML='<div class="empty">Aucune annonce ne correspond à votre recherche.</div>';return}
   const cards=filtered.slice(0,shown).map(l=>{
-    const photo=photoUrl(firstPhoto(l)),url='/?annonce='+encodeURIComponent(l.id)+'&retour='+encodeURIComponent(location.pathname+location.search);/* 02/11/2026 : fermer l'annonce ramène au showroom */
+    const photo=cardPhoto(firstPhoto(l)),url='/?annonce='+encodeURIComponent(l.id)+'&retour='+encodeURIComponent(location.pathname+location.search);/* 02/11/2026 : fermer l'annonce ramène au showroom */
     return '<a class="ad" href="'+url+'"><div class="photo"'+(photo?' style="background-image:url(&quot;'+esc(photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.category==='vehicules'&&window.displayVehicleTitle?window.displayVehicleTitle(l.title||'Annonce'):(l.title||'Annonce'))+'</div><div class="price">'+esc(money(l.price))+'</div>'+(l.category==='vehicules'&&(l.vehicle_year||l.mileage!=null||l.fuel)?'<div class="specs">'+esc([l.vehicle_year,l.mileage!=null?fmtN(l.mileage)+' km':'',nice(l.fuel),nice(l.transmission)].filter(Boolean).join(' · '))+'</div>':'')+'<div class="city">'+esc(l.city||'')+'</div></div></a>';
   }).join('');
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');
