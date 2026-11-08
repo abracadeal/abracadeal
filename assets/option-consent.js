@@ -32,6 +32,10 @@ setTimeout(()=>{
  if(typeof planState!=='function'||typeof changePlan!=='function')return;
  window.planState=o=>{
   const cur=mySub&&['active','trialing'].includes(mySub.status)?mySub:null;
+  /* 08/11/2026 : règle du 02/11 — un Fondateur (ou un pro qui arrive pendant l'offre Fondateurs) ne voit aucune formule payante Auto/Immo :
+     seulement l'offre Fondateurs (ou sa formule actuelle) et la carte « sur devis ». */
+  const foundersView=o.category_group==='auto_moto_immo'&&o.recurring&&o.code!=='pro_250'&&(cur?cur.founder_number!=null:(!mySub||mySub.founder_number!=null)&&(typeof founderOpen!=='function'||founderOpen()));
+  if(foundersView){if(cur&&o.code===cur.plan_code)return {label:'Votre formule actuelle',disabled:true};if(cur||o.code!=='pro_50')return {hidden:true};return {};}
   if(!cur||!o.recurring||!(o.code in PRO_LIMITS)||!(cur.plan_code in PRO_LIMITS))return {};
   const founder=cur.founder_number!=null,curLimit=PRO_LIMITS[cur.plan_code],nextLimit=PRO_LIMITS[o.code];
   if(o.code===cur.plan_code)return {label:'Votre formule actuelle',disabled:true,note:founder?'Fondateur':''};
