@@ -55,7 +55,7 @@ label.chk input{width:auto}
     <h1>API partenaires</h1>
     <div style="display:flex;gap:8px;flex-wrap:wrap">
       <a class="btn" href="api.html" target="_blank" rel="noopener">Documentation publique</a>
-      <a class="btn" href="index.html#admin">← Admin</a>
+      <a class="btn" href="admin.html">← Admin</a>
     </div>
   </header>
 
@@ -161,6 +161,6 @@ $('fStatus').onchange=render; $('fPartner').onchange=render; $('refresh').onclic
 
 (async()=>{const {data:{session}}=await sb.auth.getSession(); if(!session){$('loading').hidden=true;$('gate').hidden=false;return;} load();})();
 </script>
-<script src="/assets/app-shell-20261018.js?v=6" defer></script>
+<script src="/assets/app-shell-20261018.js?v=7" defer></script>
 </body>
 </html>

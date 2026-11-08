@@ -23,11 +23,11 @@
     'gestion-sejour.html': 'espace-hote.html', 'photos-vacances.html': 'espace-hote.html',
     'avis-vacances.html': 'vacances.html', 'logement-vacances.html': 'vacances.html', 'profil-vacances.html': 'vacances.html',
     'recherche-vacances.html': 'vacances.html', 'espace-voyageur.html': 'vacances.html', 'espace-hote.html': 'vacances.html',
-    'ical.html': 'vacances.html', 'admin-vacances.html': 'vacances.html',
-    'admin-commerce.html': 'moderation.html', 'admin-retention.html': 'moderation.html',
+    'ical.html': 'vacances.html',
+    'admin-commerce.html': 'admin.html#tech', 'admin-retention.html': 'admin.html#tech', 'admin-vacances.html': 'admin.html#tech',
     /* 28/10/2026 : #admin rouvre le menu Admin (mobile) ou Mon compte (ordinateur), plus « Compte » sur mobile. */
-    'admin-pilotage.html': 'index.html#admin', 'admin-prospection.html': 'index.html#admin', 'admin-test-import.html': 'index.html#admin', 'admin-partenaires.html': 'index.html#admin', 'admin-diffusion.html': 'index.html#admin', 'diffusion.html': 'index.html',
-    'admin-recherche.html': 'index.html#admin', 'moderation.html': 'index.html#admin',
+    'admin-pilotage.html': 'admin.html#money', 'admin-prospection.html': 'admin.html#prospect', 'admin-test-import.html': 'admin.html#tech', 'admin-partenaires.html': 'admin.html#tech', 'admin-diffusion.html': 'admin.html#tech', 'diffusion.html': 'index.html',
+    'admin-recherche.html': 'admin.html#tech', 'moderation.html': 'admin.html',
     'pro.html': 'index.html#resultats'
   };
   var parent = PARENT[page] || 'index.html';

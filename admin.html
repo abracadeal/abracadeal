@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#160922">
+<title>Admin — Abracadeal</title>
+<!-- 08/11/2026 (Anthony : « un espace admin propre et intuitif, à jour tout le temps ») :
+     un seul tableau de bord, 6 rubriques, données en direct (RPC admin_overview), actualisation automatique. -->
+<script src="assets/session-guard-20261106.js?v=1"></script>
+<script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<link rel="stylesheet" href="assets/admin-home-20261108.css?v=1">
+<link rel="icon" href="/favicon.ico?v=3" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
+</head>
+<body>
+<header class="ah-top">
+  <div class="ah-wrap ah-topin">
+    <a class="ah-back" href="index.html" aria-label="Retour au site">‹</a>
+    <div class="ah-brand">Abracadeal <span>Admin</span></div>
+    <button class="ah-refresh" id="ahRefresh" type="button" aria-label="Actualiser">
+      <span class="ah-live" id="ahLive"></span><span id="ahUpdated">Chargement…</span>
+    </button>
+  </div>
+  <nav class="ah-tabs ah-wrap" id="ahTabs" aria-label="Rubriques">
+    <button type="button" data-tab="today" class="on">Aujourd’hui<b class="ah-tabdot" id="ahTodoDot" hidden></b></button>
+    <button type="button" data-tab="pros">Pros</button>
+    <button type="button" data-tab="prospect">Prospection</button>
+    <button type="button" data-tab="traffic">Trafic</button>
+    <button type="button" data-tab="money">Argent</button>
+    <button type="button" data-tab="tech">Technique</button>
+  </nav>
+</header>
+
+<main class="ah-wrap" id="ahMain">
+  <p class="ah-status" id="ahStatus">Vérification de la connexion…</p>
+
+  <section class="ah-panel on" data-panel="today" hidden>
+    <h2>À traiter</h2>
+    <div class="ah-todo" id="ahTodo"></div>
+    <h2>Aujourd’hui sur le site</h2>
+    <div class="ah-kpis" id="ahTodayKpis"></div>
+    <h2>Derniers pros inscrits</h2>
+    <div class="ah-list" id="ahNewPros"></div>
+  </section>
+
+  <section class="ah-panel" data-panel="pros" hidden>
+    <div class="ah-kpis" id="ahProsKpis"></div>
+    <div class="ah-filter"><input id="ahProSearch" type="search" placeholder="Chercher un pro (nom, ville, e-mail)" autocomplete="off"></div>
+    <div class="ah-list" id="ahPros"></div>
+    <div class="ah-links"><a href="pro-pro.html">Entre Pro (Pro/Pro) ›</a><a href="admin-recherche.html">Chercher une annonce ›</a></div>
+  </section>
+
+  <section class="ah-panel" data-panel="prospect" hidden>
+    <div class="ah-state" id="ahMailerState"></div>
+    <div class="ah-kpis" id="ahProspectKpis"></div>
+    <h2>Activité récente</h2>
+    <p class="ah-note">Pros qui ont cliqué sur le lien du mail ou qui se sont inscrits, du plus récent au plus ancien.</p>
+    <div class="ah-list" id="ahProspectRows"></div>
+    <div class="ah-links"><a href="admin-prospection.html">Gérer la prospection (boîtes, modèles, STOP) ›</a></div>
+  </section>
+
+  <section class="ah-panel" data-panel="traffic" hidden>
+    <div class="ah-seg" id="ahDays">
+      <button type="button" data-days="1">Aujourd’hui</button><button type="button" data-days="7" class="on">7 jours</button><button type="button" data-days="30">30 jours</button>
+    </div>
+    <div class="ah-kpis" id="ahTrafficKpis"></div>
+    <h2>D’où viennent les visiteurs</h2>
+    <div class="ah-bars" id="ahSources"></div>
+    <h2>Jour par jour</h2>
+    <div class="ah-days" id="ahDaysChart"></div>
+    <h2>Annonces les plus vues</h2>
+    <div class="ah-list" id="ahTopAds"></div>
+    <h2>Recherches tapées (30 jours)</h2>
+    <div class="ah-list" id="ahSearches"></div>
+    <p class="ah-note">Visiteurs = personnes différentes par jour. Tes propres visites en admin ne sont pas comptées.</p>
+  </section>
+
+  <section class="ah-panel" data-panel="money" hidden>
+    <div class="ah-kpis" id="ahMoneyKpis"></div>
+    <h2>Seuil de TVA (franchise)</h2>
+    <div class="ah-vat" id="ahVat"></div>
+    <h2>Derniers encaissements</h2>
+    <div class="ah-list" id="ahPayments"></div>
+    <p class="ah-note">Paiements réels uniquement : les paiements de test Stripe ne sont pas comptés. Suivi indicatif, ne remplace pas la comptabilité.</p>
+  </section>
+
+  <section class="ah-panel" data-panel="tech" hidden>
+    <div class="ah-kpis" id="ahTechKpis"></div>
+    <h2>Offre Fondateurs</h2>
+    <div class="ah-state" id="ahFounder"></div>
+    <h2>Flux des pros (stocks importés)</h2>
+    <div class="ah-list" id="ahFeeds"></div>
+    <h2>Stockage des photos</h2>
+    <div class="ah-vat" id="ahStorage"></div>
+    <h2>Outils</h2>
+    <div class="ah-tools">
+      <a href="moderation.html">Modération</a>
+      <a href="admin-test-import.html">Imports de sites</a>
+      <a href="admin-partenaires.html">API partenaires</a>
+      <a href="admin-diffusion.html">Diffusion</a>
+      <a href="admin-recherche.html">Base des annonces</a>
+      <a href="pro-pro.html">Entre Pro (Pro/Pro)</a>
+      <a href="admin-vacances.html">Vacances</a>
+      <a href="admin-commerce.html">Offres commerce</a>
+      <a href="admin-retention.html">Conservation des données</a>
+      <a href="admin-pilotage.html">Ancien tableau Finances</a>
+    </div>
+  </section>
+</main>
+
+<script src="assets/admin-home-20261108.js?v=1"></script>
+</body>
+</html>

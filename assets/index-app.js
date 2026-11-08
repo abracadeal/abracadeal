@@ -1083,8 +1083,8 @@ document.addEventListener('DOMContentLoaded',()=>{
     if(nav){
       e.preventDefault();e.stopImmediatePropagation();
       if(!isAdmin()){syncAdminNav();return;}
-      document.querySelectorAll('.mobile-nav-item').forEach(el=>el.classList.toggle('is-active',el===nav));
-      openModal('mobileAdminModal');
+      // 08/11/2026 (Anthony) : l'onglet Admin ouvre directement le nouvel espace admin (admin.html), tout y est rangé.
+      location.href='admin.html';return;
       syncAdminBadges();
       return;
     }

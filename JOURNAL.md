@@ -1,3 +1,9 @@
+## 2026-11-08 — Nouvel espace admin `admin.html` (Claude)
+
+- Demande d'Anthony : admin propre, rubriques cohérentes, chiffres toujours à jour. `admin.html` + `assets/admin-home-20261108.{js,css}` : 6 onglets (Aujourd'hui = à traiter + chiffres du jour + derniers pros ; Pros ; Prospection ; Trafic ; Argent ; Technique + outils). Un appel `admin_overview()` (SECURITY DEFINER, is_admin) + `admin_traffic_stats`, `admin_prospect_tracking`, `admin_search_popularity`, `admin_storage_usage`. Actualisation toutes les 30 s (page visible), au retour sur l'onglet/l'appli et via le bouton « À jour ».
+- Argent : paiements Stripe de test (`cs_test…`) exclus ; comptes `internal_accounts` exclus des pros.
+- Accès : onglet Admin (mobile) → `admin.html` directement ; tuile « Espace admin » en tête de « Administration » (ordinateur) ; retours des pages admin (app-shell v7) → `admin.html#rubrique`. Anciennes pages conservées et listées dans « Outils ».
+
 ## 2026-11-08 — Mails : aucun envoi inutile ou faux (Claude)
 
 - Prospection : un prospect déjà inscrit ne reçoit plus ni 1er mail ni relance, même inscrit avec une autre adresse (`prospect_is_registered`, utilisé 3 fois dans `prospect_mailer_claim`). Lien `prospection_prospects.account_user_id`, rempli automatiquement à la vérification pro (trigger `link_prospect_to_pro` : SIREN, e-mail, ou domaine propre à un seul prospect). Sophie Folley et WeeCars Angers reliés (ils auraient reçu une relance à la réactivation des relances). Suivi `admin_prospect_tracking` : même rapprochement.
