@@ -4049,13 +4049,19 @@ function diversifyBySeller(items,maxRun=2){
   }
   return out;
 }
+/* 08/11/2026 (Anthony : « À la une change d'annonce aléatoirement ») : le mélange était refait à chaque redessin
+   des cartes (plusieurs fois au chargement). Il reste aléatoire d'une visite à l'autre, mais stable pendant la visite. */
 function shuffleCopy(items){
-  const out=[...items];
-  for(let i=out.length-1;i>0;i--){
-    const j=Math.floor(Math.random()*(i+1));
-    [out[i],out[j]]=[out[j],out[i]];
-  }
-  return out;
+  return [...items].sort((a,b)=>catalogShuffleKey(a&&a.id!=null?a.id:a)-catalogShuffleKey(b&&b.id!=null?b.id:b));
+}
+/* 08/11/2026 (Anthony : vignettes qui clignotent) : on ne remplace le contenu d'une grille que s'il a vraiment changé,
+   sinon les images étaient recréées (et redessinées) à chaque appel pour rien. */
+function abSetHtml(el,html){
+  if(!el)return;
+  const sig=String(html).replace(/ data-fade onload="[^"]*"| onload="this\.classList\.add\('is-loaded'\)"/g,'');
+  if(el.__abSig===sig&&el.firstChild&&el.firstChild===el.__abFirst&&el.childNodes.length===el.__abCount)return;
+  el.innerHTML=html;
+  el.__abSig=sig;el.__abFirst=el.firstChild;el.__abCount=el.childNodes.length;
 }
 function selectMixedFeatured(items,limit=8){
   const groups=new Map();
@@ -4106,7 +4112,7 @@ function renderRecentViewed(){
   // 08/11/2026 (Anthony) : une seule rangée personnalisée sur l'accueil — on garde « D'après vos recherches récentes ». Code conservé pour plus tard.
   sec.classList.add('hidden');grid.innerHTML='';return;
   const ids=readLocalList(RECENT_VIEWED_KEY);const byId=new Map((allAds||[]).map(a=>[a.id,a]));const items=ids.map(id=>byId.get(id)).filter(Boolean).slice(0,8);
-  if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}grid.innerHTML=items.map(a=>personalizedCard(a)).join('');sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}abSetHtml(grid,items.map(a=>personalizedCard(a)).join(''));sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 function renderRecentSearchSuggestions(){
   const sec=$('#recentSearchSection'),grid=$('#recentSearchGrid');if(!sec||!grid)return;
@@ -4115,7 +4121,7 @@ function renderRecentSearchSuggestions(){
   /* 02/11/2026 (Anthony : « limite en double ») : les annonces déjà dans « Récemment consultées » ne sont pas reproposées ici. */
   const liveIds=new Set((allAds||[]).map(a=>a.id));const seen=new Set(readLocalList(RECENT_VIEWED_KEY).filter(id=>liveIds.has(id)).slice(0,8));
   const items=(allAds||[]).filter(a=>a.status==='active'&&!seen.has(a.id)).map(a=>({a,s:score(a)})).filter(x=>x.s>0).sort((x,y)=>y.s-x.s).slice(0,8).map(x=>x.a);
-  if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}grid.innerHTML=items.map(a=>personalizedCard(a)).join('');sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}abSetHtml(grid,items.map(a=>personalizedCard(a)).join(''));sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 function haversineKm(a,b){const R=6371,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),la1=toRad(a.lat),la2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
 async function communeCentre(city,postal){
@@ -4132,7 +4138,7 @@ async function renderNearby(userPos){
   const centres=new Map();for(const [k,v] of unique){try{const c=await communeCentre(v.city,v.postal);if(c)centres.set(k,c)}catch{}}
   const ranked=active.map(a=>{const c=centres.get(`${a.postal_code||''}|${a.city||''}`);return c?{a,d:haversineKm(userPos,c)}:null}).filter(Boolean).sort((x,y)=>x.d-y.d).slice(0,8);
   if(!ranked.length){grid.innerHTML='<div class="empty-state" style="grid-column:1/-1">Aucune annonce localisable pour le moment.</div>';return}
-  grid.innerHTML=ranked.map(x=>personalizedCard(x.a,`<div class="nearby-distance">≈ ${x.d<10?x.d.toFixed(1):Math.round(x.d)} km</div>`)).join('');if(cta)cta.style.display='none';queueMicrotask(()=>hydrateFavoriteCounts(grid));
+  abSetHtml(grid,ranked.map(x=>personalizedCard(x.a,`<div class="nearby-distance">≈ ${x.d<10?x.d.toFixed(1):Math.round(x.d)} km</div>`)).join(''));if(cta)cta.style.display='none';queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 function requestNearby(){if(!navigator.geolocation){toast('La localisation n’est pas disponible sur cet appareil.');return}const topBtn=$('#nearbySearchBtn'),oldTop=topBtn?.innerHTML;if(topBtn){topBtn.disabled=true;topBtn.textContent='📍 Localisation…'}navigator.geolocation.getCurrentPosition(async p=>{const pos={lat:p.coords.latitude,lon:p.coords.longitude};await renderNearby(pos);$('#nearbySection')?.scrollIntoView({behavior:'smooth',block:'start'});if(topBtn){topBtn.disabled=false;topBtn.innerHTML=oldTop||'📍 Autour de moi'}},()=>{toast('Autorisez la localisation pour voir les annonces autour de vous.');if(topBtn){topBtn.disabled=false;topBtn.innerHTML=oldTop||'📍 Autour de moi'}},{enableHighAccuracy:false,timeout:10000,maximumAge:300000});}
 function renderPersonalizedHome(){if(onlyMine||favoritesMode||moderationMode)return;renderRecentViewed();renderRecentSearchSuggestions();}
@@ -4149,7 +4155,7 @@ function renderHomeFeatured(){
     return;
   }
   const picked=selectMixedFeatured(candidates,8);
-  grid.innerHTML=picked.map(a=>{
+  abSetHtml(grid,picked.map(a=>{
     const photos=visiblePhotosFor(a);
     const img=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
     const category=vehicleSubcategoryOf(a)?subcategoryLabel(a.category,vehicleSubcategoryOf(a)):catLabel(a.category);
@@ -4165,7 +4171,7 @@ function renderHomeFeatured(){
         <div class="home-featured-city"><svg class="ad-city-pin" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>${esc(a.city||'')}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
       </div>
     </article>`;
-  }).join('');
+  }).join(''));
   section.classList.remove('home-featured-loading');
   section.classList.remove('hidden');
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
@@ -4301,7 +4307,7 @@ function renderAds(){
     for(let i=0;i<ads.length;i++){if(ads[i].__homeHeader)continue;cards++;if(cards>catalogueRender.limit){cut=i;break;}}
     if(cut<ads.length){moreLeft=ads.slice(cut).filter(a=>!a.__homeHeader).length;ads=ads.slice(0,cut);}
   }
-  grid.innerHTML=ads.map(a=>{
+  abSetHtml(grid,ads.map(a=>{
     if(a.__homeHeader) return homeGroupHeaderHtml(a);
     const photos=visiblePhotosFor(a);
     /* 02/11/2026 (Anthony : « je clique sur la voiture et j'ai un casque qui apparaît ») : la liste des vignettes ne doit jamais
@@ -4358,7 +4364,7 @@ function renderAds(){
           ${(!moderationMode&&canDelete&&!currentProfile?.is_admin)?`<button class="mini-btn danger" onclick="event.stopPropagation();deleteAd('${a.id}')">Supprimer</button>`:''}
         </div>`:''}
       </div></article>`;
-  }).join('')+(moreLeft?`<div class="catalogue-more" style="grid-column:1/-1;display:flex;justify-content:center;padding:18px 0"><button type="button" class="mini-btn" id="catalogueMoreBtn" style="min-height:46px;padding:0 26px;font-size:15px">Voir plus d’annonces (${moreLeft})</button></div>`:'');
+  }).join('')+(moreLeft?`<div class="catalogue-more" style="grid-column:1/-1;display:flex;justify-content:center;padding:18px 0"><button type="button" class="mini-btn" id="catalogueMoreBtn" style="min-height:46px;padding:0 26px;font-size:15px">Voir plus d’annonces (${moreLeft})</button></div>`:''));
   if(moreLeft)setupCatalogueMore();
   queueMicrotask(()=>hydrateFavoriteCounts(grid));
   updateQuickFilterLabels();
