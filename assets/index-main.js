@@ -4060,7 +4060,37 @@ function abSetHtml(el,html){
   if(!el)return;
   const sig=String(html).replace(/ data-fade onload="[^"]*"| onload="this\.classList\.add\('is-loaded'\)"/g,'');
   if(el.__abSig===sig&&el.firstChild&&el.firstChild===el.__abFirst&&el.childNodes.length===el.__abCount)return;
-  el.innerHTML=html;
+  /* Contenu changé (ex. boutons admin/favoris qui arrivent après la connexion) : on reconstruit les cartes, mais les photos
+     déjà affichées sont reprises telles quelles (déjà chargées et cadrées) au lieu d'être rechargées → aucun clignotement. */
+  const PHOTO='.ad-photo,.home-featured-photo,.personalized-photo';
+  const old=new Map();
+  el.querySelectorAll('img').forEach(im=>{
+    const box=im.parentElement;
+    if(!box||!box.matches(PHOTO)||!im.complete||!im.naturalWidth)return;
+    const k=im.dataset.abSrc||im.getAttribute('src');
+    if(!old.has(k))old.set(k,im);
+  });
+  if(!old.size){el.innerHTML=html;}
+  else{
+    const tpl=document.createElement('template');
+    tpl.innerHTML=html;
+    tpl.content.querySelectorAll('img').forEach(im=>{
+      const box=im.parentElement;
+      if(!box||!box.matches(PHOTO))return;
+      const prev=old.get(im.getAttribute('src'));
+      if(!prev)return;
+      old.delete(im.getAttribute('src'));
+      const pbox=prev.parentElement;
+      if(pbox){
+        if(pbox.classList.contains('photo-fit'))box.classList.add('photo-fit');
+        const bg=pbox.style.getPropertyValue('--photo-bg');if(bg)box.style.setProperty('--photo-bg',bg);
+        const wm=pbox.querySelector('.photo-watermark.hidden'),nwm=box.querySelector('.photo-watermark');
+        if(wm&&nwm)nwm.classList.add('hidden');
+      }
+      im.replaceWith(prev);
+    });
+    el.replaceChildren(tpl.content);
+  }
   el.__abSig=sig;el.__abFirst=el.firstChild;el.__abCount=el.childNodes.length;
 }
 function selectMixedFeatured(items,limit=8){
