@@ -603,6 +603,8 @@ document.addEventListener('DOMContentLoaded',()=>{
       const {data:wallet,error:walletError}=await sb.from('pro_listing_credit_wallet').select('credits').eq('user_id',currentUser.id).gt('credits',0).limit(1);
       if(walletError)console.warn('Vérification crédit annonce Pro indisponible',walletError);
       else hasSingleCredit=Array.isArray(wallet)&&wallet.some(row=>Number(row?.credits||0)>0);
+      /* 08/11/2026 (grille v3) : annonces gratuites permanentes (5 Auto/Immo, 10 petites catégories, 1 Emploi). */
+      if(!hasSingleCredit){const {data:freeLeft,error:freeErr}=await sb.rpc('my_pro_free_left');if(!freeErr&&Number(freeLeft||0)>0)hasSingleCredit=true;}
     }
     if(active||hasSingleCredit){
       try{sessionStorage.removeItem('abraca_pro_plan_pending')}catch(_){}
@@ -677,11 +679,17 @@ document.addEventListener('DOMContentLoaded',()=>{
   };
   const planLabels={
     pro_20:'Jusqu’à 20 annonces',
+    pro_25:'Jusqu’à 25 annonces',
     pro_50:'Jusqu’à 50 annonces',
     pro_100:'Jusqu’à 100 annonces',
     pro_200:'Jusqu’à 200 annonces',
     pro_250:'Plus de 100 annonces (sur devis)',
-    services_30:'Services — jusqu’à 30 annonces'
+    services_30:'Services — jusqu’à 30 annonces',
+    services_50:'Services — jusqu’à 50 annonces',services_200:'Services — jusqu’à 200 annonces',
+    hightech_50:'High-tech — jusqu’à 50 annonces',hightech_200:'High-tech — jusqu’à 200 annonces',
+    maison_50:'Maison & Déco — jusqu’à 50 annonces',maison_200:'Maison & Déco — jusqu’à 200 annonces',
+    mode_50:'Mode — jusqu’à 50 annonces',mode_200:'Mode — jusqu’à 200 annonces',
+    emploi_illimite:'Emploi — offres illimitées'
   };
   const statusLabels={
     trialing:'Période gratuite',

@@ -2735,3 +2735,13 @@
 
 - 08/11/2026 (Claude) : mobile — « Ma page Pro » (tableau de bord Pro et bouton « Modifier ma page Pro ») ouvre le showroom en plein écran (≤ 760 px) : barre « Ma page Pro » + × en haut, bannière en 16/9, barre du bas masquée, boutons Voir / Enregistrer / Annuler collés en bas. Fermeture (×, Annuler, fermeture du compte) remet tout en place. Ordinateur inchangé. index-main.js ?v=20261108-showfs.
 - 08/11/2026 (Claude) : MyCreativeSite (contact@mycreativesite.fr, iDream Lab, secteur services) = compte maison gratuit (décision Anthony) : pro_subscriptions services_30, 30 annonces, status active, source internal_free, sans Stripe. Panneau « Mon abonnement Pro » : cas internal_free → badge « Gratuit », formule + « Gratuit, sans engagement », aucun bouton Stripe. index-app.js ?v=20261108-internal.
+
+## 08/11/2026 (Claude, demande d'Anthony : « Oui on fait ces prix là ») — Grille v3 (HT)
+- Auto/Moto/Immo : 5 annonces gratuites pour toujours ; pro_25 = 49 €/mois (nouveau), pro_50 = 89 €, pro_100 = 149 € ; au-delà sur devis ; annonce à l'unité 14,99 € inchangée. pro_20 retiré.
+- High-tech / Maison / Mode / Services : 10 annonces gratuites ; X_50 = 9,99 €/mois, X_200 = 24,99 €/mois ; annonce à l'unité 1,99 € (hors domaine). Formules 30/100 et packs 5/10/30 retirés.
+- Emploi : 1 offre gratuite ; emploi_1 = 4,99 € ; emploi_illimite = 29,99 €/mois. Formules 30/100/250/500 et packs retirés.
+- Vacances : 4,99 €/logement ; formules vacances_20/60 désactivées. Options de visibilité inchangées. Fondateurs inchangés.
+- Stripe (live) : nouveaux prix créés (metadata grille 2026-11-08b). Les 5 abonnements Fondateurs (essai gratuit) basculés sur les nouveaux prix sans prorata, essai conservé : Fondateur 1 pro_20 → pro_25 (49 €), Fondateurs 2-5 pro_50 → 89 €. Plus aucun abonnement sur les anciens prix.
+- Base (migration grille_v3_20261108) : pro_subscription_plans / commerce_offers mis à jour ; public.abraca_pro_free_allowance(group) + abraca_consume_pro_listing_credit : sans formule, dans son domaine, le pro publie gratuitement jusqu'au quota ; trigger des « 5 annonces offertes à l'inscription » supprimé (crédits déjà donnés conservés). RPC my_pro_free_left() pour le site (ensureProPlanSelection ne renvoie plus vers les tarifs tant qu'il reste des annonces gratuites). Stats admin : « Plan 25 annonces » compte pro_20 + pro_25. MyCreativeSite → services_200 (interne gratuit).
+- Site : pro-fondateur.html (bandeau « N annonces gratuites, pour toujours », pro_25), CGV (photos + annonces gratuites), libellés d'abonnement (index-app.js ?v=20261108-grille3).
+- À trancher avec Anthony : la formule 100 inclut toujours 5 « À la une » 7 j + 5 remontées par mois (décision du 15/10, prise quand elle valait 499,99 €).
