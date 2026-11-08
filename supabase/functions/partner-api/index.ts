@@ -1,4 +1,4 @@
-// partner-api v1 (05/11/2026, Claude) — API REST pour les éditeurs de logiciels (Septeo/Modelo, Apimo, La Boîte Immo…).
+// partner-api v1.2 (08/11/2026 : éditeurs « grants_plan », ex. MyCreativeSite = annonces illimitées incluses) — v1 (05/11/2026, Claude) — API REST pour les éditeurs de logiciels (Septeo/Modelo, Apimo, La Boîte Immo…).
 // Documentation publique : https://abracadeal.fr/api.html
 //
 // Principe : l'éditeur pousse les annonces de ses agences clientes. Une agence n'est diffusée que si
@@ -141,7 +141,7 @@ async function sendWelcome(partner: any, userId: string, email: string, company:
   const paras = [
     "Bonjour,",
     `Vous avez activé la diffusion sur Abracadeal dans <strong>${esc(partner.name)}</strong>. Nous avons donc ouvert l’espace Pro de <strong>${esc(company)}</strong>.`,
-    "Vos annonces arrivent automatiquement depuis votre logiciel et se mettent à jour toutes seules : vous n’avez rien à ressaisir.",
+    partner.grants_plan ? "Vos annonces arrivent automatiquement depuis votre site et se mettent à jour toutes seules, en illimité : c’est inclus dans votre formule, sans rien à payer en plus." : "Vos annonces arrivent automatiquement depuis votre logiciel et se mettent à jour toutes seules : vous n’avez rien à ressaisir.",
     "Pour accéder à votre espace (voir vos annonces, les mettre à la une, les partager), choisissez simplement votre mot de passe :",
   ];
   const bullets = [founder ? "Gratuit, sans carte bancaire" : "Aucune carte bancaire demandée", "Sans engagement", "Vos annonces visibles sur Google et partageables en un clic"];
@@ -163,6 +163,23 @@ ${paras.map((x) => `<p style="margin:0 0 14px 0;line-height:1.55;color:#21132d;"
     body: JSON.stringify({ from: "Abracadeal <contact@abracadeal.fr>", to: [email], reply_to: "contact@abracadeal.fr", subject: "Votre espace Pro Abracadeal est prêt", html, text }),
   }).catch((e) => console.error(e));
 }
+// 08/11/2026 (Anthony) : un éditeur avec grants_plan (MyCreativeSite, Pack Auto & Immo) offre à ses clients une formule
+// interne gratuite (annonces illimitées) au lieu de l'offre Fondateurs. Ne remplace jamais un abonnement en cours d'un autre type.
+async function grantPartnerPlan(partner: any, userId: string) {
+  if (!partner.grants_plan) return;
+  const { data: plan } = await admin.from("pro_subscription_plans").select("code,listing_limit").eq("code", partner.grants_plan).maybeSingle();
+  if (!plan) return;
+  const { data: cur } = await admin.from("pro_subscriptions").select("plan_code,status,source").eq("user_id", userId).maybeSingle();
+  if (cur && ["active", "trialing"].includes(cur.status) && cur.source !== "partner:" + partner.id) return;
+  await admin.from("pro_subscriptions").upsert({ user_id: userId, plan_code: plan.code, listing_limit: plan.listing_limit, status: "active", source: "partner:" + partner.id,
+    stripe_customer_id: null, stripe_subscription_id: null, stripe_checkout_session_id: null, current_period_end: null, cancel_at_period_end: false,
+    founder_number: null, free_until: null, billing_starts_at: null, enrolled_at: new Date().toISOString(), updated_at: new Date().toISOString() }, { onConflict: "user_id" });
+}
+async function revokePartnerPlan(partner: any, userId: string) {
+  if (!partner.grants_plan || !userId) return;
+  await admin.from("pro_subscriptions").update({ status: "canceled", updated_at: new Date().toISOString() }).eq("user_id", userId).eq("source", "partner:" + partner.id);
+}
+
 // Ouvre le compte Pro. Renvoie l'identifiant du compte, ou une raison (texte) si l'ouverture doit être faite à la main.
 async function openProAccount(partner: any, ag: any): Promise<{ userId?: string; reason?: string }> {
   if (partner.sandbox) return { reason: "éditeur de test : pas d'ouverture de compte" };
@@ -199,7 +216,8 @@ async function openProAccount(partner: any, ag: any): Promise<{ userId?: string;
       const ver = await callFunction("verify-professional", token, { action: "verify", siret: ag.siret });
       if (ver.ok && ver.data?.verified === true) {
         const { data: open } = await admin.rpc("get_founder_offer_open");
-        if (open !== false) {
+        if (partner.grants_plan) { await grantPartnerPlan(partner, userId); founder = true; }
+        else if (open !== false) {
           const sub = await callFunction("create-pro-subscription-order", token, { plan_code: "pro_50", expect_founder: true });
           founder = !!(sub.ok && sub.data?.founder);
           if (founder) await admin.from("pro_email_outbox").update({ available_at: new Date(Date.now() + 20 * 60e3).toISOString() }).eq("user_id", userId).eq("status", "pending");
@@ -212,14 +230,14 @@ async function openProAccount(partner: any, ag: any): Promise<{ userId?: string;
   const { data: pv } = await admin.from("pro_verifications").select("user_id").eq("user_id", userId).eq("siret", ag.siret).maybeSingle();
   if (!pv) return { reason: "compte créé mais SIRET non vérifié automatiquement : à vérifier dans l'admin" };
   await sendWelcome(partner, userId, email, ag.name || company.company_name, founder);
-  if (!founder) await notifyPending(partner, { ...ag, admin_notified_at: null }, "compte ouvert automatiquement, mais sans offre Fondateur (place indisponible) : ses annonces seront refusées sans abonnement");
+  if (!founder && !partner.grants_plan) await notifyPending(partner, { ...ag, admin_notified_at: null }, "compte ouvert automatiquement, mais sans offre Fondateur (place indisponible) : ses annonces seront refusées sans abonnement");
   return { userId };
 }
 
 // Passe l'agence en « active » : compte Pro existant avec ce SIRET, sinon ouvert automatiquement ; puis crée son flux dans le moteur d'import.
 async function activate(partner: any, ag: any) {
   if (ag.status === "stopped") return ag;
-  if (ag.status === "active" && ag.feed_id && ag.feed_key) return ag;
+  if (ag.status === "active" && ag.feed_id && ag.feed_key) { if (partner.grants_plan && ag.owner_id) await grantPartnerPlan(partner, ag.owner_id); return ag; }
   let { data: pv } = await admin.from("pro_verifications").select("user_id").eq("siret", ag.siret).limit(1).maybeSingle();
   if (!pv?.user_id) {
     // Une seule tentative automatique par agence : ensuite, c'est l'admin qui tranche (évite les comptes en double).
@@ -230,6 +248,7 @@ async function activate(partner: any, ag: any) {
   }
   const { data: prof } = await admin.from("profiles").select("account_type").eq("id", pv.user_id).maybeSingle();
   if (prof?.account_type !== "professionnel") { await notifyPending(partner, ag, "le compte portant ce SIRET n'est pas un compte Pro"); return ag; }
+  await grantPartnerPlan(partner, pv.user_id);
   const feedKey = randomKey("abf_");
   const now = new Date().toISOString();
   const feed = must(await admin.from("pro_stock_feeds").insert({
@@ -336,6 +355,7 @@ Deno.serve(async (req) => {
         removed = (r || []).length;
       }
       await admin.from("partner_agencies").update({ status: "stopped", updated_at: new Date().toISOString() }).eq("id", ag.id);
+      await revokePartnerPlan(partner, ag.owner_id);
       return json({ ok: true, agency_id: agencyId, status: "stopped", listings_removed: removed });
     }
 
