@@ -1,0 +1,3 @@
+-- 08/11/2026 (Anthony) : adresse du showroom figée une fois créée ; seul un admin peut la changer.
+-- Appliqué en base (migration pro_slug_locked) : pro_slug_set refuse le changement pour un non-admin,
+-- trigger abraca_pro_slug_guard (before update on pro_showrooms) remet l'ancienne adresse si un non-admin tente de la changer.

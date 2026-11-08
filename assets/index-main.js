@@ -6677,7 +6677,8 @@ async function saveProShowroom(e){
     if(error)throw error;
     // 01/11/2026 : adresse courte du showroom (abracadeal.fr/<adresse>)
     let slug=proShowroomRecord.slug||null;const slugIn=(document.getElementById('accountCompanySlug')?.value||'').trim();
-    if(slugIn&&slugIn!==slug){const {data:sv,error:se}=await sb.rpc('pro_slug_set',{p_user:currentUser.id,p_slug:slugIn});if(se)throw se;slug=sv;const sl=document.getElementById('accountCompanySlug');if(sl)sl.value=sv;}
+    /* 08/11/2026 : adresse figée une fois créée (seul le support la change) */
+    if(slugIn&&!slug){const {data:sv,error:se}=await sb.rpc('pro_slug_set',{p_user:currentUser.id,p_slug:slugIn});if(se)throw se;slug=sv;const sl=document.getElementById('accountCompanySlug');if(sl)sl.value=sv;}
     payload.slug=slug;{const lk=document.getElementById('proPublicPageLink');if(lk&&slug)lk.href='/'+slug;}
     const obsolete=[];
     if(proShowroomPendingBanner&&proShowroomRecord.banner_path&&proShowroomRecord.banner_path!==bannerPath)obsolete.push(proShowroomRecord.banner_path);
@@ -6826,3 +6827,11 @@ document.getElementById('publishBackBtn')?.addEventListener('click',()=>{publish
   }
   window.addEventListener('pageshow',e=>{if(e.persisted&&document.getElementById('publishModal')?.classList.contains('open')){closeModal('publishModal');resetPublishForm();}});
 })();
+
+/* 08/11/2026 : copier le lien du showroom (adresse non modifiable) */
+document.addEventListener('click',e=>{
+  if(!e.target.closest('#copyShowroomLinkBtn'))return;
+  const v=(document.getElementById('accountCompanySlug')?.value||'').trim();if(!v)return;
+  const url='https://abracadeal.fr/'+v;
+  (navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(()=>toast('Lien copié : '+url.replace('https://',''))).catch(()=>prompt('Copiez ce lien :',url));
+});
