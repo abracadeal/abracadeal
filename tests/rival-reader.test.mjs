@@ -7,6 +7,8 @@ let state,r;const mem={load:async()=>state,save:async s=>state=structuredClone(s
 for(let p=0;p<2;p++){cpuReset();r=await readRival(new URL(base),get,mem,async u=>u);if(p===0)assert.equal(r.partial,true);}assert.equal(r.length,1);assert.equal(r.partial,false);assert.equal(r.total,1);assert.equal(r.stats.expected_total,4);assert.equal(r.stats.excluded,3);assert.equal(r.stats.failed.length,0);
 // Real next-page links are followed; a repeated/incomplete page cannot certify
 // the catalogue. Same-title IDs are kept as separate source products.
-const first=load('stock').replace('4 produits','5 produits')+'<a href="'+stock+'?p=2">2</a>',next='<p>Il y a 5 produits.</p><ul class="product_list"><li><a href="'+url(9)+'">9</a></li></ul>';let pageState;const mm={load:async()=>pageState,save:async s=>pageState=structuredClone(s)};
+const first=load('stock').replace('4 produits','5 produits')+'<a href="'+stock+'?p=2">2</a>',next='<span class="heading-counter">Il y a 5 produits.</span><ul class="product_list"><li><a href="'+url(9)+'">9</a></li></ul>';let pageState;const mm={load:async()=>pageState,save:async s=>pageState=structuredClone(s)};
 for(let p=0;p<3;p++){cpuReset();r=await readRival(new URL(base),async u=>u.searchParams.get('p')==='2'?{url:u,text:next}:u.pathname.includes('/vehicules-d-occasion/9-')?{url:u,text:load('3').replace('id_product=3','id_product=9')}:u.toString()===stock?{url:u,text:first}:get(u),mm);}assert.equal(r.partial,false);assert.equal(r.length,2);assert.equal(r.stats.expected_total,5);
 console.log('Rival: two occasion categories, new exclusion, source fields/contact/gallery/full description, pagination, count and resume OK');
+
+assert.equal(rivalLinks('<p>Il y a 0 produits dans votre panier.</p>'+load('stock'),new URL(stock)).total,4);

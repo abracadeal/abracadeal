@@ -11,7 +11,7 @@ const clean=(s:string)=>sDecode(s.replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi,
 function element(s:string,id:string,tag='div'){const m=new RegExp('<'+tag+'\\b[^>]*id="'+id+'"[^>]*>','i').exec(s);if(!m)return '';let depth=1;const re=new RegExp('<\\/?'+tag+'\\b[^>]*>','gi');re.lastIndex=m.index+m[0].length;for(let t;(t=re.exec(s));){depth+=/^<\//.test(t[0])?-1:1;if(!depth)return s.slice(m.index,re.lastIndex);}throw Error('Bloc Rival incomplet : '+id);}
 export function rivalLinks(html:string,u:URL){
  if(!isRival(u)||!STOCK.includes(u.pathname))throw Error('Catalogue Rival hors périmètre');
- const text=clean(html),total=/Il n.y a aucun produit dans cette cat[ée]gorie/i.test(text)?0:Number(text.match(/Il y a\s+(\d+)\s+produits?/i)?.[1]??NaN);if(!Number.isFinite(total))throw Error('Compteur Rival absent');
+ const text=clean(html.match(/<span\b[^>]*class="heading-counter"[^>]*>([\s\S]*?)<\/span>/i)?.[1]||''),total=/Il n.y a aucun produit dans cette cat[ée]gorie/i.test(text)?0:Number(text.match(/Il y a\s+(\d+)\s+produits?/i)?.[1]??NaN);if(!Number.isFinite(total))throw Error('Compteur Rival absent');
  const grid=html.match(/<ul\b[^>]*class="[^"]*product_list[^\"]*"[^>]*>([\s\S]*?)<\/ul>/i)?.[1]||'',details=new Set<string>(),lists=new Set<string>();
  for(const m of grid.matchAll(/href="([^"]+)"/gi)){const d=new URL(sDecode(m[1]),u);if(isRival(d)&&d.pathname.startsWith(u.pathname.split('/').slice(0,3).join('/')+'/vehicules-d-occasion/')&&/\/\d+-[^/]+\.html$/.test(d.pathname)){d.search='';d.hash='';details.add(d.toString());}}
  for(const m of html.matchAll(/href="([^"]+)"/gi)){const p=new URL(sDecode(m[1]),u);if(isRival(p)&&p.pathname===u.pathname&&/^\d+$/.test(p.searchParams.get('p')||'')){p.hash='';lists.add(p.toString());}}
