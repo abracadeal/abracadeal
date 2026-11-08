@@ -351,6 +351,26 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <link rel="stylesheet" href="assets/tablet-grid-20261030.css?v=2">
 <style id="signup-founder-list-20261027">.signup-founder-list{list-style:none;margin:14px 0 10px;padding:0;display:grid;gap:9px}.signup-founder-list li{display:flex;align-items:center;gap:10px;font-size:.95rem;color:#34143f;line-height:1.3}.signup-founder-list svg{width:20px;height:20px;flex:0 0 20px;padding:3px;border-radius:999px;background:#f3e6f9;fill:none;stroke:#7b27a0;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;box-sizing:border-box}.signup-founder-note{margin:0 0 4px;font-size:.8rem;color:#7a6a80}.signup-founder-mark{color:#7b27a0}</style>
 </template>
+<style id="proShowroomFullscreenCss">/* 08/11/2026 (Anthony) : sur mobile, « Ma page Pro » ouvre le showroom en plein écran, modifiable. */
+.pro-showroom-fs-bar{display:none}
+@media(max-width:760px){
+#companyForm.showroom-fs{position:fixed;inset:0;z-index:100040;background:#fff;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:0 0 calc(18px + env(safe-area-inset-bottom))}
+#companyForm.showroom-fs .pro-showroom-fs-bar{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5;background:#fff;border-bottom:1px solid #eee5f0;padding:calc(10px + env(safe-area-inset-top)) 16px 10px}
+#companyForm.showroom-fs .pro-showroom-fs-bar strong{font-size:1.2rem;color:#2a1733}
+.pro-showroom-fs-close{border:0;background:transparent;font-size:1.9rem;line-height:1;padding:2px 8px;color:#4b3b55;cursor:pointer}
+#companyForm.showroom-fs .pro-showroom-live{border:0;border-radius:0;box-shadow:none;margin:0 0 12px}
+#companyForm.showroom-fs .pro-showroom-cover{aspect-ratio:16/9}
+#companyForm.showroom-fs .pro-showroom-edit-note,#companyForm.showroom-fs .form-grid,#companyForm.showroom-fs #companySaveStatus{margin-left:16px;margin-right:16px}
+#companyForm.showroom-fs .form-actions{position:sticky;bottom:0;z-index:5;background:#fff;border-top:1px solid #eee5f0;margin:14px 0 0;padding:10px 16px calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap}
+#companyForm.showroom-fs .form-actions .btn{flex:1 1 auto}
+body.showroom-fs-open{overflow:hidden}
+body.showroom-fs-open .mobile-bottom-nav{display:none!important}
+#companyForm.showroom-fs .form-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#companyForm.showroom-fs .form-actions .btn{min-height:44px;padding:0 10px;font-size:.92rem}
+#companyForm.showroom-fs .form-actions .pro-public-link{grid-column:1/-1}
+#companyForm.showroom-fs .form-actions #saveCompanyShowroomBtn[hidden]{display:none}
+}
+</style>
 </head>
 <body>
 
@@ -1660,6 +1680,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 </div>
           <button type="button" class="btn ghost" id="editCompanyBtn">Modifier ma page Pro</button>
           <form id="companyForm" class="hidden">
+<div class="pro-showroom-fs-bar"><strong>Ma page Pro</strong><button type="button" class="pro-showroom-fs-close" id="proShowroomFsClose" aria-label="Fermer">×</button></div>
 <div class="pro-showroom-live">
  <div class="pro-showroom-cover" id="proShowroomCoverLive" role="button" tabindex="0" aria-label="Changer la bannière"><button class="pro-cover-change" id="proBannerChangeBtn" type="button">📷 Changer la bannière</button></div>
  <div class="pro-showroom-identity">
@@ -1997,7 +2018,7 @@ html.abraca-tablet-as-mobile .hero .search-wrap{padding-left:12px!important;padd
 <script src="assets/option-consent.js?v=20261008-pay-loading2" defer></script>
 <script src="assets/card-photo-fit-20261101.js?v=5" defer></script>
 <script src="assets/vehicle-title-20261103.js?v=1" defer></script>
-<script src="assets/index-main.js?v=20261108-r2b" defer></script>
+<script src="assets/index-main.js?v=20261108-showfs" defer></script>
 <script src="assets/veh-sub-chips-20261106.js?v=1" defer></script>
 <script src="assets/social-login-20261018.js?v=20261106-site" defer></script>
 <script src="assets/description-helper-20261013.js?v=3" defer></script>

@@ -2732,3 +2732,5 @@
   - Admin › Pilotage : la carte « Stockage des photos » montre aussi Cloudflare R2 (fichiers copiés, Mo, en attente, dernière copie, % des 10 Go gratuits) via la fonction admin_r2_usage().
   - Showroom pro (pro.html, Anthony : « les showroom aussi sont lents en photo ») : cartes = WebP 480 px via wsrv depuis la vignette R2 (photos reprises du site du pro : réduites aussi) au lieu de la photo d'origine en fond ; secours wsrv « default » = photo d'origine.
   - Plus tard : domaine photos.abracadeal.fr (nécessite le DNS chez Cloudflare) au lieu de r2.dev.
+
+- 08/11/2026 (Claude) : mobile — « Ma page Pro » (tableau de bord Pro et bouton « Modifier ma page Pro ») ouvre le showroom en plein écran (≤ 760 px) : barre « Ma page Pro » + × en haut, bannière en 16/9, barre du bas masquée, boutons Voir / Enregistrer / Annuler collés en bas. Fermeture (×, Annuler, fermeture du compte) remet tout en place. Ordinateur inchangé. index-main.js ?v=20261108-showfs.

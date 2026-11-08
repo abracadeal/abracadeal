@@ -133,6 +133,7 @@ function openModal(id){
 function closeModal(id){
   const el=document.getElementById(id);
   if(!el) return;
+  if(id==='accountModal')window.closeShowroomFs?.();
   /* 02/11/2026 (Anthony : « dans le showroom, on clique sur une annonce et ça nous emmène sur le site principal ») :
      annonce ouverte depuis un showroom (…?annonce=<id>&retour=/weecars-angers) → en la fermant on revient au showroom. */
   /* Seulement quand la fiche est vraiment fermée : si une autre fenêtre s'ouvre juste après (connexion pour envoyer un message,
@@ -576,6 +577,7 @@ function renderCompanyAccount(){
   $('#proBoostWallet')?.classList.toggle('hidden',!pro);
   $('#companyForm').classList.add('hidden');
   $('#editCompanyBtn').classList.remove('hidden');
+  window.closeShowroomFs?.();
   const data=currentUser?.user_metadata?.company_registration||{};
   const labels={yes:'Numéro de TVA renseigné',no:'Sans numéro de TVA / franchise en base',pending:'En cours d’attribution'};
   const rows=[['Raison sociale',data.company_name],['SIRET',data.siret],['SIREN',data.siren],['Situation TVA',labels[data.vat_status]],...(data.vat_number?[['Numéro de TVA',data.vat_number]]:[])];
@@ -590,16 +592,21 @@ for(const prefix of ['signup']){
   $('#'+prefix+'Siret')?.addEventListener('input',()=>syncCompanyFields(prefix));
   $('#'+prefix+'VatStatus')?.addEventListener('change',()=>syncCompanyFields(prefix));
 }
+// 08/11/2026 (Anthony) : sur mobile, la page Pro s'ouvre en plein écran pour la voir en grand et la modifier.
+window.closeShowroomFs=function(){document.getElementById('companyForm')?.classList.remove('showroom-fs');document.body.classList.remove('showroom-fs-open');};
+document.getElementById('proShowroomFsClose')?.addEventListener('click',()=>document.getElementById('cancelCompanyBtn')?.click());
 document.getElementById('editCompanyBtn')?.addEventListener('click',async()=>{
   document.getElementById('companyForm')?.classList.remove('hidden');
+  const fs=window.matchMedia('(max-width:760px)').matches;
+  if(fs){const f=document.getElementById('companyForm');f?.classList.add('showroom-fs');if(f)f.scrollTop=0;document.body.classList.add('showroom-fs-open');}
   document.getElementById('editCompanyBtn')?.classList.add('hidden');
   const status=document.getElementById('companySaveStatus');if(status)status.textContent='Chargement de votre showroom…';
   // 08/11/2026 : le chargement ne doit plus rester bloqué sur « Chargement… » en cas d'erreur.
   try{await loadProShowroomData(true);if(status)status.textContent='';}
   catch(err){console.warn('Showroom',err);if(status)status.textContent='Impossible de charger votre showroom pour le moment. Réessayez dans un instant.';}
   const live=document.querySelector('#companyForm .pro-showroom-live')||document.getElementById('companyForm');
-  live?.scrollIntoView({behavior:'smooth',block:'start'});
-  setTimeout(()=>document.getElementById('accountCompanyDescription')?.focus({preventScroll:true}),500);
+  if(!fs){live?.scrollIntoView({behavior:'smooth',block:'start'});
+  setTimeout(()=>document.getElementById('accountCompanyDescription')?.focus({preventScroll:true}),500);}
 });
 document.getElementById('cancelCompanyBtn')?.addEventListener('click',()=>{renderCompanyAccount();document.getElementById('editCompanyBtn')?.focus()});
 document.getElementById('companyForm')?.addEventListener('submit',saveProShowroom);
