@@ -221,7 +221,7 @@
   }
 
   function refresh(force) {
-    if (state.loading) return;
+    if (state.loading || !state.ready) return;
     if (!force && document.visibilityState === 'hidden') return;
     state.loading = true; $('ahLive').className = 'ah-live busy';
     sb.rpc('admin_overview').then(function (r) {
@@ -256,6 +256,7 @@
     var pr = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
     if (!pr.data || !pr.data.is_admin) { $('ahStatus').textContent = 'Accès réservé à l’administrateur.'; $('ahUpdated').textContent = '—'; return; }
     var h = (location.hash || '').slice(1);
+    state.ready = true;
     showTab(['today', 'pros', 'prospect', 'traffic', 'money', 'tech'].indexOf(h) >= 0 ? h : 'today');
     refresh(true);
   })();
