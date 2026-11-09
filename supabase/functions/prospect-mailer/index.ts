@@ -1,3 +1,4 @@
+// v31 09/11/2026 : mail aperçu signé « Le Service Pros Abracadeal » (Anthony reste anonyme auprès des pros).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026, v3 13/10/2026 (relance J+5 dans le même fil),
 // v4 13/10/2026 : test A/B (A = mail avec lien, B = sans lien, on invite à répondre), variante stable par prospect.
@@ -131,7 +132,7 @@ https://abracadeal.fr/pro-fondateur.html
 
 « Je publie » et votre SIRET, c'est tout. Gratuit, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
 
-Anthony, fondateur d'Abracadeal
+Le Service Pros Abracadeal
 abracadeal.fr – {{expediteur}}` };
   return { subject, body:
 `Bonjour,
@@ -151,7 +152,7 @@ C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vo
 
 Économisez tout ça et faites d'Abracadeal votre partenaire officiel.
 
-Anthony, fondateur d'Abracadeal
+Le Service Pros Abracadeal
 abracadeal.fr – {{expediteur}}` };
 }
 // 03/11/2026 : même tri que la page pro-fondateur.html (goodRows) — un aperçu « Cental--> » ×6 ou une maison « vendue » 1 450 €

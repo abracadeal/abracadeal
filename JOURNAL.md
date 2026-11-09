@@ -2777,3 +2777,7 @@
 - Hébergement : GitHub Pages, un dépôt ClicandSite/site-<slug> par client ; workflow « Nouveau site client » (repo clicandsite) crée le dépôt et active Pages ; chaque site se régénère toutes les 15 min (scripts/client-site/site.yml). Prérequis : secret SITES_TOKEN (jeton GitHub d'Anthony) à créer une fois.
 - RPC publique cs_site_public_info(p_slug) (MyCreativeSite) ; cs-edit v15 garde les liens vers les pages d'annonces.
 - Concession auto et moto : modèle dédié (garage.html?concession=1), mis en avant sur l'accueil ; Pack renommé « Pack Auto, Moto & Immo » ; Abracadeal seulement dans les formules à 99 € (Boutique, Pack).
+
+## 09/11/2026 (Claude) — prospect-mailer v31
+- Mail « aperçu » (1er mail + relance) signé « Le Service Pros Abracadeal » au lieu de « Anthony, fondateur d’Abracadeal » : Anthony reste anonyme auprès des pros.
+- Prospects mis en pause (adresse d’agence web, pas du pro) : Distinxion (avdigital.fr), La Fabrique Automobile (futurdigital.fr), Agence Bannier (anmconso.com).
