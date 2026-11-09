@@ -40,14 +40,15 @@
 <link rel="stylesheet" href="assets/footer-copyright-20261027.css?v=4">
 <link rel="stylesheet" href="assets/vac-icons-20261027.css?v=1">
 <link rel="stylesheet" href="assets/buttons-20261108.css?v=1">
+<link rel="stylesheet" href="assets/vacances-like-home-20261109.css?v=1">
 </head>
 <body>
 <div class="vac-mobile-main-return">
-  <a class="vac-mobile-brand" href="index.html" aria-label="Retour à Abracadeal"><b>Abracadeal</b><small>Louez - Voyagez</small></a>
+  <a class="vac-mobile-brand brand-logo-link" href="index.html" aria-label="Retour à Abracadeal"><picture class="brand-logo-pic"><source srcset="assets/abracadeal-logo-h96.webp" type="image/webp"><img class="brand-logo-img" src="assets/abracadeal-logo-h96.png" width="501" height="96" alt="Abracadeal" decoding="async" fetchpriority="high"></picture></a>
 </div>
 <header class="topbar">
   <div class="container nav">
-    <a class="brand" href="index.html" aria-label="Retour à Abracadeal"><b>Abracadeal</b><small>Louez - Voyagez</small></a>
+    <a class="brand brand-logo-link" href="index.html" aria-label="Retour à Abracadeal"><picture class="brand-logo-pic"><source srcset="assets/abracadeal-logo-h96.webp" type="image/webp"><img class="brand-logo-img" src="assets/abracadeal-logo-h96.png" width="501" height="96" alt="Abracadeal" decoding="async" fetchpriority="high"></picture></a>
     <div class="nav-actions">
       <a class="btn premium" id="vacBackMainBtn" href="index.html">Abracadeal</a>
       <a class="btn ghost" id="vacAdminLink" href="admin-vacances.html" style="display:none">Admin</a>
@@ -62,14 +63,16 @@
     </button>
   </div>
 </header>
-<div class="vac-founder-strip" id="vacFounderStrip"><div class="container vac-founder-strip-inner"><span><span class="vfs-long"><svg class="strip-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg><strong>Propriétaires &amp; hébergeurs</strong> · Publication offerte aux 500 premiers logements, sans carte bancaire</span><span class="vfs-short"><svg class="strip-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg><strong>500 premiers logements</strong> : publication offerte</span></span><a class="vfs-cta" href="vacances.html?mode=hote&amp;host_signup=1">Publier mon logement</a></div></div>
+<div class="vac-founder-strip" id="vacFounderStrip"><div class="container vac-founder-strip-inner"><span><span class="vfs-long"><svg class="strip-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9Z"/></svg><strong>Propriétaires &amp; hébergeurs</strong> · Publiez votre logement gratuitement, sans carte bancaire <span class="vfs-limit">500 premiers logements</span></span><span class="vfs-short"><svg class="strip-ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/></svg><strong>500 premiers logements</strong> : publication offerte</span></span><a class="vfs-cta" href="vacances.html?mode=hote&amp;host_signup=1">Devenir Fondateur</a></div></div>
 <div class="vac-mobile-banner-shell" id="vacMobileTop">
   <picture>
     <source data-tablet-keep-media media="(max-width: 767px), (min-width: 600px) and (max-width: 1400px) and (min-height: 500px) and (hover: none) and (pointer: coarse)" type="image/jpeg" srcset="assets/banniere-vacances-mobile-tablette.jpg" width="2000" height="667">
     <source type="image/webp" srcset="assets/banniere-vacances-desktop.webp" width="1920" height="823">
     <img class="vac-mobile-banner-exact" src="assets/banniere-vacances-desktop.jpg" alt="Abracadeal Vacances, lampe magique dorée" width="1920" height="823" decoding="async" fetchpriority="high">
   </picture>
+  <a class="vac-hero-host" id="vacHeroHost" href="vacances.html?mode=hote&amp;host_signup=1">＋ Devenir hôte</a>
 </div>
+<script>/* 09/11/2026 : le bouton doré suit le bouton hôte du menu (Devenir hôte / Espace Hôte / Mode voyageur…) */(function(){var h=document.getElementById('hostSignupCta'),b=document.getElementById('vacHeroHost');if(!h||!b)return;var sync=function(){var t=(h.textContent||'').trim();b.textContent=(/^devenir/i.test(t)?'＋ ':'')+t;b.href=h.getAttribute('href')||b.href;};new MutationObserver(sync).observe(h,{childList:true,characterData:true,subtree:true,attributes:true,attributeFilter:['href']});sync();b.addEventListener('click',function(e){e.preventDefault();h.click();});})();</script>
 <div class="auth-modal" id="vacAuthModal" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="vacAuthTitle">
   <div class="auth-backdrop" data-close-auth></div>
   <div class="auth-card">

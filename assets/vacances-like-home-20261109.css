@@ -1,0 +1,32 @@
+/* 09/11/2026 (demande d'Anthony) : Abracadeal Vacances avec la même mise en page que l'accueil —
+   même logo en haut à gauche, mêmes boutons-icônes en haut à droite, même bandeau Fondateurs,
+   bannière plus petite (230 px sur ordinateur, comme l'accueil) et bouton doré en haut à droite de la bannière. */
+header.topbar{background:rgba(9,5,16,.96)!important;min-height:71px}
+header.topbar .container.nav{min-height:71px;align-items:center}
+header.topbar .brand.brand-logo-link{display:flex;align-items:center;padding:0;background:none;border:0;text-decoration:none}
+.brand-logo-link .brand-logo-img{display:block;height:36px;width:auto}
+.vac-mobile-brand.brand-logo-link{display:flex;align-items:center}
+.vac-mobile-brand.brand-logo-link .brand-logo-img{height:30px;width:auto}
+/* Boutons en haut à droite : icône + libellé, comme Favoris / Messages / Connexion de l'accueil */
+header.topbar .vac-dnav-item{display:grid!important;justify-items:center;align-content:center;gap:2px 3px;min-width:78px;height:58px;padding:5px 10px!important;border:0!important;border-radius:12px!important;background:none!important;color:#f6eef9!important;font:700 11px/11px "DM Sans",sans-serif!important;box-shadow:none!important;text-decoration:none}
+header.topbar .vac-dnav-item:hover{background:rgba(255,255,255,.07)!important}
+header.topbar .vac-dnav-item>span:first-child:not(:only-child){line-height:1}
+header.topbar .vac-dnav-item svg{width:26px!important;height:26px!important;stroke:#f6eef9!important;stroke-width:1.9!important;fill:none}
+header.topbar #vacAdminLink{display:inline-flex;align-items:center;height:40px;padding:0 16px;border-radius:999px;font:800 14px "DM Sans",sans-serif;background:rgba(255,255,255,.08)!important;color:#f6eef9!important;border:1px solid rgba(255,255,255,.18)!important;box-shadow:none!important}
+/* Bandeau Fondateurs identique à l'accueil */
+.vac-founder-strip{background:linear-gradient(90deg,#3a1263 0%,#6b1f8f 50%,#3a1263 100%)!important;border:0!important;font-family:"DM Sans",sans-serif}
+.vac-founder-strip-inner{padding:7px 20px!important;gap:8px 20px!important;font-size:14px!important;font-weight:750!important;min-height:44.5px;box-sizing:border-box}
+.vac-founder-strip strong{color:#f6c96a;font-weight:900}
+.vac-founder-strip .vfs-limit{margin-left:10px;padding:2px 8px;border:1px solid rgba(246,201,106,.7);border-radius:999px;color:#f6c96a;font-size:12px;font-weight:800;line-height:15.6px}
+.vac-founder-strip .vfs-cta{padding:6px 16px!important;font-size:14px!important;font-weight:900!important;color:#5a1a86!important;background:#fff!important;border-radius:999px!important;box-shadow:0 4px 14px rgba(0,0,0,.25)!important}
+.vac-founder-strip .strip-ico{width:16px;height:16px;stroke:#f6c96a}
+/* Bannière : ordinateur et grand écran comme l'accueil (230 px, image entière centrée) */
+.vac-hero-host{display:none}
+@media (min-width:1024px) and (hover:hover),(min-width:1401px){
+  html body div#vacMobileTop.vac-mobile-banner-shell{display:block!important;position:relative!important;width:100%!important;max-width:none!important;height:230px!important;margin:0!important;border-radius:0!important;overflow:hidden!important;background:#0e0120!important;box-shadow:none!important;border:0!important}
+  html body div#vacMobileTop picture{display:block!important;height:230px!important;width:100%!important;margin:0!important}
+  html body div#vacMobileTop picture img.vac-mobile-banner-exact{display:block!important;height:230px!important;width:100%!important;max-width:100%!important;max-height:230px!important;margin:0 auto!important;object-fit:contain!important;object-position:center!important;border-radius:0!important;transform:none!important}
+  .vac-hero-host{display:flex;align-items:center;justify-content:center;position:absolute;top:20px;right:22px;z-index:9;height:56px;padding:13px 23px;border-radius:16px;border:2px solid rgba(255,246,210,.95);background:linear-gradient(120deg,#ffd77a,#ffa82f);color:#30153e;font:850 16.32px "DM Sans",sans-serif;text-decoration:none;box-shadow:0 8px 27px rgba(23,5,32,.45);white-space:nowrap}
+  .vac-hero-host:hover{filter:brightness(1.04);transform:translateY(-1px)}
+  header.topbar #hostSignupCta{display:none!important}
+}
