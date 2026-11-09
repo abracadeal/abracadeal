@@ -11,7 +11,7 @@
   "path": "garage/signature-motors-group-weecars-les-ponts-de-ce",
   "name": "WeeCars Angers",
   "city": "Les Ponts-de-Cé",
-  "count": 126,
+  "count": 125,
   "active": true,
   "short": "weecars-angers"
  },
@@ -42,7 +42,7 @@
   "path": "garage/weecars-brest-brest",
   "name": "WeeCars Brest",
   "city": "Brest",
-  "count": 145,
+  "count": 147,
   "active": true,
   "short": "weecars-brest"
  }
