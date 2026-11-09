@@ -2781,3 +2781,8 @@
 ## 09/11/2026 (Claude) — prospect-mailer v31
 - Mail « aperçu » (1er mail + relance) signé « Le Service Pros Abracadeal » au lieu de « Anthony, fondateur d’Abracadeal » : Anthony reste anonyme auprès des pros.
 - Prospects mis en pause (adresse d’agence web, pas du pro) : Distinxion (avdigital.fr), La Fabrique Automobile (futurdigital.fr), Agence Bannier (anmconso.com).
+
+## 2026-11-09 nuit — MyCreativeSite : SEO Pack Auto, Moto & Immo + robot « nouveaux pros »
+- Pages : /site-internet-concession-automobile/, /site-internet-concession-moto/, /site-internet-diffusion-annonces-auto-immo/ ; garage et agence immobilière réécrites (Pack 99 € + 490 €, une page Google par annonce, Abracadeal illimité). Le Pack est en tête des prix et dans les offres JSON-LD.
+- Guide /conseils/concession-auto-moto-vendre-plus-avec-son-site/ ; aide /aide/nom-de-domaine/ (OVH, IONOS, GoDaddy, Gandi) ; liens métiers en pied de page de l'accueil.
+- Robot prospects (clicandsite-prospect-finder v6) : mode « nouveaux » = créations publiées au BODACC chaque jour, classées concession / garage / moto / immobilier (+ date de début d'activité, souvent future). Cron clicandsite-nouveaux toutes les 5 min, rattrapage depuis le 10/09. Interrupteur à part : robot_settings.bodacc_enabled. Annuaire : NAF 45.40Z (motos) ajouté. CRM admin : filtre « Nouveaux et futurs pros ». Aucun mail envoyé.
