@@ -2804,3 +2804,7 @@
 ## 2026-11-09 — Abracadeal Vacances : même mise en page que l'accueil (Claude)
 - Demande d'Anthony : logo image identique à l'accueil en haut à gauche (ordinateur et mobile), boutons du haut en icônes comme Favoris / Messages / Connexion de l'accueil, bandeau Fondateurs identique (même dégradé, hauteur, police, pastille « 500 premiers logements », bouton blanc « Devenir Fondateur »), bannière ordinateur ramenée à 230 px (image entière centrée) avec le bouton doré en haut à droite comme « Déposer une annonce » (« ＋ Devenir hôte », il suit le bouton hôte du menu qui reste caché sur ordinateur).
 - Fichier : assets/vacances-like-home-20261109.css (chargé en dernier) + petites modifications de vacances.html. Mobile inchangé hormis le logo.
+
+## 09/11/2026 — Vacances : ancien bouton « Admin » retiré
+- vacances.html : bouton `#vacAdminLink` (Admin) supprimé de l'en-tête (vacances-main.js gère son absence).
+- Accès admin Vacances : tuile « Vacances » ajoutée dans Compte → Administration (admin-account-layout-20261018.js, index v=16). Déjà présent aussi dans le menu admin mobile et dans admin.html.

@@ -13,6 +13,7 @@
   var $ = function (s) { return document.querySelector(s); };
   var NS = 'http://www.w3.org/2000/svg';
   var ICONS = {
+    vacances: '<path d="M3 11.5 12 4l9 7.5"/><path d="M5 10.5V21h14V10.5"/><path d="M9 21v-6h6v6"/>',
     moderate: '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3Z"/><path d="m8.5 12 2.5 2.5 4.5-5"/>',
     flux: '<path d="M4 12a8 8 0 0 1 13.7-5.6L20 8.7"/><path d="M20 4v4.7h-4.7"/><path d="M20 12a8 8 0 0 1-13.7 5.6L4 15.3"/><path d="M4 20v-4.7h4.7"/>',
     pro: '<rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/><path d="M3 12.5h18"/>',
@@ -117,6 +118,8 @@
     grid.appendChild(tile('Pro/Pro', 'pro', clickOf('#b2bAccountBtn')));
     grid.appendChild(tile('Finances', 'finance', null, 'admin-pilotage.html'));
     grid.appendChild(tile('Prospection', 'prospect', null, 'admin-prospection.html'));
+    /* 09/11/2026 : admin Vacances (logements, hôtes, demandes) — remplace l'ancien bouton Admin de vacances.html */
+    grid.appendChild(tile('Vacances', 'vacances', null, 'admin-vacances.html'));
     /* 06/11/2026 : API partenaires (éditeurs de logiciels, clés, agences reçues) */
     grid.appendChild(tile('API partenaires', 'upload', null, 'admin-partenaires.html'));
     /* 07/11/2026 : passerelle — diffusion du stock des pros vers d'autres sites */
