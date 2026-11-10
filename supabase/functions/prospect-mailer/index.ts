@@ -1,4 +1,5 @@
 // v31 09/11/2026 : mail aperçu signé « Le Service Pros Abracadeal » (Anthony reste anonyme auprès des pros).
+// v33 10/11/2026 : « send » accepte une version mise en page (html) et le fil complet (references) ; clé interne acceptée.
 // v32 10/11/2026 : action « send » — l'admin écrit / répond depuis le CRM avec la boîte OVH choisie (copie rangée dans « Envoyés »).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026, v3 13/10/2026 (relance J+5 dans le même fil),
@@ -10,7 +11,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 //   POST {action:"test", mailbox, category, followup?, variant?} admin connecté : envoie UN message de test à l'adresse de l'admin
 //   POST {action:"run"}                     cron (clé interne) : envoie seulement si le « feu vert » est donné
 //   POST {action:"bounces", dry?, days?}    cron ou admin : lit les rebonds (IMAP) et passe les adresses mortes en « error » (v12, 30/10/2026)
-//   POST {action:"send", mailbox, to, subject, text, prospect_id?, in_reply_to?} admin connecté : mail libre depuis la boîte OVH
+//   POST {action:"send", mailbox, to, subject, text, html?, prospect_id?, in_reply_to?, references?} admin connecté (ou clé interne) : mail libre depuis la boîte OVH
 //   POST {action:"unsubscribe", u, t}       page abracadeal.fr/desinscription.html
 //   POST ?u=..&t=.. (List-Unsubscribe-Post) désinscription en un clic depuis la messagerie
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -209,7 +210,7 @@ async function variantOf(id: string, stored?: string | null) {
   const { data } = await admin.rpc("prospect_ab_variant", { p_id: id });
   return data === "B" ? "B" : "A";
 }
-async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null, annonces?: string) {
+async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null, annonces?: string, html?: string | null, references?: string | null) {
   const from = c.email;
   let body = fill(tpl.body, company, from, annonces);
   let unsubHeader = "";
@@ -222,14 +223,20 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
       `Pour ne plus recevoir nos e-mails : ${page}`;
     unsubHeader = `List-Unsubscribe: <${oneClick}>, <mailto:${from}?subject=STOP>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n`;
   }
-  const thread = inReplyTo && /^<[^<>\s]+>$/.test(inReplyTo) ? `In-Reply-To: ${inReplyTo}\r\nReferences: ${inReplyTo}\r\n` : "";
+  // v33 10/11/2026 : « References » complet du fil quand il est fourni (réponse rangée dans la bonne conversation).
+  const refs = references && /^(<[^<>\s]+>\s*)+$/.test(references.trim()) ? references.trim().replace(/\s+/g, " ") : inReplyTo;
+  const thread = inReplyTo && /^<[^<>\s]+>$/.test(inReplyTo) ? `In-Reply-To: ${inReplyTo}\r\nReferences: ${refs}\r\n` : "";
   const msgId = `<${crypto.randomUUID()}@${from.split("@")[1]}>`;
   const b = b64(body.replace(/\r?\n/g, "\r\n")).replace(/.{1,76}/g, "$&\r\n").trimEnd();
   const data =
     `From: ${encHeader(c.display_name)} <${from}>\r\nTo: <${to}>\r\nReply-To: <${from}>\r\n` +
     `Subject: ${encHeader(fill(tpl.subject, company, from, annonces).replace(/[\r\n]/g, " "))}\r\nDate: ${new Date().toUTCString().replace("GMT", "+0000")}\r\n` +
     `Message-ID: ${msgId}\r\n${thread}MIME-Version: 1.0\r\n${unsubHeader}` +
-    `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`;
+    (html
+      // v33 10/11/2026 : version mise en page (bannière Abracadeal) + version texte, pour les réponses envoyées par l'admin.
+      ? (() => { const bd = "abraca-" + crypto.randomUUID(); const h = b64(html.replace(/\r?\n/g, "\r\n")).replace(/.{1,76}/g, "$&\r\n").trimEnd();
+          return `Content-Type: multipart/alternative; boundary="${bd}"\r\n\r\n--${bd}\r\nContent-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}\r\n--${bd}\r\nContent-Type: text/html; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${h}\r\n--${bd}--`; })()
+      : `Content-Type: text/plain; charset=UTF-8\r\nContent-Transfer-Encoding: base64\r\n\r\n${b}`);
   return { data, msgId };
 }
 // v14 02/11/2026 : adresse ramassée sur le site mais qui appartient à l'hébergeur / au créateur du site / à un logiciel
@@ -423,7 +430,9 @@ Deno.serve(async (req) => {
 
   // v32 : mail libre / réponse depuis le CRM, avec la boîte OVH choisie (jamais Gmail).
   if (action === "send") {
-    const user = await requireAdmin(req);
+    // v33 10/11/2026 : aussi appelable par Claude/ChatGPT avec la clé interne (envoi validé par Anthony au préalable).
+    const internalKey = req.headers.get("x-internal-key") || "";
+    const user = internalKey ? (internalKey === await secret("prospect_crawler_internal") ? { id: "internal" } : null) : await requireAdmin(req);
     if (!user) return json({ error: "Accès réservé à l'administrateur" }, 401);
     const to = String(body.to || "").trim().toLowerCase();
     const subject = String(body.subject || "").replace(/[\r\n]/g, " ").trim().slice(0, 200);
@@ -433,7 +442,9 @@ Deno.serve(async (req) => {
     try {
       const c = await creds(String(body.mailbox || ""));
       const reply = typeof body.in_reply_to === "string" && /^<[^<>\s]+>$/.test(body.in_reply_to) ? body.in_reply_to : null;
-      const { data, msgId } = await buildMail(c, to, "", null, { subject, body: text } as Tpl, reply);
+      const html = typeof body.html === "string" && body.html.trim() ? String(body.html).slice(0, 100000) : null;
+      const refs = typeof body.references === "string" ? body.references : null;
+      const { data, msgId } = await buildMail(c, to, "", null, { subject, body: text } as Tpl, reply, undefined, html, refs);
       await smtp(c, { to, data });
       const sentCopy = await imapAppendSent(c, data);
       const pid = typeof body.prospect_id === "string" && /^[0-9a-f-]{36}$/.test(body.prospect_id) ? body.prospect_id : null;

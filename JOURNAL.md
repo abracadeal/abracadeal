@@ -1,3 +1,7 @@
+## 2026-11-10 — prospect-mailer v33 : réponse mise en page depuis partenaires@ (Claude)
+
+- Action « send » : version HTML (bannière Abracadeal) en plus du texte, fil complet (References), clé interne acceptée pour un envoi validé par Anthony. Premier usage : mail de bienvenue à Gubernatis (Lisa Lunven), en réponse à son « OK », depuis partenaires@abracadeal.com.
+
 ## 2026-11-10 — Inscription par l'admin : plus aucun mail automatique (Claude)
 
 - **Demande d'Anthony :** « les mails qui partent direct c'est pas bon ». Cas Gubernatis : mail de bienvenue parti à 13:07 (1 min après la création) avec 5 annonces (offre Fondateur pas encore active) et le texte « un véhicule ajouté apparaît » pour une agence immo ; mail d'activation Fondateur programmé +20 min.
