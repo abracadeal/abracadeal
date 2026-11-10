@@ -1,3 +1,9 @@
+## 2026-11-10 — Incident : 89 annonces Gubernatis repassées en vérification (Claude)
+
+- Cause : la mise à jour SQL de listing_contacts.phone (second numéro) a déclenché abraca_listing_contacts_edit_recheck (« Coordonnées de contact modifiées ») → 89 annonces en pending de 14:05 à ~14:12 ; « Nice » ne donnait plus rien.
+- Réparé : moderate-listing relancé sur les 89, puis remise en ligne de celles restées en attente pour ce seul motif (analyse IA faite, snapshot à jour).
+- **Règle pour Claude et ChatGPT : toute modification SQL de listing_contacts / listing_photos d’annonces en ligne doit se faire dans une transaction avec set_config('abraca.revision_write', txid_current()::text, true), sinon les annonces repassent en vérification.**
+
 ## 2026-11-10 — Gubernatis : second numéro sur les annonces (Claude)
 
 - Demande d’Anthony : ajouter 06 81 22 72 41 en plus sur les annonces Gubernatis.
