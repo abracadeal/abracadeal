@@ -1,3 +1,8 @@
+## 2026-11-10 — Recherche par ville : communes voisines + ville qui ne reste plus collée (Claude)
+
+- Constat (Anthony) : « bordeaux », « angers » ne trouvaient pas les WeeCars. Causes : (1) smart-search ne vidait jamais searchCity → la ville d’une recherche précédente restait appliquée ; (2) WeeCars Angers est aux Ponts-de-Cé, donc « angers » ne correspondait à aucune annonce ; seules 16 villes étaient reconnues comme lieu.
+- Changé : smart-search vide la ville à chaque recherche ; toute commune de France est reconnue (geo.api.gouv.fr, nom exact, mise en cache) → « Angers et alentours » ; index-main : une ville trouve aussi les annonces des communes à moins de 15 km (refreshCityNear, centres déjà mis en cache par communeCentre).
+
 ## 2026-11-10 — prospect-mailer v33 : réponse mise en page depuis partenaires@ (Claude)
 
 - Action « send » : version HTML (bannière Abracadeal) en plus du texte, fil complet (References), clé interne acceptée pour un envoi validé par Anthony. Premier usage : mail de bienvenue à Gubernatis (Lisa Lunven), en réponse à son « OK », depuis partenaires@abracadeal.com.

@@ -3811,6 +3811,7 @@ async function loadAds(){
   }
 
   allAds=loadedAds;
+  if(($('#searchCity')?.value||'').trim()){cityNearState={key:'',ids:new Set()};refreshCityNear();}
   catalogLoadedOnce=true;
   moderationRiskById.clear();
   risks.forEach((v,k)=>moderationRiskById.set(k,v));
@@ -4005,7 +4006,8 @@ function filteredAds(){
     const immoParkingOk=!immoOnly||!immoParking||realEstateHasParking(a,immoParking);
     const immoRadiusOk=!immoOnly||!immoRadiusActive||(immoRadiusState.ready&&Number(immoRadiusState.distances.get(a.id))<=immoRadius);
     const immoNearbyOk=!immoOnly||!immoNearbyFilterState.active||(immoNearbyFilterState.ready&&Number(immoNearbyFilterState.distances.get(a.id))<=immoNearbyFilterState.radius);
-    const cityOk=(!city)||(immoOnly&&immoRadiusActive?immoRadiusOk:locationHay.includes(city));
+    // 10/11/2026 (Anthony : « je tape Angers, rien, alors qu'on a WeeCars ») : une ville trouve aussi les communes voisines (15 km).
+    const cityOk=(!city)||(immoOnly&&immoRadiusActive?immoRadiusOk:(locationHay.includes(city)||(cityNearState.key===city&&cityNearState.ids.has(a.id))));
     return (!q||keywordMatches(hay,qTokens))&&cityOk&&categoryOk&&subOk&&priceMinOk&&priceMaxOk&&conditionOk&&sellerOk&&makeOk&&modelOk&&yearMinOk&&yearMaxOk&&mileageOk&&fuelOk&&immoTransactionOk&&immoPropertyTypeOk&&immoSurfaceOk&&immoRoomsOk&&immoBedroomsOk&&immoDpeOk&&immoFurnishedOk&&immoOutdoorOk&&immoParkingOk&&immoRadiusOk&&immoNearbyOk;
   });
   const sortRaw=$('#sortAds')?.value||'newest';
@@ -4194,6 +4196,27 @@ function renderRecentSearchSuggestions(){
   if(!items.length){sec.classList.add('hidden');grid.innerHTML='';return}abSetHtml(grid,items.map(a=>personalizedCard(a)).join(''));sec.classList.remove('hidden');queueMicrotask(()=>hydrateFavoriteCounts(grid));
 }
 function haversineKm(a,b){const R=6371,toRad=x=>x*Math.PI/180,dLat=toRad(b.lat-a.lat),dLon=toRad(b.lon-a.lon),la1=toRad(a.lat),la2=toRad(b.lat);const h=Math.sin(dLat/2)**2+Math.cos(la1)*Math.cos(la2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(h))}
+/* 10/11/2026 : ville recherchée → annonces des communes voisines (centre à moins de CITY_NEAR_KM). Calcul en tâche de fond,
+   la liste se redessine quand les distances sont prêtes (centres des communes gardés sur le téléphone). */
+const CITY_NEAR_KM=15;
+let cityNearState={key:'',ids:new Set()},cityNearRun=0;
+async function refreshCityNear(){
+  const q=($('#searchCity')?.value||'').trim().toLowerCase();
+  const run=++cityNearRun;
+  if(!q){cityNearState={key:'',ids:new Set()};return;}
+  if(cityNearState.key===q)return;
+  try{
+    const postal=/^\d{5}$/.test(q)?q:'';
+    const center=await communeCentre(postal?'':q,postal);
+    if(!center||run!==cityNearRun)return;
+    const unique=new Map();(allAds||[]).forEach(a=>{if(!a.city&&!a.postal_code)return;const k=`${a.postal_code||''}|${a.city||''}`;if(!unique.has(k))unique.set(k,{city:a.city,postal:a.postal_code,ids:[]});unique.get(k).ids.push(a.id);});
+    const ids=new Set();
+    await Promise.all([...unique.values()].map(async v=>{try{const c=await communeCentre(v.city,v.postal);if(c&&haversineKm(center,c)<=CITY_NEAR_KM)v.ids.forEach(id=>ids.add(id));}catch{}}));
+    if(run!==cityNearRun)return;
+    cityNearState={key:q,ids};
+    renderAds();
+  }catch(e){console.warn('Communes voisines',e)}
+}
 async function communeCentre(city,postal){
   const cityNorm=String(city||'').trim().toLowerCase();const postalNorm=String(postal||'').trim();const key=`abracadeal-centre:v2:${postalNorm}:${cityNorm}`;try{const c=JSON.parse(localStorage.getItem(key)||'null');if(c?.lat&&c?.lon)return c}catch{}
   if(cityNorm==='monaco' || postalNorm.startsWith('980')){const out={lat:43.7384,lon:7.4246};try{localStorage.setItem(key,JSON.stringify(out))}catch{}return out;}
@@ -6031,6 +6054,7 @@ $('#searchBtn').addEventListener('click',async()=>{
   await loadAds();document.querySelector('#resultats').scrollIntoView({behavior:'smooth'});
 });
 ['#searchQuery','#searchCity'].forEach(sel=>$(sel).addEventListener('keydown',e=>{if(e.key==='Enter')$('#searchBtn').click()}));
+$('#searchCity')?.addEventListener('change',()=>{refreshCityNear();});
 $('#nearbySearchBtn')?.addEventListener('click',requestNearby);
 document.querySelectorAll('.category-link').forEach(a=>a.addEventListener('click',e=>{
   e.preventDefault();navigateCatalogue(a.dataset.category||'',a.dataset.sub||'');

@@ -56,6 +56,27 @@ function resetCatalogueScope(){
  try{if(typeof activeVehicleSubcategory!=='undefined')activeVehicleSubcategory='';}catch(_){}
  apply('filterCategory','');
  apply('filterSubcategory','');
+ // 10/11/2026 : la ville d'une recherche précédente ne reste plus collée (« bordeaux » puis « angers » donnait 0 résultat).
+ apply('searchCity','');
+}
+/* 10/11/2026 : n'importe quelle commune de France (pas seulement la liste ci-dessus) est reconnue comme lieu,
+   via geo.api.gouv.fr (gratuit) : « angers », « pau », « saint-malo »… Résultat gardé sur le téléphone. */
+const communeCache=new Map();
+async function communeOf(text){
+ const t=fold(text).replace(/[^a-z0-9\s'-]/g,' ').replace(/\s+/g,' ').trim();
+ if(!t||t.length<3||/\d/.test(t)||t.split(' ').length>4)return null;
+ if(communeCache.has(t))return communeCache.get(t);
+ let hit=null;
+ try{const k='abraca-commune:'+t;const c=localStorage.getItem(k);if(c!==null){hit=c||null;communeCache.set(t,hit);return hit;}}catch(_){}
+ try{
+  const r=await fetch('https://geo.api.gouv.fr/communes?nom='+encodeURIComponent(t)+'&boost=population&fields=nom,population&limit=5');
+  const arr=r.ok?await r.json():[];
+  const norm=x=>fold(x).replace(/[-']/g,' ').replace(/\s+/g,' ').trim();
+  const best=(Array.isArray(arr)?arr:[]).find(x=>norm(x.nom)===norm(t));
+  hit=best?best.nom:null;
+ }catch(_){return null}
+ communeCache.set(t,hit);try{localStorage.setItem('abraca-commune:'+t,hit||'')}catch(_){}
+ return hit;
 }
 function init(){
  const query=$('searchQuery'),search=$('searchBtn');
@@ -83,8 +104,18 @@ function init(){
   if(f.brand)apply('filterVehicleMake',f.brand);
   if(f.city)apply('searchCity',f.city);
   query.value=f.query;
+  if(!f.city&&f.query&&!f.category&&!f.brand){
+   const asked=f.query;
+   communeOf(asked).then(nom=>{
+    if(!nom||query.value!==asked)return;
+    apply('searchCity',nom.toLowerCase());
+    query.value='';query.dispatchEvent(new Event('input',{bubbles:true}));
+    info.textContent='✦ Critères reconnus : '+nom+' et alentours';
+    try{renderAds()}catch(_){}
+   });
+  }
   const labels=[f.category,f.brand,f.city,f.maxPrice?'≤ '+f.maxPrice.toLocaleString('fr-FR')+' €':'',f.maxKm?'≤ '+f.maxKm.toLocaleString('fr-FR')+' km':'',f.minArea?'≥ '+f.minArea+' m²':''].filter(Boolean);
-  info.textContent=labels.length?'✦ Critères reconnus : '+labels.join(' · ')+(f.query?' · Mots-clés : '+f.query:''):'';
+  info.textContent=labels.length?'✦ Critères reconnus : '+labels.map(x=>x===f.city?x+' et alentours':x).join(' · ')+(f.query?' · Mots-clés : '+f.query:''):'';
  },true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
