@@ -305,7 +305,15 @@ Deno.serve(async(req)=>{
     const{error:moderationError}=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,checked_at:new Date().toISOString(),engine,ai_checked:true,reused_photo_count:reusedPhotos,auto_published:autoPublished},{onConflict:'listing_id'});
     if(moderationError)throw moderationError;
 
-    if(listing.revision_of&&riskLevel==='green'&&!qualityCheck){
+    /* 10/11/2026 (Anthony) : une annonce déjà validée (même numéro) ne repasse plus en modération humaine.
+       La nouvelle version payante d'un particulier est publiée dès que l'analyse de sécurité est passée,
+       sauf risque rouge (contenu interdit, photos d'un autre compte…) qui reste pour l'admin. */
+    let originalValidated=false;
+    if(listing.revision_of){
+      const {data:orig}=await admin.from('listings').select('first_validated_at').eq('id',listing.revision_of).maybeSingle();
+      originalValidated=!!orig?.first_validated_at;
+    }
+    if(listing.revision_of&&((riskLevel==='green'&&!qualityCheck)||(originalValidated&&riskLevel!=='red'&&extraTier<2))){
       await publishPhotos(admin,listing,photos);
       const r=await admin.rpc('complete_listing_revision',{p_candidate_id:listing.id,p_approve:true});if(r.error)throw r.error;
     }
