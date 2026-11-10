@@ -1,4 +1,5 @@
 ## 10/11/2026 — Claude : bouton « Continuer avec Facebook » masqué
+- 16:54 : app Meta passée en Live (infos DPO + URL suppression renseignées par Anthony) → bouton Facebook réactivé (`PAUSED` vide).
 - confidentialite.html : section `#suppression-donnees` ajoutée (URL d'instructions de suppression exigée par Meta pour le mode Live).
 - Test d'Anthony : Facebook répond « Application inactive » (app Meta « Abracadeal » encore en mode Développement). Bouton Facebook masqué dans `assets/social-login-20261018.js` (constante `PAUSED`) ; Google inchangé. À réactiver en retirant 'facebook' de `PAUSED` une fois l'app Meta passée en Live.
 
