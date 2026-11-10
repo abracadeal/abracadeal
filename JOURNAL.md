@@ -1,3 +1,7 @@
+## 2026-11-10 — Démos supprimées (Claude, Anthony : « oui et les autres démos »)
+
+- Dossier demo/ supprimé (gubernatis, infinity, centurion-motors) et liens private.demo_preview_links effacés (Gubernatis + Infinity). Les aperçus prospects (prospect_previews) restent, ils servent aux mails de prospection.
+
 ## 2026-11-10 — Recherche par ville : communes voisines + ville qui ne reste plus collée (Claude)
 
 - Constat (Anthony) : « bordeaux », « angers » ne trouvaient pas les WeeCars. Causes : (1) smart-search ne vidait jamais searchCity → la ville d’une recherche précédente restait appliquée ; (2) WeeCars Angers est aux Ponts-de-Cé, donc « angers » ne correspondait à aucune annonce ; seules 16 villes étaient reconnues comme lieu.
