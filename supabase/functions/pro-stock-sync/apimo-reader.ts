@@ -4,7 +4,7 @@ import { sDecode } from './smart-reader.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
 const text=(s:string)=>sDecode(s.replace(/<br\s*\/?>|<\/(?:p|li|div|h[1-6])>/gi,'\n').replace(/<[^>]*>/g,' ')).replace(/[ \t\u00a0\u202f]+/g,' ').split('\n').map(x=>x.trim()).filter(Boolean).join('\n');
 const num=(s:string)=>s.replace(/[\s\u00a0\u202f]/g,'').replace(',','.');
-export const isApimoModules=(html:string)=>/apimo\.net\/[^"']*site-internet/i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes)\/?"/i.test(html);
+export const isApimoModules=(html:string)=>/apimo\.net\//i.test(html)&&/data-model-namespace=/i.test(html)&&/href="(?:https?:\/\/[^/]+)?\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes)\/?"/i.test(html);
 // Les lettres sont dessinées en tracés SVG. Lire la couleur de la ligne agrandie et encadrée,
 // pas une classe déduite de seuils numériques ni la légende complète A→G.
 export function apimoDiagnostic(svg:string){
@@ -18,7 +18,7 @@ export function apimoDiagnostic(svg:string){
 }
 export function parseApimoDetail(raw:string,url:string){
   const html=raw.replace(/<(script|style)\b[^>]*>[\s\S]*?<\/\1>/gi,'');
-  const id=new URL(url).pathname.match(/\+(\d+)\/?$/)?.[1];if(!id)return null;
+  const id=new URL(url).pathname.match(/(?:\+|\/)(\d{5,})\/?$/)?.[1];if(!id)return null;
   const modules=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi);
   const module=(name:string)=>modules.find(x=>new RegExp('class="[^"]*\\b'+name+'\\b').test(x))||'';
   const info=module('property-info-template-2')||module('property-info-template-12')||module('property-info-template-19')||module('property-info-template-41');
@@ -35,10 +35,10 @@ export function parseApimoDetail(raw:string,url:string){
   const infoText=text(info);const price=(variant41?text(main):infoText).match(/(\d[\d \t\u00a0\u202f.,]*)[ \t\u00a0\u202f]*€/);
   // Les données structurées doivent appartenir au bien, jamais à l'adresse de l'agence.
   let property:any=null;for(const m of raw.matchAll(/<script\b[^>]*type="application\/ld\+json"[^>]*>([\s\S]*?)<\/script>/gi)){try{const j=JSON.parse(m[1]);const nodes=Array.isArray(j)?j:j['@graph']||[j];const listing=nodes.find((x:any)=>x['@type']==='RealEstateListing'&&(String(x.about?.identifier)===id||(()=>{try{return new URL(x.url).pathname===new URL(url).pathname;}catch{return false;}})()));if(listing)property=listing.about;}catch{}}
-  const route=url.match(/\/propriete\/(?:vente|location)\+([^+]+)\+([^+]+)/);
+  const route=url.match(/\/propriete\/(?:vente|location)(?:\+([^+]+)\+|\/([^/]+)\/)/);
   const ville=property?.address?.addressLocality|| (variant41?text(main.match(/<h2\b[^>]*class="city"[^>]*>([\s\S]*?)<\/h2>/i)?.[1]||''):variant19?(property?.address?.addressLocality||text(info.match(/<h1\b[^>]*>[\s\S]*?<span\b[^>]*>([\s\S]*?)<\/span>/i)?.[1]||'')):variant12?(property?.address?.addressLocality||text(info.match(/class="title property-title-12"[^>]*>([\s\S]*?)<\/h\d>/i)?.[1]||'').replace(/^(?:Vente|Location)\s+\S+\s+/i,'')):(p[p.length-1]||''));
   if(!titre||!description||!ville)return null;
-  const o:any={reference:id,url,titre,description,ville,transaction:/\/location\+/.test(url)?'location':'vente',type_bien:p[1]&&/^(?:appartement|maison|villa|terrain|immeuble|parking|garage|bureau|local|commerce|studio|loft|château|propriété|hôtel)\b/i.test(p[1])?p[1]:route?decodeURIComponent(route[1]):'',texte_page:text(summary+' '+legal)};
+  const o:any={reference:id,url,titre,description,ville,transaction:/\/location(?:\+|\/)/.test(url)?'location':'vente',type_bien:p[1]&&/^(?:appartement|maison|villa|terrain|immeuble|parking|garage|bureau|local|commerce|studio|loft|château|propriété|hôtel)\b/i.test(p[1])?p[1]:route?decodeURIComponent(route[1]||route[2]):'',texte_page:text(summary+' '+legal)};
   if(price)o.prix=num(price[1]); // « Prix sur demande » : conserver la fiche, sans inventer de montant.
   if(property?.address?.postalCode)o.code_postal=String(property.address.postalCode);
   // Le module utilisateur de la fiche désigne son conseiller ; ne pas lire l'équipe du pied de page.
@@ -100,24 +100,26 @@ export function parseApimoDetail(raw:string,url:string){
   return o;
 }
 export async function readApimoModules(start:URL,home:string,fetchHtml:Fetcher,memory?:CrawlMemory,fallback?:(html:string,url:string)=>any){
-  if(/\/propriete\/[^/]+\+\d+\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
+  if(/\/propriete\/(?:[^/]+\+\d+|(?:vente|location)\/[^?#]+\/\d{5,}|\d{5,})\/?$/.test(start.pathname)){const row=parseApimoDetail(home,start.toString());return row?[row]:[];}
   const root=new URL(start.origin);const links=[...home.matchAll(/href="([^"]+)"/gi)].map(m=>{try{return new URL(sDecode(m[1]),start);}catch{return null;}}).filter((u):u is URL=>!!u&&u.hostname===start.hostname);
   // 01/11/2026 (Anthony, Solution Immobilier : « manque les biens à vendre ») : certaines agences appellent la liste des ventes « nos-biens » / « nos-proprietes ».
   const bases=[...new Set(links.filter(u=>/^\/[a-z]{2}\/(?:ventes?|locations?|acheter|louer|nos-biens|nos-proprietes|biens|proprietes|annonces)\/?$/.test(u.pathname)).map(u=>u.origin+u.pathname))];
   if(!bases.length&&!links.some(u=>{let p=u.pathname;try{p=decodeURIComponent(p);}catch{}return /^\/[a-z]{2}\/propri[ée]t[ée]\//.test(p);}))throw Error('Listes actives de vente/location Apimo introuvables.');
-  const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0;
+  const queue=[...bases],seen=new Set<string>(),details=new Map<string,string>();let partial=false,pages=0,expected:number|null=null;
   while(queue.length&&pages<40){const next=queue.shift()!;if(seen.has(next))continue;seen.add(next);let html='';try{html=(await fetchHtml(new URL(next))).text;}catch{partial=true;continue;}pages++;
+    if(bases.length===1&&new URL(next).pathname===start.pathname){const count=text(html).match(/R[ée]sultats recherches\s*(\d+)/i);if(count)expected=Number(count[1]);}
     let list=html.split(/(?=<div\b[^>]*\bdata-module-id=)/gi).filter(x=>/\bmodule-listing\b/.test(x)).join('');
     /* 02/11/2026 (Dana, Gambetta) : liste sans module « listing » reconnu → liens de toute la page (les pages « vendus » ne sont pas dans les listes suivies) */if(!list)list=html;
     for(const m of list.matchAll(/href="([^"]+)"/gi)){let u:URL;try{u=new URL(sDecode(m[1]),next);}catch{continue;}u.hash='';if(u.hostname!==start.hostname)continue;
-      let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}/* 02/11/2026 (Gambetta « /fr/propriété/86167598 ») : adresse de fiche sans « vente+… », avec accents */const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)\+[^/]+\+)?(\d{5,})\/?$/)?.[1];if(id){u.search='';details.set(id,u.toString());}
+      let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}/* 02/11/2026 (Gambetta « /fr/propriété/86167598 ») : adresse de fiche sans « vente+… », avec accents */const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)(?:\+[^/]+\+|\/[^?#]+\/))?(\d{5,})\/?$/)?.[1];if(id){u.search='';details.set(id,u.toString());}
       else if(bases.some(b=>u.origin+u.pathname===b)&&/^\d+$/.test(u.searchParams.get('page')||'')&&!seen.has(u.toString())&&!queue.includes(u.toString()))queue.push(u.toString());}
   }
   if(queue.length)partial=true;
+  if(expected!==null&&details.size!==expected)partial=true;
   /* 02/11/2026 (Dana Immobilier : pas de page « ventes », les biens à vendre sont sur l'accueil) : fiches liées depuis la page de départ aussi */
-  for(const u of links){let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)\+[^/]+\+)?(\d{5,})\/?$/)?.[1];if(id&&!details.has(id)){const c=new URL(u.toString());c.search='';c.hash='';details.set(id,c.toString());}}
+  for(const u of links){let pth=u.pathname;try{pth=decodeURIComponent(pth);}catch{}const id=pth.match(/^\/[a-z]{2}\/propri[ée]t[ée]\/(?:(?:vente|location)(?:\+[^/]+\+|\/[^?#]+\/))?(\d{5,})\/?$/)?.[1];if(id&&!details.has(id)){const c=new URL(u.toString());c.search='';c.hash='';details.set(id,c.toString());}}
   const entries=[...details.entries()];const ids=new Map(entries.map(([id,u])=>[String(u),id]));
   // 01/11/2026 : lecture des fiches par étapes mémorisée.
   const rows:any=await eachDetailResumable('apimo-v1:'+start.hostname,entries.map(e=>String(e[1])),async url=>{const{text}=await fetchHtml(new URL(url));/* 02/11/2026 (duo-immo : modèle de fiche Apimo inconnu → fiches vides « Appartement · Martigues ») : lecture des données structurées de la fiche à la place */let row=parseApimoDetail(text,url);if(!row&&fallback){const f=fallback(text,url);if(f?.titre&&f?.prix){row={...f,url,reference:ids.get(url)||f.reference};for(const m of text.matchAll(/data:image\/svg\+xml;base64,([^"')]+)/gi)){try{const svg=new TextDecoder().decode(Uint8Array.from(atob(m[1]),c=>c.charCodeAt(0)));const d=apimoDiagnostic(svg);if(d.kind&&d.letter&&!row[d.kind])row[d.kind]=d.letter;if(d.kind==='dpe'&&d.values[0]&&!row.consommation_energie)row.consommation_energie=d.values[0];}catch{}}}}if(!row)partial=true;return row||{reference:ids.get(url),url};},memory);partial=partial||rows.partial;
-  (rows as any).partial=partial;(rows as any).total=details.size;(rows as any).stats={pages,details:details.size,read:rows.length};return rows;
+  (rows as any).partial=partial;(rows as any).total=details.size;(rows as any).stats={...rows.stats,pages,details:details.size,read:rows.length,expected_total:expected,total_mismatch:expected!==null&&details.size!==expected};return rows;
 }
