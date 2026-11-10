@@ -1,4 +1,6 @@
 ## 10/11/2026 — Claude : bouton « Continuer avec Facebook » masqué
+- Règle (Anthony + Claude) : tout nouveau moyen de connexion ou de paiement doit être testé de bout en bout avec un vrai compte AVANT d'être affiché aux visiteurs (le bouton Facebook était visible depuis le 18/10 alors que l'app Meta était en mode Développement).
+- Test 17:00 : connexion Facebook OK ; même e-mail qu'un compte existant → identité Facebook rattachée au compte existant (pas de doublon). Identité Facebook de test retirée du compte d'Anthony ensuite.
 - 16:54 : app Meta passée en Live (infos DPO + URL suppression renseignées par Anthony) → bouton Facebook réactivé (`PAUSED` vide).
 - confidentialite.html : section `#suppression-donnees` ajoutée (URL d'instructions de suppression exigée par Meta pour le mode Live).
 - Test d'Anthony : Facebook répond « Application inactive » (app Meta « Abracadeal » encore en mode Développement). Bouton Facebook masqué dans `assets/social-login-20261018.js` (constante `PAUSED`) ; Google inchangé. À réactiver en retirant 'facebook' de `PAUSED` une fois l'app Meta passée en Live.
