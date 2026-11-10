@@ -11,7 +11,7 @@
   "path": "garage/signature-motors-group-weecars-les-ponts-de-ce",
   "name": "WeeCars Angers",
   "city": "Les Ponts-de-Cé",
-  "count": 125,
+  "count": 127,
   "active": true,
   "short": "weecars-angers"
  },
@@ -37,6 +37,14 @@
   "count": 92,
   "active": true,
   "short": "weecars-bordeaux-est"
+ },
+ "e3505c22-ebe6-4a7b-ba1a-099a5d63778c": {
+  "path": "immo/cabinet-merengone-et-associes-gubernatis-immobilier-nice",
+  "name": "Cabinet Merengone Et Associes (gubernatis Immobilier)",
+  "city": "Nice",
+  "count": 89,
+  "active": true,
+  "short": "gubernatis-immobilier"
  },
  "eb9ad657-664b-457a-b4c1-1fd85f5c4737": {
   "path": "garage/weecars-brest-brest",
