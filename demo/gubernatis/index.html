@@ -29,9 +29,9 @@ const app=document.getElementById('app');
 const sb=window.supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
 const esc=s=>String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]));
 const initials=name=>String(name||'PRO').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase()||'PRO';
-const TYPES={'vente-appartement':'Appartement','vente-maison':'Maison','vente-terrain':'Terrain','location':'Location','bureaux-commerces':'Bureaux / Commerces','parking-garage':'Parking / Garage'};
+const TYPES={'vente-appartement':'Appartement','vente-maison':'Maison','vente-terrain':'Terrain','location':'Location','saisonniere':'Location saisonnière','bureaux-commerces':'Bureaux / Commerces','parking-garage':'Parking / Garage'};
 let name='',city='',listings=[],filtered=[],shown=24,isFollowing=false,followerCount=0;
-function money(l){if(l.price==null||l.price==='')return 'Prix non renseigné';const s=Number(l.price).toLocaleString('fr-FR')+' €';return l.sub==='location'?s+' / mois':s;}
+function money(l){if(l.price==null||l.price==='')return 'Prix non renseigné';const s=Number(l.price).toLocaleString('fr-FR')+' €';return (l.priceFrom?'À partir de ':'')+s+(l.pricePeriod?' / '+l.pricePeriod:(l.transaction==='location'||l.sub==='location'?' / mois':''));}
 function fail(){app.innerHTML='<div class="error"><h1>Aperçu indisponible</h1><p>Ce lien d’aperçu n’est pas valide ou a expiré.</p><a href="/">Découvrir Abracadeal</a></div>';}
 function renderShell(){
   document.title=name+' · Showroom Abracadeal';
@@ -74,7 +74,7 @@ function renderCards(){
   const {data,error}=await sb.rpc('get_demo_preview',{p_token:k});
   if(error||!data){fail();return}
   name=data.name;city=data.city||'';
-  listings=(data.rows||[]).map(r=>({title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,rooms:r.r,sub:r.sub||'',photo:r.ph||''}));
+  listings=(data.rows||[]).map(r=>({title:r.t||'Bien immobilier',price:r.p,city:r.c||'',transaction:r.tr,pricePeriod:r.pe,priceFrom:r.pf,surface:r.s,rooms:r.r,sub:r.sub||'',photo:r.ph||''}));
   renderShell();
 })().catch(fail);
 </script>

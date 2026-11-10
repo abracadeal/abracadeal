@@ -336,11 +336,11 @@ function dmInitials(name){
 }
 
 var sb=window.supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co','sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
-var TYPES={'vente-appartement':'Appartement','vente-maison':'Maison','vente-terrain':'Terrain','location':'Location','bureaux-commerces':'Bureaux / Commerces','parking-garage':'Parking / Garage'};
+var TYPES={'vente-appartement':'Appartement','vente-maison':'Maison','vente-terrain':'Terrain','location':'Location','saisonniere':'Location saisonnière','bureaux-commerces':'Bureaux / Commerces','parking-garage':'Parking / Garage'};
 var ADS=[],LIST=[],shown=24;
 function $(s){return document.querySelector(s)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(m){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]})}
-function money(a){if(a.price==null)return 'Prix non communiqué';var t=Number(a.price).toLocaleString('fr-FR')+' €';return a.sub==='location'?t+' / mois':t}
+function money(a){if(a.price==null)return 'Prix non communiqué';var t=Number(a.price).toLocaleString('fr-FR')+' €';return (a.priceFrom?'À partir de ':'')+t+(a.pricePeriod?' / '+a.pricePeriod:(a.transaction==='location'||a.sub==='location'?' / mois':''))}
 function openModal(id){var el=document.getElementById(id);el.classList.add('open');el.setAttribute('aria-hidden','false');var b=el.querySelector('.modal-body');if(b)b.scrollTop=0;document.body.style.overflow='hidden';}
 function closeModal(id){var el=document.getElementById(id);el.classList.remove('open');el.setAttribute('aria-hidden','true');document.body.style.overflow='';}
 document.addEventListener('click',function(e){var c=e.target.closest('[data-close]');if(c){e.preventDefault();closeModal(c.getAttribute('data-close'));}});
@@ -368,7 +368,7 @@ window.changeDetailPhoto=function(d){if(cur)selectDetailPhoto((idx+d+cur.photos.
 window.demoOnly=function(btn,txt){btn.textContent=txt||'Disponible une fois en ligne';};
 window.openAd=function(i){
  var a=ADS[i];if(!a)return;
- cur=a;idx=0;var info=[['Type de bien',TYPES[a.sub]||'Immobilier']].concat(a.surface?[['Surface',Number(a.surface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat(a.landSurface?[['Terrain',Number(a.landSurface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat((a.roomAreas||[]).map(function(x){var at=x.indexOf(':');return at<0?['Surface détaillée',x]:[x.slice(0,at).trim(),x.slice(at+1).trim()]})).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat(a.bedrooms?[['Chambres',String(a.bedrooms)]]:[]).concat(a.charges?[['Charges annuelles',eur(a.charges)]]:[]).concat(a.fees?[['Honoraires',String(a.fees)]]:[]).concat([['Ville',a.city]]);
+ cur=a;idx=0;var info=[['Type de bien',TYPES[a.sub]||'Immobilier'],['Transaction',a.transaction==='saisonniere'?'Location saisonnière':a.transaction==='location'?'Location':'Vente']].concat(a.surface?[['Surface',Number(a.surface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat(a.landSurface?[['Terrain',Number(a.landSurface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat((a.roomAreas||[]).map(function(x){var at=x.indexOf(':');return at<0?['Surface détaillée',x]:[x.slice(0,at).trim(),x.slice(at+1).trim()]})).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat(a.bedrooms?[['Chambres',String(a.bedrooms)]]:[]).concat(a.charges?[['Charges annuelles',eur(a.charges)]]:[]).concat(a.fees?[['Honoraires',String(a.fees)]]:[]).concat([['Ville',a.city]]);
  var thumbs=a.photos.length>1?'<div class="detail-thumbs">'+a.photos.map(function(u,k){return '<button type="button" class="'+(k===0?'active':'')+'" onclick="selectDetailPhoto('+k+')"><img src="'+esc(u)+'" alt="Photo '+(k+1)+'" loading="lazy"></button>'}).join('')+'</div>':'';
  $('#detailBody').innerHTML=
  '<div class="listing-detail dm-has-actions">'
@@ -391,7 +391,7 @@ window.openAd=function(i){
  var k=new URLSearchParams(location.search).get('k')||'';
  var res=k?await sb.rpc('get_demo_preview',{p_token:k}):{data:null};
  if(!res||!res.data){$('#resultSubtitle').textContent='Ce lien d’aperçu n’est pas valide ou a expiré.';return}
- ADS=(res.data.rows||[]).map(function(r,i){var pp=(r.pp&&r.pp.length?r.pp:(r.ph?[r.ph]:[]));return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,landSurface:r.ls,roomAreas:r.ra||[],rooms:r.r,bedrooms:r.ch,sub:r.sub||'',photo:r.ph||pp[0]||'',photos:pp,dpe:r.d,ges:r.g,fees:r.fe,charges:r.ac,desc:r.de||''}});
+ ADS=(res.data.rows||[]).map(function(r,i){var pp=(r.pp&&r.pp.length?r.pp:(r.ph?[r.ph]:[]));return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',transaction:r.tr,pricePeriod:r.pe,priceFrom:r.pf,surface:r.s,landSurface:r.ls,roomAreas:r.ra||[],rooms:r.r,bedrooms:r.ch,sub:r.sub||'',photo:r.ph||pp[0]||'',photos:pp,dpe:r.d,ges:r.g,fees:r.fe,charges:r.ac,desc:r.de||''}});
  LIST=ADS.slice();
  $('#demoProLine').textContent='Agence immobilière · Nice · '+ADS.length+' biens';
  $('#resultSubtitle').textContent=ADS.length+' biens · touchez une annonce pour l’ouvrir';

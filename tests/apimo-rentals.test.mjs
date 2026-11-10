@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {parseApimoDetail,readApimoModules} from '../supabase/functions/pro-stock-sync/apimo-reader.ts';
+const origin='https://gubernatis-immobilier.com';
+const fixture=fs.readFileSync(new URL('./fixtures/gubernatis-property-87563806.html',import.meta.url),'utf8');
+const season=origin+'/fr/propriete/location-saisonniere/appartement/valdeblore/bien/87563806';
+const seasonal=parseApimoDetail(fixture.replaceAll('245 000 €','À partir de 700 € / Semaine'),season);
+assert.equal(seasonal.transaction,'saisonniere');assert.equal(seasonal.type_bien,'appartement');assert.equal(seasonal.prix,'700');assert.equal(seasonal.prix_periode,'semaine');assert.equal(seasonal.prix_a_partir,true);
+const home='<a href="https://apimo.net/fr/">Apimo</a><div data-model-namespace="x"><a href="/fr/nos-biens">Biens</a></div><select name="search-form-1[search][category]"><option value="Location|2">Location</option></select>';
+const sold=origin+'/fr/propriete/location/appartement/nice/ancien/80000999';
+const rentalRoutes=Array.from({length:5},(_,i)=>origin+'/fr/propriete/'+(i===4?'location-saisonniere':'location')+'/appartement/nice/bien/'+(80000084+i));
+let visited=[];
+const rows=await readApimoModules(new URL(origin+'/fr/nos-biens'),home,async u=>{
+ visited.push(u.href);let text='';
+ if(u.pathname==='/sitemap.xml')text='<sitemapindex><loc>'+origin+'/sitemap-1.xml</loc></sitemapindex>';
+ else if(u.pathname==='/sitemap-1.xml')text='<urlset><loc><![CDATA['+origin+'/fr/locations]]></loc><loc>'+sold+'</loc><loc>https://other.fr/fr/locations</loc><loc>'+origin+'/en/locations</loc></urlset>';
+ else if(u.pathname==='/fr/locations')text='<div data-module-id="1" class="module-listing">'+rentalRoutes.map(x=>'<a href="'+x+'">Bien</a>').join('')+'</div>';
+ else if(u.pathname==='/fr/nos-biens')text='<h2>Résultats recherches 84</h2><div data-module-id="1" class="module-listing">'+Array.from({length:84},(_,i)=>'<a href="/fr/propriete/vente/appartement/nice/bien/'+(80000000+i)+'">Bien</a>').join('')+'</div>';
+ else text=fixture.replaceAll('87563806',u.pathname.match(/(\d+)$/)[1]);
+ return {url:u,text};
+});
+assert.equal(rows.length,89);assert.equal(rows.partial,false);assert.equal(rows.stats.source_counter,84);assert.equal(rows.stats.supplemental_details,5);assert.equal(rows.stats.expected_total,89);assert.ok(!visited.includes(sold));assert.ok(!visited.some(x=>x.includes('/en/')||x.includes('other.fr')));assert.equal(rows.filter(r=>r.transaction==='location').length,4);assert.equal(rows.filter(r=>r.transaction==='saisonniere').length,1);
+console.log('Apimo rentals: current catalogues from sitemap only, 84+4+1, no stale/sold sitemap properties, seasonal period preserved');
