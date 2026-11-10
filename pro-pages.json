@@ -11,7 +11,7 @@
   "path": "garage/signature-motors-group-weecars-les-ponts-de-ce",
   "name": "WeeCars Angers",
   "city": "Les Ponts-de-Cé",
-  "count": 127,
+  "count": 131,
   "active": true,
   "short": "weecars-angers"
  },
@@ -34,7 +34,7 @@
   "path": "garage/auto-negoce-bordeaux-33-artigues-pres-bordeaux",
   "name": "WeeCars Bordeaux Est",
   "city": "Artigues-Près-Bordeaux",
-  "count": 92,
+  "count": 91,
   "active": true,
   "short": "weecars-bordeaux-est"
  },
