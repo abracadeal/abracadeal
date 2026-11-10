@@ -10,3 +10,5 @@ const {lautreDiagnosticImages}=await import('../supabase/functions/pro-stock-syn
 console.log('L’Autre: complete multi-paragraph/list description, scoped diagnostic exclusion and legacy connector-to-box C/B labels OK');
 
 assert.equal(parseLautre(load('3064'),second.details[0]).dpe,'E');assert.equal(parseLautre(load('3151'),list.details[3]).charges_annuelles,2616);assert.equal(parseLautre(load('3212').replace('A vendre appartement de 88 m2 aux Ulis</h1>','A vendre appartement de 88 m2 aux Ulis (sous offre acceptée)</h1>'),u)._sold,1);
+
+assert.equal(parseLautre(load('3212').replace('A vendre appartement de 88 m2 aux Ulis</h1>','Appartement 4 pièces à vendre à Palaiseau</h1>'),u).ville,'Palaiseau');
