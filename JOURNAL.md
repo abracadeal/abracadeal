@@ -1,3 +1,14 @@
+## 2026-11-10 — Démo showroom Gubernatis Immobilier (Nice) (Claude)
+
+- Demande d'Anthony : aperçu showroom à préparer pour Gubernatis Immobilier (Lisa Lunven a demandé si Abracadeal est compatible Apimo). RIEN envoyé à l'agence (consigne d'Anthony « n'envoie rien pour l'instant »).
+- Lecture à blanc après la réparation ChatGPT (v333) : requête 4470, 84/84 lues, 7 pages, uniquement /fr/, 0 doublon, cycle_complete=true. 83 biens en aperçu (villa Saint-Jean-Cap-Ferrat sans prix exclue de l'aperçu), 51 DPE.
+- prospect_previews (prospect b25b0f4c…) rempli avec les 83 biens, count=84 ; « Levens » corrigé en « Tourrette-Levens » dans la démo seulement (le normaliseur reste à corriger).
+- private.demo_preview_links : token mAD1DTJCpkUvv06A, expire le 09/01/2027.
+- Pages demo/gubernatis/index.html (showroom) et client.html (vue acheteur), copiées de demo/infinity. Liens :
+  https://abracadeal.fr/demo/gubernatis/?k=mAD1DTJCpkUvv06A
+  https://abracadeal.fr/demo/gubernatis/client.html?k=mAD1DTJCpkUvv06A
+- À faire si l'agence dit OK : import normal via le robot, puis supprimer la démo.
+
 ## 2026-11-10 — Gubernatis : 84/84 résultats lus, programme neuf inclus (ChatGPT)
 
 - Demande directe d’Anthony : environ 85 annoncés, seulement une trentaine lus. Version v329 initiale : 32 lus, types appartement erronément maison et aucun DPE/GES. Le détecteur imposait un lien fournisseur /site-internet absent de ce modèle Cello et le lecteur spécialisé ne reconnaissait pas les routes /propriete/vente/type/ville/slug/id.
