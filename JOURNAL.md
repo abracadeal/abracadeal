@@ -1,3 +1,9 @@
+## 2026-11-10 — Gubernatis : second numéro sur les annonces (Claude)
+
+- Demande d’Anthony : ajouter 06 81 22 72 41 en plus sur les annonces Gubernatis.
+- Nouvelle table pro_contact_settings (listing_phone, RLS : le pro lit, l’admin gère). Gubernatis : +33681227241 ; listing_contacts.phone mis à jour sur les 89 annonces. « Voir le numéro » affiche « Conseiller · 06 81 22 72 41 » puis « Agence · 04 93 44 92 36 » (get_listing_contact_details existant).
+- pro-stock-sync : upsertContact prend listing_phone pour les nouvelles annonces (avant le numéro du profil).
+
 ## 2026-11-10 — Location saisonnière séparée de Vacances (Claude)
 
 - Demande d’Anthony : « sépare location saisonnière de vacances ! Vacances ce sera vraiment une section comme Airbnb ».
