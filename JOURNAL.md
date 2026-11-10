@@ -1,3 +1,10 @@
+## 2026-11-10 — Gubernatis : parcours Apimo complet en cours de vérification (ChatGPT)
+
+- Demande directe d’Anthony : environ 85 annoncés, seulement une trentaine lus. Version v329 initiale : 32 lus, types appartement erronément maison et aucun DPE/GES. Le détecteur imposait un lien fournisseur /site-internet absent de ce modèle Cello et le lecteur spécialisé ne reconnaissait pas les routes /propriete/vente/type/ville/slug/id.
+- Correction Apimo : détection par lien Apimo + modules + catalogue actif, routes avec slash et programme, transaction/type depuis la route, reprise existante par mémoire conservée. Le compteur des résultats est comparé au nombre de fiches découvertes ; écart maintenu partiel. Statistiques de reprise préservées.
+- Source contrôlée : sept pages, 84 cartes au compteur actuel (au lieu des 85 précédemment observés par Anthony), dont 83 fiches de biens et le programme neuf Nice Riquier. Ce programme immobilier est conservé ; la restriction neuf/occasion concerne les véhicules. Fiche témoin 87563806 : appartement 245000 €, 30,08 m², Nice, 10 photos originales, diagnostics graphiques C/A, prestations et mentions légales. Aucun import, mail ni validation visuelle automatique.
+- Tests locaux : fixture propre sans formulaire/jeton, sept pages/84 fiches, programme inclus, type/transaction, diagnostics C/A, écart 85/84 partiel. Régressions Apimo et bundle vérifiés. Changelog et documentation déploiement Supabase consultés, aucune évolution pertinente. Résultat de production à consigner après déploiement.
+
 ## 2026-11-10 — Gubernatis : pagination Apimo corrigée, 83 fiches lues (ChatGPT)
 
 - Demande explicite Anthony : https://gubernatis-immobilier.com/fr/nos-biens, 85 annoncés contre une trentaine lus. Demande 20eb9938-0b4c-4027-8df6-08f78af397a7 prise in_progress. Main cloné d46eaaa97ff0db091b338fce1f5a61585d1bb14a, guide APPRENDRE-AU-ROBOT et haut du journal lus ; fonction initiale v329 épinglée 96edea21e05cd27590bec96214ea3447d3981ea8. Aucun autre fichier existant modifié.
