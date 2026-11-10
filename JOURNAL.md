@@ -2880,3 +2880,5 @@
 ## 09/11/2026 — Vacances : ancien bouton « Admin » retiré
 - vacances.html : bouton `#vacAdminLink` (Admin) supprimé de l'en-tête (vacances-main.js gère son absence).
 - Accès admin Vacances : tuile « Vacances » ajoutée dans Compte → Administration (admin-account-layout-20261018.js, index v=16). Déjà présent aussi dans le menu admin mobile et dans admin.html.
+
+- 10/11/2026 (Claude) : CRM prospection — bloc « Écrire un mail » (boîte OVH au choix, jamais Gmail ; copie rangée dans « Envoyés » par IMAP), bouton « Écrire » sur chaque prospect et sur les accords (remplace le lien mailto qui ouvrait Gmail). prospect-mailer v32 : action send (admin), journal prospection_logs « manual_mail ».

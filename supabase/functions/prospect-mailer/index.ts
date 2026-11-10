@@ -1,4 +1,5 @@
 // v31 09/11/2026 : mail aperçu signé « Le Service Pros Abracadeal » (Anthony reste anonyme auprès des pros).
+// v32 10/11/2026 : action « send » — l'admin écrit / répond depuis le CRM avec la boîte OVH choisie (copie rangée dans « Envoyés »).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 // Envoi de la prospection Abracadeal depuis les boîtes OVH (Zimbra, SMTP SSL 465). 10/10/2026, v3 13/10/2026 (relance J+5 dans le même fil),
 // v4 13/10/2026 : test A/B (A = mail avec lien, B = sans lien, on invite à répondre), variante stable par prospect.
@@ -9,6 +10,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 //   POST {action:"test", mailbox, category, followup?, variant?} admin connecté : envoie UN message de test à l'adresse de l'admin
 //   POST {action:"run"}                     cron (clé interne) : envoie seulement si le « feu vert » est donné
 //   POST {action:"bounces", dry?, days?}    cron ou admin : lit les rebonds (IMAP) et passe les adresses mortes en « error » (v12, 30/10/2026)
+//   POST {action:"send", mailbox, to, subject, text, prospect_id?, in_reply_to?} admin connecté : mail libre depuis la boîte OVH
 //   POST {action:"unsubscribe", u, t}       page abracadeal.fr/desinscription.html
 //   POST ?u=..&t=.. (List-Unsubscribe-Post) désinscription en un clic depuis la messagerie
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
@@ -350,6 +352,39 @@ async function processBounces(dry: boolean, sinceDays: number) {
   }
   return { ok: true, dry, report, marked: marked.length };
 }
+
+// v32 : range une copie du mail envoyé dans le dossier « Envoyés » de la boîte (IMAP APPEND), pour la retrouver sur le téléphone.
+async function imapAppendSent(c: Creds, data: string) {
+  if (!c.password) return "pas de mot de passe";
+  for (const host of IMAP_HOSTS) {
+    let conn: Deno.TlsConn;
+    try { conn = await Deno.connectTls({ hostname: host, port: 993 }); } catch { continue; }
+    const timer = setTimeout(() => { try { conn.close(); } catch { /* fermé */ } }, 30000);
+    let txt = ""; let n = 0;
+    const readUntil = async (re: RegExp) => { while (!re.test(txt)) { const ch = new Uint8Array(16384); const k = await conn.read(ch); if (k === null) throw new Error("IMAP fermé"); txt += dec.decode(ch.subarray(0, k)); } const m = re.exec(txt)!; const out = txt.slice(0, m.index + m[0].length); txt = txt.slice(m.index + m[0].length); return out; };
+    const w = async (s: string | Uint8Array) => { const d = typeof s === "string" ? enc.encode(s) : s; let o = 0; while (o < d.length) o += await conn.write(d.subarray(o)); };
+    const cmd = async (line: string) => { const tag = "s" + (++n); await w(`${tag} ${line}\r\n`); const r = await readUntil(new RegExp(`(^|\\r\\n)${tag} (OK|NO|BAD)[^\\r\\n]*\\r\\n`)); if (!new RegExp(`${tag} OK`).test(r)) throw new Error(r.slice(-200)); return r; };
+    try {
+      await readUntil(/\r\n/);
+      const q = (s: string) => `"${s.replace(/["\\]/g, "\\$&")}"`;
+      await cmd(`LOGIN ${q(c.email)} ${q(c.password)}`);
+      const list = await cmd(`LIST "" "*"`);
+      const special = /\(([^)]*\\Sent[^)]*)\) "[^"]*" ("[^"]+"|\S+)/i.exec(list);
+      const named = /\) "[^"]*" ("?(?:Sent|Envoy[^"\r\n]*|Sent Items|Sent Messages)"?)\r\n/i.exec(list);
+      const folder = (special?.[2] || named?.[1] || '"Sent"');
+      const bytes = enc.encode(data.endsWith("\r\n") ? data : data + "\r\n");
+      const tag = "s" + (++n);
+      await w(`${tag} APPEND ${folder} (\\Seen) {${bytes.length}}\r\n`);
+      await readUntil(/\r\n/); // « + Ready »
+      await w(bytes); await w("\r\n");
+      const r = await readUntil(new RegExp(`(^|\\r\\n)${tag} (OK|NO|BAD)[^\\r\\n]*\\r\\n`));
+      await cmd("LOGOUT").catch(() => {});
+      return new RegExp(`${tag} OK`).test(r) ? null : r.slice(-160);
+    } catch (e) { return String((e as Error).message || e).slice(0, 160); }
+    finally { clearTimeout(timer); try { conn.close(); } catch { /* fermé */ } }
+  }
+  return "IMAP injoignable";
+}
 async function creds(mailbox: string): Promise<Creds> {
   const { data, error } = await admin.rpc("prospect_mailer_creds", { p_email: mailbox });
   if (error || !data) throw new Error("Adresse d'envoi inconnue");
@@ -383,6 +418,31 @@ Deno.serve(async (req) => {
   if (action === "unsubscribe") {
     const ok = await unsubscribe(String(body.u || ""), String(body.t || ""));
     return json({ ok }, ok ? 200 : 400);
+  }
+
+
+  // v32 : mail libre / réponse depuis le CRM, avec la boîte OVH choisie (jamais Gmail).
+  if (action === "send") {
+    const user = await requireAdmin(req);
+    if (!user) return json({ error: "Accès réservé à l'administrateur" }, 401);
+    const to = String(body.to || "").trim().toLowerCase();
+    const subject = String(body.subject || "").replace(/[\r\n]/g, " ").trim().slice(0, 200);
+    const text = String(body.text || "").trim().slice(0, 20000);
+    if (!/^[^@\s<>]+@[^@\s<>]+\.[a-z]{2,}$/i.test(to)) return json({ ok: false, error: "Adresse du destinataire invalide" });
+    if (!subject || !text) return json({ ok: false, error: "Objet et message obligatoires" });
+    try {
+      const c = await creds(String(body.mailbox || ""));
+      const reply = typeof body.in_reply_to === "string" && /^<[^<>\s]+>$/.test(body.in_reply_to) ? body.in_reply_to : null;
+      const { data, msgId } = await buildMail(c, to, "", null, { subject, body: text } as Tpl, reply);
+      await smtp(c, { to, data });
+      const sentCopy = await imapAppendSent(c, data);
+      const pid = typeof body.prospect_id === "string" && /^[0-9a-f-]{36}$/.test(body.prospect_id) ? body.prospect_id : null;
+      if (pid) {
+        await admin.from("prospection_logs").insert({ prospect_id: pid, action: "manual_mail", detail: `${c.email} → ${to} : ${subject} ${msgId}`.slice(0, 2000) });
+        await admin.from("prospection_prospects").update({ last_inbound_contact_at: new Date().toISOString(), updated_at: new Date().toISOString() }).eq("id", pid).is("last_inbound_contact_at", null);
+      }
+      return json({ ok: true, message: `Mail envoyé à ${to} depuis ${c.email}.` + (sentCopy ? " (Copie non rangée dans « Envoyés » : " + sentCopy + ")" : " Copie rangée dans « Envoyés ».") });
+    } catch (e) { return json({ ok: false, error: String((e as Error).message || e).slice(0, 300) }); }
   }
 
   if (action === "verify" || action === "test") {

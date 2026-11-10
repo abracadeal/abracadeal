@@ -87,7 +87,7 @@ function renderProspects(){
   $('prospectsBody').innerHTML=list.length?list.map(r=>`<details class="pr"><summary><span class="prn">${esc(r.company||'Sans nom')}</span><span class="pill ${esc(r.status)}">${esc(P_ST[r.status]||r.status)}</span></summary><div class="prb">
     <div><span>E-mail</span>${esc(r.email)}</div><div><span>Métier</span>${esc(r.category||'—')}</div><div><span>Ville</span>${esc(r.city||'—')}</div>
     <div><span>Dernier envoi</span>${r.sent_at?new Date(r.sent_at).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}):'—'}</div><div><span>Clics</span>${r.click_count>0?'<b>'+r.click_count+'</b>':'—'}</div>
-    <div class="pra">${r.status==='opted_out'?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>':'<button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}</div>
+    <div class="pra">${r.status==='opted_out'?'<button class="btn" onclick="restoreProspect(\''+r.id+'\')">Réactiver</button>':'<button class="btn" onclick="openCompose(\''+esc(r.email)+'\',\''+r.id+'\')">Écrire</button> <button class="btn red" onclick="markStop(\''+r.id+'\')">STOP</button>'}</div>
   </div></details>`).join(''):'<div class="small">Aucun prospect.</div>';
 }
 
@@ -123,7 +123,7 @@ async function loadAcceptances(){
   $('acceptList').innerHTML=rows.map(r=>'<div class="cl"'+(r.handled_at?' style="opacity:.55"':'')+'><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> '+sirenTxt(r)+(r.handled_at?' <span class="pill">Traité le '+esc(fmtDate(r.handled_at))+'</span>':'')+'</div>'+
     '<div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · accord le '+esc(fmtDate(r.accepted_at))+'</div>'+
     '<div class="clm">SIRET : <b>'+esc(r.siret)+'</b> · <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/'+encodeURIComponent(r.siret)+'" target="_blank" rel="noopener">vérifier sur l’annuaire</a></div>'+
-    '<div class="clm">E-mail donné : <a href="mailto:'+esc(r.email)+'">'+esc(r.email)+'</a>'+(r.prospect_email&&r.prospect_email.toLowerCase()!==String(r.email).toLowerCase()?' (mail prospecté : '+esc(r.prospect_email)+')':'')+(r.phone?' · Tél. : <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':'')+'</div>'+
+    '<div class="clm">E-mail donné : <a href="#" onclick="openCompose(\''+esc(r.email)+'\',\''+esc(r.prospect_id||'')+'\');return false">'+esc(r.email)+'</a> (écrire depuis la boîte Abracadeal)'+(r.prospect_email&&r.prospect_email.toLowerCase()!==String(r.email).toLowerCase()?' (mail prospecté : '+esc(r.prospect_email)+')':'')+(r.phone?' · Tél. : <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':'')+'</div>'+
     (r.source_url?'<div class="clm">Site : <a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_url)+'</a></div>':'')+
     (r.ref_code?'<div class="clm"><a href="pro-fondateur.html?r='+encodeURIComponent(r.ref_code)+'" target="_blank" rel="noopener">Voir son aperçu</a></div>':'')+
     (r.handled_note?'<div class="clm">Note : '+esc(r.handled_note)+'</div>':'')+
@@ -148,6 +148,33 @@ async function loadOptOuts(){
     <div><span>Depuis le</span>${esc(fmtDate(r.opted_out_at||r.updated_at))}</div>
     <div class="pra"><button class="btn" onclick="restoreProspect('${r.id}')">Réactiver</button></div>
   </div></details>`).join(''):'<div class="small">Personne ne s’est désinscrit.</div>';
+}
+
+// 10/11/2026 (Anthony) : écrire / répondre depuis le CRM avec la boîte OVH (Zimbra), jamais depuis Gmail.
+function fillFrom(){
+  const sel=$('cFrom');if(!sel)return;const cur=sel.value;
+  const mbs=((mailerState&&mailerState.mailboxes)||[]).filter(m=>m.has_password);
+  sel.innerHTML=mbs.length?mbs.map(m=>'<option value="'+esc(m.email)+'">'+esc(m.display_name||'')+' &lt;'+esc(m.email)+'&gt;</option>').join(''):'<option value="">Aucune boîte prête</option>';
+  if(cur)sel.value=cur;
+}
+function openCompose(to,pid,subject){
+  fillFrom();$('cTo').value=to||'';$('cProspect').value=pid||'';if(subject)$('cSubject').value=subject;
+  $('cStatus').textContent='';const c=$('composeCard');c.open=true;c.scrollIntoView({behavior:'smooth'});setTimeout(()=>$('cSubject').focus(),300);
+}
+function resetCompose(){$('cTo').value='';$('cSubject').value='';$('cProspect').value='';$('cText').value='Bonjour,\n\n\n\nLe Service Pros Abracadeal';$('cStatus').textContent='';}
+async function sendCompose(){
+  const to=$('cTo').value.trim(),subject=$('cSubject').value.trim(),text=$('cText').value.trim(),mailbox=$('cFrom').value;
+  if(!mailbox){$('cStatus').textContent='Aucune boîte d’envoi prête.';return}
+  if(!to||!subject||!text){$('cStatus').textContent='Remplis le destinataire, l’objet et le message.';return}
+  if(!confirm('Envoyer ce mail à '+to+' depuis '+mailbox+' ?'))return;
+  const b=$('cSend');b.disabled=true;$('cStatus').textContent='Envoi en cours…';
+  try{
+    const {data,error}=await sb.functions.invoke('prospect-mailer',{body:{action:'send',mailbox,to,subject,text,prospect_id:$('cProspect').value||null}});
+    if(error)throw error;
+    if(!data||!data.ok)throw new Error((data&&data.error)||'Échec de l’envoi');
+    $('cStatus').textContent=data.message;$('cSubject').value='';$('cText').value='Bonjour,\n\n\n\nLe Service Pros Abracadeal';
+  }catch(e){$('cStatus').textContent='Erreur : '+(e.message||e);}
+  finally{b.disabled=false;}
 }
 
 document.addEventListener('input',e=>{if(e.target&&e.target.id==='pSearch')renderProspects();});
@@ -319,7 +346,7 @@ function fmtDate(v){return v?new Date(v).toLocaleString('fr-FR',{dateStyle:'shor
 async function loadMailer(){
   const {data,error}=await sb.rpc('admin_prospect_mailer_state');
   if(error){$('goBox').className='notice err';$('goBox').textContent='Erreur : '+error.message;return}
-  mailerState=data;
+  mailerState=data;setTimeout(fillFrom,0);
   const st=data.settings||{};
   $('mailboxes').innerHTML=(data.mailboxes||[]).map((m,i)=>{
     const state=!m.has_password?'<span class="wait">● Mot de passe à enregistrer</span>'

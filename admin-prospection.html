@@ -44,6 +44,21 @@
     <div id="stopList" class="plist"><div class="small">Chargement…</div></div>
   </details>
 
+  <details class="card fold" id="composeCard"><summary>Écrire un mail</summary>
+    <p class="small">Le mail part de ta boîte Abracadeal (OVH), jamais de Gmail. Une copie est rangée dans « Envoyés » de la boîte choisie.</p>
+    <div class="field"><label>De</label><select id="cFrom"></select></div>
+    <div class="field"><label>À</label><input id="cTo" type="email" inputmode="email" autocapitalize="none" placeholder="adresse@du-pro.fr"></div>
+    <div class="field"><label>Objet</label><input id="cSubject" placeholder="Objet du mail"></div>
+    <div class="field"><label>Message</label><textarea id="cText" rows="9">Bonjour,
+
+
+
+Le Service Pros Abracadeal</textarea></div>
+    <input type="hidden" id="cProspect">
+    <div class="pra"><button class="btn green" id="cSend" onclick="sendCompose()">Envoyer</button> <button class="btn" onclick="resetCompose()">Effacer</button></div>
+    <div class="small" id="cStatus" aria-live="polite"></div>
+  </details>
+
   <section class="card" id="acceptCard">
     <h2>Accords « Je publie » <span class="dayn" id="aCount"></span></h2>
     <p class="small">Les pros qui ont cliqué « Je publie » sur leur aperçu et donné leur SIRET. Rien n’est publié tant que tu ne lances pas l’import.</p>
@@ -175,7 +190,7 @@
   <button class="btn primary" onclick="location.href='index.html'">Retour au site</button>
 </section>
 
-<script src="assets/admin-prospection.js?v=20261106-stop2"></script>
+<script src="assets/admin-prospection.js?v=20261110-mail"></script>
 <script src="/assets/app-shell-20261018.js?v=8" defer></script>
 <link rel="stylesheet" href="assets/admin-theme-20261108.css?v=3">
 <script src="assets/admin-subnav-20261108.js?v=3" defer></script>
