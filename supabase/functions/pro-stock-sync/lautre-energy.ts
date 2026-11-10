@@ -6,7 +6,7 @@ export function lautreEnergyClass(bytes:Uint8Array):string|null{try{
  let r:any,c:number,palette:any;if(bytes[0]===137&&bytes[1]===80){r=decode(bytes);c=r.channels;palette=r.palette;}else if(bytes[0]===255&&bytes[1]===216){r=jpeg.decode(bytes,{useTArray:true,maxMemoryUsageInMB:32});c=4;}else return null;
  const w=r.width,h=r.height;if(w<250||h<180||w*h>600000||r.depth===16)return null;
  const rgb=(x:number,y:number):number[]=>{const i=y*w+x;if(palette)return (palette[r.data[i]]||[255,255,255]).slice(0,3);const off=i*c;return Array.from(r.data.subarray(off,off+3));};
- const close=(a:number[],b:number[])=>a.every((v,i)=>Math.abs(v-b[i])<=12);const colored=(a:number[])=>Math.max(...a)-Math.min(...a)>25&&Math.min(...a)<235;
+ const close=(a:number[],b:number[])=>a.every((v,i)=>Math.abs(v-b[i])<=(bytes[0]===255?32:12));const colored=(a:number[])=>Math.max(...a)-Math.min(...a)>25&&Math.min(...a)<235;
  const end=Math.floor(w*.45),grades=new Map<number,number>();
  // Locate the common left edge instead of assuming a percentage: templates have different margins.
  for(let x=Math.floor(w*.06);x<Math.floor(w*.22);x+=2){
