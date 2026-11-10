@@ -7,7 +7,8 @@
 - Pages demo/gubernatis/index.html (showroom) et client.html (vue acheteur), copiées de demo/infinity. Liens :
   https://abracadeal.fr/demo/gubernatis/?k=mAD1DTJCpkUvv06A
   https://abracadeal.fr/demo/gubernatis/client.html?k=mAD1DTJCpkUvv06A
-- À faire si l'agence dit OK : import normal via le robot, puis supprimer la démo.
+- 10/11 10:50 : la mise en ligne GitHub Pages de 10:29 a échoué (#2919, aléatoire) → relancée par ce commit.
+- À faire si l’agence dit OK : import normal via le robot, puis supprimer la démo.
 
 ## 2026-11-10 — Gubernatis : 84/84 résultats lus, programme neuf inclus (ChatGPT)
 
