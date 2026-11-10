@@ -1,3 +1,6 @@
+## 10/11/2026 — Claude : bouton « Continuer avec Facebook » masqué
+- Test d'Anthony : Facebook répond « Application inactive » (app Meta « Abracadeal » encore en mode Développement). Bouton Facebook masqué dans `assets/social-login-20261018.js` (constante `PAUSED`) ; Google inchangé. À réactiver en retirant 'facebook' de `PAUSED` une fois l'app Meta passée en Live.
+
 ## 10/11/2026 — Claude : une annonce validée ne repasse plus en modération
 - Base : colonne `listings.first_validated_at` (posée automatiquement à la 1re mise en ligne, effacée si l'annonce est refusée). Trigger `zzzz_keep_validated_listing_online` : une annonce déjà validée et en ligne ne peut plus être remise « en attente » automatiquement (synchro pros, changement de prix/description/photos/contact, contrôle aléatoire 3 %, heuristiques). Seuls admin/modérateur peuvent la remettre en attente.
 - `abraca_guard_approved_listing_edit` et `abraca_requeue_for_related_edit` : plus d'invalidation de la modération pour une annonce validée et en ligne.
