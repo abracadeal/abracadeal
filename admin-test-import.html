@@ -516,10 +516,20 @@ E('oLookup').addEventListener('click',async()=>{
  }catch(e){box.innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}finally{E('oLookup').disabled=false}
 });
 async function sendWelcome(userId,feedId,host){
- const li=step('Envoi du mail au garage (lien pour choisir son mot de passe)…','wait');
- const r=REQS.find(x=>x.feed_id===feedId)||{};
- try{const d=await onboardCall({action:'welcome',user_id:userId,online:r.listings_online||0,pending:r.listings_pending||0});setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b>.','ok');return true}
+ const li=step('Envoi du mail au pro (lien pour choisir son mot de passe)…','wait');
+ try{const d=await onboardCall({action:'welcome',user_id:userId});setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b> ('+d.online+' en ligne'+(d.pending?', '+d.pending+' en vérification':'')+(d.founder?', Fondateur':'')+').','ok');return true}
  catch(e){setStep(li,'Mail non envoyé : '+esc(e.message||e)+' ','ko');const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Réessayer l\'envoi';b.onclick=async()=>{li.remove();if(await sendWelcome(userId,feedId))onbDone()};li.appendChild(b);return false}
+}
+// 10/11/2026 (Anthony) : aucun mail ne part tout seul. Récapitulatif réel (annonces, Fondateur) puis envoi par l'admin.
+async function offerWelcome(userId,feedId){
+ const li=step('Rien n\'a été envoyé au pro. Vérifie son compte, puis envoie le mail de bienvenue.','ok');
+ const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Vérifier et envoyer le mail de bienvenue';li.appendChild(b);
+ b.onclick=async()=>{b.disabled=true;
+  try{const p=await onboardCall({action:'welcome_preview',user_id:userId});
+   const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
+   if(!confirm(msg)){b.disabled=false;return}
+   b.remove();if(await sendWelcome(userId,feedId))onbDone();
+  }catch(e){alert(e.message||e);b.disabled=false}};
 }
 // 07/11/2026 : une fois l'inscription réussie, le résumé s'efface et le formulaire se vide.
 let onbTimer=null;
@@ -542,11 +552,10 @@ E('onbForm').addEventListener('submit',async ev=>{
   li=step('Lecture du site et mise en ligne des annonces (jusqu\'à 2 minutes, ne fermez pas la page)…','wait');
   lastSync=null;await runSync({feed_id:d.feed_id,company:d.company?.company_name,site_url:body.site_url},null);
   if(lastSync?.error){setStep(li,'Import en erreur : '+esc(lastSync.error)+'. Le mail n\'est pas envoyé : corrigez puis relancez « Synchroniser maintenant ».','ko');
-   const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Envoyer quand même le mail';b.onclick=async()=>{b.remove();if(await sendWelcome(d.user_id,d.feed_id))onbDone()};li.appendChild(b);return}
+   offerWelcome(d.user_id,d.feed_id);return}
   E('oSteps').scrollIntoView({behavior:'smooth',block:'center'});
   setStep(li,'<b>'+(lastSync?.created||0)+'</b> annonces créées, <b>'+(lastSync?.updated||0)+'</b> mises à jour (en ligne après la modération).','ok');
-  if(d.existing){step('Compte déjà existant : pas de mail de bienvenue envoyé.','ok');onbDone();return}
-  if(await sendWelcome(d.user_id,d.feed_id))onbDone();
+  offerWelcome(d.user_id,d.feed_id);
  }catch(e){setStep(li,esc(e.message||e),'ko')}
  finally{go.disabled=false}
 });

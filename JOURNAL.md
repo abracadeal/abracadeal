@@ -1,3 +1,10 @@
+## 2026-11-10 — Inscription par l'admin : plus aucun mail automatique (Claude)
+
+- **Demande d'Anthony :** « les mails qui partent direct c'est pas bon ». Cas Gubernatis : mail de bienvenue parti à 13:07 (1 min après la création) avec 5 annonces (offre Fondateur pas encore active) et le texte « un véhicule ajouté apparaît » pour une agence immo ; mail d'activation Fondateur programmé +20 min.
+- **Changé (admin-test-import.html) :** après création + import, rien n'est envoyé. Bouton « Vérifier et envoyer le mail de bienvenue » : récapitulatif réel (e-mail, annonces en ligne / en vérification, Fondateur oui/non, mail déjà envoyé ?) puis confirmation. Idem pour un compte existant.
+- **Changé (admin-onboard-pro) :** action welcome_preview ; welcome compte les annonces côté serveur (plus de chiffres venant de la page) ; texte adapté à l'immobilier (« un bien ajouté apparaît, un bien vendu ou loué disparaît ») ; le mail d'activation Fondateur (subscription_started) reste en attente (2099) et est supprimé quand le mail de bienvenue, qui annonce déjà l'offre, est envoyé.
+- **Gubernatis :** mail d'activation Fondateur du 10/11 suspendu (available_at +7 jours) en attendant la décision d'Anthony.
+
 ## 2026-11-10 — Inscription Gubernatis : offre Fondateur refusée à cause du code d'activité (Claude)
 
 - **Constat (capture d'Anthony, 13:07) :** compte Pro Gubernatis créé par l'admin (contact@cabinet-merengone.com, SIRET 53398729300024, import du site https://gubernatis-immobilier.com/fr/ activé) mais « Offre Fondateur non activée : Erreur lors de la préparation de l'abonnement ».

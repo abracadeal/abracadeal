@@ -85,7 +85,8 @@ async function activateFounder(userId: string, token: string, warnings: string[]
   if (open === false) { warnings.push("Offre Fondateurs fermée : pas d’abonnement gratuit créé."); return null; }
   const sub = await callFunction("create-pro-subscription-order", token, { plan_code: "pro_50", expect_founder: true });
   if (sub.ok && sub.data?.founder) {
-    await admin.from("pro_email_outbox").update({ available_at: new Date(Date.now() + 20 * 60e3).toISOString() }).eq("user_id", userId).eq("status", "pending");
+    // 10/11/2026 (Anthony : « les mails qui partent direct c'est pas bon ») : le mail d'activation reste en attente ; il est remplacé par le mail de bienvenue envoyé par l'admin après vérification.
+    await admin.from("pro_email_outbox").update({ available_at: "2099-01-01T00:00:00Z" }).eq("user_id", userId).eq("email_type", "subscription_started").eq("status", "pending");
     return { number: sub.data.founder_number, free_until: sub.data.free_until };
   }
   warnings.push("Offre Fondateur non activée : " + (sub.data?.error || "place indisponible"));
@@ -105,7 +106,8 @@ function tempPassword() {
   return "Ab#" + Array.from(b).map((x) => x.toString(36).padStart(2, "0")).join("").slice(0, 30) + "9z";
 }
 
-function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean; slug?: string | null }) {
+function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean; slug?: string | null; sector?: string }) {
+  const immo = p.sector === "immobilier";
   const total = p.online + p.pending;
   const title = total > 0 ? "Vos annonces sont sur Abracadeal" : "Votre espace Pro Abracadeal est prêt";
   const paras = [
@@ -114,7 +116,7 @@ function welcomeMail(p: { company: string; site: string; online: number; pending
     total > 0
       ? `<strong>${total} annonce${total > 1 ? "s" : ""}</strong> ${total > 1 ? "ont été importées" : "a été importée"}${p.pending > 0 ? ` (${p.pending} encore en vérification, en ligne d’ici quelques minutes)` : ""}. Vous n’avez rien à ressaisir.`
       : `Vos annonces sont en cours d’import et seront en ligne dans les prochaines minutes. Vous n’avez rien à ressaisir.`,
-    `Elles se mettent à jour toutes seules à partir de votre site : un véhicule ajouté apparaît, un véhicule vendu disparaît.`,
+    `Elles se mettent à jour toutes seules à partir de votre site : ${immo ? "un bien ajouté apparaît, un bien vendu ou loué disparaît" : "un véhicule ajouté apparaît, un véhicule vendu disparaît"}.`,
     ...(p.slug ? [`Votre showroom a sa propre adresse, à donner à vos clients : <strong>abracadeal.fr/${esc(p.slug)}</strong>`] : []),
     `Pour accéder à votre espace (voir vos annonces, les mettre à la une, les partager), choisissez simplement votre mot de passe :`,
   ];
@@ -390,31 +392,42 @@ Deno.serve(async (req) => {
       return json({ ok: true, existing: false, user_id: userId, feed_id: imp?.feed_id, company, sector, founder, showroom: vitrine, warnings });
     }
 
-    if (action === "welcome") {
+    if (action === "welcome" || action === "welcome_preview") {
+      // 10/11/2026 : plus aucun envoi automatique — l'admin voit le récapitulatif (chiffres réels) puis envoie lui-même.
       const userId = String(body?.user_id || "");
       const { data: u, error: uErr } = await admin.auth.admin.getUserById(userId);
       if (uErr || !u?.user?.email) return json({ error: "Compte introuvable" }, 404);
       const m: any = u.user.user_metadata || {};
       if (!m.onboarded_by_admin) return json({ error: "Ce compte n’a pas été créé depuis l’admin." }, 409);
+      const [{ count: online }, { count: pending }, { data: fe }, { data: prof }, { data: shw }] = await Promise.all([
+        admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "active"),
+        admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "pending"),
+        admin.from("founder_enrollments").select("founder_number,revoked_at").eq("user_id", userId).maybeSingle(),
+        admin.from("profiles").select("pro_sector").eq("id", userId).maybeSingle(),
+        admin.from("pro_showrooms").select("slug").eq("user_id", userId).maybeSingle(),
+      ]);
+      const founder = !!fe && !fe.revoked_at && fe.founder_number != null;
+      const recap = { email: u.user.email, online: online || 0, pending: pending || 0, founder, already_sent_at: m.welcome_sent_at || null };
+      if (action === "welcome_preview") return json({ ok: true, ...recap });
       if (!RESEND_API_KEY) return json({ error: "Envoi d’e-mails indisponible (clé Resend manquante)." }, 503);
       const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "recovery", email: u.user.email, options: { redirectTo: "https://abracadeal.fr/" } });
       if (linkErr || !link?.properties?.action_link) throw new Error("Lien de mot de passe impossible : " + (linkErr?.message || ""));
-      const { data: sub } = await admin.from("pro_subscriptions").select("founder_number,status").eq("user_id", userId).maybeSingle();
-      const { data: shw } = await admin.from("pro_showrooms").select("slug").eq("user_id", userId).maybeSingle();
       const mail = welcomeMail({
         company: m.display_name || "votre entreprise", site: m.stock_site?.url || "",
-        online: Math.max(0, Number(body?.online) || 0), pending: Math.max(0, Number(body?.pending) || 0),
-        link: link.properties.action_link, founder: sub?.founder_number != null, slug: shw?.slug || null,
+        online: recap.online, pending: recap.pending,
+        link: link.properties.action_link, founder, slug: shw?.slug || null, sector: prof?.pro_sector || m.pro_sector || "",
       });
       const r = await fetch("https://api.resend.com/emails", {
         method: "POST",
-        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `admin-onboard-welcome-${userId}-${new Date().toISOString().slice(0, 13)}` },
+        headers: { Authorization: `Bearer ${RESEND_API_KEY}`, "Content-Type": "application/json", "Idempotency-Key": `admin-onboard-welcome-${userId}-${Date.now()}` },
         body: JSON.stringify({ from: FROM_EMAIL, to: [u.user.email], reply_to: "contact@abracadeal.fr", subject: mail.subject, html: mail.html, text: mail.text }),
       });
       const d = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error("Envoi du mail impossible : " + (d?.message || r.status));
       await admin.auth.admin.updateUserById(userId, { user_metadata: { ...m, welcome_sent_at: new Date().toISOString() } });
-      return json({ ok: true, email: u.user.email });
+      // Le mail de bienvenue annonce déjà l'offre Fondateur : le mail d'activation en attente n'a plus lieu d'être.
+      if (founder) await admin.from("pro_email_outbox").delete().eq("user_id", userId).eq("email_type", "subscription_started").eq("status", "pending");
+      return json({ ok: true, ...recap });
     }
 
     return json({ error: "Action inconnue" }, 400);
