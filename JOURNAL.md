@@ -1,3 +1,9 @@
+## 10/11/2026 — Claude : une annonce validée ne repasse plus en modération
+- Base : colonne `listings.first_validated_at` (posée automatiquement à la 1re mise en ligne, effacée si l'annonce est refusée). Trigger `zzzz_keep_validated_listing_online` : une annonce déjà validée et en ligne ne peut plus être remise « en attente » automatiquement (synchro pros, changement de prix/description/photos/contact, contrôle aléatoire 3 %, heuristiques). Seuls admin/modérateur peuvent la remettre en attente.
+- `abraca_guard_approved_listing_edit` et `abraca_requeue_for_related_edit` : plus d'invalidation de la modération pour une annonce validée et en ligne.
+- `moderate-listing` : la modification payante d'un particulier sur une annonce déjà validée est publiée dès l'analyse de sécurité passée (sauf risque rouge / contenu interdit).
+- Gardés : contenu interdit (prostitution…) et blocages de sécurité toujours refusés ; une annonce refusée par un humain repasse par la validation humaine.
+
 ## 2026-11-10 après-midi — L’Autre Immobilier : diagnostics terminés, 7/7 biens validés en lecture (ChatGPT)
 
 - Départ : main récupéré `edeb4aad7afdf290509337cac3351329b95df444`, haut de JOURNAL et guide relus. Version réelle pro-stock-sync v336 ACTIVE épinglée sur `9744b0b51daecfc2a0f9bd505d9e9bc8b613293a` ; aucun écart fonction avec main. Travail isolé dans un nouveau worktree, ancien répertoire non réinitialisé. Modifications Claude (Apimo/Gubernatis, surfaces/location saisonnière, second numéro et autres sujets) conservées intégralement. Aucune intervention sur les annonces en ligne, listing_contacts ou listing_photos.
@@ -2952,9 +2958,3 @@
 - Accès admin Vacances : tuile « Vacances » ajoutée dans Compte → Administration (admin-account-layout-20261018.js, index v=16). Déjà présent aussi dans le menu admin mobile et dans admin.html.
 
 - 10/11/2026 (Claude) : CRM prospection — bloc « Écrire un mail » (boîte OVH au choix, jamais Gmail ; copie rangée dans « Envoyés » par IMAP), bouton « Écrire » sur chaque prospect et sur les accords (remplace le lien mailto qui ouvrait Gmail). prospect-mailer v32 : action send (admin), journal prospection_logs « manual_mail ».
-
-## 10/11/2026 — Claude : une annonce validée ne repasse plus en modération
-- Base : colonne `listings.first_validated_at` (posée automatiquement à la 1re mise en ligne, effacée si l'annonce est refusée). Trigger `zzzz_keep_validated_listing_online` : une annonce déjà validée et en ligne ne peut plus être remise « en attente » automatiquement (synchro pros, changement de prix/description/photos/contact, contrôle aléatoire 3 %, heuristiques). Seuls admin/modérateur peuvent la remettre en attente.
-- `abraca_guard_approved_listing_edit` et `abraca_requeue_for_related_edit` : plus d'invalidation de la modération pour une annonce validée et en ligne.
-- `moderate-listing` : la modification payante d'un particulier sur une annonce déjà validée est publiée dès l'analyse de sécurité passée (sauf risque rouge / contenu interdit).
-- Gardés : contenu interdit (prostitution…) et blocages de sécurité toujours refusés ; une annonce refusée par un humain repasse par la validation humaine.
