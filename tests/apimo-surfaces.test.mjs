@@ -18,3 +18,5 @@ r=detail('Box sécurisé.','garage-parking','<li>1 Garage <span>13 m²</span></l
 r=detail('Appartement moderne.','appartement','<li>1 Chambre <span>10 m²</span></li><li>1 Séjour <span>21 m²</span></li>');assert.equal(r.surface,undefined);assert.match(r.surfacespieces,/Chambre : 10 m²/);assert.match(r.surfacespieces,/Séjour : 21 m²/);
 r=detail('Programme de plusieurs appartements.','appartement');assert.equal(r.surface,undefined);
 console.log('Apimo surfaces: explicit description total, separate terrain, sole garage, room details without invented sum, absent/hypothetical left blank');
+
+r=detail('','bureau');assert.equal(r.description,'');assert.equal(r.type_bien,'bureau');
