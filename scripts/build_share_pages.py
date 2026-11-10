@@ -752,7 +752,7 @@ def page_head(title, desc, url, robots="index,follow,max-image-preview:large", o
 
 
 PAGE_FOOT = """</main>
-<footer>Abracadeal — petites annonces partout en France · <a href="/annonces/">Toutes les catégories et villes</a> · <a href="/">Accueil</a></footer>
+<footer>Abracadeal — petites annonces partout en France · <a href="/annonces/">Toutes les catégories et villes</a> · <a href="/">Accueil</a> · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer>
 </body></html>
 """
 
@@ -859,7 +859,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
 <a class="cta" href="{e(app_url)}" rel="nofollow">Voir l’annonce complète et contacter le vendeur</a>
 {similar_section(similar)}
 </main>
-<footer>Annonce publiée sur <a href="{SITE}/">Abracadeal</a> — petites annonces partout en France · <a href="{SITE}/annonces/">Toutes les catégories et villes</a>. Les coordonnées du vendeur sont réservées aux membres connectés.</footer>
+<footer>Annonce publiée sur <a href="{SITE}/">Abracadeal</a> — petites annonces partout en France · <a href="{SITE}/annonces/">Toutes les catégories et villes</a>. Les coordonnées du vendeur sont réservées aux membres connectés. · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer>
 </body></html>
 """
 

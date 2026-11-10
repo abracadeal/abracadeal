@@ -1,3 +1,7 @@
+## 2026-11-10 — « Site réalisé par MyCreativeSite » sur les pages SEO (Claude)
+
+- Décision d’Anthony : Abracadeal considéré comme client de MyCreativeSite (même société iDream Lab) → mention « Site réalisé par MyCreativeSite » (lien de marque) dans le pied des pages SEO générées (annonces, catégories/villes, Auto, pages pros) et de deposer-une-annonce-gratuite.html ; déjà présente sur l’accueil et Vacances. Aucune mention sur le site ou le showroom d’un pro (leur site est souvent fait par un autre prestataire).
+
 ## 2026-11-10 — Incident : 89 annonces Gubernatis repassées en vérification (Claude)
 
 - Cause : la mise à jour SQL de listing_contacts.phone (second numéro) a déclenché abraca_listing_contacts_edit_recheck (« Coordonnées de contact modifiées ») → 89 annonces en pending de 14:05 à ~14:12 ; « Nice » ne donnait plus rien.
