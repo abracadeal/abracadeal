@@ -1,3 +1,11 @@
+## 2026-11-10 — Location saisonnière séparée de Vacances (Claude)
+
+- Demande d’Anthony : « sépare location saisonnière de vacances ! Vacances ce sera vraiment une section comme Airbnb ».
+- Immobilier : nouvelle transaction « Location saisonnière » (realEstateTransactionOf → saisonniere, menu Immobilier et filtre Transaction ; « Location » renommée « Location longue durée »). Le lien du menu ne renvoie plus vers vacances.html.
+- Prix : période affichée selon l’annonce (pricePeriod : nuit / semaine / mois) et « dès » si prix de départ, sur la vignette et la fiche (avant : toujours « / mois », ex. Valdeblore 700 € la semaine).
+- Recherche : « saisonnière » → Immobilier, location saisonnière ; Vacances seulement pour vacances / séjour / hébergement / gîte.
+- Textes Vacances : « Logements de vacances » au lieu de « Locations saisonnières » (accueil, vacances.html).
+
 ## 2026-11-10 — Démos supprimées (Claude, Anthony : « oui et les autres démos »)
 
 - Dossier demo/ supprimé (gubernatis, infinity, centurion-motors) et liens private.demo_preview_links effacés (Gubernatis + Infinity). Les aperçus prospects (prospect_previews) restent, ils servent aux mails de prospection.

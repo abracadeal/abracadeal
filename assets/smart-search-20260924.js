@@ -23,7 +23,7 @@ function correctTypos(input){
 }
 function interpret(input){
  const text=correctTypos(input),found={},removed=[];
- const category=/\b(appartement|studio|maison|villa|terrain|immobilier|logement)\b/.test(text)?'immobilier':/\b(vacances|saisonniere|sejour|hebergement|gite)\b/.test(text)?'vacances':/\b(moto|motos|scooter|velos?|vtt|vae|bmx)\b/.test(text)?'vehicules':/\b(voiture|voitures|auto|vehicule|vehicules)\b/.test(text)?'vehicules':'';
+ const category=/\b(appartement|studio|maison|villa|terrain|immobilier|logement|saisonnieres?)\b/.test(text)?'immobilier':/\b(vacances|sejour|hebergement|gite)\b/.test(text)?'vacances':/\b(moto|motos|scooter|velos?|vtt|vae|bmx)\b/.test(text)?'vehicules':/\b(voiture|voitures|auto|vehicule|vehicules)\b/.test(text)?'vehicules':'';
  // 18/10/2026 : une marque seule (ex. « Mercedes ») reste une recherche globale par mot-clé,
  // toutes catégories (voitures, pièces, jantes, vêtements…). La catégorie n'est choisie que si
  // le type est écrit (voiture, moto, scooter, appartement…).
@@ -41,7 +41,7 @@ function interpret(input){
   // 02/11/2026 : un casque, des pièces, des jantes… vont dans « Équipements & pièces », jamais dans Véhicules.
  const equipmentWords=/\b(casques?|blousons?|gants|bottes|combinaisons?|pieces?|piece detachee|pneus?|jantes?|enjoliveurs?|retroviseurs?|phares?|pare[- ]?chocs?|batteries?|autoradio|siege auto|porte[- ]velos?|coffre de toit|barres? de toit|equipements?|accessoires?)\b/;
  if(category==='vehicules')found.sub=/\b(velos?|vtt|vae|bmx)\b/.test(text)?'velos':equipmentWords.test(text)?'equipements':/\b(moto|motos|scooter)\b/.test(text)?'motos':/\b(voiture|voitures|auto)\b/.test(text)?'voitures':'';
- if(category==='immobilier'){if(/\b(location|louer|loue)\b/.test(text))found.transaction='location';else if(/\b(achat|acheter|vente|vendre)\b/.test(text))found.transaction='vente';}
+ if(category==='immobilier'){if(/\bsaisonnieres?\b/.test(text))found.transaction='saisonniere';else if(/\b(location|louer|loue)\b/.test(text))found.transaction='location';else if(/\b(achat|acheter|vente|vendre)\b/.test(text))found.transaction='vente';}
  let rest=text;for(const piece of removed)rest=rest.replace(piece,' ');
  rest=rest.replace(/\b(je cherche|recherche|cherche|je veux|un|une|des|de|du|avec|pour|en|a|et|moins|plus|budget|voiture|auto|vehicule|moto|immobilier|appartement|maison|villa|vacances|saisonniere|location|achat|acheter|vente|vendre|noire?|blanche?)\b/g,' ');
  found.query=rest.replace(/[^a-z0-9\s-]/g,' ').replace(/\s+/g,' ').trim();

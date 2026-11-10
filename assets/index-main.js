@@ -3087,6 +3087,9 @@ function realEstateMetaSearchText(a){const m=realEstateMetaOf(a);return Object.v
 function normalizeImmoSearchValue(v){return String(v||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();}
 function realEstateTransactionOf(a){
   const m=realEstateMetaOf(a),raw=normalizeImmoSearchValue(m.transaction||'');
+  // 10/11/2026 (Anthony) : la location saisonniere d'une agence reste dans l'Immobilier, separee de la location longue duree
+  // et de la section Vacances (logements de vacances entre hotes et voyageurs).
+  if(/saison/.test(raw)||vehicleSubcategoryOf(a)==='saisonniere')return 'saisonniere';
   if(/loc|louer|rent|lease/.test(raw))return 'location';
   if(/vente|vendre|sale/.test(raw))return 'vente';
   const sub=vehicleSubcategoryOf(a);
@@ -3140,9 +3143,15 @@ function immoDpeMatches(actual,maximum){
   const ranks={A:1,B:2,C:3,D:4,E:5,F:6,G:7};
   return !!ranks[a]&&!!ranks[m]&&ranks[a]<=ranks[m];
 }
+function immoPriceSuffix(a){
+  const tr=realEstateTransactionOf(a),p=normalizeImmoSearchValue(realEstateMetaOf(a).pricePeriod||'');
+  if(tr!=='location'&&tr!=='saisonniere')return '';
+  if(/nuit/.test(p))return '/ nuit';if(/semaine/.test(p))return '/ semaine';if(/mois/.test(p))return '/ mois';
+  return tr==='saisonniere'?'/ semaine':'/ mois';
+}
 function realEstateCardPriceHtml(a){
-  const m=realEstateMetaOf(a),rental=realEstateTransactionOf(a)==='location',price=Number(a.price||0);
-  if(rental){return `<div class="immo-card-price-main"><span>${money(a.price)}</span><span class="immo-card-price-suffix">/ mois</span></div>${m.rentCharges!==undefined?`<div class="immo-card-charges">+ ${formatImmoMoney(m.rentCharges)} de charges / mois</div>`:''}`;}
+  const m=realEstateMetaOf(a),tr=realEstateTransactionOf(a),rental=tr==='location'||tr==='saisonniere',price=Number(a.price||0);
+  if(rental){return `<div class="immo-card-price-main">${m.priceFrom?'<span class="immo-card-price-suffix">dès</span>':''}<span>${money(a.price)}</span><span class="immo-card-price-suffix">${esc(immoPriceSuffix(a))}</span></div>${m.rentCharges!==undefined?`<div class="immo-card-charges">+ ${formatImmoMoney(m.rentCharges)} de charges / mois</div>`:''}`;}
   const surface=Number(m.surface||0),unit=price>0&&surface>0?Math.round(price/surface):0;
   return `<div class="immo-card-price-main"><span>${money(a.price)}</span></div>${unit?`<div class="immo-card-unit-price">≈ ${unit.toLocaleString('fr-FR')} €/m²</div>`:''}`;
 }
@@ -3161,8 +3170,8 @@ function updateRealEstateFilterLabels(){
   const immo=($('#filterCategory')?.value||activeCategory||'')==='immobilier';
   const tr=$('#filterImmoTransaction')?.value||'';
   const min=$('#filterPriceMinLabel'),max=$('#filterPriceMaxLabel');
-  if(min)min.textContent=immo?(tr==='location'?'Loyer minimum':'Budget minimum'):'Prix minimum';
-  if(max)max.textContent=immo?(tr==='location'?'Loyer maximum':'Budget maximum'):'Prix maximum';
+  if(min)min.textContent=immo?((tr==='location'||tr==='saisonniere')?'Loyer minimum':'Budget minimum'):'Prix minimum';
+  if(max)max.textContent=immo?((tr==='location'||tr==='saisonniere')?'Loyer maximum':'Budget maximum'):'Prix maximum';
 }
 let immoRadiusState={key:'',radius:0,ready:false,distances:new Map()};
 let immoNearbyFilterState={active:false,radius:20,ready:false,distances:new Map()};
@@ -4913,7 +4922,7 @@ window.openAd=id=>{
           <div class="detail-topline">
             <div>
               <h1 class="detail-title-main">${esc(displayListingTitle(a.title,a))}</h1>
-              <div class="detail-price-main">${money(a.price)}</div>
+              <div class="detail-price-main">${a.category==='immobilier'&&realEstateMetaOf(a).priceFrom&&immoPriceSuffix(a)?'dès ':''}${money(a.price)}${a.category==='immobilier'&&immoPriceSuffix(a)?' '+esc(immoPriceSuffix(a)):''}</div>
               <div class="detail-location">📍 ${esc(a.city)}${a.postal_code?` (${esc(a.postal_code)})`:''}</div>
               <div class="detail-meta-line">${esc(categoryLabel)}${created?' · Publiée le '+esc(created):''}</div>
               ${a.listing_reference?`<div class="detail-meta-line">Référence de l’annonce : <b>${esc(a.listing_reference)}</b></div>`:''}
