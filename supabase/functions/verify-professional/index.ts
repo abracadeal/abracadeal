@@ -21,11 +21,15 @@ function cleanActivityCode(value: unknown) {
   return String(value ?? '').trim().toUpperCase().replace(/\s+/g, '');
 }
 
-function classifyBusinessSector(codeValue: unknown, labelValue: unknown) {
+function classifyBusinessSector(codeValue: unknown, labelValue: unknown, nameValue: unknown = '') {
   const code = cleanActivityCode(codeValue).replace(/\./g, '');
   const label = String(labelValue ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   if (code.startsWith('45') || /(automobile|vehicule|voiture|moto|motocycle|garage|concessionnaire)/.test(label)) return 'vehicules';
   if (code.startsWith('68') || /(immobilier|immobiliere|agence immobiliere|transaction immobiliere|administration de biens)/.test(label)) return 'immobilier';
+  // 10/11/2026 : agences enregistrées sous un autre code (ex. Gubernatis Immobilier en 70.22Z) — le nom officiel/enseigne tranche.
+  const name = String(nameValue ?? '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (/\b(immobilier|immobiliere|immo)\b/.test(name)) return 'immobilier';
+  if (/\b(garage|automobiles?|autos|motos|concessionnaire)\b/.test(name)) return 'vehicules';
   return 'other';
 }
 
@@ -53,7 +57,7 @@ async function lookupCompanyBySiret(siretOrSiren: string) {
   const companyPostalCode = String(establishment?.code_postal || '').trim();
   const activityCode = cleanActivityCode(establishment?.activite_principale || company?.siege?.activite_principale || company?.activite_principale || '');
   const activityLabel = String(establishment?.libelle_activite_principale || company?.siege?.libelle_activite_principale || company?.libelle_activite_principale || '').trim();
-  const businessSector = classifyBusinessSector(activityCode, activityLabel);
+  const businessSector = classifyBusinessSector(activityCode, activityLabel, [companyName, company?.nom_commercial, establishment?.nom_commercial, ...(Array.isArray(establishment?.liste_enseignes) ? establishment.liste_enseignes : [])].filter(Boolean).join(' '));
   return { siret, siren, company_name: companyName, company_city: companyCity, company_postal_code: companyPostalCode, activity_code: activityCode || null, activity_label: activityLabel || null, business_sector: businessSector };
 }
 

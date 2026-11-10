@@ -1,3 +1,13 @@
+## 2026-11-10 — Inscription Gubernatis : offre Fondateur refusée à cause du code d'activité (Claude)
+
+- **Constat (capture d'Anthony, 13:07) :** compte Pro Gubernatis créé par l'admin (contact@cabinet-merengone.com, SIRET 53398729300024, import du site https://gubernatis-immobilier.com/fr/ activé) mais « Offre Fondateur non activée : Erreur lors de la préparation de l'abonnement ».
+- **Cause :** le registre classe la société en 70.22Z (conseil) → pro_verifications.business_sector = 'other' → claim_founder_slot lève « L’activité enregistrée pour ce SIRET/SIREN ne permet pas l’offre Fondateur… », message non reconnu par create-pro-subscription-order → erreur générique.
+- **Corrigé :**
+  - verify-professional et admin-onboard-pro : si le code/libellé ne tranche pas, le nom officiel / enseigne décide (« immobilier », « immo » → immobilier ; « garage », « automobiles », « autos », « motos », « concessionnaire » → véhicules).
+  - admin-onboard-pro : si le registre reste « other », le domaine choisi par l'admin (avec l'accord du pro) est retenu avant l'offre Fondateur ; avertissement reformulé.
+  - admin-onboard-pro : relancer « Créer le compte et importer le stock » sur un compte existant retente l'offre Fondateur si le pro n'a ni place Fondateur ni abonnement (session technique par lien magique, même contrôle que l'inscription). L'import est un upsert, rien n'est dupliqué.
+- **À faire pour Gubernatis :** Anthony relance le même formulaire (mêmes valeurs) → Fondateur activé.
+
 ## 2026-11-10 — Gubernatis : surfaces manquantes et détail dans la démo (ChatGPT)
 
 - Demande Anthony : « il manque les surfaces ». Dernier main 2a33b46 récupéré en worktree isolé, v333 de production relue. Démo existante : 78 surfaces totales sur 83 fiches. Cinq absences contrôlées sur les fiches publiques.

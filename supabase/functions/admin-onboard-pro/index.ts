@@ -22,14 +22,17 @@ const esc = (v: unknown) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "
 
 const MARKETPLACES = /^(https?:\/\/)?([^\/]*\.)?(leboncoin|lacentrale|autoscout24|paruvendu|seloger|bienici|logic-immo|pap|ouestfrance-(?:auto|immo)|largus|vinted|facebook|instagram|tiktok)\./i;
 
-function classifySector(codeValue: unknown, labelValue: unknown) {
+function classifySector(codeValue: unknown, labelValue: unknown, nameValue: unknown = "") {
   const code = String(codeValue ?? "").trim().toUpperCase().replace(/[\s.]/g, "");
-  const label = String(labelValue ?? "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const label = String(labelValue ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
   if (code.startsWith("45") || /(automobile|vehicule|voiture|moto|motocycle|garage|concessionnaire)/.test(label)) return "vehicules";
   if (code.startsWith("68") || /(immobilier|immobiliere|agence immobiliere|transaction immobiliere|administration de biens)/.test(label)) return "immobilier";
+  // 10/11/2026 : agences enregistrées sous un autre code (ex. Gubernatis Immobilier en 70.22Z) — le nom officiel/enseigne tranche.
+  const name = String(nameValue ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+  if (/\b(immobilier|immobiliere|immo)\b/.test(name)) return "immobilier";
+  if (/\b(garage|automobiles?|autos|motos|concessionnaire)\b/.test(name)) return "vehicules";
   return "other";
 }
-// Même lecture du registre que verify-professional (recherche-entreprises.api.gouv.fr).
 async function lookupCompany(siret: string) {
   const r = await fetch(`https://recherche-entreprises.api.gouv.fr/search?q=${encodeURIComponent(siret)}&page=1&per_page=1`, { headers: { Accept: "application/json", "User-Agent": "Abracadeal/1.0" } });
   if (!r.ok) throw new Error("Le registre des entreprises est momentanément indisponible. Réessayez plus tard.");
@@ -47,7 +50,7 @@ async function lookupCompany(siret: string) {
     company_name: String(c?.nom_complet || c?.nom_raison_sociale || c?.nom_commercial || "Entreprise").trim(),
     company_city: String(e?.libelle_commune || "").trim(), company_postal_code: String(e?.code_postal || "").trim(),
     activity_code: activityCode || null, activity_label: activityLabel || null,
-    business_sector: classifySector(activityCode, activityLabel),
+    business_sector: classifySector(activityCode, activityLabel, [c?.nom_complet, c?.nom_commercial, e?.nom_commercial, ...(Array.isArray(e?.liste_enseignes) ? e.liste_enseignes : [])].filter(Boolean).join(" ")),
   };
 }
 function normalizeUrl(raw: unknown) {
@@ -70,6 +73,32 @@ async function callFunction(name: string, token: string, body: unknown) {
   const r = await fetch(`${SUPABASE_URL}/functions/v1/${name}`, { method: "POST", headers: { Authorization: `Bearer ${token}`, apikey: ANON_KEY, "Content-Type": "application/json" }, body: JSON.stringify(body) });
   const d = await r.json().catch(() => ({}));
   return { ok: r.ok && d?.ok !== false, status: r.status, data: d };
+}
+// 10/11/2026 : l'admin a choisi le domaine avec l'accord du pro — si le registre ne tranche pas (« other »), on retient ce choix
+// pour l'offre Fondateur, puis on active l'offre via une session technique du compte (même contrôle que l'inscription normale).
+async function confirmSectorIfUnclear(userId: string, sector: string) {
+  if (sector !== "vehicules" && sector !== "immobilier") return;
+  await admin.from("pro_verifications").update({ business_sector: sector }).eq("user_id", userId).eq("business_sector", "other");
+}
+async function activateFounder(userId: string, token: string, warnings: string[]) {
+  const { data: open } = await admin.rpc("get_founder_offer_open");
+  if (open === false) { warnings.push("Offre Fondateurs fermée : pas d’abonnement gratuit créé."); return null; }
+  const sub = await callFunction("create-pro-subscription-order", token, { plan_code: "pro_50", expect_founder: true });
+  if (sub.ok && sub.data?.founder) {
+    await admin.from("pro_email_outbox").update({ available_at: new Date(Date.now() + 20 * 60e3).toISOString() }).eq("user_id", userId).eq("status", "pending");
+    return { number: sub.data.founder_number, free_until: sub.data.free_until };
+  }
+  warnings.push("Offre Fondateur non activée : " + (sub.data?.error || "place indisponible"));
+  return null;
+}
+async function sessionFor(email: string) {
+  const { data: link, error } = await admin.auth.admin.generateLink({ type: "magiclink", email });
+  const hash = link?.properties?.hashed_token;
+  if (error || !hash) throw new Error("Session technique impossible : " + (error?.message || ""));
+  const pub = createClient(SUPABASE_URL, ANON_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
+  const { data, error: vErr } = await pub.auth.verifyOtp({ type: "magiclink", token_hash: hash });
+  if (vErr || !data?.session) throw new Error("Session technique impossible : " + (vErr?.message || ""));
+  return data.session.access_token;
 }
 function tempPassword() {
   const b = new Uint8Array(24); crypto.getRandomValues(b);
@@ -290,7 +319,7 @@ Deno.serve(async (req) => {
       const sector = company.business_sector === "vehicules" || company.business_sector === "immobilier" ? company.business_sector : wanted;
       const warnings: string[] = [];
       if (company.business_sector !== "other" && company.business_sector !== wanted) warnings.push(`Domaine corrigé d’après le registre : ${company.business_sector === "immobilier" ? "Immobilier" : "Auto / Moto"}.`);
-      if (company.business_sector === "other") warnings.push(`Activité du registre hors auto/immobilier (${company.activity_label || company.activity_code || "inconnue"}) : l’offre Fondateurs peut être refusée.`);
+      if (company.business_sector === "other") warnings.push(`Activité du registre hors auto/immobilier (${company.activity_label || company.activity_code || "inconnue"}) : domaine « ${wanted === "immobilier" ? "Immobilier" : "Véhicules"} » retenu d’après ton choix (accord du pro).`);
 
       // Compte déjà existant pour cet e-mail : on ne recrée rien, on ajoute seulement la demande d'import.
       const { data: siretOwner } = await admin.from("pro_verifications").select("user_id").eq("siret", siret).maybeSingle();
@@ -302,7 +331,23 @@ Deno.serve(async (req) => {
         const { data: imp, error: impErr } = await caller.rpc("admin_create_site_import", { p_owner_id: existingUser.id, p_url: site, p_sector: sector });
         if (impErr) throw impErr;
         const vitrine = await autofillShowroom(existingUser.id, site);
-        return json({ ok: true, existing: true, user_id: existingUser.id, feed_id: imp?.feed_id, company, sector, founder: null, showroom: vitrine, warnings: ["Ce garage avait déjà un compte : seul l’import de son site a été ajouté.", showroomNote(vitrine)] });
+        const exWarnings = ["Ce professionnel avait déjà un compte : import de son site vérifié."];
+        // 10/11/2026 : si l'offre Fondateur n'avait pas pu être activée à la création, on la retente ici (aucun abonnement existant).
+        let exFounder: any = null;
+        const [{ data: fe }, { data: cur }] = await Promise.all([
+          admin.from("founder_enrollments").select("founder_number,free_until,revoked_at").eq("user_id", existingUser.id).maybeSingle(),
+          admin.from("pro_subscriptions").select("status").eq("user_id", existingUser.id).maybeSingle(),
+        ]);
+        if (!fe && !(cur && ["active", "trialing", "past_due"].includes(String(cur.status)))) {
+          await confirmSectorIfUnclear(existingUser.id, sector);
+          try {
+            const tok = await sessionFor(email);
+            exFounder = await activateFounder(existingUser.id, tok, exWarnings);
+            try { await admin.auth.admin.signOut(tok); } catch (_) { /* session technique */ }
+          } catch (e) { exWarnings.push("Offre Fondateur non activée : " + (e instanceof Error ? e.message : String(e))); }
+        } else if (fe && !fe.revoked_at) exFounder = { number: fe.founder_number, free_until: fe.free_until };
+        exWarnings.push(showroomNote(vitrine));
+        return json({ ok: true, existing: true, user_id: existingUser.id, feed_id: imp?.feed_id, company, sector, founder: exFounder, showroom: vitrine, warnings: exWarnings });
       }
 
       const { data: phoneFree } = await admin.rpc("abracadeal_phone_available", { p_phone: phone, p_account_type: "professionnel" });
@@ -333,16 +378,8 @@ Deno.serve(async (req) => {
 
       let founder: any = null;
       if (ver.ok) {
-        const { data: open } = await admin.rpc("get_founder_offer_open");
-        if (open === false) warnings.push("Offre Fondateurs fermée : pas d’abonnement gratuit créé.");
-        else {
-          const sub = await callFunction("create-pro-subscription-order", token, { plan_code: "pro_50", expect_founder: true });
-          if (sub.ok && sub.data?.founder) {
-            founder = { number: sub.data.founder_number, free_until: sub.data.free_until };
-            // Le mail d'activation automatique part après le mail de bienvenue (qui contient le lien du mot de passe).
-            await admin.from("pro_email_outbox").update({ available_at: new Date(Date.now() + 20 * 60e3).toISOString() }).eq("user_id", userId).eq("status", "pending");
-          } else warnings.push("Offre Fondateur non activée : " + (sub.data?.error || "place indisponible"));
-        }
+        await confirmSectorIfUnclear(userId, sector);
+        founder = await activateFounder(userId, token, warnings);
       }
       try { await admin.auth.admin.signOut(token); } catch (_) { /* session temporaire */ }
 
