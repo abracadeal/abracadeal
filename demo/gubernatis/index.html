@@ -62,7 +62,7 @@ function setTab(tab){
 function renderCards(){
   const host=document.getElementById('stockResults');if(!host)return;
   const cards=filtered.slice(0,shown).map(l=>{
-    const specs=[TYPES[l.sub]||'',l.surface?Math.round(l.surface)+' m²':'',l.rooms?l.rooms+' pièce'+(l.rooms>1?'s':''):''].filter(Boolean).join(' · ');
+    const specs=[TYPES[l.sub]||'',l.surface?Number(l.surface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²':'',l.rooms?l.rooms+' pièce'+(l.rooms>1?'s':''):''].filter(Boolean).join(' · ');
     return '<div class="ad"><div class="photo"'+(l.photo?' style="background-image:url(&quot;'+esc(l.photo)+'&quot;)"':'')+'></div><div class="adbody"><div class="adtitle">'+esc(l.title)+'</div><div class="price">'+esc(money(l))+'</div>'+(specs?'<div class="specs">'+esc(specs)+'</div>':'')+'<div class="city">'+esc(l.city||'')+'</div></div></div>';
   }).join('');
   host.innerHTML='<div class="grid">'+cards+'</div>'+(shown<filtered.length?'<button class="more" id="moreBtn" type="button">Voir plus</button>':'');

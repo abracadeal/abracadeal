@@ -346,7 +346,7 @@ function closeModal(id){var el=document.getElementById(id);el.classList.remove('
 document.addEventListener('click',function(e){var c=e.target.closest('[data-close]');if(c){e.preventDefault();closeModal(c.getAttribute('data-close'));}});
 document.addEventListener('keydown',function(e){if(e.key==='Escape')closeModal('detailModal');});
 function gradeOk(v){return /^[A-G]$/.test(String(v||'').trim().toUpperCase())}
-function specs(a){return [a.surface?Math.round(a.surface)+' m²':'',a.rooms?a.rooms+' pièce'+(a.rooms>1?'s':''):'',a.bedrooms?a.bedrooms+' ch.':''].filter(Boolean)}
+function specs(a){return [a.surface?Number(a.surface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²':'',a.rooms?a.rooms+' pièce'+(a.rooms>1?'s':''):'',a.bedrooms?a.bedrooms+' ch.':''].filter(Boolean)}
 function scale(kind,g){g=String(g||'').trim().toUpperCase();if(!gradeOk(g))return '<span class="diagnostic-na">Non communiqué</span>';return '<div class="diagnostic-scale '+(kind==='ges'?'climate':'energy')+'">'+['A','B','C','D','E','F','G'].map(function(x){return '<span class="diagnostic-grade g-'+x.toLowerCase()+(x===g?' selected':'')+'">'+x+'</span>'}).join('')+'</div>'}
 function eur(n){return Number(n).toLocaleString('fr-FR')+' €'}
 function card(a){
@@ -368,7 +368,7 @@ window.changeDetailPhoto=function(d){if(cur)selectDetailPhoto((idx+d+cur.photos.
 window.demoOnly=function(btn,txt){btn.textContent=txt||'Disponible une fois en ligne';};
 window.openAd=function(i){
  var a=ADS[i];if(!a)return;
- cur=a;idx=0;var info=[['Type de bien',TYPES[a.sub]||'Immobilier']].concat(a.surface?[['Surface',Math.round(a.surface)+' m²']]:[]).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat(a.bedrooms?[['Chambres',String(a.bedrooms)]]:[]).concat(a.charges?[['Charges annuelles',eur(a.charges)]]:[]).concat(a.fees?[['Honoraires',String(a.fees)]]:[]).concat([['Ville',a.city]]);
+ cur=a;idx=0;var info=[['Type de bien',TYPES[a.sub]||'Immobilier']].concat(a.surface?[['Surface',Number(a.surface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat(a.landSurface?[['Terrain',Number(a.landSurface).toLocaleString('fr-FR',{maximumFractionDigits:2})+' m²']]:[]).concat((a.roomAreas||[]).map(function(x){var at=x.indexOf(':');return at<0?['Surface détaillée',x]:[x.slice(0,at).trim(),x.slice(at+1).trim()]})).concat(a.rooms?[['Pièces',String(a.rooms)]]:[]).concat(a.bedrooms?[['Chambres',String(a.bedrooms)]]:[]).concat(a.charges?[['Charges annuelles',eur(a.charges)]]:[]).concat(a.fees?[['Honoraires',String(a.fees)]]:[]).concat([['Ville',a.city]]);
  var thumbs=a.photos.length>1?'<div class="detail-thumbs">'+a.photos.map(function(u,k){return '<button type="button" class="'+(k===0?'active':'')+'" onclick="selectDetailPhoto('+k+')"><img src="'+esc(u)+'" alt="Photo '+(k+1)+'" loading="lazy"></button>'}).join('')+'</div>':'';
  $('#detailBody').innerHTML=
  '<div class="listing-detail dm-has-actions">'
@@ -391,7 +391,7 @@ window.openAd=function(i){
  var k=new URLSearchParams(location.search).get('k')||'';
  var res=k?await sb.rpc('get_demo_preview',{p_token:k}):{data:null};
  if(!res||!res.data){$('#resultSubtitle').textContent='Ce lien d’aperçu n’est pas valide ou a expiré.';return}
- ADS=(res.data.rows||[]).map(function(r,i){var pp=(r.pp&&r.pp.length?r.pp:(r.ph?[r.ph]:[]));return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,rooms:r.r,bedrooms:r.ch,sub:r.sub||'',photo:r.ph||pp[0]||'',photos:pp,dpe:r.d,ges:r.g,fees:r.fe,charges:r.ac,desc:r.de||''}});
+ ADS=(res.data.rows||[]).map(function(r,i){var pp=(r.pp&&r.pp.length?r.pp:(r.ph?[r.ph]:[]));return {i:i,title:r.t||'Bien immobilier',price:r.p,city:r.c||'',surface:r.s,landSurface:r.ls,roomAreas:r.ra||[],rooms:r.r,bedrooms:r.ch,sub:r.sub||'',photo:r.ph||pp[0]||'',photos:pp,dpe:r.d,ges:r.g,fees:r.fe,charges:r.ac,desc:r.de||''}});
  LIST=ADS.slice();
  $('#demoProLine').textContent='Agence immobilière · Nice · '+ADS.length+' biens';
  $('#resultSubtitle').textContent=ADS.length+' biens · touchez une annonce pour l’ouvrir';

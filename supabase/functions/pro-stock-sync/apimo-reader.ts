@@ -66,10 +66,25 @@ export function parseApimoDetail(raw:string,url:string){
   let areaV=areaM?num(areaM[1]):'';
   if(!areaV&&Number(property?.floorSize?.value)>0)areaV=String(Number(property.floorSize.value));
   if(!areaV){const line=infoText.split('\n').find(l=>/\d\s*m²/.test(l)&&!/terrain|jardin|terrasse|balcon|parcelle|cave|garage|parking/i.test(l));const m=line?.match(/(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m²/);if(m)areaV=num(m[1]);}
+  // 10/11/2026 Gubernatis : total publié seulement dans le descriptif, ou garage décrit dans « Surfaces ».
+  // Ne jamais additionner les pièces ni utiliser jardin/terrasse comme surface du logement.
+  const areaNumber='(\\d[\\d \\u00a0\\u202f]*(?:[.,]\\d+)?)';
+  if(!areaV&&!/terrain/i.test(o.type_bien)){
+    const firstParagraph=description.split('\n')[0];
+    const total=firstParagraph.match(new RegExp('(?:surface|superficie)\\s+(?:habitable|totale|utile|privative)(?:\\s+(?:de|d[’\']))?\\s*(?:environ\\s+)?'+areaNumber+'\\s*m[²2]','i'))
+      ||firstParagraph.match(new RegExp('(?:villa|maison|appartement|studio|logement|local(?: commercial)?)\\s+(?:d[’\']environ|de|d[’\'])\\s*(?:environ\\s+)?'+areaNumber+'\\s*m[²2]','i'));
+    if(total&&!/^\s*(?:de\s*)?(?:terrain|jardin|terrasse|balcon|parcelle)\b/i.test(firstParagraph.slice((total.index||0)+total[0].length))&&!/projet|extension|potentiel|possibilit[ée]|apr[èe]s travaux/i.test(firstParagraph))areaV=num(total[1]);
+    if(!areaV&&/garage|parking|cave|box/i.test(o.type_bien)){
+      const units=[...surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)].map(m=>text(m[1]));
+      if(units.length===1){const m=units[0].match(/^(?:1\s+)?(?:Garage|Parking|Cave|Box)\s+(\d+(?:[.,]\d+)?)\s*m[²2]$/i);if(m)areaV=num(m[1]);}
+    }
+  }
   if(areaV)o[/terrain/i.test(o.type_bien)?'surface_terrain':'surface']=areaV;
+  const landDescription=description.match(/\bterrain\s+(?:d[’']?\s*)?(?:de\s+)?(?:environ\s*)?(\d[\d \u00a0\u202f]*(?:[.,]\d+)?)\s*m[²2]/i);
   const rooms=infoText.match(/(\d+)\s*pi[eè]ces?/i)||all.match(/(\d+)[ \t]*pi[eè]ces?/i);if(rooms)o.pieces=rooms[1];const bedrooms=infoText.match(/(\d+)\s*chambres?/i)||all.match(/(\d+)[ \t]*chambres?/i);if(bedrooms)o.chambres=bedrooms[1];else if((variant12||variant19)&&property?.numberOfBedrooms)o.chambres=String(property.numberOfBedrooms);
   let baths=0;
   for(const m of surfaceBlock.matchAll(/<li\b[^>]*>([\s\S]*?)<\/li>/gi)){const t=text(m[1]);const land=t.match(/^\d+\s*(?:Terrain|Jardin)\s+(\d+(?:[.,]\d+)?)\s*m²/i);if(land&&!o.surface_terrain)o.surface_terrain=num(land[1]);const bath=t.match(/^(\d+)\s+Salle de (?:bains?|douche)/i);if(bath)baths+=Number(bath[1]);}
+  if(!o.surface_terrain&&landDescription)o.surface_terrain=num(landDescription[1]);
   if(baths)o.salles_de_bain=String(baths);
   if(variant41)for(const [cls,field] of [['room','pieces'],['bedroom','chambres'],['bathroom','salles_de_bain'],['area',/terrain/i.test(o.type_bien)?'surface_terrain':'surface']]){const value=info.match(new RegExp('<li\\b[^>]*class="'+cls+'"[^>]*>[\\s\\S]*?<span[^>]*>([\\d.,]+)</span>','i'))?.[1];if(value)o[field]=num(value);}
   const factKeys:Record<string,string>={'exposition':'exposition','état':'etat_bien','étage':'etage','année de construction':'annee_construction','énergie de chauffage':'chauffage'};

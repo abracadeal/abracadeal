@@ -1,3 +1,10 @@
+## 2026-11-10 — Gubernatis : surfaces manquantes et détail dans la démo (ChatGPT)
+
+- Demande Anthony : « il manque les surfaces ». Dernier main 2a33b46 récupéré en worktree isolé, v333 de production relue. Démo existante : 78 surfaces totales sur 83 fiches. Cinq absences contrôlées sur les fiches publiques.
+- Villa 87298704 : 82 m² publiés dans le premier paragraphe, terrain environ 2000 m² séparé ; garage 85404743 : 13 m² publiés dans la rubrique Surfaces. Ajout générique Apimo de ces replis sans remplacer les champs structurés/bandeaux existants. Rejet des projets/extensions et d'une surface de terrain prise pour logement. Pas de somme des pièces, pas de surface calculée depuis longueur/largeur.
+- Appartement Villefranche 86760044 : total non publié, mais six surfaces de pièces. Programme 82317780 et commerce 84581766 : aucune surface publiée, laissée absente. Le détail des surfaces était lu mais perdu dans l'aperçu ; champs ra (pièces) et ls (terrain) transmis à l'aperçu complet, affichage dans les informations clés de la démo Gubernatis. Précision jusqu'à deux décimales conservée dans les cartes et la fiche.
+- Tests : garde-fous total/terrain/projet/garage/pièces sans total/absence, quatre régressions Apimo, pagination 84, reprise, bundle et syntaxe des scripts démo. Pas de mail, import d'annonces ou validation du prospect. Résultat de production et rafraîchissement de la démo à consigner après déploiement.
+
 ## 2026-11-10 — Démo showroom Gubernatis Immobilier (Nice) (Claude)
 
 - Demande d'Anthony : aperçu showroom à préparer pour Gubernatis Immobilier (Lisa Lunven a demandé si Abracadeal est compatible Apimo). RIEN envoyé à l'agence (consigne d'Anthony « n'envoie rien pour l'instant »).
