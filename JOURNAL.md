@@ -1,3 +1,8 @@
+## 2026-11-10 (nuit) — Photos : R2 stockage principal, étape 1 (Claude)
+
+- Fait : assets/r2-photos-20261110.js chargé après supabase-js sur vacances, logement-vacances, photos-vacances, recherche-vacances, pro, pro-pro, options-annonce et moderation : getPublicUrl() de listing-images / listing-thumbs pointe sur R2 (filet : rechargement depuis Supabase si R2 répond en erreur). Toutes les photos étaient déjà copiées dans R2 (0 en attente) → moins de bande passante Supabase.
+- Bloqué : la migration SQL (r2_sync.offloaded_at, r2_pending qui n’efface de R2 que les photos plus référencées, r2_offload_candidates / r2_mark_offloaded, pending_photo_duplicates) a demandé une confirmation sur le serveur Supabase, restée sans réponse (Anthony endormi). Rien n’a été appliqué ni supprimé. Restent ensuite : moderate-listing / prepare-listing-edit / generate-listing-thumbs / process-data-retention / share-listing / syndication_feed / pages SEO lisant R2, puis retrait des originaux Supabase.
+
 ## 10/11/2026 — Claude : bouton « Continuer avec Facebook » masqué
 - Règle (Anthony + Claude) : tout nouveau moyen de connexion ou de paiement doit être testé de bout en bout avec un vrai compte AVANT d'être affiché aux visiteurs (le bouton Facebook était visible depuis le 18/10 alors que l'app Meta était en mode Développement).
 - Test 17:00 : connexion Facebook OK ; même e-mail qu'un compte existant → identité Facebook rattachée au compte existant (pas de doublon). Identité Facebook de test retirée du compte d'Anthony ensuite.
