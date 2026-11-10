@@ -115,7 +115,7 @@ function init(){
    });
   }
   const labels=[f.category,f.brand,f.city,f.maxPrice?'≤ '+f.maxPrice.toLocaleString('fr-FR')+' €':'',f.maxKm?'≤ '+f.maxKm.toLocaleString('fr-FR')+' km':'',f.minArea?'≥ '+f.minArea+' m²':''].filter(Boolean);
-  info.textContent=labels.length?'✦ Critères reconnus : '+labels.map(x=>x===f.city?x+' et alentours':x).join(' · ')+(f.query?' · Mots-clés : '+f.query:''):'';
+  info.textContent=labels.length?'✦ Critères reconnus : '+labels.map(x=>x===f.city?x.replace(/(^|[\s-])\S/g,m=>m.toUpperCase())+' et alentours':x).join(' · ')+(f.query?' · Mots-clés : '+f.query:''):'';
  },true);
 }
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init,{once:true});else init();
