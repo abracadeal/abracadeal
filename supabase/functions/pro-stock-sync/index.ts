@@ -366,7 +366,7 @@ async function normalizeRows(rows:any[],sector:string,ownerId?:string|null,prefe
  for(const r of out){const loc=exactSourceCities.get(String(r.externalUrl));if(loc&&!ovr.get(hostOf(r.externalUrl)+'|'+String(r.ref))?.ville){r.city=loc.city;r.postal=loc.postal;r.errors=(r.errors||[]).filter((e:string)=>e!=='ville manquante');r.sourceWarnings=(r.sourceWarnings||[]).filter((w:string)=>!/^Ville/.test(w));}}
  // Geo is optional enrichment: bound its network time and process distinct cities in parallel.
  const cityGroups=new Map<string,any[]>();for(const r of out){const key=norm(String(r.city||''));if(!cityGroups.has(key))cityGroups.set(key,[]);cityGroups.get(key)!.push(r);}
- const groups=[...cityGroups.values()];let geoNext=0;await Promise.all(Array.from({length:4},async()=>{while(geoNext<Math.min(groups.length,4)){const group=groups[geoNext++];for(const r of group)if(!bergeIdentity(r)&&!siteaIdentity(r)&&!i3vIdentity(r))await correctCityPostal(r);}}));
+ const groups=[...cityGroups.values()];let geoNext=0;await Promise.all(Array.from({length:4},async()=>{while(geoNext<Math.min(groups.length,4)){const group=groups[geoNext++];for(const r of group)if(!bergeIdentity(r)&&!siteaIdentity(r)&&!i3vIdentity(r)&&!/^https?:\/\/(?:www\.)?lautre-immobilier\.fr\/a-vendre\//i.test(String(r.externalUrl||'')))await correctCityPostal(r);}}));
  // Même annonce publiée deux fois sur le site (références différentes) : on garde celle qui a le plus de photos.
  const seenL=new Map<string,number>();const res:any[]=[];let dup=0;
  for(const r of out){const k=listingKey(r);const j=seenL.get(k);if(j===undefined){seenL.set(k,res.length);res.push(r);continue;}dup++;if((r.photos?.length||0)>(res[j].photos?.length||0))res[j]=r;}
