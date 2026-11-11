@@ -6,8 +6,29 @@ import { isPlaceholderPhoto } from './photo-utils.ts';
 
 const catalogue = new URL('https://www.nextlogis.fr/annonces-immobilieres-saint-nazaire-d-aude.html');
 const detailPath = /^\/annonce-immobiliere-[^/]+-(\d+)\.html$/i;
+const excludedGalleryDigests = new Set([
+  '3723142758ed9e4b30e3c47f94ee3021623272dbca24a27bba9617d2ffb2e801', // Illustration de devanture
+  'd9f97ab6e5c7fc1c11a91c8ce9bbfbda9e7bfc246eb190b597982fff19c642d5', // Panneau fonds de commerce, réutilisé sur deux annonces
+  'bbd802d0e2efdf3cd4521f6f7eb07297c634d9ac05329c172a7b3f881d8e5850', // Logo générique tabac / loto
+  '84ea20f07021f5b3d85b5a4415bba3e1ac5be649bc5ad9b62f6e107205aefe95', // Illustration fonds de commerce
+  '1f10846c6d6aa97144183e8ee3109bf14a10e3a7d28f188abeda97eb09b53444', // Ardoise murs commerciaux
+  '16a6917c5359db94d156e74f91a99fb00f40d00b3266800dcbd710859bca9c73', // Illustration cabaret
+  'e18cd3ac34f099f37e6e5dfbf94a4583b3c7c1d5a5e1bbb437918ed8a384357a', // Illustration terrain à vendre
+  'fed56f8239e8cbc2790cf7194a4797ec1f7ee59be0f567ca3293e6191f9cfe42', // Seconde prise presque identique de la même pièce
+]);
 type Fetcher = (url: URL) => Promise<{text: string; url: URL}>;
 export const isNextlogis = (url: URL) => /^(?:www\.)?nextlogis\.fr$/.test(url.hostname);
+
+export function nextlogisIdentity(row: {externalUrl?: string; ref?: string}) {
+  if (!row.externalUrl || !row.ref) return null;
+  try {
+    const page = new URL(row.externalUrl);
+    const id = detailPath.exec(page.pathname)?.[1];
+    return isNextlogis(page) && id === row.ref ? 'nextlogis|' + id : null;
+  } catch {
+    return null;
+  }
+}
 
 function text(html: string) {
   return sDecode(html.replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, ' '))
@@ -105,7 +126,7 @@ export function parseNextlogis(html: string, url: string) {
     mandat: title[5],
     url,
     titre: title[1] + ' ' + title[3],
-    type_bien: title[1],
+    type_bien: /^murs commerciaux$/i.test(title[1]) ? 'local commercial' : title[1],
     transaction: /\bà louer\b/i.test(title[1]) ? 'location' : 'vente',
     prix: price,
     ville: title[3],
@@ -175,7 +196,7 @@ export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | un
       for (const photo of row.photos!.split('|')) {
         const hash = await digest(photo);
         if (!hash) throw Error('Photo Nextlogis inaccessible');
-        if (!hashes.has(hash)) hashes.set(hash, photo);
+        if (!excludedGalleryDigests.has(hash) && !hashes.has(hash)) hashes.set(hash, photo);
       }
       let diagnostics = {};
       if (row.diagnosticUrl && (row.consommation_energie || row.emission_ges)) {

@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import {nextlogisCatalogue, parseNextlogis, nextlogisEnergy} from '../supabase/functions/pro-stock-sync/nextlogis-reader.ts';
+import {nextlogisCatalogue, parseNextlogis, nextlogisEnergy, nextlogisIdentity} from '../supabase/functions/pro-stock-sync/nextlogis-reader.ts';
 
 const fixture = name => fs.readFileSync(new URL('./fixtures/nextlogis/'+name, import.meta.url), 'utf8');
 const list = nextlogisCatalogue(fixture('list.html'), new URL('https://www.nextlogis.fr/'));
@@ -20,7 +20,20 @@ assert.equal(house.photos.split('|').length, 8);
 assert.equal(house.consommation_energie, 264);
 assert.equal(house.emission_ges, 13);
 assert.doesNotMatch(house.photos, /dpe|thumb/);
-assert.equal(row(50).surface_terrain, 6779);
+const firstLand = row(50);
+const secondLand = row(51);
+assert.equal(firstLand.titre, secondLand.titre);
+assert.equal(firstLand.prix, secondLand.prix);
+assert.equal(firstLand.surface_terrain, 6779);
+assert.equal(secondLand.surface_terrain, 12330);
+assert.deepEqual([firstLand.mandat, secondLand.mandat], ['703', '704']);
+assert.deepEqual([firstLand, secondLand].map(land =>
+  nextlogisIdentity({externalUrl: land.url, ref: land.reference})), ['nextlogis|50', 'nextlogis|51']);
+assert.equal(nextlogisIdentity({externalUrl: firstLand.url, ref: '51'}), null);
+assert.equal(nextlogisIdentity({externalUrl: firstLand.url.replace('nextlogis.fr', 'example.com'), ref: '50'}), null);
+assert.equal(row(67).type_bien, 'local commercial');
+assert.equal(row(67).surface, 393);
+assert.equal(row(67).prix, 472500);
 assert.equal(row(50).contact_nom, 'Mickael PEYRON');
 assert.equal(row(50).contact_telephone, '0601999470');
 assert.equal(row(104).contact_nom, 'Anais RIVAL');
