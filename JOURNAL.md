@@ -2993,3 +2993,7 @@
 - Accès admin Vacances : tuile « Vacances » ajoutée dans Compte → Administration (admin-account-layout-20261018.js, index v=16). Déjà présent aussi dans le menu admin mobile et dans admin.html.
 
 - 10/11/2026 (Claude) : CRM prospection — bloc « Écrire un mail » (boîte OVH au choix, jamais Gmail ; copie rangée dans « Envoyés » par IMAP), bouton « Écrire » sur chaque prospect et sur les accords (remplace le lien mailto qui ouvrait Gmail). prospect-mailer v32 : action send (admin), journal prospection_logs « manual_mail ».
+
+## 11/11/2026 — Claude — Google Images : 1re photo sous abracadeal.fr (demande d'Anthony)
+- scripts/build_share_pages.py (VERSION 12) : la 1re photo de chaque annonce est servie sous notre adresse, https://abracadeal.fr/annonce/<id>/apercu.jpg (JPEG 1200 px déjà généré pour WhatsApp) : grande photo de la fiche, données structurées Product « image », vignettes des listes (si l'aperçu existe) et sitemap-annonces.xml (1 image par annonce au lieu de 5, toutes chez nous). Photos suivantes inchangées (R2 / site du pro), pas listées dans le sitemap.
+- Pourquoi : Google Images attribuait les photos à pub-…r2.dev ou aux sites des pros (spidervo…). Domaine photos.abracadeal.fr (DNS Cloudflare) plus nécessaire pour ça.

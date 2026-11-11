@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "11"  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
+VERSION = "12"  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -605,7 +605,7 @@ def json_ld(listing, meta, photos, page_url, desc, crumbs):
     data = {"@context": "https://schema.org", "@type": "Product", "name": display_title(listing),
             "description": desc[:5000], "url": page_url, "sku": listing["id"], "offers": offer}
     if photos:
-        data["image"] = photos
+        data["image"] = [page_url + "apercu.jpg"]  # 11/11/2026 (Anthony) : la 1re photo, sous notre adresse
     brand = detect_brand(listing, desc)
     if brand:
         data["brand"] = {"@type": "Brand", "name": brand}
@@ -810,7 +810,8 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
     pro_link = (f'<p class="where">Vendu par <a href="/{e(pro["path"])}/">{e(pro.get("name") or "ce professionnel")}</a>'
                 f'{" · voir ses " + str(int(pro["count"])) + " annonces" if int(pro.get("count") or 0) > 1 else ""}</p>') if pro else ""
     lazy = ' loading="lazy"'
-    gallery = "".join(f'<img src="{e(u)}" alt="{e(title)} – photo {i + 1}"{lazy if i else ""} width="800" height="600">'
+    # 11/11/2026 (Anthony) : la 1re photo est servie sous abracadeal.fr (apercu.jpg), les suivantes restent chez le pro / R2
+    gallery = "".join(f'<img src="{e(image if i == 0 else u)}" alt="{e(title)} – photo {i + 1}"{lazy if i else ""} width="800" height="600">'
                       for i, u in enumerate(photos))
     rows = "".join(f"<tr><th>{e(k)}</th><td>{e(v)}</td></tr>" for k, v in specs)
     return f"""<!doctype html>
@@ -877,6 +878,8 @@ def listing_card(item):
     if price and l.get("category") == "vacances":
         price += " / nuit"
     img = photos[0] if photos else DEFAULT_PHOTO
+    if photos and os.path.exists(os.path.join(ROOT, str(l["id"]), "apercu.jpg")):
+        img = f"/annonce/{l['id']}/apercu.jpg"  # 11/11/2026 : 1re photo sous notre adresse
     title = display_title(l)
     return (f'<li><a href="/annonce/{e(l["id"])}/"><img src="{e(img)}" alt="{e(title)}" loading="lazy" width="400" height="300">'
             f'<span class="t">{e(title)}</span>{f"<span class=p>{e(price)}</span>" if price else ""}'
@@ -1062,7 +1065,8 @@ def write_sitemap(entries):
     lines = ['<?xml version="1.0" encoding="UTF-8"?>',
              '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">']
     for lid, lastmod, photos in entries:
-        img = "".join(f"<image:image><image:loc>{html.escape(u)}</image:loc></image:image>" for u in photos[:5])
+        # 11/11/2026 (Anthony) : une seule image par annonce, sous notre adresse (aperçu = 1re photo)
+        img = f"<image:image><image:loc>{SITE}/annonce/{lid}/apercu.jpg</image:loc></image:image>" if photos and os.path.exists(os.path.join(ROOT, lid, "apercu.jpg")) else ""
         lines.append(f"  <url><loc>{SITE}/annonce/{lid}/</loc><lastmod>{lastmod}</lastmod>{img}</url>")
     lines.append("</urlset>")
     write_if_changed(SITEMAP, "\n".join(lines) + "\n")
