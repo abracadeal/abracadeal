@@ -4,7 +4,7 @@
 - private.r2_sync.offloaded_at/size ; r2_offload_candidates() (copies de plus de 30 min encore référencées) ; r2_mark_offloaded() ; r2_pending() ne supprime de R2 un original retiré que s'il n'est plus référencé ou supprimé par la rétention.
 - r2-sync v2 : action « offload » ; cron abracadeal-r2-offload (minutes impaires, 100 par passage). Les nouvelles photos suivent le même chemin automatiquement.
 - Lecture des originaux depuis R2 quand ils ne sont plus sur Supabase : moderate-listing v36 (hash, quarantaine, analyse IA), prepare-listing-edit, generate-listing-thumbs, process-data-retention, moderator-api, share-listing, photos-vacances.js, flux syndication_feed, pages statiques (build_share_pages.py).
-- Contrôle : 552 annonces actives avant, à recompter après.
+- Résultat : 1 138 fichiers retirés de Supabase, 0 échec. Stockage Supabase ~242 Mo → ~20 Mo (showroom, sauvegardes, photos en attente). 552 annonces actives avant et après, 0 en attente : aucune re-modération. 602 photos d’nnonces actives présentes sur R2, contrôle HTTP 8/8 OK.
 
 ## 2026-11-10 (nuit) — Photos : R2 stockage principal, étape 1 (Claude)
 
