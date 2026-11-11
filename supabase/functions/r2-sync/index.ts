@@ -21,6 +21,18 @@ Deno.serve(async (req) => {
   const body = await req.json().catch(() => ({}));
   const limit = Math.min(Math.max(Number(body?.limit) || 40, 1), 200);
   const started = Date.now();
+  if (body?.action === "sizes") {
+    // 11/11/2026 : relève sur R2 la taille des fichiers copiés avant que r2_sync ne la note (jauge admin).
+    const { data: miss, error: me } = await admin.rpc("r2_missing_sizes", { lim: 300 });
+    if (me) return json({ error: me.message }, 500);
+    let ok = 0; const list = (miss || []) as { bucket_id: string; name: string }[];
+    for (let i = 0; i < list.length && Date.now() - started < 45000; i += 10) await Promise.all(list.slice(i, i + 10).map(async (m) => {
+      const h = await r2.fetch(keyUrl(m.bucket_id, m.name), { method: "HEAD" }).catch(() => null);
+      const len = Number(h?.headers.get("content-length") || 0);
+      if (h?.ok && len) { await admin.rpc("r2_set_size", { p_bucket: m.bucket_id, p_name: m.name, p_size: len }); ok++; }
+    }));
+    return json({ ok: true, sized: ok, candidates: list.length, ms: Date.now() - started });
+  }
   if (body?.action === "offload") {
     // 11/11/2026 : R2 devient le stockage principal. On retire de Supabase les originaux déjà copiés sur R2,
     // seulement après avoir vérifié la copie (HEAD R2, même taille). La ligne listing_photos ne change pas.
