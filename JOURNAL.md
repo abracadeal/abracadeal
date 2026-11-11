@@ -1,3 +1,6 @@
+## 11/11/2026 (matin) — Jauge R2 de l'admin corrigée
+- La jauge « Cloudflare R2 » affichait 0 Mo : elle additionnait les tailles depuis Supabase, où les originaux n'existent plus. Elle lit maintenant private.r2_sync.size, relevée sur R2 (r2-sync v3, action « sizes », RPC r2_set_size / r2_missing_sizes). 1 132 fichiers, 218,6 Mo.
+
 ## 2026-11-11 — Grange Cars, cinq véhicules lus et vérifiés (ChatGPT)
 
 - Main récupéré `3082c99b3908be7fa4870f7784424e1330eb004c`. JOURNAL et guide du robot relus. Fonction réellement déployée v338 ACTIVE épinglée sur `da3b813b952db4ca7dde0bf15e88d799cb14ff3e`, aucun écart de pro-stock-sync avec main. Worktree isolé. Changements concurrents R2, modération, pages SEO et autres connecteurs conservés. Changelog Supabase consulté, aucune évolution pertinente pour ce déploiement.
