@@ -46,6 +46,16 @@ function orient(img: Image, o: number): Image {
   return out;
 }
 
+/* 11/11/2026 : Cloudflare R2 = stockage principal des photos publiques. Un original retiré de Supabase
+   (copie R2 vérifiée) est relu depuis R2. */
+const R2_PUBLIC='https://pub-9747954003f04922a082752db15aeeed.r2.dev/';
+async function downloadPhoto(admin:any,bucket:string,path:string):Promise<{data:any,error:any}>{
+ const r=await admin.storage.from(bucket).download(path);
+ if(!r.error&&r.data)return r;
+ if(bucket!=='listing-images'&&bucket!=='listing-thumbs')return r;
+ try{const res=await fetch(R2_PUBLIC+bucket+'/'+String(path).split('/').map(encodeURIComponent).join('/'));if(res.ok)return {data:await res.blob(),error:null};}catch(_){}
+ return r;
+}
 Deno.serve(async (req) => {
   if (req.method !== "POST") return json({ error: "Method not allowed" }, 405);
   const { data: sec } = await admin.from("integration_secrets").select("secret_value").eq("name", "pro_stock_moderation_internal").maybeSingle();
@@ -60,7 +70,7 @@ Deno.serve(async (req) => {
       const r: Record<string, unknown> = { path };
       for (const bucket of ["listing-images", "listing-thumbs"]) {
         try {
-          const { data: f } = await admin.storage.from(bucket).download(String(path));
+          const { data: f } = await downloadPhoto(admin, bucket, String(path));
           if (!f) { r[bucket] = "absent"; continue; }
           const b = new Uint8Array(await f.arrayBuffer()); const im = await Image.decode(b);
           r[bucket] = { w: im.width, h: im.height, exif: exifOrientation(b), bytes: b.length };
@@ -88,7 +98,7 @@ Deno.serve(async (req) => {
     if (Date.now() - started > 20000) break;
     const path = String(row.storage_path);
     try {
-      const { data: file, error: dErr } = await admin.storage.from("listing-images").download(path);
+      const { data: file, error: dErr } = await downloadPhoto(admin, "listing-images", path);
       if (dErr || !file) throw dErr || new Error("téléchargement impossible");
       const bytes = new Uint8Array(await file.arrayBuffer());
       let img = await Image.decode(bytes);

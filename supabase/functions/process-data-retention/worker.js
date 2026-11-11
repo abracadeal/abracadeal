@@ -41,6 +41,8 @@ export async function runRetention(admin, sendNotice) {
    try {
     if(quarantine) {
      let {data,error}=await admin.storage.from(item.bucket).download(item.path);
+     // 11/11/2026 : original retiré de Supabase (copie Cloudflare R2) → preuve reprise depuis R2.
+     if((error||!data)&&(item.bucket==='listing-images'||item.bucket==='listing-thumbs')){try{const res=await fetch('https://pub-9747954003f04922a082752db15aeeed.r2.dev/'+item.bucket+'/'+String(item.path).split('/').map(encodeURIComponent).join('/'));if(res.ok){data=await res.blob();error=null;}}catch(_){}}
      // Recover a crash between deleting the public copy and recording its private location.
      if(error){const existing=await admin.storage.from(quarantine.bucket).download(quarantine.path);data=existing.data;error=existing.error;}
      if(error||!data)throw error||new Error('Photo de preuve indisponible');

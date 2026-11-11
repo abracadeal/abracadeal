@@ -12,7 +12,7 @@ Deno.serve(async(req:Request)=>{
   const dest=home+"?annonce="+encodeURIComponent(id);
   const photos=[...(a.listing_photos||[])].sort((x:any,y:any)=>(x.position||0)-(y.position||0));
   let image=photos[0]?.storage_path||"";
-  if(image && !/^https?:\/\//i.test(image)) image=Deno.env.get("SUPABASE_URL")+"/storage/v1/object/public/listing-images/"+image.split("/").map(encodeURIComponent).join("/");
+  if(image && !/^https?:\/\//i.test(image)) image="https://pub-9747954003f04922a082752db15aeeed.r2.dev/listing-images/"+image.split("/").map(encodeURIComponent).join("/"); /* 11/11/2026 : photos sur R2 */
   if(!image) image=home+"assets/default-listing-photo-20260921.jpg";
   const price=a.price!==null&&a.price!==""?Number(a.price).toLocaleString("fr-FR")+" €":"";
   const title=[a.title,price].filter(Boolean).join(" - ")+" sur Abracadeal";

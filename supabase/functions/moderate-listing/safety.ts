@@ -1,4 +1,5 @@
 import {remoteImage} from './import-images.ts';
+import {downloadPhoto,R2_PUBLIC} from './policy.ts';
 export const MODEL='omni-moderation-latest';
 const must=(r:any)=>{if(r.error)throw r.error;return r.data;};
 export function snapshot(listing:any,photos:any[]){
@@ -12,7 +13,14 @@ export async function quarantine(admin:any,photos:any[]){
   if(p.storage_bucket!=='listing-images'||/^https?:\/\//i.test(p.storage_path))continue;
   // Copy first, persist location, then remove the public copy. All errors fail closed.
   const existing=await admin.storage.from('listing-images-pending').download(p.storage_path);
-  if(existing.error)must(await admin.storage.from('listing-images').copy(p.storage_path,p.storage_path,{destinationBucket:'listing-images-pending'}));
+  if(existing.error){
+   const copied=await admin.storage.from('listing-images').copy(p.storage_path,p.storage_path,{destinationBucket:'listing-images-pending'});
+   if(copied.error){ /* 11/11/2026 : original retiré de Supabase (copie R2) → repris depuis R2 */
+    const fromR2=await downloadPhoto(admin,'listing-images',p.storage_path);
+    if(fromR2.error||!fromR2.data)must(copied);
+    must(await admin.storage.from('listing-images-pending').upload(p.storage_path,fromR2.data,{contentType:fromR2.data.type||'image/webp',upsert:true}));
+   }
+  }
   must(await admin.from('listing_photos').update({storage_bucket:'listing-images-pending'}).eq('id',p.id));
   must(await admin.storage.from('listing-images').remove([p.storage_path]));
   p.storage_bucket='listing-images-pending';
@@ -27,6 +35,8 @@ export async function scanSafety(admin:any,listing:any,photos:any[],fetcher=fetc
    // Photo affichée depuis le site du pro : téléchargée pour l'analyse (contrôles d'adresse et de taille), jamais stockée.
    const img=await remoteImage(url);let bin='';for(let i=0;i<img.bytes.length;i+=32768)bin+=String.fromCharCode(...img.bytes.subarray(i,i+32768));
    url=`data:${img.type};base64,${btoa(bin)}`;
+  }else if(p.storage_bucket==='listing-images'||p.storage_bucket==='listing-thumbs'){
+   url=R2_PUBLIC+p.storage_bucket+'/'+String(p.storage_path).split('/').map(encodeURIComponent).join('/'); // 11/11/2026 : originaux publiés sur R2
   }else{
    const signed=must(await admin.storage.from(p.storage_bucket).createSignedUrl(p.storage_path,120));
    if(!signed?.signedUrl)throw new Error('Photo inaccessible');

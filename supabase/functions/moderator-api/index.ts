@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
         const urls: string[] = [];
         for (const p of photos.slice(0, 12)) {
           if (/^https?:\/\//i.test(p.storage_path)) { urls.push(p.storage_path); continue; }
-          if (p.storage_bucket === "listing-images") { urls.push(admin.storage.from("listing-images").getPublicUrl(p.storage_path).data.publicUrl); continue; }
+          if (p.storage_bucket === "listing-images") { urls.push("https://pub-9747954003f04922a082752db15aeeed.r2.dev/listing-images/" + String(p.storage_path).split("/").map(encodeURIComponent).join("/")); continue; } // 11/11/2026 : photos sur R2
           const { data: s } = await admin.storage.from(p.storage_bucket).createSignedUrl(p.storage_path, 3600);
           if (s?.signedUrl) urls.push(s.signedUrl);
         }

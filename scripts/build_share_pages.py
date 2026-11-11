@@ -338,7 +338,7 @@ def photo_urls(listing):
         if not path:
             continue
         out.append(path if path.startswith("http") else
-                   f"{SUPABASE_URL}/storage/v1/object/public/listing-images/{urllib.parse.quote(path)}")
+                   f"https://pub-9747954003f04922a082752db15aeeed.r2.dev/listing-images/{urllib.parse.quote(path)}")  # 11/11/2026 : photos sur Cloudflare R2
     return out
 
 
