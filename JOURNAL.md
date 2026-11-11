@@ -2997,3 +2997,7 @@
 ## 11/11/2026 — Claude — Google Images : 1re photo sous abracadeal.fr (demande d'Anthony)
 - scripts/build_share_pages.py (VERSION 12) : la 1re photo de chaque annonce est servie sous notre adresse, https://abracadeal.fr/annonce/<id>/apercu.jpg (JPEG 1200 px déjà généré pour WhatsApp) : grande photo de la fiche, données structurées Product « image », vignettes des listes (si l'aperçu existe) et sitemap-annonces.xml (1 image par annonce au lieu de 5, toutes chez nous). Photos suivantes inchangées (R2 / site du pro), pas listées dans le sitemap.
 - Pourquoi : Google Images attribuait les photos à pub-…r2.dev ou aux sites des pros (spidervo…). Domaine photos.abracadeal.fr (DNS Cloudflare) plus nécessaire pour ça.
+
+## 11/11/2026 — Claude : photo par défaut sur des annonces de pros déjà validées (signalé par Anthony)
+- Cause : depuis le 10/11 (annonce validée = reste en ligne), une annonce synchronisée qui change reste « active » ; moderate-listing recopiait sa 1re photo depuis le site du pro dans le bucket privé `listing-images-pending` mais ne la publiait plus (seule la branche pending → active le faisait) → vignette = image par défaut. 16 annonces touchées (depuis le 10/11 15:37).
+- Correctif moderate-listing : une annonce restée en ligne voit ses photos du bucket privé publiées dans `listing-images` (sans quarantaine en cas d'échec). Les 16 annonces relancées.

@@ -301,6 +301,27 @@ Deno.serve(async(req)=>{
       }else finalStatus='pending';
     }
 
+    /* 11/11/2026 (Anthony : « la photo par défaut apparaît alors qu'il y a des photos ») : une annonce déjà validée reste
+       en ligne pendant la synchro (trigger zzzz_keep_validated_listing_online), donc elle ne passe plus par la branche
+       « pending → active » ci-dessus. Sa 1re photo, recopiée depuis le site du pro dans le bucket privé, n'était alors
+       jamais publiée : la vignette affichait l'image par défaut. On publie ici les photos d'une annonce restée en ligne. */
+    if(!listing.revision_of&&finalStatus!=='rejected'){
+      const{data:now,error:nowError}=await admin.from('listings').select('id,title,description,updated_at,status').eq('id',listing.id).single();
+      if(nowError)throw nowError;
+      if(now.status==='active'){
+        const nowPhotos=await getPhotos(admin,listing.id);
+        for(const p of nowPhotos){
+          if(p.storage_bucket!=='listing-images-pending')continue;
+          // Pas de quarantaine en cas d'échec : l'annonce est déjà validée et en ligne (le prochain passage réessaie).
+          const there=await admin.storage.from('listing-images').download(p.storage_path);
+          if(there.error){const c=await admin.storage.from('listing-images-pending').copy(p.storage_path,p.storage_path,{destinationBucket:'listing-images'});if(c.error){console.error('publication photo',p.id,c.error);continue;}}
+          const u=await admin.from('listing_photos').update({storage_bucket:'listing-images'}).eq('id',p.id).eq('storage_bucket','listing-images-pending');
+          if(u.error)console.error('publication photo',p.id,u.error);
+        }
+        finalStatus='active';
+      }
+    }
+
     const engine=MODEL+'+'+(extraErrorMessage?'abracadeal-rules-only':'abracadeal-rules-only+sql_heuristic_v1');
     const{error:moderationError}=await admin.from('listing_moderation').upsert({listing_id:listing.id,risk_score:score,risk_level:riskLevel,reasons,checked_at:new Date().toISOString(),engine,ai_checked:true,reused_photo_count:reusedPhotos,auto_published:autoPublished},{onConflict:'listing_id'});
     if(moderationError)throw moderationError;
