@@ -20,6 +20,7 @@ import { isKombishop, readKombishop } from './kombishop-reader.ts';
 import { isLecoeur, readLecoeur } from './lecoeur-reader.ts';
 import { isBerge, readBerge, bergeIdentity, bergeDiagnosticImages } from './berge-reader.ts';
 import { isLautre, readLautre, lautreDiagnosticImages } from './lautre-reader.ts';
+import { isGrangeCars, readGrangeCars } from './grange-cars-reader.ts';
 import { isAtsSud, readAtsSud, atsIdentity } from './ats-sud-reader.ts';
 import { isFordStrasbourg, readFordStrasbourg, fordStrasbourgIdentity } from './ford-strasbourg-reader.ts';
 import { isRival, readRival, rivalIdentity } from './rival-reader.ts';
@@ -1057,6 +1058,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
   if(isAtelierRetro(url)){feed.sector='vehicules';return readAtelierRetro(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isLautre(url)){feed.sector='immobilier';return readLautre(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
+  if(isGrangeCars(url)){feed.sector='vehicules';return readGrangeCars(fetchSiteHtml,estatePhotoDigest);}
   if(isAtsSud(url)){feed.sector='vehicules';return readAtsSud(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isFordStrasbourg(url)){feed.sector='vehicules';return readFordStrasbourg(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isRival(url)){feed.sector='vehicules';return readRival(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}

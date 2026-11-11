@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {parseGrangeCars,readGrangeCars} from '../supabase/functions/pro-stock-sync/grange-cars-reader.ts';
+
+const stock = fs.readFileSync(new URL('./fixtures/grange-cars/stock.html',import.meta.url), 'utf8');
+const rows = parseGrangeCars(stock);
+assert.deepEqual(rows.map(row => row.prix), [75000, 54000, 42500, 36000, 28000]);
+assert.deepEqual(rows.map(row => row.annee), [undefined, 1983, 1969, undefined, 1974]);
+assert.equal(rows[0].titre, 'Alpine A110 1300 / Moteur R8 Gordini 1440');
+assert.equal(rows[4].marque, undefined);
+assert.equal(new Set(rows.map(row => row.reference)).size, 5);
+assert(rows.every(row => row.photos.split('|').length === 1 && row.description === undefined));
+assert(rows.every(row => row.contact_telephone === '+33686922832' && row.contact_nom.endsWith('(garage)')));
+assert.match(rows[4].photos, /higelin%20dino\.jpg$/);
+assert.equal(parseGrangeCars(stock.replace('HIGELIN Original 1974', 'HIGELIN Original 1974 vendu')).length, 4);
+assert.throws(() => parseGrangeCars(stock.replace('42500&euro;', 'prix sur demande')), /incomplet/);
+assert.throws(() => parseGrangeCars(stock + '<a rel="next" href="/vehicules-a-vendre?page=2">Suivant</a>'), /Pagination/);
+const fetchStock = async url => ({url, text: stock});
+await assert.rejects(readGrangeCars(fetchStock, async () => null), /inaccessible/);
+const checked = await readGrangeCars(fetchStock, async url => url);
+assert.equal(checked.stats.cycle_complete, true);
+assert.equal(checked.total, 5);
+console.log('Grange Cars: five own title/price/album pairs, three years, shared garage contact, pagination guard and photo failures');
