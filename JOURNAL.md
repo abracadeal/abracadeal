@@ -1,3 +1,11 @@
+## 11/11/2026 (nuit) — Cloudflare R2 devient le stockage principal des photos
+- But : libérer le stockage Supabase (risque de limitation du plan gratuit au 8 décembre). Validé par Anthony (« Libère »).
+- Les originaux publiés (listing-images) et les vignettes (listing-thumbs) sont retirés de Supabase une fois la copie R2 vérifiée (HEAD R2 privé + URL publique, même taille). Les lignes listing_photos ne changent pas : aucune annonce ne repasse en modération.
+- private.r2_sync.offloaded_at/size ; r2_offload_candidates() (copies de plus de 30 min encore référencées) ; r2_mark_offloaded() ; r2_pending() ne supprime de R2 un original retiré que s'il n'est plus référencé ou supprimé par la rétention.
+- r2-sync v2 : action « offload » ; cron abracadeal-r2-offload (minutes impaires, 100 par passage). Les nouvelles photos suivent le même chemin automatiquement.
+- Lecture des originaux depuis R2 quand ils ne sont plus sur Supabase : moderate-listing v36 (hash, quarantaine, analyse IA), prepare-listing-edit, generate-listing-thumbs, process-data-retention, moderator-api, share-listing, photos-vacances.js, flux syndication_feed, pages statiques (build_share_pages.py).
+- Contrôle : 552 annonces actives avant, à recompter après.
+
 ## 2026-11-10 (nuit) — Photos : R2 stockage principal, étape 1 (Claude)
 
 - Fait : assets/r2-photos-20261110.js chargé après supabase-js sur vacances, logement-vacances, photos-vacances, recherche-vacances, pro, pro-pro, options-annonce et moderation : getPublicUrl() de listing-images / listing-thumbs pointe sur R2 (filet : rechargement depuis Supabase si R2 répond en erreur). Toutes les photos étaient déjà copiées dans R2 (0 en attente) → moins de bande passante Supabase.
