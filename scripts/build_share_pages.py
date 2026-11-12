@@ -560,7 +560,7 @@ def seo_title(listing, meta):
         t = " – ".join(x for x in cand if x)
         if len(t) <= 52:
             return t
-    return t
+    return " – ".join(x for x in (head, short_where) if x)
 
 
 # Catégories qui ne sont pas des produits : pas de balisage Product/Offer (Google les traiterait
