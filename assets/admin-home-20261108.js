@@ -282,6 +282,7 @@
     if (!user) { $('ahStatus').innerHTML = 'Connecte-toi sur <a href="index.html">Abracadeal</a> avec le compte administrateur.'; $('ahUpdated').textContent = 'Non connecté'; return; }
     var pr = await sb.from('profiles').select('is_admin').eq('id', user.id).maybeSingle();
     if (!pr.data || !pr.data.is_admin) { $('ahStatus').textContent = 'Accès réservé à l’administrateur.'; $('ahUpdated').textContent = '—'; return; }
+    try { localStorage.setItem('abraca_not_counted', '1'); } catch (_) {} // appareil de l'admin : jamais compté dans les stats
     var h = (location.hash || '').slice(1);
     state.ready = true;
     var alias = { traffic: 'stats', money: 'stats' }; h = alias[h] || h;

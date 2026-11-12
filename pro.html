@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
 <script src="/assets/supabase-js-2.118.0.js"></script>
 <script src="/assets/r2-photos-20261110.js"></script>
-<script src="/assets/visit-source-20261112.js?v=1"></script>
+<script src="/assets/visit-source-20261112.js?v=2"></script>
 <script src="/assets/site-confirm-20261106.js?v=2" defer></script>
 <script src="/assets/boost-gift-20261106.js?v=2" defer></script>
 <style>
@@ -252,10 +252,10 @@ async function init(){
 })();
 // 01/11/2026 (Anthony) : compteur de visites du showroom (même identifiant anonyme que les annonces ; 1 fois par jour)
   // 02/11/2026 (Claude) : visite du showroom comptée aussi dans les visiteurs du site (tableau de bord admin).
-  try{const day=new Date().toISOString().slice(0,10),k='abraca_visit_showroom_'+day;if(localStorage.getItem('abraca_not_counted')!=='1'&&!localStorage.getItem(k)){localStorage.setItem(k,'1');let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}
+  try{const day=new Date().toISOString().slice(0,10),k='abraca_visit_showroom_'+day;if(localStorage.getItem('abraca_not_counted')!=='1'&&!(window.abracaIsRobot&&window.abracaIsRobot())&&!localStorage.getItem(k)){localStorage.setItem(k,'1');let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}
     const vs=typeof window.abracaVisitOrigin==='function'?window.abracaVisitOrigin():{source:'direct',host:''};
     sb.rpc('track_site_visit',{p_visitor:v,p_page:'showroom',p_source:vs.source,p_ref_host:vs.host||null,p_mobile:matchMedia('(max-width:760px),(pointer:coarse)').matches}).then(()=>{},()=>{});}}catch(_){}
-  if(!(currentUser&&currentUser.id===id)&&localStorage.getItem('abraca_not_counted')!=='1')try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
+  if(!(currentUser&&currentUser.id===id)&&localStorage.getItem('abraca_not_counted')!=='1'&&!(window.abracaIsRobot&&window.abracaIsRobot()))try{let v=localStorage.getItem('abraca_vid');if(!v){v=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random().toString(36).slice(2));localStorage.setItem('abraca_vid',v);}sb.rpc('track_showroom_view',{p_owner:id,p_visitor:v}).then(()=>{},()=>{});}catch(_){}
   // 01/11/2026 (Anthony) : adresse courte du showroom (abracadeal.fr/weecars-angers) affichée dans la barre d'adresse.
   if(showroom?.slug&&/\/pro\.html$/i.test(location.pathname)){try{history.replaceState(null,'','/'+showroom.slug);}catch(_){}}
 }

@@ -1,3 +1,9 @@
+## 12/11/2026 (nuit) — Claude : visites d'Anthony et des robots exclues des stats
+- Anthony : « c'est moi ça se trouve » (269 visiteurs « Direct » sur 30 jours). Constat : quasi tous les visiteurs ne viennent qu'une fois, beaucoup sur ordinateur en pleine nuit (2 h–5 h) et un pic de 90 le 08/11 → surtout des robots / navigateurs de test (Google qui affiche la page, outils de Claude/ChatGPT) : chaque passage = nouvel identifiant = nouveau visiteur.
+- window.abracaIsRobot() (visit-source-20261112.js : navigator.webdriver, headless, bot…) : ni visite, ni vue d'annonce, ni vitrine comptées (abracaNotCounted dans index-main.js, pro.html).
+- Tout appareil où l'admin se connecte (site ou admin.html) est marqué abraca_not_counted (comme ?moi=1), même déconnecté ensuite.
+- Données passées non nettoyées (impossible de distinguer après coup).
+
 ## 12/11/2026 (nuit) — Claude : admin sans doublon + provenance des visites
 - Anthony : « Gérer la prospection, c'est un menu dans le menu ? Enlève les doublons, fais-en un parfait, et voir d'où viennent les visites ».
 - Admin : l'onglet Prospection ouvre directement admin-prospection.html, qui a maintenant le même en-tête et les mêmes 5 onglets que admin.html (assets/admin-prospection-head-20261112.css ; barre du bas sur mobile). Panneau résumé Prospection retiré d'admin.html (doublon) ; pastille dorée sur l'onglet quand des « OK » attendent. Ancien en-tête de la page (Tableau de bord pilotage / Base annonces / Retour / Déconnexion), barre app-shell et lien « ‹ Espace admin » retirés. Ordre : chiffres → Accords « Je publie » → Qui a cliqué / inscrit → Outils (liste, écrire, import, texte du mail, réglages d'envoi, STOP, Gmail de secours). Les deux blocs Gmail fusionnés en un « Secours ».

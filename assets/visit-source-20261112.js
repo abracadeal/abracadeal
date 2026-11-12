@@ -8,6 +8,14 @@
 (function () {
   'use strict';
   function hostOf(u) { try { return u ? new URL(u).hostname.replace(/^www\./, '').toLowerCase() : ''; } catch (_) { return ''; } }
+  /* Robots et navigateurs automatisés (Google qui affiche la page, outils de test de Claude/ChatGPT…) :
+     jamais comptés comme visiteurs. */
+  window.abracaIsRobot = function () {
+    try {
+      if (navigator.webdriver) return true;
+      return /bot|crawl|spider|slurp|headless|lighthouse|pagespeed|preview|facebookexternalhit|bingpreview|google-inspectiontool|chrome-lighthouse|phantomjs|puppeteer|playwright|selenium/i.test(navigator.userAgent || '');
+    } catch (_) { return false; }
+  };
   window.abracaVisitOrigin = function () {
     try {
       var q = new URLSearchParams(location.search);

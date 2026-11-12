@@ -374,6 +374,9 @@ async function applyAuthSession(session,{preserveEditing=true}={}){
     currentProfile=data||null;
     if(!currentProfile?.is_admin)moderationMode=false;
     if(currentProfile)try{window.abracaSessionGuard?.setRole(currentProfile.is_admin===true);}catch(_){}
+    // 12/11/2026 (Anthony : « c'est moi ça se trouve ») : un appareil où l'admin s'est connecté n'est plus jamais compté
+    // dans les statistiques, même déconnecté ensuite (comme ?moi=1).
+    if(currentProfile?.is_admin===true)try{localStorage.setItem('abraca_not_counted','1');}catch(_){}
   }else{
     moderationMode=false;
   }
@@ -4819,7 +4822,7 @@ function abracaVisitorId(){try{let v=localStorage.getItem('abraca_vid');if(!v){v
 /* 02/11/2026 (Anthony : « 40 c'est sûrement moi ») : abracadeal.fr/?moi=1 sur un appareil = cet appareil n'est plus compté
    dans les statistiques (visites, vues, numéros), même déconnecté ; ?moi=0 pour annuler. */
 (function(){try{const v=new URLSearchParams(location.search).get('moi');if(v==='1'){localStorage.setItem('abraca_not_counted','1');setTimeout(()=>{try{toast('Cet appareil n’est plus compté dans les statistiques');}catch(_){}},1500);}else if(v==='0'){localStorage.removeItem('abraca_not_counted');}}catch(_){}})();
-function abracaNotCounted(){try{return localStorage.getItem('abraca_not_counted')==='1';}catch(_){return false;}}
+function abracaNotCounted(){try{if(typeof window.abracaIsRobot==='function'&&window.abracaIsRobot())return true;return localStorage.getItem('abraca_not_counted')==='1';}catch(_){return false;}}
 function trackListingEvent(id,kind){try{if(!sb||!id||abracaNotCounted())return;sb.rpc('track_listing_event',{p_listing_id:id,p_kind:kind,p_visitor:abracaVisitorId()||null}).then(()=>{},()=>{});}catch(_){}}
 window.trackListingEvent=trackListingEvent;
 /* 02/11/2026 (Claude) : compteur de visiteurs du site (1 fois par visiteur, page et jour), avec la provenance
