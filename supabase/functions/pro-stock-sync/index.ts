@@ -22,6 +22,7 @@ import { isBerge, readBerge, bergeIdentity, bergeDiagnosticImages } from './berg
 import { isLautre, readLautre, lautreDiagnosticImages } from './lautre-reader.ts';
 import { isNextlogis, nextlogisIdentity, readNextlogis } from './nextlogis-reader.ts';
 import { isMaisonCotard, readMaisonCotard } from './maison-cotard-reader.ts';
+import { isNegoceAuto33, readNegoceAuto33 } from './negoce-auto33-reader.ts';
 import { isGrangeCars, readGrangeCars } from './grange-cars-reader.ts';
 import { isAtsSud, readAtsSud, atsIdentity } from './ats-sud-reader.ts';
 import { isFordStrasbourg, readFordStrasbourg, fordStrasbourgIdentity } from './ford-strasbourg-reader.ts';
@@ -1062,6 +1063,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isLautre(url)){feed.sector='immobilier';return readLautre(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isNextlogis(url)){feed.sector='immobilier';return readNextlogis(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isMaisonCotard(url)){feed.sector='immobilier';return readMaisonCotard(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
+  if(isNegoceAuto33(url)){feed.sector='vehicules';return readNegoceAuto33(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isGrangeCars(url)){feed.sector='vehicules';return readGrangeCars(fetchSiteHtml,estatePhotoDigest);}
   if(isAtsSud(url)){feed.sector='vehicules';return readAtsSud(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isFordStrasbourg(url)){feed.sector='vehicules';return readFordStrasbourg(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
@@ -1394,7 +1396,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|nextlogis-v1$|maison-cotard-v1$|ats-motoconcess-v1:|atelier-retro-v1:)/.test(cp.data.state.scope||'')){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|nextlogis-v1$|maison-cotard-v1$|negoce-auto33-v1:|ats-motoconcess-v1:|atelier-retro-v1:)/.test(cp.data.state.scope||'')){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }
