@@ -3375,7 +3375,7 @@ async function openSharedListingFromUrl(){
     }catch(err){console.error('Recherche directe de l’annonce impossible',err);}
   }
 
-  if(ad){setTimeout(()=>openAd(id),0);return;}
+  if(ad){setTimeout(()=>openAd(id),0);if(params.get('tel')==='1'&&publicId)setTimeout(()=>{try{window.viewListingPhone(id);}catch(_){}},900);return;}
   toast(adminPreviewId?'Annonce introuvable':'Cette annonce est introuvable ou n’est plus en ligne');
 }
 let activeShareListingId=null;
@@ -5016,7 +5016,7 @@ window.openAd=id=>{
                 ${!isOwner?`<button class="btn primary" type="button" onclick="startMessageForListing('${a.id}')">Envoyer un message</button>`:''}
                 <div class="phone-share-row">
                   ${a.show_phone
-                    ?`<div class="phone-contact-box" id="phoneContact-${a.id}"><button class="btn ghost" type="button" onclick="viewListingPhone('${a.id}')">Voir le numéro</button><div class="contact-login-note">Le numéro est réservé aux membres connectés.</div></div>`
+                    ?`<div class="phone-contact-box" id="phoneContact-${a.id}"><button class="btn ghost" type="button" onclick="viewListingPhone('${a.id}')">Voir le numéro</button>${a.seller_type==='professionnel'?'':'<div class="contact-login-note">Le numéro est réservé aux membres connectés.</div>'}</div>`
                     :`<div class="phone-contact-box note">Le vendeur a choisi de ne pas afficher son numéro.</div>`}
                   <div class="detail-inline-share" aria-label="Partager cette annonce">
                     <span class="detail-inline-share-label">Partager</span>
@@ -5597,12 +5597,18 @@ window.startMessageForListing=async(listingId)=>{
   await openMessages(data);
 };
 window.viewListingPhone=async(listingId)=>{
-  if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
-  trackListingEvent(listingId,'phone');/* 01/11/2026 : compteur « Voir le numéro » — 12/11/2026 : compté seulement une fois connecté (avant, un visiteur non connecté qui cliquait était compté sans voir le numéro) */
+  /* 12/11/2026 (Anthony) : annonces de pros → numéro visible sans connexion (quota anti-aspiration côté serveur) ;
+     particuliers → connexion obligatoire. Clic sans connexion = compteur « phone_login » (mesure des contacts perdus). */
+  const loggedIn=!!currentUser||!!(await ensureSessionUser());
+  const askLogin=()=>{trackListingEvent(listingId,'phone_login');try{localStorage.setItem('abracaReturnTo',JSON.stringify({u:location.origin+'/?annonce='+encodeURIComponent(listingId)+'&tel=1',t:Date.now()}));}catch(_){}
+    closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');
+    try{const panel=document.getElementById('loginForm');if(panel){document.getElementById('phoneLoginHint')?.remove();panel.insertAdjacentHTML('afterbegin','<div id="phoneLoginHint" class="contact-login-note" style="margin:0 0 12px;padding:10px 12px;border-radius:12px;background:#f6eefa;color:#4b1d63;font-weight:700">Pour voir le numéro du vendeur, connectez-vous en 1 clic avec Google ou Facebook — c’est gratuit.</div>');}}catch(_){}
+    toast('Connectez-vous pour voir le numéro');};
   /* 07/11/2026 (Anthony) : annonce d'agence avec un agent → portable de l'agent + numéro de l'agence + e-mail de l'agent (connectés uniquement) */
-  let details=null;{const r=await sb.rpc('get_listing_contact_details',{p_listing_id:listingId});if(!r.error)details=r.data||{};else if(!/function|schema cache/i.test(r.error.message||'')){toast(r.error.message||'Impossible d’afficher le numéro');return;}}
+  let details=null;{const r=await sb.rpc('get_listing_contact_details',{p_listing_id:listingId});if(!r.error)details=r.data||{};else if(!loggedIn&&/connexion requise/i.test(r.error.message||'')){askLogin();return;}else if(!/function|schema cache/i.test(r.error.message||'')){toast(r.error.message||'Impossible d’afficher le numéro');return;}}
   let data,error;if(details){data=details.phone||null;}else{({data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId}));}
-  if(error){toast(error.message||'Impossible d’afficher le numéro');return;}
+  if(error){if(!loggedIn&&/connexion requise/i.test(error.message||'')){askLogin();return;}toast(error.message||'Impossible d’afficher le numéro');return;}
+  if(data)trackListingEvent(listingId,'phone');/* compteur « numéro affiché » : seulement quand le numéro est vraiment montré */
   const host=document.getElementById(`phoneContact-${listingId}`);
   if(!data){
     document.getElementById(`dmPhoneBtn-${listingId}`)?.remove();
