@@ -459,6 +459,12 @@ async function validateSite(){
   let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
   const host=new URL(url).hostname.replace(/^www\./i,'').toLowerCase();
   const n=Number(LASTDATA?.total_on_site||0)||NORM.filter(x=>!(x.errors||[]).length).length;
+  /* 13/11/2026 (Anthony, Gubernatis) : un site déjà relié à un pro inscrit (flux actif) n'est pas un prospect : rien à relier. */
+  {const{data:feeds}=await sb.from('pro_stock_feeds').select('owner_id,feed_url,active,last_success_at').ilike('feed_url','%'+host+'%').limit(10);
+   const live=(feeds||[]).find(f=>{try{return f.active&&new URL(f.feed_url).hostname.replace(/^www\./i,'').toLowerCase()===host}catch{return false}});
+   if(live){let cnt=0;try{const{count}=await sb.from('listings').select('id',{count:'exact',head:true}).eq('owner_id',live.owner_id).eq('status','active');cnt=count||0}catch(_){}
+    E('status').innerHTML='Ce site appartient déjà à un pro inscrit : <b>'+cnt+' annonce'+(cnt>1?'s':'')+' en ligne</b>, mises à jour automatiquement toutes les 6 h. Rien à valider.';
+    E('status').scrollIntoView({behavior:'smooth',block:'center'});b.disabled=false;b.textContent='Valider ce site';return}}
   const query=sb.from('prospection_prospects').select('id,company,source_url,email');
   const{data:pros,error}=LEARN_CONTEXT?.url===url&&LEARN_CONTEXT?.prospectId?await query.eq('id',LEARN_CONTEXT.prospectId).limit(1):await query.ilike('source_url','%'+host+'%').limit(20);
   if(error)throw error;

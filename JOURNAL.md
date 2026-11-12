@@ -3077,3 +3077,4 @@
 ## 13/11/2026 (nuit) — Claude : « Sites en réparation » (signalé par Anthony, Gubernatis)
 - Gubernatis (Nice) restait en « ✓ Réparé · à valider » alors que son stock est en ligne (89 biens). Migration robot_learning_hide_live_sites_20261113 : admin_list_robot_learning n'affiche plus une demande réparée dont le domaine correspond à un flux pro actif, approuvé et déjà synchronisé.
 - Annonce « Cannes Félix Faure – Bar-pub 200 m² » absente : ajoutée sur le site de l'agence après la synchro de 19 h 22 (89 reçus, 0 créé) ; prise au passage de synchro suivant (toutes les 6 h, 01 h 22).
+- admin-test-import.html : « Valider ce site » sur un site déjà relié à un pro inscrit (flux actif) n'ouvre plus la demande d'e-mail de prospect (risque de doublon) ; affiche « déjà un pro inscrit, N annonces en ligne ».
