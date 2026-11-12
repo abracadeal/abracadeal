@@ -3065,3 +3065,7 @@
 
 ## 12/11/2026 — Claude : prix en or sur les vignettes (demande d'Anthony)
 - assets/price-gold-20261112.css (chargé en dernier dans index.html) : prix des vignettes (résultats, accueil « À la une », recherches récentes, vus récemment, près de chez vous) en or #f7bd4b au lieu du rose. Pages à fond clair (fiche détail, vitrine pro, pages /annonce/ Google) laissées en violet. Pour revenir au rose : retirer la ligne du fichier dans index.html.
+
+## 12/11/2026 — Claude : compteur « Voir le numéro » corrigé
+- assets/index-main.js (viewListingPhone) : l'événement « phone » était enregistré AVANT la vérification de connexion → un visiteur non connecté qui cliquait « Voir le numéro » (puis tombait sur la connexion) était compté comme ayant vu le numéro. Les 4 « numéros affichés » existants (02/11 → 10/11) viennent tous de visiteurs non connectés. Désormais compté seulement une fois connecté. index.html : v=20261112-phone.
+- Rappel exclusion d'Anthony : connecté en admin = jamais compté (serveur) ; et l'appareil reçoit abraca_not_counted dès la connexion admin (vaut aussi pour l'appli installée, qui a son propre stockage).

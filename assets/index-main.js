@@ -5597,8 +5597,8 @@ window.startMessageForListing=async(listingId)=>{
   await openMessages(data);
 };
 window.viewListingPhone=async(listingId)=>{
-  trackListingEvent(listingId,'phone');/* 01/11/2026 : compteur « Voir le numéro » */
   if(!currentUser&&!(await ensureSessionUser())){closeModal('detailModal');window.setAuthTab('login');openModal('accountModal');toast('Connectez-vous pour voir le numéro');return;}
+  trackListingEvent(listingId,'phone');/* 01/11/2026 : compteur « Voir le numéro » — 12/11/2026 : compté seulement une fois connecté (avant, un visiteur non connecté qui cliquait était compté sans voir le numéro) */
   /* 07/11/2026 (Anthony) : annonce d'agence avec un agent → portable de l'agent + numéro de l'agence + e-mail de l'agent (connectés uniquement) */
   let details=null;{const r=await sb.rpc('get_listing_contact_details',{p_listing_id:listingId});if(!r.error)details=r.data||{};else if(!/function|schema cache/i.test(r.error.message||'')){toast(r.error.message||'Impossible d’afficher le numéro');return;}}
   let data,error;if(details){data=details.phone||null;}else{({data,error}=await sb.rpc('get_listing_phone',{p_listing_id:listingId}));}
