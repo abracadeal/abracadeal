@@ -1,3 +1,7 @@
+## 12/11/2026 (nuit) — Claude : admin « Données indisponibles : statement timeout »
+- Cause : admin_overview comptait les prospects inscrits avec prospect_is_registered(), qui recalculait le domaine e-mail des 10 912 prospects pour chaque prospect envoyé (≈ 8 s → délai dépassé).
+- Correctif : index prospection_prospects_email_domain_idx sur public.prospect_email_domain(email) (migration prospect_email_domain_index). Comptage 8 s → 0,5 s, même résultat (9) ; admin_overview complet 0,7 s. Profite aussi à prospect_mailer_claim().
+
 ## 12/11/2026 (nuit) — Claude : boutons Google / Facebook qui disparaissaient
 - Signalé par Anthony : plus de connexion/inscription Google ni Facebook. Côté Supabase tout fonctionne (fournisseurs activés, /authorize redirige bien vers Google et Facebook).
 - Cause 1 : les boutons n'étaient affichés qu'après la réponse de /auth/v1/settings ; si Supabase était lent ou en erreur (timeouts 504 vus le 11/11), ils restaient cachés. Désormais affichés d'office, la réponse ne sert qu'à masquer un fournisseur explicitement coupé.
