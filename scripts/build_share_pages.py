@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "13"  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
+VERSION = "14"  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -505,14 +505,35 @@ def pres_de(name):
     return ("près d’" if name[:1].lower() in "aeiouyhâéèêîôû" else "près de ") + name
 
 
+# 12/11/2026 (SEO auto, accord d'Anthony) : mentions commerciales retirées du titre Google (pas de la fiche) —
+# personne ne les tape dans Google et elles poussent le modèle et la ville hors de la partie affichée.
+SEO_TITLE_NOISE = re.compile(
+    r"(?i)(\bavec\s+)?\bgarantie\s*(?:constructeur\s*)?\d*\s*(?:mois|ans?)?\b"
+    r"|\btva\s+r[ée]cup[ée]rable\b"
+    r"|\b(?:avec\s+)?cam[ée]ra(?:\s+de\s+recul)?\b"
+    r"|\b(?:avec\s+)?attelage(?:\s+amovible)?\b"
+    r"|\bporsche\s+approved(?:\s+\d+\s*mois)?\b"
+    r"|\b1(?:[èe]re|re)\s+main\b")
+
+
+def seo_clean_title(title):
+    t = SEO_TITLE_NOISE.sub(" ", title)
+    t = re.sub(r"\s*(?://+|\|)\s*|\s+/\s*|\s*/\s+", " ", t)  # « // », « | », « / » entre mots (pas « 120/70/15 »)
+    t = re.sub(r"(?:\s*[-–]\s*){2,}", " - ", t)          # séparateurs en double après suppression
+    t = re.sub(r"\s+-(?=\S)|(?<=\S)-\s+", " ", t)       # « Pdk- Porsche », « - Camera »
+    t = re.sub(r"(?<!\S)\*+|\*+(?!\S)", " ", t)          # astérisques isolés (« BVA *tva… »)
+    t = re.sub(r"\s{2,}", " ", t).strip(" -–,;:.·")
+    return t if len(t) >= 8 else title
+
+
 def seo_title(listing, meta):
     """Titre Google : titre du vendeur + infos clés absentes du titre (marque, modèle, version, année, km)."""
-    title = display_title(listing)
+    title = seo_clean_title(display_title(listing))
     low = title.lower()
     extra = []
     vm = meta["vmeta"] or {}
     for v in (listing.get("vehicle_make"), listing.get("vehicle_model"), vm.get("version")):
-        if v and str(v).lower() not in low and len(title) + len(" ".join(extra)) + len(str(v)) < 55:
+        if v and slugify(v) not in slugify(low) and len(title) + len(" ".join(extra)) + len(str(v)) < 55:
             extra.append(str(v))
             low += " " + str(v).lower()
     if listing.get("vehicle_year") and str(listing["vehicle_year"]) not in low:
@@ -531,12 +552,15 @@ def seo_title(listing, meta):
     dep = (listing.get("postal_code") or "")[:2]
     near = near_city(listing)
     where = f"{city}, {near} ({dep})" if city and near and dep else (f"{city} ({dep})" if city and dep else city)
-    parts = [head]
-    if price:
-        parts.append(price)
-    if where:
-        parts.append(where)
-    return " – ".join(parts)
+    # 12/11/2026 (SEO auto, accord d'Anthony) : viser ≤ 65 caractères avec « | Abracadeal » (13) → 52 ici.
+    # Les mots du vendeur et la ville sont toujours gardés ; le prix part en premier (il reste dans la
+    # description et les données structurées), puis la ville proche (« Les Ponts-de-Cé, Angers » → « Les Ponts-de-Cé »).
+    short_where = f"{city} ({dep})" if city and dep else city
+    for cand in ([head, price, where], [head, price, short_where], [head, short_where]):
+        t = " – ".join(x for x in cand if x)
+        if len(t) <= 52:
+            return t
+    return t
 
 
 # Catégories qui ne sont pas des produits : pas de balisage Product/Offer (Google les traiterait

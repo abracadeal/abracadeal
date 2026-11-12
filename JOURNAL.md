@@ -3034,3 +3034,8 @@
 ## 11/11/2026 — Claude : photo par défaut sur des annonces de pros déjà validées (signalé par Anthony)
 - Cause : depuis le 10/11 (annonce validée = reste en ligne), une annonce synchronisée qui change reste « active » ; moderate-listing recopiait sa 1re photo depuis le site du pro dans le bucket privé `listing-images-pending` mais ne la publiait plus (seule la branche pending → active le faisait) → vignette = image par défaut. 16 annonces touchées (depuis le 10/11 15:37).
 - Correctif moderate-listing : une annonce restée en ligne voit ses photos du bucket privé publiées dans `listing-images` (sans quarantaine en cas d'échec). Les 16 annonces relancées.
+
+## 12/11/2026 (nuit) — SEO auto (Claude, accord d'Anthony)
+- Audit : 549 annonces actives = 549 dans sitemap-annonces.xml ; balises, JSON-LD, fil d'Ariane, liens internes OK.
+- scripts/build_share_pages.py (VERSION 14) : titre Google des fiches raccourci sans couper les mots du vendeur — mentions commerciales retirées du <title> seulement (« Garantie 12 mois », « TVA récupérable », caméra de recul, attelage, « // », « * »), prix retiré quand le titre dépasse ~65 caractères (il reste dans la description et le JSON-LD), « Ville, grande ville (dep) » → « Ville (dep) » si trop long ; marque ajoutée au titre comparée sans accents (plus de « Citroën … Citroen »). Moyenne 110 → 94 caractères, aucun doublon.
+- Plan suivi dans scripts/SEO_PLAN.md.
