@@ -26,7 +26,7 @@
     'ical.html': 'vacances.html',
     'admin-commerce.html': 'admin.html#tech', 'admin-retention.html': 'admin.html#tech', 'admin-vacances.html': 'admin.html#tech',
     /* 28/10/2026 : #admin rouvre le menu Admin (mobile) ou Mon compte (ordinateur), plus « Compte » sur mobile. */
-    'admin-pilotage.html': 'admin.html#money', 'admin-prospection.html': 'admin.html#prospect', 'admin-test-import.html': 'admin.html#tech', 'admin-partenaires.html': 'admin.html#tech', 'admin-diffusion.html': 'admin.html#tech', 'diffusion.html': 'index.html',
+    'admin-pilotage.html': 'admin.html#money', 'admin-prospection.html': 'admin.html', 'admin-test-import.html': 'admin.html#tech', 'admin-partenaires.html': 'admin.html#tech', 'admin-diffusion.html': 'admin.html#tech', 'diffusion.html': 'index.html',
     'admin-recherche.html': 'admin.html#tech', 'moderation.html': 'admin.html',
     'pro.html': 'index.html#resultats'
   };

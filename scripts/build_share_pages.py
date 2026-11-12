@@ -652,7 +652,7 @@ BOT_RE = ("bot|crawl|spider|slurp|google|bing|yandex|baidu|duckduck|qwant|ecosia
 # Visiteurs réels : ouverts directement dans la vraie fiche du site (même affichage que le reste d'Abracadeal).
 # Même contenu que la page statique (rendu dynamique), pas de cloaking.
 HUMAN_TO_APP = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
-                "document.documentElement.style.visibility='hidden';"
+                "document.documentElement.style.visibility='hidden';try{sessionStorage.setItem('abraca_entry_ref',document.referrer||'')}catch(e){}"
                 "location.replace('/?annonce='+encodeURIComponent('{lid}'));}catch(e){}})();</script>")
 HUMAN_LINKS = ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
                "document.addEventListener('DOMContentLoaded',function(){var a=document.querySelectorAll('a[href^=\"/annonce/\"]');"
@@ -684,7 +684,7 @@ def app_target(cat_slug=None, city_name=None):
 
 def human_redirect(target):
     return ("<script>(function(){try{if(/" + BOT_RE + "/i.test(navigator.userAgent))return;"
-            "document.documentElement.style.visibility='hidden';"
+            "document.documentElement.style.visibility='hidden';try{sessionStorage.setItem('abraca_entry_ref',document.referrer||'')}catch(e){}"
             "location.replace(" + json.dumps(target) + ");}catch(e){}})();</script>")
 
 

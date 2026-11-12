@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="robots" content="noindex,nofollow">
 <title>Abracadeal — Prospection</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <script src="assets/session-guard-20261106.js?v=1"></script>
 <script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
@@ -13,24 +15,27 @@
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
-<link rel="stylesheet" href="/assets/app-shell-20261018.css?v=7">
 </head>
 <body>
-<header class="top">
-  <div class="wrap topin">
-    <div class="brand">Abracadeal <span>Prospection</span></div>
-    <div class="actions">
-      <button class="btn primary" onclick="location.href='admin-pilotage.html'">Tableau de bord</button>
-      <button class="btn" onclick="location.href='admin-recherche.html'">Base annonces</button>
-      <button class="btn" onclick="location.href='index.html'">Retour au site</button>
-      <button class="btn" id="logoutBtn">Déconnexion</button>
-    </div>
+<header class="ah-top">
+  <div class="ah-wrap ah-topin">
+    <a class="ah-back" href="index.html" aria-label="Retour au site">‹</a>
+    <div class="ah-brand">Abracadeal <span>Admin</span></div>
+    <button class="ah-refresh" id="logoutBtn" type="button">Se déconnecter</button>
   </div>
+  <!-- 12/11/2026 (Anthony : « enlève les doublons ») : la prospection n'est plus un menu dans le menu,
+       cette page EST l'onglet Prospection de l'admin. -->
+  <nav class="ah-tabs ah-wrap" aria-label="Rubriques">
+    <a href="admin.html#today"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Accueil</span></a>
+    <a href="admin.html#pros"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/></svg><span>Pros</span></a>
+    <a href="admin-prospection.html" class="on" aria-current="page"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Prospection</span></a>
+    <a href="admin.html#stats"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Stats</span></a>
+    <a href="admin.html#tech"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/></svg><span>Réglages</span></a>
+  </nav>
 </header>
 
 <main class="wrap" id="app" style="display:none">
-  <h1>Prospection Pros</h1>
-  <p class="sub">Mails automatiques aux pros, qui a cliqué, qui s’est inscrit, liste STOP.</p>
+  
 
   <section class="grid4">
     <div class="metric"><span>Prospects</span><strong id="mTotal">0</strong></div>
@@ -38,12 +43,39 @@
     <div class="metric"><span>Envoyés aujourd’hui</span><strong id="mToday">0</strong></div>
     <div class="metric" style="cursor:pointer" onclick="var c=document.getElementById('stopCard');c.open=true;c.scrollIntoView({behavior:'smooth'})"><span>STOP / opposition</span><strong id="mStop">0</strong></div>
   </section>
-
-  <details class="card fold" id="stopCard"><summary>Ne veulent plus de mails <span class="dayn" id="stopCount"></span></summary>
-    <p class="small">Les pros qui ont cliqué sur « se désinscrire » ou que tu as mis en STOP. Le robot ne leur envoie plus rien, ni premier mail ni relance.</p>
-    <div id="stopList" class="plist"><div class="small">Chargement…</div></div>
+  <section class="card" id="acceptCard">
+    <h2>Accords « Je publie » <span class="dayn" id="aCount"></span></h2>
+    <p class="small">Les pros qui ont cliqué « Je publie » sur leur aperçu et donné leur SIRET. Rien n’est publié tant que tu ne lances pas l’import.</p>
+    <div id="acceptList" class="plist"><div class="small">Chargement…</div></div>
+  </section>
+  <section class="card" id="trackCard">
+    <h2>Qui a cliqué ? Qui s’est inscrit ?</h2>
+    <p class="small">Clics sur le lien personnel du mail (hors antivirus) et comptes créés ensuite. Les ouvertures ne sont pas suivies.</p>
+    <section class="grid4">
+      <div class="metric"><span>Mails suivis</span><strong id="tSent">0</strong></div>
+      <div class="metric"><span>Ont cliqué</span><strong id="tClicked">0</strong></div>
+      <div class="metric"><span>Taux de clic</span><strong id="tRate">—</strong></div>
+      <div class="metric"><span>Comptes créés</span><strong id="tAccounts">0</strong></div>
+    </section>
+    <div id="tByCat" class="catgrid"></div>
+    <div id="trackGroups"><div class="small">Chargement…</div></div>
+  </section>
+  <h2 class="ah-sec">Outils</h2>
+  <details class="card fold" id="prospectsFold"><summary>Liste des prospects <span class="dayn" id="pCount"></span></summary>
+    <div class="row pfilters">
+      <input id="pSearch" type="search" placeholder="Chercher un nom, un e-mail, une ville…">
+      <select id="statusFilter">
+        <option value="">Tous statuts</option>
+        <option value="ready">Prêts</option>
+        <option value="sent">Envoyés</option>
+        <option value="error">Erreurs</option>
+        <option value="opted_out">STOP</option>
+        <option value="paused">En pause</option>
+      </select>
+      <button class="btn" id="refreshBtn">↻</button>
+    </div>
+    <div id="prospectsBody" class="plist"><div class="small">Chargement…</div></div>
   </details>
-
   <details class="card fold" id="composeCard"><summary>Écrire un mail</summary>
     <p class="small">Le mail part de ta boîte Abracadeal (OVH), jamais de Gmail. Une copie est rangée dans « Envoyés » de la boîte choisie.</p>
     <div class="field"><label>De</label><select id="cFrom"></select></div>
@@ -58,26 +90,6 @@ Le Service Pros Abracadeal</textarea></div>
     <div class="pra"><button class="btn green" id="cSend" onclick="sendCompose()">Envoyer</button> <button class="btn" onclick="resetCompose()">Effacer</button></div>
     <div class="small" id="cStatus" aria-live="polite"></div>
   </details>
-
-  <section class="card" id="acceptCard">
-    <h2>Accords « Je publie » <span class="dayn" id="aCount"></span></h2>
-    <p class="small">Les pros qui ont cliqué « Je publie » sur leur aperçu et donné leur SIRET. Rien n’est publié tant que tu ne lances pas l’import.</p>
-    <div id="acceptList" class="plist"><div class="small">Chargement…</div></div>
-  </section>
-
-  <section class="card" id="trackCard">
-    <h2>Suivi : qui a cliqué ?</h2>
-    <p class="small">Clics sur le lien personnel du mail (hors antivirus) et comptes créés ensuite. Les ouvertures ne sont pas suivies.</p>
-    <section class="grid4">
-      <div class="metric"><span>Mails suivis</span><strong id="tSent">0</strong></div>
-      <div class="metric"><span>Ont cliqué</span><strong id="tClicked">0</strong></div>
-      <div class="metric"><span>Taux de clic</span><strong id="tRate">—</strong></div>
-      <div class="metric"><span>Comptes créés</span><strong id="tAccounts">0</strong></div>
-    </section>
-    <div id="tByCat" class="catgrid"></div>
-    <div id="trackGroups"><div class="small">Chargement…</div></div>
-  </section>
-
   <details class="card fold"><summary>Importer un fichier de prospects</summary>
     <div class="row">
       <div class="field grow">
@@ -89,36 +101,6 @@ Le Service Pros Abracadeal</textarea></div>
     <div class="small">Colonnes reconnues automatiquement : Société / Entreprise, Email, Catégorie, Ville, Département, Téléphone, Source, URL. Les doublons d’e-mail sont ignorés.</div>
     <div id="importMsg" class="notice" style="display:none"></div>
   </details>
-
-  <details class="card fold" id="mailerCard"><summary>Envoi automatique (adresses, réglages)</summary>
-    <div class="small">Les mots de passe sont rangés dans le coffre-fort chiffré de la base : ils ne s’affichent jamais, même ici. « Vérifier » teste seulement la connexion à OVH, sans rien envoyer.</div>
-    <div id="mailboxes"></div>
-    <div class="sep"></div>
-    <h2 style="font-size:1rem">Répartition des envois par métier (chaque jour)</h2>
-    <div class="row" id="mixBox"></div>
-    <div class="small" id="mixInfo" style="margin-top:6px"></div>
-    <div class="sep"></div>
-    <div id="goBox" class="notice">Chargement…</div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn green" id="goBtn" style="display:none">Donner le feu vert</button>
-      <button class="btn red" id="stopAllBtn" style="display:none">Tout arrêter</button>
-    </div>
-    <div id="mailerMsg" class="notice" style="display:none"></div>
-  </details>
-
-  <details class="card fold"><summary>Option : envoi manuel via Gmail</summary>
-    <div class="row">
-      <div class="field grow">
-        <label>Google OAuth Client ID</label>
-        <input id="googleClientId" placeholder="...apps.googleusercontent.com" autocomplete="off">
-      </div>
-      <button class="btn" id="saveClientBtn">Enregistrer</button>
-      <button class="btn green" id="gmailBtn">Connecter Gmail</button>
-    </div>
-    <div class="small" style="margin-top:8px">Le jeton Gmail reste uniquement dans cette page pendant la session. Aucun mot de passe Gmail n’est stocké. Autorisation demandée : envoi d’e-mails uniquement.</div>
-    <div id="gmailState" class="notice">Gmail non connecté.</div>
-  </details>
-
   <details class="card fold"><summary>Texte du mail de prospection</summary>
     <div class="row" style="margin-bottom:10px">
       <div class="field" style="min-width:260px">
@@ -150,8 +132,39 @@ Le Service Pros Abracadeal</textarea></div>
     </div>
     <div id="previewBox" class="notice" style="display:none;white-space:pre-wrap"></div>
   </details>
+  <details class="card fold" id="mailerCard"><summary>Réglages de l’envoi automatique (boîtes, horaires, répartition)</summary>
+    <div class="small">Les mots de passe sont rangés dans le coffre-fort chiffré de la base : ils ne s’affichent jamais, même ici. « Vérifier » teste seulement la connexion à OVH, sans rien envoyer.</div>
+    <div id="mailboxes"></div>
+    <div class="sep"></div>
+    <h2 style="font-size:1rem">Répartition des envois par métier (chaque jour)</h2>
+    <div class="row" id="mixBox"></div>
+    <div class="small" id="mixInfo" style="margin-top:6px"></div>
+    <div class="sep"></div>
+    <div id="goBox" class="notice">Chargement…</div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn green" id="goBtn" style="display:none">Donner le feu vert</button>
+      <button class="btn red" id="stopAllBtn" style="display:none">Tout arrêter</button>
+    </div>
+    <div id="mailerMsg" class="notice" style="display:none"></div>
+  </details>
+  <details class="card fold" id="stopCard"><summary>Ne veulent plus de mails <span class="dayn" id="stopCount"></span></summary>
+    <p class="small">Les pros qui ont cliqué sur « se désinscrire » ou que tu as mis en STOP. Le robot ne leur envoie plus rien, ni premier mail ni relance.</p>
+    <div id="stopList" class="plist"><div class="small">Chargement…</div></div>
+  </details>
+  <details class="card fold"><summary>Secours : envoi manuel par Gmail</summary>
+<p class="small">Inutile en temps normal : l’envoi automatique part de tes boîtes Abracadeal (OVH).</p>
 
-  <details class="card fold"><summary>Envoi manuel d’un lot via Gmail</summary>
+    <div class="row">
+      <div class="field grow">
+        <label>Google OAuth Client ID</label>
+        <input id="googleClientId" placeholder="...apps.googleusercontent.com" autocomplete="off">
+      </div>
+      <button class="btn" id="saveClientBtn">Enregistrer</button>
+      <button class="btn green" id="gmailBtn">Connecter Gmail</button>
+    </div>
+    <div class="small" style="margin-top:8px">Le jeton Gmail reste uniquement dans cette page pendant la session. Aucun mot de passe Gmail n’est stocké. Autorisation demandée : envoi d’e-mails uniquement.</div>
+    <div id="gmailState" class="notice">Gmail non connecté.</div>
+  <div class="sep"></div><h2 style="font-size:1rem">Envoyer un lot</h2>
     <div class="toolbar">
       <button class="btn primary" id="sendBatchBtn">Envoyer le prochain lot</button>
       <button class="btn red" id="stopBatchBtn" disabled>Arrêter le lot</button>
@@ -167,21 +180,26 @@ Le Service Pros Abracadeal</textarea></div>
     <div id="sendMsg" class="notice" style="display:none"></div>
   </details>
 
-  <details class="card fold" id="prospectsFold"><summary>Liste des prospects <span class="dayn" id="pCount"></span></summary>
-    <div class="row pfilters">
-      <input id="pSearch" type="search" placeholder="Chercher un nom, un e-mail, une ville…">
-      <select id="statusFilter">
-        <option value="">Tous statuts</option>
-        <option value="ready">Prêts</option>
-        <option value="sent">Envoyés</option>
-        <option value="error">Erreurs</option>
-        <option value="opted_out">STOP</option>
-        <option value="paused">En pause</option>
-      </select>
-      <button class="btn" id="refreshBtn">↻</button>
-    </div>
-    <div id="prospectsBody" class="plist"><div class="small">Chargement…</div></div>
-  </details>
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
 </main>
 
 <section class="card lock" id="lock">
@@ -191,8 +209,7 @@ Le Service Pros Abracadeal</textarea></div>
 </section>
 
 <script src="assets/admin-prospection.js?v=20261110-mail"></script>
-<script src="/assets/app-shell-20261018.js?v=8" defer></script>
 <link rel="stylesheet" href="assets/admin-theme-20261108.css?v=3">
-<script src="assets/admin-subnav-20261108.js?v=3" defer></script>
+<link rel="stylesheet" href="assets/admin-prospection-head-20261112.css?v=1">
 </body>
 </html>

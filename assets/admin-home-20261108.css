@@ -75,9 +75,10 @@ a{color:inherit}
 .ah-seg button{flex:1;border:1px solid var(--line);background:var(--card);color:var(--muted);font:700 .85rem 'DM Sans',sans-serif;padding:9px;border-radius:12px;cursor:pointer}
 .ah-seg button.on{background:#fff;color:#1b0d2d}
 .ah-bars{display:grid;gap:7px}
-.ah-bar{display:grid;grid-template-columns:110px 1fr 40px;align-items:center;gap:9px;font-size:.84rem}
+.ah-bar{display:grid;grid-template-columns:minmax(120px,40%) 1fr auto;align-items:center;gap:9px;font-size:.84rem}
 .ah-bar i{display:block;height:10px;border-radius:999px;background:linear-gradient(90deg,#8a2ca8,var(--pink))}
-.ah-bar b{text-align:right}
+.ah-bar b{text-align:right;white-space:nowrap}
+.ah-bar span{line-height:1.25}
 .ah-days{display:flex;align-items:flex-end;gap:5px;height:150px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 10px 8px;overflow-x:auto}
 .ah-dcol{flex:1 0 30px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;gap:4px;font-size:.68rem;color:var(--muted)}
 .ah-dcol b{color:#fff;font-size:.72rem}

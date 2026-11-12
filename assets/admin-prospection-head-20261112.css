@@ -1,0 +1,24 @@
+/* 12/11/2026 — Prospection = un onglet de l'admin : même en-tête et mêmes onglets que admin.html. */
+.ah-top{--line:rgba(255,255,255,.09);--muted:#b9a8c9;--pink:#ec409d;--pink2:#ff69bd;--gold:#f7bd4b;position:sticky;top:0;z-index:50;background:rgba(22,9,34,.94);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-bottom:1px solid var(--line);padding-top:env(safe-area-inset-top);font-family:'DM Sans',system-ui,-apple-system,sans-serif;color:#f4eefb}
+.ah-wrap{width:min(1100px,100% - 24px);margin:0 auto}
+.ah-topin{display:flex;align-items:center;gap:10px;min-height:56px}
+.ah-back{width:36px;height:36px;display:grid;place-items:center;border-radius:12px;background:rgba(255,255,255,.07);text-decoration:none;font-size:26px;line-height:1;padding-bottom:3px;color:#f4eefb}
+.ah-brand{font:700 1.15rem Fraunces,Georgia,serif;flex:1}
+.ah-brand span{font:700 .72rem 'DM Sans',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:#1b0d2d;background:var(--gold);padding:3px 7px;border-radius:999px;margin-left:6px;vertical-align:3px}
+.ah-refresh{border:1px solid var(--line);background:rgba(255,255,255,.05);color:var(--muted);font:600 .8rem 'DM Sans',sans-serif;padding:7px 11px;border-radius:999px;cursor:pointer}
+.ah-tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding:2px 0 10px}
+.ah-tabs::-webkit-scrollbar{display:none}
+.ah-tabs a{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);color:var(--muted);font:700 .88rem 'DM Sans',sans-serif;padding:8px 14px;border-radius:999px;text-decoration:none}
+.ah-tabs a.on{background:linear-gradient(135deg,var(--pink),var(--pink2));color:#fff;border-color:transparent}
+.ah-tabs svg{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+.ah-sec{font:700 1.05rem Fraunces,Georgia,serif;margin:26px 0 10px;color:#fff}
+body>header.top{display:none}
+#app{padding-top:14px}
+@media(max-width:759px){
+  .ah-top{backdrop-filter:none;-webkit-backdrop-filter:none;background:#160922}
+  .ah-tabs{position:fixed;left:0;right:0;bottom:0;width:100%;margin:0;z-index:60;display:grid;grid-template-columns:repeat(5,1fr);gap:0;padding:6px 4px calc(6px + env(safe-area-inset-bottom));background:rgba(22,9,34,.97);border-top:1px solid var(--line);overflow:visible}
+  .ah-tabs a{flex-direction:column;gap:3px;border:0;border-radius:12px;background:none!important;font-size:.68rem;padding:6px 2px}
+  .ah-tabs svg{width:23px;height:23px}
+  .ah-tabs a.on{color:var(--pink2)}
+  body{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+}

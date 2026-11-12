@@ -20,19 +20,21 @@
   };
   var kpi = function (label, value, sub, tone) { return '<div class="ah-kpi' + (tone ? ' ' + tone : '') + '"><span>' + esc(label) + '</span><strong>' + value + '</strong>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>'; };
   var SECTOR = { vehicules: 'Auto / moto', immobilier: 'Immobilier', hightech: 'High-tech', maison: 'Maison', mode: 'Mode', emploi: 'Emploi', services: 'Services' };
-  var SRC = { google: 'Google', bing: 'Autres moteurs', facebook: 'Facebook', instagram: 'Instagram', email: 'E-mails', direct: 'Direct / favoris', autre_site: 'Autres sites' };
+  var SRC = { google: 'Google', seo: 'Fiches Google (origine masquée)', bing: 'Autres moteurs (Bing, Qwant…)', ia: 'ChatGPT et autres IA', facebook: 'Facebook', instagram: 'Instagram', prospection: 'Mails de prospection', email: 'Autres e-mails', partage: 'Liens partagés (WhatsApp, SMS…)', direct: 'Direct (adresse tapée, favoris, appli)', autre_site: 'Autres sites' };
+  var PAGE = { accueil: 'Accueil', annonce: 'Une annonce', showroom: 'Vitrine d’un pro', categorie: 'Une catégorie', vacances: 'Vacances', autre: 'Autre page' };
 
   var state = { data: null, traffic: null, tracking: null, searches: null, storage: null, days: 7, tab: 'today', loading: false, lastOk: 0 };
 
   /* ---------- onglets ---------- */
   function showTab(tab) {
+    // 12/11/2026 : l'onglet Prospection ouvre directement l'outil complet (plus de page résumé + menu dans le menu).
+    if (tab === 'prospect') { location.href = 'admin-prospection.html'; return; }
     state.tab = tab;
     document.querySelectorAll('#ahTabs button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
     document.querySelectorAll('.ah-panel').forEach(function (p) { p.classList.toggle('on', p.dataset.panel === tab); });
     try { history.replaceState(null, '', '#' + tab); } catch (_) {}
     window.scrollTo({ top: 0 });
     if (tab === 'stats' && !state.traffic) loadTraffic();
-    if (tab === 'prospect' && !state.tracking) loadTracking();
     if (tab === 'tech' && !state.storage) loadStorage();
   }
   window.addEventListener('hashchange', function () { var h = (location.hash || '').slice(1); h = ({ traffic: 'stats', money: 'stats' })[h] || h; if (h && h !== state.tab && document.querySelector('.ah-panel[data-panel="' + h + '"]')) showTab(h); });
@@ -107,6 +109,8 @@
   }
 
   function renderProspect(d) {
+    var dot = $('ahProspectDot'); if (dot) dot.hidden = !Number((d.todo || {}).acceptances_pending);
+    if (!$('ahMailerState')) return;
     var p = d.prospection || {};
     var on = p.sending_enabled, fu = p.followups_enabled;
     $('ahMailerState').innerHTML =
@@ -125,6 +129,7 @@
   }
 
   function renderTracking() {
+    if (!$('ahProspectRows')) return;
     var t = state.tracking;
     if (!t) { $('ahProspectRows').innerHTML = '<div class="ah-empty">Chargement…</div>'; return; }
     var rows = (t.rows || []).slice().sort(function (a, b) {
@@ -146,7 +151,12 @@
       kpi('Vues d’annonces', nf(sum('vues_annonces'))) + kpi('Numéros affichés', nf(sum('numeros'))) + kpi('Messages', nf(sum('messages'))) +
       kpi('Showrooms vus', nf(sum('showrooms'))) + kpi('Recherches', nf(sum('recherches')));
     var src = Object.entries(t.sources || {}).sort(function (a, b) { return b[1] - a[1]; }), max = src.length ? src[0][1] : 1;
-    $('ahSources').innerHTML = src.map(function (s) { return '<div class="ah-bar"><span>' + esc(SRC[s[0]] || s[0]) + '</span><i style="width:' + Math.max(4, Math.round(100 * s[1] / max)) + '%"></i><b>' + nf(s[1]) + '</b></div>'; }).join('') || '<div class="ah-empty">Pas encore de données.</div>';
+    var tot = src.reduce(function (n, x) { return n + Number(x[1] || 0); }, 0) || 1;
+    $('ahSources').innerHTML = src.map(function (s) { return '<div class="ah-bar"><span>' + esc(SRC[s[0]] || s[0]) + '</span><i style="width:' + Math.max(4, Math.round(100 * s[1] / max)) + '%"></i><b>' + nf(s[1]) + ' · ' + Math.round(100 * s[1] / tot) + ' %</b></div>'; }).join('') || '<div class="ah-empty">Pas encore de données.</div>';
+    var hosts = t.hosts || [];
+    if ($('ahHosts')) $('ahHosts').innerHTML = hosts.length ? hosts.map(function (h) { return '<div class="ah-row"><div><strong>' + esc(h.host) + '</strong><small>' + esc(SRC[h.source] || '') + '</small></div><div class="ah-row-r">' + nf(h.n) + ' visiteur' + (Number(h.n) > 1 ? 's' : '') + '</div></div>'; }).join('') : '<div class="ah-empty">Pas encore de site d’origine enregistré (suivi détaillé depuis le 12/11/2026).</div>';
+    var pg = Object.entries(t.pages || {}).sort(function (a, b) { return b[1] - a[1]; }), pmax = pg.length ? pg[0][1] : 1;
+    if ($('ahPages')) $('ahPages').innerHTML = pg.map(function (x) { return '<div class="ah-bar"><span>' + esc(PAGE[x[0]] || x[0]) + '</span><i style="width:' + Math.max(4, Math.round(100 * x[1] / pmax)) + '%"></i><b>' + nf(x[1]) + '</b></div>'; }).join('') || '<div class="ah-empty">Pas encore de données.</div>';
     var dmax = Math.max.apply(null, rows.map(function (r) { return Number(r.visiteurs || 0); }).concat([1]));
     $('ahDaysChart').innerHTML = rows.slice().reverse().map(function (r) {
       var day = new Date(r.day + 'T12:00:00');
@@ -250,7 +260,6 @@
       renderAll(); stamp();
       var extra = [loadTodayTraffic()];
       if (state.traffic || state.tab === 'stats') extra.push(loadTraffic());
-      if (state.tracking || state.tab === 'prospect') extra.push(loadTracking());
       if (state.tab === 'tech') extra.push(loadStorage());
       return Promise.all(extra);
     }).catch(function (e) {

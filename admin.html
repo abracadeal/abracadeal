@@ -12,7 +12,7 @@
 <script src="/assets/supabase-js-2.118.0.js"></script><script src="assets/admin-auth.js?v=1"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap">
-<link rel="stylesheet" href="assets/admin-home-20261108.css?v=4">
+<link rel="stylesheet" href="assets/admin-home-20261108.css?v=5">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=5">
@@ -29,7 +29,7 @@
   <nav class="ah-tabs ah-wrap" id="ahTabs" aria-label="Rubriques">
     <button type="button" data-tab="today" class="on"><svg viewBox="0 0 24 24"><path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/></svg><span>Accueil</span><b class="ah-tabdot" id="ahTodoDot" hidden></b></button>
     <button type="button" data-tab="pros"><svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M9 7V5.5A1.5 1.5 0 0 1 10.5 4h3A1.5 1.5 0 0 1 15 5.5V7"/></svg><span>Pros</span></button>
-    <button type="button" data-tab="prospect"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Prospection</span></button>
+    <button type="button" data-tab="prospect"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg><span>Prospection</span><b class="ah-tabdot" id="ahProspectDot" hidden></b></button>
     <button type="button" data-tab="stats"><svg viewBox="0 0 24 24"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M22 20H2"/></svg><span>Stats</span></button>
     <button type="button" data-tab="tech"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/></svg><span>Réglages</span></button>
   </nav>
@@ -57,13 +57,6 @@
     <div class="ah-go"><a href="pro-pro.html"><span><strong>Entre Pro</strong><small>Le marché réservé aux professionnels</small></span><i>›</i></a></div>
   </section>
 
-  <section class="ah-panel" data-panel="prospect" hidden>
-    <div class="ah-state" id="ahMailerState"></div>
-    <div class="ah-kpis" id="ahProspectKpis"></div>
-    <div class="ah-go"><a href="admin-prospection.html"><span><strong>Gérer la prospection</strong><small>Boîtes d’envoi, modèles de mails, liste STOP, réponses « OK »</small></span><b id="ahGoOk" hidden></b><i>›</i></a></div>
-    <h2>Activité récente</h2>
-    <div class="ah-list" id="ahProspectRows"></div>
-  </section>
 
   <section class="ah-panel" data-panel="stats" hidden>
     <div class="ah-seg" id="ahDays">
@@ -72,6 +65,11 @@
     <div class="ah-kpis" id="ahTrafficKpis"></div>
     <h2>D’où viennent les visiteurs</h2>
     <div class="ah-bars" id="ahSources"></div>
+    <p class="ah-note">Avant le 12/11/2026, les visiteurs arrivés de Google sur une fiche d’annonce étaient comptés « Direct » : les chiffres se précisent à partir de cette date.</p>
+    <h2>Sites qui envoient des visiteurs</h2>
+    <div class="ah-list" id="ahHosts"></div>
+    <h2>Page d’arrivée</h2>
+    <div class="ah-bars" id="ahPages"></div>
     <h2>Jour par jour</h2>
     <div class="ah-days" id="ahDaysChart"></div>
     <h2>Annonces les plus vues</h2>
@@ -104,6 +102,6 @@
   </section>
 </main>
 
-<script src="assets/admin-home-20261108.js?v=5"></script>
+<script src="assets/admin-home-20261108.js?v=6"></script>
 </body>
 </html>
