@@ -3073,3 +3073,7 @@
 ## 12/11/2026 — Claude : numéro des pros sans connexion (accord d'Anthony)
 - Site (index-main.js, v=20261112-telpro) : « Voir le numéro » tente l'affichage même déconnecté ; si le serveur répond « Connexion requise » (particuliers) → compteur `phone_login`, fenêtre de connexion avec un bandeau « connectez-vous en 1 clic avec Google ou Facebook », et retour automatique sur l'annonce avec affichage du numéro après connexion (?annonce=<id>&tel=1). Compteur `phone` seulement quand le numéro est vraiment montré. Mention « réservé aux membres connectés » masquée sur les annonces de pros.
 - Base : supabase/2026-11-12-pro-phone-public.sql (get_listing_phone / get_listing_contact_details ouverts aux visiteurs pour les annonces publiques de vrais comptes pro, quota par IP 10/10 min et 25/24 h ; kinds `message` (manquait) et `phone_login` ajoutés ; les 4 anciens « phone » de visiteurs non connectés passés en `phone_login`).
+
+## 13/11/2026 (nuit) — Claude : « Sites en réparation » (signalé par Anthony, Gubernatis)
+- Gubernatis (Nice) restait en « ✓ Réparé · à valider » alors que son stock est en ligne (89 biens). Migration robot_learning_hide_live_sites_20261113 : admin_list_robot_learning n'affiche plus une demande réparée dont le domaine correspond à un flux pro actif, approuvé et déjà synchronisé.
+- Annonce « Cannes Félix Faure – Bar-pub 200 m² » absente : ajoutée sur le site de l'agence après la synchro de 19 h 22 (89 reçus, 0 créé) ; prise au passage de synchro suivant (toutes les 6 h, 01 h 22).
