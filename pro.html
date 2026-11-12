@@ -5,6 +5,16 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Showroom Abracadeal</title>
 <meta name="robots" content="index,follow">
+<script>
+/* 12/11/2026 (Claude) : Search Console — les vitrines pro.html?id=… étaient explorées en doublon des pages
+   statiques garage/… immo/… professionnel/… (aucune adresse officielle). On déclare la page statique comme canonique ;
+   si le pro n'a pas encore de page statique, la vitrine est sa propre adresse officielle (sans paramètre parasite). */
+(function(){try{var id=(new URLSearchParams(location.search).get('id')||'').toLowerCase();if(!/^[0-9a-f-]{36}$/.test(id))return;
+ var set=function(h){var l=document.querySelector('link[rel=canonical]')||document.createElement('link');l.rel='canonical';l.href=h;if(!l.parentNode)document.head.appendChild(l);};
+ set('https://abracadeal.fr/pro.html?id='+id);
+ fetch('/pro-pages.json',{cache:'force-cache'}).then(function(r){return r.ok?r.json():null}).then(function(d){var p=d&&d[id];if(p&&p.path&&p.active!==false)set('https://abracadeal.fr/'+String(p.path).replace(/^\/|\/$/g,'')+'/');}).catch(function(){});
+}catch(e){}})();
+</script>
 <meta name="theme-color" content="#1b0d2d">
 <link rel="icon" href="/favicon.ico?v=3" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3">
