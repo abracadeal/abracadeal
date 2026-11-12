@@ -60,6 +60,7 @@ Disallow: /backups/
 Disallow: /docs/
 Disallow: /emails/
 Disallow: /scripts/
+Disallow: /assets/email/
 Disallow: /supabase/
 Disallow: /tests/
 
