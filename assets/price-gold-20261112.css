@@ -1,0 +1,17 @@
+/* 12/11/2026 — Prix en or sur les vignettes (fond foncé) — demande d'Anthony.
+   Remplace le rose (#ff54b7 / #ff64bd). Pour revenir au rose : retirer ce fichier d'index.html.
+   Les pages à fond clair (fiche détail, vitrine pro, pages Google /annonce/) gardent le violet : l'or s'y lit mal. */
+.ad-price,
+#resultats .ad-price,
+.home-featured-price,
+.personalized-price,
+#homeFeaturedSection .home-featured-price,
+#recentSearchSection .personalized-price,
+#recentViewedSection .personalized-price,
+#nearbySection .personalized-price{
+  color:#f7bd4b!important;
+  font-weight:950!important;
+}
+.ad-price *,
+.home-featured-price *,
+.personalized-price *{color:inherit!important}
