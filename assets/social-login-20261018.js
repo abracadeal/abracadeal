@@ -85,8 +85,14 @@
 
   // 30/10/2026 : un pro arrivé par un mail de prospection (lien ?r=…) ne doit pas créer
   // un compte particulier par « Continuer avec Google » : boutons masqués pour lui.
-  function isProspectPro(){try{const r=JSON.parse(localStorage.getItem('abraca_prospect_ref')||'null');return !!(r&&/^[a-z0-9]{8}$/.test(r.code)&&Date.now()-Number(r.at||0)<90*864e5);}catch(_){return false}}
-  let enabled=new Set();
+  // 12/11/2026 (Claude) : plus de masquage pour les pros arrivés par un mail de prospection —
+  // la fenêtre « Finalisez votre compte » impose déjà le choix Particulier/Pro + SIRET, et le
+  // masquage faisait disparaître les boutons pendant 90 jours sur tout appareil ayant ouvert un lien ?r=.
+  function isProspectPro(){return false}
+  // 12/11/2026 (Claude) : boutons affichés d'office (Google et Facebook sont activés dans Supabase).
+  // Avant, ils n'apparaissaient qu'après la réponse de /auth/v1/settings : si Supabase était lent
+  // ou en erreur, ils restaient cachés. La réponse ne sert plus qu'à masquer un fournisseur coupé.
+  let enabled=new Set(PROVIDERS.filter(p=>!PAUSED.has(p.id)).map(p=>p.id));
   function refreshVisibility(){
     for(const box of blocks){
       let any=false;
@@ -98,11 +104,13 @@
       box.classList.toggle('hidden',!any||box.dataset.pro==='1'||isProspectPro());
     }
   }
+  syncProVisibility();
   fetch(SUPABASE_URL+'/auth/v1/settings',{headers:{apikey:SUPABASE_KEY}})
     .then(r=>r.ok?r.json():null)
     .then(s=>{
-      const ext=s?.external||{};
-      enabled=new Set(PROVIDERS.filter(p=>ext[p.id]===true&&!PAUSED.has(p.id)).map(p=>p.id));
+      const ext=s?.external;
+      if(!ext)return;
+      enabled=new Set(PROVIDERS.filter(p=>ext[p.id]!==false&&!PAUSED.has(p.id)).map(p=>p.id));
       syncProVisibility();
     })
     .catch(()=>{});

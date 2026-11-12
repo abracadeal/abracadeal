@@ -1,3 +1,9 @@
+## 12/11/2026 (nuit) — Claude : boutons Google / Facebook qui disparaissaient
+- Signalé par Anthony : plus de connexion/inscription Google ni Facebook. Côté Supabase tout fonctionne (fournisseurs activés, /authorize redirige bien vers Google et Facebook).
+- Cause 1 : les boutons n'étaient affichés qu'après la réponse de /auth/v1/settings ; si Supabase était lent ou en erreur (timeouts 504 vus le 11/11), ils restaient cachés. Désormais affichés d'office, la réponse ne sert qu'à masquer un fournisseur explicitement coupé.
+- Cause 2 : tout appareil ayant ouvert un lien de prospection (?r=…) cachait les boutons 90 jours (règle du 30/10). Supprimé : la fenêtre « Finalisez votre compte » impose déjà Particulier/Pro + SIRET.
+- social-login-20261018.js ?v=20261112-always.
+
 ## 2026-11-11 (après-midi) — Nextlogis, lecture intégrale vérifiée (ChatGPT)
 
 - Départ sur main `dbbeaa10cadf2429f80847f74776ec5417b1e3b4`. JOURNAL et version réelle de pro-stock-sync vérifiés. Production initiale v339 épinglée sur `164949f33e497d3cfcf0fdea743c745c42a41639`, code de la fonction identique à main. Worktree isolé, changements concurrents et autres connecteurs conservés. Demande `b0feac83-d85c-42e2-a7f2-92f7f578ab52` prise après les blocages déjà documentés dans la file. Test initial à blanc `7395` : 0 annonce, trois erreurs de parcours.
