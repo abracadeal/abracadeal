@@ -30,6 +30,14 @@
   "count": 0,
   "active": false
  },
+ "be49d25d-fa3c-4361-8488-4762ba4c09ad": {
+  "path": "garage/alternativecars-bikes-alternativecars-saint-front-dalemps",
+  "name": "Alternativecars&bikes (alternativecars)",
+  "city": "Saint-Front-d’Alemps",
+  "count": 7,
+  "active": true,
+  "short": "alternativecars-bikes-alternativecars"
+ },
  "c177abd7-174a-454e-aa56-2fc940d63837": {
   "path": "garage/auto-negoce-bordeaux-33-artigues-pres-bordeaux",
   "name": "WeeCars Bordeaux Est",
