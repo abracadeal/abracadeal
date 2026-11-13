@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, scripts/build_pro_pages.py, scripts/build_chatgpt_feed.py, .github/workflows/share-pages.yml]
+    paths: [scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, scripts/build_pro_pages.py, scripts/build_chatgpt_feed.py, scripts/build_catalog_feed.py, .github/workflows/share-pages.yml]
 
 permissions:
   contents: write
@@ -31,6 +31,7 @@ jobs:
       - run: python scripts/build_auto_seo_pages.py
       - run: python scripts/build_pro_pages.py
       - run: python scripts/build_chatgpt_feed.py
+      - run: python scripts/build_catalog_feed.py
       - name: Publier les changements
         run: |
           git add -A annonce annonces auto feeds pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml

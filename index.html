@@ -13,7 +13,7 @@ html.abraca-embed body::before,html.abraca-embed body::after{display:none!import
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>/* 02/11/2026 (Anthony : premier affichage lent sur mobile) : le catalogue part dès le début de la page, en parallèle des styles et scripts. */
 /* 08/11/2026 : il part juste après le téléchargement des styles (petit script après le lien CSS), pour ne pas leur prendre la bande passante : l'affichage arrive plus tôt sur mobile. */
-window.__abracaStartCatalog=function(){window.__abracaStartCatalog=null;try{if(/[?&](embed=1|apercu=import|admin_preview=|annonce=)/.test(location.search))return;window.__abracaCatalogPrefetch=fetch('https://jplzvxmpbpjssyinozap.supabase.co/rest/v1/rpc/public_catalog',{method:'POST',headers:{apikey:'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF','Content-Type':'application/json'},body:'{}'}).then(function(r){return r.ok?r.json():null;}).catch(function(){return null;});}catch(e){}};</script>
+window.__abracaLoadCatalog=function(){var U='https://jplzvxmpbpjssyinozap.supabase.co/rest/v1/rpc/',H={apikey:'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF','Content-Type':'application/json'};function full(){return fetch(U+'public_catalog',{method:'POST',headers:H,body:'{}'}).then(function(r){return r.ok?r.json():null;});}/* 13/11/2026 (quota Supabase) : catalogue lu dans feeds/catalog.json (GitHub Pages) + seulement les annonces modifiées depuis (public_catalog_since) */return fetch('/feeds/catalog.json',{cache:'no-cache'}).then(function(r){return r.ok?r.json():null;}).then(function(s){if(!s||!s.at||!Array.isArray(s.rows)||!s.rows.length)return full();return fetch(U+'public_catalog_since',{method:'POST',headers:H,body:JSON.stringify({p_since:s.at})}).then(function(r){return r.ok?r.json():null;}).then(function(d){if(!d||!Array.isArray(d.ids)||!Array.isArray(d.rows))return full();var m={},out=[],i;for(i=0;i<s.rows.length;i++)m[s.rows[i].id]=s.rows[i];for(i=0;i<d.rows.length;i++)m[d.rows[i].id]=d.rows[i];for(i=0;i<d.ids.length;i++){if(!m[d.ids[i]])return full();out.push(m[d.ids[i]]);}return out;});}).catch(function(){return full();}).catch(function(){return null;});};window.__abracaStartCatalog=function(){window.__abracaStartCatalog=null;try{if(/[?&](embed=1|apercu=import|admin_preview=|annonce=)/.test(location.search))return;window.__abracaCatalogPrefetch=window.__abracaLoadCatalog();}catch(e){}};</script>
 <script>/* 08/11/2026 (vitesse) : copie intégrée de assets/tablet-as-mobile-20261007.js (un téléchargement bloquant en moins). Si ce fichier change, recopier ici. */
 /* Tablette tactile (iPad...) = version mobile.
    Sur tablette, toutes les media queries de largeur (CSS, window.matchMedia et
@@ -2019,7 +2019,7 @@ body.showroom-fs-open .mobile-bottom-nav{display:none!important}
 <script src="assets/card-photo-fit-20261101.js?v=5" defer></script>
 <script src="assets/vehicle-title-20261103.js?v=1" defer></script>
 <script src="assets/visit-source-20261112.js?v=2" defer></script>
-<script src="assets/index-main.js?v=20261112-telpro" defer></script>
+<script src="assets/index-main.js?v=20261113-catalog" defer></script>
 <script src="assets/veh-sub-chips-20261106.js?v=1" defer></script>
 <script src="assets/social-login-20261018.js?v=20261112-always" defer></script>
 <script src="assets/description-helper-20261013.js?v=3" defer></script>

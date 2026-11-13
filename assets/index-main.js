@@ -3677,7 +3677,9 @@ function fetchPublicCatalog(){
   const full=()=>sb.from('listings').select(PUBLIC_CATALOG_SELECT)
     .is('revision_of',null).eq('status','active').eq('visibility_scope','public')
     .order('created_at',{ascending:false});
-  const rpc=()=>Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full());
+  /* 13/11/2026 (quota Supabase) : fichier statique + compléments (window.__abracaLoadCatalog, index.html), sinon public_catalog */
+  const rpc=()=>(typeof window.__abracaLoadCatalog==='function'?Promise.resolve(window.__abracaLoadCatalog()).then(d=>Array.isArray(d)?{data:d,error:null}:null).catch(()=>null):Promise.resolve(null))
+    .then(x=>x||Promise.resolve(sb.rpc('public_catalog')).then(r=>(!r.error&&Array.isArray(r.data))?{data:r.data,error:null}:full()).catch(()=>full()));
   // 08/11/2026 : le préchargement démarre après l'affichage de la bannière ; s'il n'est pas encore parti, on le lance maintenant.
   if(!window.__abracaCatalogPrefetch&&typeof window.__abracaStartCatalog==='function')window.__abracaStartCatalog();
   const pre=window.__abracaCatalogPrefetch;window.__abracaCatalogPrefetch=null;
