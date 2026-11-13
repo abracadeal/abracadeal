@@ -153,12 +153,14 @@ let isVeh=false;
 function applyFilters(){
   const sort=document.getElementById('stockSort')?.value||'';
   const num=(v,d)=>v==null||v===''?d:Number(v);
-  filtered=[...listings].sort((a,b)=>sort==='price-asc'?num(a.price,Infinity)-num(b.price,Infinity):sort==='price-desc'?num(b.price,-Infinity)-num(a.price,-Infinity):new Date(b.created_at)-new Date(a.created_at));
+  filtered=[...listings].sort((a,b)=>sort==='price-asc'?num(a.price,Infinity)-num(b.price,Infinity):sort==='price-desc'?num(b.price,-Infinity)-num(a.price,-Infinity):(((a.category==='vehicules'&&!a.vehicle_make&&!a.vehicle_year&&!a.mileage)?1:0)-((b.category==='vehicules'&&!b.vehicle_make&&!b.vehicle_year&&!b.mileage)?1:0))||(new Date(b.created_at)-new Date(a.created_at)));/* 13/11/2026 : véhicules avant pièces/équipements */
   shown=24;renderCards();
 }
 function renderAds(){
   const pane=document.getElementById('pane');
-  isVeh=listings.filter(l=>l.category==='vehicules').length>listings.length/2;
+  /* 13/11/2026 : pièces / équipements (sans marque, année ni km) ne sont pas des « véhicules » */
+  const isPart=l=>l.category==='vehicules'&&!l.vehicle_make&&!l.vehicle_year&&!l.mileage;
+  isVeh=listings.every(l=>l.category==='vehicules'&&!isPart(l));
   const n=listings.length,label=(isVeh?'véhicule':'annonce')+(n>1?'s':'');
   pane.innerHTML=(n>1?'<div class="tools sortbar"><div class="count"><b>'+n+'</b> '+label+'</div><select id="stockSort" aria-label="Trier par prix"><option value="">Trier par prix</option><option value="price-asc">Prix croissant</option><option value="price-desc">Prix décroissant</option></select></div>':'')+'<div id="stockResults"></div>';
   document.getElementById('stockSort')?.addEventListener('change',applyFilters);
