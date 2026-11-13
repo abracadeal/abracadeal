@@ -4,7 +4,7 @@ import { sDecode } from './smart-reader.ts';
 
 const site = new URL('https://www.pointimmo-pasturel.com/');
 const catalogue = new URL('/immo/c/front/search/pk/13/mode/0', site);
-const scope = 'pointimmo-v2:';
+const scope = 'pointimmo-v3:';
 // Repeated versions of the same floor plan or interior photo, confirmed on the source galleries.
 const repeatedPhotos = new Set([
   '/media/images/immo/385/z2_4935.webp',
@@ -202,5 +202,9 @@ export async function readPointImmo(fetchHtml: Fetcher, memory: CrawlMemory | un
     }
     return {...row, photos: [...unique.values()].join('|')};
   }, memory, {expectedTotal: cards.size, maxDetails: 4});
-  return Object.assign(rows, {platform: 'Point Immo (Proxi)', sector: 'immobilier'});
+  // Normalization may rewrite location fields. Keep the saved source rows intact for the next pass.
+  return Object.assign(rows.map(row => ({...row})), {
+    platform: 'Point Immo (Proxi)', sector: 'immobilier', partial: rows.partial, total: rows.total,
+    stats: rows.stats, cycleStarted: rows.cycleStarted, cycleSeen: rows.cycleSeen,
+  });
 }
