@@ -6665,6 +6665,7 @@ let proCropState={kind:'banner',img:null,objectUrl:'',scale:1,minScale:1,x:0,y:0
 let proPreviewBannerUrl='',proPreviewLogoUrl='';
 
 function showroomAssetUrl(path){
+  if(path&&/^https:\/\//i.test(path))return path;/* 13/11/2026 : image hébergée sur le site (ex. logo refait par l'équipe) */
   if(!path||!sb)return '';
   const {data}=sb.storage.from('pro-showroom').getPublicUrl(path);
   return data?.publicUrl||'';

@@ -191,8 +191,8 @@ def pro_page(oid, p, kind, path, name, city, postal, items):
         meta_desc = f"{name}, agence immobilière{where} : {count} à vendre et à louer sur Abracadeal. Photos, prix, surface et DPE sur chaque annonce."
     else:
         meta_desc = f"{name}{where} : {count} en ligne sur Abracadeal."
-    logo = SHOWROOM + urllib.parse.quote(p["logo_path"]) if p.get("logo_path") else ""
-    banner = SHOWROOM + urllib.parse.quote(p["banner_path"]) if p.get("banner_path") else ""
+    logo = (p["logo_path"] if str(p.get("logo_path") or "").startswith("https://") else SHOWROOM + urllib.parse.quote(p["logo_path"])) if p.get("logo_path") else ""
+    banner = (p["banner_path"] if str(p.get("banner_path") or "").startswith("https://") else SHOWROOM + urllib.parse.quote(p["banner_path"])) if p.get("banner_path") else ""
     first_photo = next((it["photos"][0] for it in items if it["photos"]), "")
     image = banner or logo or first_photo
     crumbs = [("Accueil", SITE + "/"), (k["dir_title"], f"{SITE}/{kind}/"), (name, None)]
