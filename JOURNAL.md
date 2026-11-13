@@ -3078,3 +3078,8 @@
 - Gubernatis (Nice) restait en « ✓ Réparé · à valider » alors que son stock est en ligne (89 biens). Migration robot_learning_hide_live_sites_20261113 : admin_list_robot_learning n'affiche plus une demande réparée dont le domaine correspond à un flux pro actif, approuvé et déjà synchronisé.
 - Annonce « Cannes Félix Faure – Bar-pub 200 m² » absente : ajoutée sur le site de l'agence après la synchro de 19 h 22 (89 reçus, 0 créé) ; prise au passage de synchro suivant (toutes les 6 h, 01 h 22).
 - admin-test-import.html : « Valider ce site » sur un site déjà relié à un pro inscrit (flux actif) n'ouvre plus la demande d'e-mail de prospect (risque de doublon) ; affiche « déjà un pro inscrit, N annonces en ligne ».
+
+## 13/11/2026 (01 h 45) — Claude : biens Apimo nouveaux absents pendant 3 jours (Gubernatis, bar-pub Cannes Félix Faure 87576801)
+- Cause : dans pro-stock-sync, un tour de lecture terminé n'est « acquitté » (applied) que pour une liste de scopes ; « apimo-v1: » n'y était pas → le tour du 10/11 de Gubernatis (et celui du 11/11 de Sophie Folley) était resservi tel quel à chaque synchro jusqu'à 72 h : 89 reçus, 0 créé, nouveaux biens ignorés, biens vendus jamais retirés.
+- Code corrigé dans le dépôt (apimo-v1: ajouté à la liste) — **À DÉPLOYER** (pro-stock-sync, 800 Ko, pas déployé par Claude cette nuit).
+- En attendant : migration apimo_crawl_refresh_20261113 préparée (déclencheur qui marque « appliqué » les tours Apimo terminés + relecture immédiate de Gubernatis) — en attente de la validation d'Anthony dans Supabase.
