@@ -1,3 +1,9 @@
+## 13/11/2026 — Alternative Cars, descriptions et stock corrigés (ChatGPT)
+
+- Demande `9655d104-df3b-487e-9ba3-797590760637`. Le test à blanc `12522` mélangeait cinq véhicules et quinze pièces détachées. Le champ long de WooCommerce contenait les codes Divi. Le texte rédigé est publié dans le champ de description courte.
+- Lecture de la catégorie publique `vehicules-en-vente`, descriptions Divi écartées, URL des photos dédupliquées et commune source Saint-Front-d’Alemps (24460) conservée. pro-stock-sync v349 ACTIVE, code `05a882922943b46f864a948dc70f66f32bf11842`. Bundle vérifié.
+- Test à blanc en production `12533` sur l’adresse d’origine : 5 véhicules sur 5, 5 descriptions, 52 liens photo distincts par fiche, aucun doublon d’annonce ni erreur. Le numéro public est celui du garage. Validation visuelle laissée à Anthony. Aucun import, aucune publication, aucun mail.
+
 ## 2026-11-13 (après-midi) — Ultimate Car 83 et périmètre BG Motors Pro (ChatGPT)
 
 - Main récupéré sur `f928f04e0e727a9bcfe2b8886c076528940475ee`, JOURNAL relu. Fonction réellement déployée v347 sur `01adcdeba412b982dab54e7f0a45834e9838f0c0`, aucun écart de la fonction avec main. Worktree isolé, autres connecteurs et modifications concurrentes préservés. Demandes en attente relues dans l’ordre.
