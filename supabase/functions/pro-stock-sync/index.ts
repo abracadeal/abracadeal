@@ -23,6 +23,7 @@ import { isLautre, readLautre, lautreDiagnosticImages } from './lautre-reader.ts
 import { isNextlogis, nextlogisIdentity, readNextlogis } from './nextlogis-reader.ts';
 import { isMaisonCotard, readMaisonCotard } from './maison-cotard-reader.ts';
 import { isNegoceAuto33, readNegoceAuto33 } from './negoce-auto33-reader.ts';
+import { isPointImmo, readPointImmo } from './pointimmo-reader.ts';
 import { isGrangeCars, readGrangeCars } from './grange-cars-reader.ts';
 import { isAtsSud, readAtsSud, atsIdentity } from './ats-sud-reader.ts';
 import { isFordStrasbourg, readFordStrasbourg, fordStrasbourgIdentity } from './ford-strasbourg-reader.ts';
@@ -344,7 +345,7 @@ function tidyDescription(v:unknown,title=''){
  return dedupeDescription(out.join('\n').replace(/\n{3,}/g,'\n\n').replace(/^\n+/,'').trim(),title);
 }
 // 29/10/2026 (Anthony) : doublons de photos (même image en plusieurs tailles / adresses) et doublons d'annonces, pour tous les sites.
-function listingKey(r:any){const nextlogis=nextlogisIdentity(r);if(nextlogis)return nextlogis;if(/^https?:\/\/(?:www\.)?lautre-immobilier\.fr\/a-vendre\//i.test(String(r.externalUrl||''))&&r.ref)return 'lautre|'+r.ref;const ats=atsIdentity(r);if(ats)return ats;const ford=fordStrasbourgIdentity(r);if(ford)return ford;const rival=rivalIdentity(r);if(rival)return rival;const vr=vrAutoIdentity(r);if(vr)return vr;const i3v=i3vIdentity(r);if(i3v)return i3v;const retro=atelierRetroIdentity(r);if(retro)return retro;const sitea=siteaIdentity(r);if(sitea)return sitea;const berge=bergeIdentity(r);if(berge)return berge;if(/^https?:\/\/(?:www\.)?lecoeurtransactions\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'lecoeur|'+r.ref;if(r.category==='vehicules'&&/^https?:\/\/(?:www\.)?kombishop\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'kombishop|'+r.ref;if(/^https?:\/\/(?:www\.)?18avenue\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return '18avenue|'+r.ref;if(r.category==='vehicules'&&/^https?:\/\/(?:www\.)?decrosautomobiles\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'decros|'+r.ref;const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
+function listingKey(r:any){if(r.ref&&/^https:\/\/www\.pointimmo-pasturel\.com\/fr\//i.test(String(r.externalUrl||'')))return 'pointimmo|'+r.ref;const nextlogis=nextlogisIdentity(r);if(nextlogis)return nextlogis;if(/^https?:\/\/(?:www\.)?lautre-immobilier\.fr\/a-vendre\//i.test(String(r.externalUrl||''))&&r.ref)return 'lautre|'+r.ref;const ats=atsIdentity(r);if(ats)return ats;const ford=fordStrasbourgIdentity(r);if(ford)return ford;const rival=rivalIdentity(r);if(rival)return rival;const vr=vrAutoIdentity(r);if(vr)return vr;const i3v=i3vIdentity(r);if(i3v)return i3v;const retro=atelierRetroIdentity(r);if(retro)return retro;const sitea=siteaIdentity(r);if(sitea)return sitea;const berge=bergeIdentity(r);if(berge)return berge;if(/^https?:\/\/(?:www\.)?lecoeurtransactions\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'lecoeur|'+r.ref;if(r.category==='vehicules'&&/^https?:\/\/(?:www\.)?kombishop\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'kombishop|'+r.ref;if(/^https?:\/\/(?:www\.)?18avenue\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return '18avenue|'+r.ref;if(r.category==='vehicules'&&/^https?:\/\/(?:www\.)?decrosautomobiles\.fr\//i.test(String(r.externalUrl||''))&&r.ref)return 'decros|'+r.ref;const t=String(r.title||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]+/g,'');
  return [r.category,r.sub||'',t,Math.round(Number(r.price)||0),r.surface||'',r.mileage||'',r.year||'',r.city||''].join('|');}
 // Corrections faites par l'admin sur une fiche (table pro_stock_overrides, clé = site + référence), appliquées avant la mise en forme.
 // « _exclure » : la fiche n'est jamais publiée.
@@ -1063,6 +1064,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isLautre(url)){feed.sector='immobilier';return readLautre(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isNextlogis(url)){feed.sector='immobilier';return readNextlogis(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isMaisonCotard(url)){feed.sector='immobilier';return readMaisonCotard(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
+  if(isPointImmo(url)){feed.sector='immobilier';return readPointImmo(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isNegoceAuto33(url)){feed.sector='vehicules';return readNegoceAuto33(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isGrangeCars(url)){feed.sector='vehicules';return readGrangeCars(fetchSiteHtml,estatePhotoDigest);}
   if(isAtsSud(url)){feed.sector='vehicules';return readAtsSud(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
@@ -1396,7 +1398,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|nextlogis-v1$|maison-cotard-v1$|negoce-auto33-v1:|ats-motoconcess-v1:|atelier-retro-v1:|apimo-v1:)/.test(cp.data.state.scope||'')/* 13/11/2026 (Claude) : apimo-v1 ajouté — sans lui, Gubernatis / Sophie Folley gardaient le même tour 72 h (nouveaux biens absents) */){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|nextlogis-v1$|maison-cotard-v1$|negoce-auto33-v1:|pointimmo-v1:|ats-motoconcess-v1:|atelier-retro-v1:|apimo-v1:)/.test(cp.data.state.scope||'')/* 13/11/2026 (Claude) : apimo-v1 ajouté — sans lui, Gubernatis / Sophie Folley gardaient le même tour 72 h (nouveaux biens absents) */){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }
