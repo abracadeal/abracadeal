@@ -618,7 +618,7 @@ async function previewAlternativeCarsParts(source:unknown){
    const {data,totalPages}=await fetchSiteJson(endpoint);
    if(!Array.isArray(data)||totalPages>20||(!totalPages&&data.length===100))throw Error('Catalogue de pièces incomplet');
    for(const product of data){
-    if(product.is_in_stock===false||!product.categories?.some((c:any)=>c.slug==='pieces-detachees'))continue;
+    if(product.is_in_stock===false||!product.categories?.some((c:any)=>c.slug==='pieces-detachees'||/^https:\/\/alternativecars\.fr\/categorie-produit\/pieces-detachees\//i.test(c.link||'')))continue;
     const reference=String(product.id);
     const description=[product.short_description,product.description]
      .map(value=>aaClean(String(value||'').replace(/<\/p>/gi,'\n')))
