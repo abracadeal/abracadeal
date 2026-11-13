@@ -3099,3 +3099,8 @@
 - Bug : dosage par métier (category_mix 45 auto / 45 immo / 10 moto) appliqué seulement au 1er mail du jour de chaque boîte (relances désactivées → branche sans dosage, qui préfère les aperçus immo) → 204 immo / 34 auto / 1 moto. Migration prospect_mix_always_20261113 : dosage toujours appliqué quand les relances sont coupées.
 - Clics sans suite le 12/11 : Casa Terra Immobilier (info@casaterra.fr), Cabinet Bedin (biscaplage@). Règle d'Anthony : pas de relance.
 - 13/11 12 h 32 : migration apimo_crawl_refresh_20261113 appliquée (accord d'Anthony) + synchro lancée : Gubernatis 1 créé (bar-pub Félix Faure, en ligne), 3 mis à jour, 1 archivé (F3 Carré d'or Dubouchage). Le déploiement du code pro-stock-sync reste à faire (le déclencheur suffit en attendant).
+
+## 13/11/2026 — Claude : SEO, pages Google en retard de plusieurs heures
+- Le jeton GitHub du coffre Supabase (vault `abracadeal_github_pages_token`, utilisé par private.request_share_pages_build quand une annonce change) est refusé par GitHub (401 Bad credentials). Le déclenchement immédiat ne marche donc plus ; seul le cron GitHub « */10 » tourne, mais GitHub ne l'exécute que toutes les 4 à 8 h → nouvelles annonces sans page Google/sitemap pendant des heures, annonces retirées encore en ligne.
+- Build lancé à la main (run 43419985436) : 552 annonces au sitemap, bar-pub Félix Faure publié, F3 Dubouchage retiré.
+- À FAIRE (Anthony) : nouveau jeton GitHub fine-grained (dépôt abracadeal/abracadeal, permission Actions : lecture et écriture) à coller dans Supabase → Vault → abracadeal_github_pages_token.
