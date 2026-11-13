@@ -4,7 +4,14 @@ import { sDecode } from './smart-reader.ts';
 
 const site = new URL('https://www.pointimmo-pasturel.com/');
 const catalogue = new URL('/immo/c/front/search/pk/13/mode/0', site);
-const scope = 'pointimmo-v1:';
+const scope = 'pointimmo-v2:';
+// Repeated versions of the same floor plan or interior photo, confirmed on the source galleries.
+const repeatedPhotos = new Set([
+  '/media/images/immo/385/z2_4935.webp',
+  '/media/images/immo/386/z2_4907.webp',
+  '/media/images/immo/384/z2_4912.webp',
+  '/media/images/immo/561/z2_7118.webp',
+]);
 const pageSize = 48;
 const detailPath = /^\/fr\/[a-z0-9-]+$/i;
 type Fetcher = (url: URL) => Promise<{text: string; url: URL}>;
@@ -111,7 +118,7 @@ export function parsePointImmo(html: string, url: string, card: Card) {
   const gallery = new Set<string>();
   for (const match of article.matchAll(/<a rel="lightbox" href="([^"]+)"/gi)) {
     const photo = new URL(sDecode(match[1]), page);
-    if (isPlaceholderPhoto(photo.href)) continue;
+    if (isPlaceholderPhoto(photo.href) || repeatedPhotos.has(photo.pathname)) continue;
     if (photo.origin !== site.origin || !photo.pathname.startsWith(photoPath)) throw Error('Galerie Point Immo hors périmètre');
     gallery.add(photo.href);
   }
@@ -155,10 +162,16 @@ export async function readPointImmo(fetchHtml: Fetcher, memory: CrawlMemory | un
   if (all.length !== first.total || new Set(all.map(card => String(card.objectKey))).size !== first.total ||
       all.some(card => String(card.portfolioKey) !== '13')) throw Error('Catalogue Point Immo incomplet');
   const available = all.filter(pointImmoAvailable);
-  // The agency publishes the same 415 m² Rodez loft as a home and as a commercial space.
-  const loft = available.find(card => String(card.objectKey) === '586' && card.ref === '942' && card.url === 'loft-rodez');
-  const eligible = available.filter(card => !(loft && String(card.objectKey) === '575' &&
-    card.ref === '250' && card.url === 'local---loft-rodez' && card.price === loft.price));
+  // These two properties are each advertised as a dwelling and a commercial space.
+  // Keep the published residential loft and the published commercial listing in Naucelle.
+  const alternateListings = [
+    ['575', '250', 'local---loft-rodez', '586', '942', 'loft-rodez'],
+    ['555', '902', 'maison---local-renove-en-hypercentre', '552', '248', 'local-commercial-en-monopropriete'],
+  ];
+  const eligible = available.filter(card => !alternateListings.some(([id, ref, slug, keptId, keptRef, keptSlug]) =>
+    String(card.objectKey) === id && card.ref === ref && card.url === slug &&
+    available.some(kept => String(kept.objectKey) === keptId && kept.ref === keptRef &&
+      kept.url === keptSlug && kept.price === card.price)));
   const cards = new Map<string, Card>();
   for (const card of eligible) {
     if (!/^\d+$/.test(String(card.objectKey)) || !/^[a-z0-9-]+$/i.test(card.url)) throw Error('Lien Point Immo invalide');
