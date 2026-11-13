@@ -3119,3 +3119,8 @@
 - Correctif : scripts/build_catalog_feed.py écrit feeds/catalog.json (workflow « Pages de partage ») ; index.html window.__abracaLoadCatalog lit ce fichier puis rpc public_catalog_since(p_since) (nouvelle, migration public_catalog_since_20261113 : identifiants en ligne + annonces modifiées depuis, ~40 Ko) ; repli sur public_catalog si le fichier manque ou si un identifiant est absent. index-main.js : fetchPublicCatalog passe par la même fonction (v=20261113-catalog).
 - 13/11 13 h 16 : nouveau jeton GitHub (fine-grained « Abracadeal pages SEO », Actions lecture/écriture sur abracadeal/abracadeal, sans expiration) enregistré par Anthony dans le Vault ; testé : API 200 et déclenchement workflow_dispatch OK.
 - 13/11 : vignettes À la une / recherches récentes / vus récemment / près de chez vous : ligne « année · km · carburant · boîte » rognée à mi-hauteur (hauteur max 2,7 em mais les éléments internes avaient une hauteur de ligne plus grande) → assets/card-fixes-20261113.css (testé en rendu mobile 390 px : 2 lignes entières).
+
+## 13/11/2026 — Claude : exclusion des statistiques (comme Clic&Site)
+- assets/stats-optout-20261113.js (chargé sur index.html, mentions-legales.html, pro.html) : nom « Anthony Doche » des mentions légales (page + fenêtre de l'accueil) = lien secret invisible [data-stats-toggle] qui bascule localStorage « abraca_not_counted » (même marque que ?moi=1 et la connexion admin) avec message ; adresses #nostats / #stats. Testé (Playwright mobile).
+- Un seul domaine (abracadeal.com redirige vers abracadeal.fr), une seule langue.
+- Les statistiques maison (site_visits) n'enregistrent aucune ville : pas de visites « Lyon » à trier ici.
