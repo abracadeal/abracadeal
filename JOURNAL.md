@@ -1,3 +1,9 @@
+## 13/11/2026 — Alternative Cars, pièces incluses dans la synchronisation (ChatGPT)
+
+- `readFeed` charge les véhicules et les pièces WooCommerce. Les pièces sont normalisées sous Véhicules / `pieces-detachees`, sans année, date de mise en circulation ni kilométrage. L’aperçu garde sa rubrique dédiée et réutilise cette lecture.
+- Si le catalogue de pièces échoue, les véhicules sont transmis à la synchro et l’archivage du flux est suspendu. Simulation HTTP 503 vérifiée.
+- Robot v352, commit `31b43a01164c5c98334f7aa750c8c011b9b3d473`. Test à blanc production `12588` : 20 fiches complètes dont 15 pièces sans année ni kilométrage. Aucun flux Alternative Cars enregistré au contrôle, aucune publication déclenchée. Blocage mail du garage vérifié actif.
+
 ## 13/11/2026 — Alternative Cars, aperçu des pièces détachées (ChatGPT)
 
 - L’aperçu de l’URL lit aussi la catégorie WooCommerce `pieces-detachees` et ses sous-catégories. Les pièces apparaissent dans une rubrique distincte sous les véhicules, avec titre, prix, photo et lien source. Les codes Divi sont écartés. Une erreur du catalogue de pièces laisse l’aperçu des véhicules accessible.
