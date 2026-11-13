@@ -1,0 +1,24 @@
+/* 13/11/2026 (Anthony, capture « Sélection du moment ») : sur les vignettes À la une, la ligne
+   « année · km · carburant · boîte » était rognée à mi-hauteur (« Manuelle », « Automatique » coupés) :
+   le corps de la carte (flex, hauteur fixe) écrasait cette ligne. Elle garde désormais sa hauteur
+   (2 lignes max) ; c'est l'espace libre au-dessus de la ville qui se réduit. */
+#homeFeaturedSection .ad-specs.ad-specs-line,
+#recentSearchSection .ad-specs.ad-specs-line,
+#recentViewedSection .ad-specs.ad-specs-line,
+#nearbySection .ad-specs.ad-specs-line,
+.home-featured-body .ad-specs.ad-specs-line,
+.personalized-body .ad-specs.ad-specs-line{
+  flex:0 0 auto!important;
+  min-height:0!important;
+  height:auto!important;
+  max-height:none!important;
+  line-height:1.35!important;
+}
+#homeFeaturedSection .ad-specs.ad-specs-line > *,
+#recentSearchSection .ad-specs.ad-specs-line > *,
+#recentViewedSection .ad-specs.ad-specs-line > *,
+#nearbySection .ad-specs.ad-specs-line > *{
+  line-height:inherit!important;font-size:inherit!important;vertical-align:baseline!important;
+}
+.home-featured-body .home-featured-city,
+.personalized-body .personalized-city{flex:0 0 auto!important}
