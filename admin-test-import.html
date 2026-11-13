@@ -114,6 +114,7 @@ details.fold[open]{padding-bottom:14px}
  <p id="status" class="muted"></p>
  <div class="stats" id="stats" hidden></div>
  <div class="grid" id="grid"></div>
+ <section id="partsPreview" hidden></section>
  </details>
  <details class="fold" id="fold-reqs" open><summary><span>Demandes</span> <span class="fold-n" data-count="reqs"></span></summary>
 
@@ -260,7 +261,7 @@ async function loadReqs(){
 }
 async function act(a,i,btn){
  const r=REQS[i];if(!r)return;
- if(a==='preview'){btn.disabled=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu · '+(r.company||r.site_url);E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').scrollIntoView({behavior:'smooth'});
+ if(a==='preview'){btn.disabled=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu · '+(r.company||r.site_url);E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';E('grid').innerHTML='';E('partsPreview').hidden=true;E('stats').hidden=true;E('resTitle').scrollIntoView({behavior:'smooth'});
   try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{action:'preview_feed',feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
    if(!data?.ok){E('status').innerHTML='<span style="color:var(--bad)">'+esc(data?.error||'Lecture impossible')+'</span>';}
    else{ROWS=data.raw||[];NORM=data.rows||[];render(data,r.sector);}
@@ -280,7 +281,7 @@ async function act(a,i,btn){
   if(error)alert(error.message);loadReqs();}
 }
 async function runSync(r,btn){
- E('resTitle').hidden=false;E('resTitle').textContent='Synchronisation · '+(r.company||r.site_url);E('grid').innerHTML='';E('stats').hidden=true;
+ E('resTitle').hidden=false;E('resTitle').textContent='Synchronisation · '+(r.company||r.site_url);E('grid').innerHTML='';E('partsPreview').hidden=true;E('stats').hidden=true;
  E('status').textContent='Import en cours… (jusqu\'à 2 minutes, ne fermez pas la page)';E('resTitle').scrollIntoView({behavior:'smooth'});
  try{const{data,error}=await sb.functions.invoke('pro-stock-sync',{body:{feed_id:r.feed_id}});if(error)throw Error(await fnError(error));
   lastSync=data;
@@ -290,7 +291,7 @@ async function runSync(r,btn){
 }
 async function load(ev){
  ev.preventDefault();
- const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu';
+ const btn=E('go');btn.disabled=true;E('grid').innerHTML='';E('partsPreview').hidden=true;E('stats').hidden=true;E('resTitle').hidden=false;E('resTitle').textContent='Aperçu';
  E('status').textContent='Lecture du site en cours… (jusqu\'à une minute)';
  let url=E('url').value.trim();if(!/^https?:\/\//i.test(url))url='https://'+url;
  try{
@@ -330,6 +331,18 @@ async function load(ev){
  finally{btn.disabled=false}
 }
 function render(data,sector){
+ const section=E('partsPreview'),parts=data.parts;
+ section.hidden=!parts;
+ section.innerHTML=parts?'<h3>Pièces détachées · '+parts.items.length+'</h3>'+
+  (parts.error?'<p role="status">'+esc(parts.error)+'</p>':'<div class="grid">'+parts.items.map(part=>{
+   const photo=part.photos[0];
+   const title=esc(part.title);
+   const link=/^https:\/\/alternativecars\.fr\/produit\//i.test(part.url||'');
+   return '<article class="car">'+(photo?'<div class="ph"><img loading="lazy" src="'+esc(photo)+'" alt=""></div>':'')+
+    '<div class="body"><div class="ttl">'+(link?'<a href="'+esc(part.url)+'" target="_blank" rel="noopener">'+title+'</a>':title)+
+    '</div><div class="price">'+euro(part.price)+'</div>'+(part.description?'<p>'+esc(part.description)+'</p>':'')+'</div></article>';
+  }).join('')+'</div>'):'';
+
  const immo=sector==='immobilier';
  // 29/10/2026 : chaque fiche lue est reliée à sa version normalisée (photos sans doublons, ville corrigée) ; doublons d'annonce signalés.
  NN=ROWS.map(r=>NORM.find(n=>(n.externalUrl&&r.url&&n.externalUrl===r.url)||(n.ref&&r.reference!=null&&String(n.ref)===String(r.reference)))||null);
@@ -448,7 +461,7 @@ E('form').addEventListener('submit',load);
 // 30/10/2026 (Anthony) : après une action sur le site testé (Valider, Réparer), il disparaît de l'écran
 // (aperçu, boutons, adresse) ; seul le message de confirmation reste.
 function clearTest(){
- E('grid').innerHTML='';E('stats').hidden=true;E('resTitle').hidden=true;E('sitePreview').hidden=true;E('siteValidate').hidden=true;E('url').value='';
+ E('grid').innerHTML='';E('partsPreview').hidden=true;E('stats').hidden=true;E('resTitle').hidden=true;E('sitePreview').hidden=true;E('siteValidate').hidden=true;E('url').value='';
  LASTDATA=null;NORM=[];ROWS=[];LEARN_CONTEXT=null;
 }
 async function validateSite(){
