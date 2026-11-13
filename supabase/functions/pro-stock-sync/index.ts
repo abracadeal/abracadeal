@@ -604,17 +604,22 @@ function wooSpecs(html:string){
  }
  return o;
 }
-async function readWooSite(origin:URL){
+async function readWooSite(origin:URL, vehicleCategory?:string){
  const items:any[]=[];
  for(let page=1;page<=20;page++){
-  const{data,totalPages}=await fetchSiteJson(new URL(`/wp-json/wc/store/v1/products?per_page=100&page=${page}`,origin)).catch(e=>{throw Error(`Liste des véhicules illisible (page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
+  const endpoint=new URL('/wp-json/wc/store/v1/products',origin);
+  if(vehicleCategory)endpoint.searchParams.set('category',vehicleCategory);
+  endpoint.searchParams.set('per_page','100');
+  if(page>1||!vehicleCategory)endpoint.searchParams.set('page',String(page));
+  const{data,totalPages}=await fetchSiteJson(endpoint).catch(e=>{throw Error(`Liste des véhicules illisible (page ${page}) : ${e instanceof Error?e.message:String(e)}`);});
   if(!Array.isArray(data))throw Error('Réponse WooCommerce inattendue : synchronisation annulée par sécurité.');
   items.push(...data);if(!data.length||page>=(totalPages||1))break;
+  if(vehicleCategory&&page===20)throw Error('Catalogue WooCommerce incomplet : synchronisation annulée par sécurité.');
  }
  const catSlugs=(p:any)=>(p.categories||[]).map((c:any)=>norm(c.slug||c.name));
  const sold=(p:any)=>catSlugs(p).some((s:string)=>/(^|_)(vendu|vendus|sold|reserve|reserves)($|_)/.test(s));
  const hasDispo=items.some(p=>catSlugs(p).some((s:string)=>/^disponibles?$/.test(s)));
- const live=items.filter(p=>p.is_in_stock!==false&&!sold(p)&&(!hasDispo||catSlugs(p).some((s:string)=>/^disponibles?$/.test(s))));
+ const live=items.filter(p=>p.is_in_stock!==false&&!sold(p)&&(!vehicleCategory||catSlugs(p).includes(norm(vehicleCategory)))&&(!hasDispo||catSlugs(p).some((s:string)=>/^disponibles?$/.test(s))));
  if(!live.length)throw Error('Aucun véhicule disponible trouvé sur le site : synchronisation annulée par sécurité.');
  const rows:any[]=[];let i=0;const list=live.slice(0,300);
  await Promise.all(Array.from({length:4},async()=>{while(i<list.length){const p=list[i++];
@@ -622,7 +627,19 @@ async function readWooSite(origin:URL){
   const o:any={reference:String(p.id),url:p.permalink,titre:decodeEntities(String(p.name||'')).replace(/\s+/g,' ').trim(),etat:'occasion',type:'voiture'};
   if(raw>0)o.prix=String(Math.round(raw/10**minor));
   const brand=(p.brands||[])[0]?.name||(p.categories||[]).map((c:any)=>c.name).find((n:string)=>!/^(disponibles?|vendus?|sold|non class)/i.test(n));if(brand)o.marque=decodeEntities(brand);
-  const desc=aaClean(String(p.description||p.short_description||'').replace(/<\/p>/gi,'\n'));if(desc)o.description=desc.slice(0,6000);
+  const descriptions=[p.description,p.short_description]
+   .map(value=>aaClean(String(value||'').replace(/<\/p>/gi,'\n')))
+   .filter(value=>value&&!/\[\/?et_pb_/i.test(value));
+  if(descriptions[0])o.description=descriptions[0].slice(0,6000);
+  if(vehicleCategory){
+   const titleBrand=o.titre.match(/^(Ford|Chevrolet|Shelby)\b/i)?.[1];
+   if(titleBrand)o.marque=titleBrand[0].toUpperCase()+titleBrand.slice(1).toLowerCase();
+   const year=(o.titre+' '+String(o.description||'').split(/[,.\n]/,1)[0]).match(/\b(?:19|20)\d{2}\b/);
+   if(year)o.annee=year[0];
+   o.ville=o._exact_source_city="Saint-Front-d’Alemps";
+   o.code_postal='24460';
+   o.contact_telephone='0607524533';
+  }
   // Attributs WooCommerce (Marque, Énergie, Boîte, Mise en circulation, Kilométrage, Couleur…).
   for(const at of Array.isArray(p.attributes)?p.attributes:[]){const n=norm(at?.name);const v=decodeEntities(String((at?.terms||[]).map((t:any)=>t?.name).filter(Boolean).join(', '))).trim();if(!v)continue;
    if(/marque|brand/.test(n))o.marque=v;else if(/modele|model/.test(n))o.modele=v;else if(/energie|carburant|fuel/.test(n))o.carburant=v;else if(/boite|transmission/.test(n))o.boite=v;else if(/couleur|color/.test(n))o.couleur=v;
@@ -632,7 +649,7 @@ async function readWooSite(origin:URL){
   const photos:string[]=[];for(const im of p.images||[]){const u=String(im?.src||'');if(/^https?:\/\//i.test(u)&&!photos.includes(u))photos.push(u);}
   if(photos.length)o.photos=photos.slice(0,45).join('|');
   if(/\b(sprinter|vito|transporter|trafic|master|jumper|boxer|ducato|fourgon|utilitaire)\b/i.test(o.titre))o.type='utilitaire';
-  try{if(p.permalink){const{text}=await fetchSiteHtml(new URL(p.permalink));Object.assign(o,{...wooSpecs(text),...o});
+  try{if(p.permalink&&!vehicleCategory){const{text}=await fetchSiteHtml(new URL(p.permalink));Object.assign(o,{...wooSpecs(text),...o});
    if(o.puissance_din&&/^\d+$/.test(o.puissance_din))o.puissance_din+=' ch';
    if(o.annee&&!o.mise_en_circulation)o.mise_en_circulation=o.annee;}}catch{}
   rows.push(o);}}));
@@ -1061,6 +1078,12 @@ async function readFeed(feed:any,persistCrawl=false){
   let url:URL;
   try{url=new URL(String(feed.feed_url));}catch{throw new Error('URL de flux invalide.');}
   if(!['http:','https:'].includes(url.protocol))throw new Error('Le flux doit utiliser HTTP ou HTTPS.');
+  if(/^(?:www\.)?alternativecars\.fr$/i.test(url.hostname)){
+    feed.sector='vehicules';
+    const rows=await readWooSite(new URL('https://alternativecars.fr'), 'vehicules-en-vente');
+    (rows as any).platform='Alternative Cars (véhicules en vente)';
+    return rows;
+  }
   if(isAtelierRetro(url)){feed.sector='vehicules';return readAtelierRetro(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));}
   if(isLautre(url)){feed.sector='immobilier';return readLautre(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isNextlogis(url)){feed.sector='immobilier';return readNextlogis(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
