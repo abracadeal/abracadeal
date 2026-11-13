@@ -3098,3 +3098,4 @@
 - 7 jours : 239 mails, 9 rebonds (3,8 %), 3 désinscriptions, 6 clics, 1 accord (Sophie Folley).
 - Bug : dosage par métier (category_mix 45 auto / 45 immo / 10 moto) appliqué seulement au 1er mail du jour de chaque boîte (relances désactivées → branche sans dosage, qui préfère les aperçus immo) → 204 immo / 34 auto / 1 moto. Migration prospect_mix_always_20261113 : dosage toujours appliqué quand les relances sont coupées.
 - Clics sans suite le 12/11 : Casa Terra Immobilier (info@casaterra.fr), Cabinet Bedin (biscaplage@). Règle d'Anthony : pas de relance.
+- 13/11 12 h 32 : migration apimo_crawl_refresh_20261113 appliquée (accord d'Anthony) + synchro lancée : Gubernatis 1 créé (bar-pub Félix Faure, en ligne), 3 mis à jour, 1 archivé (F3 Carré d'or Dubouchage). Le déploiement du code pro-stock-sync reste à faire (le déclencheur suffit en attendant).
