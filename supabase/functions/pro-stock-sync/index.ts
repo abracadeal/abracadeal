@@ -24,6 +24,7 @@ import { isNextlogis, nextlogisIdentity, readNextlogis } from './nextlogis-reade
 import { isMaisonCotard, readMaisonCotard } from './maison-cotard-reader.ts';
 import { isNegoceAuto33, readNegoceAuto33 } from './negoce-auto33-reader.ts';
 import { isPointImmo, readPointImmo } from './pointimmo-reader.ts';
+import { isUltimateCar83, readUltimateCar83 } from './ultimatecar83-reader.ts';
 import { isGrangeCars, readGrangeCars } from './grange-cars-reader.ts';
 import { isAtsSud, readAtsSud, atsIdentity } from './ats-sud-reader.ts';
 import { isFordStrasbourg, readFordStrasbourg, fordStrasbourgIdentity } from './ford-strasbourg-reader.ts';
@@ -1065,6 +1066,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isNextlogis(url)){feed.sector='immobilier';return readNextlogis(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isMaisonCotard(url)){feed.sector='immobilier';return readMaisonCotard(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isPointImmo(url)){feed.sector='immobilier';return readPointImmo(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
+  if(isUltimateCar83(url)){feed.sector='vehicules';return readUltimateCar83(fetchSiteHtml,estatePhotoDigest);}
   if(isNegoceAuto33(url)){feed.sector='vehicules';return readNegoceAuto33(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isGrangeCars(url)){feed.sector='vehicules';return readGrangeCars(fetchSiteHtml,estatePhotoDigest);}
   if(isAtsSud(url)){feed.sector='vehicules';return readAtsSud(url,fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
