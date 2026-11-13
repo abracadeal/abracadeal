@@ -1,3 +1,8 @@
+## 13/11/2026 — Alternative Cars, aperçu des pièces détachées (ChatGPT)
+
+- L’aperçu de l’URL lit aussi la catégorie WooCommerce `pieces-detachees` et ses sous-catégories. Les pièces apparaissent dans une rubrique distincte sous les véhicules, avec titre, prix, photo et lien source. Les codes Divi sont écartés. Une erreur du catalogue de pièces laisse l’aperçu des véhicules accessible.
+- Robot v351, commit `7509598a55fea6514eb88df0533d0a0aad2e2e88`. Test à blanc en production `12566` : 5 véhicules complets et 15 pièces avec titre, prix et photo. Aperçu admin `f1d492cca0dc36c98b6be77e88dc91de34a2ee0b`. Les pièces sont en lecture seule dans cet aperçu.
+
 ## 13/11/2026 — Alternative Cars, descriptions et stock corrigés (ChatGPT)
 
 - Demande `9655d104-df3b-487e-9ba3-797590760637`. Le test à blanc `12522` mélangeait cinq véhicules et quinze pièces détachées. Le champ long de WooCommerce contenait les codes Divi. Le texte rédigé est publié dans le champ de description courte.
