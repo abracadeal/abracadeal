@@ -569,17 +569,17 @@ async function loadWelcome(){
  if(!rows.length){box.innerHTML='<div class="empty">Aucun pro inscrit depuis l\'admin.</div>';return}
  box.innerHTML=rows.map(r=>{const who='<b>'+esc(r.name||r.email)+'</b>'+(r.city?' · '+esc(r.city):'')+'<br><span style="opacity:.75">'+esc(r.email)+' · '+r.online+' annonce'+(r.online>1?'s':'')+' en ligne · inscrit le '+fmt(r.created_at)+'</span>';
   return r.sent_at
-   ?'<div class="wdone" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span>'+who+'</span><span style="white-space:nowrap">✓ Envoyé le '+fmt(r.sent_at)+'</span></div>'
+   ?'<div class="wdone" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span>'+who+'</span><span style="white-space:nowrap;display:flex;gap:8px;align-items:center">✓ Envoyé le '+fmt(r.sent_at)+' <button type="button" class="sbtn" data-welcome="'+esc(r.id)+'" data-again="1">Renvoyer</button></span></div>'
    :'<div class="req" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 4px"><span>'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
  }).join('');
  box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;b.disabled=true;b.textContent='Vérification…';
   try{const p=await onboardCall({action:'welcome_preview',user_id:id});
    const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
-   if(!confirm(msg)){b.disabled=false;b.textContent='Envoyer';return}
+   if(!confirm(msg)){b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer';return}
    b.textContent='Envoi…';await onboardCall({action:'welcome',user_id:id});
    try{await sb.rpc('admin_release_mail_hold',{p_user:id});}catch(_){}
    await loadWelcome();
-  }catch(e){alert(e.message||e);b.disabled=false;b.textContent='Envoyer'}});
+  }catch(e){alert(e.message||e);b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer'}});
 }
 // 07/11/2026 : une fois l'inscription réussie, le résumé s'efface et le formulaire se vide.
 let onbTimer=null;
