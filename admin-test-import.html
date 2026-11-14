@@ -124,6 +124,11 @@ details.fold[open]{padding-bottom:14px}
 
  <div class="reqs" id="pros"><div class="empty">Chargement…</div></div>
  </details>
+ <!-- 14/11/2026 (Anthony) : section à part pour les mails de bienvenue des pros inscrits par l'admin -->
+ <details class="fold" id="fold-welcome" open><summary><span>Mails de bienvenue</span> <span class="fold-n" data-count="welcomeq"></span></summary>
+ <p class="hint" style="margin:6px 0 10px;color:var(--muted,#a89bb3);font-size:14px">Pros inscrits depuis l'admin. Rien ne part tant que tu ne cliques pas sur « Envoyer ».</p>
+ <div class="reqs" id="welcomeq"><div class="empty">Chargement…</div></div>
+ </details>
  <details class="fold" id="fold-onb"><summary><span>Inscrire un garage qui a dit oui</span></summary>
 
  <form class="onb" id="onbForm" autocomplete="off">
@@ -179,9 +184,9 @@ async function init(){
  if(!user){E('gate').innerHTML='Connectez-vous d\'abord sur <a href="index.html">Abracadeal</a> avec le compte administrateur.';return}
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
- E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();
+ E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();loadWelcome();
  E('refreshLearn').onclick=async()=>{const b=E('refreshLearn');b.disabled=true;b.textContent='Mise à jour…';try{await loadLearn();}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
- E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
+ E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn(),loadWelcome()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('sitePreview').onclick=previewSite;
  E('learnCur').onclick=async()=>{let u=E('url').value.trim();if(!u){alert('Entre d\'abord l\'adresse du site.');return}if(!/^https?:\/\//i.test(u))u='https://'+u;if(await askLearn(u,E('sector').value,LEARN_CONTEXT?.company||'',LEARN_CONTEXT?.url===u?LEARN_CONTEXT.prospectId||null:null)){clearTest();E('status').innerHTML='Envoyé dans « Sites en réparation » : <b>'+esc(u)+'</b>';}};
 }
@@ -536,7 +541,7 @@ E('oLookup').addEventListener('click',async()=>{
 });
 async function sendWelcome(userId,feedId,host){
  const li=step('Envoi du mail au pro (lien pour choisir son mot de passe)…','wait');
- try{const d=await onboardCall({action:'welcome',user_id:userId});setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b> ('+d.online+' en ligne'+(d.pending?', '+d.pending+' en vérification':'')+(d.founder?', Fondateur':'')+').','ok');return true}
+ try{const d=await onboardCall({action:'welcome',user_id:userId});try{await sb.rpc('admin_release_mail_hold',{p_user:userId});}catch(_){}try{loadWelcome()}catch(_){}setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b> ('+d.online+' en ligne'+(d.pending?', '+d.pending+' en vérification':'')+(d.founder?', Fondateur':'')+').','ok');return true}
  catch(e){setStep(li,'Mail non envoyé : '+esc(e.message||e)+' ','ko');const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Réessayer l\'envoi';b.onclick=async()=>{li.remove();if(await sendWelcome(userId,feedId))onbDone()};li.appendChild(b);return false}
 }
 // 10/11/2026 (Anthony) : aucun mail ne part tout seul. Récapitulatif réel (annonces, Fondateur) puis envoi par l'admin.
@@ -555,9 +560,30 @@ async function offerWelcome(userId,feedId){
 (function(){const id=new URLSearchParams(location.search).get('bienvenue');if(!id||!/^[0-9a-f-]{36}$/i.test(id))return;
  const go=()=>{try{E('fold-onb').open=true}catch(_){}const ul=E('oSteps');if(ul){ul.hidden=false;ul.innerHTML='';}offerWelcome(id,null);try{(E('oSteps')||document.body).scrollIntoView({behavior:'smooth',block:'center'})}catch(_){}}; 
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(go,800));else setTimeout(go,800);})();
+// 14/11/2026 (Anthony) : liste des mails de bienvenue — un pro inscrit apparaît ici avec son bouton « Envoyer ».
+async function loadWelcome(){
+ const box=E('welcomeq');if(!box)return;
+ const{data,error}=await sb.rpc('admin_list_welcome_pros',{p_limit:60});
+ if(error){box.innerHTML='<div class="empty">Liste indisponible : '+esc(error.message)+'</div>';return}
+ const rows=data||[];const fmt=d=>new Date(d).toLocaleString('fr-FR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
+ if(!rows.length){box.innerHTML='<div class="empty">Aucun pro inscrit depuis l\'admin.</div>';return}
+ box.innerHTML=rows.map(r=>{const who='<b>'+esc(r.name||r.email)+'</b>'+(r.city?' · '+esc(r.city):'')+'<br><span style="opacity:.75">'+esc(r.email)+' · '+r.online+' annonce'+(r.online>1?'s':'')+' en ligne · inscrit le '+fmt(r.created_at)+'</span>';
+  return r.sent_at
+   ?'<div class="wdone" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span>'+who+'</span><span style="white-space:nowrap">✓ Envoyé le '+fmt(r.sent_at)+'</span></div>'
+   :'<div class="req" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 4px"><span>'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
+ }).join('');
+ box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;b.disabled=true;b.textContent='Vérification…';
+  try{const p=await onboardCall({action:'welcome_preview',user_id:id});
+   const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
+   if(!confirm(msg)){b.disabled=false;b.textContent='Envoyer';return}
+   b.textContent='Envoi…';await onboardCall({action:'welcome',user_id:id});
+   try{await sb.rpc('admin_release_mail_hold',{p_user:id});}catch(_){}
+   await loadWelcome();
+  }catch(e){alert(e.message||e);b.disabled=false;b.textContent='Envoyer'}});
+}
 // 07/11/2026 : une fois l'inscription réussie, le résumé s'efface et le formulaire se vide.
 let onbTimer=null;
-function onbDone(){step('Terminé. Ce résumé va disparaître.','ok');clearTimeout(onbTimer);onbTimer=setTimeout(()=>{const ul=E('oSteps');ul.innerHTML='';ul.hidden=true;E('onbForm').reset();E('oCompany').hidden=true;E('oCompany').innerHTML='';},6000)}
+function onbDone(){step('Terminé. Ce résumé va disparaître.','ok');try{loadWelcome()}catch(_){}clearTimeout(onbTimer);onbTimer=setTimeout(()=>{const ul=E('oSteps');ul.innerHTML='';ul.hidden=true;E('onbForm').reset();E('oCompany').hidden=true;E('oCompany').innerHTML='';},6000)}
 E('onbForm').addEventListener('submit',async ev=>{
  ev.preventDefault();
  const go=E('oGo');if(go.disabled)return;
