@@ -550,6 +550,11 @@ async function offerWelcome(userId,feedId){
    b.remove();if(await sendWelcome(userId,feedId))onbDone();
   }catch(e){alert(e.message||e);b.disabled=false}};
 }
+// 14/11/2026 (Anthony « je trouve pas ») : envoyer le mail de bienvenue plus tard, sans refaire l'inscription :
+// admin-test-import.html?bienvenue=<id du compte pro> affiche le même bouton (récapitulatif + confirmation).
+(function(){const id=new URLSearchParams(location.search).get('bienvenue');if(!id||!/^[0-9a-f-]{36}$/i.test(id))return;
+ const go=()=>{try{E('fold-onb').open=true}catch(_){}const ul=E('oSteps');if(ul){ul.hidden=false;ul.innerHTML='';}offerWelcome(id,null);try{(E('oSteps')||document.body).scrollIntoView({behavior:'smooth',block:'center'})}catch(_){}}; 
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(go,800));else setTimeout(go,800);})();
 // 07/11/2026 : une fois l'inscription réussie, le résumé s'efface et le formulaire se vide.
 let onbTimer=null;
 function onbDone(){step('Terminé. Ce résumé va disparaître.','ok');clearTimeout(onbTimer);onbTimer=setTimeout(()=>{const ul=E('oSteps');ul.innerHTML='';ul.hidden=true;E('onbForm').reset();E('oCompany').hidden=true;E('oCompany').innerHTML='';},6000)}
