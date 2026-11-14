@@ -3150,3 +3150,9 @@
 - 13/11 : vitrine (pro.html) : compteur « N annonces » (et non « véhicules ») quand il y a des pièces/équipements (sans marque, année ni km) ; ordre par défaut : véhicules d'abord.
 - 13/11 21 h 35 : bannière Alternative Cars remplacée à la demande d'Anthony (Mustang coupé noire fournie par Anthony + leur logo) : assets/pros/alternative-cars-banner.jpg.
 - 13/11 21 h 40 : logo vitrine Alternative Cars = leur petite voiture seule, en grand (assets/pros/alternative-cars-logo-v2.png) — le nom complet était illisible dans le carré.
+
+## 14/11/2026 (nuit) — Claude : SEO auto
+- Contrôle : 572 annonces actives en base = 572 dans sitemap-annonces.xml (mêmes identifiants), aucune retirée ; sitemaps XML valides ; robots.txt OK (IA autorisées, aspirateurs bloqués).
+- scripts/build_share_pages.py : émoji punaise (📍) des fiches annonces remplacé par un pictogramme SVG (règle « pas d'émojis ») ; vehicle_title enlève la marque + modèle répétés en tête (« Mercedes GLA Mercedes GLA 200 D » → « Mercedes GLA 200 D », 6 annonces WeeCars Brest) ; page_head coupe la meta description à 155 caractères ; sitemap-categories.xml avec <lastmod> (date du dernier vrai changement de la page).
+- scripts/build_auto_seo_pages.py : meta description ≤ 155 car. + balises Open Graph ; sitemap-auto.xml avec <lastmod>. scripts/build_pro_pages.py : sitemap-pros.xml avec <lastmod>.
+- Testé hors ligne (jeu d'essai) : 1 seul H1, JSON-LD valide, sitemaps XML valides, lastmod stable d'un passage à l'autre.

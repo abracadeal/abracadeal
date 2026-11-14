@@ -32,7 +32,7 @@ import urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_share_pages import (FIELDS, SUPABASE_URL, SUPABASE_KEY, SITE, PAGE_FOOT, fetch, slugify, money,
                                photo_urls, listing_card, page_head, ld_script, breadcrumb_ld, crumbs_html,
-                               write_if_changed)
+                               write_if_changed, old_lastmods, lastmod_tag)
 
 BASE = os.environ.get("ABRACA_OUT") or os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 FIXTURE = os.environ.get("ABRACA_PRO_FIXTURE")
@@ -294,16 +294,17 @@ def main():
                 pass
     for slug, path in shorts.items():
         write_if_changed(os.path.join(BASE, slug, "index.html"), pages[path])
-    keep = set()
+    keep, changed = set(), {}
+    old_lm = old_lastmods(SITEMAP)
     for path, content in pages.items():
         folder = os.path.join(BASE, *path.split("/"))
         keep.add(os.path.normpath(folder))
-        write_if_changed(os.path.join(folder, "index.html"), content)
+        changed[path] = write_if_changed(os.path.join(folder, "index.html"), content)
     for kind in KINDS:
         root = os.path.join(BASE, kind)
         if entries[kind]:
             keep.add(os.path.normpath(root))
-            write_if_changed(os.path.join(root, "index.html"), directory_page(kind, entries[kind]))
+            changed[kind] = write_if_changed(os.path.join(root, "index.html"), directory_page(kind, entries[kind]))
         if os.path.isdir(root):
             for d, _dirs, files in os.walk(root, topdown=False):
                 if os.path.normpath(d) not in keep and "index.html" in files:
@@ -314,9 +315,9 @@ def main():
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for kind in KINDS:
         if entries[kind]:
-            lines.append(f"  <url><loc>{SITE}/{kind}/</loc></url>")
+            lines.append(f"  <url><loc>{SITE}/{kind}/</loc>{lastmod_tag(f'{SITE}/{kind}/', changed[kind], old_lm)}</url>")
     for path in sorted(pages):
-        lines.append(f"  <url><loc>{SITE}/{path}/</loc></url>")
+        lines.append(f"  <url><loc>{SITE}/{path}/</loc>{lastmod_tag(f'{SITE}/{path}/', changed[path], old_lm)}</url>")
     lines.append("</urlset>")
     write_if_changed(SITEMAP, "\n".join(lines) + "\n")
     print(f"Pages pros : {len(pages)} pages ({', '.join(f'{k} {len(v)}' for k, v in entries.items())})")

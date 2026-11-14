@@ -465,6 +465,11 @@ def _veh_word(w, first):
     return re.sub(r"(^|[-'’])([a-zà-öø-ÿ])", lambda m: m.group(1) + m.group(2).upper(), low)
 
 
+# 14/11/2026 (SEO auto) : règle d'Anthony « pas d'émojis sur le site » → pictogramme SVG au lieu de l'émoji punaise.
+PIN_SVG = ('<svg class="pin" aria-hidden="true" width="13" height="13" viewBox="0 0 24 24" fill="currentColor" '
+           'style="vertical-align:-2px;margin-right:3px"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>')
+
+
 def vehicle_title(t):
     """03/11/2026 : « DS DS 7 Crossback 2.0 BLUEHDI 180 » → « DS 7 Crossback 2.0 BlueHDi 180 » (comme sur le site)."""
     out = []
@@ -473,6 +478,11 @@ def vehicle_title(t):
         if out and out[-1].lower() == w.lower() and re.search(r"[a-z]", w, re.I):
             continue
         out.append(w)
+    # 14/11/2026 (SEO auto) : « Mercedes GLA Mercedes GLA 200 D » (flux WeeCars Brest) → « Mercedes GLA 200 D »
+    for k in (3, 2):
+        if len(out) > 2 * k and [x.lower() for x in out[:k]] == [x.lower() for x in out[k:2 * k]]:
+            out = out[k:]
+            break
     return " ".join(out)
 
 
@@ -748,6 +758,10 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:7px 4px;
 
 def page_head(title, desc, url, robots="index,follow,max-image-preview:large", og_image=None, extra="", redirect=None):
     e = lambda s: html.escape(str(s), quote=True)
+    # 14/11/2026 (SEO auto) : meta description ≤ 155 caractères (pages catégories / villes / pros)
+    desc = str(desc or "")
+    if len(desc) > 155:
+        desc = desc[:154].rsplit(" ", 1)[0].rstrip(" ,;:.–-") + "…"
     og = (f'<meta property="og:image" content="{e(og_image)}">\n'
           f'<meta name="twitter:card" content="summary_large_image">\n') if og_image else ""
     return f"""<!doctype html>
@@ -876,7 +890,7 @@ def page_html(listing, size, crumbs, ref_suffix="", similar=()):
 <span class="badge">{e(seller)} · {e(cat)}</span>
 <h1>{e(title)}</h1>
 {f'<p class="price">{e(price)}</p>' if price else ''}
-{f'<p class="where">📍 {e(place)}</p>' if place else ''}
+{f'<p class="where">{PIN_SVG}{e(place)}</p>' if place else ''}
 {pro_link}
 <a class="cta" href="{e(app_url)}" rel="nofollow">Contacter le vendeur sur Abracadeal</a>
 {f'<section class="card"><h2>Caractéristiques</h2><table>{rows}</table></section>' if rows else ''}
@@ -1064,12 +1078,28 @@ def write_if_changed(path, content):
     return False
 
 
+def old_lastmods(path):
+    """14/11/2026 (SEO auto) : <lastmod> des pages catégories / Auto / pros = date du dernier vrai changement de la page
+    (gardée d'un passage à l'autre tant que la page ne change pas)."""
+    try:
+        txt = open(path, encoding="utf-8").read()
+    except OSError:
+        return {}
+    return dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", txt))
+
+
+def lastmod_tag(loc, changed, old):
+    d = old.get(loc) if not changed else None
+    return f"<lastmod>{d or datetime.date.today().isoformat()}</lastmod>"
+
+
 def write_hubs(pages):
-    keep = set()
+    keep, changed = set(), {}
+    old_lm = old_lastmods(SITEMAP_HUBS)
     for rel, (content, _) in pages.items():
         folder = os.path.join(HUBS, *rel.split("/")) if rel else HUBS
         keep.add(os.path.normpath(folder))
-        write_if_changed(os.path.join(folder, "index.html"), content)
+        changed[rel] = write_if_changed(os.path.join(folder, "index.html"), content)
     # Supprime les pages catégories / villes qui n'ont plus lieu d'être (-> 404)
     for dirpath, dirnames, filenames in os.walk(HUBS, topdown=False):
         norm = os.path.normpath(dirpath)
@@ -1080,7 +1110,8 @@ def write_hubs(pages):
     lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for rel in sorted(pages):
         if pages[rel][1]:
-            lines.append(f"  <url><loc>{SITE}/annonces/{rel + '/' if rel else ''}</loc></url>")
+            loc = f"{SITE}/annonces/{rel + '/' if rel else ''}"
+            lines.append(f"  <url><loc>{loc}</loc>{lastmod_tag(loc, changed[rel], old_lm)}</url>")
     lines.append("</urlset>")
     write_if_changed(SITEMAP_HUBS, "\n".join(lines) + "\n")
 
@@ -1153,7 +1184,7 @@ def sold_page_html(snap, reason, since, size, similar):
     return head + f"""{crumbs_html(crumbs)}
 <span class="badge">Annonce {e(state)}</span>
 <h1>{e(title)}</h1>
-<p class="where">{'📍 ' + e(city) + ' · ' if city else ''}{e(cat_name)}</p>
+<p class="where">{PIN_SVG + e(city) + ' · ' if city else ''}{e(cat_name)}</p>
 <div class="gallery"><img src="apercu.jpg" alt="{e(title)}" width="{size[0]}" height="{size[1]}" style="filter:grayscale(.6);opacity:.8"></div>
 <section class="card"><h2>Cette annonce n’est plus disponible</h2>
 <p>{'Le vendeur a indiqué que cet article est vendu.' if reason == 'sold' else 'Cette annonce a expiré et n’est plus en ligne.'}

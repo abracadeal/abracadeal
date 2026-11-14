@@ -44,14 +44,35 @@ def page(title,h1,desc,url,items,related):
     crumbs={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":SITE+"/"},{"@type":"ListItem","position":2,"name":"Auto","item":SITE+"/auto/"},{"@type":"ListItem","position":3,"name":h1,"item":url}]}
     rel=''.join(f'<li><a href="{esc(u)}">{esc(n)}</a></li>' for n,u in related[:40])
     listings=''.join(card(x) for x in items[:120])
-    head_extra=FONTS+'<style>'+SITE_CSS+'.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:0;list-style:none}.grid li a{display:grid;gap:4px;background:#fff;border:1px solid #ebe4ef;padding:14px 16px;border-radius:16px;box-shadow:0 7px 20px rgba(35,17,48,.055);text-decoration:none;color:#26122f}.grid span{font-weight:800;color:#8b2aa6}.grid small{color:#756a7e}nav.top{font-size:.85rem;color:#756a7e;margin:4px 0 12px}nav.top a{color:#756a7e}</style>'+HUMAN_LINKS
-    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(desc)}"><meta name="robots" content="index,follow"><link rel="canonical" href="{esc(url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
+    # 14/11/2026 (SEO auto) : meta description ≤ 155 caractères (le texte complet reste en intro) + balises Open Graph
+    md=desc if len(desc)<=155 else desc[:154].rsplit(" ",1)[0].rstrip(" ,;:.–-")+"…"
+    og=(f'<meta property="og:type" content="website"><meta property="og:site_name" content="Abracadeal">'
+        f'<meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(md)}">'
+        f'<meta property="og:url" content="{esc(url)}"><meta property="og:image" content="{SITE}/icon-512.png">')
+    head_extra=og+FONTS+'<style>'+SITE_CSS+'.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:0;list-style:none}.grid li a{display:grid;gap:4px;background:#fff;border:1px solid #ebe4ef;padding:14px 16px;border-radius:16px;box-shadow:0 7px 20px rgba(35,17,48,.055);text-decoration:none;color:#26122f}.grid span{font-weight:800;color:#8b2aa6}.grid small{color:#756a7e}nav.top{font-size:.85rem;color:#756a7e;margin:4px 0 12px}nav.top a{color:#756a7e}</style>'+HUMAN_LINKS
+    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(md)}"><meta name="robots" content="index,follow"><link rel="canonical" href="{esc(url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
 
 def write(path,content):
     os.makedirs(os.path.dirname(path),exist_ok=True)
     old=open(path,encoding="utf-8").read() if os.path.exists(path) else None
     if old!=content:
         with open(path,"w",encoding="utf-8") as f:f.write(content)
+        return True
+    return False
+
+
+def old_lastmods(path):
+    """14/11/2026 (SEO auto) : <lastmod> des pages catégories / Auto / pros = date du dernier vrai changement de la page
+    (gardée d'un passage à l'autre tant que la page ne change pas)."""
+    try:
+        txt = open(path, encoding="utf-8").read()
+    except OSError:
+        return {}
+    return dict(re.findall(r"<loc>([^<]+)</loc><lastmod>([^<]+)</lastmod>", txt))
+
+def lastmod_tag(loc, changed, old):
+    d = old.get(loc) if not changed else None
+    return f"<lastmod>{d or datetime.date.today().isoformat()}</lastmod>"
 
 def main():
     rows=[x for x in fetch_listings() if x.get("vehicle_make")]
@@ -88,15 +109,18 @@ def main():
             label=f"Voitures d’occasion à moins de {ceiling:,} €".replace(","," ")
             desc=f"Trouvez une voiture d’occasion à moins de {ceiling:,} € sur Abracadeal. Comparez les annonces disponibles par marque, modèle et ville.".replace(","," ")
             pages[p]=page(label+" | Abracadeal",label,desc,SITE+f"/auto/{p}/",sub,make_links)
-    keep=set()
+    keep,changed=set(),{}
+    old_lm=old_lastmods(SITEMAP)
     for rel,content in pages.items():
-        folder=os.path.join(ROOT,*rel.split("/")) if rel else ROOT; keep.add(os.path.normpath(folder)); write(os.path.join(folder,"index.html"),content)
+        folder=os.path.join(ROOT,*rel.split("/")) if rel else ROOT; keep.add(os.path.normpath(folder)); changed[rel]=write(os.path.join(folder,"index.html"),content)
     if os.path.isdir(ROOT):
         for d,dirs,files in os.walk(ROOT,topdown=False):
             if os.path.normpath(d) not in keep and "index.html" in files: os.remove(os.path.join(d,"index.html"))
             if d!=ROOT and os.path.isdir(d) and not os.listdir(d): os.rmdir(d)
     lines=['<?xml version="1.0" encoding="UTF-8"?>','<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
-    for rel in sorted(pages): lines.append(f'  <url><loc>{SITE}/auto/{rel+"/" if rel else ""}</loc></url>')
+    for rel in sorted(pages):
+        loc=f'{SITE}/auto/{rel+"/" if rel else ""}'
+        lines.append(f'  <url><loc>{loc}</loc>{lastmod_tag(loc,changed[rel],old_lm)}</url>')
     lines.append('</urlset>'); write(SITEMAP,"\n".join(lines)+"\n")
     print(f"SEO Auto: {len(rows)} annonces, {len(pages)} pages")
 if __name__=="__main__": main()
