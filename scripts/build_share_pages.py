@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "15"  # 14/11/2026 (SEO auto) : pictogramme au lieu de l’émoji punaise, titres marque+modèle dédoublonnés  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
+VERSION = "16"  # 14/11/2026 : émojis retirés des descriptions de pros  # 14/11/2026 (SEO auto) : pictogramme au lieu de l’émoji punaise, titres marque+modèle dédoublonnés  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -304,7 +304,25 @@ def parse_description(raw, listing=None):
     text = MARKER.sub("", raw or "").strip()
     if listing is not None and re.search(r"^\[ABRACA_SOURCE:", raw or "", re.M):
         text = drop_imported_contradictions(text, listing)
+    if listing is not None and listing.get("seller_type") == "professionnel":
+        text = strip_emojis(text)
     return text, meta
+
+
+# 14/11/2026 (accord d'Anthony) : pas d'émojis dans les descriptions des pros (« 📍 », « 💰 Prix : » des flux) ;
+# le texte est gardé. Les annonces de particuliers restent telles quelles. Même règle sur le site (index-main.js).
+EMOJI = re.compile("[\U0001F000-\U0001FAFF\u2600-\u27BF\u2B00-\u2BFF\u23E9-\u23FA\u231A\u231B\uFE0F\u200D\u20E3]")
+
+
+def strip_emojis(text):
+    out = []
+    for line in (text or "").split("\n"):
+        had = bool(EMOJI.search(line))
+        line = EMOJI.sub("", line)
+        if had:
+            line = re.sub(r"[ \t]{2,}", " ", line).strip()
+        out.append(line)
+    return re.sub(r"\n{3,}", "\n\n", "\n".join(out)).strip()
 
 
 def drop_imported_contradictions(text, listing):

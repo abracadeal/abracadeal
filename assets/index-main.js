@@ -3290,7 +3290,9 @@ function cleanDescription(a){
     .replace(/^\[ABRACA_IMETA:[^\]]+\]\s*/gm,'')
     .replace(/^\[ABRACA_REF:[^\]]+\]\s*/gm,'')
     .replace(/^\[ABRACA_SOURCE:[^\]]+\]\s*/gm,'')
-    .trim();
+    .trim()
+    /* 14/11/2026 (accord d'Anthony) : pas d'émojis dans les descriptions des pros (flux : « 📍 », « 💰 Prix : »), texte gardé */
+    .replace(/^.*$/gm,l=>a&&a.seller_type==='professionnel'&&/[\u{1F000}-\u{1FAFF}\u2600-\u27BF\u2B00-\u2BFF\u23E9-\u23FA\u231A\u231B\uFE0F\u200D\u20E3]/u.test(l)?l.replace(/[\u{1F000}-\u{1FAFF}\u2600-\u27BF\u2B00-\u2BFF\u23E9-\u23FA\u231A\u231B\uFE0F\u200D\u20E3]/gu,'').replace(/[ \t]{2,}/g,' ').trim():l);
 }
 /* 06/11/2026 (Anthony : BMW C600, 4 390 € affiché mais « Prix : 3 890 € » dans le texte) : dans le stock repris
    du site d'un pro, le texte libre recopié peut contredire ses propres chiffres officiels. On n'affiche pas une
