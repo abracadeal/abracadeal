@@ -3157,3 +3157,4 @@
 - scripts/build_auto_seo_pages.py : meta description ≤ 155 car. + balises Open Graph ; sitemap-auto.xml avec <lastmod>. scripts/build_pro_pages.py : sitemap-pros.xml avec <lastmod>.
 - Testé hors ligne (jeu d'essai) : 1 seul H1, JSON-LD valide, sitemaps XML valides, lastmod stable d'un passage à l'autre.
 - 14/11 3 h 30 — Claude : correctif SEO appliqué (git am), workflow OK (572 annonces, 208 pages Auto, 7 pages pros, sitemaps avec lastmod valides). VERSION des fiches passée à 15 pour que les 566 fiches déjà générées perdent aussi l'émoji punaise et le doublon marque+modèle.
+- 14/11 8 h 57 — Claude : mail de bienvenue Alternative Cars pas encore parti (welcome_sent_at vide) ; navigateur intégré injoignable → demandé à Anthony de cliquer « Envoyer le mail de bienvenue ». Blocage mail_hold toujours en place jusqu'à l'envoi.
