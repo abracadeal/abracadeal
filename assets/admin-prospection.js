@@ -118,9 +118,10 @@ async function loadAcceptances(){
   if(error){$('acceptList').innerHTML='<div class="small">Erreur : '+esc(error.message)+'</div>';return}
   const rows=data||[],todo=rows.filter(r=>!r.handled_at);
   $('aCount').innerHTML=todo.length?'<b class="ok">'+todo.length+' à traiter</b>':'';
-  if(!rows.length){$('acceptList').innerHTML='<div class="small">Aucun accord pour l’instant.</div>';return}
+  // 14/11/2026 (Anthony) : les accords déjà traités ne s'affichent plus (ils restent en base).
+  if(!todo.length){$('acceptList').innerHTML='<div class="small">Aucun accord à traiter.</div>';return}
   const sirenTxt=r=>r.siren_matches===true?'<span class="pill ok">SIRET conforme</span>':r.siren_matches===false?'<span class="pill" style="color:#ffb7c0">SIRET ≠ SIREN connu ('+esc(r.known_siren)+')</span>':'<span class="pill">SIRET à vérifier</span>';
-  $('acceptList').innerHTML=rows.map(r=>'<div class="cl"'+(r.handled_at?' style="opacity:.55"':'')+'><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> '+sirenTxt(r)+(r.handled_at?' <span class="pill">Traité le '+esc(fmtDate(r.handled_at))+'</span>':'')+'</div>'+
+  $('acceptList').innerHTML=todo.map(r=>'<div class="cl"'+(r.handled_at?' style="opacity:.55"':'')+'><div class="clh"><b>'+esc(r.company||'Sans nom')+'</b> '+sirenTxt(r)+(r.handled_at?' <span class="pill">Traité le '+esc(fmtDate(r.handled_at))+'</span>':'')+'</div>'+
     '<div class="clm">'+esc(r.category||'')+(r.city?' · '+esc(r.city):'')+' · accord le '+esc(fmtDate(r.accepted_at))+'</div>'+
     '<div class="clm">SIRET : <b>'+esc(r.siret)+'</b> · <a href="https://annuaire-entreprises.data.gouv.fr/etablissement/'+encodeURIComponent(r.siret)+'" target="_blank" rel="noopener">vérifier sur l’annuaire</a></div>'+
     '<div class="clm">E-mail donné : <a href="#" onclick="openCompose(\''+esc(r.email)+'\',\''+esc(r.prospect_id||'')+'\');return false">'+esc(r.email)+'</a> (écrire depuis la boîte Abracadeal)'+(r.prospect_email&&r.prospect_email.toLowerCase()!==String(r.email).toLowerCase()?' (mail prospecté : '+esc(r.prospect_email)+')':'')+(r.phone?' · Tél. : <a href="tel:'+esc(r.phone)+'">'+esc(r.phone)+'</a>':'')+'</div>'+
