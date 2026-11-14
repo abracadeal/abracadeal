@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "14"  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
+VERSION = "15"  # 14/11/2026 (SEO auto) : pictogramme au lieu de l’émoji punaise, titres marque+modèle dédoublonnés  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
