@@ -354,7 +354,15 @@ function render(data,sector){
 
  const immo=sector==='immobilier';
  // 29/10/2026 : chaque fiche lue est reliée à sa version normalisée (photos sans doublons, ville corrigée) ; doublons d'annonce signalés.
- NN=ROWS.map(r=>NORM.find(n=>(n.externalUrl&&r.url&&n.externalUrl===r.url)||(n.ref&&r.reference!=null&&String(n.ref)===String(r.reference)))||null);
+ const uniqueIndex=(rows,keyOf)=>{
+  const index=new Map();
+  for(const row of rows){const key=keyOf(row);if(key)index.set(key,index.has(key)?null:row);}
+  return index;
+ };
+ const byRef=uniqueIndex(NORM,n=>String(n.ref??''));
+ const byUrl=uniqueIndex(NORM,n=>n.externalUrl);
+ const rawUrls=uniqueIndex(ROWS,r=>r.url);
+ NN=ROWS.map(r=>byRef.get(String(r.reference??''))||(rawUrls.get(r.url)?byUrl.get(r.url):null)||null);
  const ready=NORM.filter(r=>!(r.errors||[]).length).length,bad=NORM.length-ready;
  // 30/10/2026 (Anthony) : « Biens lus » − « Prêts » − « Avec erreur » = fiches non publiées (doublon d'une autre annonce du site, ou fiche vendue / illisible).
  const skipped=Math.max(0,ROWS.length-NORM.length);

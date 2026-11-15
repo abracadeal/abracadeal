@@ -1,3 +1,8 @@
+## 15/11/2026 — Autopia, photos de chaque véhicule dans l’aperçu (ChatGPT)
+
+- Les véhicules Autopia partagent l’adresse de leur catalogue. L’aperçu associait toutes les fiches au premier résultat normalisé ayant cette URL. Il associe désormais les fiches par référence unique et utilise l’URL uniquement lorsqu’elle identifie une seule fiche côté source et côté résultat.
+- Test de régression : deux véhicules avec la même URL gardent chacun leur photo, une fiche non retenue ne reprend pas la photo d’une autre, et une URL individuelle reste utilisable. Contrôle des images source par empreinte. Modification de l’aperçu admin uniquement.
+
 ## 15/11/2026 — Autopia Cars 38 et Immogaronne (ChatGPT)
 
 - Autopia : lecture du catalogue public utilisé par la page du garage, sans les véhicules de démonstration. Test à blanc 16707 : 34 fiches en aperçu, 32 disponibles et 2 sous réservation, 393 photos et zéro doublon. Synchronisation limitée aux disponibles.
