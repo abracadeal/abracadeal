@@ -21,6 +21,7 @@ assert.equal(row.contact_telephone, '0780979753');
 assert.equal(parseNegoceAuto33({...listing, on_promotion: false}, url).prix, 18200);
 assert.equal(parseNegoceAuto33({...listing, status: 'Sous réservation'}, url)._sold, 1);
 assert.equal(parseNegoceAuto33({...listing, mileage: 0}, url)._sold, 1);
+assert.match(parseNegoceAuto33({...listing, status: 'Sous réservation'}, url, undefined, true).description, /sous réservation/);
 assert.throws(() => parseNegoceAuto33(listing, url + '-other'), /Identité/);
 assert.throws(() => parseNegoceAuto33({...listing, primary_image_url: photo.replace('/public/', '/sign/')}, url), /galerie publique/);
 console.log('Négoce Auto 33: displayed promotional price, scope, exclusions and own gallery');

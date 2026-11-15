@@ -31,15 +31,16 @@ function publicKey(script: string) {
   }
 }
 
-function isAvailable(vehicle: Vehicle) {
+function isAvailable(vehicle: Vehicle, preview = false) {
+  if (preview && vehicle.status === 'Sous réservation') return true;
   return vehicle.status === 'Disponible' && vehicle.mileage !== 0;
 }
 
-export function parseNegoceAuto33(vehicle: Vehicle, url: string, phone?: string) {
+export function parseNegoceAuto33(vehicle: Vehicle, url: string, phone?: string, preview = false) {
   if (!uuid.test(vehicle.id) || new URL(url).href !== new URL('/vehicules/' + vehicle.id, catalogue).href) {
     throw Error('Identité de véhicule Négoce Auto 33 incohérente');
   }
-  if (!isAvailable(vehicle)) return {_sold: 1};
+  if (!isAvailable(vehicle, preview)) return {_sold: 1};
   const price = Number(vehicle.price);
   const discount = vehicle.on_promotion ? Number(vehicle.discount_percent || 0) : 0;
   if (!(price > 0) || !Number.isFinite(discount) || discount < 0 || discount >= 100 ||
@@ -56,17 +57,18 @@ export function parseNegoceAuto33(vehicle: Vehicle, url: string, phone?: string)
     if (!photos.has(image.pathname)) photos.set(image.pathname, image.href);
   }
   const brand = vehicle.brand.trim(), model = vehicle.model.trim();
+  const note = vehicle.status === 'Sous réservation' ? 'Disponibilité : sous réservation.' : '';
   return {
     reference: vehicle.id, url, titre: brand + ' ' + model, marque: brand, modele: model,
     prix: displayedPrice, annee: vehicle.year, kilometrage: vehicle.mileage, carburant: vehicle.fuel,
     boite: vehicle.transmission, puissance_din: vehicle.real_power, puissance_fiscale: vehicle.fiscal_power,
     portes: vehicle.doors, places: vehicle.seats, type: 'voiture', etat: 'occasion',
-    description: vehicle.description?.trim(), photos: [...photos.values()].join('|'),
+    description: [note, vehicle.description?.trim()].filter(Boolean).join('\n\n') || undefined, photos: [...photos.values()].join('|'),
     contact_nom: phone ? 'Négoce Auto 33 (garage)' : undefined, contact_telephone: phone,
   };
 }
 
-export async function readNegoceAuto33(fetchHtml: Fetcher, memory: CrawlMemory | undefined, digest: (url: string) => Promise<string | null>) {
+export async function readNegoceAuto33(fetchHtml: Fetcher, memory: CrawlMemory | undefined, digest: (url: string) => Promise<string | null>, preview = false) {
   const [page, home] = await Promise.all([fetchHtml(catalogue), fetchHtml(new URL('/', catalogue))]);
   if (!isNegoceAuto33(page.url) || page.url.pathname !== catalogue.pathname) throw Error('Catalogue Négoce Auto 33 hors périmètre');
   const phones = [...new Set([...page.text.matchAll(/href="tel:\+33([1-9]\d{8})"/gi)].map(m => '0' + m[1]))];
@@ -123,16 +125,16 @@ export async function readNegoceAuto33(fetchHtml: Fetcher, memory: CrawlMemory |
     }
     offset += part.rows.length;
   }
-  const details = [...source.values()].filter(isAvailable).map(row => new URL('/vehicules/' + row.id, catalogue).href);
+  const details = [...source.values()].filter(vehicle => isAvailable(vehicle, preview)).map(row => new URL('/vehicules/' + row.id, catalogue).href);
   if (!details.length) throw Error('Aucun véhicule d’occasion disponible dans le catalogue Négoce Auto 33');
   const snapshot = JSON.stringify([...source.values()]);
   const fingerprint = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(snapshot));
   const version = Array.from(new Uint8Array(fingerprint), byte => byte.toString(16).padStart(2, '0')).join('');
-  const rows = await crawlCatalogue(catalogue.href, scope + version, [catalogue.href], async url => {
+  const rows = await crawlCatalogue(catalogue.href, scope + (preview ? 'preview:' : '') + version, [catalogue.href], async url => {
     if (url.href === catalogue.href) return {text: '', url};
     const id = url.pathname.split('/').pop() || '';
     if (url.origin !== catalogue.origin || url.pathname !== '/vehicules/' + id || !uuid.test(id) ||
-        !source.has(id) || !isAvailable(source.get(id)!)) throw Error('Fiche Négoce Auto 33 hors du stock');
+        !source.has(id) || !isAvailable(source.get(id)!, preview)) throw Error('Fiche Négoce Auto 33 hors du stock');
     const detail = await request({select: detailFields, id: 'eq.' + id});
     if (detail.rows.length !== 1) throw Error('Fiche publique Négoce Auto 33 introuvable');
     return {text: JSON.stringify(detail.rows[0]), url};
@@ -143,7 +145,7 @@ export async function readNegoceAuto33(fetchHtml: Fetcher, memory: CrawlMemory |
         listed.on_promotion !== detail.on_promotion || listed.discount_percent !== detail.discount_percent) {
       throw Error('Fiche et catalogue Négoce Auto 33 désynchronisés');
     }
-    const row = parseNegoceAuto33(detail, url, phone);
+    const row = parseNegoceAuto33(detail, url, phone, preview);
     if (row._sold || !row.photos) return row;
     const unique = new Map<string, string>(), photos = row.photos.split('|');
     for (let index = 0; index < photos.length; index += 4) {

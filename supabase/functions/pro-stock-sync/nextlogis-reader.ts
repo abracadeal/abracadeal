@@ -196,20 +196,22 @@ export function nextlogisEnergy(bytes: Uint8Array) {
   }
 }
 
-export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | undefined, digest: (url: string) => Promise<string | null>) {
+export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | undefined, digest: (url: string) => Promise<string | null>, preview = false) {
   const first = await fetchHtml(catalogue);
   if (!isNextlogis(first.url) || first.url.pathname !== catalogue.pathname) throw Error('Catalogue Nextlogis hors périmètre');
   const list = nextlogisCatalogue(first.text, first.url);
   const fetchPage: Fetcher = async url => url.href === catalogue.href ? first : fetchHtml(url);
-  const rows = await crawlCatalogue(catalogue.href, 'nextlogis-v2', [catalogue.href], fetchPage,
+  const rows = await crawlCatalogue(catalogue.href, preview ? 'nextlogis-preview-v1' : 'nextlogis-v2', [catalogue.href], fetchPage,
     (html, url) => nextlogisCatalogue(html, url), async (html, url) => {
       const row = parseNextlogis(html, url);
       if (row._sold) return row;
       const hashes = new Map<string, string>();
+      let illustration: string | undefined;
       for (const photo of row.photos!.split('|')) {
         const hash = await digest(photo);
         if (!hash) throw Error('Photo Nextlogis inaccessible');
-        if (!excludedGalleryDigests.has(hash) && !hashes.has(hash)) hashes.set(hash, photo);
+        if (excludedGalleryDigests.has(hash)) illustration ??= photo;
+        else if (!hashes.has(hash)) hashes.set(hash, photo);
       }
       let diagnostics = {};
       if (row.diagnosticUrl && ((!row.dpe && row.consommation_energie) || (!row.ges && row.emission_ges))) {
@@ -231,6 +233,10 @@ export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | un
         const read = nextlogisEnergy(bytes.subarray(0, length));
         diagnostics = {dpe: row.dpe ?? (row.consommation_energie ? read.dpe : undefined),
           ges: row.ges ?? (row.emission_ges ? read.ges : undefined)};
+      }
+      if (preview && !hashes.size && illustration) {
+        return {...row, ...diagnostics, photos: illustration,
+          description: 'Visuel d’illustration publié par l’agence.\n\n' + row.description};
       }
       return {...row, ...diagnostics, photos: [...hashes.values()].join('|')};
     }, memory, {expectedTotal: list.count, maxDetails: 4});
