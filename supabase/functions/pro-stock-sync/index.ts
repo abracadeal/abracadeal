@@ -1,3 +1,4 @@
+import {isExclusiveGt, readExclusiveGt} from './exclusivegt-reader.ts';
 import {isAutopia, readAutopia} from './autopia-reader.ts';
 import {parseOrpiBusinessDetail} from "./orpi-business-detail.ts";
 import {dedupeEstateListings} from "./estate-duplicates.ts";
@@ -1132,6 +1133,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isNextlogis(url)){feed.sector='immobilier';return readNextlogis(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest,feed._cataloguePreview===true);}
   if(isMaisonCotard(url)){feed.sector='immobilier';return readMaisonCotard(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
   if(isPointImmo(url)){feed.sector='immobilier';return readPointImmo(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest);}
+  if(isExclusiveGt(url)){feed.sector='vehicules';return readExclusiveGt(fetchSiteHtml);}
   if(isAutopia(url)){feed.sector='vehicules';return readAutopia(fetchSiteHtml,feed._cataloguePreview===true);}
   if(isUltimateCar83(url)){feed.sector='vehicules';return readUltimateCar83(fetchSiteHtml,estatePhotoDigest,feed._cataloguePreview===true,crawlMemory(feed,persistCrawl));}
   if(isNegoceAuto33(url)){feed.sector='vehicules';return readNegoceAuto33(fetchSiteHtml,crawlMemory(feed,persistCrawl),estatePhotoDigest,feed._cataloguePreview===true);}
