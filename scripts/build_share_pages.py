@@ -1091,7 +1091,19 @@ def build_hubs(items):
             crumbs.append((f"Annonces à {cities[it['city_key']]}", hub_url(None, it["city_key"])))
         crumbs.append((display_title(l), f"{SITE}/annonce/{l['id']}/"))
         it["crumbs"] = crumbs
-    dedupe_hubs(pages, meta)
+    canon = dedupe_hubs(pages, meta)
+    # Fil d'Ariane des annonces : directement vers la page principale (et non vers une page fusionnée)
+    by_url = {hub_rel_url(r): hub_rel_url(k) for r, k in canon.items()}
+    label_of = lambda k: cities.get(k.split("/")[-1], "") if "/" in k else ""
+    for it in items:
+        fixed = []
+        for name, url in it["crumbs"]:
+            if url in by_url:
+                k = next(k for r, k in canon.items() if hub_rel_url(r) == url)
+                name, url = (label_of(k) or name), by_url[url]
+            if not fixed or fixed[-1][1] != url:
+                fixed.append((name, url))
+        it["crumbs"] = fixed
     return pages
 
 
@@ -1137,6 +1149,14 @@ def dedupe_hubs(pages, meta):
             content = content.replace(f'<link rel="canonical" href="{hub_rel_url(rel)}">',
                                       f'<link rel="canonical" href="{hub_rel_url(canon[rel])}">', 1)
             pages[rel] = (content, False)
+    # Liens internes : plus aucune liste ne pointe vers une page fusionnée (on garde le lien vers la page principale).
+    dead = {hub_rel_url(r) for r in canon if r in pages and not pages[r][1]}
+    for rel in list(pages):
+        content, indexable = pages[rel]
+        for u in dead:
+            content = re.sub(r'<li><a href="' + re.escape(u) + r'">[^<]*</a></li>', "", content)
+        pages[rel] = (content, indexable)
+    return {r: k for r, k in canon.items() if r in pages and not pages[r][1]}
 
 
 def write_if_changed(path, content):

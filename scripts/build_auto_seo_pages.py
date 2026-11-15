@@ -145,6 +145,10 @@ def main():
         elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
         indexable[r]=robots=="index,follow" and not can
         pages[r]=page(*args,robots=robots,canonical=can)
+    # Liens internes : pas de lien vers une page fusionnée (la page principale est déjà dans la liste)
+    for r in list(pages):
+        for d in canon:
+            pages[r]=re.sub(r'<li><a href="/auto/'+re.escape(d)+r'/">[^<]*</a></li>','',pages[r])
     keep,changed=set(),{}
     old_lm=old_lastmods(SITEMAP)
     for rel,content in pages.items():
