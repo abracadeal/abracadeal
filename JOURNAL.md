@@ -1,3 +1,8 @@
+## 15/11/2026 — Ultimate Car 83, catalogue complet dans l’aperçu (ChatGPT)
+
+- « Tester » lit les deux pages et les fiches showroom à délai, avec reprise par deux fiches. Le lecteur extrait prix comptant, délai, caractéristiques et galerie. Le filtre de la synchronisation reste limité au stock d’occasion immédiat. Aucun import ni mail déclenché.
+- Code `a02f21d6572b9f6a3819bf7fba0e4e6d5828942a`, pro-stock-sync v355 ACTIVE. Test source local et test de régression réussis. Production à blanc `16485 → 16502` : 21/21 fiches complètes, 225 photos, aucun échec. Peugeot 3008 32 790 €, T-Roc 37 490 €, Tucson 37 990 € TTC, tous affichés sous 6 à 8 semaines. Demande remise en « Réparé · à valider ».
+
 ## 15/11/2026 — Cinq retours « Sites à réparer » contrôlés (ChatGPT)
 
 - Nextlogis : le lecteur traite les deux images d’étiquette DPE 2021 à la fin des fiches et conserve l’ancien format combiné. Reprise invalidée pour relire les anciennes fiches. Tests du lecteur et bundle réussis. Code `0ec8d0e2be9b7aac99f646720f119ba159ce90ec`, pro-stock-sync v354 ACTIVE. Lecture à blanc `16466 → 16470` : 20/20 fiches, 9 DPE et 8 GES, contre 3 et 2 avant correction. Ginestas D/D. Deux fiches dont les sources n’ont qu’une illustration générique restent sans galerie.
