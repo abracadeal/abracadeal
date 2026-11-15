@@ -48,12 +48,15 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git commit -q -m "Pages SEO : mise a jour automatique"
           CHANGED=$(git diff --name-only HEAD~1 HEAD)
+          # 15/11/2026 : si une autre publication est passée entre-temps (conflit sur un fichier généré, ex. feeds/catalog.json),
+          # notre version — la plus récente — l'emporte (-X theirs = le commit rejoué), et un rebase raté est annulé avant de réessayer.
           for i in 1 2 3; do
-            if git pull --rebase -q origin main && git push -q origin main; then
+            if git pull --rebase -X theirs -q origin main && git push -q origin main; then
               # Moteurs IndexNow (Bing…) prévenus des pages nouvelles ou modifiées, 1 min après la mise en ligne
               sleep 60; echo "$CHANGED" | python scripts/indexnow.py || true
               exit 0
             fi
+            git rebase --abort 2>/dev/null || true
             sleep 5
           done
           exit 1

@@ -46,7 +46,10 @@
     var items = [
       ['Réponses « OK » de prospects', t.acceptances_pending, 'admin-prospection.html', 'Des pros ont répondu OK : créer leur espace.'],
       ['Imports de sites à valider', t.imports_pending, 'admin-test-import.html', 'Des pros attendent la mise en ligne de leur stock.'],
-      ['Flux en erreur', t.feeds_failing, '#tech', 'Le stock d’un pro ne se met plus à jour.']
+      ['Flux en erreur', t.feeds_failing, '#tech', 'Le stock d’un pro ne se met plus à jour.'],
+      // 15/11/2026 : jeton GitHub refusé = les annonces n'arrivent plus sur Google en direct
+      ['Mise en ligne Google en panne', state.gh && state.gh.ok === false ? 1 : 0, 'https://supabase.com/dashboard/project/jplzvxmpbpjssyinozap/integrations/vault/secrets',
+       'GitHub : ' + ((state.gh && state.gh.detail) || 'déclenchement refusé') + '. Créer un nouveau jeton et le mettre dans le coffre Supabase (abracadeal_github_pages_token).']
     ];
     var todo = items.filter(function (x) { return Number(x[1]) > 0; });
     var modN = Number(t.moderation_pending || 0) + Number(t.reports_open || 0) + Number(t.auto_to_review || 0);
@@ -258,7 +261,7 @@
       $('ahStatus').hidden = true;
       document.querySelectorAll('.ah-panel').forEach(function (p) { p.hidden = false; });
       renderAll(); stamp();
-      var extra = [loadTodayTraffic()];
+      var extra = [loadTodayTraffic(), sb.rpc('admin_share_pages_health').then(function (h) { if (!h.error) { state.gh = h.data; renderToday(state.data); } })];
       if (state.traffic || state.tab === 'stats') extra.push(loadTraffic());
       if (state.tab === 'tech') extra.push(loadStorage());
       return Promise.all(extra);
