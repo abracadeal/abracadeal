@@ -3210,3 +3210,4 @@
 - 14/11 17 h 20 — Claude : admin-prospection, section « Accords « Je publie » » : seuls les accords à traiter s'affichent ; ceux marqués « Traité » disparaissent de la liste (données gardées dans private.prospect_acceptances). v=20261114-traites.
 - 15/11 12 h 55 — Claude : admin-test-import, section « Mails de bienvenue » : sur mobile le bouton « Renvoyer » sortait de l'écran (date « Envoyé le » en nowrap à droite). Désormais texte à gauche (date d'envoi sous l'adresse) et bouton toujours visible à droite (classe .wrow). Testé à 390 px.
 - 15/11 12 h 55 — Claude : Sophie Folley marquée « bienvenue envoyée » SANS envoi (décision Anthony : trop tard) — welcome_sent_at = 07/11 22 h 10 (heure de son mail Fondateur), welcome_marked_manually dans raw_user_meta_data.
+- 15/11 18 h 10 — Claude : numéro de téléphone de l'éditeur (06 20 26 54 98, donné par Anthony) ajouté aux mentions légales (mentions-legales.html + fenêtre de l'accueil), obligation LCEN.
