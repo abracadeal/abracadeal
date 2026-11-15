@@ -39,7 +39,7 @@ def esc(s): return html.escape(str(s or ""),quote=True)
 def card(l):
     return f'<li><a href="/annonce/{esc(l["id"])}/"><strong>{esc(l.get("title") or "Annonce automobile")}</strong><span>{esc(money(l.get("price")))}</span><small>{esc(l.get("city"))}</small></a></li>'
 
-def page(title,h1,desc,url,items,related):
+def page(title,h1,desc,url,items,related,robots="index,follow",canonical=None):
     schema={"@context":"https://schema.org","@type":"ItemList","numberOfItems":len(items),"itemListElement":[{"@type":"ListItem","position":i+1,"url":f'{SITE}/annonce/{x["id"]}/'} for i,x in enumerate(items[:120])]}
     crumbs={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":SITE+"/"},{"@type":"ListItem","position":2,"name":"Auto","item":SITE+"/auto/"},{"@type":"ListItem","position":3,"name":h1,"item":url}]}
     rel=''.join(f'<li><a href="{esc(u)}">{esc(n)}</a></li>' for n,u in related[:40])
@@ -50,7 +50,7 @@ def page(title,h1,desc,url,items,related):
         f'<meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(md)}">'
         f'<meta property="og:url" content="{esc(url)}"><meta property="og:image" content="{SITE}/icon-512.png">')
     head_extra=og+FONTS+'<style>'+SITE_CSS+'.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:0;list-style:none}.grid li a{display:grid;gap:4px;background:#fff;border:1px solid #ebe4ef;padding:14px 16px;border-radius:16px;box-shadow:0 7px 20px rgba(35,17,48,.055);text-decoration:none;color:#26122f}.grid span{font-weight:800;color:#8b2aa6}.grid small{color:#756a7e}nav.top{font-size:.85rem;color:#756a7e;margin:4px 0 12px}nav.top a{color:#756a7e}</style>'+HUMAN_LINKS
-    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(md)}"><meta name="robots" content="index,follow"><link rel="canonical" href="{esc(url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
+    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(md)}"><meta name="robots" content="{robots}"><link rel="canonical" href="{esc(canonical or url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
 
 def write(path,content):
     os.makedirs(os.path.dirname(path),exist_ok=True)
@@ -74,31 +74,48 @@ def lastmod_tag(loc, changed, old):
     d = old.get(loc) if not changed else None
     return f"<lastmod>{d or datetime.date.today().isoformat()}</lastmod>"
 
+# 15/11/2026 (audit SEO, accord d'Anthony) : vrais noms de marques dans les titres (« BMW » et non « Bmw »), motos annoncées
+# comme motos (et non « annonces auto ») ; pages de moins de MIN_INDEX annonces en noindex et hors sitemap ;
+# modèle identique à sa marque (un seul modèle) ou budget identique au budget supérieur : la page la plus large reste, l'autre pointe vers elle.
+NICE_MAKES={"bmw":"BMW","bmw motorrad":"BMW Motorrad","citroen":"Citroën","ds":"DS","harley davidson":"Harley-Davidson",
+            "mg motor":"MG Motor","mg":"MG","ktm":"KTM","vw":"Volkswagen","land rover":"Land Rover","alfa romeo":"Alfa Romeo"}
+MOTO_MAKES={"bmw motorrad","ducati","harley davidson","harley-davidson","kawasaki","keeway","ktm","triumph","royal enfield","piaggio","kymco","sym","aprilia","moto guzzi","mv agusta","indian","yamaha"}
+MIXED_MAKES={"honda","suzuki"}
+MIN_INDEX=3
+
+def nice_make(mk):
+    k=re.sub(r"\s+"," ",str(mk or "").strip()).lower()
+    return NICE_MAKES.get(k) or str(mk or "").strip()
+
+def make_kind(mk):
+    k=str(mk or "").strip().lower()
+    return "annonces moto" if k in MOTO_MAKES else ("annonces auto et moto" if k in MIXED_MAKES else "annonces auto")
+
 def main():
     rows=[x for x in fetch_listings() if x.get("vehicle_make")]
     makes={}
     for l in rows:
-        mk=(l.get("vehicle_make") or "").strip(); md=(l.get("vehicle_model") or "").strip()
+        mk=nice_make(l.get("vehicle_make")); md=(l.get("vehicle_model") or "").strip()
         makes.setdefault(mk,{}).setdefault(md,[]).append(l)
-    pages={}
+    pages={}; specs={}
     make_links=[(m,f"/auto/{slug(m)}/") for m in sorted(makes)]
     root_desc="Voitures d’occasion publiées sur Abracadeal : parcourez les annonces par marque, modèle, énergie et budget, auprès de particuliers et de professionnels."
-    pages[""]=page("Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
+    specs[""]=("root",rows,"Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
     for mk,models in makes.items():
         its=[x for arr in models.values() for x in arr]; ms=slug(mk)
         model_links=[(f"{mk} {md}",f"/auto/{ms}/{slug(md)}/") for md in sorted(models) if md]
         desc=f"Découvrez les {mk} d’occasion actuellement en ligne sur Abracadeal. Comparez les modèles, prix, kilométrages et localisations des annonces disponibles."
-        pages[ms]=page(f"{mk} d'occasion : annonces auto | Abracadeal",f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
+        specs[ms]=("make",its,f"{mk} d'occasion : {make_kind(mk)} | Abracadeal",f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
         for md,sub in models.items():
             if not md: continue
             p=f"{ms}/{slug(md)}"; desc=f"Retrouvez les {mk} {md} d’occasion disponibles sur Abracadeal, publiées par des particuliers et des professionnels. Consultez prix, année, kilométrage et ville sur chaque annonce."
-            pages[p]=page(f"{mk} {md} d'occasion | Abracadeal",f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
+            specs[p]=("model",sub,f"{mk} {md} d'occasion | Abracadeal",f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
     for key,label in FUELS.items():
         if key!=slug(key): continue
         sub=[x for x in rows if slug(x.get("fuel"))==key]
         if sub:
             desc=f"Parcourez les voitures d’occasion {label.lower()} actuellement disponibles sur Abracadeal, avec prix, marque, modèle et localisation."
-            pages[key]=page(f"Voitures {label.lower()} d'occasion | Abracadeal",f"Voitures {label.lower()} d’occasion",desc,SITE+f"/auto/{key}/",sub,make_links)
+            specs[key]=("fuel",sub,f"Voitures {label.lower()} d'occasion | Abracadeal",f"Voitures {label.lower()} d’occasion",desc,SITE+f"/auto/{key}/",sub,make_links)
     for ceiling,p in BUDGETS:
         sub=[]
         for x in rows:
@@ -108,7 +125,26 @@ def main():
         if sub:
             label=f"Voitures d’occasion à moins de {ceiling:,} €".replace(","," ")
             desc=f"Trouvez une voiture d’occasion à moins de {ceiling:,} € sur Abracadeal. Comparez les annonces disponibles par marque, modèle et ville.".replace(","," ")
-            pages[p]=page(label+" | Abracadeal",label,desc,SITE+f"/auto/{p}/",sub,make_links)
+            specs[p]=("budget",sub,label+" | Abracadeal",label,desc,SITE+f"/auto/{p}/",sub,make_links)
+    ids={r:frozenset(str(x["id"]) for x in v[1]) for r,v in specs.items()}
+    # Doublons seulement dans la même famille (intentions de recherche différentes sinon) :
+    # modèle identique à sa marque → la marque ; budget identique au budget supérieur → le budget supérieur.
+    canon={}
+    for r,(kind,*_) in specs.items():
+        if kind=="model":
+            mk=r.split("/")[0]
+            if mk in specs and ids[mk]==ids[r]: canon[r]=mk
+    budgets=[p for _,p in BUDGETS if p in specs]
+    for i,b in enumerate(budgets):
+        for hi in reversed(budgets[i+1:]):
+            if ids[hi]==ids[b]: canon[b]=hi; break
+    indexable={}
+    for r,(kind,its,*args) in specs.items():
+        robots,can="index,follow",None
+        if kind!="root" and len(its)<MIN_INDEX: robots="noindex,follow"
+        elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
+        indexable[r]=robots=="index,follow" and not can
+        pages[r]=page(*args,robots=robots,canonical=can)
     keep,changed=set(),{}
     old_lm=old_lastmods(SITEMAP)
     for rel,content in pages.items():
@@ -119,8 +155,9 @@ def main():
             if d!=ROOT and os.path.isdir(d) and not os.listdir(d): os.rmdir(d)
     lines=['<?xml version="1.0" encoding="UTF-8"?>','<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for rel in sorted(pages):
+        if not indexable[rel]: continue
         loc=f'{SITE}/auto/{rel+"/" if rel else ""}'
         lines.append(f'  <url><loc>{loc}</loc>{lastmod_tag(loc,changed[rel],old_lm)}</url>')
     lines.append('</urlset>'); write(SITEMAP,"\n".join(lines)+"\n")
-    print(f"SEO Auto: {len(rows)} annonces, {len(pages)} pages")
+    print(f"SEO Auto: {len(rows)} annonces, {len(pages)} pages, {sum(indexable.values())} indexables")
 if __name__=="__main__": main()

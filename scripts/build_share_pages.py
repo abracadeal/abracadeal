@@ -156,7 +156,9 @@ AGGLOS = {
                   "Perpignan et ses environs (Cabestany, Canet-en-Roussillon, Saint-Estève, Rivesaltes), dans les Pyrénées-Orientales."),
     "lyon": ("Lyon", ["Lyon", "Villeurbanne", "Vénissieux", "Caluire-et-Cuire", "Bron", "Vaulx-en-Velin", "Saint-Priest", "Oullins"], ["6900"],
              "Lyon et la métropole de Lyon (Villeurbanne, Vénissieux, Caluire, Bron)."),
-    "bordeaux": ("Bordeaux", ["Bordeaux", "Mérignac", "Pessac", "Talence", "Bègles", "Le Bouscat", "Villenave-d'Ornon", "Cenon", "Lormont"], [],
+    "bordeaux": ("Bordeaux", ["Bordeaux", "Mérignac", "Pessac", "Talence", "Bègles", "Le Bouscat", "Villenave-d'Ornon", "Cenon", "Lormont",
+                              "Artigues-près-Bordeaux", "Floirac", "Bruges", "Eysines", "Gradignan", "Le Haillan", "Blanquefort",
+                              "Saint-Médard-en-Jalles", "Bassens", "Ambarès-et-Lagrave", "Carbon-Blanc"], [],
                  "Bordeaux et sa métropole (Mérignac, Pessac, Talence, Bègles)."),
     "toulouse": ("Toulouse", ["Toulouse", "Blagnac", "Colomiers", "Tournefeuille", "Balma", "L'Union", "Ramonville-Saint-Agne", "Muret"], [],
                  "Toulouse et son agglomération (Blagnac, Colomiers, Tournefeuille, Balma)."),
@@ -1015,7 +1017,9 @@ def build_hubs(items):
     at = lambda k: loc.get(k) or f"à {cities[k]}"
     cats = [h[0] for h in HUB_CATEGORIES if h[0] in CORE_CATEGORIES or by_cat[h[0]]]
 
-    pages = {}
+    pages, meta = {}, {}
+    ids_of = lambda its: frozenset(str(it["listing"]["id"]) for it in its)
+    kind_of = lambda k: "dept" if k in loc else ("agglo" if k in agglo_text and k in AGGLOS else "commune")
     home = ("Accueil", SITE + "/")
     root = ("Toutes les annonces", hub_url())
     city_links = lambda cat=None: [(f"{cat_info[cat][1]} {at(k)}" if cat else f"Annonces {at(k)}",
@@ -1031,6 +1035,7 @@ def build_hubs(items):
                           "motos, immobilier, locations de vacances, high-tech et bien plus, publiées par des particuliers et des professionnels.",
                           "Parcourez les petites annonces Abracadeal par catégorie (voitures d’occasion, motos, immobilier...) et par ville (Cannes, Nice, Marseille...).",
                           hub_url(), [home, root], items, "Catégories et villes", links, redirect=app_target()), bool(items))
+    meta[""] = (ids_of(items), "root")
 
     # Catégories
     for c in cats:
@@ -1039,6 +1044,7 @@ def build_hubs(items):
         pages[c] = (hub_page(f"{name} : annonces entre particuliers et pros | Abracadeal", f"{name}",
                              intro, f"{name} : {len(its)} annonce{'s' if len(its) > 1 else ''} en ligne sur Abracadeal. {intro[:110].rsplit(' ', 1)[0]}…",
                              hub_url(c), [home, root, (name, hub_url(c))], its, f"{name} par ville", city_links(c), redirect=app_target(c)), bool(its))
+        meta[c] = (ids_of(its), "cat")
 
     # Villes et catégorie + ville
     for k, cname in cities.items():
@@ -1057,6 +1063,7 @@ def build_hubs(items):
                              f"(voitures, motos, immobilier, high-tech...) sur Abracadeal.",
                              hub_url(None, k), [home, root, (f"Annonces {A}", hub_url(None, k))], its,
                              f"Rubriques {A}", cat_links, redirect=app_target(None, app_city)), bool(its))
+        meta[k] = (ids_of(its), kind_of(k))
         for c in cats:
             sub = [it for it in its if c in it["cats"]]
             if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
@@ -1069,6 +1076,7 @@ def build_hubs(items):
                 f"par des particuliers et des professionnels sur Abracadeal.",
                 hub_url(c, k), [home, root, (name, hub_url(c)), (cname, hub_url(c, k))], sub,
                 f"Autres rubriques {A}", [(n, u) for n, u in cat_links if u != hub_url(c, k)], redirect=app_target(c, app_city)), bool(sub))
+            meta[f"{c}/{k}"] = (ids_of(sub), "cat+" + kind_of(k))
 
     # Fil d'Ariane de chaque annonce : catégorie la plus précise, puis ville si elle a sa page
     for it in items:
@@ -1083,7 +1091,52 @@ def build_hubs(items):
             crumbs.append((f"Annonces à {cities[it['city_key']]}", hub_url(None, it["city_key"])))
         crumbs.append((display_title(l), f"{SITE}/annonce/{l['id']}/"))
         it["crumbs"] = crumbs
+    dedupe_hubs(pages, meta)
     return pages
+
+
+# 15/11/2026 (audit SEO, accord d'Anthony) : Google ne doit pas voir plusieurs pages avec exactement les mêmes annonces
+# (ex. « Angers », « Les Ponts-de-Cé », « Maine-et-Loire » et « Voitures d'occasion à Angers » = les 120 mêmes voitures),
+# ni des pages quasi vides. Pages de moins de MIN_HUB_INDEX annonces : noindex + hors sitemap.
+# Pages identiques : une seule reste (la plus recherchée : catégorie + grande ville > catégorie + commune > catégorie + département
+# > grande ville > commune > département) ; les autres pointent vers elle (canonical) et sortent du sitemap.
+MIN_HUB_INDEX = 3
+HUB_PRIORITY = {"root": 100, "cat": 90, "cat+agglo": 70, "cat+commune": 60, "cat+dept": 50, "agglo": 45, "commune": 40, "dept": 30}
+
+
+def hub_rel_url(rel):
+    return f"{SITE}/annonces/{rel + '/' if rel else ''}"
+
+
+def dedupe_hubs(pages, meta):
+    groups = {}
+    for rel, (ids, kind) in meta.items():
+        if rel in pages and pages[rel][1] and ids and kind not in ("root",):
+            groups.setdefault(ids, []).append(rel)
+    canon = {}
+    for ids, rels in groups.items():
+        if len(rels) < 2:
+            continue
+        # à égalité, la catégorie la plus précise gagne (« Voitures d'occasion » avant « Véhicules »)
+        catsize = lambda r: len(meta.get(r.split("/")[0], (frozenset(), ""))[0]) if "/" in r else 10 ** 9
+        catpos = lambda r: next((i for i, h in enumerate(HUB_CATEGORIES) if h[0] == r.split("/")[0]), 99) if "/" in r else 99
+        rels.sort(key=lambda r: (-HUB_PRIORITY.get(meta[r][1], 0), catsize(r), catpos(r), len(r), r))
+        for r in rels[1:]:
+            if meta[r][1] != "cat":  # une catégorie entière reste toujours indexable
+                canon[r] = rels[0]
+    for rel, (ids, kind) in meta.items():
+        if rel not in pages or kind == "root":
+            continue
+        content, indexable = pages[rel]
+        if not indexable:
+            continue
+        if len(ids) < MIN_HUB_INDEX:
+            content = content.replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex,follow">', 1)
+            pages[rel] = (content, False)
+        elif rel in canon:
+            content = content.replace(f'<link rel="canonical" href="{hub_rel_url(rel)}">',
+                                      f'<link rel="canonical" href="{hub_rel_url(canon[rel])}">', 1)
+            pages[rel] = (content, False)
 
 
 def write_if_changed(path, content):

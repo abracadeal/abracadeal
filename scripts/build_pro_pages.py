@@ -121,8 +121,23 @@ def nice_name(p):
     """Nom affiché : nom du showroom / profil, sinon raison sociale (souvent en majuscules dans le registre)."""
     name = (p.get("display_name") or "").strip() or (p.get("company_name") or "").strip() or "Professionnel"
     if name.isupper() and len(name) > 4:
-        name = " ".join(w if len(w) <= 3 and w.isalpha() and w in ("SAS", "SARL", "EURL", "SA", "SNC") else w.capitalize()
-                        for w in name.split())
+        # 15/11/2026 (audit SEO) : « CABINET MERENGONE ET ASSOCIES (GUBERNATIS IMMOBILIER) » →
+        # « Cabinet Merengone et Associés (Gubernatis Immobilier) » (et non « … Et Associes (gubernatis Immobilier) »).
+        small = {"ET", "DE", "DU", "DES", "LA", "LE", "LES", "D", "L", "EN", "AU", "AUX", "SUR", "&"}
+        legal = {"SAS", "SARL", "EURL", "SA", "SNC", "SASU"}
+        accents = {"ASSOCIES": "Associés", "IMMOBILIERE": "Immobilière", "AGENCE": "Agence"}
+        out = []
+        for i, w in enumerate(name.split()):
+            pre = re.match(r"^\W*", w).group(0); post = re.search(r"\W*$", w).group(0)
+            core = w[len(pre):len(w) - len(post)] if post else w[len(pre):]
+            if core in legal:
+                word = core
+            elif i > 0 and core in small:
+                word = core.lower()
+            else:
+                word = accents.get(core) or "-".join(x.capitalize() for x in core.split("-"))
+            out.append(pre + word + post)
+        name = " ".join(out)
     return name
 
 
@@ -180,6 +195,15 @@ def pro_page(oid, p, kind, path, name, city, postal, items):
     n = len(items)
     one, many = k["what"]
     count = f"{n} {one if n == 1 else many}"
+    if kind == "garage":
+        # 15/11/2026 (audit SEO) : un garage qui publie aussi des pièces détachées (sans marque, année ni km)
+        # n'annonce pas « 20 véhicules » quand il n'en a que 5.
+        nveh = sum(1 for it in items if it["listing"].get("vehicle_make") or it["listing"].get("vehicle_year") or it["listing"].get("mileage"))
+        nparts = n - nveh
+        if nparts and nveh:
+            count = (f"{nveh} {one if nveh == 1 else many} et {nparts} pièce{'s' if nparts > 1 else ''} détachée{'s' if nparts > 1 else ''}")
+        elif nparts:
+            count = f"{n} annonce{'s' if n > 1 else ''}"
     where = f" à {city}" if city else ""
     title = f"{name} – {k['label']}{where} : {count} | Abracadeal"
     desc_txt = (p.get("description") or "").strip()
