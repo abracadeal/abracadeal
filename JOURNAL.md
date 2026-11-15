@@ -1,3 +1,9 @@
+## 15/11/2026 — Mon Agence Automobile Châteauroux (ChatGPT)
+
+- Lecture du catalogue filtré de Châteauroux, des fiches du vendeur et du diaporama principal. Les photos sont dédoublonnées par URL canonique et contenu. Fiat Punto retrouvée : 3 490 €, 13 photos.
+- Code `14e5d5260ae503625f85aa385ed42015682e8154`, robot v357 ACTIVE. Test à blanc 16542 → 16547 complet : 11/11 véhicules, 188 photos, aucune paire principale/deuxième identique, aucun doublon d’annonce. Demande en « Réparé · à valider ».
+- Ford Alliance : le Puma 5372405 ne publie toujours qu’une image générique. Le Kuga 5353026 répond HTTP 410. BH Car : la ville du prospect indique Limoges et l’e-mail correspond officiellement à Marmande. Périmètre à confirmer. Aucun import ni mail.
+
 ## 15/11/2026 — Retours photos Nextlogis et véhicules Négoce Auto 33 (ChatGPT)
 
 - Négoce Auto 33 : l’aperçu affiche aussi les fiches sous réservation avec leur statut. Test à blanc 16512 → 16515 : 7/7, dont 3 réservés. Synchronisation réservée aux véhicules disponibles.
