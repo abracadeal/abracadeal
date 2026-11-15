@@ -1,3 +1,10 @@
+## 15/11/2026 — Retours photos Nextlogis et véhicules Négoce Auto 33 (ChatGPT)
+
+- Négoce Auto 33 : l’aperçu affiche aussi les fiches sous réservation avec leur statut. Test à blanc 16512 → 16515 : 7/7, dont 3 réservés. Synchronisation réservée aux véhicules disponibles.
+- Nextlogis : l’aperçu restitue le visuel public de la fiche si l’agence ne publie qu’une illustration, avec mention explicite. Fonds de commerce à Narbonne et terrain à Saint-Nazaire-d’Aude. Test 16516 → 16520 : 20/20, sans erreur. Galeries de synchronisation inchangées.
+- Châteauroux : comparaison des deux premières images sur les 10 fiches de l’aperçu 16509. Les paires sont distinctes par leur contenu et par leur empreinte visuelle. Aucun changement de lecteur ni de statut.
+- Bundle et tests lecteurs réussis. pro-stock-sync v356 ACTIVE, commit `8213f98df00564695c155362bad940ba032ea6f2`. Les deux demandes corrigées passent en « Réparé · à valider ». Aucun import ni mail.
+
 ## 15/11/2026 — Ultimate Car 83, catalogue complet dans l’aperçu (ChatGPT)
 
 - « Tester » lit les deux pages et les fiches showroom à délai, avec reprise par deux fiches. Le lecteur extrait prix comptant, délai, caractéristiques et galerie. Le filtre de la synchronisation reste limité au stock d’occasion immédiat. Aucun import ni mail déclenché.
