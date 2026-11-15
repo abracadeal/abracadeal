@@ -91,6 +91,10 @@ details.fold[open]>summary::after{transform:rotate(-135deg)}
 details.fold>summary>span:first-child{flex:1}
 .fold-n{font-size:13px;font-weight:900;background:#3b2946;color:#fff;border-radius:999px;padding:3px 9px}
 .fold-n:empty{display:none}
+/* 15/11/2026 : mails de bienvenue — texte à gauche (coupé proprement), bouton toujours visible à droite */
+.wrow{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 8px}
+.wrow .wtxt{flex:1 1 auto;min-width:0;overflow-wrap:anywhere}
+.wrow .sbtn{flex:0 0 auto}
 #grid.only-err .car:not(.err){display:none}
 #grid.only-skip .car:not(.skip){display:none}
 .stat-skip{border-color:rgba(255,255,255,.25)!important}.stat-skip b{color:inherit}
@@ -569,8 +573,8 @@ async function loadWelcome(){
  if(!rows.length){box.innerHTML='<div class="empty">Aucun pro inscrit depuis l\'admin.</div>';return}
  box.innerHTML=rows.map(r=>{const who='<b>'+esc(r.name||r.email)+'</b>'+(r.city?' · '+esc(r.city):'')+'<br><span style="opacity:.75">'+esc(r.email)+' · '+r.online+' annonce'+(r.online>1?'s':'')+' en ligne · inscrit le '+fmt(r.created_at)+'</span>';
   return r.sent_at
-   ?'<div class="wdone" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 4px;border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span>'+who+'</span><span style="white-space:nowrap;display:flex;gap:8px;align-items:center">✓ Envoyé le '+fmt(r.sent_at)+' <button type="button" class="sbtn" data-welcome="'+esc(r.id)+'" data-again="1">Renvoyer</button></span></div>'
-   :'<div class="req" style="display:flex;justify-content:space-between;gap:10px;align-items:center;padding:12px 4px"><span>'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
+   ?'<div class="wdone wrow" style="border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span class="wtxt">'+who+'<br><span style="color:#8fe3b0">✓ Envoyé le '+fmt(r.sent_at)+'</span></span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'" data-again="1">Renvoyer</button></div>'
+   :'<div class="req wrow"><span class="wtxt">'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
  }).join('');
  box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;b.disabled=true;b.textContent='Vérification…';
   try{const p=await onboardCall({action:'welcome_preview',user_id:id});
