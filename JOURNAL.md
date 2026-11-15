@@ -1,3 +1,9 @@
+## 15/11/2026 — Autopia Cars 38 et Immogaronne (ChatGPT)
+
+- Autopia : lecture du catalogue public utilisé par la page du garage, sans les véhicules de démonstration. Test à blanc 16707 : 34 fiches en aperçu, 32 disponibles et 2 sous réservation, 393 photos et zéro doublon. Synchronisation limitée aux disponibles.
+- Immogaronne : reconnaissance des liens Apimo à double barre et distinction vente/location sur les listes sources. Test à blanc 16708 : 6 pages, 47/47 fiches, 35 ventes et 12 locations, 387 photos, zéro doublon.
+- Robot v358 actif sur `44589c7784945ff7998c09d9b590817e01a1ce84`. Bundle et diff vérifiés. Deux demandes mises en « Réparé · à valider ». I3V reste en attente : les 13 pages correspondent au catalogue du réseau, distinct de l'agence I3V. Aucun import ni mail.
+
 ## 15/11/2026 — Mon Agence Automobile Châteauroux (ChatGPT)
 
 - Lecture du catalogue filtré de Châteauroux, des fiches du vendeur et du diaporama principal. Les photos sont dédoublonnées par URL canonique et contenu. Fiat Punto retrouvée : 3 490 €, 13 photos.
