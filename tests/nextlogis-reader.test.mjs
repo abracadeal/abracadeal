@@ -20,6 +20,13 @@ assert.equal(house.photos.split('|').length, 8);
 assert.equal(house.consommation_energie, 264);
 assert.equal(house.emission_ges, 13);
 assert.doesNotMatch(house.photos, /dpe|thumb/);
+const listingWithDiagnostic = fixture('157.html').replace(/(<section\b[^>]*id="description_bien"[^>]*>)([\s\S]*?)(<\/section>)/i,
+  "$1$2<img src='./img/DPE2021/DPE/D.png' id='dpeimg'><img id='gesimg' src='./img/DPE2021/GSE/C.png'>$3");
+const updatedHouse = parseNextlogis(listingWithDiagnostic, house.url);
+assert.equal(updatedHouse.dpe, 'D');
+assert.equal(updatedHouse.ges, 'C');
+assert.equal(parseNextlogis(listingWithDiagnostic.replace('./img/DPE2021/DPE/D.png',
+  'https://example.com/img/DPE2021/DPE/D.png'), house.url).dpe, undefined);
 const firstLand = row(50);
 const secondLand = row(51);
 assert.equal(firstLand.titre, secondLand.titre);

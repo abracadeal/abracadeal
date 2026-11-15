@@ -118,6 +118,17 @@ export function parseNextlogis(html: string, url: string) {
   const parking = fields.get('stationnement');
   if (parking && !/^aucun$/i.test(parking)) equipment.push(parking);
   const diagnosticPath = section.match(/\bsrc=["'](img\/dpe\/depges-\d+-\d+\.jpg)["']/i)?.[1];
+  const publishedGrade = (id: string, folder: string) => {
+    for (const image of section.matchAll(/<img\b[^>]*>/gi)) {
+      if (image[0].match(/\sid=["']([^"']+)["']/i)?.[1] !== id) continue;
+      const src = image[0].match(/\ssrc=["']([^"']+)["']/i)?.[1];
+      if (!src) continue;
+      const label = new URL(src, page);
+      const pattern = new RegExp('^/img/DPE2021/' + folder + '/([A-G])\\.png$', 'i');
+      if (label.origin === page.origin) return pattern.exec(label.pathname)?.[1].toUpperCase();
+    }
+    return undefined;
+  };
   return {
     ...contactOf(description, html),
     _source_specific_fields: true,
@@ -146,6 +157,8 @@ export function parseNextlogis(html: string, url: string) {
     charges_annuelles: /charges annuelles/i.test(description) ? facts('charges prévisionnels') : undefined,
     nombre_lots: facts('nombre lots'),
     honoraires: text(section.match(/<span class="compc">([\s\S]*?)<\/span>/i)?.[1] || ''),
+    dpe: publishedGrade('dpeimg', 'DPE'),
+    ges: publishedGrade('gesimg', 'GSE'),
     consommation_energie: facts('dpe'),
     emission_ges: facts('ges'),
     diagnosticUrl: diagnosticPath ? new URL(diagnosticPath, page).href : undefined,
@@ -188,7 +201,7 @@ export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | un
   if (!isNextlogis(first.url) || first.url.pathname !== catalogue.pathname) throw Error('Catalogue Nextlogis hors périmètre');
   const list = nextlogisCatalogue(first.text, first.url);
   const fetchPage: Fetcher = async url => url.href === catalogue.href ? first : fetchHtml(url);
-  const rows = await crawlCatalogue(catalogue.href, 'nextlogis-v1', [catalogue.href], fetchPage,
+  const rows = await crawlCatalogue(catalogue.href, 'nextlogis-v2', [catalogue.href], fetchPage,
     (html, url) => nextlogisCatalogue(html, url), async (html, url) => {
       const row = parseNextlogis(html, url);
       if (row._sold) return row;
@@ -199,7 +212,7 @@ export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | un
         if (!excludedGalleryDigests.has(hash) && !hashes.has(hash)) hashes.set(hash, photo);
       }
       let diagnostics = {};
-      if (row.diagnosticUrl && (row.consommation_energie || row.emission_ges)) {
+      if (row.diagnosticUrl && ((!row.dpe && row.consommation_energie) || (!row.ges && row.emission_ges))) {
         const response = await fetch(row.diagnosticUrl, {redirect: 'error', signal: AbortSignal.timeout(8000)});
         if (!response.ok || !response.body) throw Error('Diagnostic Nextlogis inaccessible');
         const stream = response.body.getReader();
@@ -216,7 +229,8 @@ export async function readNextlogis(fetchHtml: Fetcher, memory: CrawlMemory | un
           length += chunk.value.length;
         }
         const read = nextlogisEnergy(bytes.subarray(0, length));
-        diagnostics = {dpe: row.consommation_energie ? read.dpe : undefined, ges: row.emission_ges ? read.ges : undefined};
+        diagnostics = {dpe: row.dpe ?? (row.consommation_energie ? read.dpe : undefined),
+          ges: row.ges ?? (row.emission_ges ? read.ges : undefined)};
       }
       return {...row, ...diagnostics, photos: [...hashes.values()].join('|')};
     }, memory, {expectedTotal: list.count, maxDetails: 4});
