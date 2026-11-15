@@ -10,6 +10,7 @@
 // (lien « Plus d'infos » vers /agences/…/<agence>/) : seules les fiches de l'agence inscrite sont gardées.
 // DPE / GES dessinés en SVG dans la page : <g id="EnergieC">, <g id="GesC">. Ville absente de la fiche : prise dans le lien
 // (« vente-appartement-t3-rennes-61466680 » → Rennes).
+import { dedupePhotos } from './photo-utils.ts';
 import { smartDetail, sDecode } from './smart-reader.ts';
 import { crawlCatalogue, crawlDetails, type CrawlMemory } from './resumable-crawl.ts';
 type Fetcher=(u:URL)=>Promise<{text:string,url:URL}>;
@@ -117,4 +118,56 @@ export async function readBhCarAgency(url:URL,fetchHtml:Fetcher,ldParse:(html:st
     if(!r)throw Error('Fiche non reconnue');r.url=l;return r;
   },memory,{maxDetails:400});
   return rows;
+}
+
+
+const chateauroux = new URL('https://www.monagenceautomobile.fr/acheter-un-vehicule/?agencie=54');
+export const isMaaChateauroux = (url: URL) =>
+  /^(?:www\.)?monagenceautomobile\.fr$/i.test(url.hostname) &&
+  (/^\/agence\/chateauroux-54\/?$/.test(url.pathname) ||
+   (url.pathname === chateauroux.pathname && url.searchParams.get('agencie') === '54'));
+
+export async function readMaaChateauroux(url: URL, fetchHtml: Fetcher,
+    ldVehicle: (html: string, url: string) => any, digest: (url: string) => Promise<string | null>,
+    memory?: CrawlMemory) {
+  if (!isMaaChateauroux(url)) throw Error('Agence Châteauroux non reconnue');
+  return crawlCatalogue(chateauroux.href, 'maa-chateauroux-v1', [chateauroux.href], fetchHtml, (html, page) => {
+    if (!isMaaChateauroux(page)) throw Error('Catalogue redirigé hors de Châteauroux');
+    const details = new Set<string>();
+    for (const card of html.matchAll(/<a\s+href="(\/vehicule\/[a-z0-9-]+)"[^>]*>([\s\S]*?)<\/a>/gi)) {
+      if (/Agence\s*:\s*Châteauroux\s*\(36\)/i.test(sDecode(card[2]))) {
+        details.add(new URL(card[1], chateauroux).href);
+      }
+    }
+    if (!details.size) throw Error('Aucune annonce de Châteauroux trouvée dans le catalogue');
+    const lists = new Set<string>();
+    for (const link of html.matchAll(/href="([^"]*agencie=54[^"]*)"/gi)) {
+      const next = new URL(sDecode(link[1]), page);
+      if (next.origin === page.origin && isMaaChateauroux(next) && next.pathname === chateauroux.pathname && next.href !== page.href) lists.add(next.href);
+    }
+    return {details: [...details], lists: [...lists]};
+  }, async (html, link) => {
+    const row = ldVehicle(html, link);
+    if (!row || !/"seller"\s*:\s*\{[^}]*"name"\s*:\s*"Mon Agence Automobile Châteauroux"/i.test(html)) {
+      throw Error('Véhicule sans identité Châteauroux confirmée');
+    }
+    if (row._sold) return row;
+    const gallery = html.match(/<div class="swiper slider-picture[^"]*">([\s\S]*?)<div class="swiper slider-nav/i)?.[1] || '';
+    const images: string[] = dedupePhotos([...gallery.matchAll(/<img\b[^>]*\bsrc="([^"]+)"/gi)]
+      .map(image => new URL(sDecode(image[1]), link))
+      .filter(image => image.origin === 'https://cdn.monagenceautomobile.fr' && /^\/+uploads\//.test(image.pathname))
+      .map(image => image.href));
+    if (!images.length) throw Error('Galerie Châteauroux absente');
+    const photos = new Map<string, string>();
+    for (let offset = 0; offset < images.length; offset += 4) {
+      const batch = images.slice(offset, offset + 4);
+      const hashes = await Promise.all(batch.map(digest));
+      for (const [index, hash] of hashes.entries()) {
+        if (!hash) throw Error('Photo Châteauroux inaccessible');
+        if (!photos.has(hash)) photos.set(hash, batch[index]);
+      }
+    }
+    const detail = smartDetail(html, link, 'vehicules');
+    return {...detail, ...row, ville: 'Châteauroux', code_postal: '36000', photos: [...photos.values()].join('|')};
+  }, memory, {maxDetails: 2});
 }

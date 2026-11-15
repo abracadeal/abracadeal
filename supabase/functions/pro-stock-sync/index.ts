@@ -52,7 +52,7 @@ import { simpliciAgencyId, readSimpliciAgency } from "./simplicicar-reader.ts";
 import { cityaAgencyId, readCityaAgency, cityaNdfAgency, readCityaNdfAgency } from "./citya-reader.ts";
 import { isCimmAgency, readCimmAgency } from "./cimm-reader.ts";
 import { ofimAgencyId, readOfimAgency } from "./ofim-reader.ts";
-import { isLaResidenceAgency, readLaResidenceAgency, isLaFrancaiseAgency, readLaFrancaiseAgency, isBhCarSite, readBhCarAgency } from "./network-agency-readers.ts";
+import { isLaResidenceAgency, readLaResidenceAgency, isLaFrancaiseAgency, readLaFrancaiseAgency, isBhCarSite, readBhCarAgency, isMaaChateauroux, readMaaChateauroux } from "./network-agency-readers.ts";
 import { fillEnergyFromImages } from "./energy-image.ts";
 import { cpu, cpuReset } from "./cpu-meter.ts";
 import { findCommune, resetCommuneCalls, checkPostal, validateCity, titleCommune, listReady, norm as normCity, setNear, distanceKm, communeByPostal, nearKnown, homonyms } from "./commune-lookup.ts";
@@ -1151,6 +1151,7 @@ async function readFeed(feed:any,persistCrawl=false){
   if(isGuyHoquetAgency(url)){const rows=await readGuyHoquetAgency(url,fetchSiteHtml);(rows as any).platform='Guy Hoquet (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isCimmAgency(url)){const rows=await readCimmAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='Cimm Immobilier (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   /* 04/11/2026 (Ofim Saint-Gilles : pages d'agences lues comme des biens) */if(ofimAgencyId(url)){const rows=await readOfimAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='OFIM (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
+  if(isMaaChateauroux(url)){feed.sector='vehicules';const rows=await readMaaChateauroux(url,fetchSiteHtml,ldVehicle,estatePhotoDigest,crawlMemory(feed,persistCrawl));return Object.assign(rows,{platform:'Mon Agence Automobile Châteauroux',sector:'vehicules'});}
   if(isBhCarSite(url)){const rows=await readBhCarAgency(url,fetchSiteHtml,ldVehicle,crawlMemory(feed,persistCrawl));(rows as any).platform='BH Car (véhicules de l\'agence)';(rows as any).sector='vehicules';feed.sector='vehicules';return rows;}
   if(isLaResidenceAgency(url)){const rows=await readLaResidenceAgency(url,fetchSiteHtml,ldImmo,crawlMemory(feed,persistCrawl));(rows as any).platform='La Résidence (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
   if(isLaFrancaiseAgency(url)){const rows=await readLaFrancaiseAgency(url,fetchSiteHtml,crawlMemory(feed,persistCrawl));(rows as any).platform='La Française Immobilière (biens de l\'agence)';(rows as any).sector='immobilier';feed.sector='immobilier';return rows;}
@@ -1467,7 +1468,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
    const cp=await admin.from('pro_stock_crawl_state').select('state,updated_at').eq('feed_id',feed.id).maybeSingle();if(cp.error)throw cp.error;
-   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|naos-berry-v1:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|nextlogis-v2$|maison-cotard-v1$|negoce-auto33-v1:|pointimmo-v3:|ats-motoconcess-v1:|atelier-retro-v1:|apimo-v1:)/.test(cp.data.state.scope||'')/* 13/11/2026 (Claude) : apimo-v1 ajouté — sans lui, Gubernatis / Sophie Folley gardaient le même tour 72 h (nouveaux biens absents) */){
+   if(cp.data?.state?.started===(rawRows as any).cycleStarted&&/^(?:orpi-v2:|orpi-oce-v1:|smart-v1:|18avenue-v4$|kombishop-v1$|lecoeur-v3$|berge-v2$|sitea-v1$|i3v-v2:|naos-berry-v1:|vrauto-v2:|rival-v1$|ford-strasbourg-v2$|lautre-v1$|maa-chateauroux-v1$|nextlogis-v2$|maison-cotard-v1$|negoce-auto33-v1:|pointimmo-v3:|ats-motoconcess-v1:|atelier-retro-v1:|apimo-v1:)/.test(cp.data.state.scope||'')/* 13/11/2026 (Claude) : apimo-v1 ajouté — sans lui, Gubernatis / Sophie Folley gardaient le même tour 72 h (nouveaux biens absents) */){
     const ack=await admin.from('pro_stock_crawl_state').update({state:{...cp.data.state,applied:true},updated_at:new Date().toISOString()}).eq('feed_id',feed.id).eq('updated_at',cp.data.updated_at);if(ack.error)throw ack.error;
    }
   }
