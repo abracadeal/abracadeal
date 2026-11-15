@@ -1,3 +1,12 @@
+## 15/11/2026 — Cinq retours « Sites à réparer » contrôlés (ChatGPT)
+
+- Nextlogis : le lecteur traite les deux images d’étiquette DPE 2021 à la fin des fiches et conserve l’ancien format combiné. Reprise invalidée pour relire les anciennes fiches. Tests du lecteur et bundle réussis. Code `0ec8d0e2be9b7aac99f646720f119ba159ce90ec`, pro-stock-sync v354 ACTIVE. Lecture à blanc `16466 → 16470` : 20/20 fiches, 9 DPE et 8 GES, contre 3 et 2 avant correction. Ginestas D/D. Deux fiches dont les sources n’ont qu’une illustration générique restent sans galerie.
+- Ultimate Car 83 `16438` : 21 cartes sur deux pages de « Nos véhicules », une occasion disponible immédiatement, 20 sur délai. Une fiche complète et 12 photos.
+- L’Autre Immobilier `16439 → 16453` : 11 fiches examinées dans « À vendre », 8 disponibles et complètes, 3 écartées selon leur statut, 68 photos.
+- Négoce Auto 33 `16454 → 16455` : 7 véhicules au catalogue, 3 sous réservation, 4 disponibles et complets, 57 photos.
+- I3V `16461 → 16464` : le catalogue propre à l’agence affiche 13 ventes sur deux pages et zéro location. Les 13 fiches ont été lues, avec 121 photos.
+- Les cinq demandes sont visibles en « Réparé · à valider ». Garage VR Auto reste en attente : photo du Peugeot 3008 toujours en HTTP 404 lors du contrôle. Aucun import, mail, changement de prospect ou validation visuelle.
+
 ## 13/11/2026 — Alternative Cars, pièces incluses dans la synchronisation (ChatGPT)
 
 - `readFeed` charge les véhicules et les pièces WooCommerce. Les pièces sont normalisées sous Véhicules / `pieces-detachees`, sans année, date de mise en circulation ni kilométrage. L’aperçu garde sa rubrique dédiée et réutilise cette lecture.
