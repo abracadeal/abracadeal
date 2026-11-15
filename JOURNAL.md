@@ -1,3 +1,8 @@
+## 15/11/2026 — Exclusive GT (ChatGPT)
+
+- Le catalogue Jimdo « En stock » présente plusieurs véhicules dans une même page, chacun suivi de sa propre galerie. Nouveau lecteur borné à cette rubrique, association par identifiant de module, prix comptant, date MEC mensuelle, kilométrage et texte source.
+- Tests sur les sept fiches source et bundle réussis. Production v359 ACTIVE, code `cd373f955856426c27b2c937465c45451c328e7d`. Test à blanc 16866 : 7/7 complets, 175 photos, 7 couvertures distinctes, zéro doublon et aucune erreur. Demande en « Réparé · à valider ». Aucun import ni mail.
+
 ## 15/11/2026 — Autopia, photos de chaque véhicule dans l’aperçu (ChatGPT)
 
 - Les véhicules Autopia partagent l’adresse de leur catalogue. L’aperçu associait toutes les fiches au premier résultat normalisé ayant cette URL. Il associe désormais les fiches par référence unique et utilise l’URL uniquement lorsqu’elle identifie une seule fiche côté source et côté résultat.
