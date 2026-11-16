@@ -191,6 +191,17 @@ TAGS = {
 }
 
 
+def hashtags(l, city_tag):
+    """Instagram : 5 hashtags au maximum (consigne d'Anthony, 16/11/2026)."""
+    base = TAGS.get(l.get("category"), "#petitesannonces #bonplan").split()
+    tags = ["#abracadeal"] + ([city_tag] if city_tag else []) + [t for t in base if t != "#abracadeal"]
+    seen, out = set(), []
+    for t in tags:
+        if t not in seen:
+            seen.add(t); out.append(t)
+    return " ".join(out[:5])
+
+
 def caption(l):
     city = l.get("city") or ""
     city_tag = "#" + re.sub(r"[^a-z0-9]", "", urllib.parse.unquote(city).lower().replace("é", "e").replace("è", "e")) if city else ""
@@ -202,7 +213,7 @@ def caption(l):
     if city: lines.append(f"📍 {city}")
     lines += ["", "👉 Annonce complète, photos et contact : lien en bio (abracadeal.fr)",
               "Petites annonces gratuites, sans commission.", "",
-              " ".join(x for x in [TAGS.get(l.get("category"), "#petitesannonces #bonplan #abracadeal"), city_tag, "#cotedazur" if l.get("category") == "immobilier" else ""] if x)]
+              hashtags(l, city_tag)]
     return "\n".join(lines)
 
 
