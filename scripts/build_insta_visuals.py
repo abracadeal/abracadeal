@@ -78,7 +78,10 @@ def nice_title(t):
     t = re.sub(r"\s+", " ", str(t or "")).strip()
     letters = [c for c in t if c.isalpha()]
     if letters and sum(c.isupper() for c in letters) / len(letters) > 0.7:
-        t = " ".join(w if any(c.isdigit() for c in w) or (len(w) <= 3 and not w.isalpha()) else w.capitalize() for w in t.split())
+        small = {"DE", "LA", "LE", "DU", "ET", "DES", "EN", "AU", "AUX", "UN", "UNE", "AVEC", "SUR", "LES"}
+        t = " ".join(w if any(c.isdigit() for c in w) or (len(w) <= 3 and w.isalpha() and w.upper() not in small) or (len(w) <= 3 and not w.isalpha())
+                     else (w.lower() if w.upper() in small else w.capitalize()) for w in t.split())
+        t = t[:1].upper() + t[1:]
     return t
 
 
