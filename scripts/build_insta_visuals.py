@@ -4,6 +4,7 @@ Usage : python scripts/build_insta_visuals.py <id_annonce> [<id_annonce> ...]
 Pour chaque annonce, crée out/insta/<id>/ :
   1.jpg      couverture 1080x1350 : grande photo + bandeau violet (titre, infos, prix en or, abracadeal.fr)
   2..5.jpg   photos suivantes 1080x1350 (carrousel) avec un petit bandeau abracadeal.fr
+  story.jpg  story 1080x1920 avec une zone pour le sticker « Lien »
   legende.txt  texte du post (titre, prix, ville, « lien en bio », hashtags)
 Lancé par le workflow « Visuels Instagram » (à la demande) ; les fichiers sont poussés sur la branche insta-visuals
 (jamais publiée sur le site).
@@ -138,6 +139,40 @@ def make_cover(l, photo):
     return img
 
 
+def make_story(l, photo):
+    """Story 1080x1920 : photo, titre, prix, et une zone libre pour coller le sticker « Lien »."""
+    SW, SH = 1080, 1920
+    img = gradient(SW, SH)
+    ph_h = 1150
+    img.paste(cover_crop(photo, SW, ph_h), (0, 0))
+    fade = Image.new("L", (SW, 160), 0)
+    fd = ImageDraw.Draw(fade)
+    for y in range(160):
+        fd.line([(0, y), (SW, y)], fill=round(255 * y / 159))
+    img.paste(Image.new("RGB", (SW, 160), BG2), (0, ph_h - 160), fade)
+    d = ImageDraw.Draw(img)
+    pad = 70
+    y = ph_h + 20
+    for ln in textwrap.wrap(nice_title(l["title"]), width=26)[:2]:
+        d.text((pad, y), ln, font=font(True, 58), fill=WHITE)
+        y += 72
+    sub = " · ".join(x for x in [info_line(l), l.get("city") or ""] if x)
+    sf = font(False, 38)
+    for ln in ([sub] if d.textlength(sub, font=sf) <= SW - 2 * pad else [x for x in [info_line(l), l.get("city") or ""] if x])[:2]:
+        d.text((pad, y + 8), ln, font=sf, fill=GREY)
+        y += 52
+    pr = price_txt(l.get("price"))
+    if pr:
+        d.text((pad, y + 40), pr, font=font(True, 96), fill=GOLD)
+    # zone du sticker « Lien »
+    zy = SH - 330
+    d.rounded_rectangle((pad, zy, SW - pad, zy + 130), radius=65, outline=GOLD, width=4)
+    d.text((SW // 2, zy + 65), "Voir l'annonce", font=font(True, 46), fill=GOLD, anchor="mm")
+    lg = logo(300)
+    img.paste(lg, ((SW - lg.width) // 2, SH - 150), lg)
+    return img
+
+
 def make_slide(photo):
     img = cover_crop(photo, W, H)
     bar = Image.new("RGBA", (W, 110), (27, 16, 36, 215))
@@ -193,6 +228,7 @@ def main(ids):
             print("aucune photo :", lid)
             continue
         make_cover(l, photos[0]).save(os.path.join(out, "1.jpg"), quality=92)
+        make_story(l, photos[0]).save(os.path.join(out, "story.jpg"), quality=92)
         for i, ph in enumerate(photos[1:], start=2):
             make_slide(ph).save(os.path.join(out, f"{i}.jpg"), quality=90)
         open(os.path.join(out, "legende.txt"), "w", encoding="utf-8").write(caption(l))
