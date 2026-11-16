@@ -5128,8 +5128,15 @@ async function renderDetailRecommendations(a){
   if(!sellerSection||!sellerBox||!interestSection||!interestBox) return;
 
   try{
+    // 16/11/2026 (quota Supabase, gratuit à garder) : la fiche rechargeait jusqu'à 42 annonces complètes (descriptions comprises)
+    // depuis Supabase à chaque ouverture, alors que le catalogue public est déjà en mémoire (lu sur abracadeal.fr). On s'en sert.
+    const pool=(typeof lastGoodPublicAds!=='undefined'&&lastGoodPublicAds.length)?lastGoodPublicAds:null;
+    const nowMs=Date.now();
+    const live=x=>x&&x.status==='active'&&x.visibility_scope!=='private'&&!x.revision_of&&(!x.expires_at||new Date(x.expires_at).getTime()>nowMs);
+    const byDate=(u,v)=>new Date(v.created_at||0)-new Date(u.created_at||0);
     const sellerReq=a.is_showroom
       ?Promise.resolve({data:[],error:null})
+      :pool?Promise.resolve({data:pool.filter(x=>live(x)&&x.owner_id===a.owner_id&&x.id!==a.id).sort(byDate).slice(0,6),error:null})
       :sb.from('listings')
         .select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
         .eq('status','active')
@@ -5139,7 +5146,7 @@ async function renderDetailRecommendations(a){
         .order('created_at',{ascending:false})
         .limit(6);
 
-    const relatedReq=sb.from('listings')
+    const relatedReq=pool?Promise.resolve({data:pool.filter(x=>live(x)&&x.category===a.category&&x.id!==a.id).sort(byDate).slice(0,36),error:null}):sb.from('listings')
       .select('id,owner_id,revision_of,category,title,description,price,city,seller_type,status,source,external_id,external_url,last_synced_at,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,created_at,updated_at,show_phone,item_condition,postal_code,featured_until,promotion_tier,photo_limit,crit_air,loa_available,loa_monthly,listing_reference,expires_at,archived_at,archive_reason,retention_until,visibility_scope,vacation_low_price_confirmed_at,vacation_low_price_confirmed_value,listing_photos(id,storage_path,storage_bucket,position)')
       .eq('status','active')
       .eq('visibility_scope','public')
