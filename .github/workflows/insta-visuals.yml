@@ -1,0 +1,33 @@
+# 16/11/2026 (Claude) : visuels Instagram d'annonces, à la demande (ids séparés par des virgules).
+# Résultat poussé sur la branche insta-visuals (jamais publiée sur le site).
+name: Visuels Instagram
+
+on:
+  workflow_dispatch:
+    inputs:
+      ids:
+        description: "Identifiants des annonces (séparés par des virgules)"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install pillow==10.4.0
+      - run: python scripts/build_insta_visuals.py "${{ github.event.inputs.ids }}"
+      - name: Pousser sur la branche insta-visuals
+        run: |
+          cd out/insta
+          git init -q -b insta-visuals
+          git config user.name "abracadeal-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A && git commit -q -m "Visuels Instagram"
+          git push -q -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" insta-visuals
