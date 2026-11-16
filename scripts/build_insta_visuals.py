@@ -21,12 +21,16 @@ BG1, BG2 = (27, 16, 36), (52, 26, 72)
 
 
 def font(bold, size):
-    for p in (["fonts/Montserrat-ExtraBold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf"] if bold
-              else ["fonts/Montserrat-SemiBold.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"]):
-        fp = p if p.startswith("/") else os.path.join(BASE, "out", p)
-        if os.path.exists(fp):
-            return ImageFont.truetype(fp, size)
-    return ImageFont.load_default()
+    vf = os.path.join(BASE, "out", "fonts", "Montserrat-VF.ttf")
+    if os.path.exists(vf):
+        try:
+            f = ImageFont.truetype(vf, size)
+            f.set_variation_by_axes([800 if bold else 500])
+            return f
+        except Exception:
+            pass
+    p = "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf" if bold else "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"
+    return ImageFont.truetype(p, size) if os.path.exists(p) else ImageFont.load_default()
 
 
 def get(url, binary=False):
@@ -72,7 +76,8 @@ def info_line(l):
 
 def nice_title(t):
     t = re.sub(r"\s+", " ", str(t or "")).strip()
-    if t.isupper():
+    letters = [c for c in t if c.isalpha()]
+    if letters and sum(c.isupper() for c in letters) / len(letters) > 0.7:
         t = " ".join(w if any(c.isdigit() for c in w) or (len(w) <= 3 and not w.isalpha()) else w.capitalize() for w in t.split())
     return t
 
@@ -115,9 +120,12 @@ def make_cover(l, photo):
     for ln in lines:
         d.text((pad, y), ln, font=tf, fill=WHITE)
         y += 62
+    sf = font(False, 34)
     sub = " · ".join(x for x in [info_line(l), l.get("city") or ""] if x)
-    if sub:
-        d.text((pad, y + 6), sub, font=font(False, 34), fill=GREY)
+    subs = [sub] if d.textlength(sub, font=sf) <= W - 2 * pad else [x for x in [info_line(l), l.get("city") or ""] if x]
+    for ln in subs[:2]:
+        d.text((pad, y + 6), ln, font=sf, fill=GREY)
+        y += 46
     pr = price_txt(l.get("price"))
     if pr:
         d.text((pad, H - 150), pr, font=font(True, 84), fill=GOLD)
@@ -162,18 +170,12 @@ def caption(l):
 
 def main(ids):
     os.makedirs(os.path.join(BASE, "out", "fonts"), exist_ok=True)
-    for name in ("Montserrat-ExtraBold.ttf", "Montserrat-SemiBold.ttf"):
-        fp = os.path.join(BASE, "out", "fonts", name)
-        if not os.path.exists(fp):
-            try:
-                data = get(f"https://github.com/google/fonts/raw/main/ofl/montserrat/static/{name}", binary=True)
-                open(fp, "wb").write(data)
-            except Exception:
-                try:
-                    data = get("https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf", binary=True)
-                    open(fp, "wb").write(data)
-                except Exception as e:
-                    print("police Montserrat indisponible :", e)
+    vf = os.path.join(BASE, "out", "fonts", "Montserrat-VF.ttf")
+    if not os.path.exists(vf):
+        try:
+            open(vf, "wb").write(get("https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat%5Bwght%5D.ttf", binary=True))
+        except Exception as e:
+            print("police Montserrat indisponible :", e)
     for lid in ids:
         l = listing(lid)
         out = os.path.join(BASE, "out", "insta", lid)
