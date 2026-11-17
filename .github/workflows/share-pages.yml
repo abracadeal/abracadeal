@@ -4,7 +4,8 @@ name: Pages de partage des annonces
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    # 17/11/2026 : toutes les 30 min (au lieu de 10) — compte GitHub signalé le 17/11, on calme l'activité automatique
+    - cron: "*/30 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -61,4 +62,7 @@ jobs:
             git rebase --abort 2>/dev/null || true
             sleep 5
           done
-          exit 1
+          # 17/11/2026 : conflit insoluble (ex. photo renommée/supprimée par une publication simultanée) :
+          # pas d'échec — la passe suivante régénère tout depuis la dernière version en ligne.
+          echo "::warning::Publication reportée à la passe suivante (conflit avec une publication simultanée)"
+          exit 0
