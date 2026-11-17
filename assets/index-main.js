@@ -5130,7 +5130,15 @@ async function renderDetailRecommendations(a){
   try{
     // 16/11/2026 (quota Supabase, gratuit à garder) : la fiche rechargeait jusqu'à 42 annonces complètes (descriptions comprises)
     // depuis Supabase à chaque ouverture, alors que le catalogue public est déjà en mémoire (lu sur abracadeal.fr). On s'en sert.
-    const pool=(typeof lastGoodPublicAds!=='undefined'&&lastGoodPublicAds.length)?lastGoodPublicAds:null;
+    // 17/11/2026 : fiche ouverte par un lien direct (Instagram, partage…) avant le chargement du catalogue → on lit le fichier statique.
+    let pool=(typeof lastGoodPublicAds!=='undefined'&&lastGoodPublicAds.length)?lastGoodPublicAds:null;
+    if(!pool){
+      try{
+        window.__abracaStaticCatalog=window.__abracaStaticCatalog||fetch('/feeds/catalog.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(d=>d&&Array.isArray(d.rows)?d.rows:null).catch(()=>null);
+        const rows=await window.__abracaStaticCatalog;
+        if(rows&&rows.length)pool=rows;
+      }catch(e){}
+    }
     const nowMs=Date.now();
     const live=x=>x&&x.status==='active'&&x.visibility_scope!=='private'&&!x.revision_of&&(!x.expires_at||new Date(x.expires_at).getTime()>nowMs);
     const byDate=(u,v)=>new Date(v.created_at||0)-new Date(u.created_at||0);
