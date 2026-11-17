@@ -696,9 +696,9 @@ def crumbs_html(crumbs):
     return '<nav class="crumbs" aria-label="Fil d’Ariane">' + " › ".join(parts + [e(crumbs[-1][0])]) + "</nav>"
 
 
-FONTS = ('<link rel="preconnect" href="https://fonts.googleapis.com">\n'
-         '<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>\n'
-         '<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap" rel="stylesheet">')
+FONTS = (''
+         ''
+         '<link href="/assets/fonts-20261117.css" rel="stylesheet">')
 # Robots (Google, Bing, aperçus WhatsApp/Facebook…) : ils lisent la page statique.
 BOT_RE = ("bot|crawl|spider|slurp|google|bing|yandex|baidu|duckduck|qwant|ecosia|seznam|petal|facebookexternalhit|"
           "facebot|whatsapp|twitter|linkedin|telegram|discord|skype|slack|pinterest|embedly|preview|lighthouse|"

@@ -1,7 +1,7 @@
 /* Abracadeal — habillage commun des pages admin (08/11/2026, demande d'Anthony : mêmes couleurs, polices et
    cartes que le nouvel espace admin admin.html). Chargé en dernier sur chaque page admin : il ne change pas
    la structure des pages, seulement leur apparence (variables de couleurs, polices, cartes, boutons, champs). */
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap');
+@import url('/assets/fonts-20261117.css');
 :root{
   --bg:#160922;--panel:#24123b;--panel2:#2c1648;--line:rgba(255,255,255,.09);--text:#f4eefb;--muted:#b9a8c9;
   --purple:#8a2ca8;--pink:#ec409d;--gold:#f7bd4b;--green:#43ba80;--red:#f45b73;--orange:#f2ae58;
