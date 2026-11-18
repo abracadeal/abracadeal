@@ -1346,7 +1346,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
  const runResult=await admin.from('pro_stock_sync_runs').insert({feed_id:feed.id}).select('id').single();
  if(runResult.error)throw runResult.error;
  const run=runResult.data;
- let created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0,unchanged=0,deferred=0;
+ let waitingPhotos=0,created=0,updated=0,archived=0,errors=0,photoTruncated=0,moderated=0,unchanged=0,deferred=0;
  // Budget de temps : au-delà, les annonces restent « en attente » et la relance de modération (cron) prend le relais.
  const t0=Date.now();let archiveSkipped:string|null=null;
  const failures:string[]=[];
@@ -1358,6 +1358,8 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
    try{
     // Invalid rows still count as present: a malformed update must not archive the old listing.
     if(r.ref)seen.add(r.ref);
+    /* 18/11/2026 (Claude) : annonce publiée par le pro sans photo (souvent ajoutée juste avant les photos) = en attente, pas une erreur de flux ; importée dès que les photos sont là */
+    if(r.errors?.length===1&&r.errors[0]==='aucune photo'){waitingPhotos++;continue;}
     if(r.errors?.length)throw Error(r.errors.join(', '));
     const existing=must(await admin.from('listings').select('*,listing_moderation(stock_import_signature,stock_import_photo_ids),listing_photos(id)').eq('owner_id',feed.owner_id).eq('source',source).eq('external_id',r.ref).maybeSingle());
     // Reports and safety decisions must not be undone by a scheduled reimport.
@@ -1467,7 +1469,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     }
    }
   }
-  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:(archiveSkipped?`Retraits non appliqués : ${archiveSkipped}`:null);
+  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:(archiveSkipped?`Retraits non appliqués : ${archiveSkipped}`:(waitingPhotos?`${waitingPhotos} annonce(s) en attente de photos sur le site du pro (importées dès que les photos seront en ligne)`:null));
   must(await admin.from('pro_stock_feeds').update({...((rawRows as any).platform?{site_platform:(rawRows as any).platform}:{}),last_run_at:new Date().toISOString(),...(errors?{}:{last_success_at:new Date().toISOString()}),last_error:errorMessage,updated_at:new Date().toISOString()}).eq('id',feed.id));
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
