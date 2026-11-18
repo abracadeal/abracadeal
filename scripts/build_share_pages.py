@@ -57,7 +57,7 @@ MAX_HUB_LISTINGS = 120
 MAX_SIMILAR = 6
 UNAVAILABLE_DAYS = 30  # durée de vie de la page « vendue / expirée »
 DEPOSIT_URL = SITE + "/?deposer=1"
-VERSION = "16"  # 14/11/2026 : émojis retirés des descriptions de pros  # 14/11/2026 (SEO auto) : pictogramme au lieu de l’émoji punaise, titres marque+modèle dédoublonnés  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
+VERSION = "17"  # 18/11/2026 : aperçus à 1200 px de large (Facebook)  # 14/11/2026 : émojis retirés des descriptions de pros  # 14/11/2026 (SEO auto) : pictogramme au lieu de l’émoji punaise, titres marque+modèle dédoublonnés  # 12/11/2026 (SEO auto) : titre Google raccourci (mentions commerciales retirées, prix retiré si trop long)  # 12/11/2026 : adresse d’origine gardée avant la redirection (provenance des visites)  # 11/11/2026 : 1re photo servie sous abracadeal.fr (apercu.jpg) pour Google Images  # 03/11/2026 : grande ville de l’agglomération dans le titre. À incrémenter pour forcer la régénération de toutes les pages
 FIELDS = ("id,owner_id,title,description,price,city,postal_code,category,seller_type,source,item_condition,"
           "vehicle_make,vehicle_model,vehicle_year,mileage,fuel,transmission,crit_air,"
           "created_at,updated_at,expires_at,listing_photos(storage_path,position)")
@@ -366,6 +366,10 @@ def to_jpeg(raw):
     img = Image.open(io.BytesIO(raw))
     img = img.convert("RGB")
     img.thumbnail((1200, 1200))
+    # 18/11/2026 : Facebook n'affiche pas une photo de moins de 600 px de large en grand aperçu (il prend le logo à la place) :
+    # les petites photos (ex. 480 px chez certains logiciels d'agence) sont agrandies à 1200 px de large.
+    if img.width < 1200:
+        img = img.resize((1200, round(img.height * 1200 / img.width)), Image.LANCZOS)
     for quality in (82, 74, 66, 58, 50):
         out = io.BytesIO()
         img.save(out, "JPEG", quality=quality, optimize=True, progressive=True)
@@ -1328,7 +1332,7 @@ def main():
                    for s in similar]
         payload = {k: v for k, v in listing.items() if k not in ("listing_photos", "updated_at", "expires_at")}
         sig = hashlib.sha256(json.dumps([VERSION, photos, payload, it["crumbs"], ref, sim_sig, PRO_PAGES.get(str(listing.get("owner_id") or ""))], sort_keys=True, default=str).encode()).hexdigest()[:16]
-        img_sig = hashlib.sha256(src.encode()).hexdigest()[:16]
+        img_sig = hashlib.sha256(("w1200|" + src).encode()).hexdigest()[:16]  # 18/11/2026 : « w1200| » = aperçus refaits à 1200 px de large
         index = os.path.join(folder, "index.html")
         if os.path.exists(index) and f"<!-- sig:{sig} -->" in open(index, encoding="utf-8").read():
             continue
