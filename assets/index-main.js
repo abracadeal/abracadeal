@@ -1685,7 +1685,7 @@ async function refreshAutoFeedUi(){
     if($('#proAutoFeedName'))$('#proAutoFeedName').value=sector==='immobilier'?'Portefeuille immobilier':'Stock Auto / Moto';
     if(proAutoFeed){
       if($('#proImportFeedUrl')&&proAutoFeed.feed_url)$('#proImportFeedUrl').value=proAutoFeed.feed_url;
-      if(status)status.innerHTML=`<b>Synchronisation automatique active</b> · ${sector==='immobilier'?'Immobilier':'Auto / Moto'}${proAutoFeed.last_success_at?` · dernière synchro ${new Date(proAutoFeed.last_success_at).toLocaleString('fr-FR')}`:''}${proAutoFeed.last_error?(/en attente de photos/.test(proAutoFeed.last_error)?`<br><span style="color:#8a6d00">À noter : ${esc(proAutoFeed.last_error)}</span>`:`<br><span style="color:#a33">Dernière erreur : ${esc(proAutoFeed.last_error)}</span>`):''}`;
+      if(status)status.innerHTML=`<b>Synchronisation automatique active</b> · ${sector==='immobilier'?'Immobilier':'Auto / Moto'}${proAutoFeed.last_success_at?` · dernière synchro ${new Date(proAutoFeed.last_success_at).toLocaleString('fr-FR')}`:''}${proAutoFeed.last_error?(/photo provisoire|en attente de photos/.test(proAutoFeed.last_error)?`<br><span style="color:#8a6d00">À noter : ${esc(proAutoFeed.last_error)}</span>`:`<br><span style="color:#a33">Dernière erreur : ${esc(proAutoFeed.last_error)}</span>`):''}`;
     }else{
       if(status)status.innerHTML=`<b>${sector==='immobilier'?'Immobilier':'Auto / Moto'}</b> · aucun flux connecté. Vous pouvez importer un fichier ou connecter l’URL de votre logiciel métier.`;
     }

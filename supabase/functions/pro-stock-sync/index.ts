@@ -1358,8 +1358,8 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
    try{
     // Invalid rows still count as present: a malformed update must not archive the old listing.
     if(r.ref)seen.add(r.ref);
-    /* 18/11/2026 (Claude) : annonce publiée par le pro sans photo (souvent ajoutée juste avant les photos) = en attente, pas une erreur de flux ; importée dès que les photos sont là */
-    if(r.errors?.length===1&&r.errors[0]==='aucune photo'){waitingPhotos++;continue;}
+    /* 18/11/2026 (Anthony) : annonce publiée par le pro sans photo (souvent ajoutée juste avant les photos) = importée avec la photo par défaut « Photos bientôt disponibles » ; remplacée automatiquement dès que le pro met ses photos (la signature change) */
+    if(r.errors?.length===1&&r.errors[0]==='aucune photo'){r.photos=['https://abracadeal.fr/assets/photo-a-venir.jpg'];r.errors=[];waitingPhotos++;}
     if(r.errors?.length)throw Error(r.errors.join(', '));
     const existing=must(await admin.from('listings').select('*,listing_moderation(stock_import_signature,stock_import_photo_ids),listing_photos(id)').eq('owner_id',feed.owner_id).eq('source',source).eq('external_id',r.ref).maybeSingle());
     // Reports and safety decisions must not be undone by a scheduled reimport.
@@ -1469,7 +1469,7 @@ async function sync(feed:any,rawRows:any[],modeOverride?:string){
     }
    }
   }
-  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:(archiveSkipped?`Retraits non appliqués : ${archiveSkipped}`:(waitingPhotos?`${waitingPhotos} annonce(s) en attente de photos sur le site du pro (importées dès que les photos seront en ligne)`:null));
+  const errorMessage=errors?`${errors} annonce(s) en erreur : ${failures.slice(0,3).join(' ; ').slice(0,1200)}`:(archiveSkipped?`Retraits non appliqués : ${archiveSkipped}`:(waitingPhotos?`${waitingPhotos} annonce(s) sans photo sur le site du pro : publiée(s) avec une photo provisoire, remplacée dès que les photos seront en ligne`:null));
   must(await admin.from('pro_stock_feeds').update({...((rawRows as any).platform?{site_platform:(rawRows as any).platform}:{}),last_run_at:new Date().toISOString(),...(errors?{}:{last_success_at:new Date().toISOString()}),last_error:errorMessage,updated_at:new Date().toISOString()}).eq('id',feed.id));
   if(run)must(await admin.from('pro_stock_sync_runs').update({finished_at:new Date().toISOString(),status:errors?'error':'success',error_message:errorMessage,received_count:rawRows.length,created_count:created,updated_count:updated,archived_count:archived,error_count:errors}).eq('id',run.id));
   if((rawRows as any).cycleStarted&&!(rawRows as any).partial){
