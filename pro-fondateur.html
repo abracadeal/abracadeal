@@ -89,7 +89,7 @@ return '<div class="mp-card"><div class="mp-ph"><img loading="lazy" referrerpoli
 +'<button class="btn" type="submit" style="width:100%;min-height:50px;font-size:17px;font-weight:800;background:linear-gradient(90deg,var(--gold),#e0b44a);color:#1c0b2b;padding:0 28px;border:0;cursor:pointer">Je publie</button>'
 +'<div id="mpAcceptMsg" role="status" style="min-height:20px;font-weight:600"></div></form>'
 +'<p style="margin-top:10px;font-size:14px"><a href="index.html#signupPro">Je préfère créer mon compte moi-même</a></p></div>';
-box.hidden=false;
+box.hidden=false;/* 19/11/2026 (Claude) : le pro venu du mail voit d'abord SES annonces, pas le bandeau général. */try{const hero=box.closest('.hero');if(hero){hero.querySelectorAll(':scope>h1,:scope>p,:scope>.hero-cta').forEach(e=>e.style.display='none');hero.querySelector('.pill')?.after(box);}}catch(_){}
 /* 02/11/2026 (Claude) : « Je publie » = accord du pro + SIRET (prospect_accept). Rien n'est publié automatiquement : l'import est lancé ensuite. */
 const f=document.getElementById('mpAcceptForm');
 if(f)f.addEventListener('submit',async e=>{e.preventDefault();const msg=document.getElementById('mpAcceptMsg'),btn=f.querySelector('button');const fd=new FormData(f);
