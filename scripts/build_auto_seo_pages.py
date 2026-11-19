@@ -68,6 +68,12 @@ MODEL_GUIDES={
  "alfa-romeo/stelvio":"L’Alfa Romeo Stelvio est le premier SUV d’Alfa Romeo, lancé en 2017. Il partage sa plateforme Giorgio avec la berline Giulia, d’où un comportement routier très apprécié ; la version Quadrifoglio développe 510 ch.",
  "ford/b-max":"Le Ford B-Max est un monospace citadin vendu de 2012 à 2017, dérivé de la Fiesta. Son originalité : des portes arrière coulissantes et l’absence de montant central, pour un accès très large à bord, pratique en famille.",
 }
+def google_seen():
+    """19/11/2026 : pages que Google montre déjà (data/google-seen-pages.txt) → indexées dès 1 annonce."""
+    try:
+        with open(os.path.join(BASE,"data","google-seen-pages.txt"),encoding="utf-8") as f:
+            return {l.strip().strip("/") for l in f if l.strip() and not l.startswith("#")}
+    except OSError: return set()
 def stats_html(items):
     """Repères chiffrés tirés des annonces en ligne (années, kilométrages, énergies)."""
     ys=sorted({int(x["vehicle_year"]) for x in items if str(x.get("vehicle_year") or "").isdigit() and 1950<int(x["vehicle_year"])<2100})
@@ -145,7 +151,7 @@ def main():
     for l in rows:
         mk=nice_make(l.get("vehicle_make")); md=(l.get("vehicle_model") or "").strip()
         makes.setdefault(mk,{}).setdefault(md,[]).append(l)
-    pages={}; specs={}; EXTRA={}
+    pages={}; specs={}; EXTRA={}; SEEN=google_seen()
     make_links=[(m,f"/auto/{slug(m)}/") for m in sorted(makes)]
     root_desc="Voitures d’occasion publiées sur Abracadeal : parcourez les annonces par marque, modèle, énergie et budget, auprès de particuliers et de professionnels."
     specs[""]=("root",rows,"Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
@@ -200,7 +206,8 @@ def main():
         robots,can="index,follow",None
         ex,has_guide=EXTRA.get(r,("",False))
         # 19/11/2026 (SEO) : une page modèle avec repères (guide) reste indexée dès 1 annonce (Google la montre déjà : Fabia, B-Max…)
-        if kind!="root" and len(its)<MIN_INDEX and not (has_guide and its): robots="noindex,follow"
+        seen=("auto/"+r) in SEEN
+        if kind!="root" and len(its)<MIN_INDEX and not ((has_guide or seen) and its): robots="noindex,follow"
         elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
         indexable[r]=robots=="index,follow" and not can
         pages[r]=page(*args,robots=robots,canonical=can,extra=ex)

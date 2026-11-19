@@ -1139,6 +1139,15 @@ def build_hubs(items):
 # Pages identiques : une seule reste (la plus recherchée : catégorie + grande ville > catégorie + commune > catégorie + département
 # > grande ville > commune > département) ; les autres pointent vers elle (canonical) et sortent du sitemap.
 MIN_HUB_INDEX = 3
+# 19/11/2026 (SEO) : l'audit du 15/11 avait sorti de Google des pages qu'il montrait déjà (Terrains Pyrénées-Atlantiques
+# 216 impressions, Véhicules à Cannes 4 clics…). Les pages listées dans data/google-seen-pages.txt restent indexées dès 1 annonce.
+def _google_seen():
+    try:
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "google-seen-pages.txt"), encoding="utf-8") as f:
+            return {l.strip().strip("/") for l in f if l.strip() and not l.startswith("#")}
+    except OSError:
+        return set()
+GOOGLE_SEEN = _google_seen()
 HUB_PRIORITY = {"root": 100, "cat": 90, "cat+agglo": 70, "cat+commune": 60, "cat+dept": 50, "agglo": 45, "commune": 40, "dept": 30}
 
 
@@ -1168,7 +1177,7 @@ def dedupe_hubs(pages, meta):
         content, indexable = pages[rel]
         if not indexable:
             continue
-        if len(ids) < MIN_HUB_INDEX:
+        if len(ids) < MIN_HUB_INDEX and not (ids and ("annonces/" + rel) in GOOGLE_SEEN):
             content = content.replace('<meta name="robots" content="index,follow">', '<meta name="robots" content="noindex,follow">', 1)
             pages[rel] = (content, False)
         elif rel in canon:
