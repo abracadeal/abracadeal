@@ -958,7 +958,12 @@ def hub_price_floor(sub):
                 vals.append(v)
         except (TypeError, ValueError):
             pass
-    return money(min(vals)) if vals else ""
+    if not vals:
+        return ""
+    vals.sort()
+    med = vals[len(vals) // 2]
+    vals = [v for v in vals if v >= med * 0.1] or vals  # pas de « dès 15 € » à cause d'une pièce détachée au milieu des véhicules
+    return money(vals[0])
 
 
 def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links, redirect=None):
