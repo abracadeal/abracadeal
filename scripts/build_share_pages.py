@@ -948,6 +948,19 @@ def listing_card(item):
             f'<span class="c">{e(l.get("city") or "")}</span></a></li>')
 
 
+def hub_price_floor(sub):
+    """19/11/2026 : prix le plus bas des annonces d'une page (texte « 4 990 € »), vide si aucun prix."""
+    vals = []
+    for it in sub:
+        try:
+            v = float(it["listing"].get("price"))
+            if v > 0:
+                vals.append(v)
+        except (TypeError, ValueError):
+            pass
+    return money(min(vals)) if vals else ""
+
+
 def hub_page(title, h1, intro, desc, url, crumbs, items, links_title, links, redirect=None):
     e = lambda s: html.escape(str(s), quote=True)
     robots = "index,follow" if items else "noindex,follow"
@@ -1073,11 +1086,12 @@ def build_hubs(items):
             if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
                 continue
             slug, name, plural, _, intro = cat_info[c]
+            lo = hub_price_floor(sub)  # 19/11/2026 (SEO) : « dès X € » dans le titre et la description → meilleur taux de clic
             pages[f"{c}/{k}"] = (hub_page(
-                f"{name} {A} | Abracadeal", f"{name} {A}",
+                f"{name} {A}{' dès ' + lo if lo else ''} | Abracadeal", f"{name} {A}",
                 f"Les {plural} {A}, dans toutes les communes du département. {intro}" if k in loc else f"Les {plural} à {ctext} {intro}",
-                f"{name} {A} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural} publiée{'s' if len(sub) > 1 else ''} "
-                f"par des particuliers et des professionnels sur Abracadeal.",
+                f"{name} {A} : {len(sub)} annonce{'s' if len(sub) > 1 else ''} de {plural}{' dès ' + lo if lo else ''}, publiée{'s' if len(sub) > 1 else ''} "
+                f"par des particuliers et des professionnels sur Abracadeal, sans commission.",
                 hub_url(c, k), [home, root, (name, hub_url(c)), (cname, hub_url(c, k))], sub,
                 f"Autres rubriques {A}", [(n, u) for n, u in cat_links if u != hub_url(c, k)], redirect=app_target(c, app_city)), bool(sub))
             meta[f"{c}/{k}"] = (ids_of(sub), "cat+" + kind_of(k))

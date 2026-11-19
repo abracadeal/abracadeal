@@ -34,6 +34,25 @@ def money(v):
     try:return f"{int(float(v)):,} €".replace(","," ")
     except:return ""
 
+
+def offer(items):
+    """19/11/2026 (SEO) : chiffres réels pour les titres/descriptions (nombre, prix mini/maxi, villes) → meilleur taux de clic dans Google."""
+    prices=[]
+    for x in items:
+        try:
+            v=float(x.get("price"))
+            if v>0: prices.append(v)
+        except: pass
+    cities=[]
+    for x in items:
+        c=(x.get("city") or "").strip()
+        if c and c not in cities: cities.append(c)
+    n=len(items)
+    lo=money(min(prices)) if prices else ""
+    hi=money(max(prices)) if prices else ""
+    rng=(f"à {lo}" if lo==hi else f"de {lo} à {hi}") if lo else ""
+    return n,lo,rng,cities[:3]
+
 def esc(s): return html.escape(str(s or ""),quote=True)
 
 def card(l):
@@ -104,12 +123,16 @@ def main():
     for mk,models in makes.items():
         its=[x for arr in models.values() for x in arr]; ms=slug(mk)
         model_links=[(f"{mk} {md}",f"/auto/{ms}/{slug(md)}/") for md in sorted(models) if md]
-        desc=f"Découvrez les {mk} d’occasion actuellement en ligne sur Abracadeal. Comparez les modèles, prix, kilométrages et localisations des annonces disponibles."
-        specs[ms]=("make",its,f"{mk} d'occasion : {make_kind(mk)} | Abracadeal",f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
+        n,lo,rng,cts=offer(its); pl='s' if n>1 else ''
+        desc=(f"{n} {mk} d’occasion en ligne sur Abracadeal{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
+              f"Annonces de particuliers et de professionnels, sans commission : comparez modèles, prix et kilométrages.")
+        specs[ms]=("make",its,(f"{mk} d'occasion dès {lo} : {n} annonce{pl} | Abracadeal" if lo else f"{mk} d'occasion : {make_kind(mk)} | Abracadeal"),f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
         for md,sub in models.items():
             if not md: continue
-            p=f"{ms}/{slug(md)}"; desc=f"Retrouvez les {mk} {md} d’occasion disponibles sur Abracadeal, publiées par des particuliers et des professionnels. Consultez prix, année, kilométrage et ville sur chaque annonce."
-            specs[p]=("model",sub,f"{mk} {md} d'occasion | Abracadeal",f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
+            p=f"{ms}/{slug(md)}"; n,lo,rng,cts=offer(sub); pl='s' if n>1 else ''
+            desc=(f"{n} {mk} {md} d’occasion en ligne{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
+                  f"Annonces de particuliers et de professionnels sur Abracadeal : prix, année, kilométrage et ville sur chaque annonce.")
+            specs[p]=("model",sub,(f"{mk} {md} d'occasion dès {lo} | Abracadeal" if lo else f"{mk} {md} d'occasion | Abracadeal"),f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
     for key,label in FUELS.items():
         if key!=slug(key): continue
         sub=[x for x in rows if slug(x.get("fuel"))==key]
