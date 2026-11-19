@@ -20,7 +20,7 @@ def slug(s):
 
 def fetch_listings():
     now=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-    fields="id,title,price,city,vehicle_make,vehicle_model,fuel,created_at,updated_at,description"
+    fields="id,title,price,city,vehicle_make,vehicle_model,vehicle_year,mileage,fuel,created_at,updated_at,description"
     rows=[]; start=0
     while True:
         q=urllib.parse.urlencode({"select":fields,"status":"eq.active","visibility_scope":"eq.public","revision_of":"is.null","category":"eq.vehicules","or":f"(expires_at.is.null,expires_at.gt.{now})","order":"created_at.desc"})
@@ -55,10 +55,39 @@ def offer(items):
 
 def esc(s): return html.escape(str(s or ""),quote=True)
 
+# 19/11/2026 (SEO) : repères généraux sur les modèles que Google montre déjà (Search Console : Fabia 124 impressions,
+# Corsa 103, DS 3 Crossback 100, Mokka 98, Crossland 97…). Faits connus et stables sur le modèle, rien sur les annonces.
+MODEL_GUIDES={
+ "skoda/fabia":"La Skoda Fabia est la citadine polyvalente de Skoda (groupe Volkswagen). La 4e génération, lancée en 2021, n’existe qu’en essence (1.0 TSI et 1.5 TSI). La génération précédente (2014-2021) existait aussi en diesel et en break Fabia Combi, apprécié pour son grand coffre.",
+ "opel/corsa":"L’Opel Corsa est l’une des citadines les plus vendues en Europe. La Corsa F, depuis 2019, partage sa base technique avec la Peugeot 208 et existe aussi en 100 % électrique (Corsa-e, puis Corsa Electric). La Corsa E (2014-2019) reste une occasion économique très répandue.",
+ "ds/ds-3-crossback":"Le DS 3 Crossback est le SUV urbain de la marque premium DS, vendu sous ce nom de 2019 à 2022 puis rebaptisé DS 3. Il a existé en essence PureTech, en diesel BlueHDi et en électrique E-Tense, avec une finition plus haut de gamme que ses cousins Peugeot et Opel.",
+ "opel/mokka":"L’Opel Mokka est un SUV urbain. La 2e génération, lancée en 2020 sur une base Stellantis, existe en essence, en diesel et en électrique (Mokka-e). La première génération (2012-2019) a été vendue sous le nom de Mokka X à partir de 2016.",
+ "opel/crossland":"L’Opel Crossland (Crossland X jusqu’en 2020) est un SUV compact familial lancé en 2017, cousin technique de la Peugeot 2008 de première génération et du Citroën C3 Aircross. Il a depuis été remplacé par l’Opel Frontera.",
+ "peugeot/2008":"Le Peugeot 2008 est le SUV urbain de Peugeot. La 2e génération, lancée en 2019, existe en essence PureTech, en diesel BlueHDi, en hybride et en électrique (e-2008). La première génération (2013-2019) est une occasion recherchée pour son prix et sa sobriété.",
+ "porsche/panamera":"La Porsche Panamera est la grande berline sportive de Porsche, à quatre portes. Trois générations se sont succédé (2009, 2016 et 2023), avec des versions hybrides rechargeables E-Hybrid et un break Sport Turismo sur la 2e génération.",
+ "alfa-romeo/stelvio":"L’Alfa Romeo Stelvio est le premier SUV d’Alfa Romeo, lancé en 2017. Il partage sa plateforme Giorgio avec la berline Giulia, d’où un comportement routier très apprécié ; la version Quadrifoglio développe 510 ch.",
+ "ford/b-max":"Le Ford B-Max est un monospace citadin vendu de 2012 à 2017, dérivé de la Fiesta. Son originalité : des portes arrière coulissantes et l’absence de montant central, pour un accès très large à bord, pratique en famille.",
+}
+def stats_html(items):
+    """Repères chiffrés tirés des annonces en ligne (années, kilométrages, énergies)."""
+    ys=sorted({int(x["vehicle_year"]) for x in items if str(x.get("vehicle_year") or "").isdigit() and 1950<int(x["vehicle_year"])<2100})
+    km=[]
+    for x in items:
+        try:
+            v=int(float(x.get("mileage")))
+            if v>0: km.append(v)
+        except: pass
+    fu=sorted({str(x.get("fuel")).strip().capitalize() for x in items if x.get("fuel")})
+    parts=[]
+    if ys: parts.append(f"année {ys[0]}" if len(ys)==1 else f"années {ys[0]} à {ys[-1]}")
+    if km: parts.append((f"{min(km):,} km" if len(km)==1 else f"de {min(km):,} à {max(km):,} km").replace(","," "))
+    if fu: parts.append(", ".join(fu).lower())
+    return f"<p>Dans les annonces en ligne : {esc(' · '.join(parts))}.</p>" if parts else ""
+
 def card(l):
     return f'<li><a href="/annonce/{esc(l["id"])}/"><strong>{esc(l.get("title") or "Annonce automobile")}</strong><span>{esc(money(l.get("price")))}</span><small>{esc(l.get("city"))}</small></a></li>'
 
-def page(title,h1,desc,url,items,related,robots="index,follow",canonical=None):
+def page(title,h1,desc,url,items,related,robots="index,follow",canonical=None,extra=""):
     schema={"@context":"https://schema.org","@type":"ItemList","numberOfItems":len(items),"itemListElement":[{"@type":"ListItem","position":i+1,"url":f'{SITE}/annonce/{x["id"]}/'} for i,x in enumerate(items[:120])]}
     crumbs={"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Accueil","item":SITE+"/"},{"@type":"ListItem","position":2,"name":"Auto","item":SITE+"/auto/"},{"@type":"ListItem","position":3,"name":h1,"item":url}]}
     rel=''.join(f'<li><a href="{esc(u)}">{esc(n)}</a></li>' for n,u in related[:40])
@@ -69,7 +98,7 @@ def page(title,h1,desc,url,items,related,robots="index,follow",canonical=None):
         f'<meta property="og:title" content="{esc(title)}"><meta property="og:description" content="{esc(md)}">'
         f'<meta property="og:url" content="{esc(url)}"><meta property="og:image" content="{SITE}/icon-512.png">')
     head_extra=og+FONTS+'<style>'+SITE_CSS+'.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:12px;padding:0;list-style:none}.grid li a{display:grid;gap:4px;background:#fff;border:1px solid #ebe4ef;padding:14px 16px;border-radius:16px;box-shadow:0 7px 20px rgba(35,17,48,.055);text-decoration:none;color:#26122f}.grid span{font-weight:800;color:#8b2aa6}.grid small{color:#756a7e}nav.top{font-size:.85rem;color:#756a7e;margin:4px 0 12px}nav.top a{color:#756a7e}</style>'+HUMAN_LINKS
-    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(md)}"><meta name="robots" content="{robots}"><link rel="canonical" href="{esc(canonical or url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
+    return f'''<!doctype html><html lang="fr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>{esc(title)}</title><meta name="description" content="{esc(md)}"><meta name="robots" content="{robots}"><link rel="canonical" href="{esc(canonical or url)}"><script type="application/ld+json">{json.dumps(crumbs,ensure_ascii=False)}</script><script type="application/ld+json">{json.dumps(schema,ensure_ascii=False)}</script>{head_extra}</head><body>{HEADER}<main><nav class="top"><a href="/">Accueil</a> › <a href="/auto/">Auto</a> › {esc(h1)}</nav><h1>{esc(h1)}</h1><p class="intro">{esc(desc)}</p><p><strong>{len(items)} annonce{'s' if len(items)>1 else ''} en ligne.</strong></p><ul class="grid">{listings}</ul>{extra}{f'<h2>Explorer aussi</h2><ul class="links">{rel}</ul>' if rel else ''}</main><footer><a href="/">Abracadeal</a> — petites annonces en France · Site réalisé par <a href="https://mycreativesite.fr/">MyCreativeSite</a></footer></body></html>'''
 
 def write(path,content):
     os.makedirs(os.path.dirname(path),exist_ok=True)
@@ -116,7 +145,7 @@ def main():
     for l in rows:
         mk=nice_make(l.get("vehicle_make")); md=(l.get("vehicle_model") or "").strip()
         makes.setdefault(mk,{}).setdefault(md,[]).append(l)
-    pages={}; specs={}
+    pages={}; specs={}; EXTRA={}
     make_links=[(m,f"/auto/{slug(m)}/") for m in sorted(makes)]
     root_desc="Voitures d’occasion publiées sur Abracadeal : parcourez les annonces par marque, modèle, énergie et budget, auprès de particuliers et de professionnels."
     specs[""]=("root",rows,"Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
@@ -132,6 +161,11 @@ def main():
             p=f"{ms}/{slug(md)}"; n,lo,rng,cts=offer(sub); pl='s' if n>1 else ''
             desc=(f"{n} {mk} {md} d’occasion en ligne{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
                   f"Annonces de particuliers et de professionnels sur Abracadeal : prix, année, kilométrage et ville sur chaque annonce.")
+            guide=MODEL_GUIDES.get(p,"")
+            others=[x for k2,arr in models.items() if k2!=md for x in arr][:8] if len(sub)<6 else []
+            extra=(f"<h2>{esc(mk)} {esc(md)} : à savoir</h2><p>{esc(guide)}</p>" if guide else "")+stats_html(sub)+\
+                  (f'<h2>Autres {esc(mk)} d’occasion</h2><ul class="grid">'+''.join(card(x) for x in others)+'</ul>' if others else "")
+            EXTRA[p]=(extra,bool(guide))
             specs[p]=("model",sub,(f"{mk} {md} d'occasion dès {lo} | Abracadeal" if lo else f"{mk} {md} d'occasion | Abracadeal"),f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
     for key,label in FUELS.items():
         if key!=slug(key): continue
@@ -164,10 +198,12 @@ def main():
     indexable={}
     for r,(kind,its,*args) in specs.items():
         robots,can="index,follow",None
-        if kind!="root" and len(its)<MIN_INDEX: robots="noindex,follow"
+        ex,has_guide=EXTRA.get(r,("",False))
+        # 19/11/2026 (SEO) : une page modèle avec repères (guide) reste indexée dès 1 annonce (Google la montre déjà : Fabia, B-Max…)
+        if kind!="root" and len(its)<MIN_INDEX and not (has_guide and its): robots="noindex,follow"
         elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
         indexable[r]=robots=="index,follow" and not can
-        pages[r]=page(*args,robots=robots,canonical=can)
+        pages[r]=page(*args,robots=robots,canonical=can,extra=ex)
     # Liens internes : pas de lien vers une page fusionnée (la page principale est déjà dans la liste)
     for r in list(pages):
         for d in canon:
