@@ -3252,3 +3252,7 @@
 
 ## 19/11/2026 11 h 20 — Claude : SEO, prix « dès » des pages véhicules
 - Les pages véhicules ne calculent plus le « dès X € » que sur les annonces avec une marque (vrais véhicules). Plus de « Véhicules à Alfortville dès 15 € » (c'étaient des pièces moto) : s'il n'y a pas de vrai véhicule, le titre n'affiche pas de prix.
+
+## 19/11/2026 16 h 40 — Claude : prospect-mailer v35 (commit 0634082)
+- Relance du mail « aperçu » : version HTML avec 3 photos des annonces du pro (+ version texte identique). 1er mail inchangé (texte seul). Déployé (v35), la fonction répond.
+- Diagnostic inscriptions : ~400 mails en 10 jours → 10 clics (tous sur le mail aperçu, 0 sur le mail standard) → 1 inscription. Page pro-fondateur testée (ordinateur + mobile) et « Je publie » (prospect_accept) : rien de cassé.
