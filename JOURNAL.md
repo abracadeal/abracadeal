@@ -3261,3 +3261,9 @@
 - pro-fondateur.html : quand l'aperçu du pro s'affiche, il passe tout en haut (bandeau général masqué). Vérifié sur mobile.
 - prospect_mailer_claim (migration prospect_mailer_apercu_only_rythme_reduit) : 1er mail seulement aux prospects avec aperçu prêt (≥ 3 annonces) — le mail standard faisait 0 clic / 102. Boîtes : 15 mails/jour chacune au lieu de 25 (30/jour au total).
 - Stock restant avec aperçu : 474 agences immobilières (aucun garage pour l'instant). Relances toujours coupées (followups_enabled = false).
+
+## 19/11/2026 17 h 15 — Claude : SEO (pages vues par Google remises dans l'index)
+- Constat Search Console : l'audit du 15/11 (moins de 3 annonces → noindex) avait sorti de Google ~50 pages qu'il montrait déjà (Skoda Fabia 124 impressions, Terrains Pyrénées-Atlantiques 216, Véhicules à Cannes 4 clics…).
+- data/google-seen-pages.txt (pages ≥ 10 impressions sur 28 jours) : ces pages restent indexées dès 1 annonce (build_share_pages.py + build_auto_seo_pages.py). Résultat : 69/69 indexées.
+- Pages modèles auto : bloc « à savoir » (repères sur le modèle) pour Fabia, Corsa, DS 3 Crossback, Mokka, Crossland, 2008, Panamera, Stelvio, B-Max ; années / km / énergies des annonces ; « Autres <marque> d'occasion » quand il y a peu d'annonces.
+- À mettre à jour de temps en temps : la liste data/google-seen-pages.txt depuis Search Console.
