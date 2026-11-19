@@ -1,3 +1,4 @@
+// v35 19/11/2026 : relance du mail aperçu avec 3 photos des annonces du pro (HTML + texte).
 // v31 09/11/2026 : mail aperçu signé « Le Service Pros Abracadeal » (Anthony reste anonyme auprès des pros).
 // v33 10/11/2026 : « send » accepte une version mise en page (html) et le fil complet (references) ; clé interne acceptée.
 // v32 10/11/2026 : action « send » — l'admin écrit / répond depuis le CRM avec la boîte OVH choisie (copie rangée dans « Envoyés »).
@@ -183,7 +184,7 @@ function goodPreviewRows(rows: any[], immo: boolean) {
     return true;
   });
 }
-async function previewInfo(prospectId: string, category = ""): Promise<{ n: number; sure: boolean }> {
+async function previewInfo(prospectId: string, category = ""): Promise<{ n: number; sure: boolean; rows?: any[] }> {
   try {
     const { data } = await admin.from("prospect_previews").select("count,count_sure,rows").eq("prospect_id", prospectId).maybeSingle();
     if (!data) return { n: 0, sure: false };
@@ -192,7 +193,7 @@ async function previewInfo(prospectId: string, category = ""): Promise<{ n: numb
     // 04/11/2026 : la même photo sur toutes les annonces = le robot a lu une icône ou un visuel du site, pas les vraies photos.
     if (new Set(good.map((a: any) => String(a.ph))).size < 2) return { n: 0, sure: false };
     const n = Number(data.count || 0) || good.length;
-    return { n, sure: data.count_sure === true && n > 0 };
+    return { n, sure: data.count_sure === true && n > 0, rows: good };
   } catch { return { n: 0, sure: false }; }
 }
 // kind : "" (site lu), "manuel" (vend sur Leboncoin), "normal" (site qui bloque les robots).
@@ -210,7 +211,26 @@ async function variantOf(id: string, stored?: string | null) {
   const { data } = await admin.rpc("prospect_ab_variant", { p_id: id });
   return data === "B" ? "B" : "A";
 }
-async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null, annonces?: string, html?: string | null, references?: string | null) {
+// v35 19/11/2026 (Anthony : « ok ») : la relance du mail aperçu montre 3 photos de ses annonces (version HTML + version texte).
+// Le 1er mail reste en texte seul (meilleure arrivée en boîte de réception). Photos du site du pro, https uniquement.
+function escHtml(t: string) { return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function eurTxt(p: any) { const n = Number(p); return n > 0 ? n.toLocaleString("fr-FR").replace(/\u202f|\u00a0/g, " ") + " €" : ""; }
+function photosHtml(body: string, photos: any[]) {
+  const link = (body.match(/https:\/\/abracadeal\.fr\/pro-fondateur\.html[^\s]*/) || ["https://abracadeal.fr/pro-fondateur.html"])[0];
+  const cells = photos.map((a: any) => `<td style="width:33%;padding:4px;vertical-align:top"><a href="${escHtml(link)}" style="text-decoration:none;color:#1c0b2b">` +
+    `<img src="${escHtml(String(a.ph))}" alt="" width="180" style="width:100%;max-width:180px;height:auto;border-radius:8px;display:block">` +
+    `<div style="font:600 13px Arial,sans-serif;margin-top:4px">${escHtml(String(a.t).slice(0, 60))}</div>` +
+    `<div style="font:700 13px Arial,sans-serif;color:#6b2fa3">${escHtml(eurTxt(a.p))}</div></a></td>`).join("");
+  const grid = `<table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;max-width:560px;margin:10px 0"><tr>${cells}</tr></table>`;
+  let done = false;
+  const lines = body.split("\n").map((l) => {
+    const h = escHtml(l).replace(/https?:\/\/[^\s<]+/g, (u) => `<a href="${u}">${u}</a>`);
+    if (!done && l.includes(link)) { done = true; return h + grid; }
+    return h;
+  });
+  return `<div style="font:15px/1.5 Arial,sans-serif;color:#222;max-width:600px">${lines.join("<br>\n")}</div>`;
+}
+async function buildMail(c: Creds, to: string, company: string, prospectId: string | null, tpl: Tpl, inReplyTo?: string | null, annonces?: string, html?: string | null, references?: string | null, photos?: any[]) {
   const from = c.email;
   let body = fill(tpl.body, company, from, annonces);
   let unsubHeader = "";
@@ -221,6 +241,7 @@ async function buildMail(c: Creds, to: string, company: string, prospectId: stri
     const oneClick = `${SUPABASE_URL}/functions/v1/prospect-mailer?u=${prospectId}&t=${t}`;
     body += `\n\n--\nVous recevez ce message car votre entreprise est référencée publiquement comme professionnel. ` +
       `Pour ne plus recevoir nos e-mails : ${page}`;
+    if (!html && photos && photos.length >= 2) html = photosHtml(body, photos);
     unsubHeader = `List-Unsubscribe: <${oneClick}>, <mailto:${from}?subject=STOP>\r\nList-Unsubscribe-Post: List-Unsubscribe=One-Click\r\n`;
   }
   // v33 10/11/2026 : « References » complet du fil quand il est fourni (réponse rangée dans la bonne conversation).
@@ -518,7 +539,8 @@ Deno.serve(async (req) => {
         const useApercu = nPrev >= 3 && firstWasApercu;
         const tpl = useApercu ? apercuTemplates(j.category || "", shown, followup)
           : await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
-        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", shown));
+        const photos = followup && useApercu ? (pv.rows || []).filter((a: any) => /^https:\/\//.test(String(a.ph))).slice(0, 3) : undefined;
+        const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", shown), null, null, photos);
         await smtp(c, { to: j.email, data });
         if (followup) await admin.rpc("prospect_mailer_followup_done", { p_id: j.id, p_ok: true, p_error: null });
         else {
