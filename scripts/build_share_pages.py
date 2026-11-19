@@ -948,10 +948,13 @@ def listing_card(item):
             f'<span class="c">{e(l.get("city") or "")}</span></a></li>')
 
 
-def hub_price_floor(sub):
-    """19/11/2026 : prix le plus bas des annonces d'une page (texte « 4 990 € »), vide si aucun prix."""
+def hub_price_floor(sub, vehicles_only=False):
+    """19/11/2026 : prix le plus bas des annonces d'une page (texte « 4 990 € »), vide si aucun prix.
+    Rubrique véhicules : seules les annonces de vrais véhicules (marque renseignée) comptent, pas les pièces."""
     vals = []
     for it in sub:
+        if vehicles_only and not (it["listing"].get("vehicle_make") or "").strip():
+            continue
         try:
             v = float(it["listing"].get("price"))
             if v > 0:
@@ -1091,7 +1094,7 @@ def build_hubs(items):
             if not sub and not (c in CORE_CATEGORIES and k in CORE_CITIES):
                 continue
             slug, name, plural, _, intro = cat_info[c]
-            lo = hub_price_floor(sub)  # 19/11/2026 (SEO) : « dès X € » dans le titre et la description → meilleur taux de clic
+            lo = hub_price_floor(sub, vehicles_only=(c == "vehicules"))  # 19/11/2026 (SEO) : « dès X € » dans le titre et la description → meilleur taux de clic
             pages[f"{c}/{k}"] = (hub_page(
                 f"{name} {A}{' dès ' + lo if lo else ''} | Abracadeal", f"{name} {A}",
                 f"Les {plural} {A}, dans toutes les communes du département. {intro}" if k in loc else f"Les {plural} à {ctext} {intro}",
