@@ -3256,3 +3256,8 @@
 ## 19/11/2026 16 h 40 — Claude : prospect-mailer v35 (commit 0634082)
 - Relance du mail « aperçu » : version HTML avec 3 photos des annonces du pro (+ version texte identique). 1er mail inchangé (texte seul). Déployé (v35), la fonction répond.
 - Diagnostic inscriptions : ~400 mails en 10 jours → 10 clics (tous sur le mail aperçu, 0 sur le mail standard) → 1 inscription. Page pro-fondateur testée (ordinateur + mobile) et « Je publie » (prospect_accept) : rien de cassé.
+
+## 19/11/2026 17 h — Claude : prospection, « fais au mieux » (Anthony)
+- pro-fondateur.html : quand l'aperçu du pro s'affiche, il passe tout en haut (bandeau général masqué). Vérifié sur mobile.
+- prospect_mailer_claim (migration prospect_mailer_apercu_only_rythme_reduit) : 1er mail seulement aux prospects avec aperçu prêt (≥ 3 annonces) — le mail standard faisait 0 clic / 102. Boîtes : 15 mails/jour chacune au lieu de 25 (30/jour au total).
+- Stock restant avec aperçu : 474 agences immobilières (aucun garage pour l'instant). Relances toujours coupées (followups_enabled = false).
