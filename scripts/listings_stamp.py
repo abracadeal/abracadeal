@@ -5,7 +5,8 @@ Un passage complet est quand même fait toutes les 6 heures (annonces arrivées 
 import datetime, os, sys, urllib.request
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import abraca_gzip  # noqa: F401
-from build_share_pages import SUPABASE_URL, SUPABASE_KEY
+SUPABASE_URL = "https://jplzvxmpbpjssyinozap.supabase.co"
+SUPABASE_KEY = "sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF"  # clé publique du site (même que build_share_pages.py)
 
 STAMP = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "data", "listings-stamp.txt")
 
