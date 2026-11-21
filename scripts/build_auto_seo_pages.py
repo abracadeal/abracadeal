@@ -179,6 +179,8 @@ def main():
         mk=nice_make(l.get("vehicle_make")); md=(l.get("vehicle_model") or "").strip()
         makes.setdefault(mk,{}).setdefault(md,[]).append(l)
     pages={}; specs={}; EXTRA={}; SEEN=google_seen()
+    # 21/11/2026 : lien vers le guide d'achat depuis l'accueil Auto
+    EXTRA[""]=('<h2>Conseils</h2><p><a href="/conseils/acheter-voiture-occasion.html">Acheter une voiture d’occasion : les 10 points à vérifier</a></p>',False)
     make_links=[(m,f"/auto/{slug(m)}/") for m in sorted(makes)]
     root_desc="Voitures d’occasion publiées sur Abracadeal : parcourez les annonces par marque, modèle, énergie et budget, auprès de particuliers et de professionnels."
     specs[""]=("root",rows,"Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
