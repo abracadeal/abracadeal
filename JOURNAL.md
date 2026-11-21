@@ -3286,3 +3286,9 @@
 - Fait : scripts/abraca_gzip.py (lectures urllib compressées gzip, importé par les scripts build_*) + workflow share-pages toutes les heures (17 * * * *). Run de contrôle OK (565 annonces lues, 0 page changée).
 - À surveiller le 22-23/11 dans Usage → Egress per day : objectif < 80 Mo/jour pour finir le cycle (12/12) sous 5 Go.
 - 21/11 22 h 50 (suite, Anthony : « faut baisser maintenant ») : share-pages toutes les 2 h (17 */2) + scripts/listings_stamp.py : petite vérification (dernière modif + nombre d'annonces, quelques octets) ; si rien n'a changé, aucune relecture (passage complet forcé toutes les 6 h et à chaque modification des scripts). data/listings-stamp.txt publié avec les pages. Le site lui-même lit déjà le catalogue statique (feeds/catalog.json) depuis le 13/11.
+
+## 21/11/2026 23 h — Claude : inciter à s'inscrire (accord d'Anthony : « oui tout »)
+- Alertes : nouvelle fonction process-saved-alerts (v1, commit 42afc6b) + cron abracadeal-saved-alerts-daily (7 h 07 UTC = 8 h 07 Paris) : un mail par inscrit avec les nouvelles annonces correspondant à ses alertes (mot-clé, catégorie, ville, prix max), via Resend. Testé : mail reçu sur abracadeal@gmail.com (boîte de réception). Avant, saved_alerts existait mais aucun mail ne partait.
+- assets/abraca-alerts.js (chargé après index-main.js) : bandeau « Recevez chaque matin les nouvelles annonces … — Créer une alerte gratuite » au-dessus des résultats dès qu'une recherche/filtre est actif ; liens /?alerte=1&q=&cat=&ville=&prix=, /?alertes=1, /?fav=<id> ; sans compte → onglet inscription + retour automatique (abracaReturnTo) ; favoris sans compte → inscription puis favori ajouté ; rappel « Vous aussi, vendez gratuitement » sur les fiches (pas pour les pros).
+- Pages /auto/ : encadré « Créer une alerte gratuite » (marque, modèle, budget).
+- Alerte de test « Test Claude – véhicules jusqu'à 15 000 € » sur le compte admin : à supprimer (suppression SQL en attente d'autorisation).
