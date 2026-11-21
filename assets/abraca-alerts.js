@@ -76,6 +76,7 @@
     renderAds=function(){const r=origRender.apply(this,arguments);try{updateAlertBar();}catch(_){}return r;};
   }catch(_){}
 
+  setTimeout(()=>{try{updateAlertBar();}catch(_){}},1500);
   /* Favoris sans compte */
   try{
     const origFav=window.toggleFavorite;
