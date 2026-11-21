@@ -5,11 +5,11 @@ name: Pages de partage des annonces
 on:
   schedule:
     # 17/11/2026 : toutes les 30 min (au lieu de 10) — compte GitHub signalé le 17/11, on calme l'activité automatique
-    - cron: "17 * * * *"  # 21/11/2026 : toutes les heures (quota Egress Supabase), avant : 30 min
+    - cron: "17 */2 * * *"  # 21/11/2026 : toutes les 2 h et seulement si des annonces ont changé (quota Egress Supabase), avant : 30 min
   workflow_dispatch:
   push:
     branches: [main]
-    paths: [scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, scripts/build_pro_pages.py, scripts/build_chatgpt_feed.py, scripts/build_catalog_feed.py, scripts/build_communes_file.py, .github/workflows/share-pages.yml]
+    paths: [scripts/listings_stamp.py, scripts/abraca_gzip.py, scripts/build_share_pages.py, scripts/build_auto_seo_pages.py, scripts/build_pro_pages.py, scripts/build_chatgpt_feed.py, scripts/build_catalog_feed.py, scripts/build_communes_file.py, .github/workflows/share-pages.yml]
 
 permissions:
   contents: write
@@ -27,17 +27,31 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install pillow==10.4.0
-      - run: python scripts/build_share_pages.py
-      - run: python scripts/build_auto_seo_pages.py
-      - run: python scripts/build_pro_pages.py
-      - run: python scripts/build_chatgpt_feed.py
-      - run: python scripts/build_catalog_feed.py
+      # 21/11/2026 (quota Egress Supabase) : si aucune annonce n'a changé depuis le dernier passage, on ne relit rien
+      # (passage complet forcé toutes les 6 h et à chaque modification des scripts).
+      - id: check
+        run: python scripts/listings_stamp.py check >> "$GITHUB_OUTPUT" && cat "$GITHUB_OUTPUT"
+      - if: steps.check.outputs.run == 'true'
+        run: pip install pillow==10.4.0
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/build_share_pages.py
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/build_auto_seo_pages.py
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/build_pro_pages.py
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/build_chatgpt_feed.py
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/build_catalog_feed.py
       # 15/11/2026 : liste des communes en fichier statique pour pro-stock-sync (au lieu de 1,4 Mo lus dans Supabase ~250 fois/jour)
-      - run: 'python scripts/build_communes_file.py || echo "liste des communes non mise a jour"'
+      - if: steps.check.outputs.run == 'true'
+        run: 'python scripts/build_communes_file.py || echo "liste des communes non mise a jour"'
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/listings_stamp.py save
       - name: Publier les changements
+        if: steps.check.outputs.run == 'true'
         run: |
-          git add -A annonce annonces auto feeds pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml
+          git add -A annonce annonces auto feeds pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml data/listings-stamp.txt
           # Dossiers des pages pros : absents tant qu'aucun pro n'a d'annonce en ligne (git add échouerait)
           for p in garage immo professionnel; do
             if [ -e "$p" ] || git ls-files --error-unmatch "$p" >/dev/null 2>&1; then git add -A "$p"; fi
