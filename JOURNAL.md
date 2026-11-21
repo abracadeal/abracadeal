@@ -3276,3 +3276,6 @@
 ## 21/11/2026 22 h 30 — Claude : première page de conseils (accord d'Anthony)
 - conseils/acheter-voiture-occasion.html : « Acheter une voiture d'occasion : les 10 points à vérifier » (CT, Histovec, entretien, km, essai, papiers, paiement, garanties, arnaques) + liens vers /auto/ et budgets. Ajoutée à sitemap-pages.xml, lien depuis l'accueil /auto/ (build_auto_seo_pages.py).
 - Objectif : faire venir des gens qui ne connaissent pas Abracadeal (recherches de conseils). D'autres pages suivront si Anthony valide celle-ci.
+
+## 21/11/2026 22 h 40 — Claude : vignettes de la fiche annonce
+- « Les autres annonces du vendeur » et « Ces annonces peuvent vous intéresser » chargeaient la photo d'origine du site du pro (plusieurs Mo) → photos à moitié dessinées sur mobile. relatedCardHtml passe par thumbImgAttrs (version allégée wsrv + fondu + secours), comme les cartes de l'accueil. index-main.js?v=20261121-vignettes.
