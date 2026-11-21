@@ -162,6 +162,12 @@ def nice_make(mk):
     k=re.sub(r"\s+"," ",str(mk or "").strip()).lower()
     return NICE_MAKES.get(k) or str(mk or "").strip()
 
+def full_name(mk,md):
+    """21/11/2026 : « DS » + « Ds 7 Crossback » → « DS 7 Crossback » (pas « DS Ds 7 Crossback »). Affichage seulement, l'URL ne change pas."""
+    w=str(md or "").split()
+    if w and w[0].lower()==str(mk).lower(): return " ".join([mk]+w[1:])
+    return f"{mk} {md}"
+
 def make_kind(mk):
     k=str(mk or "").strip().lower()
     return "annonces moto" if k in MOTO_MAKES else ("annonces auto et moto" if k in MIXED_MAKES else "annonces auto")
@@ -178,22 +184,22 @@ def main():
     specs[""]=("root",rows,"Voitures d'occasion par marque, modèle et budget | Abracadeal","Voitures d’occasion",root_desc,SITE+"/auto/",rows,make_links+[(v,f"/auto/{slug(k)}/") for k,v in FUELS.items() if k==slug(k)])
     for mk,models in makes.items():
         its=[x for arr in models.values() for x in arr]; ms=slug(mk)
-        model_links=[(f"{mk} {md}",f"/auto/{ms}/{slug(md)}/") for md in sorted(models) if md]
+        model_links=[(full_name(mk,md),f"/auto/{ms}/{slug(md)}/") for md in sorted(models) if md]
         n,lo,rng,cts=offer(its); pl='s' if n>1 else ''
         desc=(f"{n} {mk} d’occasion en ligne sur Abracadeal{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
               f"Annonces de particuliers et de professionnels, sans commission : comparez modèles, prix et kilométrages.")
         specs[ms]=("make",its,(f"{mk} d'occasion dès {lo} : {n} annonce{pl} | Abracadeal" if lo else f"{mk} d'occasion : {make_kind(mk)} | Abracadeal"),f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
         for md,sub in models.items():
             if not md: continue
-            p=f"{ms}/{slug(md)}"; n,lo,rng,cts=offer(sub); pl='s' if n>1 else ''
-            desc=(f"{n} {mk} {md} d’occasion en ligne{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
+            p=f"{ms}/{slug(md)}"; n,lo,rng,cts=offer(sub); pl='s' if n>1 else ''; fn=full_name(mk,md)
+            desc=(f"{n} {fn} d’occasion en ligne{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
                   f"Annonces de particuliers et de professionnels sur Abracadeal : prix, année, kilométrage et ville sur chaque annonce.")
             guide=MODEL_GUIDES.get(p,"")
             others=[x for k2,arr in models.items() if k2!=md for x in arr][:8] if len(sub)<6 else []
-            extra=(f"<h2>{esc(mk)} {esc(md)} : à savoir</h2><p>{esc(guide)}</p>" if guide else "")+stats_html(sub)+\
+            extra=(f"<h2>{esc(fn)} : à savoir</h2><p>{esc(guide)}</p>" if guide else "")+stats_html(sub)+\
                   (f'<h2>Autres {esc(mk)} d’occasion</h2><ul class="grid">'+''.join(card(x) for x in others)+'</ul>' if others else "")
             EXTRA[p]=(extra,bool(guide))
-            specs[p]=("model",sub,(f"{mk} {md} d'occasion dès {lo} | Abracadeal" if lo else f"{mk} {md} d'occasion | Abracadeal"),f"{mk} {md} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
+            specs[p]=("model",sub,(f"{fn} d'occasion dès {lo} | Abracadeal" if lo else f"{fn} d'occasion | Abracadeal"),f"{fn} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
     for key,label in FUELS.items():
         if key!=slug(key): continue
         sub=[x for x in rows if slug(x.get("fuel"))==key]
