@@ -3279,3 +3279,9 @@
 
 ## 21/11/2026 22 h 40 — Claude : vignettes de la fiche annonce
 - « Les autres annonces du vendeur » et « Ces annonces peuvent vous intéresser » chargeaient la photo d'origine du site du pro (plusieurs Mo) → photos à moitié dessinées sur mobile. relatedCardHtml passe par thumbImgAttrs (version allégée wsrv + fondu + secours), comme les cartes de l'accueil. index-main.js?v=20261121-vignettes.
+
+## 21/11/2026 22 h 45 — Claude : quota Supabase « Egress »
+- Constat (capture d'Anthony) : 3,32 Go sur 5 Go utilisés du 12 au 21/11 (≈ 300 Mo/jour) ; bandeau Supabase : quota dépassé au cycle précédent, projet restreint le 08/12 si on reste au-dessus. Base 120 Mo/500, stockage 0,02 Go/1 : OK.
+- Cause principale probable : les scripts de pages (share/auto/pro/catalog) relisaient toutes les annonces sans compression (≈ 10 Mo par passage) toutes les 30 min.
+- Fait : scripts/abraca_gzip.py (lectures urllib compressées gzip, importé par les scripts build_*) + workflow share-pages toutes les heures (17 * * * *). Run de contrôle OK (565 annonces lues, 0 page changée).
+- À surveiller le 22-23/11 dans Usage → Egress per day : objectif < 80 Mo/jour pour finir le cycle (12/12) sous 5 Go.
