@@ -3267,3 +3267,8 @@
 - data/google-seen-pages.txt (pages ≥ 10 impressions sur 28 jours) : ces pages restent indexées dès 1 annonce (build_share_pages.py + build_auto_seo_pages.py). Résultat : 69/69 indexées.
 - Pages modèles auto : bloc « à savoir » (repères sur le modèle) pour Fabia, Corsa, DS 3 Crossback, Mokka, Crossland, 2008, Panamera, Stelvio, B-Max ; années / km / énergies des annonces ; « Autres <marque> d'occasion » quand il y a peu d'annonces.
 - À mettre à jour de temps en temps : la liste data/google-seen-pages.txt depuis Search Console.
+
+## 21/11/2026 nuit — Claude : passage SEO
+- Contrôle : 0 lien interne cassé sur les pages publiques (les liens « cassés » restants sont dans tests/fixtures, non publiés), sitemaps propres (aucune page absente ni en noindex), pages vues par Google toujours indexées (67, les 12 autres = modèles vendus).
+- Repères « à savoir » ajoutés sur 21 modèles de plus vus par Google (DS 7 Crossback, Fiesta, Mini One, Marco Polo, 911, Captur, Mégane, RS6 Avant, Série 6, SQ2, Classe V, SpaceTourer, A5, Passat, i10, Transit Custom, Grandland, Duster, Renegade, Countryman, Classe A).
+- Titres : « DS 7 Crossback » au lieu de « DS Ds 7 Crossback » (URL inchangées).
