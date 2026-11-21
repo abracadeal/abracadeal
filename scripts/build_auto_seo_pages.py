@@ -96,6 +96,16 @@ def google_seen():
         with open(os.path.join(BASE,"data","google-seen-pages.txt"),encoding="utf-8") as f:
             return {l.strip().strip("/") for l in f if l.strip() and not l.startswith("#")}
     except OSError: return set()
+def alert_cta(q=None,cat="vehicules",prix=None,label=""):
+    """21/11/2026 (Anthony : « il faut inciter à s'inscrire ») : bouton « Prévenez-moi » → /?alerte=1… (inscription puis alerte pré-remplie)."""
+    params={"alerte":"1","cat":cat}
+    if q: params["q"]=q
+    if prix: params["prix"]=str(prix)
+    url="/?"+urllib.parse.urlencode(params)
+    return (f'<p style="margin:18px 0;padding:14px 16px;border-radius:14px;background:#2b1548;color:#fff">'
+            f'Recevez chaque matin les nouvelles annonces {esc(label)} par e-mail. '
+            f'<a href="{esc(url)}" style="display:inline-block;margin-top:8px;padding:9px 16px;border-radius:999px;background:#ec409d;color:#fff;font-weight:700;text-decoration:none">Créer une alerte gratuite</a></p>')
+
 def stats_html(items):
     """Repères chiffrés tirés des annonces en ligne (années, kilométrages, énergies)."""
     ys=sorted({int(x["vehicle_year"]) for x in items if str(x.get("vehicle_year") or "").isdigit() and 1950<int(x["vehicle_year"])<2100})
@@ -179,7 +189,7 @@ def main():
     for l in rows:
         mk=nice_make(l.get("vehicle_make")); md=(l.get("vehicle_model") or "").strip()
         makes.setdefault(mk,{}).setdefault(md,[]).append(l)
-    pages={}; specs={}; EXTRA={}; SEEN=google_seen()
+    pages={}; specs={}; EXTRA={}; SEEN=google_seen(); ALERT={"":alert_cta(label="de voitures d’occasion")}
     # 21/11/2026 : lien vers le guide d'achat depuis l'accueil Auto
     EXTRA[""]=('<h2>Conseils</h2><p><a href="/conseils/acheter-voiture-occasion.html">Acheter une voiture d’occasion : les 10 points à vérifier</a></p>',False)
     make_links=[(m,f"/auto/{slug(m)}/") for m in sorted(makes)]
@@ -191,6 +201,7 @@ def main():
         n,lo,rng,cts=offer(its); pl='s' if n>1 else ''
         desc=(f"{n} {mk} d’occasion en ligne sur Abracadeal{', '+rng if rng else ''}{' — '+', '.join(cts) if cts else ''}. "
               f"Annonces de particuliers et de professionnels, sans commission : comparez modèles, prix et kilométrages.")
+        ALERT[ms]=alert_cta(q=mk,label=f"{mk} d’occasion")
         specs[ms]=("make",its,(f"{mk} d'occasion dès {lo} : {n} annonce{pl} | Abracadeal" if lo else f"{mk} d'occasion : {make_kind(mk)} | Abracadeal"),f"{mk} d’occasion",desc,SITE+f"/auto/{ms}/",its,model_links+make_links)
         for md,sub in models.items():
             if not md: continue
@@ -202,6 +213,7 @@ def main():
             extra=(f"<h2>{esc(fn)} : à savoir</h2><p>{esc(guide)}</p>" if guide else "")+stats_html(sub)+\
                   (f'<h2>Autres {esc(mk)} d’occasion</h2><ul class="grid">'+''.join(card(x) for x in others)+'</ul>' if others else "")
             EXTRA[p]=(extra,bool(guide))
+            ALERT[p]=alert_cta(q=fn,label=f"{fn} d’occasion")
             specs[p]=("model",sub,(f"{fn} d'occasion dès {lo} | Abracadeal" if lo else f"{fn} d'occasion | Abracadeal"),f"{fn} d’occasion",desc,SITE+f"/auto/{p}/",sub,[(f"Toutes les {mk}",f"/auto/{ms}/")]+model_links)
     for key,label in FUELS.items():
         if key!=slug(key): continue
@@ -218,6 +230,7 @@ def main():
         if sub:
             label=f"Voitures d’occasion à moins de {ceiling:,} €".replace(","," ")
             desc=f"Trouvez une voiture d’occasion à moins de {ceiling:,} € sur Abracadeal. Comparez les annonces disponibles par marque, modèle et ville.".replace(","," ")
+            ALERT[p]=alert_cta(prix=ceiling,label=f"à moins de {ceiling:,} €".replace(","," "))
             specs[p]=("budget",sub,label+" | Abracadeal",label,desc,SITE+f"/auto/{p}/",sub,make_links)
     ids={r:frozenset(str(x["id"]) for x in v[1]) for r,v in specs.items()}
     # Doublons seulement dans la même famille (intentions de recherche différentes sinon) :
@@ -240,7 +253,7 @@ def main():
         if kind!="root" and len(its)<MIN_INDEX and not ((has_guide or seen) and its): robots="noindex,follow"
         elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
         indexable[r]=robots=="index,follow" and not can
-        pages[r]=page(*args,robots=robots,canonical=can,extra=ex)
+        pages[r]=page(*args,robots=robots,canonical=can,extra=ALERT.get(r,alert_cta(label="de voitures d’occasion"))+ex)
     # Liens internes : pas de lien vers une page fusionnée (la page principale est déjà dans la liste)
     for r in list(pages):
         for d in canon:
