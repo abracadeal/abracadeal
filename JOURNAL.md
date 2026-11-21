@@ -3285,3 +3285,4 @@
 - Cause principale probable : les scripts de pages (share/auto/pro/catalog) relisaient toutes les annonces sans compression (≈ 10 Mo par passage) toutes les 30 min.
 - Fait : scripts/abraca_gzip.py (lectures urllib compressées gzip, importé par les scripts build_*) + workflow share-pages toutes les heures (17 * * * *). Run de contrôle OK (565 annonces lues, 0 page changée).
 - À surveiller le 22-23/11 dans Usage → Egress per day : objectif < 80 Mo/jour pour finir le cycle (12/12) sous 5 Go.
+- 21/11 22 h 50 (suite, Anthony : « faut baisser maintenant ») : share-pages toutes les 2 h (17 */2) + scripts/listings_stamp.py : petite vérification (dernière modif + nombre d'annonces, quelques octets) ; si rien n'a changé, aucune relecture (passage complet forcé toutes les 6 h et à chaque modification des scripts). data/listings-stamp.txt publié avec les pages. Le site lui-même lit déjà le catalogue statique (feeds/catalog.json) depuis le 13/11.
