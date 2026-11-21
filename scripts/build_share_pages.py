@@ -34,6 +34,7 @@ import shutil
 import sys
 import unicodedata
 import urllib.parse
+import abraca_gzip  # noqa: F401  (21/11/2026 : lectures Supabase compressées)
 import urllib.request
 
 from PIL import Image

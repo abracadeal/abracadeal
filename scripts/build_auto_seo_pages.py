@@ -2,6 +2,7 @@
 Phase 1 : marques, marque+modèle, énergie et budgets. Aucun contenu inventé.
 """
 import datetime, html, json, os, re, shutil, sys, unicodedata, urllib.parse, urllib.request
+import abraca_gzip  # noqa: F401  (21/11/2026 : lectures Supabase compressées)
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_share_pages import CSS as SITE_CSS, FONTS, HEADER, HUMAN_LINKS  # même apparence que le reste du site
 

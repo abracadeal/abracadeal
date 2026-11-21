@@ -5,7 +5,7 @@ name: Pages de partage des annonces
 on:
   schedule:
     # 17/11/2026 : toutes les 30 min (au lieu de 10) — compte GitHub signalé le 17/11, on calme l'activité automatique
-    - cron: "*/30 * * * *"
+    - cron: "17 * * * *"  # 21/11/2026 : toutes les heures (quota Egress Supabase), avant : 30 min
   workflow_dispatch:
   push:
     branches: [main]

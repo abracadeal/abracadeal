@@ -27,6 +27,7 @@ import json
 import os
 import sys
 import urllib.parse
+import abraca_gzip  # noqa: F401  (21/11/2026 : lectures Supabase compressées)
 import urllib.request
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

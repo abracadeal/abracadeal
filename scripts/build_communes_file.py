@@ -7,6 +7,7 @@ Même format que commune_list_compact : une commune par ligne « nom|cp1,cp2|pop
 Source : geo.api.gouv.fr (la même que la table commune_ref). Refait au plus une fois par semaine.
 """
 import datetime, json, os, sys, urllib.request
+import abraca_gzip  # noqa: F401  (21/11/2026 : lectures Supabase compressées)
 
 BASE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 OUT = os.path.join(BASE, "feeds", "communes.txt")

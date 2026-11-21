@@ -7,6 +7,7 @@ Le site lit ce fichier, puis demande à Supabase seulement les annonces modifié
 (rpc public_catalog_since) et la liste des identifiants en ligne.
 """
 import datetime, json, os, sys, urllib.request
+import abraca_gzip  # noqa: F401  (21/11/2026 : lectures Supabase compressées)
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from build_share_pages import SUPABASE_URL, SUPABASE_KEY, BASE
