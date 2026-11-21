@@ -3292,3 +3292,10 @@
 - assets/abraca-alerts.js (chargé après index-main.js) : bandeau « Recevez chaque matin les nouvelles annonces … — Créer une alerte gratuite » au-dessus des résultats dès qu'une recherche/filtre est actif ; liens /?alerte=1&q=&cat=&ville=&prix=, /?alertes=1, /?fav=<id> ; sans compte → onglet inscription + retour automatique (abracaReturnTo) ; favoris sans compte → inscription puis favori ajouté ; rappel « Vous aussi, vendez gratuitement » sur les fiches (pas pour les pros).
 - Pages /auto/ : encadré « Créer une alerte gratuite » (marque, modèle, budget).
 - Alerte de test « Test Claude – véhicules jusqu'à 15 000 € » sur le compte admin : à supprimer (suppression SQL en attente d'autorisation).
+
+## 21-22/11/2026 nuit — Claude : inventaire des fonctions (demande d'Anthony)
+- OK en conditions réelles : prospection (mailer v35), synchro des stocks (10 flux sans erreur), modération (44 appels/24 h, 0 erreur), inscription (mail + Google), messagerie (RPC send_message/get_conversation_messages testées en transaction annulée), mails pros (15 envoyés), vignettes, R2, iCal Vacances, clé Stripe live valide (compte « Abracadeal »).
+- Corrigé : tableau de bord admin « MRR théorique » → 403 sur pro_subscription_plans (≈ 70/jour) : grant select + politique admin (migration admin_read_pro_subscription_plans). Alertes mail (process-saved-alerts) et vignettes fiche : voir plus haut.
+- Jamais utilisés / jamais testés en vrai : options payantes particuliers (5 commandes « pending » de test du 09/10, aucune payée), Vacances (3 hôtes, 2 logements, 0 demande), B2B entre pros (0), avis (0), suivre un pro (0), recherche IA (fonction ai-search non appelée par le site, calcul des empreintes coupé), diffusion vers d'autres sites (aucun portail branché), rapport mensuel pros (1er envoi le 01/12).
+- Sécurité : ~15 fonctions de test/usage unique encore déployées, toutes neutralisées (404/410) ou protégées par clé interne. Ménage possible (cosmétique).
+- Mineur : ~110 demandes/jour de miniatures vers l'ancien stockage Supabase (400), secours après R2 ; robot « sites en réparation » : 19 demandes en attente.
