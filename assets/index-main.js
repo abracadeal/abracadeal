@@ -5084,7 +5084,9 @@ function cacheDetailAds(items){
 }
 function relatedCardHtml(a){
   const photos=[...(a.listing_photos||[])].sort((x,y)=>x.position-y.position);
-  const media=photos[0]?`<img src="${photoUrl(photos[0].storage_path)}" alt="${esc(a.title||'Annonce')}">`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
+  /* 21/11/2026 (Anthony : « l'affichage est nul ») : vignettes « autres annonces / suggestions » en version allégée comme les cartes
+     (avant : photo d'origine du site du pro, plusieurs Mo, qui s'affichait à moitié). */
+  const media=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="${esc(a.title||'Annonce')}" loading="lazy" decoding="async">`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
   return `<article class="detail-related-card" onclick="if(!event.target.closest('button,a'))openAd('${a.id}')">
     <div class="detail-related-photo">
       ${media}${listingCardActions(a)}
