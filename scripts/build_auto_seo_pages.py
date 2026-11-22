@@ -89,6 +89,11 @@ MODEL_GUIDES={
  "mini/countryman":"La Mini Countryman est le plus grand modèle Mini, un SUV cinq portes. Elle existe en 4x4 (ALL4) et en hybride rechargeable ; la génération 2024 existe aussi en électrique.",
  "mercedes/classe-a":"La Mercedes Classe A est la compacte d’entrée de gamme de Mercedes. La 4e génération (2018) existe en cinq portes et en berline, avec les sportives AMG A 35 et A 45.",
  "ford/b-max":"Le Ford B-Max est un monospace citadin vendu de 2012 à 2017, dérivé de la Fiesta. Son originalité : des portes arrière coulissantes et l’absence de montant central, pour un accès très large à bord, pratique en famille.",
+ "citroen/c1":"La Citroën C1 est une petite citadine produite de 2005 à 2022, jumelle des Peugeot 107/108 et de la Toyota Aygo. Deux générations se sont succédé (2005 et 2014), uniquement en essence avec de petits moteurs trois cylindres.",
+ "toyota/aygo":"La Toyota Aygo est une petite citadine lancée en 2005, sœur des Citroën C1 et Peugeot 107/108 sur ses deux premières générations, avec un moteur essence 1.0 trois cylindres. Elle a été remplacée en 2022 par l’Aygo X, un petit crossover.",
+ "bmw/serie-3":"La BMW Série 3 est la berline familiale de BMW, produite depuis 1975 et déclinée en break Touring. Les générations les plus courantes en occasion sont la E90 (à partir de 2005), la F30 (à partir de 2012) et la G20 (depuis 2019), en essence, en diesel et en hybride rechargeable (330e).",
+ "hyundai/tucson":"Le Hyundai Tucson est le SUV compact de Hyundai. Il a succédé à l’ix35 en 2015 ; la génération lancée en 2020 se distingue par son style très anguleux et existe notamment en hybride et en hybride rechargeable.",
+ "peugeot/508":"La Peugeot 508 est la grande berline de Peugeot, lancée en 2010 et déclinée en break SW. La 2e génération (2018), au profil de berline fastback, existe en essence, en diesel et en hybride rechargeable, avec une version sportive PSE.",
 }
 def google_seen():
     """19/11/2026 : pages que Google montre déjà (data/google-seen-pages.txt) → indexées dès 1 annonce."""

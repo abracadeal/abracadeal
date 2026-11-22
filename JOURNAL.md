@@ -3299,3 +3299,8 @@
 - Jamais utilisés / jamais testés en vrai : options payantes particuliers (5 commandes « pending » de test du 09/10, aucune payée), Vacances (3 hôtes, 2 logements, 0 demande), B2B entre pros (0), avis (0), suivre un pro (0), recherche IA (fonction ai-search non appelée par le site, calcul des empreintes coupé), diffusion vers d'autres sites (aucun portail branché), rapport mensuel pros (1er envoi le 01/12).
 - Sécurité : ~15 fonctions de test/usage unique encore déployées, toutes neutralisées (404/410) ou protégées par clé interne. Ménage possible (cosmétique).
 - Mineur : ~110 demandes/jour de miniatures vers l'ancien stockage Supabase (400), secours après R2 ; robot « sites en réparation » : 19 demandes en attente.
+
+## 22/11/2026 nuit — Claude : tâche de nuit
+- Santé : Actions OK (1 échec « Pages de partage » le 21/11 à 21 h 46, réglé par les passages suivants), 6 flux pros sans erreur ni chute, modération 31 contrôles / 0 erreur / 0 en attente, 565 annonces en ligne.
+- SEO : 0 lien interne cassé, sitemaps propres (748 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus (dont Mokka et Panamera, plus aucune annonce).
+- Repères « à savoir » ajoutés sur 5 modèles vus par Google : Citroën C1, Toyota Aygo, BMW Série 3, Hyundai Tucson, Peugeot 508 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
