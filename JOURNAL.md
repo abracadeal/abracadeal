@@ -3304,3 +3304,9 @@
 - Santé : Actions OK (1 échec « Pages de partage » le 21/11 à 21 h 46, réglé par les passages suivants), 6 flux pros sans erreur ni chute, modération 31 contrôles / 0 erreur / 0 en attente, 565 annonces en ligne.
 - SEO : 0 lien interne cassé, sitemaps propres (748 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus (dont Mokka et Panamera, plus aucune annonce).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Citroën C1, Toyota Aygo, BMW Série 3, Hyundai Tucson, Peugeot 508 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
+
+## 23/11/2026 nuit — Claude : tâche de nuit
+- Santé : Actions OK (aucun échec), 6 flux pros sans erreur ni chute, modération 1 contrôle / 0 erreur / 0 en attente, 565 annonces en ligne, 0 nouvelle annonce sur 24 h. Prospection : 0 envoi le dimanche 22/11 (pause du week-end prévue dans prospect_mailer_claim), 1 rebond.
+- SEO : 0 lien interne cassé (959 pages), sitemaps propres (753 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus. Titres « en double » restants = anciennes adresses courtes avec canonique vers la page officielle (normal).
+- pro.html (vitrines pros, indexée) : ajout d'une description Google (il n'y en avait pas).
+- Repères « à savoir » ajoutés sur 5 modèles vus par Google : Opel Astra, Audi A4, Audi A6, BMW Série 5, BMW X2 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).

@@ -59,6 +59,11 @@ def esc(s): return html.escape(str(s or ""),quote=True)
 # 19/11/2026 (SEO) : repères généraux sur les modèles que Google montre déjà (Search Console : Fabia 124 impressions,
 # Corsa 103, DS 3 Crossback 100, Mokka 98, Crossland 97…). Faits connus et stables sur le modèle, rien sur les annonces.
 MODEL_GUIDES={
+ "opel/astra":"L’Opel Astra est la compacte d’Opel, aussi proposée en break Sports Tourer. L’Astra K (2015-2021) a été élue Voiture de l’année 2016 ; l’Astra L, lancée en 2021 sur une base Stellantis, existe en essence, en diesel, en hybride rechargeable et en électrique.",
+ "audi/a4":"L’Audi A4 est la berline familiale premium d’Audi, lancée en 1994 pour succéder à l’Audi 80. Elle existe aussi en break Avant, en version baroudeuse allroad et en transmission intégrale quattro ; depuis 2024, son successeur porte le nom d’A5.",
+ "audi/a6":"L’Audi A6 est la grande routière d’Audi depuis 1994, héritière de l’Audi 100. Elle se décline en berline, en break Avant et en version surélevée allroad quattro ; la génération C8 a été lancée en 2018.",
+ "bmw/serie-5":"La BMW Série 5 est la grande berline routière de BMW depuis 1972, aussi proposée en break Touring. La génération G30 (2017-2023) a été remplacée par la G60, qui existe pour la première fois en 100 % électrique (i5).",
+ "bmw/x2":"Le BMW X2 est un SUV compact au profil de coupé, dérivé du BMW X1 et lancé en 2018. La 2e génération, sortie en 2023, existe aussi en électrique sous le nom d’iX2.",
  "skoda/fabia":"La Skoda Fabia est la citadine polyvalente de Skoda (groupe Volkswagen). La 4e génération, lancée en 2021, n’existe qu’en essence (1.0 TSI et 1.5 TSI). La génération précédente (2014-2021) existait aussi en diesel et en break Fabia Combi, apprécié pour son grand coffre.",
  "opel/corsa":"L’Opel Corsa est l’une des citadines les plus vendues en Europe. La Corsa F, depuis 2019, partage sa base technique avec la Peugeot 208 et existe aussi en 100 % électrique (Corsa-e, puis Corsa Electric). La Corsa E (2014-2019) reste une occasion économique très répandue.",
  "ds/ds-3-crossback":"Le DS 3 Crossback est le SUV urbain de la marque premium DS, vendu sous ce nom de 2019 à 2022 puis rebaptisé DS 3. Il a existé en essence PureTech, en diesel BlueHDi et en électrique E-Tense, avec une finition plus haut de gamme que ses cousins Peugeot et Opel.",
