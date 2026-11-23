@@ -3310,3 +3310,9 @@
 - SEO : 0 lien interne cassé (959 pages), sitemaps propres (753 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus. Titres « en double » restants = anciennes adresses courtes avec canonique vers la page officielle (normal).
 - pro.html (vitrines pros, indexée) : ajout d'une description Google (il n'y en avait pas).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Opel Astra, Audi A4, Audi A6, BMW Série 5, BMW X2 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
+
+## 23/11/2026 17 h — Claude : passage SEO + quota
+- Search Console (7 jours au 21/11) : 2 390 affichages (≈ 340/jour, contre ≈ 110/jour sur les 28 jours précédents), 6 clics, position moyenne 29,6. Déjà en 1re page : « ds3 crossback occasion nantes » (2,9), « crossland occasion nantes » (6,0), « opel crossland diesel occasion » (7,4), « peugeot expert automatique occasion » (7,8), « corsa occasion » (8,1), « ds3 crossback occasion rennes » (9,6).
+- Contrôles du dépôt : sitemaps propres, 66 pages vues par Google indexées (13 modèles vendus). La tâche de nuit tourne bien (22 et 23/11).
+- Egress Supabase : 3,49 Go / 5 ; 61 Mo le 22/11 (contre ≈ 300 avant le 21/11). Marge encore juste → share-pages toutes les 4 h (17 */4).
+- À noter : « Log Query » 74 Go / 100 (pas facturé, application annoncée plus tard) → éviter query_logs (lecture des journaux Supabase) sauf nécessité.
