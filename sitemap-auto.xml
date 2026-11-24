@@ -19,9 +19,11 @@
   <url><loc>https://abracadeal.fr/auto/bmw/serie-3/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-4/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-5/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/serie-6/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/bmw/serie-7/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/bmw/x1/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/bmw/x2/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/bmw/z4/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/citroen/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c1/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/citroen/c3/</loc><lastmod>2026-11-23</lastmod></url>
@@ -31,7 +33,9 @@
   <url><loc>https://abracadeal.fr/auto/citroen/spacetourer/</loc><lastmod>2026-11-23</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/cupra/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/dacia/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/dacia/dokker/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/dacia/duster/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/dacia/spring/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/diesel/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/dodge/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ds/</loc><lastmod>2026-11-24</lastmod></url>
@@ -44,9 +48,11 @@
   <url><loc>https://abracadeal.fr/auto/ford/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ford/b-max/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ford/fiesta/</loc><lastmod>2026-11-22</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/ford/focus/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ford/kuga/</loc><lastmod>2026-11-21</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ford/ranger/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/ford/transit-custom/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/honda/civic/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/hybride/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/hyundai/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/hyundai/i10/</loc><lastmod>2026-11-21</lastmod></url>
@@ -73,17 +79,23 @@
   <url><loc>https://abracadeal.fr/auto/opel/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/opel/astra/</loc><lastmod>2026-11-23</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/opel/corsa/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/opel/crossland/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/opel/grandland/</loc><lastmod>2026-11-23</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/opel/mokka/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/opel/zafira/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/108/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/2008/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/208/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/3008/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/308/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/5008/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/peugeot/508/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/peugeot/expert/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/porsche/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/porsche/911/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/porsche/boxster/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/porsche/panamera/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/renault/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/renault/captur/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/renault/clio/</loc><lastmod>2026-11-24</lastmod></url>
@@ -94,7 +106,9 @@
   <url><loc>https://abracadeal.fr/auto/seat/ateca/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/skoda/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/skoda/fabia/</loc><lastmod>2026-11-21</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/suzuki/sx4-s-cross/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/tesla/</loc><lastmod>2026-11-24</lastmod></url>
+  <url><loc>https://abracadeal.fr/auto/tesla/model-3/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/toyota/</loc><lastmod>2026-11-24</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/toyota/aygo/</loc><lastmod>2026-11-23</lastmod></url>
   <url><loc>https://abracadeal.fr/auto/toyota/yaris/</loc><lastmod>2026-11-23</lastmod></url>
