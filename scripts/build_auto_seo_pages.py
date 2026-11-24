@@ -247,6 +247,31 @@ def main():
             desc=f"Trouvez une voiture d’occasion à moins de {ceiling:,} € sur Abracadeal. Comparez les annonces disponibles par marque, modèle et ville.".replace(","," ")
             ALERT[p]=alert_cta(prix=ceiling,label=f"à moins de {ceiling:,} €".replace(","," "))
             specs[p]=("budget",sub,label+" | Abracadeal",label,desc,SITE+f"/auto/{p}/",sub,make_links)
+    # 25/11/2026 (SEO) : une page que Google montre déjà (data/google-seen-pages.txt) ne disparaît plus quand le modèle est vendu
+    # (avant : page supprimée → erreur 404 → position perdue, ex. Opel Crossland 92 affichages, 6e sur « crossland occasion nantes »).
+    # Elle reste en ligne avec : « aucune en vente en ce moment », les repères, d'autres voitures proches et « Prévenez-moi ».
+    by_make={slug(m):m for m in makes}
+    def pretty(sl):
+        w=sl.split("-")
+        return " ".join(x.upper() if (len(x)<=3 and not x.isdigit() and x not in ("de","du","la","le")) else x.capitalize() for x in w)
+    for seen_path in sorted(SEEN):
+        if not seen_path.startswith("auto/"): continue
+        r=seen_path[5:].strip("/")
+        if not r or r in specs or r.startswith("moins-de-") or r in FUELS: continue
+        parts=r.split("/")
+        if len(parts)>2: continue
+        mk=by_make.get(parts[0]) or pretty(parts[0])
+        name=mk if len(parts)==1 else full_name(mk,pretty(parts[1]))
+        others=[x for arr in makes.get(mk,{}).values() for x in arr][:8] or sorted(rows,key=lambda x:str(x.get("created_at","")),reverse=True)[:8]
+        guide=MODEL_GUIDES.get(r,"")
+        ALERT[r]=alert_cta(q=name,label=f"{name} d’occasion")
+        EXTRA[r]=((f'<p><strong>Aucune {esc(name)} en vente sur Abracadeal en ce moment.</strong> Créez une alerte gratuite : vous recevrez par e-mail les prochaines annonces dès leur publication.</p>')
+                  +(f"<h2>{esc(name)} : à savoir</h2><p>{esc(guide)}</p>" if guide else "")
+                  +(f'<h2>{"Autres "+esc(mk)+" d’occasion" if makes.get(mk) else "Dernières voitures d’occasion"}</h2><ul class="grid">'+''.join(card(x) for x in others)+'</ul>' if others else ""),True)
+        rel_links=[(f"Toutes les {mk}",f"/auto/{slug(mk)}/")] if (len(parts)==2 and makes.get(mk)) else []
+        specs[r]=("empty",[],f"{name} d'occasion | Abracadeal",f"{name} d’occasion",
+                  f"{name} d’occasion : aucune annonce en ce moment sur Abracadeal. Créez une alerte gratuite pour être prévenu des prochaines, et découvrez d’autres voitures d’occasion.",
+                  SITE+f"/auto/{r}/",[],rel_links+make_links)
     ids={r:frozenset(str(x["id"]) for x in v[1]) for r,v in specs.items()}
     # Doublons seulement dans la même famille (intentions de recherche différentes sinon) :
     # modèle identique à sa marque → la marque ; budget identique au budget supérieur → le budget supérieur.
@@ -265,7 +290,8 @@ def main():
         ex,has_guide=EXTRA.get(r,("",False))
         # 19/11/2026 (SEO) : une page modèle avec repères (guide) reste indexée dès 1 annonce (Google la montre déjà : Fabia, B-Max…)
         seen=("auto/"+r) in SEEN
-        if kind!="root" and len(its)<MIN_INDEX and not ((has_guide or seen) and its): robots="noindex,follow"
+        if kind=="empty": pass  # page vue par Google, gardée indexée (voir plus haut)
+        elif kind!="root" and len(its)<MIN_INDEX and not ((has_guide or seen) and its): robots="noindex,follow"
         elif r in canon: can=f'{SITE}/auto/{canon[r]+"/" if canon[r] else ""}'
         indexable[r]=robots=="index,follow" and not can
         pages[r]=page(*args,robots=robots,canonical=can,extra=ALERT.get(r,alert_cta(label="de voitures d’occasion"))+ex)
