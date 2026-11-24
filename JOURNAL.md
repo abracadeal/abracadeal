@@ -3316,3 +3316,9 @@
 - Contrôles du dépôt : sitemaps propres, 66 pages vues par Google indexées (13 modèles vendus). La tâche de nuit tourne bien (22 et 23/11).
 - Egress Supabase : 3,49 Go / 5 ; 61 Mo le 22/11 (contre ≈ 300 avant le 21/11). Marge encore juste → share-pages toutes les 4 h (17 */4).
 - À noter : « Log Query » 74 Go / 100 (pas facturé, application annoncée plus tard) → éviter query_logs (lecture des journaux Supabase) sauf nécessité.
+
+## 24/11/2026 nuit — Claude : tâche de nuit
+- Santé : Actions OK (aucun échec ; pas de passage « Pages de partage » depuis 22 h 38 UTC, normal avec le rythme toutes les 4 h), 6 flux pros sans erreur ni chute, modération 26 contrôles / 0 erreur / 0 en attente, 566 annonces en ligne, 8 nouvelles sur 24 h. Prospection 23/11 : 30 envois, 2 clics, 0 réponse, 0 inscription, 0 rebond.
+- SEO : 0 lien interne cassé (961 pages), sitemaps propres (748 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus.
+- tendances-vendeurs.html et vendeur-tendances.html : ajout d'une description Google (il n'y en avait pas).
+- Repères « à savoir » ajoutés sur 5 modèles vus par Google : Citroën Jumpy, Volkswagen Golf Plus, Mercedes GLB, Opel Zafira, Nissan Navara (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
