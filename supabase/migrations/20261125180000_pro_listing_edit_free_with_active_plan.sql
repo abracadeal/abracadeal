@@ -1,0 +1,2 @@
+-- 25/11/2026 : prepare_listing_change — un pro avec abonnement actif modifie gratuitement ses annonces, même déposées à la main
+-- (condition « l.source<>'manual' » retirée ; message d'erreur : « nécessite un abonnement Pro actif »). Appliquée via MCP (remplacement dans pg_get_functiondef).
