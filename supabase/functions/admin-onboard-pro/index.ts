@@ -106,7 +106,7 @@ function tempPassword() {
   return "Ab#" + Array.from(b).map((x) => x.toString(36).padStart(2, "0")).join("").slice(0, 30) + "9z";
 }
 
-function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean; slug?: string | null; sector?: string }) {
+function welcomeMail(p: { company: string; site: string; online: number; pending: number; link: string; founder: boolean; slug?: string | null; sector?: string; giftBoosts?: number; giftDays?: number }) {
   const immo = p.sector === "immobilier";
   const total = p.online + p.pending;
   const title = total > 0 ? "Vos annonces sont sur Abracadeal" : "Votre espace Pro Abracadeal est prêt";
@@ -118,6 +118,8 @@ function welcomeMail(p: { company: string; site: string; online: number; pending
       : `Vos annonces sont en cours d’import et seront en ligne dans les prochaines minutes. Vous n’avez rien à ressaisir.`,
     `Elles se mettent à jour toutes seules à partir de votre site : ${immo ? "un bien ajouté apparaît, un bien vendu ou loué disparaît" : "un véhicule ajouté apparaît, un véhicule vendu disparaît"}.`,
     ...(p.slug ? [`Votre showroom a sa propre adresse, à donner à vos clients : <strong>abracadeal.fr/${esc(p.slug)}</strong>`] : []),
+    // 25/11/2026 (Anthony) : cadeau de bienvenue facultatif — « À la une » offerts (crédits déjà ajoutés par l'admin).
+    ...(p.giftBoosts ? [`🎁 <strong>Cadeau de bienvenue : ${p.giftBoosts} mise${p.giftBoosts > 1 ? "s" : ""} « À la une » de ${p.giftDays || 7} jours offerte${p.giftBoosts > 1 ? "s" : ""}.</strong> Vos annonces apparaissent en tête de la page d’accueil et des résultats. Dès que vous êtes connecté, choisissez ${immo ? "les biens" : "les véhicules"} à mettre en avant, en un clic depuis « Mes annonces ».`] : []),
     `Pour accéder à votre espace (voir vos annonces, les mettre à la une, les partager), choisissez simplement votre mot de passe :`,
   ];
   const bullets = [
@@ -413,7 +415,8 @@ Deno.serve(async (req) => {
       const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "recovery", email: u.user.email, options: { redirectTo: "https://abracadeal.fr/" } });
       if (linkErr || !link?.properties?.action_link) throw new Error("Lien de mot de passe impossible : " + (linkErr?.message || ""));
       const mail = welcomeMail({
-        company: m.display_name || "votre entreprise", site: m.stock_site?.url || "",
+        company: String(body?.company || "").trim().slice(0, 120) || m.display_name || "votre entreprise", site: m.stock_site?.url || "",
+        giftBoosts: Math.max(0, Math.min(20, Number(body?.gift_boosts) || 0)), giftDays: Number(body?.gift_days) === 30 ? 30 : 7,
         online: recap.online, pending: recap.pending,
         link: link.properties.action_link, founder, slug: shw?.slug || null, sector: prof?.pro_sector || m.pro_sector || "",
       });
