@@ -3322,3 +3322,8 @@
 - SEO : 0 lien interne cassé (961 pages), sitemaps propres (748 URL, aucune absente ni en noindex), pages vues par Google toutes indexées sauf 13 modèles vendus.
 - tendances-vendeurs.html et vendeur-tendances.html : ajout d'une description Google (il n'y en avait pas).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Citroën Jumpy, Volkswagen Golf Plus, Mercedes GLB, Opel Zafira, Nissan Navara (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
+
+## 25/11/2026 — Claude : SEO (pages modèles vendues + demandes d'indexation)
+- build_auto_seo_pages.py : une page modèle déjà vue par Google (data/google-seen-pages.txt) reste en ligne et indexée même quand plus aucune annonce de ce modèle n'est en vente (message « Aucune … en ce moment », guide, autres voitures de la marque, bouton alerte). Ex. : /auto/opel/crossland/ (3e page la mieux placée sur Google) recréée.
+- Search Console : indexation demandée pour 10 pages : /auto/skoda/fabia/, /auto/opel/crossland/, /auto/opel/corsa/, /conseils/acheter-voiture-occasion.html (pas encore connue de Google), /auto/peugeot/2008/, /auto/ds/ds-3-crossback/, /auto/ford/fiesta/, /annonces/terrains-a-vendre/pyrenees-atlantiques/, /annonces/vehicules/cannes/, /auto/.
+- Reprise des publications Facebook/Instagram quotidiennes validée par Anthony (chaque post validé par lui avant publication).
