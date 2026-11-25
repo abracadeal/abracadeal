@@ -15,6 +15,14 @@
   "active": true,
   "short": "weecars-angers"
  },
+ "8d177271-5e9d-44f5-91df-c061d11c1832": {
+  "path": "garage/elite-prestige-services-cannes",
+  "name": "Elite Prestige Services",
+  "city": "Cannes",
+  "count": 1,
+  "active": true,
+  "short": "elite-prestige-services"
+ },
  "90c40fb7-ae19-4a67-9451-9aec4a3e4ac8": {
   "path": "immo/sophie-folley-immobilier-salies-de-bearn",
   "name": "Sophie Folley Immobilier",
