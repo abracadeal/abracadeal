@@ -562,7 +562,8 @@ async function offerWelcome(userId,feedId){
  const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Vérifier et envoyer le mail de bienvenue';li.appendChild(b);
  b.onclick=async()=>{b.disabled=true;
   try{const p=await onboardCall({action:'welcome_preview',user_id:userId});
-   const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
+   const gs=box.querySelector('[data-gift="'+id+'"]'),gift=b.dataset.again?0:Number(gs?gs.value:0)||0;
+   const msg='Mail de bienvenue à '+p.email+'\n\n• '+(gift?gift+' « À la une » de 7 jours offerts (crédités maintenant)\n• ':'')+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
    if(!confirm(msg)){b.disabled=false;return}
    b.remove();if(await sendWelcome(userId,feedId))onbDone();
   }catch(e){alert(e.message||e);b.disabled=false}};
@@ -582,13 +583,13 @@ async function loadWelcome(){
  box.innerHTML=rows.map(r=>{const who='<b>'+esc(r.name||r.email)+'</b>'+(r.city?' · '+esc(r.city):'')+'<br><span style="opacity:.75">'+esc(r.email)+' · '+r.online+' annonce'+(r.online>1?'s':'')+' en ligne · inscrit le '+fmt(r.created_at)+'</span>';
   return r.sent_at
    ?'<div class="wdone wrow" style="border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span class="wtxt">'+who+'<br><span style="color:#8fe3b0">✓ Envoyé le '+fmt(r.sent_at)+'</span></span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'" data-again="1">Renvoyer</button></div>'
-   :'<div class="req wrow"><span class="wtxt">'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
+   :'<div class="req wrow"><span class="wtxt">'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><label style="font-size:12px;opacity:.85;white-space:nowrap">🎁 À la une offerts <select data-gift="'+esc(r.id)+'"><option value="0">0</option><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></label><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
  }).join('');
  box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;b.disabled=true;b.textContent='Vérification…';
   try{const p=await onboardCall({action:'welcome_preview',user_id:id});
    const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
    if(!confirm(msg)){b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer';return}
-   b.textContent='Envoi…';await onboardCall({action:'welcome',user_id:id});
+   b.textContent='Envoi…';await onboardCall({action:'welcome',user_id:id,gift_boosts:gift,gift_days:7});
    try{await sb.rpc('admin_release_mail_hold',{p_user:id});}catch(_){}
    await loadWelcome();
   }catch(e){alert(e.message||e);b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer'}});

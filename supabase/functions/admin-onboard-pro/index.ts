@@ -405,18 +405,25 @@ Deno.serve(async (req) => {
         admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "active"),
         admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "pending"),
         admin.from("founder_enrollments").select("founder_number,revoked_at").eq("user_id", userId).maybeSingle(),
-        admin.from("profiles").select("pro_sector").eq("id", userId).maybeSingle(),
+        admin.from("profiles").select("pro_sector,display_name").eq("id", userId).maybeSingle(),
         admin.from("pro_showrooms").select("slug").eq("user_id", userId).maybeSingle(),
       ]);
       const founder = !!fe && !fe.revoked_at && fe.founder_number != null;
       const recap = { email: u.user.email, online: online || 0, pending: pending || 0, founder, already_sent_at: m.welcome_sent_at || null };
       if (action === "welcome_preview") return json({ ok: true, ...recap });
       if (!RESEND_API_KEY) return json({ error: "Envoi d’e-mails indisponible (clé Resend manquante)." }, 503);
+      // 25/11/2026 (Anthony) : cadeau « À la une » facultatif, crédité avec la session de l'admin (mêmes contrôles que l'admin).
+      const giftBoosts = Math.max(0, Math.min(20, Math.floor(Number(body?.gift_boosts) || 0)));
+      const giftDays = Number(body?.gift_days) === 30 ? 30 : 7;
+      if (giftBoosts > 0) {
+        const { error: gErr } = await caller.rpc("admin_grant_pro_boosts", { p_user_id: userId, p_duration_days: giftDays, p_credits: giftBoosts, p_note: "Cadeau de bienvenue" });
+        if (gErr) throw new Error("Cadeau « À la une » impossible : " + gErr.message);
+      }
       const { data: link, error: linkErr } = await admin.auth.admin.generateLink({ type: "recovery", email: u.user.email, options: { redirectTo: "https://abracadeal.fr/" } });
       if (linkErr || !link?.properties?.action_link) throw new Error("Lien de mot de passe impossible : " + (linkErr?.message || ""));
       const mail = welcomeMail({
-        company: String(body?.company || "").trim().slice(0, 120) || m.display_name || "votre entreprise", site: m.stock_site?.url || "",
-        giftBoosts: Math.max(0, Math.min(20, Number(body?.gift_boosts) || 0)), giftDays: Number(body?.gift_days) === 30 ? 30 : 7,
+        company: prof?.display_name || m.display_name || "votre entreprise", site: m.stock_site?.url || "",
+        giftBoosts, giftDays,
         online: recap.online, pending: recap.pending,
         link: link.properties.action_link, founder, slug: shw?.slug || null, sector: prof?.pro_sector || m.pro_sector || "",
       });
