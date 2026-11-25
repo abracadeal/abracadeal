@@ -3327,3 +3327,9 @@
 - build_auto_seo_pages.py : une page modèle déjà vue par Google (data/google-seen-pages.txt) reste en ligne et indexée même quand plus aucune annonce de ce modèle n'est en vente (message « Aucune … en ce moment », guide, autres voitures de la marque, bouton alerte). Ex. : /auto/opel/crossland/ (3e page la mieux placée sur Google) recréée.
 - Search Console : indexation demandée pour 10 pages : /auto/skoda/fabia/, /auto/opel/crossland/, /auto/opel/corsa/, /conseils/acheter-voiture-occasion.html (pas encore connue de Google), /auto/peugeot/2008/, /auto/ds/ds-3-crossback/, /auto/ford/fiesta/, /annonces/terrains-a-vendre/pyrenees-atlantiques/, /annonces/vehicules/cannes/, /auto/.
 - Reprise des publications Facebook/Instagram quotidiennes validée par Anthony (chaque post validé par lui avant publication).
+
+## 25/11/2026 nuit — Claude : tâche de nuit
+- Santé : Actions OK (le passage « Pages de partage » du 24/11 à 23 h 41 UTC a échoué une 1re fois puis a réussi en relance), 6 flux pros sans erreur ni chute (2 lectures partielles du site rattrapées au passage suivant, retraits non appliqués comme prévu), modération 37 contrôles / 0 erreur / 0 en attente, 563 annonces en ligne, 6 nouvelles sur 24 h. Prospection 24/11 : 30 envois, 0 clic, 0 réponse, 0 inscription, 1 rebond.
+- SEO : 0 lien interne cassé (969 pages), sitemaps propres (758 URL, aucune absente ni en noindex), 79 pages vues par Google toutes présentes et indexées.
+- avis-vacances.html et logement-vacances.html : ajout d'une description Google (il n'y en avait pas).
+- Repères « à savoir » ajoutés sur 5 modèles vus par Google : Peugeot 108, Peugeot Expert, Ford Focus, Dacia Spring, Tesla Model 3 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
