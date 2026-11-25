@@ -3333,3 +3333,4 @@
 - SEO : 0 lien interne cassé (969 pages), sitemaps propres (758 URL, aucune absente ni en noindex), 79 pages vues par Google toutes présentes et indexées.
 - avis-vacances.html et logement-vacances.html : ajout d'une description Google (il n'y en avait pas).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Peugeot 108, Peugeot Expert, Ford Focus, Dacia Spring, Tesla Model 3 (scripts/build_auto_seo_pages.py, pages refaites au prochain passage).
+- 25/11 14 h 45 — Claude : nouveau pro CADEK COURTAGE PLAINE DE GARONNE = Ewigo Venerque (ed99d091-…, inscrit à 14 h 12, flux venerque-ewigo.com, 52 annonces). Nom affiché « Ewigo Venerque ». Logo carré (logo Ewigo + VENERQUE) et bannière 3:1 faits par Claude : assets/pros/ewigo-venerque-logo.png et ewigo-venerque-banniere.jpg, posés en logo_path / banner_path (adresses https). Adresse de la vitrine inchangée (cadek-courtage-plaine-de-garonne-sas-ccp).
