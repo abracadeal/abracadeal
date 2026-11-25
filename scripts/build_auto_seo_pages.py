@@ -92,7 +92,7 @@ MODEL_GUIDES={
  "audi/rs6-avant":"L’Audi RS6 Avant est le break sportif d’Audi Sport. La génération lancée en 2019 reçoit un V8 4.0 TFSI biturbo d’environ 600 ch et la transmission intégrale quattro.",
  "bmw/serie-6":"La BMW Série 6 est la grande GT de BMW. La 3e génération (2011-2018) a existé en Coupé, en Cabriolet et en Gran Coupé quatre portes, avec la M6 en version sportive.",
  "audi/sq2":"L’Audi SQ2 est la version sportive du petit SUV Q2, lancée en 2018 : moteur 2.0 TFSI d’environ 300 ch et transmission intégrale quattro.",
- "mercedes/classe-v":"Le Mercedes Classe V est le grand monospace haut de gamme de Mercedes (depuis 2014), jusqu’à 8 places, en trois longueurs (compact, long et extra-long). Il existe aussi en électrique (EQV).",
+ "mercedes/classe-v":"Le Mercedes Classe V est le grand monospace haut de gamme de Mercedes (depuis 2014), jusqu’à 8 places, en trois longueurs (compact, long et extra-long). Il existe aussi en électrique (EQV). En version Extra-Long (environ 5,37 m), c’est le véhicule de référence des chauffeurs VTC et des navettes haut de gamme : jusqu’à 8 places et un grand coffre ; un modèle vendu par une société permet souvent de récupérer la TVA.",
  "citroen/spacetourer":"Le Citroën SpaceTourer est un grand monospace lancé en 2016, jusqu’à 9 places, cousin du Peugeot Traveller et du Toyota Proace Verso. Il existe aussi en électrique (ë-SpaceTourer).",
  "audi/a5":"L’Audi A5 est la famille coupé d’Audi, dérivée de l’A4 : Coupé, Cabriolet et Sportback cinq portes. La 2e génération a été vendue de 2016 à 2024, avec les sportives S5 et RS5.",
  "volkswagen/passat":"La Volkswagen Passat est la grande familiale de Volkswagen. La 8e génération (2014-2023) existait en berline et en break SW, dont une hybride rechargeable GTE ; la Passat actuelle n’existe plus qu’en break.",
@@ -180,11 +180,12 @@ def lastmod_tag(loc, changed, old):
     d = old.get(loc) if not changed else None
     return f"<lastmod>{d or datetime.date.today().isoformat()}</lastmod>"
 
+# 25/11/2026 : « Mercedes-Benz » regroupé avec « Mercedes » (une seule page par modèle ; /auto/mercedes-benz/ créé le jour même, jamais vu par Google).
 # 15/11/2026 (audit SEO, accord d'Anthony) : vrais noms de marques dans les titres (« BMW » et non « Bmw »), motos annoncées
 # comme motos (et non « annonces auto ») ; pages de moins de MIN_INDEX annonces en noindex et hors sitemap ;
 # modèle identique à sa marque (un seul modèle) ou budget identique au budget supérieur : la page la plus large reste, l'autre pointe vers elle.
 NICE_MAKES={"bmw":"BMW","bmw motorrad":"BMW Motorrad","citroen":"Citroën","ds":"DS","harley davidson":"Harley-Davidson",
-            "mg motor":"MG Motor","mg":"MG","ktm":"KTM","vw":"Volkswagen","land rover":"Land Rover","alfa romeo":"Alfa Romeo"}
+            "mg motor":"MG Motor","mercedes-benz":"Mercedes","mercedes benz":"Mercedes","mg":"MG","ktm":"KTM","vw":"Volkswagen","land rover":"Land Rover","alfa romeo":"Alfa Romeo"}
 MOTO_MAKES={"bmw motorrad","ducati","harley davidson","harley-davidson","kawasaki","keeway","ktm","triumph","royal enfield","piaggio","kymco","sym","aprilia","moto guzzi","mv agusta","indian","yamaha"}
 MIXED_MAKES={"honda","suzuki"}
 MIN_INDEX=3
