@@ -1,6 +1,6 @@
 /* 26/11/2026 (Anthony : « change tous les boutons violets en champagne »).
    Couleur champagne (or pâle) + texte prune foncé, sur tous les boutons qui étaient violets/roses.
-   Pour revenir au violet : retirer ce fichier des pages (index.html, pro.html, pro-fondateur.html). */
+   Pour revenir au violet : retirer ce fichier des pages (index.html, pro.html, pro-fondateur.html, pages Vacances). */
 :root{
   --champagne-grad:linear-gradient(120deg,#fbf0d9 0%,#efd7a6 48%,#dcb877 100%);
   --champagne-grad-hover:linear-gradient(120deg,#fdf5e4 0%,#f3dfb4 48%,#e3c387 100%);
@@ -17,6 +17,8 @@ html body .offer .btn,
 html body #followBtn.follow,
 html body #moreBtn.more,
 html body .dm-action-primary,
+html body .abraca-space-switch a.is-on,
+html body .vac-mobile-host-orb,
 html body .mobile-nav-publish .mobile-publish-orb{
   background:var(--champagne-grad)!important;
   background-color:#efd7a6!important;
@@ -45,6 +47,9 @@ html body .offer .btn *,
 html body #followBtn.follow *,
 html body #moreBtn.more *,
 html body .dm-action-primary *,
+html body .abraca-space-switch a.is-on *,
+html body .vac-mobile-host-orb *,
 html body .mobile-nav-publish .mobile-publish-orb *{color:var(--champagne-text)!important;fill:currentColor}
+html body .vac-mobile-host-orb svg,
 html body .mobile-nav-publish .mobile-publish-orb svg{stroke:var(--champagne-text)!important}
 html body .seller-showroom-btn .ssb-ico{background:rgba(42,15,58,.10)!important;color:var(--champagne-text)!important}
