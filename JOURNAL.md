@@ -3358,3 +3358,4 @@
 - 26/11 23 h 50 — Claude (demande Anthony) : bandeau Fondateurs (#founderTopbar, accueil) et bandeau « 500 premiers logements » (Vacances) en champagne, texte prune, mots en or foncé ; bouton « Devenir Fondateur » en prune (texte champagne) pour rester visible. Même fichier champagne-buttons-20261126.css (v=4).
 - 27/11 00 h — Claude (demande Anthony) : bouton « Connexion » de l'en-tête (#accountBtn accueil, #vacLoginCta Vacances, visibles sur tablette/ordinateur moyen) et bouton « Abracadeal » de l'en-tête Vacances (#vacBackMainBtn) en champagne (v=5).
 - 27/11 00 h 05 — Claude (demande Anthony) : « Mot de passe oublié ? » (.auth-link de la fenêtre de connexion) en petit bouton champagne (v=6).
+- 27/11 00 h 10 — Claude (demande Anthony) : « Mot de passe oublié ? » finalement en lien noir souligné (plus de bouton champagne), v=7.
