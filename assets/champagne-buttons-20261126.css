@@ -53,3 +53,29 @@ html body .mobile-nav-publish .mobile-publish-orb *{color:var(--champagne-text)!
 html body .vac-mobile-host-orb svg,
 html body .mobile-nav-publish .mobile-publish-orb svg{stroke:var(--champagne-text)!important}
 html body .seller-showroom-btn .ssb-ico{background:rgba(42,15,58,.10)!important;color:var(--champagne-text)!important}
+
+/* 26/11/2026 (Anthony : « le bandeau fondateur aussi ») : bandeau Fondateurs (accueil) et « 500 premiers logements » (Vacances)
+   en champagne, texte prune ; le bouton « Devenir Fondateur » passe en prune pour rester visible sur le champagne. */
+html body #founderTopbar,
+html body .vac-founder-strip{
+  background:var(--champagne-grad)!important;
+  border-top:1px solid var(--champagne-border)!important;
+  border-bottom:1px solid var(--champagne-border)!important;
+  color:var(--champagne-text)!important;
+}
+html body #founderTopbar .founder-topbar-text,
+html body #founderTopbar .founder-topbar-inner,
+html body .vac-founder-strip .vac-founder-strip-inner{color:var(--champagne-text)!important}
+html body #founderTopbar strong,
+html body .vac-founder-strip strong{color:#7a4a0c!important}
+html body #founderTopbar .ft-limit,
+html body .vac-founder-strip .vfs-limit{color:#7a4a0c!important;border-color:rgba(122,74,12,.45)!important}
+html body #founderTopbar .strip-ico,
+html body .vac-founder-strip .strip-ico{stroke:#7a4a0c!important}
+html body #founderTopbar .founder-topbar-cta,
+html body .vac-founder-strip .vfs-cta{
+  background:var(--champagne-text)!important;color:#f6e3bb!important;border:0!important;
+  box-shadow:0 4px 12px rgba(42,15,58,.25)!important;
+}
+html body #founderTopbar .founder-topbar-cta:hover,
+html body .vac-founder-strip .vfs-cta:hover{background:#3d1a52!important;color:#fff3d6!important}
