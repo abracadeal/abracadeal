@@ -3359,3 +3359,4 @@
 - 27/11 00 h — Claude (demande Anthony) : bouton « Connexion » de l'en-tête (#accountBtn accueil, #vacLoginCta Vacances, visibles sur tablette/ordinateur moyen) et bouton « Abracadeal » de l'en-tête Vacances (#vacBackMainBtn) en champagne (v=5).
 - 27/11 00 h 05 — Claude (demande Anthony) : « Mot de passe oublié ? » (.auth-link de la fenêtre de connexion) en petit bouton champagne (v=6).
 - 27/11 00 h 10 — Claude (demande Anthony) : « Mot de passe oublié ? » finalement en lien noir souligné (plus de bouton champagne), v=7.
+- 27/11 00 h 15 — Claude (demande Anthony) : fenêtre de connexion — onglet actif « Connexion » / « Créer un compte » en champagne (la règle violette #accountModal… était plus forte), bouton .header-flow-errors-btn aussi ; lien « Créer un compte gratuit » en noir. v=8.
