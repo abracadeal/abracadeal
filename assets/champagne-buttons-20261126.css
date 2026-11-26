@@ -89,10 +89,6 @@ html body .vac-founder-strip .vfs-cta{
 html body #founderTopbar .founder-topbar-cta:hover,
 html body .vac-founder-strip .vfs-cta:hover{background:#3d1a52!important;color:#fff3d6!important}
 
-/* 26/11/2026 (Anthony) : « Mot de passe oublié ? » (et les autres liens .auth-link de la fenêtre de connexion) en petit bouton champagne */
-html body .auth-link{
-  display:inline-flex!important;align-items:center;min-height:32px;padding:0 14px!important;border-radius:999px!important;
-  background:var(--champagne-grad)!important;color:var(--champagne-text)!important;border:1px solid var(--champagne-border)!important;
-  text-decoration:none!important;font-weight:800!important;box-shadow:0 3px 10px rgba(180,138,60,.20)!important;
-}
-html body .auth-link:hover{background:var(--champagne-grad-hover)!important;color:var(--champagne-text)!important}
+/* 26/11/2026 (Anthony : « en noir Mot de passe oublié ? ») : liens .auth-link de la fenêtre de connexion en noir, soulignés */
+html body .auth-link{color:#111!important;text-decoration:underline!important;text-underline-offset:3px}
+html body .auth-link:hover{color:#000!important}
