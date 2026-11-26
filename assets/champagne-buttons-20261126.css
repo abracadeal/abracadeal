@@ -92,3 +92,13 @@ html body .vac-founder-strip .vfs-cta:hover{background:#3d1a52!important;color:#
 /* 26/11/2026 (Anthony : « en noir Mot de passe oublié ? ») : liens .auth-link de la fenêtre de connexion en noir, soulignés */
 html body .auth-link{color:#111!important;text-decoration:underline!important;text-underline-offset:3px}
 html body .auth-link:hover{color:#000!important}
+
+/* 26/11/2026 (Anthony : « connexion c'est toujours violet ») : onglets « Connexion / Créer un compte » de la fenêtre de connexion — onglet actif en champagne */
+html body .auth-tab.active,
+html body #accountModal #authLoginMode:checked ~ .auth-tabs #loginTab,
+html body #accountModal #authSignupMode:checked ~ .auth-tabs #signupTab,
+html body .header-flow-errors-btn{
+  background:var(--champagne-grad)!important;color:var(--champagne-text)!important;border-color:var(--champagne-border)!important;box-shadow:var(--champagne-shadow)!important;
+}
+/* Lien « Créer un compte gratuit » sous le formulaire : en noir comme « Mot de passe oublié ? » */
+html body #accountModal .auth-switch label,html body #accountModal .auth-switch a{color:#111!important}
