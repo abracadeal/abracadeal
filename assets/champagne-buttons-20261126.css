@@ -18,6 +18,9 @@ html body #followBtn.follow,
 html body #moreBtn.more,
 html body .dm-action-primary,
 html body .abraca-space-switch a.is-on,
+html body #accountBtn.btn.ghost:not(.hidden),
+html body #vacLoginCta.btn.ghost:not(.hidden),
+html body #vacBackMainBtn,
 html body .vac-mobile-host-orb,
 html body .mobile-nav-publish .mobile-publish-orb{
   background:var(--champagne-grad)!important;
@@ -34,6 +37,9 @@ html body .seller-showroom-btn:hover,
 html body .offer .btn:hover,
 html body #followBtn.follow:hover,
 html body #moreBtn.more:hover,
+html body #accountBtn.btn.ghost:hover,
+html body #vacLoginCta.btn.ghost:hover,
+html body #vacBackMainBtn:hover,
 html body .dm-action-primary:hover{
   background:var(--champagne-grad-hover)!important;
   filter:none!important;
@@ -48,6 +54,9 @@ html body #followBtn.follow *,
 html body #moreBtn.more *,
 html body .dm-action-primary *,
 html body .abraca-space-switch a.is-on *,
+html body #accountBtn.btn.ghost *,
+html body #vacLoginCta.btn.ghost *,
+html body #vacBackMainBtn *,
 html body .vac-mobile-host-orb *,
 html body .mobile-nav-publish .mobile-publish-orb *{color:var(--champagne-text)!important;fill:currentColor}
 html body .vac-mobile-host-orb svg,
