@@ -16,6 +16,7 @@ html body .seller-showroom-btn,
 html body .offer .btn,
 html body #followBtn.follow,
 html body #moreBtn.more,
+html body .dm-action-primary,
 html body .mobile-nav-publish .mobile-publish-orb{
   background:var(--champagne-grad)!important;
   background-color:#efd7a6!important;
@@ -30,7 +31,8 @@ html body .home-group-more:hover,
 html body .seller-showroom-btn:hover,
 html body .offer .btn:hover,
 html body #followBtn.follow:hover,
-html body #moreBtn.more:hover{
+html body #moreBtn.more:hover,
+html body .dm-action-primary:hover{
   background:var(--champagne-grad-hover)!important;
   filter:none!important;
 }
@@ -42,6 +44,7 @@ html body .seller-showroom-btn *,
 html body .offer .btn *,
 html body #followBtn.follow *,
 html body #moreBtn.more *,
+html body .dm-action-primary *,
 html body .mobile-nav-publish .mobile-publish-orb *{color:var(--champagne-text)!important;fill:currentColor}
 html body .mobile-nav-publish .mobile-publish-orb svg{stroke:var(--champagne-text)!important}
 html body .seller-showroom-btn .ssb-ico{background:rgba(42,15,58,.10)!important;color:var(--champagne-text)!important}
