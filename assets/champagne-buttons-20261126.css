@@ -112,3 +112,23 @@ html body .vac-mobile-nav-item.is-active:not(.vac-mobile-host){color:#f6dfae!imp
 html body .mobile-nav-item.is-active::after,
 html body .vac-mobile-nav-item.is-active::after{background:#f0d49b!important;box-shadow:0 0 10px rgba(240,212,155,.6)!important}
 html body .mobile-nav-publish,html body .vac-mobile-host{color:#d9c08e!important}
+
+/* 27/11/2026 (Anthony : « enlève toutes les écritures violettes ») : textes violets → noir (fonds clairs) ou champagne (fonds sombres).
+   Bordures violettes des boutons à contour → champagne. */
+:root{--ink-dark:#1c1222}
+/* Accueil, fiche annonce */
+html body .quick-filter-chip,html body #qfCityLabel,html body #qfPriceLabel,
+html body .seller-profile-link,html body .detail-price-main,html body .detail-related-price,
+html body .dm-seller-badge,html body .seller-badge,html body #b2bDiscoveryTitle,
+html body .detail-modal a:not(.btn):not(.seller-showroom-btn),html body .listing-detail a:not(.btn):not(.seller-showroom-btn),
+html body .text-link,html body .category-pill,html body .status-pill,html body .filter-chip{color:var(--ink-dark)!important}
+html body .dm-action-ghost,html body .btn.ghost:not(.hidden):not(#accountBtn):not(#vacLoginCta):not(#signupBtn),
+html body .btn.secondary{color:var(--ink-dark)!important;border-color:var(--champagne-border)!important}
+/* Vacances : mots roses/violets sur la photo du haut → champagne */
+html body .hero-grid h1 span{background:linear-gradient(90deg,#fff,#f6e3bb 50%,#d9b46c)!important;-webkit-background-clip:text!important;background-clip:text!important;color:transparent!important;-webkit-text-fill-color:transparent}
+html body .hero-grid p strong{color:#f0d49b!important}
+html body .host-actions .secondary{color:var(--ink-dark)!important;border-color:var(--champagne-border)!important}
+/* Vacances (règles à ID plus fortes) */
+html body #vacTravelerMain .hero strong,html body #vacTravelerMain .hero b,html body #vacTravelerMain .hero-grid p strong{color:#f0d49b!important}
+html body #vacTravelerMain .hero h1 span{color:transparent!important}
+html body #devenir-hote .host-cta-actions .btn.secondary,html body #vacTravelerMain #devenir-hote .btn.secondary,html body #vacTravelerMain .btn.secondary,html body .price-big,html body .btn.auth-secondary,html body #vacTravelerMain .host-actions .secondary,html body #vacTravelerMain .btn.ghost:not(#vacLoginCta){color:#1c1222!important;border-color:rgba(190,150,80,.55)!important}

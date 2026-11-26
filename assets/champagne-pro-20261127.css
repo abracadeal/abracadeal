@@ -1,0 +1,8 @@
+/* 27/11/2026 (Anthony : « enlève toutes les écritures violettes ») — vitrine pro (pro.html uniquement) : textes violets → noir, contours → champagne */
+:root{--ink-dark:#1c1222;--champagne-border:rgba(190,150,80,.55)}
+html body .tabs button.active{color:var(--ink-dark)!important;border-bottom-color:#d9b46c!important}
+html body .share,html body .contact-toggle,html body .contact-link{color:var(--ink-dark)!important;border-color:var(--champagne-border)!important}
+html body .logo{color:var(--ink-dark)!important}
+html body .error a,html body .tools .count button{color:var(--ink-dark)!important}
+html body .card .price,html body .grid .price{color:var(--ink-dark)!important}
+html body .badge{color:var(--ink-dark)!important}
