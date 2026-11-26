@@ -1,0 +1,6 @@
+/* 27/11/2026 (Anthony : « sur À la une tablette les vignettes sont trop grosses ») :
+   tablette (761–1023 px) : 3 vignettes par ligne au lieu de 2 (À la une + recherches récentes / vues / près de chez vous). */
+@media (min-width:761px) and (max-width:1023px){
+  html body .home-featured-grid,
+  html body .personalized-grid{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:10px!important}
+}
