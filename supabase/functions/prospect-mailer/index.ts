@@ -153,7 +153,7 @@ https://abracadeal.fr/pro-fondateur.html
 
 ${trust}
 
-« Je publie » et votre SIRET, c'est tout. Gratuit, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
+« Je publie » et votre SIRET, c'est tout. Sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
 
 ${noTrap}
 
@@ -173,7 +173,7 @@ https://abracadeal.fr/pro-fondateur.html
 
 Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
-C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
+Sans engagement : si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
 
 ${noTrap}
 
