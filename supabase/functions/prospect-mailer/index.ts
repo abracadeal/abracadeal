@@ -141,8 +141,8 @@ function trustLine(category: string, network?: string | null) {
 }
 function apercuTemplates(category: string, n: number, followup: boolean, network?: string | null): Tpl {
   const vos = apercuNoun(category, n), plural = n !== 1, trust = trustLine(category, network);
-  // 26/11/2026 (Anthony) : rassurer — aucun piège, on ne demande que des informations publiques.
-  const noTrap = "Aucun piège : ni carte bancaire, ni mot de passe, ni document. Nous vous demandons seulement votre SIRET (une information publique, que chacun peut retrouver sur internet) et un e-mail ou un téléphone pour vous joindre.";
+  // 26/11/2026 (Anthony) : rassurer — « plus rien n'est gratuit » → pourquoi c'est donnant-donnant ; on ne demande que des informations publiques.
+  const noTrap = "Vous vous dites sûrement qu'aujourd'hui, plus rien n'est gratuit. C'est vrai, et c'est pour ça que c'est donnant-donnant : nous lançons Abracadeal et avons besoin d'annonces de qualité, vous avez besoin de visibilité. Vos annonces sont diffusées gratuitement, sans carte bancaire, sans document : seulement votre SIRET (une information publique) et un e-mail ou un téléphone pour vous joindre.";
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
