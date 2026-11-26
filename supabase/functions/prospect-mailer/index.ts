@@ -125,13 +125,22 @@ function apercuNoun(category: string, n: number) {
   return n > 1 ? `vos ${n} ${w[1]}` : `votre ${w[0]}`;
 }
 // 26/11/2026 (Anthony) : « Ils nous font confiance » avec le nom de pros déjà en ligne, du même métier que le prospect.
-function trustLine(category: string) {
+// 26/11/2026 (Anthony) : même réseau = argument le plus fort (« votre réseau est déjà là »).
+function networkOf(...parts: (string | null | undefined)[]): "ewigo" | "weecars" | null {
+  const t = parts.map((x) => String(x || "")).join(" ").toLowerCase();
+  if (/ewigo/.test(t)) return "ewigo";
+  if (/wee-?cars/.test(t)) return "weecars";
+  return null;
+}
+function trustLine(category: string, network?: string | null) {
+  if (network === "ewigo") return "Votre réseau est déjà là : Ewigo Venerque est en ligne sur Abracadeal (abracadeal.fr/ewigo-venerque).";
+  if (network === "weecars") return "Votre réseau est déjà là : WeeCars Angers, WeeCars Brest et WeeCars Bordeaux Est sont en ligne sur Abracadeal.";
   return category === "Agence immobilière"
     ? "Ils nous font confiance : Gubernatis Immobilier (Nice), Sophie Folley Immobilier."
     : "Ils nous font confiance : Ewigo Venerque, Alternative Cars, WeeCars Angers, WeeCars Brest, WeeCars Bordeaux Est.";
 }
-function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
-  const vos = apercuNoun(category, n), plural = n !== 1, trust = trustLine(category);
+function apercuTemplates(category: string, n: number, followup: boolean, network?: string | null): Tpl {
+  const vos = apercuNoun(category, n), plural = n !== 1, trust = trustLine(category, network);
   // 26/11/2026 (Anthony) : rassurer — aucun piège, on ne demande que des informations publiques.
   const noTrap = "Aucun piège : ni carte bancaire, ni mot de passe, ni document. Nous vous demandons seulement votre SIRET (une information publique, que chacun peut retrouver sur internet) et un e-mail ou un téléphone pour vous joindre.";
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
@@ -540,7 +549,7 @@ Deno.serve(async (req) => {
     for (const j of list) {
       const followup = j.kind === "followup";
       try {
-        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status,mail_kind").eq("id", j.id).single();
+        const { data: row } = await admin.from("prospection_prospects").select("ab_variant,site_check_count,site_check_status,mail_kind,source_url").eq("id", j.id).single();
         const variant = await variantOf(j.id, row?.ab_variant);
         if (!followup && !(await domainReceivesMail(j.email))) throw new Error("Domaine inexistant (aucun MX ni A) : non envoyé");
         if (isProviderEmail(j.email)) throw new Error("Adresse de l’hébergeur / du créateur du site, pas du pro : non envoyé");
@@ -553,7 +562,7 @@ Deno.serve(async (req) => {
         const pv = await previewInfo(j.id, j.category || ""), nPrev = pv.n, shown = pv.sure ? pv.n : 0;
         const firstWasApercu = followup ? row?.mail_kind === "apercu" : true;
         const useApercu = nPrev >= 3 && firstWasApercu;
-        const tpl = useApercu ? apercuTemplates(j.category || "", shown, followup)
+        const tpl = useApercu ? apercuTemplates(j.category || "", shown, followup, networkOf(j.email, j.company, (row as any)?.source_url))
           : await templates(j.category || "", followup, variant, tested ? "" : row?.site_check_status === "manual" ? "manuel" : "normal");
         const photos = followup && useApercu ? (pv.rows || []).filter((a: any) => /^https:\/\//.test(String(a.ph))).slice(0, 3) : undefined;
         const { data, msgId } = await buildMail(c, j.email, j.company, j.id, tpl, followup ? j.in_reply_to : null, stockPhrase(j.category || "", shown), null, null, photos);
