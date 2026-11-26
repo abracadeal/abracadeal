@@ -1,0 +1,47 @@
+/* 26/11/2026 (Anthony : « change tous les boutons violets en champagne »).
+   Couleur champagne (or pâle) + texte prune foncé, sur tous les boutons qui étaient violets/roses.
+   Pour revenir au violet : retirer ce fichier des pages (index.html, pro.html, pro-fondateur.html). */
+:root{
+  --champagne-grad:linear-gradient(120deg,#fbf0d9 0%,#efd7a6 48%,#dcb877 100%);
+  --champagne-grad-hover:linear-gradient(120deg,#fdf5e4 0%,#f3dfb4 48%,#e3c387 100%);
+  --champagne-text:#2a0f3a;
+  --champagne-border:rgba(190,150,80,.55);
+  --champagne-shadow:0 6px 18px rgba(180,138,60,.28);
+}
+html body .btn.primary:not(.hidden),
+html body #searchBtn,
+html body .search-btn,
+html body .home-group-more,
+html body .seller-showroom-btn,
+html body .offer .btn,
+html body #followBtn.follow,
+html body #moreBtn.more,
+html body .mobile-nav-publish .mobile-publish-orb{
+  background:var(--champagne-grad)!important;
+  background-color:#efd7a6!important;
+  color:var(--champagne-text)!important;
+  border:1px solid var(--champagne-border)!important;
+  box-shadow:var(--champagne-shadow)!important;
+}
+html body .btn.primary:not(.hidden):hover,
+html body #searchBtn:hover,
+html body .search-btn:hover,
+html body .home-group-more:hover,
+html body .seller-showroom-btn:hover,
+html body .offer .btn:hover,
+html body #followBtn.follow:hover,
+html body #moreBtn.more:hover{
+  background:var(--champagne-grad-hover)!important;
+  filter:none!important;
+}
+/* Textes et icônes à l'intérieur : même couleur sombre, lisible sur le champagne */
+html body .btn.primary:not(.hidden) *,
+html body #searchBtn *,
+html body .home-group-more *,
+html body .seller-showroom-btn *,
+html body .offer .btn *,
+html body #followBtn.follow *,
+html body #moreBtn.more *,
+html body .mobile-nav-publish .mobile-publish-orb *{color:var(--champagne-text)!important;fill:currentColor}
+html body .mobile-nav-publish .mobile-publish-orb svg{stroke:var(--champagne-text)!important}
+html body .seller-showroom-btn .ssb-ico{background:rgba(42,15,58,.10)!important;color:var(--champagne-text)!important}
