@@ -102,3 +102,13 @@ html body .header-flow-errors-btn{
 }
 /* Lien « Créer un compte gratuit » sous le formulaire : en noir comme « Mot de passe oublié ? » */
 html body #accountModal .auth-switch label,html body #accountModal .auth-switch a{color:#111!important}
+
+/* 27/11/2026 (Anthony : « sur mobile rechercher favoris messages compte aussi en bas ») : barre du bas en champagne.
+   Icônes et libellés champagne ; onglet actif champagne plus lumineux avec son trait. */
+html body .mobile-nav-item:not(.mobile-nav-publish),
+html body .vac-mobile-nav-item:not(.vac-mobile-host){color:#d9c08e!important}
+html body .mobile-nav-item.is-active:not(.mobile-nav-publish),
+html body .vac-mobile-nav-item.is-active:not(.vac-mobile-host){color:#f6dfae!important}
+html body .mobile-nav-item.is-active::after,
+html body .vac-mobile-nav-item.is-active::after{background:#f0d49b!important;box-shadow:0 0 10px rgba(240,212,155,.6)!important}
+html body .mobile-nav-publish,html body .vac-mobile-host{color:#d9c08e!important}
