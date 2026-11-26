@@ -132,6 +132,8 @@ function trustLine(category: string) {
 }
 function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
   const vos = apercuNoun(category, n), plural = n !== 1, trust = trustLine(category);
+  // 26/11/2026 (Anthony) : rassurer — aucun piège, on ne demande que des informations publiques.
+  const noTrap = "Aucun piège : ni carte bancaire, ni mot de passe, ni document. Nous vous demandons seulement votre SIRET (une information publique, que chacun peut retrouver sur internet) et un e-mail ou un téléphone pour vous joindre.";
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
@@ -143,6 +145,8 @@ https://abracadeal.fr/pro-fondateur.html
 ${trust}
 
 « Je publie » et votre SIRET, c'est tout. Gratuit, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
+
+${noTrap}
 
 Le Service Pros Abracadeal
 abracadeal.fr – {{expediteur}}` };
@@ -161,6 +165,8 @@ https://abracadeal.fr/pro-fondateur.html
 Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
 C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
+
+${noTrap}
 
 ${trust}
 
