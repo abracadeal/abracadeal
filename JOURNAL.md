@@ -3360,3 +3360,4 @@
 - 27/11 00 h 05 — Claude (demande Anthony) : « Mot de passe oublié ? » (.auth-link de la fenêtre de connexion) en petit bouton champagne (v=6).
 - 27/11 00 h 10 — Claude (demande Anthony) : « Mot de passe oublié ? » finalement en lien noir souligné (plus de bouton champagne), v=7.
 - 27/11 00 h 15 — Claude (demande Anthony) : fenêtre de connexion — onglet actif « Connexion » / « Créer un compte » en champagne (la règle violette #accountModal… était plus forte), bouton .header-flow-errors-btn aussi ; lien « Créer un compte gratuit » en noir. v=8.
+- 27/11 00 h 05 — Claude (demande Anthony) : barre du bas mobile en champagne (icônes et libellés #d9c08e, onglet actif #f6dfae avec trait champagne) sur l'accueil et Vacances. v=9.
