@@ -7,3 +7,30 @@
   html body .home-featured-grid .featured-badge,html body .home-featured-grid .pro-card-badge,
   html body .personalized-grid .featured-badge,html body .personalized-grid .pro-card-badge{white-space:nowrap!important;font-size:9.5px!important;padding:4px 7px!important}
 }
+
+/* Vraie tablette tactile (classe abraca-tablet-as-mobile : la tablette affiche la version mobile, avec la bande
+   « À la une » qui défile horizontalement, 2 grosses vignettes visibles). Anthony : « que 2 vignettes en horizontal ».
+   → 4 vignettes visibles en vertical, 6 en horizontal, dans la bande qui défile. */
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card,
+html.abraca-tablet-as-mobile body #recentSearchSection .personalized-card,
+html.abraca-tablet-as-mobile body #recentViewedSection .personalized-card,
+html.abraca-tablet-as-mobile body #nearbySection .personalized-card{
+  flex:0 0 calc((100% - 30px)/4)!important;width:calc((100% - 30px)/4)!important;
+  min-width:calc((100% - 30px)/4)!important;max-width:calc((100% - 30px)/4)!important;
+  height:auto!important;min-height:0!important;max-height:none!important;align-self:flex-start!important;
+}
+@media (orientation:landscape){
+  html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card,
+  html.abraca-tablet-as-mobile body #recentSearchSection .personalized-card,
+  html.abraca-tablet-as-mobile body #recentViewedSection .personalized-card,
+  html.abraca-tablet-as-mobile body #nearbySection .personalized-card{
+    flex-basis:calc((100% - 50px)/6)!important;width:calc((100% - 50px)/6)!important;
+    min-width:calc((100% - 50px)/6)!important;max-width:calc((100% - 50px)/6)!important;
+  }
+}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .featured-badge,
+html.abraca-tablet-as-mobile body #homeFeaturedSection .pro-card-badge{white-space:nowrap!important;font-size:9px!important;padding:3px 6px!important}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card :is(.home-featured-title,.ad-title){font-size:11.5px!important;line-height:1.22!important}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card :is(.home-featured-price,.ad-price){font-size:14px!important}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card :is(.ad-specs,.ad-city,.ad-meta,.home-featured-meta){font-size:9.5px!important}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-photo{flex:0 0 auto!important;height:auto!important;min-height:0!important;max-height:none!important;aspect-ratio:4/3!important}
