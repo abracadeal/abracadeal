@@ -124,8 +124,14 @@ function apercuNoun(category: string, n: number) {
   if (!(n > 0)) return `vos ${w[1]}`;
   return n > 1 ? `vos ${n} ${w[1]}` : `votre ${w[0]}`;
 }
+// 26/11/2026 (Anthony) : « Ils nous font confiance » avec le nom de pros déjà en ligne, du même métier que le prospect.
+function trustLine(category: string) {
+  return category === "Agence immobilière"
+    ? "Ils nous font confiance : Gubernatis Immobilier (Nice), Sophie Folley Immobilier."
+    : "Ils nous font confiance : Ewigo Venerque, Alternative Cars, WeeCars Angers, WeeCars Brest, WeeCars Bordeaux Est.";
+}
 function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
-  const vos = apercuNoun(category, n), plural = n !== 1;
+  const vos = apercuNoun(category, n), plural = n !== 1, trust = trustLine(category);
   const subject = `{{societe}} : ${vos} ${plural ? "sont déjà prêts" : "est déjà prêt"} sur Abracadeal`;
   if (followup) return { subject: "Re: " + subject, body:
 `Bonjour,
@@ -133,6 +139,8 @@ function apercuTemplates(category: string, n: number, followup: boolean): Tpl {
 Je vous redonne le lien : ${vos} ${plural ? "attendent" : "attend"} toujours sur Abracadeal, le nouveau site de petites annonces.
 
 https://abracadeal.fr/pro-fondateur.html
+
+${trust}
 
 « Je publie » et votre SIRET, c'est tout. Gratuit, sans carte bancaire, sans engagement : si ça marche, vous restez ; sinon, vous arrêtez en un clic.
 
@@ -153,6 +161,8 @@ https://abracadeal.fr/pro-fondateur.html
 Si elle vous plaît : « Je publie » et votre SIRET. Vos annonces passent en ligne, puis se mettent à jour toutes seules depuis votre site.
 
 C'est donnant-donnant : gratuit, sans carte bancaire, sans engagement. Si ça vous amène des clients, vous restez ; sinon, vous arrêtez en un clic, sans rien payer.
+
+${trust}
 
 Économisez tout ça et faites d'Abracadeal votre partenaire officiel.
 
