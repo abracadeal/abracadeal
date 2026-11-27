@@ -3376,3 +3376,6 @@
 - Santé : Actions OK (aucun échec ; les « annulés » sont des publications remplacées par la suivante, normal), 7 flux pros sans erreur ni chute, modération 19 contrôles / 0 erreur / 0 en attente, 615 annonces en ligne, 8 nouvelles sur 24 h. Prospection 26/11 : 30 envois, 1 clic, 0 réponse, 0 inscription, 2 désinscriptions, 1 rebond.
 - SEO : 0 lien interne cassé (1 062 pages), sitemaps propres (869 URL, aucune absente ni en noindex), 231 pages vues par Google toutes présentes et indexées. Seul doublon de titre : tendances-vendeurs.html / vendeur-tendances.html (« Tendances du marché », sans gravité).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Renault Clio, Peugeot 208, Volkswagen Golf, Peugeot 3008, Renault Twingo (scripts/build_auto_seo_pages.py, pages refaites au prochain passage). 61 modèles vus par Google restent sans repère.
+
+## 27/11/2026 10h — Claude : relance indexation Search Console
+- Non faite : le Mac est hors ligne (navigateur intégré injoignable). Pages en attente : /annonces/voitures-occasion/finistere/, /annonces/vehicules/finistere/, /annonces/vehicules/val-de-marne/, /auto/porsche/macan/, /auto/nissan/gt-r/, /auto/bmw/m2/, /auto/mercedes/classe-e/. Elles restent dans le sitemap, Google les reprendra de toute façon ; la demande accélère seulement.
