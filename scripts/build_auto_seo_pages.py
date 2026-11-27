@@ -109,6 +109,11 @@ MODEL_GUIDES={
  "bmw/serie-3":"La BMW Série 3 est la berline familiale de BMW, produite depuis 1975 et déclinée en break Touring. Les générations les plus courantes en occasion sont la E90 (à partir de 2005), la F30 (à partir de 2012) et la G20 (depuis 2019), en essence, en diesel et en hybride rechargeable (330e).",
  "hyundai/tucson":"Le Hyundai Tucson est le SUV compact de Hyundai. Il a succédé à l’ix35 en 2015 ; la génération lancée en 2020 se distingue par son style très anguleux et existe notamment en hybride et en hybride rechargeable.",
  "peugeot/508":"La Peugeot 508 est la grande berline de Peugeot, lancée en 2010 et déclinée en break SW. La 2e génération (2018), au profil de berline fastback, existe en essence, en diesel et en hybride rechargeable, avec une version sportive PSE.",
+ "renault/clio":"La Renault Clio est la citadine polyvalente de Renault, lancée en 1990 pour succéder à la R5 et deux fois élue Voiture de l’année (1991 et 2006). La Clio V, lancée en 2019 et restylée en 2023, existe en essence, en GPL et en hybride E-Tech.",
+ "peugeot/208":"La Peugeot 208 est la citadine de Peugeot, lancée en 2012 pour remplacer la 207. La deuxième génération, sortie en 2019 et élue Voiture de l’année 2020, existe en essence, en diesel et en 100 % électrique (e-208) ; elle a été restylée en 2023.",
+ "volkswagen/golf":"La Volkswagen Golf est la compacte de Volkswagen depuis 1974, avec huit générations à ce jour et une version sportive GTI depuis 1976. La Golf 8, lancée en 2019 et restylée en 2024, existe aussi en break (Golf SW) et en hybride rechargeable.",
+ "peugeot/3008":"Le Peugeot 3008 est le SUV compact de Peugeot. Lancé en 2009 comme crossover, il est devenu un vrai SUV avec la deuxième génération (2016), élue Voiture de l’année 2017 ; la troisième génération, sortie fin 2023, existe en hybride et en 100 % électrique (E-3008).",
+ "renault/twingo":"La Renault Twingo est la petite citadine de Renault, lancée en 1993. Après la Twingo II (2007), la Twingo III (2014), à moteur arrière et conçue avec la Smart ForFour, existe en essence et en 100 % électrique depuis 2020.",
 }
 def google_seen():
     """19/11/2026 : pages que Google montre déjà (data/google-seen-pages.txt) → indexées dès 1 annonce."""
