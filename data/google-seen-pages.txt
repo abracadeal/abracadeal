@@ -234,3 +234,4 @@ auto/volkswagen/golf
 auto/volkswagen/t-cross
 auto/volkswagen/tiguan
 auto/volkswagen/transporter
+auto/citroen/c5-aircross
