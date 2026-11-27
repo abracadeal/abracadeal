@@ -1170,7 +1170,9 @@ def dedupe_hubs(pages, meta):
         catpos = lambda r: next((i for i, h in enumerate(HUB_CATEGORIES) if h[0] == r.split("/")[0]), 99) if "/" in r else 99
         rels.sort(key=lambda r: (-HUB_PRIORITY.get(meta[r][1], 0), catsize(r), catpos(r), len(r), r))
         for r in rels[1:]:
-            if meta[r][1] != "cat":  # une catégorie entière reste toujours indexable
+            # 27/11/2026 : une page que Google montre déjà (data/google-seen-pages.txt) n'est jamais fusionnée dans une autre
+            # (ex. « terrains à vendre Pyrénées-Atlantiques » : 145 impressions, était renvoyée vers « terrains à vendre »).
+            if meta[r][1] != "cat" and ("annonces/" + r) not in GOOGLE_SEEN:  # une catégorie entière reste toujours indexable
                 canon[r] = rels[0]
     for rel, (ids, kind) in meta.items():
         if rel not in pages or kind == "root":
