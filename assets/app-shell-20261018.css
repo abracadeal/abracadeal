@@ -6,7 +6,7 @@
 
   .abs-bar{position:fixed;z-index:2147482000;left:0;right:0;top:0;height:calc(56px + env(safe-area-inset-top));padding:env(safe-area-inset-top) 6px 0;box-sizing:border-box;
     display:grid;grid-template-columns:104px minmax(0,1fr) 104px;align-items:center;
-    background:rgba(27,13,45,.94);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);
+    background:rgba(32,30,26,.94);-webkit-backdrop-filter:saturate(160%) blur(14px);backdrop-filter:saturate(160%) blur(14px);
     color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;transition:box-shadow .2s ease}
   .abs-bar.abs-scrolled{box-shadow:0 6px 22px rgba(12,3,24,.28)}
   .abs-back,.abs-more{width:44px;height:44px;margin:0;padding:0;border:0;border-radius:14px;background:transparent;color:#fff;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
@@ -18,12 +18,12 @@
   .abs-bar.abs-title-hidden .abs-title{opacity:0;transform:translateY(4px)}
 
   .abs-menu{position:fixed;z-index:2147482001;top:calc(52px + env(safe-area-inset-top));right:10px;min-width:210px;max-width:calc(100vw - 20px);padding:6px;box-sizing:border-box;
-    background:#fff;border-radius:16px;box-shadow:0 18px 44px rgba(20,4,40,.28);display:flex;flex-direction:column;gap:2px;
+    background:#fff;border-radius:16px;box-shadow:0 18px 44px rgba(25,23,19,.28);display:flex;flex-direction:column;gap:2px;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
   .abs-menu[hidden]{display:none}
-  .abs-menu .abs-menu-item{all:unset;box-sizing:border-box;display:block;padding:13px 14px;border-radius:11px;color:#2c0f3b;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap}
+  .abs-menu .abs-menu-item{all:unset;box-sizing:border-box;display:block;padding:13px 14px;border-radius:11px;color:#292621;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap}
   .abs-menu .abs-menu-item.hidden,.abs-menu .abs-menu-item[hidden]{display:none!important}
-  .abs-menu .abs-menu-item:active{background:#f4ecf8}
+  .abs-menu .abs-menu-item:active{background:#f8f4ec}
 
   /* Contenu : marges d'application, grand titre */
   body.abs-on main h1:first-of-type{font-size:clamp(26px,7.4vw,32px)!important;line-height:1.12!important;letter-spacing:-.02em}
@@ -42,8 +42,8 @@
 }
 /* Pages d'administration (admin-*, moderation) : même thème sombre, compact, partout */
 @media (max-width:760px){
-  body.abs-admin{--aa-bg:#130c1a;--aa-card:#21142d;--aa-card2:#1a1024;--aa-line:rgba(255,255,255,.09);--aa-ink:#f4ecfa;--aa-sub:#b9a7c6;--aa-accent:#c55ad6;
-    background:radial-gradient(120% 40% at 50% 0,rgba(123,42,168,.28),transparent 60%),var(--aa-bg)!important;color:var(--aa-ink)!important;
+  body.abs-admin{--aa-bg:#151411;--aa-card:#24221d;--aa-card2:#1d1b17;--aa-line:rgba(255,255,255,.09);--aa-ink:#faf5ec;--aa-sub:#c6bca7;--aa-accent:#d1ab5f;
+    background:radial-gradient(120% 40% at 50% 0,rgba(163,124,47,.28),transparent 60%),var(--aa-bg)!important;color:var(--aa-ink)!important;
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif!important}
   body.abs-admin main,body.abs-admin .wrap,body.abs-admin .shell{width:auto!important;max-width:none!important;margin:0!important;padding:16px 14px 28px!important;background:transparent!important;border:0!important;box-shadow:none!important;border-radius:0!important}
   body.abs-admin main main,body.abs-admin .wrap .wrap{padding:0!important}
@@ -70,12 +70,12 @@
   /* Champs et boutons */
   body.abs-admin input:not([type=checkbox]):not([type=radio]),body.abs-admin select,body.abs-admin textarea{background:#0f0a14!important;color:#fff!important;border:1px solid rgba(255,255,255,.14)!important;border-radius:12px!important;min-height:44px;padding:10px 12px!important;box-sizing:border-box;max-width:100%}
   body.abs-admin button,body.abs-admin .btn{border-radius:12px!important;min-height:42px;font-weight:700!important}
-  body.abs-admin a{color:#e7b6f2}
+  body.abs-admin a{color:#ecdcbc}
   /* Tableaux : défilement horizontal au lieu de casser la page */
   body.abs-admin table{display:block!important;width:100%!important;overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:12px;background:var(--aa-card2)!important}
   body.abs-admin th,body.abs-admin td{white-space:nowrap;font-size:13px!important;padding:9px 10px!important;color:var(--aa-ink)!important;border-color:var(--aa-line)!important}
-  body.abs-admin th{background:#2a1a36!important;color:#fff!important}
-  body.abs-admin pre,body.abs-admin code{background:#0f0a14!important;color:#eadcf3!important;border-radius:10px}
+  body.abs-admin th{background:#2d2a23!important;color:#fff!important}
+  body.abs-admin pre,body.abs-admin code{background:#0f0a14!important;color:#f3ebdc!important;border-radius:10px}
 }
 /* 08/11/2026 (Anthony : « les boutons retour sont affreux ») : pastille « ‹ Retour » */
 @media (max-width:760px){
@@ -91,9 +91,9 @@
   font-family:inherit!important;font-size:15px!important;font-weight:700!important;line-height:1.1!important;letter-spacing:0!important;
   min-height:44px!important;height:auto!important;padding:0 18px!important;border-radius:999px!important;
   display:inline-flex!important;align-items:center!important;justify-content:center!important;gap:6px;box-shadow:none!important;text-decoration:none!important;box-sizing:border-box}
-.btn.ghost:not(.hidden){background:#fff!important;border:1px solid #e3d7ea!important;color:#3c1b64!important}
-.btn.ghost:not(.hidden):hover{background:#faf5fc!important;border-color:#cdb6da!important}
-.btn.primary:not(.hidden){border:0!important;background:linear-gradient(90deg,#7c3aed,#db2777)!important;color:#fff!important}
+.btn.ghost:not(.hidden){background:#fff!important;border:1px solid #eae4d7!important;color:#474238!important}
+.btn.ghost:not(.hidden):hover{background:#faf5fc!important;border-color:#daceb6!important}
+.btn.primary:not(.hidden){border:0!important;background:linear-gradient(90deg,#cfa758,#c6983c)!important;color:#fff!important}
 .btn.primary:not(.hidden):hover{filter:brightness(1.06)}
 .btn.primary:disabled,.btn.ghost:disabled{opacity:.5;cursor:not-allowed}
 .btn.pro-billing-cancel:not(.hidden){background:#fff!important;border:1px solid #f1c4cf!important;color:#b4234a!important}

@@ -11,10 +11,10 @@
 #loggedInAccount.abraca-admin-layout:not(.aal-is-pro) .aal-pro{display:none!important}
 #loggedInAccount.abraca-admin-layout:not(.aal-has-import) .aal-import{display:none!important}
 #loggedInAccount.abraca-admin-layout #proImportBtn{display:none!important}
-#loggedInAccount.abraca-admin-layout{--aal-ink:#2c0f3b;--aal-sub:#7a6a83;--aal-line:#ecdff2;--aal-soft:#faf6fc;--aal-accent:#7b27a0;--aal-pink:#e2459f}
+#loggedInAccount.abraca-admin-layout{--aal-ink:#292621;--aal-sub:#7a6a83;--aal-line:#f2ecdf;--aal-soft:#faf6fc;--aal-accent:#9a762d;--aal-pink:#cfa758}
 
 /* Identité */
-#loggedInAccount.abraca-admin-layout .aal-identity{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border:1px solid var(--aal-line);border-radius:18px;background:linear-gradient(135deg,#fbf7fd,#f4eafa)}
+#loggedInAccount.abraca-admin-layout .aal-identity{display:flex;align-items:center;gap:12px;padding:14px 14px 14px 16px;border:1px solid var(--aal-line);border-radius:18px;background:linear-gradient(135deg,#fbf7fd,#faf5ea)}
 #loggedInAccount.abraca-admin-layout .aal-identity .account-user{flex:1 1 auto;min-width:0;padding:0!important;border:0!important;background:none!important;margin:0!important}
 #loggedInAccount.abraca-admin-layout .aal-identity .account-user strong{font-size:1.05rem!important;margin-bottom:2px!important;color:var(--aal-ink)}
 #loggedInAccount.abraca-admin-layout .aal-identity .account-user *{overflow-wrap:anywhere}
@@ -32,12 +32,12 @@
 #loggedInAccount.abraca-admin-layout .aal-grid,
 #loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important;margin:0!important}
 #loggedInAccount.abraca-admin-layout .aal-tile,
-#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:84px;padding:12px 6px!important;border:1px solid var(--aal-line)!important;border-radius:16px!important;background:#fff!important;color:var(--aal-ink)!important;font:inherit;font-size:.8rem!important;font-weight:800!important;line-height:1.15!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(70,20,90,.06)!important;cursor:pointer;white-space:normal!important;width:auto!important;margin:0!important}
+#loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:84px;padding:12px 6px!important;border:1px solid var(--aal-line)!important;border-radius:16px!important;background:#fff!important;color:var(--aal-ink)!important;font:inherit;font-size:.8rem!important;font-weight:800!important;line-height:1.15!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(62,57,48,.06)!important;cursor:pointer;white-space:normal!important;width:auto!important;margin:0!important}
 #loggedInAccount.abraca-admin-layout .aal-tile .aal-ico,
 #loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn .aal-ico{width:24px;height:24px;color:var(--aal-accent)}
 #loggedInAccount.abraca-admin-layout .aal-tile:active,
 #loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.btn:active{transform:scale(.97)}
-#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile{background:linear-gradient(160deg,#fff,#f8f0fc)!important}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile{background:linear-gradient(160deg,#fff,#fbf8f1)!important}
 #loggedInAccount.abraca-admin-layout .aal-mine .account-shortcuts>.admin-account-shortcut{display:none!important}
 #loggedInAccount.abraca-admin-layout .aal-badge{position:absolute;top:7px;right:7px;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:var(--aal-pink);color:#fff;font-size:.7rem;font-weight:900;line-height:20px;text-align:center;box-sizing:border-box}
 #loggedInAccount.abraca-admin-layout .aal-badge[hidden]{display:none}
@@ -77,7 +77,7 @@
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box{margin-top:18px!important;padding:16px!important;border-radius:18px!important;scroll-margin-top:12px}
 #loggedInAccount.abraca-admin-layout #accountDashboard>.profile-edit-box h3{font-size:1.05rem!important}
 /* 27/10/2026 : tuile « Importer mon stock » mise en avant (pleine largeur, dégradé, icône + sous-titre) */
-#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#7b27a0,#e2459f)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(150,40,140,.28)!important}
+#loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#9a762d,#cfa758)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(147,112,43,.28)!important}
 #loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import .aal-ico{width:26px;height:26px;padding:9px;box-sizing:content-box;border-radius:14px;background:rgba(255,255,255,.18);color:#fff!important}
 #loggedInAccount.abraca-admin-layout .aal-pro .aal-tile.aal-import .aal-tile-label{display:flex;flex-direction:column;gap:3px;font-size:1rem!important;font-weight:900}
 #loggedInAccount.abraca-admin-layout .aal-import-sub{font-size:.78rem;font-weight:600;opacity:.92}
@@ -86,12 +86,12 @@
 /* Fenêtre « Administration » (onglet Admin de la barre du bas) : même style de tuiles que le compte */
 #mobileAdminModal .admin-mobile-intro{margin:0 0 12px 2px!important;font-size:.78rem!important;font-weight:900;letter-spacing:.08em;text-transform:uppercase;color:#7a6a83!important}
 #mobileAdminModal .admin-mobile-grid{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:9px!important}
-#mobileAdminModal .admin-mobile-action{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:92px!important;padding:12px 6px!important;border:1px solid #ecdff2!important;border-radius:16px!important;background:linear-gradient(160deg,#fff,#f8f0fc)!important;color:#2c0f3b!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(70,20,90,.06)!important;font:inherit;cursor:pointer}
+#mobileAdminModal .admin-mobile-action{position:relative;display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:7px;min-height:92px!important;padding:12px 6px!important;border:1px solid #f2ecdf!important;border-radius:16px!important;background:linear-gradient(160deg,#fff,#fbf8f1)!important;color:#292621!important;text-align:center;text-decoration:none!important;box-shadow:0 4px 14px rgba(62,57,48,.06)!important;font:inherit;cursor:pointer}
 #mobileAdminModal .admin-mobile-action-icon{display:flex!important;margin:0!important;font-size:0!important}
-#mobileAdminModal .admin-mobile-action-icon svg{width:24px;height:24px;fill:none;stroke:#7b27a0;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
-#mobileAdminModal .admin-mobile-action strong{font-size:.8rem!important;font-weight:800;line-height:1.15;color:#2c0f3b!important}
+#mobileAdminModal .admin-mobile-action-icon svg{width:24px;height:24px;fill:none;stroke:#9a762d;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+#mobileAdminModal .admin-mobile-action strong{font-size:.8rem!important;font-weight:800;line-height:1.15;color:#292621!important}
 #mobileAdminModal .admin-mobile-action small{display:none!important}
-#mobileAdminModal .admin-mobile-action-badge{position:absolute!important;top:7px!important;right:7px!important;left:auto!important;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#e2459f!important;color:#fff!important;font-size:.7rem;font-weight:900;line-height:20px;align-items:center;justify-content:center;box-sizing:border-box}
+#mobileAdminModal .admin-mobile-action-badge{position:absolute!important;top:7px!important;right:7px!important;left:auto!important;min-width:20px;height:20px;padding:0 6px;border-radius:999px;background:#cfa758!important;color:#fff!important;font-size:.7rem;font-weight:900;line-height:20px;align-items:center;justify-content:center;box-sizing:border-box}
 @media(min-width:761px){#mobileAdminModal .admin-mobile-action small{display:block!important;font-size:.7rem!important;color:#806f87!important;font-weight:600}}
 
 /* 27/10/2026 : tuile « Offre Fondateurs » (interrupteur) */
@@ -99,7 +99,7 @@
 #loggedInAccount.abraca-admin-layout .aal-founder-switch.is-closed .aal-founder-state{background:#fde8ec;color:#b3263f}
 
 /* 27/10/2026 : pastille « Fondateurs » pleine largeur au-dessus des formules ; tuile « Offre Fondateurs » pleine largeur */
-.admin-plan-grid .admin-plan-founders{grid-column:1/-1;background:linear-gradient(120deg,#f4e6fa,#fbe9f3)!important;border-color:#e4c7ef!important}
+.admin-plan-grid .admin-plan-founders{grid-column:1/-1;background:linear-gradient(120deg,#f9f3e7,#faf5ea)!important;border-color:#efe2c7!important}
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-founder-switch{grid-column:1/-1;flex-direction:row!important;min-height:58px!important;gap:10px!important}
 
 /* 30/10/2026 (Anthony) : intertitre « Abonnements Pro » du tableau de bord Admin invisible (blanc sur fond clair). */
@@ -113,11 +113,11 @@ html body .admin-stats .aal-subtitle,html body #adminStatsPanel .aal-subtitle,ht
 #loggedInAccount.aal-is-admin .aal-mine .account-shortcuts>:not(#accountMessagesBtn):not(.aal-infos){display:none!important}
 #loggedInAccount.aal-is-admin .aal-admin .aal-grid{grid-template-columns:1fr!important}
 #loggedInAccount.aal-is-admin .aal-mine .account-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))!important}
-#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#7b27a0,#e2459f)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(150,40,140,.28)!important;text-decoration:none}
+#loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home{grid-column:1/-1;flex-direction:row!important;justify-content:flex-start!important;gap:14px!important;min-height:76px!important;padding:14px 18px!important;border:0!important;background:linear-gradient(120deg,#9a762d,#cfa758)!important;color:#fff!important;text-align:left!important;box-shadow:0 10px 26px rgba(147,112,43,.28)!important;text-decoration:none}
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-ico{width:26px;height:26px;padding:9px;box-sizing:content-box;border-radius:14px;background:rgba(255,255,255,.18);color:#fff!important}
 #loggedInAccount.abraca-admin-layout .aal-admin .aal-tile.aal-home .aal-tile-label{display:flex;flex-direction:column;gap:3px;font-size:1rem!important;font-weight:900;color:#fff}
 #loggedInAccount.abraca-admin-layout .aal-home-sub{font-size:.78rem;font-weight:600;opacity:.92}
 
 /* 08/11/2026 : mise en évidence de la rubrique visée par une tuile (Mes infos) */
-@keyframes aalFlash{0%{box-shadow:0 0 0 0 rgba(219,39,119,.0)}25%{box-shadow:0 0 0 4px rgba(219,39,119,.45)}100%{box-shadow:0 0 0 0 rgba(219,39,119,0)}}
+@keyframes aalFlash{0%{box-shadow:0 0 0 0 rgba(198,152,60,.0)}25%{box-shadow:0 0 0 4px rgba(198,152,60,.45)}100%{box-shadow:0 0 0 0 rgba(198,152,60,0)}}
 .aal-flash{animation:aalFlash 1.5s ease;border-radius:16px}

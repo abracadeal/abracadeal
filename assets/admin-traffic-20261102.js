@@ -13,8 +13,8 @@
     const rows=data.days||[];const sum=k=>rows.reduce((n,r)=>n+Number(r[k]||0),0);
     const tot=[['Visiteurs',sum('visiteurs')],['Vues d’annonces',sum('vues_annonces')],['Numéros affichés',sum('numeros')],['Messages',sum('messages')],['Showrooms vus',sum('showrooms')],['Recherches',sum('recherches')]];
     const src=Object.entries(data.sources||{}).sort((a,b)=>b[1]-a[1]);
-    const table=(head,body)=>'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>'+head.map(h=>'<th style="text-align:left;padding:6px;border-bottom:1px solid #5a3f66">'+h+'</th>').join('')+'</tr></thead><tbody>'+body.join('')+'</tbody></table></div>';
-    const td=v=>'<td style="padding:6px;border-bottom:1px solid #3a2747">'+v+'</td>';
+    const table=(head,body)=>'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:14px"><thead><tr>'+head.map(h=>'<th style="text-align:left;padding:6px;border-bottom:1px solid #66593f">'+h+'</th>').join('')+'</tr></thead><tbody>'+body.join('')+'</tbody></table></div>';
+    const td=v=>'<td style="padding:6px;border-bottom:1px solid #3e3930">'+v+'</td>';
     box.innerHTML='<div class="grid">'+tot.map(([l,v])=>'<div>'+l+'<div class="metric">'+v.toLocaleString('fr-FR')+'</div></div>').join('')+'</div>'
       +'<h3>D’où viennent les visiteurs</h3>'+(src.length?'<p>'+src.map(([k,v])=>esc(SRC[k]||k)+' : <b>'+v+'</b>').join(' · ')+'</p>':'<p class="muted">Pas encore de données (le compteur démarre le 02/11/2026).</p>')
       +'<details class="sub"><summary>Par jour</summary>'+table(['Jour','Visiteurs','dont mobile','Vues annonces','Numéros','Messages','Showrooms','Recherches'],rows.map(r=>'<tr>'+[fmtDay(r.day),r.visiteurs,r.mobiles,r.vues_annonces,r.numeros,r.messages,r.showrooms,r.recherches].map(td).join('')+'</tr>'))+'</details>'

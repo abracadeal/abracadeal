@@ -12,15 +12,15 @@
   function refresh(id){try{if(typeof openSellerProfile==='function')openSellerProfile(id);}catch(_){}}
 
   var css=document.createElement('style');
-  css.textContent='#adminEditDlg{border:0;border-radius:18px;padding:0;width:min(760px,96vw);max-height:92vh;background:#fff;color:#25182d}'+
-    '#adminEditDlg::backdrop{background:rgba(20,8,30,.6)}#adminEditDlg .ae{padding:18px 18px 22px;overflow:auto;max-height:92vh;box-sizing:border-box}'+
+  css.textContent='#adminEditDlg{border:0;border-radius:18px;padding:0;width:min(760px,96vw);max-height:92vh;background:#fff;color:#27241e}'+
+    '#adminEditDlg::backdrop{background:rgba(21,20,17,.6)}#adminEditDlg .ae{padding:18px 18px 22px;overflow:auto;max-height:92vh;box-sizing:border-box}'+
     '#adminEditDlg h3{margin:18px 0 8px;font-size:17px}#adminEditDlg label{display:flex;flex-direction:column;gap:4px;font-weight:600;font-size:14px;margin:0 0 10px}'+
-    '#adminEditDlg input,#adminEditDlg textarea,#adminEditDlg select{font:inherit;padding:9px 10px;border:1px solid #d9cfe2;border-radius:10px;font-weight:400}'+
+    '#adminEditDlg input,#adminEditDlg textarea,#adminEditDlg select{font:inherit;padding:9px 10px;border:1px solid #e2dccf;border-radius:10px;font-weight:400}'+
     '#adminEditDlg textarea{min-height:90px}#adminEditDlg .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}'+
-    '#adminEditDlg .img{position:relative;border-radius:12px;overflow:hidden;background:#eee;border:1px solid #e5dced}'+
-    '#adminEditDlg .rv{border:1px solid #e5dced;border-radius:12px;padding:10px;margin:0 0 10px}'+
-    '#adminEditDlg button{cursor:pointer}#adminEditDlg .ab{border:0;border-radius:10px;padding:9px 14px;font-weight:700;background:#efe7f6;color:#3b1d55}'+
-    '#adminEditDlg .ab.pri{background:#8a3ab9;color:#fff}#adminEditDlg .ab.del{background:#fbe5e3;color:#b0281b}#adminEditDlg .muted{color:#7b6c88;font-size:13px}';
+    '#adminEditDlg .img{position:relative;border-radius:12px;overflow:hidden;background:#eee;border:1px solid #ede7dc}'+
+    '#adminEditDlg .rv{border:1px solid #ede7dc;border-radius:12px;padding:10px;margin:0 0 10px}'+
+    '#adminEditDlg button{cursor:pointer}#adminEditDlg .ab{border:0;border-radius:10px;padding:9px 14px;font-weight:700;background:#f6f1e7;color:#403b32}'+
+    '#adminEditDlg .ab.pri{background:#b98f3a;color:#fff}#adminEditDlg .ab.del{background:#fbe5e3;color:#b0281b}#adminEditDlg .muted{color:#7b6c88;font-size:13px}';
   document.head.appendChild(css);
 
   function dlg(){var d=document.getElementById('adminEditDlg');if(!d){d=document.createElement('dialog');d.id='adminEditDlg';document.body.appendChild(d);
@@ -56,7 +56,7 @@
       var cell=function(k,f){return (T[k]&&T[k][f])||0;};
       var tbl='<table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="text-align:left;color:#7b6c88"><th style="padding:6px 4px">Compteur</th><th>7 jours</th><th>30 jours</th><th>Total</th></tr>'+rows.map(function(x){return '<tr style="border-top:1px solid #eee"><td style="padding:6px 4px">'+x[1]+'</td><td><b>'+cell(x[0],'j7')+'</b></td><td><b>'+cell(x[0],'j30')+'</b></td><td>'+cell(x[0],'tout')+'</td></tr>';}).join('')+'</table>';
       var ann=(stats.annonces||[]).filter(function(a){return a.vues||a.numero||a.appels||a.messages||a.partages;}).slice(0,10);
-      var top=ann.length?'<div class="muted" style="margin:10px 0 4px">Annonces les plus vues (30 jours)</div>'+ann.map(function(a){return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0;border-top:1px solid #f0eaf4"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(a.title)+'</span><span style="white-space:nowrap">👁 '+a.vues+' · ☎ '+a.numero+' · 💬 '+a.messages+'</span></div>';}).join(''):'<p class="muted">Pas encore d’activité sur ses annonces.</p>';
+      var top=ann.length?'<div class="muted" style="margin:10px 0 4px">Annonces les plus vues (30 jours)</div>'+ann.map(function(a){return '<div style="display:flex;justify-content:space-between;gap:8px;font-size:13px;padding:4px 0;border-top:1px solid #f4f1ea"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+h(a.title)+'</span><span style="white-space:nowrap">👁 '+a.vues+' · ☎ '+a.numero+' · 💬 '+a.messages+'</span></div>';}).join(''):'<p class="muted">Pas encore d’activité sur ses annonces.</p>';
       return '<h3>Statistiques</h3><p class="muted" style="margin:0 0 6px">Conversations ouvertes (30 jours) : <b>'+(stats.conversations_30j||0)+'</b></p>'+tbl+top;
     }
     var draft={};

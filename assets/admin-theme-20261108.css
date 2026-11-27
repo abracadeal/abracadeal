@@ -3,16 +3,16 @@
    la structure des pages, seulement leur apparence (variables de couleurs, polices, cartes, boutons, champs). */
 @import url('/assets/fonts-20261117.css');
 :root{
-  --bg:#160922;--panel:#24123b;--panel2:#2c1648;--line:rgba(255,255,255,.09);--text:#f4eefb;--muted:#b9a8c9;
-  --purple:#8a2ca8;--pink:#ec409d;--gold:#f7bd4b;--green:#43ba80;--red:#f45b73;--orange:#f2ae58;
-  --ah-card:#24123b;--ah-card2:#2c1648;--ah-line:rgba(255,255,255,.09)
+  --bg:#181613;--panel:#2b2822;--panel2:#353129;--line:rgba(255,255,255,.09);--text:#fbf7ee;--muted:#c9bea8;
+  --purple:#a47d30;--pink:#d0a95c;--gold:#f7bd4b;--green:#43ba80;--red:#f45b73;--orange:#f2ae58;
+  --ah-card:#2b2822;--ah-card2:#353129;--ah-line:rgba(255,255,255,.09)
 }
-html{background:#160922!important}
-html:root body.abs-admin{--aa-card:#24123b;--aa-card2:#2c1648;--aa-line:rgba(255,255,255,.09);--aa-sub:#b9a8c9;--aa-ink:#f4eefb;--aa-bg:#160922;--aa-accent:#ec409d}
+html{background:#181613!important}
+html:root body.abs-admin{--aa-card:#2b2822;--aa-card2:#353129;--aa-line:rgba(255,255,255,.09);--aa-sub:#c9bea8;--aa-ink:#fbf7ee;--aa-bg:#181613;--aa-accent:#d0a95c}
 html:root body.abs-admin h1,html:root body.abs-admin h2,html:root body.abs-admin h3{font-family:Fraunces,Georgia,serif!important;letter-spacing:0!important}
-html:root body.abs-admin th{background:#2c1648!important}
-html:root body.abs-admin input:not([type=checkbox]):not([type=radio]),html:root body.abs-admin select,html:root body.abs-admin textarea{background:#1d0e30!important}
-html:root body{background:#160922!important;color:#f4eefb!important;font-family:'DM Sans',system-ui,-apple-system,sans-serif!important}
+html:root body.abs-admin th{background:#353129!important}
+html:root body.abs-admin input:not([type=checkbox]):not([type=radio]),html:root body.abs-admin select,html:root body.abs-admin textarea{background:#23201b!important}
+html:root body{background:#181613!important;color:#fbf7ee!important;font-family:'DM Sans',system-ui,-apple-system,sans-serif!important}
 html:root body button,html:root body input,html:root body select,html:root body textarea{font-family:'DM Sans',system-ui,-apple-system,sans-serif}
 html:root body h1{font-family:Fraunces,Georgia,serif!important;font-weight:700!important;letter-spacing:0!important;color:#fff!important}
 html:root body h2,html:root body h3{font-family:Fraunces,Georgia,serif;font-weight:700;letter-spacing:0}
@@ -25,17 +25,17 @@ html:root body .metric strong{font-family:'DM Sans',sans-serif}
 html:root body summary{cursor:pointer}
 /* Champs */
 html:root body input[type=text],html:root body input[type=search],html:root body input[type=email],html:root body input[type=number],html:root body input[type=url],html:root body input[type=tel],html:root body input:not([type]),html:root body select,html:root body textarea{
-  background:#1d0e30!important;color:#f4eefb!important;border:1px solid var(--ah-line)!important;border-radius:12px!important}
-html:root body input:focus,html:root body select:focus,html:root body textarea:focus{border-color:#ec409d!important;outline:none!important;box-shadow:0 0 0 3px rgba(236,64,157,.15)!important}
+  background:#23201b!important;color:#fbf7ee!important;border:1px solid var(--ah-line)!important;border-radius:12px!important}
+html:root body input:focus,html:root body select:focus,html:root body textarea:focus{border-color:#d0a95c!important;outline:none!important;box-shadow:0 0 0 3px rgba(208,169,92,.15)!important}
 /* Boutons */
 html:root body .btn,html:root body button.btn,html:root body a.btn{border-radius:12px!important;font-weight:700!important}
-html:root body .btn.primary,html:root body .btn-primary,html:root body button.primary{background:linear-gradient(135deg,#ec409d,#ff69bd)!important;color:#fff!important;border-color:transparent!important}
+html:root body .btn.primary,html:root body .btn-primary,html:root body button.primary{background:linear-gradient(135deg,#d0a95c,#ddc28b)!important;color:#fff!important;border-color:transparent!important}
 /* Tableaux */
 html:root body table{border-collapse:collapse}
 html:root body th{color:var(--muted)!important;font-weight:700!important;text-transform:none!important;letter-spacing:0!important}
 html:root body td,html:root body th{border-color:var(--ah-line)!important}
 /* Anciens en-têtes de page : même fond que l'admin */
-html:root body .top,html:root body .topbar{background:rgba(22,9,34,.94)!important;border-bottom:1px solid var(--ah-line)!important}
+html:root body .top,html:root body .topbar{background:rgba(24,22,19,.94)!important;border-bottom:1px solid var(--ah-line)!important}
 html:root body .muted,html:root body .sub{color:var(--muted)!important}
 /* Ancienne page Finances (admin-pilotage) */
 html:root body main>section h2{margin-top:0}
