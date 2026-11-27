@@ -285,7 +285,8 @@ def main():
     for r,(kind,*_) in specs.items():
         if kind=="model":
             mk=r.split("/")[0]
-            if mk in specs and ids[mk]==ids[r]: canon[r]=mk
+            # 27/11/2026 : un modèle que Google montre déjà garde sa propre page (pas de renvoi vers la marque)
+            if mk in specs and ids[mk]==ids[r] and ("auto/"+r) not in SEEN: canon[r]=mk
     budgets=[p for _,p in BUDGETS if p in specs]
     for i,b in enumerate(budgets):
         for hi in reversed(budgets[i+1:]):
