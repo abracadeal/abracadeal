@@ -4265,7 +4265,9 @@ function renderHomeFeatured(){
     grid.innerHTML='';
     return;
   }
-  const picked=selectMixedFeatured(candidates,8);
+  /* 27/11/2026 (Anthony : « pourquoi le van un coup il y est un coup non ») : toutes les annonces à la une sont montrées
+     (au lieu de 8 tirées au hasard), dans un ordre au hasard qui change à chaque visite. Plafond de sécurité : 30. */
+  const picked=selectMixedFeatured(candidates,Math.min(30,candidates.length));
   abSetHtml(grid,picked.map(a=>{
     const photos=visiblePhotosFor(a);
     const img=photos[0]?`<img ${thumbImgAttrs(photos[0].storage_path)} alt="" loading="lazy" decoding="async"><span class="photo-watermark${abracaWmOverlay(a)}">Abracadeal</span>`:`<img src="${ABRACA_DEFAULT_LISTING_PHOTO}" alt="Abracadeal" class="abraca-default-photo">`;
