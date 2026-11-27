@@ -43,3 +43,11 @@ html.abraca-tablet-as-mobile body #recentViewedSection .personalized-grid,
 html.abraca-tablet-as-mobile body #nearbySection .personalized-grid{align-items:stretch!important}
 html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-body,
 html.abraca-tablet-as-mobile body .personalized-card .personalized-body{flex:1 1 auto!important}
+/* Anthony : « il y a des écritures rognées » : le titre faisait 31 px de haut pour 2 lignes de 14 px → le haut d'une 3e ligne dépassait.
+   Hauteur = exactement 2 lignes. */
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card .home-featured-title,
+html.abraca-tablet-as-mobile body .personalized-card .personalized-title{
+  line-height:1.25!important;height:2.5em!important;min-height:2.5em!important;max-height:2.5em!important;
+  overflow:hidden!important;display:-webkit-box!important;-webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;padding:0!important;
+}
+html.abraca-tablet-as-mobile body #homeFeaturedSection .home-featured-card .ad-specs{height:auto!important;max-height:none!important}
