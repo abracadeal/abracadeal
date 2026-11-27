@@ -46,12 +46,15 @@ jobs:
       # 15/11/2026 : liste des communes en fichier statique pour pro-stock-sync (au lieu de 1,4 Mo lus dans Supabase ~250 fois/jour)
       - if: steps.check.outputs.run == 'true'
         run: 'python scripts/build_communes_file.py || echo "liste des communes non mise a jour"'
+      # 27/11/2026 : toute page passée par le plan du site est retenue → plus jamais cachée à Google ensuite
+      - if: steps.check.outputs.run == 'true'
+        run: python scripts/remember_indexed.py
       - if: steps.check.outputs.run == 'true'
         run: python scripts/listings_stamp.py save
       - name: Publier les changements
         if: steps.check.outputs.run == 'true'
         run: |
-          git add -A annonce annonces auto feeds pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml data/listings-stamp.txt
+          git add -A annonce annonces auto feeds pro-pages.json sitemap-annonces.xml sitemap-categories.xml sitemap-auto.xml sitemap-pros.xml data/listings-stamp.txt data/google-seen-pages.txt
           # Dossiers des pages pros : absents tant qu'aucun pro n'a d'annonce en ligne (git add échouerait)
           for p in garage immo professionnel; do
             if [ -e "$p" ] || git ls-files --error-unmatch "$p" >/dev/null 2>&1; then git add -A "$p"; fi
