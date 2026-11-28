@@ -3388,3 +3388,4 @@
 ## 28/11/2026 11h — Claude : accords « Je publie » pré-remplis
 - Prospection → Accords : nouveau bouton « Inscrire ce pro (tout est pré-rempli) » → admin-test-import.html?accord=<id> remplit SIRET, e-mail, téléphone, site, domaine, coche l'accord, lance « Chercher ». Après un import réussi, l'accord passe tout seul en « traité ». Le formulaire manuel reste.
 - Corrigé 2 bugs du mail de bienvenue (admin-test-import) : « box is not defined » sur le bouton après inscription, « gift is not defined » sur le bouton Envoyer de la liste. Choix des À la une offerts ajouté aussi après inscription.
+- 11h15 : un accord « Je publie » passe tout seul en « traité » dès qu'un compte pro existe avec son SIRET (trigger trg_close_acceptance_on_pro_verified sur pro_verifications, quel que soit le chemin d'inscription). Weecars Poitiers (inscrit à 10h55) rattrapé. Bouton « Inscrire ce pro » grisé dès le 1er clic ; liste relue au retour sur la page.

@@ -128,7 +128,7 @@ async function loadAcceptances(){
     (r.source_url?'<div class="clm">Site : <a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_url)+'</a></div>':'')+
     (r.ref_code?'<div class="clm"><a href="pro-fondateur.html?r='+encodeURIComponent(r.ref_code)+'" target="_blank" rel="noopener">Voir son aperçu</a></div>':'')+
     (r.handled_note?'<div class="clm">Note : '+esc(r.handled_note)+'</div>':'')+
-    '<div class="pra" style="margin-top:8px">'+(r.handled_at?'':'<a class="btn green" href="admin-test-import.html?accord='+Number(r.id)+'">Inscrire ce pro (tout est pré-rempli)</a> ')+(r.handled_at?'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',false)">Remettre à traiter</button>':'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',true)">Marquer comme traité</button>')+'</div></div>').join('');
+    '<div class="pra" style="margin-top:8px">'+(r.handled_at?'':'<a class="btn green" href="admin-test-import.html?accord='+Number(r.id)+'" onclick="if(this.dataset.busy)return false;this.dataset.busy=1;this.style.opacity=.45;this.style.pointerEvents=\'none\';this.textContent=\'Ouverture du formulaire…\'">Inscrire ce pro (tout est pré-rempli)</a> ')+(r.handled_at?'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',false)">Remettre à traiter</button>':'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',true)">Marquer comme traité</button>')+'</div></div>').join('');
 }
 async function handleAcceptance(id,handled){
   let note=null;
@@ -474,3 +474,6 @@ $('statusFilter').addEventListener('change',loadProspects);
 $('categoryFilter').addEventListener('change',loadProspects);
 $('logoutBtn').addEventListener('click',async()=>{await sb.auth.signOut();location.href='index.html'});
 boot();
+
+// 28/11/2026 (Anthony) : au retour sur la page, la liste des accords est relue (un pro inscrit disparaît).
+window.addEventListener('pageshow',e=>{if(e.persisted)try{loadAcceptances()}catch(_){}});document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')try{loadAcceptances()}catch(_){}});
