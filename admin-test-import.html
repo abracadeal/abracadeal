@@ -188,7 +188,7 @@ async function init(){
  if(!user){E('gate').innerHTML='Connectez-vous d\'abord sur <a href="index.html">Abracadeal</a> avec le compte administrateur.';return}
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
- E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();loadWelcome();prefillFromAccord();
+ E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();loadWelcome();prefillFromAccord();vitrineFromLink();
  E('refreshLearn').onclick=async()=>{const b=E('refreshLearn');b.disabled=true;b.textContent='Mise à jour…';try{await loadLearn();}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn(),loadWelcome()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('sitePreview').onclick=previewSite;
@@ -616,6 +616,16 @@ async function prefillFromAccord(){
  step('Formulaire rempli avec l\'accord « Je publie » de <b>'+esc(r.company||'ce pro')+'</b>'+(r.handled_at?' (déjà marqué traité le '+esc(new Date(r.handled_at).toLocaleDateString('fr-FR'))+')':'')+'. Vérifie, puis « Créer le compte et importer le stock ».','ok');
  if(E('oSiret').value.length===14)E('oLookup').click();
  setTimeout(()=>E('onbForm').scrollIntoView({behavior:'smooth',block:'start'}),300);
+}
+// 28/11/2026 : admin-test-import.html?vitrine=<id du compte pro> → règle enseigne, adresse courte et logo réseau (session admin).
+async function vitrineFromLink(){
+ const id=new URLSearchParams(location.search).get('vitrine');if(!id||!/^[0-9a-f-]{36}$/i.test(id))return;
+ E('fold-onb').open=true;const ul=E('oSteps');ul.hidden=false;ul.innerHTML='';
+ const li=step('Réglage de la vitrine (nom, adresse courte, logo)…','wait');
+ const{data,error}=await sb.rpc('admin_pro_brand_autosetup',{p_user:id});
+ if(error||!data?.ok){setStep(li,'Impossible : '+esc(error?.message||data?.error||'erreur'),'ko');return}
+ setStep(li,'Vitrine réglée : <b>'+esc(data.name)+'</b> · <a href="/'+esc(data.slug)+'" target="_blank" rel="noopener">abracadeal.fr/'+esc(data.slug)+'</a>'+(data.network==='WeeCars'?' · logo et bannière WeeCars':''),'ok');
+ setTimeout(()=>ul.scrollIntoView({behavior:'smooth',block:'center'}),300);
 }
 async function closeAccord(){
  if(!accordId)return;const id=accordId;accordId=null;
