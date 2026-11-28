@@ -3379,3 +3379,9 @@
 
 ## 27/11/2026 10h — Claude : relance indexation Search Console
 - Non faite : le Mac est hors ligne (navigateur intégré injoignable). Pages en attente : /annonces/voitures-occasion/finistere/, /annonces/vehicules/finistere/, /annonces/vehicules/val-de-marne/, /auto/porsche/macan/, /auto/nissan/gt-r/, /auto/bmw/m2/, /auto/mercedes/classe-e/. Elles restent dans le sitemap, Google les reprendra de toute façon ; la demande accélère seulement.
+
+## 28/11/2026 nuit — Claude : tâche de nuit
+- Santé : Actions OK (aucun échec), 7 flux pros sans erreur ni chute (1 annonce publiée avec photo provisoire chez un pro, normal), modération 31 contrôles / 0 erreur / 0 en attente, 618 annonces en ligne, 8 nouvelles sur 24 h. Prospection 27/11 : 30 envois, 2 clics, 0 réponse, 0 inscription, 0 désinscription, 2 rebonds.
+- SEO : 0 lien interne cassé (1 067 pages), sitemaps propres (878 URL, aucune absente ni en noindex), 232 pages vues par Google toutes présentes, indexées et à leur propre adresse. Seul doublon de titre : tendances-vendeurs.html / vendeur-tendances.html (sans gravité).
+- Repères « à savoir » ajoutés sur 5 modèles vus par Google : Renault Kangoo, Toyota Yaris, Peugeot 308, Citroën C3, Volkswagen Tiguan (scripts/build_auto_seo_pages.py, pages refaites au prochain passage). 57 modèles vus par Google restent sans repère.
+- Mails : GitHub Support (ticket 5019140, 27/11) confirme la levée de la restriction du compte abracadeal — rien à faire. 2 rebonds de prospection (OVH).
