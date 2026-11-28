@@ -177,12 +177,15 @@ def load_registry():
         return {}
 
 
-def assign_path(registry, oid, kind, name, city):
+def assign_path(registry, oid, kind, name, city, slug=None):
     old = registry.get(oid)
     if old and old.get("path", "").split("/")[0] == kind:
         return old["path"]
     taken = {v.get("path") for k, v in registry.items() if k != oid}
-    base = slugify(f"{name} {city}") or slugify(name) or oid[:8]
+    # 28/11/2026 (Anthony : « une adresse de page simple comme les autres ») : un nouveau pro prend l'adresse
+    # de son showroom (garage/weecars-poitiers) plutôt que raison sociale + ville. Les pages existantes ne bougent pas.
+    slug = (slug or "").strip().lower()
+    base = (slug if re.fullmatch(r"[a-z0-9][a-z0-9-]{1,38}[a-z0-9]", slug) else "") or slugify(f"{name} {city}") or slugify(name) or oid[:8]
     base = base[:70].strip("-")
     path, n = f"{kind}/{base}", 2
     while path in taken:
@@ -284,7 +287,7 @@ def main():
         name = nice_name(p)
         city = city_of(p, listings)
         postal = postal_of(listings)
-        path = assign_path(registry, oid, kind, name, city)
+        path = assign_path(registry, oid, kind, name, city, p.get("slug"))
         items = [{"listing": l, "photos": photo_urls(l)} for l in listings]
         pages[path] = pro_page(oid, p, kind, path, name, city, postal, items)
         registry[oid] = {"path": path, "name": name, "city": city, "count": len(listings), "active": True}

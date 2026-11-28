@@ -176,6 +176,17 @@ async function fetchImage(url: string) {
     return { bytes: b, type, ext: type === "image/jpeg" || type === "image/jpg" ? "jpg" : type.split("/")[1] };
   } catch { return null; }
 }
+// 28/11/2026 (Anthony : « une bannière et un logo comme les autres, une adresse de page simple, à chaque fois ») :
+// nom d'enseigne propre, adresse courte abracadeal.fr/<enseigne>, logo + bannière du réseau (WeeCars). Appelé avec la session admin.
+async function brandSetup(caller: any, userId: string, warnings?: string[]) {
+  try {
+    const { data, error } = await caller.rpc("admin_pro_brand_autosetup", { p_user: userId });
+    if (error) throw error;
+    if (warnings && data?.ok) warnings.push(`Vitrine : « ${data.name} », adresse abracadeal.fr/${data.slug}${data.network === "WeeCars" ? ", logo et bannière WeeCars" : ""}.`);
+    return data;
+  } catch (e) { if (warnings) warnings.push("Nom / adresse courte non réglés automatiquement : " + (e instanceof Error ? e.message : String(e))); return null; }
+}
+
 async function autofillShowroom(userId: string, site: string) {
   const out = { logo: false, banner: false, description: false };
   try {
@@ -351,6 +362,7 @@ Deno.serve(async (req) => {
           } catch (e) { exWarnings.push("Offre Fondateur non activée : " + (e instanceof Error ? e.message : String(e))); }
         } else if (fe && !fe.revoked_at) exFounder = { number: fe.founder_number, free_until: fe.free_until };
         exWarnings.push(showroomNote(vitrine));
+        await brandSetup(caller, existingUser.id, exWarnings);
         return json({ ok: true, existing: true, user_id: existingUser.id, feed_id: imp?.feed_id, company, sector, founder: exFounder, showroom: vitrine, warnings: exWarnings });
       }
 
@@ -391,6 +403,7 @@ Deno.serve(async (req) => {
       if (impErr) throw new Error("Compte créé, mais demande d’import impossible : " + impErr.message);
       const vitrine = await autofillShowroom(userId, site);
       warnings.push(showroomNote(vitrine));
+      await brandSetup(caller, userId, warnings);
       return json({ ok: true, existing: false, user_id: userId, feed_id: imp?.feed_id, company, sector, founder, showroom: vitrine, warnings });
     }
 
@@ -401,6 +414,8 @@ Deno.serve(async (req) => {
       if (uErr || !u?.user?.email) return json({ error: "Compte introuvable" }, 404);
       const m: any = u.user.user_metadata || {};
       if (!m.onboarded_by_admin) return json({ error: "Ce compte n’a pas été créé depuis l’admin." }, 409);
+      // 28/11/2026 : enseigne / adresse courte / logo réseau réglés avant le mail (idempotent, ne touche plus rien une fois fait).
+      if (!m.welcome_sent_at) await brandSetup(caller, userId);
       const [{ count: online }, { count: pending }, { data: fe }, { data: prof }, { data: shw }] = await Promise.all([
         admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "active"),
         admin.from("listings").select("id", { count: "exact", head: true }).eq("owner_id", userId).eq("status", "pending"),

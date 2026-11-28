@@ -16,8 +16,8 @@
   "short": "weecars-angers"
  },
  "70186b29-e640-4702-8e2b-f1d1483adcaa": {
-  "path": "garage/pbt-cars-weecars-poitiers-la-creche",
-  "name": "Pbt Cars (Weecars Poitiers)",
+  "path": "garage/weecars-poitiers",
+  "name": "WeeCars Poitiers",
   "city": "La Crèche",
   "count": 76,
   "active": true,
