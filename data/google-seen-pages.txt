@@ -240,3 +240,4 @@ annonces/voitures-occasion/la-creche
 auto/dacia/sandero
 annonces/utilitaires/la-creche
 auto/kia/sportage
+auto/ford/transit
