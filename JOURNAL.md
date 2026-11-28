@@ -3385,3 +3385,6 @@
 - SEO : 0 lien interne cassé (1 067 pages), sitemaps propres (878 URL, aucune absente ni en noindex), 232 pages vues par Google toutes présentes, indexées et à leur propre adresse. Seul doublon de titre : tendances-vendeurs.html / vendeur-tendances.html (sans gravité).
 - Repères « à savoir » ajoutés sur 5 modèles vus par Google : Renault Kangoo, Toyota Yaris, Peugeot 308, Citroën C3, Volkswagen Tiguan (scripts/build_auto_seo_pages.py, pages refaites au prochain passage). 57 modèles vus par Google restent sans repère.
 - Mails : GitHub Support (ticket 5019140, 27/11) confirme la levée de la restriction du compte abracadeal — rien à faire. 2 rebonds de prospection (OVH).
+## 28/11/2026 11h — Claude : accords « Je publie » pré-remplis
+- Prospection → Accords : nouveau bouton « Inscrire ce pro (tout est pré-rempli) » → admin-test-import.html?accord=<id> remplit SIRET, e-mail, téléphone, site, domaine, coche l'accord, lance « Chercher ». Après un import réussi, l'accord passe tout seul en « traité ». Le formulaire manuel reste.
+- Corrigé 2 bugs du mail de bienvenue (admin-test-import) : « box is not defined » sur le bouton après inscription, « gift is not defined » sur le bouton Envoyer de la liste. Choix des À la une offerts ajouté aussi après inscription.

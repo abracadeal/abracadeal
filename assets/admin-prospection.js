@@ -128,7 +128,7 @@ async function loadAcceptances(){
     (r.source_url?'<div class="clm">Site : <a href="'+esc(r.source_url)+'" target="_blank" rel="noopener">'+esc(r.source_url)+'</a></div>':'')+
     (r.ref_code?'<div class="clm"><a href="pro-fondateur.html?r='+encodeURIComponent(r.ref_code)+'" target="_blank" rel="noopener">Voir son aperçu</a></div>':'')+
     (r.handled_note?'<div class="clm">Note : '+esc(r.handled_note)+'</div>':'')+
-    '<div class="pra" style="margin-top:8px">'+(r.handled_at?'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',false)">Remettre à traiter</button>':'<button class="btn green" onclick="handleAcceptance('+Number(r.id)+',true)">Marquer comme traité</button>')+'</div></div>').join('');
+    '<div class="pra" style="margin-top:8px">'+(r.handled_at?'':'<a class="btn green" href="admin-test-import.html?accord='+Number(r.id)+'">Inscrire ce pro (tout est pré-rempli)</a> ')+(r.handled_at?'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',false)">Remettre à traiter</button>':'<button class="btn" onclick="handleAcceptance('+Number(r.id)+',true)">Marquer comme traité</button>')+'</div></div>').join('');
 }
 async function handleAcceptance(id,handled){
   let note=null;

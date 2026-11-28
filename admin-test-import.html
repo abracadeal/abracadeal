@@ -188,7 +188,7 @@ async function init(){
  if(!user){E('gate').innerHTML='Connectez-vous d\'abord sur <a href="index.html">Abracadeal</a> avec le compte administrateur.';return}
  const{data}=await sb.from('profiles').select('is_admin').eq('id',user.id).single();
  if(!data?.is_admin){E('gate').textContent='Accès administrateur requis.';return}
- E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();loadWelcome();
+ E('gate').hidden=true;E('app').hidden=false;loadReqs();loadUnread();loadLearn();loadWelcome();prefillFromAccord();
  E('refreshLearn').onclick=async()=>{const b=E('refreshLearn');b.disabled=true;b.textContent='Mise à jour…';try{await loadLearn();}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('refreshAll').onclick=async()=>{const b=E('refreshAll');b.disabled=true;b.textContent='Mise à jour…';try{await Promise.all([loadReqs(),loadUnread(),loadLearn(),loadWelcome()]);}finally{b.disabled=false;b.textContent='↻ Mettre à jour';}};
  E('sitePreview').onclick=previewSite;
@@ -551,21 +551,22 @@ E('oLookup').addEventListener('click',async()=>{
   if(c.business_sector==='immobilier'||c.business_sector==='vehicules')E('oSector').value=c.business_sector;
  }catch(e){box.innerHTML='<span style="color:var(--bad)">'+esc(e.message||e)+'</span>'}finally{E('oLookup').disabled=false}
 });
-async function sendWelcome(userId,feedId,host){
+async function sendWelcome(userId,feedId,host,gift){
  const li=step('Envoi du mail au pro (lien pour choisir son mot de passe)…','wait');
- try{const d=await onboardCall({action:'welcome',user_id:userId});try{await sb.rpc('admin_release_mail_hold',{p_user:userId});}catch(_){}try{loadWelcome()}catch(_){}setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b> ('+d.online+' en ligne'+(d.pending?', '+d.pending+' en vérification':'')+(d.founder?', Fondateur':'')+').','ok');return true}
- catch(e){setStep(li,'Mail non envoyé : '+esc(e.message||e)+' ','ko');const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Réessayer l\'envoi';b.onclick=async()=>{li.remove();if(await sendWelcome(userId,feedId))onbDone()};li.appendChild(b);return false}
+ try{const d=await onboardCall(Object.assign({action:'welcome',user_id:userId},gift?{gift_boosts:gift,gift_days:7}:{}));try{await sb.rpc('admin_release_mail_hold',{p_user:userId});}catch(_){}try{loadWelcome()}catch(_){}setStep(li,'Mail envoyé à <b>'+esc(d.email)+'</b> ('+d.online+' en ligne'+(d.pending?', '+d.pending+' en vérification':'')+(d.founder?', Fondateur':'')+').','ok');return true}
+ catch(e){setStep(li,'Mail non envoyé : '+esc(e.message||e)+' ','ko');const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Réessayer l\'envoi';b.onclick=async()=>{li.remove();if(await sendWelcome(userId,feedId,null,gift))onbDone()};li.appendChild(b);return false}
 }
 // 10/11/2026 (Anthony) : aucun mail ne part tout seul. Récapitulatif réel (annonces, Fondateur) puis envoi par l'admin.
 async function offerWelcome(userId,feedId){
  const li=step('Rien n\'a été envoyé au pro. Vérifie son compte, puis envoie le mail de bienvenue.','ok');
+ const gl=document.createElement('label');gl.style.cssText='font-size:12px;opacity:.85;margin:0 8px;white-space:nowrap';gl.innerHTML='🎁 À la une offerts <select data-gift-once><option value="0">0</option><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select>';li.appendChild(gl);
  const b=document.createElement('button');b.type='button';b.className='sbtn';b.textContent='Vérifier et envoyer le mail de bienvenue';li.appendChild(b);
  b.onclick=async()=>{b.disabled=true;
   try{const p=await onboardCall({action:'welcome_preview',user_id:userId});
-   const gs=box.querySelector('[data-gift="'+id+'"]'),gift=b.dataset.again?0:Number(gs?gs.value:0)||0;
+   const gs=li.querySelector('select[data-gift-once]'),gift=Number(gs?gs.value:0)||0;
    const msg='Mail de bienvenue à '+p.email+'\n\n• '+(gift?gift+' « À la une » de 7 jours offerts (crédités maintenant)\n• ':'')+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
    if(!confirm(msg)){b.disabled=false;return}
-   b.remove();if(await sendWelcome(userId,feedId))onbDone();
+   b.remove();if(gs)gs.parentElement.remove();if(await sendWelcome(userId,feedId,null,gift))onbDone();
   }catch(e){alert(e.message||e);b.disabled=false}};
 }
 // 14/11/2026 (Anthony « je trouve pas ») : envoyer le mail de bienvenue plus tard, sans refaire l'inscription :
@@ -585,14 +586,40 @@ async function loadWelcome(){
    ?'<div class="wdone wrow" style="border-top:1px solid rgba(255,255,255,.08);opacity:.7"><span class="wtxt">'+who+'<br><span style="color:#8fe3b0">✓ Envoyé le '+fmt(r.sent_at)+'</span></span><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'" data-again="1">Renvoyer</button></div>'
    :'<div class="req wrow"><span class="wtxt">'+who+(r.held?'<br><span style="color:var(--gold)">Aucun mail parti pour l\'instant (bloqué jusqu\'à ton envoi)</span>':'')+'</span><label style="font-size:12px;opacity:.85;white-space:nowrap">🎁 À la une offerts <select data-gift="'+esc(r.id)+'"><option value="0">0</option><option value="3">3</option><option value="5" selected>5</option><option value="10">10</option></select></label><button type="button" class="sbtn" data-welcome="'+esc(r.id)+'">Envoyer</button></div>';
  }).join('');
- box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;b.disabled=true;b.textContent='Vérification…';
+ box.querySelectorAll('[data-welcome]').forEach(b=>b.onclick=async()=>{const id=b.dataset.welcome;const gs=box.querySelector('[data-gift="'+id+'"]'),gift=b.dataset.again?0:Number(gs?gs.value:0)||0;b.disabled=true;b.textContent='Vérification…';
   try{const p=await onboardCall({action:'welcome_preview',user_id:id});
-   const msg='Mail de bienvenue à '+p.email+'\n\n• '+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
+   const msg='Mail de bienvenue à '+p.email+'\n\n• '+(gift?gift+' « À la une » de 7 jours offerts (crédités maintenant)\n• ':'')+p.online+' annonce(s) en ligne'+(p.pending?', '+p.pending+' en vérification':'')+'\n• Offre Fondateur : '+(p.founder?'OUI':'NON — le mail ne parlera pas de gratuité')+(p.already_sent_at?'\n\n⚠ Un mail de bienvenue est déjà parti le '+new Date(p.already_sent_at).toLocaleString('fr-FR')+'.':'')+'\n\nEnvoyer maintenant ?';
    if(!confirm(msg)){b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer';return}
    b.textContent='Envoi…';await onboardCall({action:'welcome',user_id:id,gift_boosts:gift,gift_days:7});
    try{await sb.rpc('admin_release_mail_hold',{p_user:id});}catch(_){}
    await loadWelcome();
   }catch(e){alert(e.message||e);b.disabled=false;b.textContent=b.dataset.again?'Renvoyer':'Envoyer'}});
+}
+// 28/11/2026 (Anthony) : un pro clique « Je publie » → bouton « Inscrire ce pro » dans Prospection → Accords,
+// qui ouvre admin-test-import.html?accord=<id> avec le formulaire déjà rempli (SIRET, e-mail, téléphone, site, domaine).
+// Une fois l'import réussi, l'accord passe tout seul en « traité ».
+let accordId=null;
+async function prefillFromAccord(){
+ const id=Number(new URLSearchParams(location.search).get('accord')||0);if(!id)return;
+ const{data,error}=await sb.rpc('admin_prospect_acceptances');
+ const r=(data||[]).find(x=>Number(x.id)===id);
+ E('fold-onb').open=true;
+ if(error||!r){E('oSteps').hidden=false;E('oSteps').innerHTML='';step('Accord introuvable : remplis le formulaire à la main.','ko');return}
+ accordId=id;
+ E('oSiret').value=String(r.siret||'').replace(/\D/g,'');
+ E('oEmail').value=r.email||r.prospect_email||'';
+ E('oPhone').value=r.phone||'';
+ E('oSite').value=r.source_url||'';
+ E('oSector').value=/immo|agence|logement|location/i.test(r.category||'')?'immobilier':'vehicules';
+ E('oConsent').checked=true;
+ E('oSteps').hidden=false;E('oSteps').innerHTML='';
+ step('Formulaire rempli avec l\'accord « Je publie » de <b>'+esc(r.company||'ce pro')+'</b>'+(r.handled_at?' (déjà marqué traité le '+esc(new Date(r.handled_at).toLocaleDateString('fr-FR'))+')':'')+'. Vérifie, puis « Créer le compte et importer le stock ».','ok');
+ if(E('oSiret').value.length===14)E('oLookup').click();
+ setTimeout(()=>E('onbForm').scrollIntoView({behavior:'smooth',block:'start'}),300);
+}
+async function closeAccord(){
+ if(!accordId)return;const id=accordId;accordId=null;
+ try{await sb.rpc('admin_prospect_acceptance_handle',{p_id:id,p_handled:true,p_note:'Inscrit et import lancé ('+new Date().toLocaleDateString('fr-FR')+')'})}catch(_){}
 }
 // 07/11/2026 : une fois l'inscription réussie, le résumé s'efface et le formulaire se vide.
 let onbTimer=null;
@@ -618,6 +645,7 @@ E('onbForm').addEventListener('submit',async ev=>{
    offerWelcome(d.user_id,d.feed_id);return}
   E('oSteps').scrollIntoView({behavior:'smooth',block:'center'});
   setStep(li,'<b>'+(lastSync?.created||0)+'</b> annonces créées, <b>'+(lastSync?.updated||0)+'</b> mises à jour (en ligne après la modération).','ok');
+  await closeAccord();
   offerWelcome(d.user_id,d.feed_id);
  }catch(e){setStep(li,esc(e.message||e),'ko')}
  finally{go.disabled=false}
