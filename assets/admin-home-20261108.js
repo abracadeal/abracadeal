@@ -6,6 +6,7 @@
 (function () {
   'use strict';
   var sb = window.supabase.createClient('https://jplzvxmpbpjssyinozap.supabase.co', 'sb_publishable_lUCkpzyw0kQCs9AWraNjzw_2CoT0JeF');
+  window.__ahSb = sb;
   window.__abracaAdminSb = sb;
   var $ = function (id) { return document.getElementById(id); };
   var esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
@@ -60,6 +61,7 @@
     $('ahTodo').innerHTML = todo.length ? todo.map(function (x) {
       return '<a class="ah-todo-item" href="' + x[2] + '"><b>' + nf(x[1]) + '</b><span><strong>' + esc(x[0]) + '</strong><small>' + esc(x[3]) + '</small></span><i>›</i></a>';
     }).join('') : '<div class="ah-ok">✓ Rien d’urgent à traiter.</div>';
+    loadClaudeRequests();
 
     var tech = d.tech || {}, pros = d.pros || [];
     var td = (state.todayTraffic && state.todayTraffic.days && state.todayTraffic.days[0]) || {};
@@ -293,3 +295,33 @@
     refresh(true);
   })();
 })();
+
+// 28/11/2026 (Anthony : « celui qui a pas d'ordinateur il peut rien faire ») : actions verrouillées préparées par Claude,
+// validées d'un geste ici (session admin), depuis le téléphone, sans le Mac.
+function loadClaudeRequests() {
+  try {
+    var box = document.getElementById('ahClaude');
+    if (!box) { box = document.createElement('div'); box.id = 'ahClaude'; var t = document.getElementById('ahTodo'); t.parentNode.insertBefore(box, t); }
+    var e = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+    window.__ahSb.rpc('admin_claude_requests_list').then(function (res) {
+      var rows = (res && res.data) || [];
+      if (!rows.length) { box.innerHTML = ''; return; }
+      box.innerHTML = '<div style="border:1px solid #dcb877;border-radius:16px;padding:12px 14px;margin:0 0 12px;background:rgba(220,184,119,.08)"><strong style="display:block;margin-bottom:6px">🤖 Claude a besoin de ta validation</strong>' +
+        rows.map(function (r) {
+          return '<div style="display:flex;gap:10px;align-items:center;justify-content:space-between;padding:8px 0;border-top:1px solid rgba(220,184,119,.25)"><span><b>' + e(r.title) + '</b><br><small style="opacity:.8">' + e(r.detail || '') + '</small></span>' +
+            '<span style="display:flex;gap:6px;flex-shrink:0"><button type="button" data-cr="' + Number(r.id) + '" style="background:linear-gradient(120deg,#fbf0d9,#efd7a6 48%,#dcb877);color:#2a0f3a;border:0;border-radius:999px;padding:8px 14px;font-weight:800">Valider</button>' +
+            '<button type="button" data-cr-skip="' + Number(r.id) + '" style="background:transparent;color:inherit;border:1px solid rgba(220,184,119,.5);border-radius:999px;padding:8px 10px">Non</button></span></div>';
+        }).join('') + '</div>';
+      box.querySelectorAll('[data-cr],[data-cr-skip]').forEach(function (b) {
+        b.onclick = function () {
+          var skip = b.hasAttribute('data-cr-skip'), id = Number(b.getAttribute(skip ? 'data-cr-skip' : 'data-cr'));
+          b.disabled = true; b.style.opacity = '.5';
+          window.__ahSb.rpc('admin_claude_request_apply', { p_id: id, p_skip: skip }).then(function (r) {
+            if (r.error || (r.data && r.data.ok === false)) alert('Erreur : ' + ((r.error && r.error.message) || r.data.error));
+            loadClaudeRequests();
+          });
+        };
+      });
+    });
+  } catch (_) {}
+}
