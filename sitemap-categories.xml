@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://abracadeal.fr/annonces/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/alfortville/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/alpes-maritimes/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/appartements-a-vendre/</loc><lastmod>2026-11-27</lastmod></url>
@@ -44,14 +44,14 @@
   <url><loc>https://abracadeal.fr/annonces/services/alpes-maritimes/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/terrains-a-vendre/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/terrains-a-vendre/pyrenees-atlantiques/</loc><lastmod>2026-11-27</lastmod></url>
-  <url><loc>https://abracadeal.fr/annonces/utilitaires/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/utilitaires/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/angers/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/bordeaux/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/brest/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/finistere/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/gironde/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/utilitaires/maine-et-loire/</loc><lastmod>2026-11-27</lastmod></url>
-  <url><loc>https://abracadeal.fr/annonces/vehicules/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/vehicules/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/alfortville/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/alpes-maritimes/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/angers/</loc><lastmod>2026-11-27</lastmod></url>
@@ -60,15 +60,17 @@
   <url><loc>https://abracadeal.fr/annonces/vehicules/cannes/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/finistere/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/gironde/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/vehicules/la-creche/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/paris/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/saint-front-dalemps/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/val-de-marne/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/vehicules/venerque/</loc><lastmod>2026-11-27</lastmod></url>
-  <url><loc>https://abracadeal.fr/annonces/voitures-occasion/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/voitures-occasion/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/angers/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/bordeaux/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/brest/</loc><lastmod>2026-11-27</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/finistere/</loc><lastmod>2026-11-27</lastmod></url>
+  <url><loc>https://abracadeal.fr/annonces/voitures-occasion/la-creche/</loc><lastmod>2026-11-28</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/saint-front-dalemps/</loc><lastmod>2026-11-26</lastmod></url>
   <url><loc>https://abracadeal.fr/annonces/voitures-occasion/venerque/</loc><lastmod>2026-11-27</lastmod></url>
 </urlset>

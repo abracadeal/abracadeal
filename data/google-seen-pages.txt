@@ -235,3 +235,5 @@ auto/volkswagen/t-cross
 auto/volkswagen/tiguan
 auto/volkswagen/transporter
 auto/citroen/c5-aircross
+annonces/vehicules/la-creche
+annonces/voitures-occasion/la-creche
